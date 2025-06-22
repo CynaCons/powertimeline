@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import Button from '@/components/Button'
+import Timeline, { type EventItem as TimelineEvent } from '@/components/Timeline'
 
-interface EventItem {
-  id: number
-  title: string
+interface EventItem extends TimelineEvent {
   description: string
-  date: string
 }
 
 export default function Editor() {
@@ -15,6 +13,7 @@ export default function Editor() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
+  const [showForm, setShowForm] = useState(false)
 
   const addEvent = () => {
     if (!title || !date) return
@@ -33,6 +32,7 @@ export default function Editor() {
     setDescription('')
     setDate('')
     setSelectedId(newEvent.id)
+    setShowForm(false)
   }
 
   const selected = events.find((e) => e.id === selectedId)
@@ -58,32 +58,15 @@ export default function Editor() {
           </ul>
         </aside>
 
-        <section className="flex-1 flex flex-col pl-4">
-          <h1 className="text-2xl font-semibold mb-4">Chronograph Editor</h1>
-          <div className="space-y-2 mb-4">
-            <input
-              className="border rounded w-full px-2 py-1"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+        <section className="flex-1 relative pl-4 overflow-hidden">
+          <div className="flex flex-col items-center justify-center h-full">
+            <Timeline
+              events={events}
+              selectedId={selectedId}
+              onSelect={(id) => setSelectedId(id)}
             />
-            <textarea
-              className="border rounded w-full px-2 py-1"
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <input
-              type="date"
-              className="border rounded w-full px-2 py-1"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-            <Button onClick={addEvent}>Create Event</Button>
-          </div>
-          <div className="flex-1 flex items-start justify-center relative">
             {selected && (
-              <div className="p-4 border rounded shadow-md bg-white dark:bg-gray-900 w-full max-w-md">
+              <div className="mt-4 p-4 border rounded shadow-md bg-white dark:bg-gray-900 w-full max-w-md">
                 <h3 className="text-lg font-semibold mb-1">{selected.title}</h3>
                 <p className="text-sm text-gray-500 mb-2">
                   {new Date(selected.date).toLocaleDateString()}
@@ -92,30 +75,40 @@ export default function Editor() {
               </div>
             )}
           </div>
+
+          {showForm && (
+            <div className="absolute bottom-16 right-4 bg-white dark:bg-gray-900 p-4 rounded shadow-lg w-64 space-y-2">
+              <input
+                className="border rounded w-full px-2 py-1"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <textarea
+                className="border rounded w-full px-2 py-1"
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <input
+                type="date"
+                className="border rounded w-full px-2 py-1"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+              <Button onClick={addEvent} className="w-full">Create Event</Button>
+            </div>
+          )}
+
+          <Button
+            className="absolute bottom-4 right-4 h-12 w-12 rounded-full text-2xl p-0"
+            onClick={() => setShowForm((v) => !v)}
+          >
+            +
+          </Button>
         </section>
       </div>
 
-      <div className="border-t mt-4 pt-4">
-        <div className="relative">
-          <div className="absolute left-0 right-0 top-3 h-px bg-gray-300" />
-          <div className="relative flex items-center justify-between overflow-x-auto px-1">
-            {events.map((e) => (
-              <div
-                key={e.id}
-                className="flex flex-col items-center cursor-pointer px-4"
-                onClick={() => setSelectedId(e.id)}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${selectedId === e.id ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}`}
-                />
-                <span className="mt-2 text-xs whitespace-nowrap">
-                  {new Date(e.date).toLocaleDateString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </main>
   )
 }
