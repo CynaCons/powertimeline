@@ -17,11 +17,11 @@ export default function Timeline({ events, selectedId, onSelect }: TimelineProps
   const width = 800
   const height = 80
   const margin = 40
-
   if (events.length === 0) {
     return (
-      <div className="h-20 flex items-center justify-center text-gray-500">
-        No events yet
+      <div className="h-32 flex flex-col items-center justify-center text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-8">
+        <div className="text-lg font-medium mb-2">No events yet</div>
+        <div className="text-sm text-gray-400">Click the + button to add your first event</div>
       </div>
     )
   }
