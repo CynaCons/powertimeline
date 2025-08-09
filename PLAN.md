@@ -1,9 +1,10 @@
 # Development Plan
 
 ## Milestone 1: Project Scaffold
-- [ ] Initialize React + TypeScript + Tailwind project using Vite.
-- [ ] Configure Tailwind and basic styles.
-- [ ] Add placeholder timeline component rendered with SVG.
+- [x] Initialize React + TypeScript + Tailwind project using Vite.
+- [x] Configure Tailwind and basic styles.
+- [x] Add placeholder timeline component rendered with SVG.
+- [x] Set up Playwright smoke test verifying the app loads and displays.
 
 ## Milestone 2: Event Creation
 - [ ] Define event data model (date and description).
