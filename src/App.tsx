@@ -184,6 +184,13 @@ function App() {
               viewStart={viewStart}
               viewEnd={viewEnd}
               onViewWindowChange={setViewWindow}
+              onInlineEdit={(id, updates) => {
+                setEvents((prev) => {
+                  const next = prev.map((ev) => (ev.id === id ? { ...ev, title: updates.title, description: updates.description } : ev));
+                  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+                  return next;
+                });
+              }}
             />
           </div>
           {/* Create form */}

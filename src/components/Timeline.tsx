@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Event } from '../types';
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
   viewStart?: number; // default 0
   viewEnd?: number;   // default 1
   onViewWindowChange?: (start: number, end: number) => void;
+  onInlineEdit?: (id: string, updates: { title: string; description?: string }) => void;
 }
 
 const dayMs = 24 * 60 * 60 * 1000;
@@ -23,10 +24,14 @@ const Node = React.memo(function Node({
   description,
   above,
   isSelected,
+  isEditing,
   showLabel,
   draggable,
   onSelect,
   onStartDrag,
+  onStartInlineEdit,
+  onSaveInlineEdit,
+  onCancelInlineEdit,
 }: {
   id: string;
   x: number;
@@ -35,10 +40,14 @@ const Node = React.memo(function Node({
   description?: string;
   above: boolean;
   isSelected: boolean;
+  isEditing: boolean;
   showLabel: boolean;
   draggable: boolean;
   onSelect?: (id: string) => void;
   onStartDrag?: (id: string) => void;
+  onStartInlineEdit?: (id: string) => void;
+  onSaveInlineEdit?: (id: string, updates: { title: string; description?: string }) => void;
+  onCancelInlineEdit?: () => void;
 }) {
   const stemY2 = above ? 4 : 16;
   const labelY = above ? 3 : 17.5;
@@ -56,6 +65,11 @@ const Node = React.memo(function Node({
   const cardX = Math.max(1, Math.min(99 - cardW, x - cardW / 2));
   const cardBottomY = labelY; // anchor at label position
   const cardY = above ? cardBottomY - cardH : cardBottomY; // above: card ends at label; below: starts at label
+
+  // Inline edit state
+  const [etitle, setETitle] = useState(title);
+  const [edesc, setEDesc] = useState(description ?? '');
+  useEffect(() => { if (isEditing) { setETitle(title); setEDesc(description ?? ''); } }, [isEditing, title, description]);
 
   return (
     <g
@@ -116,8 +130,25 @@ const Node = React.memo(function Node({
           <text x={cardX + pad} y={cardY + pad + 1.6} fontSize={1.6} fill="#0f172a">
             {title}
           </text>
-          {/* expanded details */}
-          {isSelected && (
+          {/* Inline edit trigger when selected */}
+          {isSelected && !isEditing && (
+            <text
+              role="button"
+              aria-label="Edit inline"
+              x={cardX + cardW - pad}
+              y={cardY + pad + 1.6}
+              textAnchor="end"
+              fontSize={1.2}
+              fill="#2563eb"
+              style={{ cursor: 'pointer' }}
+              onClick={(e) => { e.stopPropagation(); onStartInlineEdit?.(id); }}
+            >
+              ✏ Edit
+            </text>
+          )}
+
+          {/* expanded details or inline editor */}
+          {isSelected && !isEditing && (
             <>
               <text x={cardX + pad} y={cardY + pad + 3.4} fontSize={1.2} fill="#475569">{date}</text>
               {description && (
@@ -126,6 +157,47 @@ const Node = React.memo(function Node({
                 </text>
               )}
             </>
+          )}
+
+          {isSelected && isEditing && (
+            <foreignObject x={cardX} y={cardY} width={cardW} height={cardH} requiredExtensions="http://www.w3.org/1999/xhtml">
+              <div
+                style={{ fontSize: 12, fontFamily: 'ui-sans-serif, system-ui', padding: 6, display: 'flex', flexDirection: 'column', gap: 6 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <input
+                  aria-label="Inline Title"
+                  type="text"
+                  value={etitle}
+                  onChange={(e) => setETitle((e.target as HTMLInputElement).value)}
+                  style={{ padding: '4px 6px', border: '1px solid #cbd5e1', borderRadius: 6 }}
+                />
+                <input
+                  aria-label="Inline Description"
+                  type="text"
+                  placeholder="Optional"
+                  value={edesc}
+                  onChange={(e) => setEDesc((e.target as HTMLInputElement).value)}
+                  style={{ padding: '4px 6px', border: '1px solid #cbd5e1', borderRadius: 6 }}
+                />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onSaveInlineEdit?.(id, { title: etitle, description: edesc || undefined }); }}
+                    style={{ background: '#059669', color: 'white', padding: '4px 8px', borderRadius: 6 }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onCancelInlineEdit?.(); }}
+                    style={{ background: '#e5e7eb', color: '#111827', padding: '4px 8px', borderRadius: 6 }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </foreignObject>
           )}
         </g>
       )}
@@ -141,6 +213,7 @@ const Timeline: React.FC<Props> = ({
   viewStart = 0,
   viewEnd = 1,
   onViewWindowChange,
+  onInlineEdit,
 }) => {
   const sorted = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
   const globalMin = sorted.length ? new Date(sorted[0].date).getTime() : Date.now();
@@ -154,6 +227,7 @@ const Timeline: React.FC<Props> = ({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [previewISO, setPreviewISO] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   function tToXPercent(t: number) {
     return ((t - viewMin) / viewRange) * 100;
@@ -270,6 +344,7 @@ const Timeline: React.FC<Props> = ({
           const above = i % 2 === 0;
           const isSelected = ev.id === selectedId;
           const showLabel = !dense || isSelected || ev.id === draggingId;
+          const isEditing = editingId === ev.id;
           return (
             <Node
               key={ev.id}
@@ -280,13 +355,21 @@ const Timeline: React.FC<Props> = ({
               description={ev.description}
               above={above}
               isSelected={isSelected}
+              isEditing={isEditing}
               showLabel={showLabel}
               draggable={!!onDragDate}
               onSelect={onSelect}
               onStartDrag={(id) => {
+                setEditingId(null);
                 setDraggingId(id);
                 setPreviewISO(ev.date);
               }}
+              onStartInlineEdit={(id) => setEditingId(id)}
+              onSaveInlineEdit={(id, updates) => {
+                setEditingId(null);
+                onInlineEdit?.(id, updates);
+              }}
+              onCancelInlineEdit={() => setEditingId(null)}
             />
           );
         })}
