@@ -7,10 +7,10 @@
 - [x] Set up Playwright smoke test verifying the app loads and displays.
 
 ## Milestone 2: Event Creation
-- [ ] Define event data model (date and description).
-- [ ] Build form to add new events.
-- [ ] Persist events in browser local storage.
-- [ ] Render saved events on the timeline.
+- [x] Define event data model (date and description).
+- [x] Build form to add new events.
+- [x] Persist events in browser local storage.
+- [x] Render saved events on the timeline.
 
 ## Milestone 3: Event Editing & Deletion
 - [ ] Select an event to modify its text or date.

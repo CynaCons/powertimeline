@@ -1,6 +1,16 @@
 import React from 'react';
+import type { Event } from '../types';
 
-const Timeline: React.FC = () => {
+interface Props {
+  events: Event[];
+}
+
+const Timeline: React.FC<Props> = ({ events }) => {
+  const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+  const min = sorted.length ? new Date(sorted[0].date).getTime() : 0;
+  const max = sorted.length ? new Date(sorted[sorted.length - 1].date).getTime() : 0;
+  const range = max - min || 1;
+
   return (
     <div className="w-full flex items-center justify-center" style={{ minHeight: 160 }}>
       <svg
@@ -17,7 +27,10 @@ const Timeline: React.FC = () => {
           </linearGradient>
         </defs>
         <line x1="0" y1="5" x2="100" y2="5" stroke="url(#timelineGradient)" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="50" cy="5" r="4" fill="#ffffff" stroke="#6d28d9" strokeWidth="1" />
+        {sorted.map((ev) => {
+          const x = ((new Date(ev.date).getTime() - min) / range) * 100;
+          return <rect key={ev.id} x={x - 1} y={4} width={2} height={2} fill="#fff" stroke="#6d28d9" strokeWidth={0.5} />;
+        })}
       </svg>
     </div>
   );
