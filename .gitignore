@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Vite cache
+.vite/
+
 # Playwright artifacts
 test-results/
 playwright-report/
