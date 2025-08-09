@@ -5,25 +5,25 @@ import type { Event } from './types';
 const STORAGE_KEY = 'chronochart-events';
 
 function App() {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Event[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [date, setDate] = useState('');
   const [title, setTitle] = useState('');
-
-  // Load events from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setEvents(JSON.parse(stored));
-      } catch {
-        /* ignore malformed data */
-      }
-    }
-  }, []);
+  const [description, setDescription] = useState('');
 
   // Persist events whenever they change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    } catch {
+      // ignore quota errors
+    }
   }, [events]);
 
   function addEvent(e: React.FormEvent) {
@@ -33,10 +33,12 @@ function App() {
       id: Date.now().toString(),
       date,
       title,
+      description: description || undefined,
     };
     setEvents((prev) => [...prev, newEvent]);
     setDate('');
     setTitle('');
+    setDescription('');
   }
 
   return (
@@ -61,6 +63,16 @@ function App() {
             onChange={(e) => setTitle(e.target.value)}
             className="rounded border px-2 py-1 text-black"
             required
+          />
+        </label>
+        <label className="flex flex-col text-sm">
+          <span>Description</span>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="rounded border px-2 py-1 text-black"
+            placeholder="Optional"
           />
         </label>
         <button

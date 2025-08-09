@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+const STORAGE_KEY = 'chronochart-events';
+
 test('application loads and displays timeline', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/Chronochart/);
@@ -20,4 +22,33 @@ test('page uses a dark background color', async ({ page }) => {
   // 2) Sanity check: computed color is not transparent or pure white
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+});
+
+test('can add an event and it persists', async ({ page }) => {
+  // Clear localStorage once, then reload to start clean
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByLabel('Date').fill('2025-01-02');
+  await page.getByLabel('Title').fill('Launch');
+  await page.getByLabel('Description').fill('Project launch');
+  await page.getByRole('button', { name: 'Add' }).click();
+
+  // Node should be rendered as a rect
+  await expect(page.locator('svg rect')).toHaveCount(1);
+
+  // Wait until localStorage contains the event before reloading
+  await page.waitForFunction((key) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return !!raw && raw.includes('Launch');
+    } catch { return false; }
+  }, STORAGE_KEY);
+
+  // Reload and verify it persists (node still present and localStorage has it)
+  await page.reload();
+  await expect(page.locator('svg rect')).toHaveCount(1);
+  const stored = await page.evaluate((key) => localStorage.getItem(key) || '', STORAGE_KEY);
+  expect(stored).toContain('Launch');
 });

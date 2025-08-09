@@ -11,6 +11,7 @@
 - [x] Build form to add new events.
 - [x] Persist events in browser local storage.
 - [x] Render saved events on the timeline.
+- [x] Add Playwright test covering event creation and persistence.
 
 ## Milestone 3: Event Editing & Deletion
 - [ ] Select an event to modify its text or date.
