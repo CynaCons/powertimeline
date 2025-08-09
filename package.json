@@ -11,6 +11,7 @@
     "test": "playwright test"
   },
   "dependencies": {
+    "@openai/codex": "^0.16.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

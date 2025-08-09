@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+/* Accessibility: refine focus styles for SVG buttons */
+svg g[role="button"]:focus { outline: none; }
+svg g[role="button"]:focus-visible rect {
+  stroke: #2563eb;
+  stroke-width: 0.6;
+}
