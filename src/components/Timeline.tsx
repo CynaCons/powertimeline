@@ -24,7 +24,9 @@ const Node = React.memo(function Node({
   description,
   above,
   isSelected,
+  isExpanded,
   isEditing,
+  showDetails,
   showLabel,
   draggable,
   onSelect,
@@ -32,6 +34,7 @@ const Node = React.memo(function Node({
   onStartInlineEdit,
   onSaveInlineEdit,
   onCancelInlineEdit,
+  onHoverChange,
 }: {
   id: string;
   x: number;
@@ -40,7 +43,9 @@ const Node = React.memo(function Node({
   description?: string;
   above: boolean;
   isSelected: boolean;
+  isExpanded: boolean;
   isEditing: boolean;
+  showDetails: boolean;
   showLabel: boolean;
   draggable: boolean;
   onSelect?: (id: string) => void;
@@ -48,6 +53,7 @@ const Node = React.memo(function Node({
   onStartInlineEdit?: (id: string) => void;
   onSaveInlineEdit?: (id: string, updates: { title: string; description?: string }) => void;
   onCancelInlineEdit?: () => void;
+  onHoverChange?: (hovered: boolean) => void;
 }) {
   const stemY2 = above ? 4 : 16;
   const labelY = above ? 3 : 17.5;
@@ -60,11 +66,12 @@ const Node = React.memo(function Node({
   const expandedH = 8.5;
   const pad = 0.8;
 
-  const cardW = isSelected ? expandedW : collapsedW;
-  const cardH = isSelected ? expandedH : collapsedH;
+  const cardW = isExpanded ? expandedW : collapsedW;
+  const cardH = isExpanded ? expandedH : collapsedH;
   const cardX = Math.max(1, Math.min(99 - cardW, x - cardW / 2));
-  const cardBottomY = labelY; // anchor at label position
-  const cardY = above ? cardBottomY - cardH : cardBottomY; // above: card ends at label; below: starts at label
+  const cardBottomY = labelY;
+  const rawCardY = above ? cardBottomY - cardH : cardBottomY;
+  const cardY = Math.max(0.5, Math.min(19 - cardH, rawCardY)); // Clamped card Y within viewBox
 
   // Inline edit state
   const [etitle, setETitle] = useState(title);
@@ -76,13 +83,16 @@ const Node = React.memo(function Node({
       role="button"
       tabIndex={0}
       aria-label={`Event: ${date} — ${title}`}
-      onClick={() => onSelect?.(id)}
+      onClick={() => { onSelect?.(id); onHoverChange?.(false); }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           onSelect?.(id);
+          onHoverChange?.(false);
         }
       }}
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => onHoverChange?.(false)}
       style={{ cursor: draggable ? ('pointer' as const) : 'default' }}
     >
       <title>{`${date} — ${title}`}</title>
@@ -106,12 +116,13 @@ const Node = React.memo(function Node({
             onMouseDown={() => {
               if (!draggable) return;
               onStartDrag?.(id);
+              onHoverChange?.(false);
             }}
           />
         );
       })()}
       {/* stem from node boundary to card anchor */}
-      <line x1={x} y1={stemY1} x2={x} y2={stemY2} stroke="#94a3b8" strokeWidth={0.25} />
+      <line x1={x} y1={stemY1} x2={x} y2={stemY2} stroke="#94a3b8" strokeWidth={0.25} markerEnd="url(#arrowHead)" shapeRendering="geometricPrecision" />
 
       {/* card: collapsed or expanded; honor density via showLabel */}
       {showLabel && (
@@ -122,9 +133,10 @@ const Node = React.memo(function Node({
             width={cardW}
             height={cardH}
             rx={0.8}
-            fill="#f8fafc"
+            fill="url(#cardMetal)"
             stroke="#cbd5e1"
             strokeWidth={0.25}
+            filter="url(#cardShadow)"
           />
           {/* title */}
           <text x={cardX + pad} y={cardY + pad + 1.6} fontSize={1.6} fill="#0f172a">
@@ -148,7 +160,7 @@ const Node = React.memo(function Node({
           )}
 
           {/* expanded details or inline editor */}
-          {isSelected && !isEditing && (
+          {isSelected && !isEditing && showDetails && (
             <>
               <text x={cardX + pad} y={cardY + pad + 3.4} fontSize={1.2} fill="#475569">{date}</text>
               {description && (
@@ -228,6 +240,7 @@ const Timeline: React.FC<Props> = ({
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [previewISO, setPreviewISO] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   function tToXPercent(t: number) {
     return ((t - viewMin) / viewRange) * 100;
@@ -293,6 +306,7 @@ const Timeline: React.FC<Props> = ({
 
   const count = sorted.length;
   const dense = count > 40;
+  const hoverEnabled = count <= 60;
 
   // Build simple evenly spaced tick marks for visual rhythm
   const ticks = Array.from({ length: 11 }, (_, i) => i * 10);
@@ -308,14 +322,22 @@ const Timeline: React.FC<Props> = ({
         className="max-w-4xl"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={() => { handleMouseUp(); setHoveredId(null); }}
         onWheel={handleWheel}
       >
         <defs>
           <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#22c55e" />
+            <stop offset="0%" stopColor="#94a3b8" />
+            <stop offset="50%" stopColor="#cbd5e1" />
+            <stop offset="100%" stopColor="#94a3b8" />
           </linearGradient>
+          <linearGradient id="cardMetal" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#f8fafc" />
+            <stop offset="100%" stopColor="#eef2f7" />
+          </linearGradient>
+          <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0.3" stdDeviation="0.4" floodColor="#94a3b8" floodOpacity="0.35" />
+          </filter>
           <filter id="selGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="0.3" result="blur" />
             <feMerge>
@@ -323,13 +345,16 @@ const Timeline: React.FC<Props> = ({
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <marker id="arrowHead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+          </marker>
         </defs>
         {/* subtle ticks */}
         {ticks.map((pct) => (
           <line key={pct} x1={pct} y1={9.4} x2={pct} y2={10.6} stroke="#e5e7eb" strokeWidth={0.25} />
         ))}
         {/* main track */}
-        <line x1="0" y1="10" x2="100" y2="10" stroke="url(#timelineGradient)" strokeWidth="3" strokeLinecap="round" />
+        <line x1="0" y1="10" x2="100" y2="10" stroke="url(#timelineGradient)" strokeWidth="3" strokeLinecap="round" shapeRendering="geometricPrecision" />
         {/* edge labels */}
         <text x={0} y={19.3} textAnchor="start" fontSize={1.4} fill="#64748b">
           {new Date(viewMin).toISOString().slice(0, 10)}
@@ -343,8 +368,11 @@ const Timeline: React.FC<Props> = ({
           const x = tToXPercent(t);
           const above = i % 2 === 0;
           const isSelected = ev.id === selectedId;
-          const showLabel = !dense || isSelected || ev.id === draggingId;
           const isEditing = editingId === ev.id;
+          const isHover = hoverEnabled && hoveredId === ev.id;
+          const isExpanded = isSelected || isEditing || isHover;
+          const showDetails = isSelected || isHover;
+          const showLabel = !dense || isSelected || ev.id === draggingId;
           return (
             <Node
               key={ev.id}
@@ -355,21 +383,22 @@ const Timeline: React.FC<Props> = ({
               description={ev.description}
               above={above}
               isSelected={isSelected}
+              isExpanded={isExpanded}
               isEditing={isEditing}
+              showDetails={showDetails}
               showLabel={showLabel}
               draggable={!!onDragDate}
               onSelect={onSelect}
               onStartDrag={(id) => {
                 setEditingId(null);
+                setHoveredId(null);
                 setDraggingId(id);
                 setPreviewISO(ev.date);
               }}
-              onStartInlineEdit={(id) => setEditingId(id)}
-              onSaveInlineEdit={(id, updates) => {
-                setEditingId(null);
-                onInlineEdit?.(id, updates);
-              }}
+              onStartInlineEdit={(id) => { setHoveredId(null); setEditingId(id); }}
+              onSaveInlineEdit={(id, updates) => { setEditingId(null); onInlineEdit?.(id, updates); }}
               onCancelInlineEdit={() => setEditingId(null)}
+              onHoverChange={(hovered) => setHoveredId(hovered ? ev.id : (hoveredId === ev.id ? null : hoveredId))}
             />
           );
         })}

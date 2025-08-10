@@ -300,3 +300,32 @@ test('left rail toggles keep app responsive', async ({ page }) => {
   // Timeline remains visible
   await expect(page.locator('svg')).toBeVisible();
 });
+
+test('card expand/collapse and inline edit works', async ({ page }) => {
+  test.setTimeout(15_000);
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByLabel('Date').fill('2025-07-01');
+  await page.getByLabel('Title').fill('Cardy');
+  await page.getByRole('button', { name: 'Add' }).click();
+  await expect(page.locator('svg rect[data-event-id]')).toHaveCount(1);
+
+  // Click node to select (expand card)
+  await page.locator('svg rect[data-event-id]').first().click();
+
+  // Click Edit inline trigger in card
+  await page.locator('svg text', { hasText: 'Edit' }).click();
+
+  // Fill inline fields (foreignObject inputs)
+  const titleInput = page.locator('input[aria-label="Inline Title"]');
+  const descInput = page.locator('input[aria-label="Inline Description"]');
+  await titleInput.fill('Cardy Edited');
+  await descInput.fill('Inline body');
+  const inlineRegion = page.locator('foreignObject');
+  await inlineRegion.getByRole('button', { name: 'Save' }).click();
+
+  // Title text in SVG should update
+  await expect(page.locator('svg text', { hasText: 'Cardy Edited' })).toBeVisible();
+});
