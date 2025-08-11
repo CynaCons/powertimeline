@@ -1,0 +1,34 @@
+:root {
+  /* Palette */
+  --cc-bg-steel-0: #0a1420;
+  --cc-bg-steel-1: #0b1724;
+  --cc-bg-steel-2: #0a1320;
+  --cc-bg-steel-3: #09121c;
+  --cc-color-axis-label: #9fb5c8;
+  --cc-color-focus-accent: #74c7ec;
+  --cc-color-border: #e5e7eb; /* tailwind gray-200 */
+  --cc-color-panel-bg: #ffffff;
+  --cc-color-panel-fg: #1f2937; /* gray-800 */
+  --cc-color-accent-primary: #4f46e5; /* indigo-600 */
+  --cc-color-accent-primary-hover: #4338ca; /* indigo-700 */
+
+  /* Typography */
+  --cc-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --cc-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
+  /* Sizing & spacing (initial subset) */
+  --cc-space-0: 0;
+  --cc-space-1: 2px;
+  --cc-space-2: 4px;
+  --cc-space-3: 6px;
+  --cc-space-4: 8px;
+  --cc-space-6: 12px;
+  --cc-radius-sm: 2px;
+  --cc-radius-md: 4px;
+
+  /* Effects */
+  --cc-focus-ring-width: 0.6;
+
+  /* Background gradient */
+  --cc-bg-gradient: radial-gradient(100% 100% at 50% 0%, var(--cc-bg-steel-0) 0%, var(--cc-bg-steel-1) 30%, var(--cc-bg-steel-2) 60%, var(--cc-bg-steel-3) 100%);
+}

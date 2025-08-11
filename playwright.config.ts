@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
-const reuse = Boolean((globalThis as any).process?.env?.CI ? false : true);
+// Force a fresh dev server each test run to avoid stale module resolution errors during refactor.
+const reuse = false;
 
 export default defineConfig({
   testDir: 'tests',

@@ -1,5 +1,67 @@
 # Development Plan
 
+## Ongoing (sorted by priority, then chronological)
+
+P0 — Milestone 9: Architecture Split & Modularization
+- Context: `Timeline.tsx` and `App.tsx` have grown large. Split along natural seams without changing behavior, DOM order, or selectors.
+- Checklist
+  - [x] Step 1: Extract overlays and focus trap
+    - [x] Create `src/app/OverlayShell.tsx` (role=dialog, pointer-events logic)
+    - [x] Create panels in `src/app/panels/`: `OutlinePanel.tsx`, `EditorPanel.tsx`, `CreatePanel.tsx`, `DevPanel.tsx`
+    - [x] Add `src/app/hooks/useFocusTrap.ts` and wire into OverlayShell
+  - [x] Step 2: Extract Node from Timeline
+    - [x] Move memoized Node to `src/timeline/Node/Node.tsx` (keep clipPath/foreignObject)
+    - [x] Preserve `data-event-id` and drag/keyboard handlers
+  - [x] Step 3: Extract SvgDefs and Axis
+    - [x] `src/timeline/SvgDefs.tsx` (gradient, filters) rendered inside same SVG
+    - [x] `src/timeline/Axis.tsx` (render ticks/labels only; keep tick math in Timeline)
+  - [x] Step 4: Extract RangeBar and CreateAffordance
+    - [x] `src/timeline/RangeBar.tsx`
+    - [x] `src/timeline/CreateAffordance.tsx`
+  - [x] Step 5: Extract hooks and utils
+    - [x] `src/timeline/hooks/useAxisTicks.ts` (with fallback ticks)
+    - [x] `src/timeline/hooks/useLanes.ts`
+    - [x] `src/lib/time.ts`
+    - [x] `src/lib/text.ts`
+  - [x] Step 6: App libs and hooks
+    - [x] `src/lib/storage.ts` (debounced save; drag guard)
+    - [x] `src/lib/devSeed.ts`
+    - [x] `src/app/hooks/useViewWindow.ts`
+    - [x] `src/app/hooks/useAnnouncer.ts`
+    - [x] Integrate storage + hooks into `App` (replace inline impl)
+    - [x] Manual verification + Playwright pass after integration
+  - [x] Step 7: Introduce style tokens
+    - [x] `src/styles/tokens.css` (CSS variables for palette/sizes)
+    - [x] Replace hardcoded background gradient + focus/axis colors with variables
+    - [x] Begin replacing remaining hardcoded colors (panels/buttons/anchors staged for later refinement)
+    - [x] Establish spacing/radius token scaffold
+    - [x] Add follow-up documentation task to VISUALS.md (will expand in Milestone 10)
+- Test guardrails
+  - [x] Preserve DOM order and all `data-testid` values: `axis-tick`, `axis-label`, `range-bar`, `range-start`, `range-end`, `anchor-date`, `card-description`, `create-plus`
+  - [x] Keep `data-event-id` on anchors; maintain `body[data-dragging]` and overlay pointer-events behavior
+  - [x] Run Playwright after each step; commit per step (current: 24/24 passing post-Step6 integration)
+- Status: Milestone 9 complete (Steps 1–7). All tests green (24/24). Remaining token expansion & docs deferred to future milestone.
+
+P1 — Milestone 8 (remaining polish)
+- [ ] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
+- [ ] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
+- [ ] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
+- [ ] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
+
+P1 — Milestone 7 (follow-up a11y polish)
+- [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review).
+
+P2 — Milestone 8 (secondary)
+- [ ] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
+- [ ] Data-testid instrumentation for lane groups/index to improve test robustness.
+- [ ] Document updated palette, connector spec, and component tokens in `VISUALS.md` with screenshots.
+
+Notes
+- Keep performance budget targeting ~120 visible events; recheck after each visual/interaction addition.
+- Update `VISUALS.md` as the steel/teal theme and attachment components solidify; ensure contrast ≥ WCAG AA.
+
+---
+
 ## Completed (reverse chronological)
 
 ### Milestone 8: Card Polish, Density Layout, and Adaptive Axis
@@ -51,7 +113,6 @@
 ### Milestone 4: Timeline Navigation
 - [x] Zoom/pan view window; performance with ~100–120 events.
 - [x] Commit-on-drop; debounced persistence; memoized sorting and Node component.
-- [x] Perf smoke test added.
 
 ### Milestone 3: Event Editing & Deletion
 - [x] Select, edit, delete; drag nodes along track to change date; tests added.
@@ -61,26 +122,4 @@
 
 ### Milestone 1: Project Scaffold
 - [x] Vite + React + TS + Tailwind; baseline styles; initial SVG timeline; initial smoke test.
-
----
-
-## Ongoing (sorted by priority, then chronological)
-
-P1 — Milestone 8
-- [ ] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
-- [ ] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
-- [ ] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
-- [ ] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
-
-P1 — Milestone 7 (follow-up a11y polish)
-- [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review).
-
-P2 — Milestone 8
-- [ ] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
-- [ ] Data-testid instrumentation for lane groups/index to improve test robustness.
-- [ ] Document updated palette, connector spec, and component tokens in VISUALS.md with screenshots.
-
-Notes
-- Keep performance budget targeting ~120 visible events; recheck after each visual/interaction addition.
-- Update VISUALS.md as the steel/teal theme and attachment components solidify; ensure contrast ≥ WCAG AA.
 
