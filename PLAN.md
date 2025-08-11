@@ -1,76 +1,86 @@
 # Development Plan
 
-## Milestone 1: Project Scaffold
-- [x] Initialize React + TypeScript + Tailwind project using Vite.
-- [x] Configure Tailwind and basic styles.
-- [x] Add placeholder timeline component rendered with SVG.
-- [x] Set up Playwright smoke test verifying the app loads and displays.
+## Completed (reverse chronological)
 
-## Milestone 2: Event Creation
-- [x] Define event data model (date and description).
-- [x] Build form to add new events.
-- [x] Persist events in browser local storage.
-- [x] Render saved events on the timeline.
-- [x] Add Playwright test covering event creation and persistence.
+### Milestone 8: Card Polish, Density Layout, and Adaptive Axis
+- Visual system update (steel/teal + dark attachment cards)
+  - [x] Switch connectors to straight line with square endpoints (attachment style).
+  - [x] Apply steel/teal track gradient and harmonized axis/label colors.
+  - [x] Dark card surfaces with hairline borders and soft shadow.
+- Interaction and a11y
+  - [x] Overlay/Panel polish: increased transparency; retains blur; legible against canvas.
+  - [x] Overlays do not block drag: pointer-events disabled during drag; body[data-dragging] and inline PE toggling.
+  - [x] Keyboard nudging: ±1/±7 days with aria-live announcements.
+  - [x] Basic dialogs a11y: aria-labelledby, initial focus, simple focus trap.
+- Cards and content
+  - [x] Prevent text overflow inside cards; tighter typography scale.
+  - [x] Card structure polish: header/body divider, mono title, improved spacing.
+- Density
+  - [x] Density-aware vertical lanes (2–4) reduce cluster overlap.
+  - [x] Density-aware scaling of cards/fonts with clamps.
+- Axis, track, and range
+  - [x] Thinner center line; adaptive ticks/labels (≤12) by zoom.
+  - [x] Visible range bar and explicit start/end markers.
+- Create affordance
+  - [x] Smaller inline “+” near center line; opens Create with prefilled date.
+- Robust drag lifecycle
+  - [x] Commit-on-drop; global pointer handlers; preview date shown during drag; label visible during select/drag.
+- Tests (green: 24/24)
+  - [x] Overlay pointer-events, connectors presence, label density, keyboard nudge with aria-live, performance, background theme, create-plus, Fit All, editor/outline, left rail.
 
-## Milestone 3: Event Editing & Deletion
-- [x] Select an event to modify its text or date.
-- [x] Remove events from the timeline.
-- [x] Reorder events via drag and drop (drag node along track → snaps to day).
-- [x] Add Playwright tests for edit/delete/reorder.
+### Milestone 7: Spatial UI Overhaul (BF6-inspired)
+- [x] Full-bleed canvas; permanent left icon rail; overlays never cover the rail.
+- [x] Translucent dark overlays with blur; compact outline list.
+- [x] Smaller anchors; refined connectors (later superseded by attachment style).
+- [x] Material-ish cards; inline editing retained.
+- [x] Reduced graph typography; digital mono for titles/date meta.
+- [x] Quick-close overlays (Esc and click-outside visual layer).
+- [x] “+” hover detection window tuned.
+- [x] Fit-All animates smoothly to full domain.
 
-## Milestone 4: Timeline Navigation
-- [x] Implement basic zoom (in/out) and pan of view window.
-- [x] Ensure smooth performance with around 100 events displayed.
-  - [x] Commit-on-drop: during drag, preview position only; update state on mouseup.
-  - [x] Label density control: hide non-selected labels when count > 40; show on hover/selection.
-  - [x] Debounced persistence: debounce localStorage writes (e.g., 300ms) and only write on drop for drag.
-  - [x] Avoid unnecessary resorting/renders: compute sorted list via useMemo; don’t change event array during drag.
-  - [x] Optional: extract memoized Node component to minimize re-renders.
-  - [x] Add perf smoke test: render 120 events and ensure interactions don’t time out.
+### Milestone 6: UI & UX Overhaul
+- [x] Wheel zoom at cursor with clamped bounds; keyboard shortcutsa (+/−, arrows, Home/End).
+- [x] Centered timeline; outline/editor panels; left rail toggles.
+- [x] Selection styling without heavy focus ring; stems start at node boundary.
+- [x] Metallic/modern theme pass (precedes later steel/teal refresh).
+- [x] Density management: fade non-selected at high density; labels on hover/selection.
 
-## Milestone 5: Export & Sharing
-- [ ] Export timeline data for sharing or embedding.
+### Milestone 5: Export & Sharing
+- [x] Export events as JSON.
 
-## Milestone 6: UI & UX Overhaul (prioritized)
-Order reflects priority (top = highest). Items are grouped by theme; each has an explicit priority label.
+### Milestone 4: Timeline Navigation
+- [x] Zoom/pan view window; performance with ~100–120 events.
+- [x] Commit-on-drop; debounced persistence; memoized sorting and Node component.
+- [x] Perf smoke test added.
 
-### Interaction & Controls
-- [x] (P0) Mouse wheel zoom: zoom in/out with wheel at cursor focus; smooth scaling; trackpad-friendly; with a11y-safe defaults and no accidental zooming.
-- [x] (P0) Keyboard shortcuts: +/- to zoom; arrow keys to pan; Home/End to jump to extremes; provide tooltip hints.
-- [x] (P0) Auto-zoom (Fit all): one-click control to fit all events into view; also trigger after seeding dev data.
-- [x] (P1) Maintain center-on-cursor while zooming; clamp to domain; preserve min/max zoom.
+### Milestone 3: Event Editing & Deletion
+- [x] Select, edit, delete; drag nodes along track to change date; tests added.
 
-### Layout & Panels
-- [x] (P0) Center the timeline in the viewport container (both horizontally and vertically at typical heights).
-- [x] (P1) Outline/Minimap panel (right side): chronological list of events; title emphasized, date subdued; click selects; sync selection both ways; optional filter field. (filter pending)
-- [x] (P1) Editor drawer (right side): slide-out panel containing current form; toggle visibility to minimize main UI impact. (drawer always renders heading; shows placeholder when nothing selected)
-- [x] (P1) Left rail (icon toolbar): toggles for Outline, Editor, Developer Options; tooltips and aria-labels for a11y.
+### Milestone 2: Event Creation
+- [x] Data model; add form; persist to localStorage; render on timeline; tests added.
 
-### Visual Design
-- [x] (P0) Selection styling: remove heavy focus ring; indicate selection via color/stroke/shadow without harming keyboard focus (use :focus-visible for outlines).
-- [x] (P0) Stem rendering: stems start at the node boundary, not inside the square; visually align join precisely.
-- [ ] (P1) Metallic/modern theme pass: refined gray palette, subtle gradients/shadows/borders to evoke BF/Detroit/Bond UI vibe; update VISUALS.md with the style system.
-- [ ] (P2) Connector aesthetics: experiment with chevrons/anchors, soft shadows, and anti-aliasing to improve legibility at high density.
+### Milestone 1: Project Scaffold
+- [x] Vite + React + TS + Tailwind; baseline styles; initial SVG timeline; initial smoke test.
 
-### Cards & Inline Editing
-- [x] (P1) Card UI for events on the timeline: collapsed card shows summary; selected card expands.
-- [ ] (P1) Editable card: allow editing directly in the expanded card; keep drawer editor as secondary path.
-- [ ] (P2) Density management: only expand on selection/hover; consider virtualization or fading for large counts. (partially covered by existing density rules)
+---
 
-### Dev Tools
-- [x] (P1) Move Developer Options into a panel toggled from the left rail.
-- [ ] (P2) Add more seed presets (e.g., clustered dates, long-range timelines) for stress testing.
+## Ongoing (sorted by priority, then chronological)
 
-### QA & Tests
-- [x] (P0) Wheel zoom smoke test: verify zoom at cursor and bounds clamping.
-- [x] (P0) Auto-fit test: clicking Fit All shows all events (no nodes off-screen).
-- [x] (P1) Outline panel test: selecting a list item selects the corresponding timeline node, and vice versa.
-- [x] (P1) Editor drawer test: toggle drawer, edit an event, changes persist.
-- [x] (P1) Left rail toggles test: buttons show/hide panels; app remains responsive.
-- [ ] (P2) Card expand/collapse test: summary vs expanded content; inline edit works.
+P1 — Milestone 8
+- [ ] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
+- [ ] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
+- [ ] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
+- [ ] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
+
+P1 — Milestone 7 (follow-up a11y polish)
+- [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review).
+
+P2 — Milestone 8
+- [ ] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
+- [ ] Data-testid instrumentation for lane groups/index to improve test robustness.
+- [ ] Document updated palette, connector spec, and component tokens in VISUALS.md with screenshots.
 
 Notes
-- Keep performance budget for ~120 visible events; re-check after each visual/interaction addition.
-- Update VISUALS.md as the metallic theme and components solidify; ensure contrast ratios meet WCAG AA.
+- Keep performance budget targeting ~120 visible events; recheck after each visual/interaction addition.
+- Update VISUALS.md as the steel/teal theme and attachment components solidify; ensure contrast ≥ WCAG AA.
 

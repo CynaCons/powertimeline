@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
+/* App background: steel/teal gradient */
+body {
+  background: radial-gradient(100% 100% at 50% 0%, #0a1420 0%, #0b1724 30%, #0a1320 60%, #09121c 100%);
+}
+
 /* Accessibility: refine focus styles for SVG buttons */
 svg g[role="button"]:focus { outline: none; }
 svg g[role="button"]:focus-visible rect {
-  stroke: #2563eb;
+  stroke: #74c7ec;
   stroke-width: 0.6;
+}
+
+/* During timeline drag, disable overlay interactions explicitly */
+body[data-dragging] aside[role="dialog"] {
+  pointer-events: none !important;
+}
+
+/* Axis and meta text color harmonization */
+svg text[data-testid="axis-label"], svg text[text-anchor="start"], svg text[text-anchor="end"] {
+  fill: #9fb5c8 !important;
 }
