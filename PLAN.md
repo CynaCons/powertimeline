@@ -40,7 +40,7 @@ P0 — Milestone 9: Architecture Split & Modularization
   - [x] Preserve DOM order and all `data-testid` values: `axis-tick`, `axis-label`, `range-bar`, `range-start`, `range-end`, `anchor-date`, `card-description`, `create-plus`
   - [x] Keep `data-event-id` on anchors; maintain `body[data-dragging]` and overlay pointer-events behavior
   - [x] Run Playwright after each step; commit per step (current: 24/24 passing post-Step6 integration)
-- Status: Milestone 9 complete (Steps 1–7). All tests green (24/24). Remaining token expansion & docs deferred to future milestone.
+- Status: Milestone 9 complete (Steps 1–7). All tests green (24/24). Minor ticks enhancement from P2 implemented.
 
 P1 — Milestone 8 (remaining polish)
 - [ ] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
@@ -52,7 +52,7 @@ P1 — Milestone 7 (follow-up a11y polish)
 - [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review).
 
 P2 — Milestone 8 (secondary)
-- [ ] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
+- [x] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
 - [ ] Data-testid instrumentation for lane groups/index to improve test robustness.
 - [ ] Document updated palette, connector spec, and component tokens in `VISUALS.md` with screenshots.
 
