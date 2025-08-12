@@ -2,39 +2,65 @@
 
 ## Ongoing (sorted by priority, then chronological)
 
-P0 — Milestone 10: Planning & Specification (draft)
-- Goal: Consolidate refactor gains (Milestone 9), finalize visual system, and address remaining a11y + documentation gaps prior to new feature surface.
-- Pending Inputs: Await product/UX feedback (you) after current UI review.
-- Proposed Focus Areas (to refine after feedback):
-  - [ ] A11y comprehensive audit (broader overlay/control review – carries forward open P1 item)
-  - [ ] Token expansion: replace remaining hardcoded panel/button/anchor colors with CSS variables; spacing/radius application
-  - [ ] Documentation: Update `VISUALS.md` with palette, connector spec, lane system diagrams, multi-line clamp behavior, focus styles
-  - [ ] Add tests: lane distribution (dense & very dense), multi-line clamp tooltip presence, focus-visible outline keyboard navigation
-  - [ ] Performance profiling pass (120+ events) after lane + multi-line additions; budget validation
-  - [ ] Export improvements (filename timestamp, optional import) – stretch
-  - [ ] Theming groundwork (light/dark token sets) – stretch
-  - [ ] Assess persistence abstraction (potential future sync) – note
-- Next Step: Incorporate your review notes, then lock scope & convert to concrete checklist.
+P0 — Milestone 10: Visual + Interaction Refinement (spec & implementation)
+- Goal: Apply BF6-inspired dark visual language, improve legibility & density handling, overhaul card rendering & editing UX, and enhance temporal scaffolding (grid/separators) while preserving performance & a11y.
+- Acceptance (overall): Maintain 24/24 existing tests; add new tests for grid lines, multi-row lanes, editing controls; keep 120-event performance smoke under prior runtime.
 
-P1 — Milestone 8 (remaining polish)
-- [x] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
-- [x] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
-- [x] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
-- [x] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
-- [x] Density-aware vertical lanes (2–4) reduce cluster overlap with capped lane assignment and alternating above/below stacking.
-  - Acceptance: With ≥50 events (dense) at least 2 distinct laneIndex values appear; with ≥90 (very dense) up to 4 laneIndex values appear; visual vertical separation noticeable; tests remain green.
+Phase A: Axis / Track / Background
+- [ ] Dark theme background (tokens): introduce dark-neutral ramp; swap current light gradient for dark gray (#111–#1a1d21 range) with subtle vignette.
+- [ ] Slim axis track line: reduce stroke width (currently visually heavy) & lighten opacity; expose token (--cc-axis-line, --cc-axis-line-width).
+- [ ] Temporal separators: render minor/major grid lines (day/week/month/year) adapting to zoom; light gray lines (different opacity per hierarchy) not exceeding performance budget.
+- [ ] Label scale & placement: reduce date label font size, adjust vertical alignment & padding so labels sit consistently relative to track; ensure ≤12 primary labels rule preserved.
 
-P1 — Milestone 7 (follow-up a11y polish)
-- [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review).
+Phase B: Event Anchors & Connectors
+- [ ] Anchor restyle: smaller square or circle variant; dark fill with subtle inner highlight; thin light (near-white) outline for contrast on dark background.
+- [ ] Connector redesign: lighten color from teal/blue to neutral light gray; reduce stroke width; shorten path length padding so cards feel closer to anchor.
+- [ ] Hover/selection states: tokenize colors; glow/focus states harmonized with new palette (no pure blue unless focus accent token retained).
 
-P2 — Milestone 8 (secondary)
-- [x] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
-- [x] Data-testid / instrumentation for lane index (data-lane-index on nodes) to improve test robustness.
-- [ ] Document updated palette, connector spec, and component tokens in `VISUALS.md` with screenshots.
+Phase C: Card Rendering & Content Architecture
+- [ ] Card surface redesign: material-inspired (elevated dark surface, subtle shadow, 1px border, 6–8px radius) with tokenized spacing (replace hardcoded numeric constants).
+- [ ] Migrate card body from pure SVG text to HTML layer: evaluate per-card absolutely positioned div overlay vs. foreignObject; choose approach with widest browser support & measurable perf.
+- [ ] Dynamic height expansion: cards auto-expand vertically to fit wrapped description (no truncation while selected or editing) with max-height + scroll fallback.
+- [ ] Truncation modes: non-selected cards show 1–2 title lines + 1 body line (clamped); selected/hovered expand contextually.
+- [ ] Inline edit UX overhaul: visible input styling, inline tick (✓) / cross (✕) icon buttons (SVG icons or text), keyboard Enter=accept / Esc=cancel.
+- [ ] Fix description edit artifact (overlapping rounded rectangle) – remove layout glitch by refactoring foreignObject region or overlay container.
+- [ ] Component injection support: allow richer React children (future attachments) via render prop (e.g., <Timeline renderCardContent={(event)=>...} />) without breaking tests.
+
+Phase D: Lanes & Vertical Density
+- [ ] Expand lane system: ensure at least 2 discrete vertical bands above and 2 below track under dense conditions (currently subtle offsets); explicit y-offset table.
+- [ ] Collision avoidance: re-run layout when card expanded/editing to nudge overlapping lanes (no visual overlap for selected cards).
+- [ ] Lane visualization test: add test asserting ≥3 distinct data-lane-index values when seeding 90+ events.
+
+Phase E: Tokens & Theming
+- [ ] Token expansion: replace residual hardcoded panel/button/anchor colors with CSS variables (backgrounds, borders, shadows, radii, spacing scale).
+- [ ] Focus ring tokens: unify focus-visible outline color & width across SVG + HTML.
+- [ ] Prepare light/dark theme toggle scaffold (CSS root selector class) – stretch.
+
+Phase F: Accessibility & Interaction Quality
+- [ ] Comprehensive a11y audit (overlays / tab order / ARIA roles & labels) – carries forward open item.
+- [ ] Live region refinement: announce edit mode enter/exit and validation outcomes.
+- [ ] Keyboard drag alternative: arrow keys with real-time preview + announce; ensure lane changes do not shift focus context unexpectedly.
+- [ ] High-contrast mode check: verify tokens yield ≥4.5:1 text contrast on dark theme.
+
+Phase G: Testing & Tooling
+- [ ] Add Playwright tests: grid line presence by zoom level; edit accept/cancel buttons; multi-row lane distribution; tooltip/expanded card content on select.
+- [ ] Performance regression check: measure render time with 150 events (target ≤ prior baseline +15%).
+- [ ] Visual regression scaffold (optional) – integrate screenshot diff for axis + card samples (stretch).
+
+Phase H: Documentation
+- [ ] Update `VISUALS.md`: dark theme palette, axis/grid spec, lane system diagram, card states (rest/hover/selected/edit), focus styles, token reference.
+- [ ] Add architecture note on HTML overlay vs SVG for cards.
+
+P1 — Accessibility (carryover)
+- [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review). (Consolidated into Phase F but tracked here until done.)
+
+P2 — Documentation (carryover)
+- [ ] Document updated palette, connector spec, and component tokens in `VISUALS.md` with screenshots. (Superseded by Phase H but remains until completed.)
 
 Notes
-- Keep performance budget targeting ~120 visible events; recheck after each visual/interaction addition.
-- Update `VISUALS.md` as the steel/teal theme and attachment components solidify; ensure contrast ≥ WCAG AA.
+- Maintain 24/24 existing tests green during incremental changes.
+- Prioritize low-risk refactors (tokens) before structural card migration.
+- Defer stretch goals if core visual & a11y tasks risk schedule.
 
 ---
 
