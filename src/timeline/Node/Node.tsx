@@ -10,6 +10,7 @@ interface NodeProps {
   description?: string;
   above: boolean;
   laneShift: number;
+  laneIndex?: number;
   scale: number;
   isSelected: boolean;
   isExpanded: boolean;
@@ -36,6 +37,7 @@ export const Node = React.memo(function Node({
   description,
   above,
   laneShift,
+  laneIndex = 0,
   scale,
   isSelected,
   isExpanded,
@@ -87,11 +89,16 @@ export const Node = React.memo(function Node({
   const bodySize = 1.0 * Math.max(0.9, scale);
   const clipId = `clip-${id}`;
 
+  const [focused, setFocused] = useState(false);
+
   return (
     <g
       role="button"
       tabIndex={0}
       aria-label={`Event: ${date} — ${title}`}
+      data-lane-index={laneIndex}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       onClick={() => { onSelect?.(id); onHoverChange?.(false); }}
       onDoubleClick={() => { onSelect?.(id); onStartInlineEdit?.(id); onHoverChange?.(false); }}
       onKeyDown={(e) => {
@@ -114,6 +121,18 @@ export const Node = React.memo(function Node({
       onMouseLeave={() => onHoverChange?.(false)}
       style={{ cursor: draggable ? 'pointer' : 'default' }}
     >
+      {/* Enlarged invisible hit area around anchor for easier pointer targeting */}
+      <rect
+        x={Math.max(0, x - 1.5)}
+        y={anchorY - 1.5}
+        width={3}
+        height={anchorSize + 3}
+        fill="transparent"
+        pointerEvents="all"
+        onPointerDown={(e) => { if (!draggable || isEditing) return; try { (e.currentTarget as any).setPointerCapture?.(e.pointerId); } catch {}; onStartDrag?.(id); onHoverChange?.(false); }}
+        onMouseDown={() => { if (!draggable || isEditing) return; onStartDrag?.(id); onHoverChange?.(false); }}
+        onClick={() => { onSelect?.(id); onHoverChange?.(false); }}
+      />
       <title>{`${date} — ${title}`}</title>
       {(() => {
         const centeredX = Math.max(anchorSize / 2, Math.min(100 - anchorSize / 2, x));
@@ -167,6 +186,10 @@ export const Node = React.memo(function Node({
               </div>
             </foreignObject>
           )}
+          {/* Focus-visible outline (when keyboard focusing) */}
+          {focused && !isSelected && (
+        <rect x={Math.max(0, x - 2)} y={Math.min(anchorY - 2, 20)} width={4} height={anchorSize + 4} fill="none" stroke="var(--cc-color-focus-accent, #74c7ec)" strokeWidth={0.4} pointerEvents="none" />
+      )}
         </g>
       )}
     </g>
