@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { truncateMono, truncateBody } from '../../lib/text';
+import { wrapMonoClamp, wrapBodyClamp } from '../../lib/text';
 
 interface NodeProps {
   id: string;
@@ -83,10 +83,14 @@ export const Node = React.memo(function Node({
   const connectorColor = '#74c7ec';
   const connectorOpacity = Math.max(opacity, 0.92);
 
-  function truncateMonoLocal(s: string, width: number, fontSize: number) { return truncateMono(s, width, fontSize, pad); }
-  function truncateBodyLocal(s: string, width: number, fontSize: number) { return truncateBody(s, width, fontSize, pad); }
+  // Remove single-line truncate locals (multi-line wrapper now used)
+  // const titleSize ... existing declarations remain
   const titleSize = 1.2 * Math.max(0.9, scale);
   const bodySize = 1.0 * Math.max(0.9, scale);
+  // Precompute wrapped title for reuse in description tooltip logic
+  const wrappedTitle = wrapMonoClamp(title, cardW, titleSize, pad, 2);
+  const titleLines = wrappedTitle.lines;
+  const titleTrunc = wrappedTitle.truncated;
   const clipId = `clip-${id}`;
 
   const [focused, setFocused] = useState(false);
@@ -168,12 +172,30 @@ export const Node = React.memo(function Node({
           </defs>
           <rect x={cardX} y={cardY} width={cardW} height={cardH} rx={0} fill="#0b1220" stroke="#3a4b5f" strokeWidth={0.2} filter="url(#cardShadow)" />
           <line x1={cardX} y1={cardY + pad + titleSize + 0.5} x2={cardX + cardW} y2={cardY + pad + titleSize + 0.5} stroke="#1f2b3a" strokeWidth={0.15} />
-          <text x={cardX + pad} y={cardY + pad + titleSize} fontSize={titleSize} fill="#e5eef9" style={{ fontFamily: 'Share Tech Mono, ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: 0.2 }}>{truncateMonoLocal(title, cardW, titleSize)}</text>
-          {description && !isEditing && (
-            <g clipPath={`url(#${clipId})`}>
-              <text x={cardX + pad} y={cardY + pad + titleSize + 1.8} fontSize={bodySize} fill="#acbdce" data-testid="card-description" style={{ fontFamily: 'ui-sans-serif, system-ui' }}>{truncateBodyLocal(description, cardW, bodySize)}</text>
-            </g>
-          )}
+          {(() => {
+            return (
+              <g>
+                {titleLines.map((ln, i) => (
+                  <text key={i} x={cardX + pad} y={cardY + pad + titleSize + i * (titleSize + 0.2)} fontSize={titleSize} fill="#e5eef9" style={{ fontFamily: 'Share Tech Mono, ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: 0.2 }}>{ln}</text>
+                ))}
+                {titleTrunc && !isEditing && (
+                  <title>{title}</title>
+                )}
+              </g>
+            );
+          })()}
+          {description && !isEditing && (() => {
+            const maxBodyLines = isExpanded ? 6 : 3;
+            const { lines: bodyLines, truncated: bodyTrunc } = wrapBodyClamp(description, cardW, bodySize, pad, maxBodyLines);
+            return (
+              <g clipPath={`url(#${clipId})`}>
+                {bodyLines.map((ln, i) => (
+                  <text key={i} x={cardX + pad} y={cardY + pad + titleSize + 1.8 + i * (bodySize + 0.6)} fontSize={bodySize} fill="#acbdce" data-testid="card-description" style={{ fontFamily: 'ui-sans-serif, system-ui' }}>{ln}</text>
+                ))}
+                {(bodyTrunc || titleTrunc) && <title>{`${date} — ${title}${description ? '\n' + description : ''}`}</title>}
+              </g>
+            );
+          })()}
           {isSelected && isEditing && (
             <foreignObject x={cardX} y={cardY} width={cardW} height={cardH} requiredExtensions="http://www.w3.org/1999/xhtml">
               <div style={{ fontSize: 12, fontFamily: 'ui-sans-serif, system-ui', padding: 6, display: 'flex', flexDirection: 'column', gap: 6 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); onCancelInlineEdit?.(); } if (e.key === 'Enter') { e.stopPropagation(); onSaveInlineEdit?.(id, { title: etitle, description: edesc || undefined }); } }} onBlur={(e) => { const current = e.currentTarget as HTMLElement; setTimeout(() => { if (!current.contains(document.activeElement)) { onSaveInlineEdit?.(id, { title: etitle, description: edesc || undefined }); } }, 0); }}>

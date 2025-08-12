@@ -43,7 +43,7 @@ P0 — Milestone 9: Architecture Split & Modularization
 - Status: Milestone 9 complete (Steps 1–7). All tests green (24/24). Minor ticks enhancement from P2 implemented.
 
 P1 — Milestone 8 (remaining polish)
-- [ ] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
+- [x] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
 - [x] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
 - [x] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
 - [x] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
