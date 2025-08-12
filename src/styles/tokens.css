@@ -1,34 +1,53 @@
 :root {
   /* Palette */
-  --cc-bg-steel-0: #0a1420;
-  --cc-bg-steel-1: #0b1724;
-  --cc-bg-steel-2: #0a1320;
-  --cc-bg-steel-3: #09121c;
-  --cc-color-axis-label: #9fb5c8;
+  --cc-bg-steel-0: #0f1418;
+  --cc-bg-steel-1: #131a20;
+  --cc-bg-steel-2: #161f26;
+  --cc-bg-steel-3: #1a232b;
+  --cc-bg-app: #131a20;
+  --cc-color-axis-label: #a8b9c6;
+  --cc-color-axis-line: #ffffff18;
+  --cc-color-axis-line-strong: #ffffff30;
+  --cc-color-grid-minor: #ffffff10;
+  --cc-color-grid-major: #ffffff15;
   --cc-color-focus-accent: #74c7ec;
-  --cc-color-border: #e5e7eb; /* tailwind gray-200 */
-  --cc-color-panel-bg: #ffffff;
-  --cc-color-panel-fg: #1f2937; /* gray-800 */
-  --cc-color-accent-primary: #4f46e5; /* indigo-600 */
-  --cc-color-accent-primary-hover: #4338ca; /* indigo-700 */
+  --cc-color-border: #2a3642;
+  --cc-color-panel-bg: #1f2932;
+  --cc-color-panel-fg: #e2e8f0;
+  --cc-color-accent-primary: #5090ea;
+  --cc-color-accent-primary-hover: #367bd9;
+  --cc-color-anchor-fill: #24313c;
+  --cc-color-anchor-outline: #f1f5f9cc;
+  --cc-color-anchor-selected: #3b82f6;
+  --cc-color-connector: #94a3b8;
+  --cc-color-card-bg: #1d2730;
+  --cc-color-card-border: #2e3a46;
+  --cc-color-card-divider: #2b3742;
+  --cc-color-card-title: #f1f5f9;
+  --cc-color-card-body: #c5d0d9;
 
   /* Typography */
   --cc-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --cc-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 
-  /* Sizing & spacing (initial subset) */
+  /* Sizing & spacing */
   --cc-space-0: 0;
   --cc-space-1: 2px;
   --cc-space-2: 4px;
   --cc-space-3: 6px;
   --cc-space-4: 8px;
+  --cc-space-5: 10px;
   --cc-space-6: 12px;
-  --cc-radius-sm: 2px;
-  --cc-radius-md: 4px;
+  --cc-radius-sm: 3px;
+  --cc-radius-md: 6px;
 
   /* Effects */
   --cc-focus-ring-width: 0.6;
+  --cc-shadow-card: 0 2px 4px -2px #00000080, 0 4px 16px -4px #00000066;
 
-  /* Background gradient */
-  --cc-bg-gradient: radial-gradient(100% 100% at 50% 0%, var(--cc-bg-steel-0) 0%, var(--cc-bg-steel-1) 30%, var(--cc-bg-steel-2) 60%, var(--cc-bg-steel-3) 100%);
+  /* Axis sizing */
+  --cc-axis-line-width: 0.18;
+
+  /* Background gradient (subtle vignette) */
+  --cc-bg-gradient: radial-gradient(120% 140% at 50% -10%, var(--cc-bg-steel-2) 0%, var(--cc-bg-steel-1) 55%, var(--cc-bg-steel-0) 85%);
 }

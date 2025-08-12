@@ -4,6 +4,7 @@
 /* App background: steel/teal gradient */
 body {
   background: var(--cc-bg-gradient);
+  color: var(--cc-color-panel-fg);
 }
 
 /* Accessibility: refine focus styles for SVG buttons */

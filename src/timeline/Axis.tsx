@@ -26,14 +26,16 @@ export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
   }
   return (
     <g data-component="Axis">
-      <line x1={tickStart} x2={tickEnd} y1={10} y2={10} stroke="#fff8" strokeWidth={0.25} />
+      {/* Main axis line */}
+      <line x1={tickStart} x2={tickEnd} y1={10} y2={10} stroke="var(--cc-color-axis-line)" strokeWidth={parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cc-axis-line-width') || '0.18')} />
+      {/* Minor tick marks */}
       {minor.map((x, i) => (
-        <line key={`m-${i}-${x}`} x1={x} x2={x} y1={9.55} y2={10.45} stroke="#fff3" strokeWidth={0.18} />
+        <line key={`m-${i}-${x}`} x1={x} x2={x} y1={9.55} y2={10.45} stroke="var(--cc-color-axis-line-strong)" strokeWidth={0.14} />
       ))}
       {ticks.map(t => (
         <g key={t.t} transform={`translate(${t.x},0)`}>
-          <line data-testid="axis-tick" x1={0} x2={0} y1={9.3} y2={10.7} stroke="#fff8" strokeWidth={0.25} />
-          <text data-testid="axis-label" x={0} y={12.2} fontSize={1.6} fill="#fff9" textAnchor="middle" style={{ pointerEvents: 'none', fontWeight: 300 }}>{t.label}</text>
+          <line data-testid="axis-tick" x1={0} x2={0} y1={9.3} y2={10.7} stroke="var(--cc-color-axis-line-strong)" strokeWidth={0.16} />
+          <text data-testid="axis-label" x={0} y={11.9} fontSize={1.2} fill="var(--cc-color-axis-label)" textAnchor="middle" style={{ pointerEvents: 'none', fontWeight: 400 }}>{t.label}</text>
         </g>
       ))}
     </g>

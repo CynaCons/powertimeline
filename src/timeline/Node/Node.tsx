@@ -80,8 +80,8 @@ export const Node = React.memo(function Node({
   const endXRaw = Math.max(cardX + pad, Math.min(cardX + cardW - pad, x));
   const endX = Math.abs(endXRaw - x) < 0.05 ? endXRaw + 0.05 : endXRaw;
   const connectorPath = `M ${x} ${stemStartY} L ${endX} ${anchorYForPath}`;
-  const connectorColor = '#74c7ec';
-  const connectorOpacity = Math.max(opacity, 0.92);
+  const connectorColor = 'var(--cc-color-connector)';
+  const connectorOpacity = Math.max(opacity, 0.9);
 
   // Remove single-line truncate locals (multi-line wrapper now used)
   // const titleSize ... existing declarations remain
@@ -147,12 +147,13 @@ export const Node = React.memo(function Node({
             y={anchorY}
             width={anchorSize}
             height={anchorSize}
-            fill={isSelected ? '#1d4ed8' : '#e2e8f0'}
-            stroke="none"
-            rx={0}
+            fill={isSelected ? 'var(--cc-color-anchor-selected)' : 'var(--cc-color-anchor-fill)'}
+            stroke="var(--cc-color-anchor-outline)"
+            strokeWidth={0.15}
+            rx={1}
             data-event-id={id}
             data-title={title}
-            style={{ cursor: draggable ? 'grab' : 'default', filter: isSelected ? 'url(#selGlow)' : undefined, pointerEvents: 'all', fillOpacity: isSelected ? 1 : Math.max(0.85, opacity) }}
+            style={{ cursor: draggable ? 'grab' : 'default', filter: isSelected ? 'url(#selGlow)' : undefined, pointerEvents: 'all', fillOpacity: isSelected ? 1 : Math.max(0.9, opacity) }}
             onPointerDown={(e) => { if (!draggable) return; try { (e.currentTarget as any).setPointerCapture?.(e.pointerId); } catch {}; onStartDrag?.(id); onHoverChange?.(false); }}
             onMouseDown={() => { if (!draggable) return; onStartDrag?.(id); onHoverChange?.(false); }}
             onClick={() => { onSelect?.(id); onHoverChange?.(false); }}
@@ -160,23 +161,23 @@ export const Node = React.memo(function Node({
           />
         );
       })()}
-      <text x={x} y={above ? 8.1 : 12.1} textAnchor="middle" fontSize={0.85} fill="#64748b" data-testid="anchor-date" style={{ fontFamily: 'Share Tech Mono, ui-monospace, SFMono-Regular, Menlo, monospace' }}>{displayDate}</text>
+      <text x={x} y={above ? 8.1 : 12.1} textAnchor="middle" fontSize={0.7} fill="var(--cc-color-axis-label)" data-testid="anchor-date" style={{ fontFamily: 'Share Tech Mono, ui-monospace, SFMono-Regular, Menlo, monospace' }}>{displayDate}</text>
       <g opacity={connectorOpacity}>
-        <path d={connectorPath} stroke={connectorColor} strokeWidth={0.35} fill="none" shapeRendering="geometricPrecision" />
-        <rect x={endX - 0.35} y={anchorYForPath - 0.35} width={0.7} height={0.7} fill={connectorColor} stroke="#0e1624" strokeWidth={0.1} />
+        <path d={connectorPath} stroke={connectorColor} strokeWidth={0.25} fill="none" shapeRendering="geometricPrecision" />
+        <rect x={endX - 0.3} y={anchorYForPath - 0.3} width={0.6} height={0.6} fill={connectorColor} stroke="var(--cc-color-card-bg)" strokeWidth={0.08} />
       </g>
       {showLabel && (
         <g opacity={opacity}>
           <defs>
             <clipPath id={clipId}><rect x={cardX} y={cardY} width={cardW} height={cardH} rx={0} /></clipPath>
           </defs>
-          <rect x={cardX} y={cardY} width={cardW} height={cardH} rx={0} fill="#0b1220" stroke="#3a4b5f" strokeWidth={0.2} filter="url(#cardShadow)" />
-          <line x1={cardX} y1={cardY + pad + titleSize + 0.5} x2={cardX + cardW} y2={cardY + pad + titleSize + 0.5} stroke="#1f2b3a" strokeWidth={0.15} />
+          <rect x={cardX} y={cardY} width={cardW} height={cardH} rx={2} fill="var(--cc-color-card-bg)" stroke="var(--cc-color-card-border)" strokeWidth={0.15} style={{ filter: 'drop-shadow(var(--cc-shadow-card))' }} />
+          <line x1={cardX} y1={cardY + pad + titleSize + 0.35} x2={cardX + cardW} y2={cardY + pad + titleSize + 0.35} stroke="var(--cc-color-card-divider)" strokeWidth={0.12} />
           {(() => {
             return (
               <g>
                 {titleLines.map((ln, i) => (
-                  <text key={i} x={cardX + pad} y={cardY + pad + titleSize + i * (titleSize + 0.2)} fontSize={titleSize} fill="#e5eef9" style={{ fontFamily: 'Share Tech Mono, ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: 0.2 }}>{ln}</text>
+                  <text key={i} x={cardX + pad} y={cardY + pad + titleSize + i * (titleSize + 0.2)} fontSize={titleSize} fill="var(--cc-color-card-title)" style={{ fontFamily: 'Share Tech Mono, ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: 0.2 }}>{ln}</text>
                 ))}
                 {titleTrunc && !isEditing && (
                   <title>{title}</title>
@@ -190,7 +191,7 @@ export const Node = React.memo(function Node({
             return (
               <g clipPath={`url(#${clipId})`}>
                 {bodyLines.map((ln, i) => (
-                  <text key={i} x={cardX + pad} y={cardY + pad + titleSize + 1.8 + i * (bodySize + 0.6)} fontSize={bodySize} fill="#acbdce" data-testid="card-description" style={{ fontFamily: 'ui-sans-serif, system-ui' }}>{ln}</text>
+                  <text key={i} x={cardX + pad} y={cardY + pad + titleSize + 1.5 + i * (bodySize + 0.55)} fontSize={bodySize} fill="var(--cc-color-card-body)" data-testid="card-description" style={{ fontFamily: 'ui-sans-serif, system-ui' }}>{ln}</text>
                 ))}
                 {(bodyTrunc || titleTrunc) && <title>{`${date} — ${title}${description ? '\n' + description : ''}`}</title>}
               </g>
