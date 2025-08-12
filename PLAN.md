@@ -2,45 +2,19 @@
 
 ## Ongoing (sorted by priority, then chronological)
 
-P0 — Milestone 9: Architecture Split & Modularization
-- Context: `Timeline.tsx` and `App.tsx` have grown large. Split along natural seams without changing behavior, DOM order, or selectors.
-- Checklist
-  - [x] Step 1: Extract overlays and focus trap
-    - [x] Create `src/app/OverlayShell.tsx` (role=dialog, pointer-events logic)
-    - [x] Create panels in `src/app/panels/`: `OutlinePanel.tsx`, `EditorPanel.tsx`, `CreatePanel.tsx`, `DevPanel.tsx`
-    - [x] Add `src/app/hooks/useFocusTrap.ts` and wire into OverlayShell
-  - [x] Step 2: Extract Node from Timeline
-    - [x] Move memoized Node to `src/timeline/Node/Node.tsx` (keep clipPath/foreignObject)
-    - [x] Preserve `data-event-id` and drag/keyboard handlers
-  - [x] Step 3: Extract SvgDefs and Axis
-    - [x] `src/timeline/SvgDefs.tsx` (gradient, filters) rendered inside same SVG
-    - [x] `src/timeline/Axis.tsx` (render ticks/labels only; keep tick math in Timeline)
-  - [x] Step 4: Extract RangeBar and CreateAffordance
-    - [x] `src/timeline/RangeBar.tsx`
-    - [x] `src/timeline/CreateAffordance.tsx`
-  - [x] Step 5: Extract hooks and utils
-    - [x] `src/timeline/hooks/useAxisTicks.ts` (with fallback ticks)
-    - [x] `src/timeline/hooks/useLanes.ts`
-    - [x] `src/lib/time.ts`
-    - [x] `src/lib/text.ts`
-  - [x] Step 6: App libs and hooks
-    - [x] `src/lib/storage.ts` (debounced save; drag guard)
-    - [x] `src/lib/devSeed.ts`
-    - [x] `src/app/hooks/useViewWindow.ts`
-    - [x] `src/app/hooks/useAnnouncer.ts`
-    - [x] Integrate storage + hooks into `App` (replace inline impl)
-    - [x] Manual verification + Playwright pass after integration
-  - [x] Step 7: Introduce style tokens
-    - [x] `src/styles/tokens.css` (CSS variables for palette/sizes)
-    - [x] Replace hardcoded background gradient + focus/axis colors with variables
-    - [x] Begin replacing remaining hardcoded colors (panels/buttons/anchors staged for later refinement)
-    - [x] Establish spacing/radius token scaffold
-    - [x] Add follow-up documentation task to VISUALS.md (will expand in Milestone 10)
-- Test guardrails
-  - [x] Preserve DOM order and all `data-testid` values: `axis-tick`, `axis-label`, `range-bar`, `range-start`, `range-end`, `anchor-date`, `card-description`, `create-plus`
-  - [x] Keep `data-event-id` on anchors; maintain `body[data-dragging]` and overlay pointer-events behavior
-  - [x] Run Playwright after each step; commit per step (current: 24/24 passing post-Step6 integration)
-- Status: Milestone 9 complete (Steps 1–7). All tests green (24/24). Minor ticks enhancement from P2 implemented.
+P0 — Milestone 10: Planning & Specification (draft)
+- Goal: Consolidate refactor gains (Milestone 9), finalize visual system, and address remaining a11y + documentation gaps prior to new feature surface.
+- Pending Inputs: Await product/UX feedback (you) after current UI review.
+- Proposed Focus Areas (to refine after feedback):
+  - [ ] A11y comprehensive audit (broader overlay/control review – carries forward open P1 item)
+  - [ ] Token expansion: replace remaining hardcoded panel/button/anchor colors with CSS variables; spacing/radius application
+  - [ ] Documentation: Update `VISUALS.md` with palette, connector spec, lane system diagrams, multi-line clamp behavior, focus styles
+  - [ ] Add tests: lane distribution (dense & very dense), multi-line clamp tooltip presence, focus-visible outline keyboard navigation
+  - [ ] Performance profiling pass (120+ events) after lane + multi-line additions; budget validation
+  - [ ] Export improvements (filename timestamp, optional import) – stretch
+  - [ ] Theming groundwork (light/dark token sets) – stretch
+  - [ ] Assess persistence abstraction (potential future sync) – note
+- Next Step: Incorporate your review notes, then lock scope & convert to concrete checklist.
 
 P1 — Milestone 8 (remaining polish)
 - [x] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
@@ -65,6 +39,20 @@ Notes
 ---
 
 ## Completed (reverse chronological)
+
+### Milestone 9: Architecture Split & Modularization
+- Objective: Decompose monolithic `App.tsx` / timeline implementation into modular components, hooks, and utilities without altering external behavior or test selectors.
+- Steps Completed:
+  - Step 1: Overlays & focus trap (`OverlayShell`, panels, `useFocusTrap`)
+  - Step 2: Extract `Node` component (memoized, drag/keyboard parity)
+  - Step 3: Extract `SvgDefs` and `Axis`
+  - Step 4: Extract `RangeBar` and `CreateAffordance`
+  - Step 5: Timeline hooks & utils (`useAxisTicks`, `useLanes`, `time`, `text`)
+  - Step 6: App libs & hooks (`storage`, `devSeed`, `useViewWindow`, `useAnnouncer`)
+  - Step 7: Style tokens (`tokens.css`, background/focus/axis variable integration)
+  - Additional: Minor unlabeled ticks (promoted from P2), persistence write-through during drag, lane instrumentation, multi-line clamp & tooltips, capped lane system (2/4 lanes)
+- Guardrails: DOM order + data-testids preserved (`axis-tick`, `axis-label`, `range-bar`, `range-start`, `range-end`, `anchor-date`, `card-description`, `create-plus`, `data-event-id`)
+- Result: 24/24 Playwright tests passing post-refactor; improved modularity for future features.
 
 ### Milestone 8: Card Polish, Density Layout, and Adaptive Axis
 - Visual system update (steel/teal + dark attachment cards)
