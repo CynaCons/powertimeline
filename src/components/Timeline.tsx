@@ -87,6 +87,8 @@ const Timeline: React.FC<Props> = ({
     setPreviewISO(null);
     draggingIdRef.current = null;
     previewISORef.current = null;
+    // Force a microtask flush to allow storage debouncer upstream to run
+    setTimeout(() => { /* noop - ensures writeThrough already executed in onDragDate */ }, 0);
   }, [onDragDate, onAnnounce, onDragState]);
 
   // Ensure overlay pointer-events flips immediately on down/up regardless of React batching
@@ -233,10 +235,12 @@ const Timeline: React.FC<Props> = ({
           const opacity = veryDense ? (faded ? 0.45 : 1) : (dense ? (faded ? 0.7 : 1) : 1);
           const displayDate = (ev.id === draggingId && previewISO) ? new Date(new Date(previewISO).getTime()).toISOString().slice(0,10) : ev.date;
           const laneShift = laneShiftById.get(ev.id) || 0;
+          const laneIndex = Math.round(laneShift / 0.6) || 0;
           return (
             <Node
               key={ev.id}
               id={ev.id}
+              laneIndex={laneIndex}
               x={x}
               date={ev.date}
               displayDate={displayDate}
@@ -261,8 +265,10 @@ const Timeline: React.FC<Props> = ({
               onHoverChange={(hovered) => setHoveredId(hovered ? ev.id : (hoveredId === ev.id ? null : hoveredId))}
               onNudge={(id, deltaDays) => {
                 const base = new Date(ev.date).getTime();
-                const t = base + deltaDays * dayMs;
-                const iso = new Date(t).toISOString().slice(0,10);
+                let tNew = base + deltaDays * dayMs;
+                // Clamp to padded domain boundaries
+                tNew = Math.min(Math.max(tNew, domainMin), domainMax);
+                const iso = new Date(tNew).toISOString().slice(0,10);
                 setPreviewISO(iso); setDraggingId(id);
                 onAnnounce?.(`Date changed to ${iso}`);
                 onDragDate?.(id, iso);

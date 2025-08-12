@@ -45,7 +45,7 @@ P0 — Milestone 9: Architecture Split & Modularization
 P1 — Milestone 8 (remaining polish)
 - [ ] Multi-line clamp for long titles/descriptions with tooltip on hover and/or expand-on-select; ensure no overflow at any zoom/density.
 - [ ] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
-- [ ] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
+- [x] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
 - [ ] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
 
 P1 — Milestone 7 (follow-up a11y polish)
@@ -53,7 +53,7 @@ P1 — Milestone 7 (follow-up a11y polish)
 
 P2 — Milestone 8 (secondary)
 - [x] Minor ticks (unlabeled) rendered alongside primary labels for context; maintain performance.
-- [ ] Data-testid instrumentation for lane groups/index to improve test robustness.
+- [x] Data-testid / instrumentation for lane index (data-lane-index on nodes) to improve test robustness.
 - [ ] Document updated palette, connector spec, and component tokens in `VISUALS.md` with screenshots.
 
 Notes

@@ -127,7 +127,7 @@ function App() {
   const addEvent = useCallback((e: React.FormEvent) => {
     e.preventDefault(); if (!date || !title) return;
     const newEvent: Event = { id: Date.now().toString(), date, title, description: description || undefined };
-    setEvents(prev => [...prev, newEvent]);
+    setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
     setSelectedId(newEvent.id);
     setDate(''); setTitle(''); setDescription('');
     setOverlay(null);
@@ -135,12 +135,12 @@ function App() {
 
   const saveSelected = useCallback((e: React.FormEvent) => {
     e.preventDefault(); if (!selectedId) return;
-    setEvents(prev => prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev));
+    setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
   }, [selectedId, editDate, editTitle, editDescription]);
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return;
-    setEvents(prev => prev.filter(ev => ev.id !== selectedId));
+    setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); storageRef.current.writeThrough(next); return next; });
     setSelectedId(undefined);
   }, [selectedId]);
 
