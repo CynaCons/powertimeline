@@ -47,6 +47,8 @@ P1 — Milestone 8 (remaining polish)
 - [x] Focus-visible outline on cards and anchors for keyboard users; clear visual focus state distinct from selection.
 - [x] Clamp keyboard nudge to domain boundaries (min/max of padded domain) to avoid impossible dates.
 - [x] Ensure ≥32px effective hit area for keyboard/mouse on anchors/cards (consider invisible hit-targets).
+- [x] Density-aware vertical lanes (2–4) reduce cluster overlap with capped lane assignment and alternating above/below stacking.
+  - Acceptance: With ≥50 events (dense) at least 2 distinct laneIndex values appear; with ≥90 (very dense) up to 4 laneIndex values appear; visual vertical separation noticeable; tests remain green.
 
 P1 — Milestone 7 (follow-up a11y polish)
 - [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review).
@@ -78,7 +80,6 @@ Notes
   - [x] Prevent text overflow inside cards; tighter typography scale.
   - [x] Card structure polish: header/body divider, mono title, improved spacing.
 - Density
-  - [x] Density-aware vertical lanes (2–4) reduce cluster overlap.
   - [x] Density-aware scaling of cards/fonts with clamps.
 - Axis, track, and range
   - [x] Thinner center line; adaptive ticks/labels (≤12) by zoom.

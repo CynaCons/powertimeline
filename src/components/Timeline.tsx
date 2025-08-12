@@ -6,7 +6,7 @@ import { Axis } from '../timeline/Axis';
 import { RangeBar } from '../timeline/RangeBar';
 import { CreateAffordance } from '../timeline/CreateAffordance';
 import { useAxisTicks } from '../timeline/hooks/useAxisTicks';
-import { useLanes } from '../timeline/hooks/useLanes';
+import { useLanes, LANE_SPACING_DENSE, LANE_SPACING_VERY_DENSE } from '../timeline/hooks/useLanes';
 import { dayMs } from '../lib/time';
 
 interface Props {
@@ -176,6 +176,12 @@ const Timeline: React.FC<Props> = ({
 
   const laneShiftById = useLanes(displayPositions, dense, veryDense);
 
+  // Helper to convert laneShift (stored as laneIndex*spacing) to laneIndex given density
+  function inferLaneIndex(shift: number) {
+    const spacing = veryDense ? LANE_SPACING_VERY_DENSE : LANE_SPACING_DENSE;
+    return Math.round(shift / spacing);
+  }
+
   return (
     <div className="w-full flex items-center justify-center" style={{ minHeight: 260 }}>
       <svg
@@ -221,11 +227,11 @@ const Timeline: React.FC<Props> = ({
         <SvgDefs />
         <Axis ticks={tickData} tickStart={tickStart} tickEnd={tickEnd} viewMin={viewMin} viewMax={viewMax} />
         <RangeBar hasEvents={events.length > 0} firstX={firstX} lastX={lastX} />
-        {sorted.map((ev, i) => {
+        {sorted.map((ev) => {
           const baseT = new Date(ev.date).getTime();
           const t = ev.id === draggingId && previewISO ? new Date(previewISO).getTime() : baseT;
           const x = tToXPercent(t);
-          const above = i % 2 === 0;
+          // laneIndex based above calculation already
           const isSelected = ev.id === selectedId;
           const isEditing = editingId === ev.id;
           const isHover = hoverEnabled && hoveredId === ev.id;
@@ -235,7 +241,8 @@ const Timeline: React.FC<Props> = ({
           const opacity = veryDense ? (faded ? 0.45 : 1) : (dense ? (faded ? 0.7 : 1) : 1);
           const displayDate = (ev.id === draggingId && previewISO) ? new Date(new Date(previewISO).getTime()).toISOString().slice(0,10) : ev.date;
           const laneShift = laneShiftById.get(ev.id) || 0;
-          const laneIndex = Math.round(laneShift / 0.6) || 0;
+          const laneIndex = inferLaneIndex(laneShift);
+          const above = laneIndex % 2 === 0;
           return (
             <Node
               key={ev.id}
@@ -266,7 +273,6 @@ const Timeline: React.FC<Props> = ({
               onNudge={(id, deltaDays) => {
                 const base = new Date(ev.date).getTime();
                 let tNew = base + deltaDays * dayMs;
-                // Clamp to padded domain boundaries
                 tNew = Math.min(Math.max(tNew, domainMin), domainMax);
                 const iso = new Date(tNew).toISOString().slice(0,10);
                 setPreviewISO(iso); setDraggingId(id);
