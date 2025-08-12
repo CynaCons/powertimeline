@@ -7,49 +7,49 @@ P0 — Milestone 10: Visual + Interaction Refinement (spec & implementation)
 - Acceptance (overall): Maintain 24/24 existing tests; add new tests for grid lines, multi-row lanes, editing controls; keep 120-event performance smoke under prior runtime.
 
 Phase A: Axis / Track / Background
-- [ ] Dark theme background (tokens): introduce dark-neutral ramp; swap current light gradient for dark gray (#111–#1a1d21 range) with subtle vignette.
-- [ ] Slim axis track line: reduce stroke width (currently visually heavy) & lighten opacity; expose token (--cc-axis-line, --cc-axis-line-width).
+- [x] Dark theme background (tokens): introduce dark-neutral ramp; swap current light gradient for dark gray (#111–#1a1d21 range) with subtle vignette. (Implemented via updated tokens + new gradient)
+- [x] Slim axis track line: reduce stroke width & lighten opacity; expose token (--cc-axis-line, --cc-axis-line-width). (Axis line now uses tokens & thinner stroke)
 - [ ] Temporal separators: render minor/major grid lines (day/week/month/year) adapting to zoom; light gray lines (different opacity per hierarchy) not exceeding performance budget.
-- [ ] Label scale & placement: reduce date label font size, adjust vertical alignment & padding so labels sit consistently relative to track; ensure ≤12 primary labels rule preserved.
+- [x] Label scale & placement: reduce date label font size, adjust vertical alignment & padding so labels sit consistently relative to track; ensure ≤12 primary labels rule preserved. (Font size reduced 1.6→1.2, y adjusted)
 
 Phase B: Event Anchors & Connectors
-- [ ] Anchor restyle: smaller square or circle variant; dark fill with subtle inner highlight; thin light (near-white) outline for contrast on dark background.
-- [ ] Connector redesign: lighten color from teal/blue to neutral light gray; reduce stroke width; shorten path length padding so cards feel closer to anchor.
-- [ ] Hover/selection states: tokenize colors; glow/focus states harmonized with new palette (no pure blue unless focus accent token retained).
+- [x] Anchor restyle: smaller square variant; dark fill + light outline tokens.
+- [x] Connector redesign: light neutral gray, reduced stroke width, shorter endpoint square.
+- [ ] Hover/selection states: tokenize glow/focus states (selection still uses legacy blue; needs palette alignment + token usage).
 
 Phase C: Card Rendering & Content Architecture
-- [ ] Card surface redesign: material-inspired (elevated dark surface, subtle shadow, 1px border, 6–8px radius) with tokenized spacing (replace hardcoded numeric constants).
-- [ ] Migrate card body from pure SVG text to HTML layer: evaluate per-card absolutely positioned div overlay vs. foreignObject; choose approach with widest browser support & measurable perf.
-- [ ] Dynamic height expansion: cards auto-expand vertically to fit wrapped description (no truncation while selected or editing) with max-height + scroll fallback.
-- [ ] Truncation modes: non-selected cards show 1–2 title lines + 1 body line (clamped); selected/hovered expand contextually.
-- [ ] Inline edit UX overhaul: visible input styling, inline tick (✓) / cross (✕) icon buttons (SVG icons or text), keyboard Enter=accept / Esc=cancel.
-- [ ] Fix description edit artifact (overlapping rounded rectangle) – remove layout glitch by refactoring foreignObject region or overlay container.
-- [ ] Component injection support: allow richer React children (future attachments) via render prop (e.g., <Timeline renderCardContent={(event)=>...} />) without breaking tests.
+- [ ] Card surface redesign: material-inspired (dark surface, subtle shadow, 1px border, radius) with tokenized spacing (current: partial tokens, legacy geometry still present).
+- [ ] Migrate card body from pure SVG text to HTML layer: evaluate per-card absolutely positioned div overlay vs. foreignObject.
+- [ ] Dynamic height expansion: auto-expand selected/editing cards (still fixed collapsed/expanded sizes).
+- [ ] Truncation modes: refine to 1–2 title lines + 1 body line for non-selected; currently multi-line clamp present but expansion logic incomplete.
+- [ ] Inline edit UX overhaul: add tick/cross icon controls (still using Save/Cancel buttons inside foreignObject).
+- [ ] Fix description edit artifact (overlapping rounded rectangle) – pending after card refactor.
+- [ ] Component injection support: render prop for rich content.
 
 Phase D: Lanes & Vertical Density
-- [ ] Expand lane system: ensure at least 2 discrete vertical bands above and 2 below track under dense conditions (currently subtle offsets); explicit y-offset table.
-- [ ] Collision avoidance: re-run layout when card expanded/editing to nudge overlapping lanes (no visual overlap for selected cards).
-- [ ] Lane visualization test: add test asserting ≥3 distinct data-lane-index values when seeding 90+ events.
+- [ ] Expand lane system: 2 above / 2 below explicit vertical bands (currently capped algorithm but visual separation modest).
+- [ ] Collision avoidance: adjust layout on expansion.
+- [ ] Lane visualization test: to be added.
 
 Phase E: Tokens & Theming
-- [ ] Token expansion: replace residual hardcoded panel/button/anchor colors with CSS variables (backgrounds, borders, shadows, radii, spacing scale).
-- [ ] Focus ring tokens: unify focus-visible outline color & width across SVG + HTML.
-- [ ] Prepare light/dark theme toggle scaffold (CSS root selector class) – stretch.
+- [ ] Token expansion: replace residual hardcoded panel/button/anchor colors.
+- [ ] Focus ring tokens: unify across SVG + HTML (partial: SVG updated; HTML inputs still custom inline styles).
+- [ ] Light/dark theme toggle scaffold – stretch.
 
 Phase F: Accessibility & Interaction Quality
-- [ ] Comprehensive a11y audit (overlays / tab order / ARIA roles & labels) – carries forward open item.
-- [ ] Live region refinement: announce edit mode enter/exit and validation outcomes.
-- [ ] Keyboard drag alternative: arrow keys with real-time preview + announce; ensure lane changes do not shift focus context unexpectedly.
-- [ ] High-contrast mode check: verify tokens yield ≥4.5:1 text contrast on dark theme.
+- [ ] Comprehensive a11y audit (overlays / tab order / ARIA roles & labels).
+- [ ] Live region refinement: edit mode enter/exit announcements.
+- [ ] Keyboard drag alternative enhancements.
+- [ ] High-contrast mode check.
 
 Phase G: Testing & Tooling
-- [ ] Add Playwright tests: grid line presence by zoom level; edit accept/cancel buttons; multi-row lane distribution; tooltip/expanded card content on select.
-- [ ] Performance regression check: measure render time with 150 events (target ≤ prior baseline +15%).
-- [ ] Visual regression scaffold (optional) – integrate screenshot diff for axis + card samples (stretch).
+- [ ] New Playwright tests (grid lines, editing controls, multi-row lanes, expanded card content).
+- [ ] Performance regression check @150 events.
+- [ ] Visual regression scaffold (stretch).
 
 Phase H: Documentation
-- [ ] Update `VISUALS.md`: dark theme palette, axis/grid spec, lane system diagram, card states (rest/hover/selected/edit), focus styles, token reference.
-- [ ] Add architecture note on HTML overlay vs SVG for cards.
+- [ ] Update `VISUALS.md` (dark palette, axis/grid, lanes, card states, focus styles, tokens).
+- [ ] Architecture note: HTML overlay vs SVG for cards.
 
 P1 — Accessibility (carryover)
 - [ ] Broader accessibility audit for overlays and controls (ARIA roles/labels completeness, trap edge cases, tab order review). (Consolidated into Phase F but tracked here until done.)
