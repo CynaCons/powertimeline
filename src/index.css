@@ -23,3 +23,19 @@ body[data-dragging] aside[role="dialog"] {
 svg text[data-testid="axis-label"], svg text[text-anchor="start"], svg text[text-anchor="end"] {
   fill: var(--cc-color-axis-label) !important;
 }
+
+/* Unified focus ring (Phase E) */
+:where(button, [role="button"], input, textarea, select):focus-visible {
+  outline: var(--cc-focus-ring-outline);
+  outline-offset: 2px;
+}
+
+/* Inputs (tokenized) */
+.cc-input { background: var(--cc-color-input-bg); border: 1px solid var(--cc-color-input-border); color: var(--cc-color-card-title); border-radius: 4px; padding: 4px 6px; font-size: 12px; }
+.cc-input::placeholder { color: var(--cc-color-input-placeholder); }
+
+/* Themed create accent utility */
+.cc-create-accent { color: var(--cc-color-accent-create); }
+
+/* High contrast ensure outline visible */
+@media (forced-colors: active) { :where(button, [role="button"], input, textarea, select):focus-visible { outline-color: Highlight; } }

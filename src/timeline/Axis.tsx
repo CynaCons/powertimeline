@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Tick } from './hooks/useAxisTicks';
 
 interface AxisProps {
@@ -10,24 +10,49 @@ interface AxisProps {
 }
 
 export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
-  // Derive minor ticks (unlabeled) between major ticks for additional temporal context
-  const minor: number[] = [];
-  for (let i = 0; i < ticks.length - 1; i++) {
-    const a = ticks[i];
-    const b = ticks[i + 1];
-    const gap = b.x - a.x;
-    if (gap > 6) { // only subdivide sufficiently large gaps
-      const parts = 4; // create 3 interior minor ticks
-      for (let p = 1; p < parts; p++) {
-        const x = a.x + (gap * p) / parts;
-        if (x > tickStart && x < tickEnd) minor.push(x);
+  // Derive minor ticks (unlabeled) between major ticks for additional temporal context.
+  // Memoize to avoid recomputation every render and guard against dense scenarios.
+  const minor = useMemo(() => {
+    if (!ticks.length) return [] as number[];
+    // Skip minor subdivision if already very dense
+    if (ticks.length > 40) return [] as number[];
+    const out: number[] = [];
+    for (let i = 0; i < ticks.length - 1; i++) {
+      const a = ticks[i];
+      const b = ticks[i + 1];
+      const gap = b.x - a.x;
+      if (gap > 6) { // only subdivide sufficiently large gaps (in viewBox percent units)
+        const parts = 4; // produces 3 interior minor ticks
+        for (let p = 1; p < parts; p++) {
+          const x = a.x + (gap * p) / parts;
+          if (x > tickStart && x < tickEnd) out.push(x);
+        }
       }
+      // Cap minors to a reasonable number to prevent perf spikes
+      if (out.length > 120) break;
     }
-  }
+    return out;
+  }, [ticks, tickStart, tickEnd]);
+
   return (
     <g data-component="Axis">
-      {/* Main axis line */}
-      <line x1={tickStart} x2={tickEnd} y1={10} y2={10} stroke="var(--cc-color-axis-line)" strokeWidth={parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cc-axis-line-width') || '0.18')} />
+      {/* Major grid lines */}
+      {ticks.map(t => (
+        <line key={`g-${t.t}`} x1={t.x} x2={t.x} y1={2} y2={18} stroke="var(--cc-color-grid-major)" strokeWidth={0.08} />
+      ))}
+      {/* Minor grid lines */}
+      {minor.map((x, i) => (
+        <line key={`gm-${i}-${x}`} x1={x} x2={x} y1={3} y2={17} stroke="var(--cc-color-grid-minor)" strokeWidth={0.06} />
+      ))}
+      {/* Main axis line (stroke width driven by CSS variable, fallback inline) */}
+      <line
+        x1={tickStart}
+        x2={tickEnd}
+        y1={10}
+        y2={10}
+        stroke="var(--cc-color-axis-line)"
+        strokeWidth="var(--cc-axis-line-width,0.18)"
+      />
       {/* Minor tick marks */}
       {minor.map((x, i) => (
         <line key={`m-${i}-${x}`} x1={x} x2={x} y1={9.55} y2={10.45} stroke="var(--cc-color-axis-line-strong)" strokeWidth={0.14} />

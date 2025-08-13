@@ -174,7 +174,11 @@ const Timeline: React.FC<Props> = ({
   const firstX = Math.max(tickStart, Math.min(tickEnd, firstXRaw));
   const lastX = Math.max(tickStart, Math.min(tickEnd, lastXRaw));
 
-  const laneShiftById = useLanes(displayPositions, dense, veryDense);
+  const laneShiftById = useLanes(
+    displayPositions.map(p => ({ id: p.id, x: p.x, expanded: (p.id === selectedId) || (p.id === draggingId) || (p.id === hoveredId) })),
+    dense,
+    veryDense
+  );
 
   // Helper to convert laneShift (stored as laneIndex*spacing) to laneIndex given density
   function inferLaneIndex(shift: number) {
@@ -242,7 +246,8 @@ const Timeline: React.FC<Props> = ({
           const displayDate = (ev.id === draggingId && previewISO) ? new Date(new Date(previewISO).getTime()).toISOString().slice(0,10) : ev.date;
           const laneShift = laneShiftById.get(ev.id) || 0;
           const laneIndex = inferLaneIndex(laneShift);
-          const above = laneIndex % 2 === 0;
+          // Phase D: lanes 0,1 map to above=true, 2,3 map to above=false
+          const above = laneIndex <= 1; 
           return (
             <Node
               key={ev.id}
@@ -259,6 +264,7 @@ const Timeline: React.FC<Props> = ({
               isSelected={isSelected}
               isExpanded={isExpanded}
               isEditing={isEditing}
+              isHover={isHover}
               showLabel={showLabel}
               opacity={opacity}
               draggable={!!onDragDate}
@@ -266,9 +272,9 @@ const Timeline: React.FC<Props> = ({
               onStartDrag={(id) => {
                 setHoveredId(null); setDraggingId(id); setPreviewISO(ev.date); draggingIdRef.current = id; previewISORef.current = ev.date; try { document.body?.setAttribute('data-dragging', '1'); } catch {}; onDragState?.(true);
               }}
-              onStartInlineEdit={(id) => { setHoveredId(null); setEditingId(id); }}
-              onSaveInlineEdit={(id, updates) => { setEditingId(null); onInlineEdit?.(id, updates); }}
-              onCancelInlineEdit={() => setEditingId(null)}
+              onStartInlineEdit={(id) => { setHoveredId(null); setEditingId(id); onAnnounce?.('Editing mode: title field focused. Press Enter to save, Escape to cancel.'); }}
+              onSaveInlineEdit={(id, updates) => { setEditingId(null); onInlineEdit?.(id, updates); onAnnounce?.('Edit saved.'); }}
+              onCancelInlineEdit={() => { setEditingId(null); onAnnounce?.('Edit canceled.'); }}
               onHoverChange={(hovered) => setHoveredId(hovered ? ev.id : (hoveredId === ev.id ? null : hoveredId))}
               onNudge={(id, deltaDays) => {
                 const base = new Date(ev.date).getTime();

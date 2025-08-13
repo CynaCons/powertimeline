@@ -48,6 +48,10 @@ function App() {
   // Announcer hook
   const { announce, renderLiveRegion } = useAnnouncer();
 
+  // Theme state
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => 'dark');
+  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
+
   useEffect(() => {
     try { if (devEnabled) localStorage.setItem(DEV_FLAG_KEY, '1'); else localStorage.removeItem(DEV_FLAG_KEY); } catch {}
   }, [devEnabled]);
@@ -195,6 +199,7 @@ function App() {
           <div className="flex items-center gap-3">
             <div className="text-[11px] text-gray-500" aria-hidden>Local-only • Prototype</div>
             <button type="button" title={devEnabled ? 'Disable Developer Options' : 'Enable Developer Options'} onClick={() => setDevEnabled((v) => !v)} className={`rounded px-2 py-1 text-[11px] border ${devEnabled ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`} aria-pressed={devEnabled} aria-label="Toggle developer options">⚙︎ Dev</button>
+            <button type="button" aria-label="Toggle light/dark theme" className="rounded px-2 py-1 text-[11px] border bg-white text-gray-600 border-gray-300 hover:bg-gray-50" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? 'Light' : 'Dark'}</button>
           </div>
         </div>
       </header>

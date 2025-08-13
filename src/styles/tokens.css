@@ -16,9 +16,11 @@
   --cc-color-panel-fg: #e2e8f0;
   --cc-color-accent-primary: #5090ea;
   --cc-color-accent-primary-hover: #367bd9;
-  --cc-color-anchor-fill: #24313c;
-  --cc-color-anchor-outline: #f1f5f9cc;
-  --cc-color-anchor-selected: #3b82f6;
+  --cc-color-anchor-fill: #e5e7eb; /* small light grey square */
+  --cc-color-anchor-hover: #d1d5db; /* slightly darker on hover */
+  --cc-color-anchor-outline: #9ca3af; /* subtle outline */
+  --cc-color-anchor-selected: #4f9dfc; /* refined selection tone */
+  --cc-color-selection-glow: #63b3ff55; /* translucent glow */
   --cc-color-connector: #94a3b8;
   --cc-color-card-bg: #1d2730;
   --cc-color-card-border: #2e3a46;
@@ -40,6 +42,8 @@
   --cc-space-6: 12px;
   --cc-radius-sm: 3px;
   --cc-radius-md: 6px;
+  --cc-radius-card: 4px; /* new card radius */
+  --cc-card-pad: 0.6; /* viewBox units padding reference */
 
   /* Effects */
   --cc-focus-ring-width: 0.6;
@@ -50,4 +54,66 @@
 
   /* Background gradient (subtle vignette) */
   --cc-bg-gradient: radial-gradient(120% 140% at 50% -10%, var(--cc-bg-steel-2) 0%, var(--cc-bg-steel-1) 55%, var(--cc-bg-steel-0) 85%);
+
+  /* New Accent & Semantic Tokens (Phase E) */
+  --cc-color-accent-create: #06b6d4; /* replaces prior #0ff cyan */
+  --cc-color-accent-create-fade: #06b6d4b3;
+  --cc-color-success-bg: #059669;
+  --cc-color-success-fg: #ffffff;
+  --cc-color-danger-bg: #334350;
+  --cc-color-danger-fg: #e2e8f0;
+  --cc-color-input-bg: #1e2a33;
+  --cc-color-input-border: #334350;
+  --cc-color-input-placeholder: #64748b;
+  --cc-color-focus-ring: var(--cc-color-focus-accent);
+  --cc-focus-ring-outline: 2px solid var(--cc-color-focus-ring);
+}
+
+/* Light theme scaffold (Phase E stretch) */
+:root[data-theme="light"] {
+  --cc-bg-app: #f8fafc;
+  --cc-color-panel-bg: #ffffffd9;
+  --cc-color-panel-fg: #1e293b;
+  --cc-color-axis-label: #334155;
+  --cc-color-axis-line: #0f172a33;
+  --cc-color-axis-line-strong: #0f172a55;
+  --cc-color-grid-minor: #0f172a10;
+  --cc-color-grid-major: #0f172a18;
+  --cc-color-anchor-fill: #f3f4f6; /* small light grey square for dark theme */
+  --cc-color-anchor-hover: #e5e7eb; /* slightly darker on hover */
+  --cc-color-anchor-outline: #6b7280; /* subtle outline */
+  --cc-color-anchor-selected: #2563eb;
+  --cc-color-selection-glow: #3b82f655;
+  --cc-color-connector: #64748b;
+  --cc-color-card-bg: #ffffff;
+  --cc-color-card-border: #e2e8f0;
+  --cc-color-card-divider: #e2e8f0;
+  --cc-color-card-title: #0f172a;
+  --cc-color-card-body: #1e293b;
+  --cc-color-focus-accent: #0ea5e9;
+  --cc-color-focus-ring: var(--cc-color-focus-accent);
+  --cc-color-accent-create: #0ea5e9;
+  --cc-color-accent-create-fade: #0ea5e9b3;
+  --cc-color-input-bg: #f1f5f9;
+  --cc-color-input-border: #cbd5e1;
+  --cc-color-input-placeholder: #64748b;
+  --cc-color-success-bg: #059669;
+  --cc-color-success-fg: #ffffff;
+  --cc-color-danger-bg: #475569;
+  --cc-color-danger-fg: #f1f5f9;
+}
+
+/* High contrast mode adjustments (Phase F) */
+@media (forced-colors: active) {
+  :root {
+    --cc-color-focus-ring: Highlight;
+    --cc-color-anchor-fill: ButtonFace;
+    --cc-color-anchor-outline: ButtonText;
+    --cc-color-card-bg: Canvas;
+    --cc-color-card-border: ButtonText;
+    --cc-color-card-title: ButtonText;
+    --cc-color-card-body: ButtonText;
+    --cc-color-connector: ButtonText;
+  }
+  svg g[role="button"] rect { forced-color-adjust: auto; }
 }
