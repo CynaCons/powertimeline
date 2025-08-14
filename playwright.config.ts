@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
-// Force a fresh dev server each test run to avoid stale module resolution errors during refactor.
-const reuse = false;
+// Allow reusing existing dev server during development
+const reuse = true;
 
 export default defineConfig({
   testDir: 'tests',

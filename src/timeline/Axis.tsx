@@ -38,11 +38,11 @@ export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
     <g data-component="Axis">
       {/* Major grid lines */}
       {ticks.map(t => (
-        <line key={`g-${t.t}`} x1={t.x} x2={t.x} y1={2} y2={18} stroke="var(--cc-color-grid-major)" strokeWidth={0.08} />
+        <line key={`g-${t.t}`} data-testid="grid-major" x1={t.x} x2={t.x} y1={2} y2={18} stroke="var(--cc-color-grid-major)" strokeWidth={0.08} />
       ))}
       {/* Minor grid lines */}
       {minor.map((x, i) => (
-        <line key={`gm-${i}-${x}`} x1={x} x2={x} y1={3} y2={17} stroke="var(--cc-color-grid-minor)" strokeWidth={0.06} />
+        <line key={`gm-${i}-${x}`} data-testid="grid-minor" x1={x} x2={x} y1={3} y2={17} stroke="var(--cc-color-grid-minor)" strokeWidth={0.06} />
       ))}
       {/* Main axis line (stroke width driven by CSS variable, fallback inline) */}
       <line

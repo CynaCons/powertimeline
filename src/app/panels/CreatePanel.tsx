@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { OverlayShell } from '../OverlayShell';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 
 interface CreatePanelProps {
   date: string; title: string; description: string;
@@ -9,16 +12,46 @@ interface CreatePanelProps {
 }
 
 export const CreatePanel: React.FC<CreatePanelProps> = ({ date, title, description, setDate, setTitle, setDescription, onAdd, dragging, onClose }) => {
+  useEffect(() => {
+    if (!date) {
+      try { setDate(new Date().toISOString().slice(0,10)); } catch {}
+    }
+  }, [date, setDate]);
   return (
     <OverlayShell id="create" title="Create Event" dragging={dragging} onClose={onClose}>
       <form onSubmit={onAdd} className="flex flex-col gap-2 text-[11px]">
-        <label className="flex flex-col"><span className="opacity-80">Date</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded border border-gray-700 bg-gray-800/60 text-gray-100 px-2 py-1" required /></label>
-        <label className="flex flex-col"><span className="opacity-80">Title</span><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="rounded border border-gray-700 bg-gray-800/60 text-gray-100 px-2 py-1" required /></label>
-        <label className="flex flex-col"><span className="opacity-80">Description</span><input type="text" value={description} onChange={(e) => setDescription(e.target.value)} className="rounded border border-gray-700 bg-gray-800/60 text-gray-100 px-2 py-1" placeholder="Optional" /></label>
-        <div className="flex gap-2">
-          <button type="submit" className="rounded bg-indigo-600 hover:bg-indigo-500 px-3 py-1 text-white">Add</button>
-          <button type="button" onClick={onClose} className="rounded bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 px-3 py-1">Cancel</button>
-        </div>
+        <TextField
+          label="Date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+          size="small"
+          variant="filled"
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          size="small"
+          variant="filled"
+        />
+        <TextField
+          label="Description"
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Optional"
+          size="small"
+          variant="filled"
+        />
+        <Stack direction="row" spacing={1}>
+          <Button type="submit" variant="contained" color="primary">Add</Button>
+          <Button type="button" variant="outlined" onClick={onClose}>Cancel</Button>
+        </Stack>
       </form>
     </OverlayShell>
   );

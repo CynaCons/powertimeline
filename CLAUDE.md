@@ -1,4 +1,4 @@
-# Copilot Instructions for Chronochart
+# Instructions for Chronochart
 
 ## Project Overview
 
@@ -18,8 +18,6 @@ Chronochart is a React timeline visualization component with SVG rendering and H
 **Essential project documentation is maintained in these key files:**
 - **PRD.md**: Product Requirements Document - defines the project goals, user stories, and feature specifications
 - **PLAN.md**: Development roadmap and milestone tracking - contains all feature implementation phases, completion status, and refinement tasks
-- **VISUALS.md**: Comprehensive visual design specification - covers color palette, component tokens, accessibility guidelines, and architectural decisions
-
 **Always reference these files when:**
 - Understanding project requirements and scope
 - Planning new features or modifications

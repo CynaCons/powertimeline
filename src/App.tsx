@@ -6,7 +6,7 @@ import { EditorPanel } from './app/panels/EditorPanel';
 import { CreatePanel } from './app/panels/CreatePanel';
 import { DevPanel } from './app/panels/DevPanel';
 import { EventStorage } from './lib/storage';
-import { seedRandom as seedRandomUtil, seedClustered as seedClusteredUtil, seedLongRange as seedLongRangeUtil } from './lib/devSeed';
+import { seedRandom as seedRandomUtil, seedClustered as seedClusteredUtil, seedLongRange as seedLongRangeUtil, seedRFKTimeline, seedJFKTimeline, seedNapoleonTimeline } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
 
@@ -133,20 +133,24 @@ function App() {
     const newEvent: Event = { id: Date.now().toString(), date, title, description: description || undefined };
     setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
     setSelectedId(newEvent.id);
+    try { announce(`Added event ${title}`); } catch {}
     setDate(''); setTitle(''); setDescription('');
     setOverlay(null);
-  }, [date, title, description]);
+  }, [date, title, description, announce]);
 
   const saveSelected = useCallback((e: React.FormEvent) => {
     e.preventDefault(); if (!selectedId) return;
     setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
-  }, [selectedId, editDate, editTitle, editDescription]);
+    try { announce(`Saved changes to ${editTitle || 'event'}`); } catch {}
+  }, [selectedId, editDate, editTitle, editDescription, announce]);
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return;
+    const toDelete = events.find(e => e.id === selectedId);
     setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); storageRef.current.writeThrough(next); return next; });
     setSelectedId(undefined);
-  }, [selectedId]);
+    try { announce(`Deleted ${toDelete?.title || 'event'}`); } catch {}
+  }, [selectedId, events, announce]);
 
   const onDragDate = useCallback((id: string, newISODate: string) => {
     // write-through during drag
@@ -166,6 +170,24 @@ function App() {
   }, []);
   const seedLongRange = useCallback(() => {
     setEvents(prev => { const next = seedLongRangeUtil(prev); storageRef.current.writeThrough(next); return next; });
+  }, []);
+  const seedRFK = useCallback(() => {
+    const data = seedRFKTimeline();
+    setEvents(data);
+    storageRef.current.writeThrough(data);
+    setSelectedId(undefined);
+  }, []);
+  const seedJFK = useCallback(() => {
+    const data = seedJFKTimeline();
+    setEvents(data);
+    storageRef.current.writeThrough(data);
+    setSelectedId(undefined);
+  }, []);
+  const seedNapoleon = useCallback(() => {
+    const data = seedNapoleonTimeline();
+    setEvents(data);
+    storageRef.current.writeThrough(data);
+    setSelectedId(undefined);
   }, []);
   const clearAll = useCallback(() => { setEvents([]); }, []);
 
@@ -192,27 +214,28 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* fixed header height reserved below via spacer */}
-      <header className="fixed top-0 inset-x-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/80 border-b border-gray-200 h-14 flex items-center">
-        <div className="mx-auto max-w-screen-2xl px-4 w-full flex items-center justify-between">
-          <h1 className="text-sm font-semibold tracking-[0.12em] text-gray-900">Chronochart</h1>
-          <div className="flex items-center gap-3">
-            <div className="text-[11px] text-gray-500" aria-hidden>Local-only • Prototype</div>
-            <button type="button" title={devEnabled ? 'Disable Developer Options' : 'Enable Developer Options'} onClick={() => setDevEnabled((v) => !v)} className={`rounded px-2 py-1 text-[11px] border ${devEnabled ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`} aria-pressed={devEnabled} aria-label="Toggle developer options">⚙︎ Dev</button>
-            <button type="button" aria-label="Toggle light/dark theme" className="rounded px-2 py-1 text-[11px] border bg-white text-gray-600 border-gray-300 hover:bg-gray-50" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? 'Light' : 'Dark'}</button>
-          </div>
-        </div>
-      </header>
-      <div className="h-14" /> {/* spacer to avoid overlap */}
-
-      {/* Full-bleed canvas area below header */}
-      <div className="relative h-[calc(100vh-56px)]">
+      {/* Full-bleed canvas area - no header, maximum space */}
+      <div className="relative h-screen">
         {/* Permanent left sidebar for icon rail */}
-        <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center gap-2 py-2">
-          <button aria-label="Outline" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'outline' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => setOverlay(overlay === 'outline' ? null : 'outline')}>list</button>
-          <button aria-label="Editor" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'editor' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => setOverlay(overlay === 'editor' ? null : 'editor')}>edit</button>
+        <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
+          {/* ChronoChart logo at top */}
+          <div className="mb-4 p-2 text-xs font-bold tracking-wide text-gray-800 text-center leading-tight">
+            <div>CC</div>
+          </div>
+          
+          {/* Navigation buttons */}
+          <div className="flex flex-col items-center gap-2 mb-auto">
+            <button aria-label="Outline" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'outline' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => setOverlay(overlay === 'outline' ? null : 'outline')}>list</button>
+            <button aria-label="Editor" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'editor' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => setOverlay(overlay === 'editor' ? null : 'editor')}>edit</button>
             <button aria-label="Create" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'create' ? 'bg-indigo-600 text-white' : 'text-indigo-600 hover:bg-indigo-50'}`} onClick={() => setOverlay(overlay === 'create' ? null : 'create')}>add</button>
-          <button aria-label="Developer" disabled={!devEnabled} title={devEnabled ? 'Developer options' : 'Enable Dev in header'} className={`material-symbols-rounded rounded-md p-2 ${overlay === 'dev' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'} ${!devEnabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => devEnabled && setOverlay(overlay === 'dev' ? null : 'dev')}>build</button>
+          </div>
+          
+          {/* Dev toggle and theme at bottom */}
+          <div className="flex flex-col items-center gap-2">
+            <button type="button" title={devEnabled ? 'Disable Developer Options' : 'Enable Developer Options'} onClick={() => setDevEnabled((v) => !v)} className={`material-symbols-rounded rounded-md p-2 text-xs ${devEnabled ? 'bg-amber-100 text-amber-800' : 'text-gray-600 hover:bg-gray-100'}`} aria-pressed={devEnabled} aria-label="Toggle developer options">build</button>
+            <button aria-label="Developer Panel" disabled={!devEnabled} title={devEnabled ? 'Developer options' : 'Enable Dev first'} className={`material-symbols-rounded rounded-md p-2 ${overlay === 'dev' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'} ${!devEnabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => devEnabled && setOverlay(overlay === 'dev' ? null : 'dev')}>settings</button>
+            <button type="button" aria-label="Toggle light/dark theme" className="material-symbols-rounded rounded-md p-2 text-gray-600 hover:bg-gray-100 text-xs" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? 'light_mode' : 'dark_mode'}</button>
+          </div>
         </aside>
 
         {/* Overlays next to the sidebar, never covering it */}
@@ -221,7 +244,6 @@ function App() {
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
             {overlay === 'outline' && (
               <OutlinePanel
-                events={events}
                 filtered={filteredForList}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
@@ -259,6 +281,9 @@ function App() {
                 dragging={dragging}
                 onClose={() => setOverlay(null)}
                 devEnabled={devEnabled}
+                seedRFK={seedRFK}
+                seedJFK={seedJFK}
+                seedNapoleon={seedNapoleon}
               />
             )}
           </>
@@ -266,20 +291,8 @@ function App() {
 
         {/* Main timeline area shifts right to avoid sidebar overlap */}
         <div className="absolute inset-0 ml-14 flex flex-col">
-          {/* Minimal header bar for actions */}
-          <div className="flex gap-2 p-2 items-center justify-center">
-            <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-2 py-1 text-xs" onClick={() => nudge(-0.1)}>◀︎ Pan</button>
-            <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-2 py-1 text-xs" onClick={() => nudge(0.1)}>Pan ▶︎</button>
-            <button className="rounded bg-indigo-600 text-white hover:bg-indigo-500 px-2 py-1 text-xs" onClick={() => zoom(0.8)}>＋ Zoom In</button>
-            <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-2 py-1 text-xs" onClick={() => zoom(1.25)}>－ Zoom Out</button>
-            <button className="rounded bg-sky-600 text-white hover:bg-sky-500 px-2 py-1 text-xs" onClick={() => { animateTo(0, 1); }}>Fit All</button>
-            <div className="ml-auto flex items-center gap-2">
-              <button type="button" onClick={exportEvents} className="rounded bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-2 py-1 text-xs" aria-label="Export events as JSON">Export</button>
-            </div>
-          </div>
-          {/* Center timeline vertically within remaining space */}
-          <div className="flex-1 min-h-0 flex items-center justify-center">
-            <div className="w-full">
+          {/* Timeline takes full available space */}
+          <div className="w-full h-full relative">
               <Timeline
                 events={events}
                 selectedId={selectedId}
@@ -290,6 +303,7 @@ function App() {
                 onViewWindowChange={(s, e) => { setWindow(s, e); }}
                 onInlineEdit={(id, updates) => {
                   setEvents((prev) => prev.map((ev) => (ev.id === id ? { ...ev, title: updates.title, description: updates.description } : ev)));
+                  try { announce(`Saved changes to ${updates.title || 'event'}`); } catch {}
                 }}
                 onCreateAt={(iso) => openCreate(iso)}
                 onDragState={(isDragging) => {
@@ -299,9 +313,22 @@ function App() {
                   const pane = overlayRef.current as HTMLElement | null; if (pane) pane.style.pointerEvents = isDragging ? 'none' : 'auto';
                 }}
                 onAnnounce={(msg) => announce(msg)}
+                devEnabled={devEnabled}
               />
               {renderLiveRegion()}
-            </div>
+              
+              {/* Bottom centered control bar overlay - highly transparent by default */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
+                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-lg shadow-lg px-4 py-2 flex gap-2 items-center">
+                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(-0.1)}>◀︎ Pan</button>
+                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(0.1)}>Pan ▶︎</button>
+                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                  <button className="rounded bg-indigo-600 text-white hover:bg-indigo-500 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(0.8)}>＋ Zoom In</button>
+                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(1.25)}>－ Zoom Out</button>
+                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                  <button className="rounded bg-sky-600 text-white hover:bg-sky-500 px-3 py-1.5 text-xs font-medium" onClick={() => { animateTo(0, 1); }}>Fit All</button>
+                </div>
+              </div>
           </div>
         </div>
       </div>
