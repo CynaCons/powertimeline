@@ -1,273 +1,203 @@
 # Development Plan
 
-## REBUILD: Timeline UI from Scratch
+## Phase 1: Core Layout System (Simplified Slot-Based Approach)
 
-### Context
-After struggling with SVG+foreignObject rendering issues and complex coordinate systems, we're rebuilding the Timeline and Node components from scratch with a focus on visual appeal, simplicity, full screen usage, and iterative approach.
+### Step 1A: Foundation Infrastructure
+- [ ] Create Slot interface and SlotGrid class for position management
+- [ ] Implement basic anchor positioning on timeline
+- [ ] Add viewport size detection and slot calculation
+- [ ] Create event clustering algorithm with pixel threshold
+- [ ] Add anchor badge display for cluster event counts
 
----
+### Step 1B: Single Column Layout
+- [ ] Implement vertical slot stacking above/below timeline anchors
+- [ ] Create basic card positioning in single column mode
+- [ ] Add simple collision detection for slot occupancy
+- [ ] Implement card rendering with absolute positioning
+- [ ] Test single column layout with various event counts
 
-## Iteration 1: Foundation ✅ COMPLETE
-- [x] Create full-screen grid background (12x12 CSS grid)
-- [x] Draw horizontal timeline line in center  
-- [x] Ensure grid covers ENTIRE available space (no centering, no margins)
-- [x] Verify layout works at different viewport sizes
-- [x] Clean slate implementation with Tailwind CSS Grid
+### Step 1C: Card Type System
+- [ ] Define 5 card types: full, compact, title-only, multi-event, infinite
+- [ ] Create card size constants and styling for each type
+- [ ] Implement card content rendering based on type
+- [ ] Add card type selection logic
+- [ ] Test visual consistency across card types
 
----
+### Step 1D: Dual Column Expansion
+- [ ] Add horizontal space detection for dual column mode
+- [ ] Implement second column slot generation
+- [ ] Create column centering logic around timeline anchors
+- [ ] Add horizontal spacing between columns
+- [ ] Test dual column layout with overflow scenarios
 
-## Iteration 2: Event Cards ✅ COMPLETE
-**Test file**: `cards.spec.ts`
+### Step 1E: Basic Degradation Engine
+- [ ] Implement degradation sequence: full → compact → title-only
+- [ ] Add slot capacity calculation per degradation level
+- [ ] Create card type conversion logic
+- [ ] Implement partial degradation (some cards degrade, others don't)
+- [ ] Test degradation with increasing event density
 
-Card Rendering
-- [x] Create HTML card components with modern styling
-- [x] White background, rounded corners, subtle shadows
-- [x] Proper padding and spacing
-- [x] Responsive card sizing
+## Phase 2: Advanced Degradation & Multi-Event Cards
 
-Content Display  
-- [x] Show title, description, and date clearly
-- [x] Bold title at the top
-- [x] Readable description text (NOT hidden or clipped)
-- [x] Small date label at bottom
-- [x] Clear visual hierarchy
+### Step 2A: Multi-Event Card Implementation
+- [ ] Create multi-event card layout with vertical separators
+- [ ] Implement event grouping logic (3-5 events per card)
+- [ ] Add multi-event card content rendering
+- [ ] Integrate multi-event cards into degradation sequence
+- [ ] Test multi-event cards with various group sizes
 
-Positioning
-- [x] Place timeline anchors at date positions horizontally
-- [x] Position cards above or below their timeline anchors
-- [x] Center cards vertically on anchor position
-- [x] Allow slight left/right shifting for card width accommodation
-- [x] Ensure cards remain fully visible in viewport
+### Step 2B: Infinite Card System
+- [ ] Create infinite card component ("N events" display)
+- [ ] Implement infinite card conversion logic
+- [ ] Add constraint: infinite only when all others are multi-event
+- [ ] Ensure single infinite card per cluster
+- [ ] Test infinite card behavior in extreme density scenarios
 
----
+### Step 2C: Complete Degradation Flow
+- [ ] Integrate full degradation sequence: full → compact → title-only → multi-event → infinite
+- [ ] Add degradation decision logic based on slot availability
+- [ ] Implement cluster-local degradation management
+- [ ] Test complete degradation flow with large datasets
+- [ ] Verify degradation rules and constraints
 
-## Iteration 3: Card Layout & Distribution ✅ COMPLETE (Extended)
-**Test files**: `layout.spec.ts`, `seeding-visual.spec.ts`
+## Phase 3: Clustering & Zoom Integration
 
-Vertical Distribution
-- [x] Distribute cards above and below timeline (not horizontally across)
-- [x] Use multiple vertical layers/rows when events cluster
-- [x] Maintain anchor alignment - cards stay near their timeline anchors
-- [x] Balance above/below distribution for visual symmetry
-- [x] **NEW**: Dynamic layer count (3-8 layers) based on event density
-- [x] **NEW**: Adaptive layer spacing for dense datasets
+### Step 3A: Dynamic Clustering
+- [ ] Implement zoom-aware clustering with pixel thresholds
+- [ ] Add cluster splitting logic when zooming in
+- [ ] Create cluster merging logic when zooming out
+- [ ] Update anchor positions when clusters change
+- [ ] Test clustering behavior across zoom levels
 
-Overlap Avoidance
-- [x] Detect card-to-card collisions in vertical space
-- [x] Shift cards to different vertical layers when overlapping
-- [x] Allow slight horizontal nudging to prevent edge overlaps
-- [x] Keep cards visually connected to their timeline anchors
-- [x] **NEW**: Advanced collision detection with spatial optimization
-- [x] **NEW**: Horizontal nudging algorithm with multiple positions
-- [x] **NEW**: Score-based position selection (collision count + distance from anchor)
+### Step 3B: Cluster Badge System
+- [ ] Implement cluster badges on timeline anchors
+- [ ] Add event count display in badges
+- [ ] Create badge styling and positioning
+- [ ] Update badges when clusters change
+- [ ] Test badge accuracy with dynamic clustering
 
-Connectors
-- [x] Add lines from timeline anchors to cards
-- [x] Connect anchor point to card center or edge
-- [x] Handle variable card positions (above/below/shifted)
-- [x] Subtle styling (gray, thin lines)
+### Step 3C: Zoom-Responsive Layout
+- [ ] Integrate zoom level with slot calculations
+- [ ] Update degradation thresholds based on zoom
+- [ ] Implement cluster boundary recalculation on zoom
+- [ ] Add smooth transitions for cluster changes
+- [ ] Test layout stability during zoom operations
 
-Timeline Scaling & Dense Layout Support
-- [x] **NEW**: Proper timeline scaling based on actual date ranges
-- [x] **NEW**: Chronological positioning instead of equal spacing
-- [x] **NEW**: Compact card mode for datasets > 20 events
-- [x] **NEW**: Napoleon Bonaparte timeline (63 events, 1746-1832)
-- [x] **NEW**: Comprehensive visual testing with all seeding options
-- [x] **NEW**: Collision overlap reduced by 65% (186 → 64 overlaps)
+## Phase 4: Overlay UI System
 
-Historical Datasets Added
-- [x] **NEW**: Napoleon Bonaparte comprehensive timeline from Henri Guillemin biography
-- [x] **NEW**: Includes family context, military campaigns, political events, exile and death
-- [x] **NEW**: Visual testing demonstrates algorithm effectiveness across different data densities
+### Step 4A: Transparent Overlay Infrastructure
+- [ ] Create overlay system for UI elements
+- [ ] Implement transparency/opacity transitions
+- [ ] Add hover detection for overlay visibility
+- [ ] Create overlay z-index management
+- [ ] Test overlay behavior with card interactions
 
-Space Optimization & UI Refinement
-- [x] **NEW**: Move controls (Pan/Zoom/Fit All) to centered bottom overlay bar
-- [x] **NEW**: Remove Export function to declutter interface
-- [x] **NEW**: Remove top app bar and integrate ChronoChart logo into navigation rail
-- [x] **NEW**: Move Dev toggle from header to navigation rail
-- [x] **NEW**: Maximize timeline viewport by reclaiming header space
+### Step 4B: Navigation Rail & Controls
+- [ ] Implement left navigation rail with transparency
+- [ ] Create bottom controls bar overlay
+- [ ] Add hover effects for overlay visibility
+- [ ] Implement smooth fade transitions
+- [ ] Test overlay integration with timeline interaction
 
-Grid-Based Card Layout System
-- [x] **NEW**: Redesign grid as functional card slot system (not just visual)
-- [x] **NEW**: One card per grid slot with smart grid sizing based on event count
-- [x] **NEW**: Cards snap to grid positions for consistent alignment
-- [x] **NEW**: Dynamic grid dimensions adapt to viewport and event density
-- [x] **NEW**: Grid serves as collision detection foundation (no overlapping slots)
-- [x] **NEW**: Visual grid indicators show occupied vs available slots
-- [x] **NEW**: Perfect overlap prevention (0 collisions achieved)
-- [x] **NEW**: Chronological positioning within grid constraints
+### Step 4C: Full Viewport Utilization
+- [ ] Remove safe zones from card positioning
+- [ ] Enable cards to use entire viewport area
+- [ ] Update slot calculations for full viewport
+- [ ] Test card positioning with overlay elements
+- [ ] Verify no UI element conflicts
 
----
+## Phase 5: Testing & Validation
 
-## Iteration 4: Intelligent Timeline System (NEW)
+### Step 5A: Layout Testing
+- [ ] Create slot occupancy validation tests
+- [ ] Add degradation sequence verification tests
+- [ ] Implement overlap detection tests
+- [ ] Create cluster behavior tests
+- [ ] Add viewport bounds checking tests
 
-### Context
-The current grid-slot system works but lacks sophistication. We need to evolve toward an intelligent positioning algorithm that maintains chronological accuracy while handling dense datasets elegantly.
+### Step 5B: Performance Testing
+- [ ] Test layout performance with 100+ events
+- [ ] Benchmark slot assignment operations
+- [ ] Measure degradation algorithm performance
+- [ ] Test zoom/cluster splitting performance
+- [ ] Verify smooth 60fps rendering
 
-### Phase A: Adaptive Card Content ⏳ PENDING
-**Goal**: Cards adapt content display based on available space and dataset density
-- [ ] Detect when dataset is dense (e.g., >30 events)
-- [ ] Implement title-only mode for dense datasets
-- [ ] Smooth content transitions between modes
-- [ ] Maintain visual hierarchy with consistent styling
+### Step 5C: Edge Case Testing
+- [ ] Test single event scenarios
+- [ ] Verify extreme density handling
+- [ ] Test empty timeline behavior
+- [ ] Add rapid zoom change tests
+- [ ] Test cluster boundary edge cases
 
-### Phase B: Intelligent Positioning Algorithm ⏳ PENDING  
-**Goal**: Replace grid system with anchor-relative positioning
-- [ ] Cards positioned above/below their chronological anchors
-- [ ] Dynamic connector lines from anchors to cards
-- [ ] Collision detection and vertical layering
-- [ ] Maintain chronological accuracy vs. grid constraints
+## Phase 6: Polish & Optimization
 
-### Phase C: Anchor Fusion System ⏳ PENDING
-**Goal**: Handle time-dense periods elegantly  
-- [ ] Detect events within close time proximity
-- [ ] Fuse nearby anchors with count badges
-- [ ] Expandable fused anchors showing grouped events
-- [ ] Smart clustering algorithm (time + spatial proximity)
+### Step 6A: Visual Polish
+- [ ] Refine card spacing and gutters
+- [ ] Polish anchor and badge styling
+- [ ] Improve degradation visual transitions
+- [ ] Add subtle hover effects for cards
+- [ ] Test visual consistency across scenarios
 
-### Phase D: Card Expansion & Focus ⏳ PENDING
-**Goal**: Rich card interaction for detailed content view
+### Step 6B: Performance Optimization
+- [ ] Optimize slot grid operations
+- [ ] Implement card virtualization if needed
+- [ ] Cache cluster calculations
+- [ ] Optimize degradation decisions
+- [ ] Profile and tune hot paths
+
+### Step 6C: Code Cleanup
+- [ ] Remove old complex positioning system
+- [ ] Clean up unused resolver classes
+- [ ] Simplify test suite for new system
+- [ ] Update documentation for new approach
+- [ ] Remove emergency fallback code
+
+## Card Expansion & Interaction
 - [ ] Click card → expand to 70%×80% viewport
 - [ ] Background blur effect for focus
 - [ ] Full description display with scrolling
 - [ ] Click-outside-to-close + close button
 - [ ] Smooth expand/collapse animations
 
-### Phase E: Angular Distribution ⏳ PENDING
-**Goal**: Advanced positioning for crowded timeline areas
-- [ ] Detect overcrowded anchor regions  
-- [ ] Angular "burst" positioning (90°±30° from anchor)
-- [ ] Varying distances to prevent overlaps
-- [ ] Dynamic connector line routing
+## Timeline Axis & Context
+- [ ] Adaptive ticks (year/month) with label collision avoidance
+- [ ] Subtle grid lines tuned to density
+- [ ] Today marker and visible range highlight
+- [ ] Axis clearance tuning and consistent gaps
 
----
+## Timeline Navigation
+- [ ] Wheel zoom anchored at cursor with smooth easing
+- [ ] Drag pan (mouse/touch) with bounds and optional inertia
+- [ ] Zoom controls (in/out, fit-to-range) and keyboard panning
+- [ ] Selection model: single-select, keyboard nav (left/right)
 
-## Iteration 5: User Interactions (Legacy)
-**Test file**: `interactions.spec.ts`
+## Content Management
+- [ ] Click timeline to add events with date auto-fill
+- [ ] Inline or modal editing for existing events
+- [ ] Delete functionality with confirmation
+- [ ] Real-time updates during editing
 
-Selection
-- [ ] Click cards to select
-- [ ] Visual feedback (border highlight)
-- [ ] Click outside to deselect
-- [ ] Only one selected at a time
+## User Interactions
+- [ ] Click cards to select with visual feedback
+- [ ] Hover effects: shadow increase, slight scale up
+- [ ] Keyboard navigation: left/right chronologically
+- [ ] Enter to select, Escape to deselect
 
-Hover Effects
-- [ ] Shadow increase on hover
-- [ ] Slight scale up (1.02x)
-- [ ] Smooth transitions
+## Performance & Polish
+- [ ] Handle 150+ events with smooth 60fps performance
+- [ ] Efficient re-rendering and virtualization if needed
+- [ ] Entrance/exit animations for cards
+- [ ] Loading states and error handling
 
-Keyboard Navigation
-- [ ] Left/right to navigate chronologically
-- [ ] Enter to select
-- [ ] Escape to deselect
+## Accessibility & Quality
+- [ ] ARIA roles/names and live region announcer
+- [ ] Roving tabindex for cards with visible focus rings
+- [ ] Reduced motion and high-contrast verification
+- [ ] Keyboard alternatives for all interactions
 
----
-
-## Iteration 5: Timeline Axis & Context
-**Test file**: `timeline.spec.ts`
-
-Date Labels
-- [ ] Show months/years below timeline
-- [ ] Adaptive density (don't overcrowd)
-- [ ] Clear, readable labels
-- [ ] Aligned with timeline position
-
-Tick Marks
-- [ ] Major ticks for years
-- [ ] Minor ticks for months
-- [ ] Extend from timeline line
-
-Grid Lines
-- [ ] Extend from major ticks
-- [ ] Light gray, not distracting
-- [ ] Help align cards temporally
-
----
-
-## Iteration 6: Timeline Navigation
-**Test file**: `navigation.spec.ts`
-
-Zoom Controls
-- [ ] In/out buttons in UI
-- [ ] Zoom in to focus on periods
-- [ ] Zoom out for overview
-- [ ] Smooth zoom transitions
-
-Mouse Wheel Zoom
-- [ ] Zoom at cursor position
-- [ ] Natural zoom behavior
-- [ ] Prevent over-zoom
-- [ ] Clamp to reasonable bounds
-
-Pan Controls
-- [ ] Pan buttons in UI
-- [ ] Drag timeline to pan
-- [ ] Keep cards in sync with timeline
-
----
-
-## Iteration 7: Content Management
-**Test file**: `editing.spec.ts`
-
-Create Events
-- [ ] Click timeline to add
-- [ ] Show create form
-- [ ] Set date based on click position
-- [ ] Add to timeline immediately
-
-Edit Events
-- [ ] Click to select, then edit button
-- [ ] Inline or modal editing
-- [ ] Update cards in real-time
-
-Delete Events
-- [ ] Delete button when selected
-- [ ] Confirm dangerous actions
-- [ ] Animate removal
-
----
-
-## Iteration 8: Polish & Performance
-**Test file**: `performance.spec.ts`
-
-Animations
-- [ ] Card entrance/exit
-- [ ] Selection feedback
-- [ ] Zoom/pan smoothness
-
-Performance
-- [ ] Handle 100+ events
-- [ ] Virtual scrolling if needed
-- [ ] Efficient re-rendering
-- [ ] Smooth at 60fps
-
-Accessibility
-- [ ] ARIA labels
-- [ ] Focus management
-- [ ] Semantic HTML structure
-
-Error Handling
-- [ ] Loading states
-- [ ] Empty states
-- [ ] Network error recovery
-
----
-
-## Technical Decisions
-
-### What We're Using:
-- **HTML/CSS for cards** - Native rendering, no foreignObject
-- **Tailwind for styling** - Consistent, maintainable styles
-- **Absolute positioning** - Simple x/y coordinates
-- **CSS Grid for background** - Full screen coverage
-
-### What We're NOT Using (for now):
-- **SVG for cards** - Only for timeline/connectors
-- **Complex slot algorithms** - Start with simple distribution
-- **24+ UI tests** - Will add tests after UI is working
-- **Overcomplicated coordinate systems** - Keep it simple
-
----
-
-## Completed Work
-Previous completed iterations have been archived in PLAN_COMPLETED.md
+## Documentation Updates
+- [ ] Update implementation details in ARCHITECTURE.md
+- [ ] Create migration guide from old to new system
+- [ ] Document slot-based positioning API
+- [ ] Add performance benchmarks and metrics
+- [ ] Create visual examples of degradation flow
