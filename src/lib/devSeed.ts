@@ -202,3 +202,94 @@ export function seedNapoleonTimeline(): Event[] {
   ];
   return events;
 }
+
+// Degradation testing seeders
+export function seedSingleColumnTest(prev: Event[]): Event[] {
+  // Create exactly enough events to fill a single column (6-8 events)
+  const base = Date.now() - 30 * dayMs;
+  const events: Event[] = [];
+  
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(base + i * 2 * dayMs).toISOString().slice(0, 10);
+    events.push({
+      id: `single-${i}`,
+      date: d,
+      title: `Single Column Event ${i + 1}`,
+      description: `This is event ${i + 1} testing single column layout with good content.`
+    });
+  }
+  
+  return events;
+}
+
+export function seedDualColumnTest(prev: Event[]): Event[] {
+  // Create enough events to require dual columns (12-16 events)
+  const base = Date.now() - 30 * dayMs;
+  const events: Event[] = [];
+  
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(base + i * 2 * dayMs).toISOString().slice(0, 10);
+    events.push({
+      id: `dual-${i}`,
+      date: d,
+      title: `Dual Column Event ${i + 1}`,
+      description: `This is event ${i + 1} testing dual column layout with substantial content to show full cards.`
+    });
+  }
+  
+  return events;
+}
+
+export function seedCompactDegradationTest(prev: Event[]): Event[] {
+  // Create enough events to force compact degradation (18-24 events)
+  const base = Date.now() - 30 * dayMs;
+  const events: Event[] = [];
+  
+  for (let i = 0; i < 20; i++) {
+    const d = new Date(base + i * 1.5 * dayMs).toISOString().slice(0, 10);
+    events.push({
+      id: `compact-${i}`,
+      date: d,
+      title: `Compact Test Event ${i + 1}`,
+      description: `Event ${i + 1} with moderate content that should degrade to compact cards when space runs out.`
+    });
+  }
+  
+  return events;
+}
+
+export function seedMultiEventTest(prev: Event[]): Event[] {
+  // Create enough events to force multi-event cards (30+ events)
+  const base = Date.now() - 20 * dayMs;
+  const events: Event[] = [];
+  
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(base + i * dayMs).toISOString().slice(0, 10);
+    events.push({
+      id: `multi-${i}`,
+      date: d,
+      title: `Multi Event ${i + 1}`,
+      description: `Event ${i + 1} that will be grouped into multi-event cards.`
+    });
+  }
+  
+  return events;
+}
+
+export function seedInfiniteTest(prev: Event[]): Event[] {
+  // Create way too many events to force infinite cards (50+ events)
+  const base = Date.now() - 25 * dayMs;
+  const events: Event[] = [];
+  
+  for (let i = 0; i < 50; i++) {
+    const d = new Date(base + i * 0.5 * dayMs).toISOString().slice(0, 10);
+    events.push({
+      id: `infinite-${i}`,
+      date: d,
+      title: `Infinite Test ${i + 1}`,
+      description: `Event ${i + 1} in extreme density test that should trigger infinite cards.`
+    });
+  }
+  
+  return events;
+}

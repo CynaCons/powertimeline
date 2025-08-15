@@ -1,22 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { Event } from '../types';
+
+interface SimpleSlotTestProps {
+  events: Event[];
+}
 
 // Simple test component to verify the slot-based concept works
-export function SimpleSlotTest() {
-  const [events] = useState([
-    { id: '1', date: '2024-01-15', title: 'Event 1', description: 'First event' },
-    { id: '2', date: '2024-01-20', title: 'Event 2', description: 'Second event' },
-    { id: '3', date: '2024-01-25', title: 'Event 3', description: 'Third event' }
-  ]);
+export function SimpleSlotTest({ events }: SimpleSlotTestProps) {
 
-  // Simple slot layout calculation
-  const viewportWidth = 1200;
-  const viewportHeight = 600;
-  const timelineY = viewportHeight / 2;
+  // Use dynamic viewport size
+  const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
   
-  // Position events in simple slots
+  useEffect(() => {
+    const updateSize = () => {
+      setViewportSize({
+        width: window.innerWidth - 56, // Account for sidebar
+        height: window.innerHeight
+      });
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  const timelineY = viewportSize.height / 2;
+  
+  // Calculate date range for positioning
+  const dateRange = events.length > 0 ? (() => {
+    const dates = events.map(e => new Date(e.date).getTime());
+    const minDate = Math.min(...dates);
+    const maxDate = Math.max(...dates);
+    const range = maxDate - minDate || 1; // Avoid division by zero
+    return { minDate, maxDate, range };
+  })() : { minDate: Date.now(), maxDate: Date.now(), range: 1 };
+  
+  // Position events based on actual dates
   const cards = events.map((event, index) => {
-    const x = (index + 1) * (viewportWidth / (events.length + 1));
-    const y = timelineY + (index % 2 === 0 ? -80 : 80); // Alternate above/below
+    // Position based on date within timeline
+    const eventTime = new Date(event.date).getTime();
+    const timeProgress = (eventTime - dateRange.minDate) / dateRange.range;
+    const x = 80 + timeProgress * (viewportSize.width - 160); // 80px margins
+    
+    // Alternate above/below timeline
+    const y = timelineY + (index % 2 === 0 ? -80 : 80);
     
     return {
       ...event,

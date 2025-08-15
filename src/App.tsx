@@ -7,7 +7,20 @@ import { EditorPanel } from './app/panels/EditorPanel';
 import { CreatePanel } from './app/panels/CreatePanel';
 import { DevPanel } from './app/panels/DevPanel';
 import { EventStorage } from './lib/storage';
-import { seedRandom as seedRandomUtil, seedClustered as seedClusteredUtil, seedLongRange as seedLongRangeUtil, seedRFKTimeline, seedJFKTimeline, seedNapoleonTimeline, seedIncremental as seedIncrementalUtil } from './lib/devSeed';
+import { 
+  seedRandom as seedRandomUtil, 
+  seedClustered as seedClusteredUtil, 
+  seedLongRange as seedLongRangeUtil, 
+  seedRFKTimeline, 
+  seedJFKTimeline, 
+  seedNapoleonTimeline, 
+  seedIncremental as seedIncrementalUtil,
+  seedSingleColumnTest,
+  seedDualColumnTest,
+  seedCompactDegradationTest,
+  seedMultiEventTest,
+  seedInfiniteTest
+} from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
 
@@ -48,7 +61,6 @@ function App() {
   // Dev options
   const [placeholderMode, setPlaceholderMode] = useState<'off'|'sparse'|'dense'>('sparse');
   const [forceCardMode, setForceCardMode] = useState<'auto'|'full'|'compact'|'title'|'multi'>('auto');
-  const [useSlotLayout, setUseSlotLayout] = useState(false);
 
   // Announcer hook
   const { announce, renderLiveRegion } = useAnnouncer();
@@ -204,6 +216,23 @@ function App() {
   
   const clearAll = useCallback(() => { setEvents([]); }, []);
 
+  // Degradation testing seeders
+  const seedSingleColumn = useCallback(() => {
+    setEvents(() => { const next = seedSingleColumnTest([]); storageRef.current.writeThrough(next); return next; });
+  }, []);
+  const seedDualColumn = useCallback(() => {
+    setEvents(() => { const next = seedDualColumnTest([]); storageRef.current.writeThrough(next); return next; });
+  }, []);
+  const seedCompactDegradation = useCallback(() => {
+    setEvents(() => { const next = seedCompactDegradationTest([]); storageRef.current.writeThrough(next); return next; });
+  }, []);
+  const seedMultiEvent = useCallback(() => {
+    setEvents(() => { const next = seedMultiEventTest([]); storageRef.current.writeThrough(next); return next; });
+  }, []);
+  const seedInfinite = useCallback(() => {
+    setEvents(() => { const next = seedInfiniteTest([]); storageRef.current.writeThrough(next); return next; });
+  }, []);
+
   // Removed unused exportEvents function
 
   const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
@@ -295,8 +324,11 @@ function App() {
                 setPlaceholderMode={setPlaceholderMode}
                 forceCardMode={forceCardMode}
                 setForceCardMode={setForceCardMode}
-                useSlotLayout={useSlotLayout}
-                setUseSlotLayout={setUseSlotLayout}
+                seedSingleColumn={seedSingleColumn}
+                seedDualColumn={seedDualColumn}
+                seedCompactDegradation={seedCompactDegradation}
+                seedMultiEvent={seedMultiEvent}
+                seedInfinite={seedInfinite}
               />
             )}
           </>
@@ -306,34 +338,7 @@ function App() {
         <div className="absolute inset-0 ml-14 flex flex-col">
           {/* Timeline takes full available space */}
           <div className="w-full h-full relative">
-            {useSlotLayout ? (
-              <SimpleSlotTest />
-            ) : (
-              <Timeline
-                events={events}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onDragDate={onDragDate}
-                viewStart={viewStart}
-                viewEnd={viewEnd}
-                onViewWindowChange={(s, e) => { setWindow(s, e); }}
-                devEnabled={devEnabled}
-                placeholderMode={placeholderMode}
-                forceCardMode={forceCardMode}
-                onInlineEdit={(id, updates) => {
-                  setEvents((prev) => prev.map((ev) => (ev.id === id ? { ...ev, title: updates.title, description: updates.description } : ev)));
-                  try { announce(`Saved changes to ${updates.title || 'event'}`); } catch {}
-                }}
-                onCreateAt={(iso) => openCreate(iso)}
-                onDragState={(isDragging) => {
-                  setDragging(isDragging);
-                  storageRef.current.setDragging(isDragging);
-                  if (!isDragging) storageRef.current.save(events); // final debounce after drop
-                  const pane = overlayRef.current as HTMLElement | null; if (pane) pane.style.pointerEvents = isDragging ? 'none' : 'auto';
-                }}
-                onAnnounce={(msg) => announce(msg)}
-              />
-            )}
+            <SimpleSlotTest events={events} />
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}

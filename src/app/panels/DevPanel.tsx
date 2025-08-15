@@ -17,11 +17,14 @@ interface DevPanelProps {
   setPlaceholderMode?: (m: 'off' | 'sparse' | 'dense') => void;
   forceCardMode?: 'auto' | 'full' | 'compact' | 'title' | 'multi';
   setForceCardMode?: (m: 'auto' | 'full' | 'compact' | 'title' | 'multi') => void;
-  useSlotLayout?: boolean;
-  setUseSlotLayout?: (use: boolean) => void;
+  seedSingleColumn?: () => void;
+  seedDualColumn?: () => void;
+  seedCompactDegradation?: () => void;
+  seedMultiEvent?: () => void;
+  seedInfinite?: () => void;
 }
 
-export const DevPanel: React.FC<DevPanelProps> = ({ seedRandom, seedClustered, seedLongRange, clearAll, dragging, onClose, devEnabled, seedRFK, seedJFK, seedNapoleon, seedIncremental, placeholderMode = 'sparse', setPlaceholderMode, forceCardMode = 'auto', setForceCardMode, useSlotLayout = false, setUseSlotLayout }) => {
+export const DevPanel: React.FC<DevPanelProps> = ({ seedRandom, seedClustered, seedLongRange, clearAll, dragging, onClose, devEnabled, seedRFK, seedJFK, seedNapoleon, seedIncremental, placeholderMode = 'sparse', setPlaceholderMode, forceCardMode = 'auto', setForceCardMode, seedSingleColumn, seedDualColumn, seedCompactDegradation, seedMultiEvent, seedInfinite }) => {
   return (
     <OverlayShell id="dev" title="Developer Options" dragging={dragging} onClose={onClose}>
       <div className="flex flex-wrap items-center gap-2 text-[11px]">
@@ -48,6 +51,14 @@ export const DevPanel: React.FC<DevPanelProps> = ({ seedRandom, seedClustered, s
   <button type="button" data-testid="clear-all" className="rounded border border-rose-300 bg-white text-rose-700 hover:bg-rose-50 px-3 py-1" onClick={clearAll}>Clear</button>
 
         <div className="w-full h-px bg-gray-300 my-2"></div>
+  <div className="text-gray-700 font-medium text-xs mb-1">Degradation Tests (Slot System)</div>
+  <button type="button" className="rounded border border-green-300 bg-white text-green-700 hover:bg-green-50 px-3 py-1" onClick={seedSingleColumn} title="6 events - single column test">Single Column</button>
+  <button type="button" className="rounded border border-green-300 bg-white text-green-700 hover:bg-green-50 px-3 py-1" onClick={seedDualColumn} title="12 events - dual column test">Dual Column</button>
+  <button type="button" className="rounded border border-yellow-300 bg-white text-yellow-700 hover:bg-yellow-50 px-3 py-1" onClick={seedCompactDegradation} title="20 events - compact degradation">Compact</button>
+  <button type="button" className="rounded border border-orange-300 bg-white text-orange-700 hover:bg-orange-50 px-3 py-1" onClick={seedMultiEvent} title="30 events - multi-event cards">Multi-Event</button>
+  <button type="button" className="rounded border border-red-300 bg-white text-red-700 hover:bg-red-50 px-3 py-1" onClick={seedInfinite} title="50 events - infinite cards">Infinite</button>
+
+        <div className="w-full h-px bg-gray-300 my-2"></div>
   <div className="text-gray-700 font-medium text-xs mb-1">Placeholders</div>
         <div className="flex items-center gap-1">
           <label htmlFor="placeholders-mode" className="text-gray-700">Mode:</label>
@@ -71,24 +82,6 @@ export const DevPanel: React.FC<DevPanelProps> = ({ seedRandom, seedClustered, s
           </select>
         </div>
 
-        <div className="w-full h-px bg-gray-300 my-2"></div>
-  <div className="text-gray-700 font-medium text-xs mb-1">Layout Engine</div>
-        <div className="flex items-center gap-2">
-          <button 
-            type="button" 
-            onClick={() => setUseSlotLayout?.(false)}
-            className={`px-3 py-1 text-xs rounded ${!useSlotLayout ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Original
-          </button>
-          <button 
-            type="button" 
-            onClick={() => setUseSlotLayout?.(true)}
-            className={`px-3 py-1 text-xs rounded ${useSlotLayout ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Slot-Based
-          </button>
-        </div>
       </div>
       {!devEnabled && <p className="text-[11px] text-gray-400 mt-2">Enable Dev in header to use seeding tools.</p>}
     </OverlayShell>
