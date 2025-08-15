@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "playwright test"
+  "test": "playwright test",
+  "test:screens": "playwright test tests/seeding-screenshots.spec.ts",
+  "test:clustered": "playwright test tests/clustered-count.spec.ts",
+  "test:degradation": "playwright test tests/degradation-flow.spec.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

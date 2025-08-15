@@ -10,7 +10,6 @@ Chronochart is a React timeline visualization component with SVG rendering and H
   - Do not stop, until the user request is complete
   - Only request user approval when initiating a new major development phaseor a new top-level PLAN section not yet approved. Within an already approved phase, proceed autonomously through minor PLAN checklist steps without interim confirmations.
   - Update `PLAN.md` in realtime whenever something is ongoing or completed.
-  - Do not ask the user to choose among technical implementation options; make engineering decisions yourself and surface them as completed or in-progress checklist items in `PLAN.md`.
   - If instructions are not clear, then say so and start a discussion to clarify
 
 ## Main Documentation Files

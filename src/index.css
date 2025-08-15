@@ -19,6 +19,28 @@ body[data-dragging] aside[role="dialog"] {
   pointer-events: none !important;
 }
 
+/* Text truncation utilities for adaptive card content */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Axis and meta text color harmonization */
 svg text[data-testid="axis-label"], svg text[text-anchor="start"], svg text[text-anchor="end"] {
   fill: var(--cc-color-axis-label) !important;

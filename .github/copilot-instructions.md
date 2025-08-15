@@ -13,15 +13,3 @@ Chronochart is a React timeline visualization component with SVG rendering and H
   - Do not ask the user to choose among technical implementation options; make engineering decisions yourself and surface them as completed or in-progress checklist items in `PLAN.md`.
   - If instructions are not clear, then say so and start a discussion to clarify
 
-## Main Documentation Files
-
-**Essential project documentation is maintained in these key files:**
-- **PRD.md**: Product Requirements Document - defines the project goals, user stories, and feature specifications
-- **PLAN.md**: Development roadmap and milestone tracking - contains all feature implementation phases, completion status, and refinement tasks
-- **VISUALS.md**: Comprehensive visual design specification - covers color palette, component tokens, accessibility guidelines, and architectural decisions
-
-**Always reference these files when:**
-- Understanding project requirements and scope
-- Planning new features or modifications
-- Checking implementation status and completion criteria
-- Understanding visual design decisions and token usage

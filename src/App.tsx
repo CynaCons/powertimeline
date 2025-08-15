@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Timeline from './components/Timeline';
+import { SimpleSlotTest } from './layout/SimpleSlotTest';
 import type { Event } from './types';
 import { OutlinePanel } from './app/panels/OutlinePanel';
 import { EditorPanel } from './app/panels/EditorPanel';
 import { CreatePanel } from './app/panels/CreatePanel';
 import { DevPanel } from './app/panels/DevPanel';
 import { EventStorage } from './lib/storage';
-import { seedRandom as seedRandomUtil, seedClustered as seedClusteredUtil, seedLongRange as seedLongRangeUtil, seedRFKTimeline, seedJFKTimeline, seedNapoleonTimeline } from './lib/devSeed';
+import { seedRandom as seedRandomUtil, seedClustered as seedClusteredUtil, seedLongRange as seedLongRangeUtil, seedRFKTimeline, seedJFKTimeline, seedNapoleonTimeline, seedIncremental as seedIncrementalUtil } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
 
@@ -44,13 +45,16 @@ function App() {
 
   // Dragging state (for disabling overlay pointer events)
   const [dragging, setDragging] = useState(false);
+  // Dev options
+  const [placeholderMode, setPlaceholderMode] = useState<'off'|'sparse'|'dense'>('sparse');
+  const [forceCardMode, setForceCardMode] = useState<'auto'|'full'|'compact'|'title'|'multi'>('auto');
+  const [useSlotLayout, setUseSlotLayout] = useState(false);
 
   // Announcer hook
   const { announce, renderLiveRegion } = useAnnouncer();
 
-  // Theme state
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => 'dark');
-  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
+  // Theme: dark-only (no data-theme switch)
+  useEffect(() => { document.documentElement.removeAttribute('data-theme'); }, []);
 
   useEffect(() => {
     try { if (devEnabled) localStorage.setItem(DEV_FLAG_KEY, '1'); else localStorage.removeItem(DEV_FLAG_KEY); } catch {}
@@ -189,16 +193,18 @@ function App() {
     storageRef.current.writeThrough(data);
     setSelectedId(undefined);
   }, []);
+  
+  const seedIncremental = useCallback((targetCount: number) => {
+    setEvents(prev => { 
+      const next = seedIncrementalUtil(prev, targetCount); 
+      storageRef.current.writeThrough(next); 
+      return next; 
+    });
+  }, []);
+  
   const clearAll = useCallback(() => { setEvents([]); }, []);
 
-  const exportEvents = useCallback(() => {
-    try {
-      const blob = new Blob([JSON.stringify(events, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'chronochart-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    } catch {}
-  }, [events]);
+  // Removed unused exportEvents function
 
   const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
   const filteredForList = useMemo(() => {
@@ -230,11 +236,11 @@ function App() {
             <button aria-label="Create" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'create' ? 'bg-indigo-600 text-white' : 'text-indigo-600 hover:bg-indigo-50'}`} onClick={() => setOverlay(overlay === 'create' ? null : 'create')}>add</button>
           </div>
           
-          {/* Dev toggle and theme at bottom */}
+          {/* Dev toggle at bottom */}
           <div className="flex flex-col items-center gap-2">
             <button type="button" title={devEnabled ? 'Disable Developer Options' : 'Enable Developer Options'} onClick={() => setDevEnabled((v) => !v)} className={`material-symbols-rounded rounded-md p-2 text-xs ${devEnabled ? 'bg-amber-100 text-amber-800' : 'text-gray-600 hover:bg-gray-100'}`} aria-pressed={devEnabled} aria-label="Toggle developer options">build</button>
             <button aria-label="Developer Panel" disabled={!devEnabled} title={devEnabled ? 'Developer options' : 'Enable Dev first'} className={`material-symbols-rounded rounded-md p-2 ${overlay === 'dev' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'} ${!devEnabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => devEnabled && setOverlay(overlay === 'dev' ? null : 'dev')}>settings</button>
-            <button type="button" aria-label="Toggle light/dark theme" className="material-symbols-rounded rounded-md p-2 text-gray-600 hover:bg-gray-100 text-xs" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? 'light_mode' : 'dark_mode'}</button>
+            {/* Theme toggle removed */}
           </div>
         </aside>
 
@@ -284,6 +290,13 @@ function App() {
                 seedRFK={seedRFK}
                 seedJFK={seedJFK}
                 seedNapoleon={seedNapoleon}
+                seedIncremental={seedIncremental}
+                placeholderMode={placeholderMode}
+                setPlaceholderMode={setPlaceholderMode}
+                forceCardMode={forceCardMode}
+                setForceCardMode={setForceCardMode}
+                useSlotLayout={useSlotLayout}
+                setUseSlotLayout={setUseSlotLayout}
               />
             )}
           </>
@@ -293,6 +306,9 @@ function App() {
         <div className="absolute inset-0 ml-14 flex flex-col">
           {/* Timeline takes full available space */}
           <div className="w-full h-full relative">
+            {useSlotLayout ? (
+              <SimpleSlotTest />
+            ) : (
               <Timeline
                 events={events}
                 selectedId={selectedId}
@@ -301,6 +317,9 @@ function App() {
                 viewStart={viewStart}
                 viewEnd={viewEnd}
                 onViewWindowChange={(s, e) => { setWindow(s, e); }}
+                devEnabled={devEnabled}
+                placeholderMode={placeholderMode}
+                forceCardMode={forceCardMode}
                 onInlineEdit={(id, updates) => {
                   setEvents((prev) => prev.map((ev) => (ev.id === id ? { ...ev, title: updates.title, description: updates.description } : ev)));
                   try { announce(`Saved changes to ${updates.title || 'event'}`); } catch {}
@@ -313,8 +332,8 @@ function App() {
                   const pane = overlayRef.current as HTMLElement | null; if (pane) pane.style.pointerEvents = isDragging ? 'none' : 'auto';
                 }}
                 onAnnounce={(msg) => announce(msg)}
-                devEnabled={devEnabled}
               />
+            )}
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}

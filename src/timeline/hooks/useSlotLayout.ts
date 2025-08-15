@@ -34,8 +34,9 @@ export function useSlotLayout(
 ): SlotGrid {
   return useMemo(() => {
     const positions = new Map<string, SlotPosition>();
-    const densityCount = options?.densityCount;
-    const maxColumns = options?.maxColumns ?? 16;
+    // Remove unused variables
+    // const densityCount = options?.densityCount;
+    // const maxColumns = options?.maxColumns ?? 16;
     const gapX = Math.max(0, options?.horizontalGap ?? 0.5);
 
     if (events.length === 0) {

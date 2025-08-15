@@ -167,6 +167,171 @@ P2 — Documentation (carryover) ✅
 
 ---
 
+## REBUILD: Timeline UI from Scratch - Completed Iterations
+
+### Iteration 1: Foundation ✅
+- [x] Create full-screen grid background (12x12 CSS grid)
+- [x] Draw horizontal timeline line in center  
+- [x] Ensure grid covers ENTIRE available space (no centering, no margins)
+- [x] Verify layout works at different viewport sizes
+- [x] Clean slate implementation with Tailwind CSS Grid
+
+### Iteration 2: Event Cards ✅
+**Test file**: `cards.spec.ts`
+
+Card Rendering
+- [x] Create HTML card components with modern styling
+- [x] White background, rounded corners, subtle shadows
+- [x] Proper padding and spacing
+- [x] Responsive card sizing
+
+Content Display  
+- [x] Show title, description, and date clearly
+- [x] Bold title at the top
+- [x] Readable description text (NOT hidden or clipped)
+- [x] Small date label at bottom
+- [x] Clear visual hierarchy
+
+Positioning
+- [x] Place timeline anchors at date positions horizontally
+- [x] Position cards above or below their timeline anchors
+- [x] Center cards vertically on anchor position
+- [x] Allow slight left/right shifting for card width accommodation
+- [x] Ensure cards remain fully visible in viewport
+
+### Iteration 3: Card Layout & Distribution ✅ (Extended)
+**Test files**: `layout.spec.ts`, `seeding-visual.spec.ts`
+
+Vertical Distribution
+- [x] Distribute cards above and below timeline (not horizontally across)
+- [x] Use multiple vertical layers/rows when events cluster
+- [x] Maintain anchor alignment - cards stay near their timeline anchors
+- [x] Balance above/below distribution for visual symmetry
+- [x] Dynamic layer count (3-8 layers) based on event density
+- [x] Adaptive layer spacing for dense datasets
+
+Overlap Avoidance
+- [x] Detect card-to-card collisions in vertical space
+- [x] Shift cards to different vertical layers when overlapping
+- [x] Allow slight horizontal nudging to prevent edge overlaps
+- [x] Keep cards visually connected to their timeline anchors
+- [x] Advanced collision detection with spatial optimization
+- [x] Horizontal nudging algorithm with multiple positions
+- [x] Score-based position selection (collision count + distance from anchor)
+
+Connectors
+- [x] Add lines from timeline anchors to cards
+- [x] Connect anchor point to card center or edge
+- [x] Handle variable card positions (above/below/shifted)
+- [x] Subtle styling (gray, thin lines)
+
+Timeline Scaling & Dense Layout Support
+- [x] Proper timeline scaling based on actual date ranges
+- [x] Chronological positioning instead of equal spacing
+- [x] Compact card mode for datasets > 20 events
+- [x] Napoleon Bonaparte timeline (63 events, 1746-1832)
+- [x] Comprehensive visual testing with all seeding options
+- [x] Collision overlap reduced by 65% (186 → 64 overlaps)
+
+Historical Datasets Added
+- [x] Napoleon Bonaparte comprehensive timeline from Henri Guillemin biography
+- [x] Includes family context, military campaigns, political events, exile and death
+- [x] Visual testing demonstrates algorithm effectiveness across different data densities
+
+Space Optimization & UI Refinement
+- [x] Move controls (Pan/Zoom/Fit All) to centered bottom overlay bar
+- [x] Remove Export function to declutter interface
+- [x] Remove top app bar and integrate ChronoChart logo into navigation rail
+- [x] Move Dev toggle from header to navigation rail
+- [x] Maximize timeline viewport by reclaiming header space
+
+Grid-Based Card Layout System
+- [x] Redesign grid as functional card slot system (not just visual)
+- [x] One card per grid slot with smart grid sizing based on event count
+- [x] Cards snap to grid positions for consistent alignment
+- [x] Dynamic grid dimensions adapt to viewport and event density
+- [x] Grid serves as collision detection foundation (no overlapping slots)
+- [x] Visual grid indicators show occupied vs available slots
+- [x] Perfect overlap prevention (0 collisions achieved)
+- [x] Chronological positioning within grid constraints
+
+---
+
+## Iteration 4: Intelligent Timeline System
+
+### Phase A: Adaptive Card Content ✅
+**Goal**: Cards adapt content display based on available space and dataset density
+- [x] Detect when dataset is dense (e.g., >30 events)
+- [x] Implement title-only mode for dense datasets
+- [x] Smart 3-tier density system: full (≤20), compact (21-50), minimal (>50)
+- [x] Smooth content transitions with CSS transitions
+- [x] Maintain visual hierarchy with consistent styling
+- [x] CSS line-clamp utilities for text truncation
+- [x] Grid utilization increased from 20 to 48 cards with smaller sizes
+- [x] Comprehensive testing across all density levels
+
+### Phase B: Intelligent Positioning Algorithm ✅
+**Goal**: Replace grid system with anchor-relative positioning
+- [x] Cards positioned above/below their chronological anchors
+- [x] Dynamic connector lines from anchors to cards
+- [x] Collision detection with fallback to grid positioning
+- [x] Hybrid system: anchor-relative when possible, grid when crowded
+- [x] Intelligent collision detection for anchor-relative positioning
+- [x] Seamless fallback to grid system for dense datasets
+- [x] Maintains chronological accuracy with improved flexibility
+
+### Phase C: Anchor Fusion System ✅
+**Goal**: Handle time-dense periods elegantly  
+- [x] Detect events within close time proximity
+- [x] Fuse nearby anchors with count badges
+- [x] Smart clustering algorithm with adaptive thresholds
+- [x] Fusion badges with event counts (blue circular indicators)
+- [x] Adaptive fusion thresholds: 30 days (>50 events), 90 days (>30 events), 365 days (≤30 events)
+- [x] Fused cards show event count and date range
+- [x] Maximum 8 events per cluster to prevent over-fusion
+- [x] Increased timeline capacity through intelligent event grouping
+
+### Phase E: Vertical Column System ✅
+**Completed**: Implementation of systematic vertical positioning with progressive column expansion
+
+### Core System Implementation
+- [x] **Single → Dual Column → Degradation**: Progressive column expansion strategy
+- [x] **Independent Cluster Management**: Each time anchor handles its own degradation
+- [x] **Rectangle-Based Collision Detection**: Complete overlap prevention system
+- [x] **Dynamic Capacity Calculation**: Viewport-aware slot allocation
+
+### Column Progression Achieved
+- [x] **Single Column**: 6-8 events per side centered on anchor
+- [x] **Dual Columns**: Left/right expansion for 12-16 events total
+- [x] **Card Type Degradation**: Full (256×96) → Compact (176×64) → Title-only (140×32) → Multi-event (180×64)
+- [x] **Zero Overlaps**: Collision detection eliminates all overlaps
+
+### Testing & Validation
+- [x] **15 Test Scenarios**: Comprehensive coverage of all seeding mechanisms
+- [x] **Automated Overlap Detection**: Real-time collision checking
+- [x] **Visual Regression Suite**: Screenshot-based validation
+- [x] **Incremental Testing**: Cumulative event addition (+1 through +24)
+
+### Technical Achievements
+- [x] **Cluster Averaging**: Dynamic anchor positioning based on event distribution
+- [x] **Position Tracking**: Cross-cluster collision prevention
+- [x] **Retry Mechanism**: Smart slot allocation with fallback strategies
+- [x] **Development Visualization**: Color-coded slot availability indicators
+
+---
+
+## Iteration 4 Phase F: Architecture Documentation ✅
+**Completed**: Comprehensive technical documentation of positioning system
+
+- [x] **ARCHITECTURE.md Created**: Full technical specification document
+- [x] **Algorithm Documentation**: Detailed pseudocode with flow diagrams
+- [x] **Visual Examples**: ASCII art diagrams illustrating column progression
+- [x] **Data Structure Specification**: Complete positioning system architecture
+- [x] **Edge Case Documentation**: Handling of empty, single, and dense scenarios
+- [x] **Performance Analysis**: Big-O complexity analysis and optimization notes
+
+---
+
 ## Iteration 11: Completed items snapshot ✅
 - [x] Add curated historical seed dataset (RFK campaign & assassination timeline) to DevPanel for a "real" example timeline (clears existing events before seeding).
 - [x] Node card redesign: flat rectangle (no radius), dark grey fill, thin white outline; collapsed shows only title; click to expand with translucent background & full description; click outside collapses; in expanded mode clicking title/description enters inline edit with Save/Cancel buttons (fresh implementation replacing prior buggy inline editing logic).

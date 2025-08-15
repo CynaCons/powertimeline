@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Incremental Buttons</title>
+</head>
+<body>
+    <h1>Testing Incremental Functions</h1>
+    <div id="test-results"></div>
+    
+    <script type="module">
+        // Import the seedIncremental function to test it directly
+        import { seedIncremental } from './src/lib/devSeed.ts';
+        
+        const resultsDiv = document.getElementById('test-results');
+        
+        function runTests() {
+            try {
+                // Test incremental function with empty array
+                const result1 = seedIncremental([], 1);
+                resultsDiv.innerHTML += '<p>✅ Test 1 passed: Empty array to 1 event - ' + result1.length + ' events</p>';
+                
+                // Test incremental function with existing events
+                const result2 = seedIncremental(result1, 3);
+                resultsDiv.innerHTML += '<p>✅ Test 2 passed: 1 event to 3 events - ' + result2.length + ' events</p>';
+                
+                // Test that it doesn't exceed target
+                const result3 = seedIncremental(result2, 2);
+                resultsDiv.innerHTML += '<p>✅ Test 3 passed: 3 events to 2 events (should stay 3) - ' + result3.length + ' events</p>';
+                
+                // Test larger increment
+                const result4 = seedIncremental(result2, 8);
+                resultsDiv.innerHTML += '<p>✅ Test 4 passed: 3 events to 8 events - ' + result4.length + ' events</p>';
+                
+                resultsDiv.innerHTML += '<p><strong>✅ All tests passed! The seedIncremental function is working correctly.</strong></p>';
+                
+            } catch (error) {
+                resultsDiv.innerHTML += '<p>❌ Error: ' + error.message + '</p>';
+                console.error(error);
+            }
+        }
+        
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

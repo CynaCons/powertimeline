@@ -17,6 +17,45 @@ export function seedRandom(prev: Event[], count: number): Event[] {
   }
   return next;
 }
+// Incremental testing function for gradual event addition at random timepoints
+export function seedIncremental(prev: Event[], targetCount: number): Event[] {
+  const result = [...prev];
+  
+  // Calculate current timeline date range or use default
+  let minDate = new Date('2025-01-01').getTime();
+  let maxDate = new Date('2025-12-31').getTime();
+  
+  if (prev.length > 0) {
+    const existingDates = prev.map(e => new Date(e.date).getTime());
+    minDate = Math.min(...existingDates);
+    maxDate = Math.max(...existingDates);
+    
+    // Expand range slightly for new events
+    const range = maxDate - minDate;
+    const expansion = Math.max(range * 0.1, 30 * dayMs); // At least 30 days expansion
+    minDate -= expansion;
+    maxDate += expansion;
+  }
+  
+  // Add events until we reach target count
+  while (result.length < targetCount) {
+    const eventNumber = result.length + 1;
+    
+    // Generate random date within the timeline range
+    const randomTime = minDate + Math.random() * (maxDate - minDate);
+    const randomDate = new Date(randomTime);
+    
+    result.push({
+      id: `inc-${eventNumber}-${Date.now()}-${Math.floor(Math.random()*1000)}`, // Unique ID
+      date: randomDate.toISOString().slice(0, 10),
+      title: `Event ${eventNumber}`,
+      description: `Incremental test event ${eventNumber} - added at random timepoint`
+    });
+  }
+  
+  return result;
+}
+
 export function seedClustered(prev: Event[]): Event[] {
   const next = [...prev]; const centers = [-10,0,12].map(o => Date.now()+o*dayMs); let idx=1;
   for (let ci=0; ci<centers.length; ci++) for (let i=0;i<10;i++) { const jitter = (Math.floor(Math.random()*7)-3)*dayMs; const d=new Date(centers[ci]+jitter).toISOString().slice(0,10); next.push({ id:(Date.now()+Math.random()+ci*100+i).toString(36), date:d, title:`Cluster ${ci+1}-${idx++}`, description:randLorem(3)});}  

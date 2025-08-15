@@ -6,7 +6,7 @@ export function useFocusTrap(enabled: boolean, root: HTMLElement | null) {
     if (!enabled || !root) return;
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Tab') return;
-      const items = Array.from(root.querySelectorAll<HTMLElement>(
+      const items = Array.from(root!.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       )).filter(el => !el.hasAttribute('disabled'));
       if (!items.length) return;
