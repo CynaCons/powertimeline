@@ -935,7 +935,7 @@ const Timeline: React.FC<Props> = ({
       if (!bands.has(key)) bands.set(key, []);
       bands.get(key)!.push(ev);
     }
-    for (const [key, itemsBand] of bands) {
+    for (const [, itemsBand] of bands) {
       // Pack above and below timeline separately to maintain visual structure
       const sides = { above: itemsBand.filter(e=>e.y < timelineY), below: itemsBand.filter(e=>e.y >= timelineY) } as const;
       for (const side of Object.values(sides)) {

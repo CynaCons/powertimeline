@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Event } from '../types';
+import type { Event } from '../types';
 import { LayoutEngine } from './LayoutEngine';
-import { LayoutResult, LayoutConfig } from './types';
+import type { LayoutResult, LayoutConfig } from './types';
 import { createLayoutConfig, getViewportSpecificConfig } from './config';
 
 interface UseSlotBasedLayoutProps {

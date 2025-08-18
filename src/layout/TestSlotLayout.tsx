@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Event } from '../types';
+import { useState } from 'react';
+import type { Event } from '../types';
 import { TimelineWithSlots } from './TimelineWithSlots';
 
 // Sample events for testing

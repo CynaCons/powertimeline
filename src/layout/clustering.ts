@@ -18,7 +18,7 @@ export class EventClustering {
     );
 
     const clusters: EventCluster[] = [];
-    const viewRange = viewEnd.getTime() - viewStart.getTime();
+    // View range available if needed: viewEnd.getTime() - viewStart.getTime()
 
     for (const event of sortedEvents) {
       const eventDate = new Date(event.date);

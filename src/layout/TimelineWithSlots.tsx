@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Event } from '../types';
+import type { Event } from '../types';
 import { useSlotBasedLayout } from './useSlotBasedLayout';
 import { CardRenderer } from './CardRenderer';
 import { AnchorBadge } from './AnchorBadge';
-import { PositionedCard, Anchor } from './types';
+import type { PositionedCard, Anchor } from './types';
 
 interface TimelineWithSlotsProps {
   events: Event[];
@@ -14,7 +14,7 @@ export function TimelineWithSlots({ events, className = '' }: TimelineWithSlotsP
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 800 });
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [_hoveredCard, _setHoveredCard] = useState<string | null>(null);
 
   // Calculate view window from events
   const { viewStart, viewEnd } = React.useMemo(() => {
@@ -133,7 +133,7 @@ export function TimelineWithSlots({ events, className = '' }: TimelineWithSlotsP
           key={card.id}
           card={card}
           isSelected={selectedCard === card.id}
-          isHovered={hoveredCard === card.id}
+          isHovered={_hoveredCard === card.id}
           onClick={handleCardClick}
           onDoubleClick={handleCardDoubleClick}
         />
@@ -148,9 +148,9 @@ export function TimelineWithSlots({ events, className = '' }: TimelineWithSlotsP
         {layoutStats && (
           <>
             <div><strong>Card Types:</strong></div>
-            {Object.entries(layoutStats.cardTypes).map(([type, count]) => (
+            {Object.entries(layoutStats.degradationStats.cardTypeCounts).map(([type, count]) => (
               <div key={type} className="ml-2">
-                {type}: {count}
+                {type}: {String(count)}
               </div>
             ))}
             {layoutStats.hasOverlaps && (

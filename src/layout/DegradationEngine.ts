@@ -1,5 +1,5 @@
-import { Event } from '../types';
-import { PositionedCard, EventCluster, LayoutConfig, CardType, Slot } from './types';
+import type { Event } from '../types';
+import type { PositionedCard, EventCluster, LayoutConfig, CardType, Slot } from './types';
 import { DualColumnLayout } from './DualColumnLayout';
 import { CardTypeSelector } from './CardTypeSelector';
 
@@ -12,15 +12,14 @@ export class DegradationEngine extends DualColumnLayout {
   }
 
   // Main degradation algorithm - implements the planned degradation sequence
-  positionClusterWithDegradation(cluster: EventCluster): PositionedCard[] {
+  positionClusterWithDegradation(cluster: EventCluster, slots: Slot[]): PositionedCard[] {
     const positionedCards: PositionedCard[] = [];
     let remainingEvents = [...cluster.events].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    // Generate slots for this cluster
-    cluster.slots = this.slotGrid.generateSlotsForAnchor(cluster.anchor);
-    const availableSlots = [...cluster.slots];
+    // Use provided slots
+    const availableSlots = [...slots];
 
     // Phase 1: Try full cards
     const { positioned: fullCards, remaining: afterFull } = 
@@ -249,7 +248,7 @@ export class DegradationEngine extends DualColumnLayout {
 
   // Force a specific degradation level for testing
   forceCardType(cluster: EventCluster, forcedType: CardType): PositionedCard[] {
-    const positionedCards: PositionedCard[] = [];
+    // const positionedCards: PositionedCard[] = []; // Not used in this implementation
     cluster.slots = this.slotGrid.generateSlotsForAnchor(cluster.anchor);
     
     const sortedEvents = [...cluster.events].sort((a, b) => 

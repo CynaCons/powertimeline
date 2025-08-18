@@ -11,7 +11,7 @@ export class SlotGrid {
   // Generate slots for a single anchor (single and dual column)
   generateSlotsForAnchor(anchor: Anchor): Slot[] {
     const slots: Slot[] = [];
-    const { timelineY, cardConfigs, columnSpacing, rowSpacing } = this.config;
+    const { timelineY, cardConfigs, rowSpacing } = this.config;
     
     // Calculate slots per side based on viewport height
     const availableHeightPerSide = (this.config.viewportHeight / 2) - 50; // Leave margin
@@ -83,7 +83,7 @@ export class SlotGrid {
 
   // Find next available slot in cluster
   findNextAvailableSlot(clusterId: string): Slot | null {
-    for (const [key, slot] of this.slots) {
+    for (const slot of this.slots.values()) {
       if (slot.clusterId === clusterId && !slot.occupied) {
         return slot;
       }

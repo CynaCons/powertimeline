@@ -22,7 +22,7 @@ export interface EventCluster {
   id: string;
   anchor: Anchor;
   events: Event[];
-  slots: Slot[];
+  slots?: Slot[];
 }
 
 export type CardType = 'full' | 'compact' | 'title-only' | 'multi-event' | 'infinite';
@@ -60,10 +60,18 @@ export interface LayoutConfig {
   rowSpacing: number;       // Vertical spacing between rows
 }
 
+export interface ColumnBounds {
+  x: number;
+  width: number;
+  minY: number;
+  maxY: number;
+}
+
 export interface LayoutResult {
   positionedCards: PositionedCard[];
   clusters: EventCluster[];
   anchors: Anchor[];
+  columnBounds?: ColumnBounds[];
   utilization: {
     totalSlots: number;
     usedSlots: number;

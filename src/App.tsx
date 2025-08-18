@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import Timeline from './components/Timeline';
-import { SimpleSlotTest } from './layout/SimpleSlotTest';
+import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import type { Event } from './types';
 import { OutlinePanel } from './app/panels/OutlinePanel';
 import { EditorPanel } from './app/panels/EditorPanel';
@@ -57,7 +56,7 @@ function App() {
   const [outlineFilter, setOutlineFilter] = useState('');
 
   // Dragging state (for disabling overlay pointer events)
-  const [dragging, setDragging] = useState(false);
+  const [dragging] = useState(false);
   // Dev options
   const [placeholderMode, setPlaceholderMode] = useState<'off'|'sparse'|'dense'>('sparse');
   const [forceCardMode, setForceCardMode] = useState<'auto'|'full'|'compact'|'title'|'multi'>('auto');
@@ -168,14 +167,14 @@ function App() {
     try { announce(`Deleted ${toDelete?.title || 'event'}`); } catch {}
   }, [selectedId, events, announce]);
 
-  const onDragDate = useCallback((id: string, newISODate: string) => {
-    // write-through during drag
-    setEvents(prev => {
-      const next = prev.map(ev => ev.id === id ? { ...ev, date: newISODate } : ev);
-      storageRef.current.writeThrough(next);
-      return next;
-    });
-  }, []);
+  // const onDragDate = useCallback((id: string, newISODate: string) => {
+  //   // write-through during drag
+  //   setEvents(prev => {
+  //     const next = prev.map(ev => ev.id === id ? { ...ev, date: newISODate } : ev);
+  //     storageRef.current.writeThrough(next);
+  //     return next;
+  //   });
+  // }, []);
 
   // Dev helpers using utilities
   const seedRandom = useCallback((count: number) => {
@@ -243,9 +242,9 @@ function App() {
   }, [sortedForList, outlineFilter]);
 
   // Create flow helpers
-  function openCreate(dateISO: string) {
-    setDate(dateISO); setTitle(''); setDescription(''); setOverlay('create');
-  }
+  // function openCreate(dateISO: string) {
+  //   setDate(dateISO); setTitle(''); setDescription(''); setOverlay('create');
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -338,7 +337,7 @@ function App() {
         <div className="absolute inset-0 ml-14 flex flex-col">
           {/* Timeline takes full available space */}
           <div className="w-full h-full relative">
-            <SimpleSlotTest events={events} />
+            <DeterministicLayoutComponent events={events} />
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}

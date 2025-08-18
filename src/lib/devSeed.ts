@@ -204,7 +204,7 @@ export function seedNapoleonTimeline(): Event[] {
 }
 
 // Degradation testing seeders
-export function seedSingleColumnTest(prev: Event[]): Event[] {
+export function seedSingleColumnTest(_prev: Event[]): Event[] {
   // Create exactly enough events to fill a single column (6-8 events)
   const base = Date.now() - 30 * dayMs;
   const events: Event[] = [];
@@ -222,7 +222,7 @@ export function seedSingleColumnTest(prev: Event[]): Event[] {
   return events;
 }
 
-export function seedDualColumnTest(prev: Event[]): Event[] {
+export function seedDualColumnTest(_prev: Event[]): Event[] {
   // Create enough events to require dual columns (12-16 events)
   const base = Date.now() - 30 * dayMs;
   const events: Event[] = [];
@@ -240,7 +240,7 @@ export function seedDualColumnTest(prev: Event[]): Event[] {
   return events;
 }
 
-export function seedCompactDegradationTest(prev: Event[]): Event[] {
+export function seedCompactDegradationTest(_prev: Event[]): Event[] {
   // Create enough events to force compact degradation (18-24 events)
   const base = Date.now() - 30 * dayMs;
   const events: Event[] = [];
@@ -258,7 +258,7 @@ export function seedCompactDegradationTest(prev: Event[]): Event[] {
   return events;
 }
 
-export function seedMultiEventTest(prev: Event[]): Event[] {
+export function seedMultiEventTest(_prev: Event[]): Event[] {
   // Create enough events to force multi-event cards (30+ events)
   const base = Date.now() - 20 * dayMs;
   const events: Event[] = [];
@@ -276,7 +276,7 @@ export function seedMultiEventTest(prev: Event[]): Event[] {
   return events;
 }
 
-export function seedInfiniteTest(prev: Event[]): Event[] {
+export function seedInfiniteTest(_prev: Event[]): Event[] {
   // Create way too many events to force infinite cards (50+ events)
   const base = Date.now() - 25 * dayMs;
   const events: Event[] = [];

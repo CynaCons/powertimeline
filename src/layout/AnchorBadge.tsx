@@ -1,5 +1,5 @@
 import React from 'react';
-import { Anchor } from './types';
+import type { Anchor } from './types';
 
 interface AnchorBadgeProps {
   anchor: Anchor;

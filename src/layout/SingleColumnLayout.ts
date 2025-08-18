@@ -48,7 +48,7 @@ export class SingleColumnLayout {
     return positionedCards;
   }
 
-  private createPositionedCard(
+  protected createPositionedCard(
     event: Event,
     slot: any,
     cardType: CardType,

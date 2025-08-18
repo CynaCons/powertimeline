@@ -1,5 +1,5 @@
-import { Event } from '../types';
-import { LayoutConfig, LayoutResult, EventCluster, PositionedCard } from './types';
+import type { Event } from '../types';
+import type { LayoutConfig, LayoutResult, EventCluster, PositionedCard } from './types';
 import { EventClustering } from './clustering';
 import { DegradationEngine } from './DegradationEngine';
 import { SlotGrid } from './SlotGrid';
@@ -24,7 +24,7 @@ export class LayoutEngine {
     viewEnd: Date
   ): LayoutResult {
     // Clear previous layout
-    this.singleColumnLayout.clear();
+    this.slotGrid.clear();
     
     // Step 1: Cluster events by time proximity
     const clusters = this.clustering.clusterEvents(events, viewStart, viewEnd);
@@ -33,8 +33,11 @@ export class LayoutEngine {
     const allPositionedCards: PositionedCard[] = [];
     
     for (const cluster of clusters) {
+      // Generate slots for the cluster
+      const slots = this.slotGrid.generateSlotsForAnchor(cluster.anchor);
+      
       // Use degradation engine for complete layout handling
-      const positioned = this.degradationEngine.positionClusterWithDegradation(cluster);
+      const positioned = this.degradationEngine.positionClusterWithDegradation(cluster, slots);
       allPositionedCards.push(...positioned);
     }
 
@@ -50,7 +53,7 @@ export class LayoutEngine {
     return {
       positionedCards: allPositionedCards,
       clusters,
-      anchors: clusters.map(cluster => cluster.anchor),
+      anchors: clusters.map((cluster: EventCluster) => cluster.anchor),
       utilization
     };
   }
@@ -72,10 +75,10 @@ export class LayoutEngine {
     events: Event[], 
     newViewStart: Date, 
     newViewEnd: Date,
-    currentClusters: EventCluster[]
+    _currentClusters: EventCluster[]
   ): LayoutResult {
     // Recalculate clusters based on new zoom level
-    const newClusters = this.clustering.clusterEvents(events, newViewStart, newViewEnd);
+    // Note: Could optimize by using currentClusters but for now we recalculate
     
     // Layout with new clusters
     return this.layoutEvents(events, newViewStart, newViewEnd);

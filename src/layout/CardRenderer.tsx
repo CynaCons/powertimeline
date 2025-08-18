@@ -1,6 +1,6 @@
 import React from 'react';
-import { PositionedCard, CardType } from './types';
-import { Event } from '../types';
+import type { PositionedCard, CardType } from './types';
+import type { Event } from '../types';
 
 interface CardRendererProps {
   card: PositionedCard;

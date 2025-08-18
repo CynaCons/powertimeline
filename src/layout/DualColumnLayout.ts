@@ -1,6 +1,5 @@
-import { Event } from '../types';
-import { PositionedCard, EventCluster, LayoutConfig, CardType, Slot } from './types';
-import { SlotGrid } from './SlotGrid';
+import type { Event } from '../types';
+import type { PositionedCard, EventCluster, LayoutConfig, CardType, Slot } from './types';
 import { SingleColumnLayout } from './SingleColumnLayout';
 
 export class DualColumnLayout extends SingleColumnLayout {
@@ -151,7 +150,7 @@ export class DualColumnLayout extends SingleColumnLayout {
     };
   }
 
-  private findClusterAnchorX(clusterId: string): number {
+  private findClusterAnchorX(_clusterId: string): number {
     // In a real implementation, this would look up the cluster anchor
     // For now, return a default value
     return this.config.viewportWidth / 2;

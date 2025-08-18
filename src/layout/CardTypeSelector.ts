@@ -1,5 +1,5 @@
-import { Event } from '../types';
-import { CardType, CardConfig, LayoutConfig } from './types';
+import type { Event } from '../types';
+import type { CardType, CardConfig, LayoutConfig } from './types';
 
 export class CardTypeSelector {
   private config: LayoutConfig;
@@ -42,7 +42,7 @@ export class CardTypeSelector {
     availableSlots: number,
     totalEventsInCluster: number
   ): boolean {
-    const cardConfig = this.config.cardConfigs[cardType];
+    // Configuration available via this.config.cardConfigs[cardType] if needed
     
     switch (cardType) {
       case 'full':
@@ -74,8 +74,8 @@ export class CardTypeSelector {
   private hasSubstantialContent(event: Event): boolean {
     return (
       event.title.length > 10 &&
-      event.description &&
-      event.description.length > 20
+      Boolean(event.description) &&
+      (event.description?.length || 0) > 20
     );
   }
 
