@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Event } from '../types';
 import type { LayoutConfig } from './types';
 import { createLayoutConfig } from './config';
-import { DeterministicLayout } from './DeterministicLayout';
+import { DeterministicLayoutV5 } from './DeterministicLayoutV5';
 
 interface DeterministicLayoutProps {
   events: Event[];
@@ -59,7 +59,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
       };
     }
 
-    const deterministicLayout = new DeterministicLayout(config);
+    const deterministicLayout = new DeterministicLayoutV5(config);
     return deterministicLayout.layout(events);
   }, [events, config]);
 
