@@ -287,6 +287,26 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
           <p>{layoutResult.clusters.length} column groups</p>
           <p>{layoutResult.positionedCards.length} positioned cards</p>
           <p>Slot utilization: {layoutResult.utilization.percentage.toFixed(1)}%</p>
+          {/* Target vs actual cluster band and pitch stats */}
+          {(() => {
+            const clusterSizes = layoutResult.clusters.map(c => c.events.length);
+            const groupsCount = layoutResult.clusters.length;
+            const avg = groupsCount > 0 ? (clusterSizes.reduce((a, b) => a + b, 0) / groupsCount) : 0;
+            const xs = layoutResult.anchors.map(a => a.x).sort((a, b) => a - b);
+            const pitches = xs.length > 1 ? xs.slice(1).map((x, i) => Math.abs(x - xs[i])) : [];
+            const pitchMin = pitches.length ? Math.min(...pitches) : 0;
+            const pitchAvg = pitches.length ? (pitches.reduce((a, b) => a + b, 0) / pitches.length) : 0;
+            const pitchMax = pitches.length ? Math.max(...pitches) : 0;
+            const withinBand = avg >= 4 && avg <= 6;
+            return (
+              <>
+                <p className={withinBand ? 'text-green-700' : 'text-amber-700'}>
+                  Avg events/cluster: {avg.toFixed(1)} (target 4–6)
+                </p>
+                <p className="text-xs text-gray-500">Group pitch px — min {pitchMin.toFixed(0)} · avg {pitchAvg.toFixed(0)} · max {pitchMax.toFixed(0)}</p>
+              </>
+            );
+          })()}
           <p className="text-green-600 font-semibold">✓ Zero overlaps guaranteed</p>
           <p className="text-blue-600 font-semibold">✓ Enhanced algorithm ready</p>
         </div>
@@ -333,6 +353,22 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
             </div>
             <span className="font-mono">{layoutResult.positionedCards.filter(c => c.cardType === 'multi-event').length}</span>
           </div>
+          {/* Promotions and Aggregations counters */}
+          {(() => {
+            const byType: Record<string, number> = layoutResult.positionedCards.reduce((acc: Record<string, number>, c: any) => {
+              const t = String(c.cardType);
+              acc[t] = (acc[t] || 0) + 1;
+              return acc;
+            }, {});
+            const totalAggregations = byType['multi-event'] || 0;
+            const promotionsCount = 0; // placeholder until promotion pass exists
+            return (
+              <div className="mt-2 pt-2 border-t">
+                <div className="flex items-center justify-between"><span>Promotions applied</span><span className="font-mono">{promotionsCount}</span></div>
+                <div className="flex items-center justify-between"><span>Aggregations applied</span><span className="font-mono">{totalAggregations}</span></div>
+              </div>
+            );
+          })()}
         </div>
         <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
           <div>Avg events/cluster: {layoutResult.clusters.length > 0 ? (layoutResult.clusters.reduce((sum, c) => sum + c.events.length, 0) / layoutResult.clusters.length).toFixed(1) : 0}</div>
@@ -340,26 +376,22 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         </div>
       </div>
 
-      {/* Enhanced Slot Allocation Info */}
+      {/* Footprints (cells) */}
       <div 
         className="absolute bottom-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md transition-all duration-200 z-[5] pointer-events-auto"
         style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
       >
-        <h3 className="font-bold text-sm mb-2">Corrected Slot Allocation</h3>
+        <h3 className="font-bold text-sm mb-2">Footprints (cells)</h3>
         <div className="text-xs space-y-1">
-          <div>Full: 4 slots (2↑, 2↓)</div>
-          <div>Compact: 8 slots (4↑, 4↓) - half height</div>
-          <div>Title-only: 8 slots (4↑, 4↓) - smaller</div>
-          <div>Multi-event: 4 slots (2↑, 2↓) - full size, multi content</div>
+          <div>Full: 4 cells</div>
+          <div>Compact: 4 cells</div>
+          <div>Title-only: 4 cells</div>
+          <div>Multi-event: 4 cells</div>
         </div>
         <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
-          Total slots: {layoutResult.utilization.totalSlots} |
-          Used: {layoutResult.utilization.usedSlots}
-        </div>
-        <div className="text-xs text-blue-600 mt-1">
-          Enhanced engine: Ready for implementation
+          Utilization — Total: {layoutResult.utilization.totalSlots} · Used: {layoutResult.utilization.usedSlots}
         </div>
         <button
           className="mt-2 text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
@@ -367,6 +399,24 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         >
           {showColumnBorders ? 'Hide' : 'Show'} Column Borders
         </button>
+      </div>
+
+      {/* Placements (candidates per group) */}
+      <div 
+        className="absolute bottom-4 left-72 backdrop-blur-sm p-3 rounded-lg shadow-md transition-all duration-200 z-[5] pointer-events-auto"
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
+      >
+        <h3 className="font-bold text-sm mb-2">Placements (candidates per group)</h3>
+        <div className="text-xs space-y-1">
+          <div>Top: 4 placements</div>
+          <div>Bottom: 4 placements</div>
+          <div>Total: 8 candidates</div>
+        </div>
+        <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
+          Applies uniformly to all card types; actual fit is governed by capacity.
+        </div>
       </div>
         </>
       )}

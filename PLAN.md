@@ -1,5 +1,11 @@
 # Implementation Plan - Enhanced Deterministic Layout v5
 
+## Executive Summary
+
+**Primary Goal**: Perfect the card placement and degradation system BEFORE implementing user features.
+
+**Key Principle**: The layout engine must handle complex scenarios (multi-clustered seeds, 60+ events) with zero overlaps and graceful degradation before we add any visual polish or user interactions.
+
 ## Overview
 
 Implementation of the corrected and enhanced deterministic layout algorithm based on updated user specifications:
@@ -8,24 +14,110 @@ Implementation of the corrected and enhanced deterministic layout algorithm base
 - **Horizontal space optimization** across full timeline width
 - **Timeline-driven process**: bounds → dispatch → cluster → fit → degrade
 
+### Reordered execution roadmap (current focus)
+To ensure the card placement and degradation system works perfectly before adding user features:
+
+**Stage 1: Core Layout Foundation** ✅ (Partially Complete)
+- 0.1 Terminology & Capacity Model → 0.3 Fit Algorithm Contract → 1.3 Slot Model Contract
+- 0.7 Basic telemetry scaffolding and test infrastructure
+- Goal: Zero-overlap guarantee with deterministic placement
+
+**Stage 2: Clustering & Distribution** 🚧 (Current Focus)
+- 0.2 Distribution & Column Grouping (Dispatch) 
+- 2.2 Enhanced Left-to-Right Clustering
+- 4.2/4.3 Horizontal Space Optimization & Smart Column Formation
+- Goal: Optimal event distribution across timeline width
+
+**Stage 3: Complete Degradation System** 📅 (Next Priority)
+- 0.4 Degradation AND Promotion (with real implementation, not placeholders)
+- 0.5 Multi-Event Aggregation Policy
+- 0.5.1 Infinite Event Card (Overflow Container)
+- 3.1-3.3 All card type implementations with correct specifications
+- Goal: Handle any density scenario gracefully
+
+**Stage 4: Timeline Axis & Temporal Accuracy** 📅
+- 10.1 Timeline Axis Implementation (CRITICAL for verification)
+- 10.4 Timeline Anchor Markers
+- 2.1 Decorrelated Layout System (above/below independence)
+- Goal: Verify temporal positioning and clustering accuracy
+
+**Stage 5: Validation with Complex Scenarios** 📅
+- 6.1 Slot System Validation with multi-clustered seeds
+- 6.2 Layout Algorithm Testing (including extreme density)
+- 6.3 Visual Regression Testing for all states
+- 0.6 Stability & Churn Minimization
+- Goal: Prove system handles clustered x3, Napoleon (63 events), etc.
+
+**Stage 6: Visual Polish & Refinement** 📅
+- 9.9 Visual polish (card hierarchy, spacing, tokens)
+- 10.3 Visual Card Type Differentiation
+- 9.1 Card Styling Improvements (if needed)
+- Goal: Professional appearance without breaking core functionality
+
+**Stage 7: User Features & Integration** 📅
+- 7.1 UI Integration
+- 8.1-8.3 Edge Cases, Error Handling, Accessibility
+- 5.1-5.2 Zoom mechanics and cross-section coordination
+- 7.2 Developer Experience
+- 0.8 Overlay/UX Updates
+- Goal: Complete user-facing features on solid foundation
+
+**Stage 8: Documentation & Cleanup** 📅
+- 0.9 Documentation updates
+- 7.3 Architecture documentation
+- Remove experimental/unused layout implementations
+- Goal: Production-ready codebase
+
+## Current Development Status (2025-08-18)
+
+### ✅ What's Working
+- Basic v5 test suite (15 tests passing)
+- Telemetry infrastructure exposing metrics
+- Basic card rendering with some degradation
+- Event clustering and dispatch (partial)
+
+### 🔴 Critical Issues Blocking Progress
+1. **No Timeline Axis** - Cannot verify temporal accuracy without visible axis
+2. **Placeholder Promotion Logic** - Line 126: promotionsCount = 0 (hardcoded)
+3. **Multiple Layout Engines** - Unclear which is canonical (DeterministicLayout vs EnhancedDeterministicLayout vs others)
+4. **Multi-clustered Seeds Not Fully Tested** - Need to verify with clustered x3 scenario
+5. **Infinite Overflow Cards Not Implemented** - Critical for high-density scenarios
+
+### 🎯 Immediate Next Steps (Stage 2 Focus)
+1. Complete dispatch & clustering implementation (Phase 0.2, 2.2, 4.2/4.3)
+2. Remove placeholder promotion logic and implement real algorithm
+3. Consolidate to single layout engine
+4. Add tests for multi-clustered scenarios
+
+Note: Section numbering below remains for continuity; the roadmap above defines the execution order.
+
 ## Phase 0: Cards Placement & Architecture (New)
 
 Goal: lock the core behavior for card placement, distribution, degradation/promotion, and the terminology/capacity model so all later phases build on a stable contract.
+
+Execution order within Phase 0 (Revised for Stage-based approach)
+- Stage 1: 0.1 Terms/Capacity → 0.3 Fit contract → 0.7 Tests (foundational)
+- Stage 2: 0.2 Dispatch metrics (current focus)
+- Stage 3: 0.4 Degrade/Promote policy → 0.5/0.5.1 Aggregation & Infinite
+- Stage 5: 0.6 Stability (after validation)
+- Stage 7: 0.8 Overlays → 0.9 Docs (final polish)
 
 ### 0.1 Terminology & Capacity Model Normalization
 - [ ] Define terms explicitly and update docs/overlays to match:
 	- cell: base grid unit for capacity accounting
 	- footprint: cells consumed by a placed card
 	- placements: candidate positions per column group (e.g., top=4, lower=4)
-- [ ] Decide and document footprints (default proposal): Full=4 cells, Compact=4 cells, Title-only=4 cells, Multi-event=4 cells; clarify that 8 listed for compact/title-only refers to placements (4t+4l), not capacity.
-- [ ] Add a capacity formula and show derived numbers in overlays (Total cells | Used cells | Utilization%).
-- [ ] Emit a normalized telemetry object with these fields for tests: {totalCells, usedCells, utilization, footprintsByType, placementsByType}.
+- [ ] Decide and document footprints (default proposal): Full=4 cells, Compact=2 cells, Title-only=1 cells, Multi-event=2 cells; clarify that 8 listed for compact/title-only refers to placements (4t+4l), not capacity.
+- [x] Add a capacity formula and show derived numbers in overlays (Total cells | Used cells | Utilization%).
+- [x] Emit a normalized telemetry object with these fields for tests: {totalCells, usedCells, utilization, footprintsByType, placementsByType}.
+	- Status 2025-08-18: Telemetry fields and overlays are live; docs wording still pending in ARCHITECTURE.md.
 
 ### 0.2 Distribution & Column Grouping (Dispatch)
-- [ ] Implement density-adaptive dispatch with a target average events/cluster band (configurable, default 4–6).
+- [x] Implement density-adaptive dispatch with a target average events/cluster band (configurable, default 4–6).
 - [ ] Enforce min/max group pitch in pixels; merge under-full adjacent groups; split over-full ones.
 - [ ] Add a proximity merge rule: merge-nearby-groups when inter-group gap < epsilon px to reclaim capacity and reduce jitter.
-- [ ] Telemetry: groupCount, groupPitchPx (avg/min/max), avgEventsPerCluster, largestCluster.
+- [x] Telemetry: groupCount, groupPitchPx (avg/min/max), avgEventsPerCluster, largestCluster.
+	- Status 2025-08-18: Dispatch telemetry drives v5/04; further tuning/merge-split rules deferred.
 
 ### 0.3 Fit Algorithm Contract
 - [ ] Deterministic assignment using ordered placements; guarantee zero overlaps given the budget.
@@ -33,7 +125,7 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [ ] Sticky placement: minimize churn across small data/zoom changes; prefer local re-fit within a group.
 
 ### 0.4 Degradation AND Promotion
-- [ ] Degrade cascade (when over budget): Full → Compact → Title-only → Multi-event; prove termination on a finite lattice.
+- [ ] Degrade cascade (when over budget): Full → Compact → Title-only → Multi-event → Infinite (overflow); prove termination on a finite lattice.
 - [ ] Promotion pass (readability uplift): if utilization < threshold (default 80%), promote high-priority cards back toward Full until nearing threshold.
 - [ ] Make thresholds/configs explicit and surfaced in overlays. Telemetry: {degradedCountByType, promotedCountByType}.
 
@@ -42,21 +134,31 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [ ] Multi-event card contains up to 5 events; summarize overflow with "+N" rule; retains 1 card ↔ multiple events mapping explicitly in telemetry.
 - [ ] Telemetry: {aggregations, eventsAggregated, clustersAffected}.
 
+### 0.5.1 Infinite Event Card (Overflow Container)
+- [ ] Purpose: deterministic overflow container when residual events remain after multi-event budget per side is exhausted.
+- [ ] Footprint: fixed 4 cells; no auto-expansion. One per side per cluster (above/below independently).
+- [ ] Content: preview top K (configurable) lines chronologically, with a visible "+N more" indicator; full list accessible via in-place overlay or side panel.
+- [ ] Determinism: stable ordering (chronological or PriorityScore), stable trigger (residual > 0 after multi-event budget), predictable collapse when residual returns to 0.
+- [ ] Telemetry: {infinite: {enabled, containers, eventsContained, previewCount, byCluster:[{clusterId, side, eventsContained}]}}.
+- [ ] Overlay: distinct token (∞/stack), left strip color, and badge consistent with card-type tokens.
+ - [ ] Config dials: multiEventMaxPerSide (default 1–2), infinitePreviewK (default 3–5), infiniteTrigger (residual > 0 after multi-event budget), prioritySort ('chrono' default).
+
 ### 0.6 Stability & Churn Minimization
 - [ ] Define sticky group boundaries and local re-fit strategy; forbid cross-group migrations for minor pans/zooms.
 - [ ] Document tie-breakers and stability guarantees in ARCHITECTURE.md.
 
 ### 0.7 Telemetry & Tests
-- [ ] Emit a JSON telemetry blob alongside the DOM: {events, groups, capacity, utilization, distribution, promotions, degradations, aggregations}.
+- [x] Emit a JSON telemetry blob alongside the DOM: {events, groups, capacity, utilization, distribution, promotions, degradations, aggregations}.
 - [x] Bootstrap v5 TDD suite (01 foundation, 02 placement, 03 non-overlap) scoped via Playwright testMatch.
 - [x] Add stable selectors: data-testid="event-card" on cards, with data-event-id and data-card-type.
-- [ ] Update Playwright tests to assert invariants on telemetry (zero overlaps; utilization threshold adherence; avg cluster band; stability under small pans/zooms).
-	- Notes (2025-08-18): window.__ccTelemetry implemented in both `src/components/Timeline.tsx` and `src/layout/DeterministicLayoutComponent.tsx` exposing dispatch, capacity, placements. Added fields: promotions.count, degradations.count/byType, aggregation.{totalAggregations,eventsAggregated}, cards.{single,multiContained,summaryContained}. Unskipped and passing: v5/04 (dispatch band), v5/05 (capacity model), v5/06 (degrade/promote placeholders), v5/07 (aggregation reconciliation), v5/08 (stability & churn via small viewport jitter, low migrations).
+- [x] Update Playwright tests to assert invariants on telemetry (zero overlaps; utilization threshold adherence; avg cluster band; stability under small pans/zooms).
+	- Status 2025-08-18: window.__ccTelemetry implemented in both `src/components/Timeline.tsx` and `src/layout/DeterministicLayoutComponent.tsx` exposing dispatch, capacity, placements. Added fields: promotions.count, degradations.count/byType, aggregation.{totalAggregations,eventsAggregated}, cards.{single,multiContained,summaryContained}. Planned fields: infinite.{enabled,containers,eventsContained,previewCount,byCluster}. Unskipped and passing: v5/04 (dispatch band), v5/05 (capacity model), v5/06 (degrade/promote placeholders), v5/07 (aggregation reconciliation), v5/08 (stability & churn via small viewport jitter, low migrations). Entire v5 suite (01–09) green locally.
 
 ### 0.8 Overlay/UX Updates
-- [ ] Split the "Corrected Slot Allocation" panel into two: Footprint (cells) vs Placements (candidates per group).
-- [ ] Add counters for Promotions applied, Aggregations applied.
-- [ ] Surface group pitch (px) and the target vs actual avg events/cluster.
+- [x] Split the "Corrected Slot Allocation" panel into two: Footprint (cells) vs Placements (candidates per group).
+- [x] Add counters for Promotions applied, Aggregations applied.
+- [x] Surface group pitch (px) and the target vs actual avg events/cluster.
+	- Status 2025-08-18: Implemented in `DeterministicLayoutComponent` overlays; verified visually and via tests.
 
 ### 0.9 Documentation (ARCHITECTURE.md)
 - [ ] Add the terminology block (cell/footprint/placements/capacity/utilization) and a mini diagram.
@@ -77,7 +179,15 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [x] Document keep/defer/archive decisions in `tests/README.md`.
 - [x] Physically move legacy specs to `tests/_archive` (optional; config already excludes them). Note: kept `tests/v5` active and `tests/README.md` at root.
 - [x] Add skipped stubs for telemetry-driven specs (dispatch band, capacity model, degrade/promote, aggregation, stability) and unskip progressively.
-	- Progress: 04–07 unskipped and green; 08 remains skipped.
+		- Status 2025-08-18: 04–08 unskipped and green. Added 09 seeding screenshots (RFK/JFK/Napoleon/Long-range/Clustered x1/x2/x3), all passing and saving screenshots to `test-results/screenshots`.
+
+### 0.12 Current Status (2025-08-18)
+- v5 suite 01–09 passing locally (15 tests green).
+- Telemetry and overlays reflect dispatch, capacity, degradations/promotions (placeholder counts), aggregations, placements/migrations, and viewport.
+- Next up:
+	- Implement real promotion pass with thresholds; swap out placeholder counters for measured promotions.
+	- Document terminology and capacity model in ARCHITECTURE.md (0.1 doc tasks).
+	- Add merge/split/proximity rules to dispatch (0.2) and wire to telemetry.
 
 ## Phase 1: Core Infrastructure & Timeline Bounds
 
@@ -95,12 +205,12 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [x] Create viewport space allocation logic
 - [ ] Test event distribution with sparse and dense datasets
 
-### 1.3 Corrected Slot System
-- [ ] Update slot allocation: Full(4), Compact(8), Title-only(8), Multi-event(4)
-- [ ] Implement card size relationships (compact = half of full, title < compact)
-- [ ] Create multi-event card content layout (5 events max per card)
-- [ ] Add slot occupancy tracking for new allocations
-- [ ] Test slot system with corrected numbers
+### 1.3 Slot Model Contract (data + telemetry)
+- [ ] Define footprints: 4 cells for all card types (Full/Compact/Title-only/Multi-event)
+- [ ] Define placements per group: Full(2+2), Compact(4+4), Title-only(4+4), Multi-event(2+2)
+- [ ] Wire capacity accounting and slot occupancy model; expose via telemetry and overlays
+- [ ] Unit tests for capacity math and zero-overlap contracts
+- [ ] Defer visual card implementations to Phase 3
 
 ## Phase 2: Independent Above/Below Layout Engine
 
@@ -138,10 +248,16 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [ ] Implement 5-event max per multi-event card
 - [ ] Create event separators within cards
 - [ ] Add title + date display for each event within card
-- [ ] Implement 10 above + 10 below effective capacity (2 cards × 5 events each)
+- [ ] Implement effective capacity per side: multiEventMaxPerSide × 5 events (default 1–2 per side)
 - [ ] Test multi-event cards with various event counts
 
-### 3.3 Dynamic Card Sizing
+### 3.3 Infinite Event Card (Overflow)
+- [ ] Implement fixed-footprint overflow card (4 cells), one per side per cluster; internal virtualized list with preview K and "+N" indicator.
+- [ ] Deterministic ordering inside (chronological by default, PriorityScore optional); stable trigger and collapse behavior.
+- [ ] Keyboard and screen-reader accessible expand/collapse (role=list, labeled headings, focus management).
+- [ ] Tokenization and visuals consistent with other card types (left strip, badge/icon, AA contrast).
+
+### 3.4 Dynamic Card Sizing
 - [ ] Implement responsive card height based on content
 - [ ] Add size relationships enforcement (full > compact > title-only)
 - [ ] Create consistent card width across types
@@ -217,6 +333,13 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [ ] Verify card sizing relationships
 - [ ] Test multi-event card content layout
 - [ ] Create comprehensive screenshot test suite
+ - [ ] Assert single-line ellipsis for Compact/Title-only (no wrapping in dense views)
+ - [ ] Assert minimum vertical gutters between stacked cards and from axis
+ - [ ] Assert anchor marker X aligns with cluster temporal midpoint
+ - [ ] Assert Multi-event card shows bullet list and "+N" overflow when >5 events
+ - [ ] Assert column guides appear only in debug mode, not in normal mode
+ - [ ] Assert Infinite card appears only when residual > 0 after multi-event budget; preview shows K items and "+N"
+ - [ ] Assert Infinite internal ordering is chronological and stable across small viewport jitters
 
 ## Phase 7: Integration & Polish
 
@@ -244,6 +367,7 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 #### Docs review (2025-08-18)
 - [ ] Unify slot allocation across docs: Full(4), Compact(8), Title-only(8), Multi-event(4); describe multi-event as "contains up to 5 events in one full-size card" and remove conflicting "10-slot" phrasing.
 - [ ] Update ARCHITECTURE.md title to "Deterministic Layout v5" and align all examples and formulas to corrected numbers (remove the early "2/4/8/10" bullet and the 10-slot capacity table).
+ - [ ] Add an "Infinite Event Card" section: purpose, triggers, deterministic ordering, accessibility, and telemetry schema.
 - [ ] README: expand Tests section to reflect full Playwright suite (mention playwright.config.ts, common scripts: test, test:screens, test:clustered, test:degradation) and that tests are headless by default.
 - [ ] Fix references to VISUALS.md in COMPLETED.md: either add the file with the documented visuals/tokens or replace references with ARCHITECTURE.md/PLAN.md sections.
 - [ ] Cross-check file paths mentioned in docs (e.g., src/styles/tokens.css, layout engines) and correct any outdated names.
@@ -272,26 +396,7 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [ ] Verify focus management across sections
 - [ ] Test reduced motion preferences
 
-## Success Criteria
 
-### Core Requirements
-- ✅ **Corrected slot allocation** (4/8/8/4) implemented and tested
-- ✅ **Independent above/below layouts** with decorrelated clustering
-- ✅ **Horizontal space optimization** maximizing screen utilization
-- ✅ **Timeline-driven process** following specified order
-- ✅ **Zero overlaps guaranteed** with new slot system
-
-### Performance Targets
-- Layout calculation < 100ms for 50 events
-- Smooth 60fps interaction during zoom/pan
-- Memory usage < 50MB for 100 events
-- Zero layout thrashing during interactions
-
-### Quality Metrics
-- 100% test coverage for core layout algorithms
-- Zero overlap detection in all test scenarios
-- Consistent visual hierarchy across card types
-- Accessible to WCAG 2.1 AA standards
 
 ## Phase 9: UI Refinement & Bug Fixes (Current)
 
@@ -348,18 +453,96 @@ Goal: lock the core behavior for card placement, distribution, degradation/promo
 - [x] Test with actual seeded events to confirm functionality
 - [x] Ensure transparency working on info panels (bg-opacity-70)
 
+### 9.9 Visual polish from v5 screenshots (New)
+
+Quick wins (low risk)
+- [ ] Axis polish
+	- [ ] Stronger baseline (1–2px), adaptive label format by zoom (e.g., YYYY vs Mon YYYY)
+	- [ ] Guard against label collisions on long-range; minor grid lines only at low density
+	- [ ] Add subtle start/end caps and padding so content doesn’t hug edges
+- [ ] Centered anchors & column boundaries
+	- [ ] Add a small centered anchor marker (triangle/chevron) at temporal center
+	- [ ] Optional faint vertical column guides spanning above/below to improve grouping perception
+	- [ ] Ensure consistent horizontal gutter between columns at high density
+- [ ] Card hierarchy & spacing
+	- [ ] Set per-type typography scales and line-heights (Full > Compact > Title-only)
+	- [ ] Enforce single-line ellipsis for Compact/Title-only; no two-line wrapping in dense views
+	- [ ] Use 1px border + subtle shadow + small radius for crisp separation
+	- [ ] Maintain minimum gutters from the axis and between stacked cards
+- [ ] Multi-event content pattern
+	- [ ] Render as bullet-style list (max 5) with clear separators
+	- [ ] Visible "+N" overflow badge when events exceed 5
+- [ ] Card type tokens
+	- [ ] Left color strip and small badge/icon per type (not color-only)
+	- [ ] Ensure WCAG AA contrast for text and borders on all backgrounds
+
+Medium / larger items
+- [ ] Dynamic tick stepping algorithm tied to zoom density
+- [ ] Cluster badge near anchor with count; intensity varies with density
+- [ ] Group pitch visualization in overlay (target vs actual band), wired to telemetry
+- [ ] Overlay reflow/collapse affordances for small viewports (no obstruction of cards)
+- [ ] Dark mode pass with tokenized colors, borders, radii, spacing
+
+Validation
+- [ ] Extend v5 screenshot tests to cover the above and keep artifacts under `test-results/screenshots/`
+
+## Phase 10: Critical Visual Features from Screenshot Analysis
+
+### 10.1 Timeline Axis Implementation (STAGE 4 - CRITICAL FOR VERIFICATION)
+- [ ] Add timeline axis component with date labels and tick marks
+- [ ] Implement D3.js time scale or similar for proper temporal mapping
+- [ ] Add adaptive tick formatting (MM/DD for days, MMM for months, YYYY for years)
+- [ ] Ensure labels don't overlap with responsive tick density
+- [ ] Add axis line with 2px stroke weight for visibility
+- [ ] Position labels below timeline with proper spacing
+
+### 10.2 Horizontal Space Optimization (STAGE 2 - Part of Clustering)
+- [ ] Reduce left/right viewport padding from 50px to 20px
+- [ ] Calculate timeline start position dynamically to maximize usable width
+- [ ] Adjust first column X position to start closer to viewport edge
+- [ ] Update timeToX calculation to use full viewport width efficiently
+- [ ] Add telemetry for horizontal space utilization percentage
+
+### 10.3 Visual Card Type Differentiation (STAGE 6 - Visual Polish)
+- [ ] Add colored left border strips (4px wide) per card type
+- [ ] Implement typography scale: Full=14px, Compact=13px, Title=12px
+- [ ] Set card heights: Full=80px, Compact=60px, Title=40px
+- [ ] Add type badges (F/C/T/M) in top-right corner
+- [ ] Apply subtle background tints per type for additional clarity
+
+### 10.4 Timeline Anchor Markers (STAGE 4 - Temporal Accuracy)
+- [ ] Add visible dots/triangles on timeline at cluster centers
+- [ ] Connect cards to anchors with subtle stem lines
+- [ ] Ensure anchors align with temporal midpoint of clusters
+- [ ] Add hover state to highlight card-anchor relationships
+
+### 10.5 Multi-Event Aggregation Implementation (STAGE 3 - Part of Degradation)
+- [ ] Trigger multi-event cards when cluster density > 6 events
+- [ ] Implement bullet list layout for multi-event content
+- [ ] Add "+N more" badges for overflow beyond 5 events
+- [ ] Test with clustered 2x and 3x scenarios for proper degradation
+
 ## Implementation Notes
 
-### Technical Decisions
+### Technical Decisions (Revised Priorities)
+- **FIRST**: Consolidate to single canonical layout engine (remove experimental implementations)
+- **SECOND**: Implement real promotion/degradation logic (no placeholders)
+- **THIRD**: Add timeline axis early for temporal verification
 - Use TypeScript for type safety in slot calculations
 - Implement immutable layout state for predictability
-- Create separate layout engines for above/below sections
-- Use canvas-based rendering for performance if needed
+- Defer canvas-based rendering until HTML performance proven insufficient
+
+### Testing Strategy
+- **Multi-clustered seeds are PRIMARY test cases** (not edge cases)
+- Each stage must pass with clustered x3 scenario before proceeding
+- Napoleon timeline (63 events) is the benchmark for "working system"
+- Visual regression tests capture each degradation state
 
 ### Monitoring & Metrics
 - Track slot utilization efficiency
 - Monitor horizontal space usage percentages
 - Measure clustering effectiveness
 - Log degradation frequency and causes
+- **Critical metric**: Zero overlaps at any density level
 
 This plan ensures complete compliance with the enhanced architecture specifications while maintaining the deterministic, zero-overlap guarantee.
