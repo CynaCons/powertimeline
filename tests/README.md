@@ -6,23 +6,33 @@ We've cleaned up the complex test suite and restarted with a simple, iterative a
 
 ### Current Tests
 
-#### `legacy.spec.ts`
-- Legacy tests from old SVG architecture (all skipped)
-- Kept for reference but not actively used
+We are migrating to a focused v5 TDD suite centered on cards placement & architecture.
 
-#### `performance.spec.ts` 
-- Performance test for handling many events (currently skipped)
-- Will be re-enabled when we have cards to test
+Active (v5)
+- `tests/v5/01-foundation.smoke.spec.ts` — app loads, axis visible
+- `tests/v5/02-cards-placement.spec.ts` — cards render above/below axis (RFK seed)
+- `tests/v5/03-non-overlap-fit.spec.ts` — no significant overlaps (RFK seed)
+- `tests/v5/04-dispatch-band.spec.ts` — dispatch band telemetry
+- `tests/v5/05-capacity-model.spec.ts` — capacity telemetry
+- `tests/v5/06-degrade-promote.spec.ts` — degradations/promotions telemetry
+- `tests/v5/07-aggregation-policy.spec.ts` — aggregation telemetry & reconciliation
 
-#### `foundation.spec.ts` ✅
-- Tests for basic layout foundation
-- Validates full-screen grid and horizontal timeline
-- All tests currently passing
+Deferred (to be reintroduced progressively)
+- `degradation-flow.spec.ts`, `clustered-count.spec.ts`, `no-overlap-and-axis-clearance.spec.ts`, `performance.spec.ts`, `basic-timeline.spec.ts`,
+  `analyze-vertical-gaps.spec.ts`, `analyze-layout.spec.ts`, `space-usage-analysis.spec.ts`, `progressive-cluster-analysis.spec.ts`,
+  `resize-behavior.spec.ts`, `zoom-mapping.spec.ts`, `timeline-proximity-test.spec.ts`, `admin-panel.spec.ts`, `info-panel-toggle.spec.ts`.
 
-#### `cards.spec.ts`
-- Tests for HTML event cards (currently skipped)
-- Will be enabled when we implement card display
-- Tests for card display, positioning, and content visibility
+Archived (legacy or screenshot-heavy)
+- Legacy SVG/UI era: `legacy.spec.ts`, `deterministic-layout.spec.ts`, `deterministic-simple.spec.ts`, `grid-lines.spec.ts`, `multi-row-lanes.spec.ts`,
+  `editing-controls.spec.ts`, `node-expansion-edit.spec.ts`, `expanded-card-content.spec.ts`, `debug-expansion.spec.ts`.
+- Visual dumps/screens: `column-system-visual.spec.ts` (+ snapshots), `napoleon-screenshot*.spec.ts`, `seeding-visual*.spec.ts` (+ snapshots),
+  `triple-cluster-screenshot.spec.ts`, `smoke-ui.spec.ts`, `visual-regression.spec.ts`.
+
+Location: All legacy specs and snapshots have been moved to `tests/_archive/`. The active suite lives under `tests/v5/`.
+
+Rationale
+- Keep tests tight, deterministic, and aligned with the new HTML card renderer and v5 layout goals.
+- Reintroduce coverage with telemetry-driven assertions (capacity, dispatch band, degrade/promote, aggregation) as features land.
 
 ### Removed Tests
 
@@ -48,13 +58,12 @@ The following tests were removed as they were based on the old SVG+foreignObject
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run the focused v5 suite (playwright.config is scoped via testMatch)
 npx playwright test
 
-# Run specific test file
-npx playwright test tests/foundation.spec.ts
-npx playwright test tests/cards.spec.ts
+# Debug one v5 spec
+npx playwright test tests/v5/02-cards-placement.spec.ts --headed
 
-# Run with headed browser for debugging
-npx playwright test --headed
+# Run just telemetry tests
+npx playwright test tests/v5/0{4,5,6,7}-*.spec.ts
 ```

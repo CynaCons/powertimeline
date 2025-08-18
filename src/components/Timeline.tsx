@@ -1313,6 +1313,112 @@ const Timeline: React.FC<Props> = ({
   
   // Debug overlay: keep non-interactive to avoid intercepting clicks in tests
 
+  // Telemetry: expose dispatch, capacity, and placements on window for tests and overlays
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Final positions after DOM nudge adjustments
+    const finalPositions = positionedResolved.map(ev => ({
+      ...ev,
+      y: ev.y + (yNudges[String(ev.id)] || 0)
+    }));
+
+    // Dispatch metrics
+    const clusterSizes = timeClusters.map(c => c.events.length);
+    const groupsCount = timeClusters.length;
+    const avgEventsPerCluster = groupsCount > 0
+      ? (clusterSizes.reduce((a, b) => a + b, 0) / groupsCount)
+      : 0;
+    const largestCluster = Math.max(0, ...clusterSizes);
+    // Neighbor pitch (px) across anchors
+    const xs = [...timeClusters].map(c => c.anchor.x).sort((a, b) => a - b);
+    const pitches = xs.length > 1 ? xs.slice(1).map((x, i) => Math.abs(x - xs[i])) : [];
+    const pitchStats = {
+      min: pitches.length ? Math.min(...pitches) : 0,
+      max: pitches.length ? Math.max(...pitches) : 0,
+      avg: pitches.length ? pitches.reduce((a, b) => a + b, 0) / pitches.length : 0
+    };
+
+    // Capacity model (coarse, normalized): estimate rows per side using a canonical height
+    // Choose a representative card height similar to compact plus gutter to stabilize across datasets
+    const AXIS_CLEAR_TELE = 20;
+    const GUTTER_Y_TELE = 20;
+    const representativeHeight = 96; // px
+    const rowHeight = representativeHeight + GUTTER_Y_TELE;
+    const maxRowsPerSide = Math.max(1, Math.floor(((containerHeight / 2) - AXIS_CLEAR_TELE - 20) / rowHeight));
+    const perColumnCapacity = maxRowsPerSide * 2; // above + below
+    const maxColumns = 2; // matches MAX_COLS used in placement
+    const totalCells = Math.max(0, groupsCount * perColumnCapacity * maxColumns);
+    const usedCells = Math.min(finalPositions.length, totalCells);
+    const utilization = totalCells > 0 ? (usedCells / totalCells) * 100 : 0;
+
+    // Placements snapshot for stability checks
+    const placements = finalPositions.map(p => ({
+      id: String(p.id),
+      x: Math.round(p.x),
+      y: Math.round(p.y),
+      clusterId: String(p.clusterId),
+      isAbove: Boolean(p.isAbove)
+    }));
+
+    // Compute migrations vs previous snapshot (best-effort)
+    const prev = (window as any).__ccTelemetry as any | undefined;
+    let migrations = 0;
+    if (prev && Array.isArray(prev.placements?.items)) {
+      const prevMap: Map<string, any> = new Map(prev.placements.items.map((it: any) => [String(it.id), it]));
+      for (const cur of placements) {
+        const old: any = prevMap.get(String(cur.id));
+        if (!old) continue;
+        const movedFar = Math.abs((old.x ?? 0) - cur.x) > 40 || Math.abs((old.y ?? 0) - cur.y) > Math.max(20, Math.round(rowHeight / 2));
+        const clusterChanged = String(old.clusterId) !== String(cur.clusterId);
+        if (movedFar || clusterChanged) migrations++;
+      }
+    }
+
+    const telemetry = {
+      version: 'v5',
+      events: {
+        total: totalEvents
+      },
+      groups: {
+        count: groupsCount
+      },
+      dispatch: {
+        avgEventsPerCluster,
+        largestCluster,
+        groupPitchPx: pitchStats,
+        targetAvgEventsPerClusterBand: [4, 6] as [number, number]
+      },
+      capacity: {
+        totalCells,
+        usedCells,
+        utilization,
+        perColumnCapacity,
+        maxRowsPerSide,
+        maxColumns
+      },
+      placements: {
+        items: placements,
+        migrations
+      },
+      viewport: {
+        width: containerWidth,
+        height: containerHeight,
+        timelineY
+      }
+    };
+
+    (window as any).__ccTelemetry = telemetry;
+  }, [
+    positionedResolved,
+    yNudges,
+    timeClusters.length,
+    containerHeight,
+    containerWidth,
+    totalEvents,
+    timelineY
+  ]);
+
   return (
   <div className="w-full h-full bg-gray-50 relative" ref={containerRef} data-testid="timeline-root">
       {/* Development: Metrics Display */}

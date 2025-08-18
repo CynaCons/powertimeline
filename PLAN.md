@@ -8,6 +8,77 @@ Implementation of the corrected and enhanced deterministic layout algorithm base
 - **Horizontal space optimization** across full timeline width
 - **Timeline-driven process**: bounds → dispatch → cluster → fit → degrade
 
+## Phase 0: Cards Placement & Architecture (New)
+
+Goal: lock the core behavior for card placement, distribution, degradation/promotion, and the terminology/capacity model so all later phases build on a stable contract.
+
+### 0.1 Terminology & Capacity Model Normalization
+- [ ] Define terms explicitly and update docs/overlays to match:
+	- cell: base grid unit for capacity accounting
+	- footprint: cells consumed by a placed card
+	- placements: candidate positions per column group (e.g., top=4, lower=4)
+- [ ] Decide and document footprints (default proposal): Full=4 cells, Compact=4 cells, Title-only=4 cells, Multi-event=4 cells; clarify that 8 listed for compact/title-only refers to placements (4t+4l), not capacity.
+- [ ] Add a capacity formula and show derived numbers in overlays (Total cells | Used cells | Utilization%).
+- [ ] Emit a normalized telemetry object with these fields for tests: {totalCells, usedCells, utilization, footprintsByType, placementsByType}.
+
+### 0.2 Distribution & Column Grouping (Dispatch)
+- [ ] Implement density-adaptive dispatch with a target average events/cluster band (configurable, default 4–6).
+- [ ] Enforce min/max group pitch in pixels; merge under-full adjacent groups; split over-full ones.
+- [ ] Add a proximity merge rule: merge-nearby-groups when inter-group gap < epsilon px to reclaim capacity and reduce jitter.
+- [ ] Telemetry: groupCount, groupPitchPx (avg/min/max), avgEventsPerCluster, largestCluster.
+
+### 0.3 Fit Algorithm Contract
+- [ ] Deterministic assignment using ordered placements; guarantee zero overlaps given the budget.
+- [ ] Introduce PriorityScore(event) for tie-breaks (importance, duration, recency) and document stable ordering.
+- [ ] Sticky placement: minimize churn across small data/zoom changes; prefer local re-fit within a group.
+
+### 0.4 Degradation AND Promotion
+- [ ] Degrade cascade (when over budget): Full → Compact → Title-only → Multi-event; prove termination on a finite lattice.
+- [ ] Promotion pass (readability uplift): if utilization < threshold (default 80%), promote high-priority cards back toward Full until nearing threshold.
+- [ ] Make thresholds/configs explicit and surfaced in overlays. Telemetry: {degradedCountByType, promotedCountByType}.
+
+### 0.5 Multi-Event Aggregation Policy
+- [ ] Trigger only when cluster size > K AND promotion budget is exhausted; never hide singletons.
+- [ ] Multi-event card contains up to 5 events; summarize overflow with "+N" rule; retains 1 card ↔ multiple events mapping explicitly in telemetry.
+- [ ] Telemetry: {aggregations, eventsAggregated, clustersAffected}.
+
+### 0.6 Stability & Churn Minimization
+- [ ] Define sticky group boundaries and local re-fit strategy; forbid cross-group migrations for minor pans/zooms.
+- [ ] Document tie-breakers and stability guarantees in ARCHITECTURE.md.
+
+### 0.7 Telemetry & Tests
+- [ ] Emit a JSON telemetry blob alongside the DOM: {events, groups, capacity, utilization, distribution, promotions, degradations, aggregations}.
+- [x] Bootstrap v5 TDD suite (01 foundation, 02 placement, 03 non-overlap) scoped via Playwright testMatch.
+- [x] Add stable selectors: data-testid="event-card" on cards, with data-event-id and data-card-type.
+- [ ] Update Playwright tests to assert invariants on telemetry (zero overlaps; utilization threshold adherence; avg cluster band; stability under small pans/zooms).
+	- Notes (2025-08-18): window.__ccTelemetry implemented in both `src/components/Timeline.tsx` and `src/layout/DeterministicLayoutComponent.tsx` exposing dispatch, capacity, placements. Added fields: promotions.count, degradations.count/byType, aggregation.{totalAggregations,eventsAggregated}, cards.{single,multiContained,summaryContained}. Unskipped and passing: v5/04 (dispatch band), v5/05 (capacity model), v5/06 (degrade/promote placeholders), v5/07 (aggregation reconciliation), v5/08 (stability & churn via small viewport jitter, low migrations).
+
+### 0.8 Overlay/UX Updates
+- [ ] Split the "Corrected Slot Allocation" panel into two: Footprint (cells) vs Placements (candidates per group).
+- [ ] Add counters for Promotions applied, Aggregations applied.
+- [ ] Surface group pitch (px) and the target vs actual avg events/cluster.
+
+### 0.9 Documentation (ARCHITECTURE.md)
+- [ ] Add the terminology block (cell/footprint/placements/capacity/utilization) and a mini diagram.
+- [ ] Write one-line contracts for each pipeline stage: bounds → dispatch → cluster → fit → degrade/promote.
+- [ ] Document the capacity model with worked examples that match overlays (e.g., 30/60/90 event scenarios).
+- [ ] Describe the aggregation and promotion policies, thresholds, and their invariants.
+
+### 0.10 Implementation Ordering (pragmatic)
+- [ ] Land terminology + telemetry scaffolding (low-risk, unblocks tests and overlays).
+- [ ] Implement adaptive dispatch and sticky fit.
+- [ ] Add promotion pass and formal aggregation policy.
+- [ ] Update overlays + ARCHITECTURE.md, then wire Playwright assertions.
+
+### 0.11 TDD Suite Bootstrap (2025-08-18)
+- [x] Create focused v5 suite: `tests/v5/01-foundation.smoke.spec.ts`, `02-cards-placement.spec.ts`, `03-non-overlap-fit.spec.ts`.
+- [x] Scope Playwright to v5 only via `testMatch` to avoid legacy noise during Phase 0.
+- [x] Update `DeterministicLayoutComponent` to emit `data-testid="event-card"` (+ data attributes) for stable selectors.
+- [x] Document keep/defer/archive decisions in `tests/README.md`.
+- [x] Physically move legacy specs to `tests/_archive` (optional; config already excludes them). Note: kept `tests/v5` active and `tests/README.md` at root.
+- [x] Add skipped stubs for telemetry-driven specs (dispatch band, capacity model, degrade/promote, aggregation, stability) and unskip progressively.
+	- Progress: 04–07 unskipped and green; 08 remains skipped.
+
 ## Phase 1: Core Infrastructure & Timeline Bounds
 
 ### 1.1 Timeline Display Range Calculation

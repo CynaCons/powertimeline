@@ -6,9 +6,10 @@ import { DeterministicLayout } from './DeterministicLayout';
 
 interface DeterministicLayoutProps {
   events: Event[];
+  showInfoPanels?: boolean;
 }
 
-export function DeterministicLayoutComponent({ events }: DeterministicLayoutProps) {
+export function DeterministicLayoutComponent({ events, showInfoPanels = false }: DeterministicLayoutProps) {
   // Dynamic viewport size
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
   const [showColumnBorders, setShowColumnBorders] = useState(false);
@@ -62,6 +63,116 @@ export function DeterministicLayoutComponent({ events }: DeterministicLayoutProp
     return deterministicLayout.layout(events);
   }, [events, config]);
 
+  // Telemetry: expose dispatch/capacity/placements for tests and overlays
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const { positionedCards, anchors, clusters, utilization } = layoutResult;
+
+    // Dispatch metrics
+    const groupsCount = clusters.length;
+    const clusterSizes = clusters.map((c: any) => c.events.length || 0);
+    const avgEventsPerCluster = groupsCount > 0 ? (clusterSizes.reduce((a: number, b: number) => a + b, 0) / groupsCount) : 0;
+    const largestCluster = Math.max(0, ...clusterSizes);
+    const xs = anchors.map((a: any) => a.x).sort((a: number, b: number) => a - b);
+    const pitches = xs.length > 1 ? xs.slice(1).map((x: number, i: number) => Math.abs(x - xs[i])) : [];
+    const groupPitchPx = {
+      min: pitches.length ? Math.min(...pitches) : 0,
+      max: pitches.length ? Math.max(...pitches) : 0,
+      avg: pitches.length ? pitches.reduce((a: number, b: number) => a + b, 0) / pitches.length : 0
+    };
+
+    // Capacity model from layoutResult.utilization
+    const totalCells = Math.max(0, utilization.totalSlots || 0);
+    const usedCells = Math.max(0, utilization.usedSlots || 0);
+    const utilPct = Math.max(0, Math.min(100, utilization.percentage || 0));
+
+    // Placements for stability
+    const placements = positionedCards.map((p: any) => ({
+      id: String(Array.isArray(p.event) ? p.event[0]?.id ?? p.id : p.event?.id ?? p.id),
+      x: Math.round(p.x),
+      y: Math.round(p.y),
+      clusterId: String(p.clusterId ?? ''),
+      isAbove: Boolean(p.y < (config.timelineY))
+    }));
+
+    // Compare with previous snapshot to compute migrations
+    const prev = (window as any).__ccTelemetry as any | undefined;
+    let migrations = 0;
+    if (prev && Array.isArray(prev.placements?.items)) {
+      const prevMap: Map<string, any> = new Map(prev.placements.items.map((it: any) => [String(it.id), it]));
+      for (const cur of placements) {
+        const old: any = prevMap.get(String(cur.id));
+        if (!old) continue;
+        const movedFar = Math.abs((old.x ?? 0) - cur.x) > 40 || Math.abs((old.y ?? 0) - cur.y) > 32;
+        const clusterChanged = String(old.clusterId) !== String(cur.clusterId);
+        if (movedFar || clusterChanged) migrations++;
+      }
+    }
+
+    // Card type counts and aggregation/degradation metrics
+    const byTypeCounts: Record<string, number> = positionedCards.reduce((acc: Record<string, number>, c: any) => {
+      const t = String(c.cardType);
+      acc[t] = (acc[t] || 0) + 1;
+      return acc;
+    }, {});
+    const multiEventCards = positionedCards.filter((c: any) => c.cardType === 'multi-event');
+    const totalAggregations = multiEventCards.length;
+    const eventsAggregated = multiEventCards.reduce((sum: number, c: any) => sum + (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)), 0);
+    const singleEventsShown = positionedCards
+      .filter((c: any) => (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)) === 1)
+      .length;
+    const summaryContained = 0; // Placeholder until 'infinite' summary cards are surfaced in UI
+    const degradationsCount = (byTypeCounts['compact'] || 0) + (byTypeCounts['title-only'] || 0);
+    const promotionsCount = 0; // Placeholder: promotion logic not implemented yet
+
+    const telemetry = {
+      version: 'v5',
+      events: { total: events.length },
+      groups: { count: groupsCount },
+      dispatch: {
+        avgEventsPerCluster,
+        largestCluster,
+        groupPitchPx,
+        targetAvgEventsPerClusterBand: [4, 6] as [number, number]
+      },
+      capacity: {
+        totalCells,
+        usedCells,
+        utilization: utilPct
+      },
+      promotions: {
+        count: promotionsCount
+      },
+      degradations: {
+        count: degradationsCount,
+        byType: {
+          compact: byTypeCounts['compact'] || 0,
+          'title-only': byTypeCounts['title-only'] || 0
+        }
+      },
+      aggregation: {
+        totalAggregations,
+        eventsAggregated
+      },
+      cards: {
+        single: singleEventsShown,
+        multiContained: eventsAggregated,
+        summaryContained
+      },
+      placements: {
+        items: placements,
+        migrations
+      },
+      viewport: {
+        width: viewportSize.width,
+        height: viewportSize.height,
+        timelineY: config.timelineY
+      }
+    };
+
+    (window as any).__ccTelemetry = telemetry;
+  }, [layoutResult, events.length, viewportSize.width, viewportSize.height, config.timelineY]);
+
 
   return (
     <div className="absolute inset-0 bg-gray-100 overflow-hidden">
@@ -103,7 +214,9 @@ export function DeterministicLayoutComponent({ events }: DeterministicLayoutProp
       {layoutResult.positionedCards.map((card) => (
         <div
           key={card.id}
-          data-testid={`card-${Array.isArray(card.event) ? card.event[0].id : card.event.id}`}
+          data-testid="event-card"
+          data-event-id={Array.isArray(card.event) ? card.event[0].id : card.event.id}
+          data-card-type={card.cardType}
           className={`absolute bg-white rounded-lg shadow-md border border-gray-200 p-3 text-sm hover:shadow-lg transition-shadow`}
           style={{
             left: card.x,
@@ -158,13 +271,16 @@ export function DeterministicLayoutComponent({ events }: DeterministicLayoutProp
         </div>
       ))}
       
-      {/* Debug Info - Enhanced Deterministic Layout */}
-      <div 
-        className="absolute top-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md max-w-sm transition-all duration-200 z-[5] pointer-events-auto"
-        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-      >
+      {/* Info Panels - Only show when enabled */}
+      {showInfoPanels && (
+        <>
+          {/* Debug Info - Enhanced Deterministic Layout */}
+          <div 
+            className="absolute top-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md max-w-sm transition-all duration-200 z-[5] pointer-events-auto"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
+          >
         <h2 className="font-bold">Enhanced Deterministic Layout v5</h2>
         <div className="text-sm text-gray-600 space-y-1">
           <p>{layoutResult.positionedCards.reduce((sum, card) => sum + (card.eventCount || 1), 0)} events</p>
@@ -252,6 +368,8 @@ export function DeterministicLayoutComponent({ events }: DeterministicLayoutProp
           {showColumnBorders ? 'Hide' : 'Show'} Column Borders
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 }

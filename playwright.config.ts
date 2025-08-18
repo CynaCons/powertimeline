@@ -5,6 +5,7 @@ const reuse = true;
 
 export default defineConfig({
   testDir: 'tests',
+  testMatch: /v5\/.+\.spec\.ts$/,
   // Fail fast: cap each test to 15s and each expect to 3s
   timeout: 15_000,
   expect: { 

@@ -89,8 +89,8 @@ export class DeterministicLayout {
     const columnGroups: ColumnGroup[] = [];
     
     // Calculate base column width (will be refined per group)
-    const baseColumnWidth = 200; // Will be adjusted based on card content
-    const maxEventsPerColumn = 8; // Limit to prevent overcrowding
+    const baseColumnWidth = 150; // Narrower columns for better distribution
+    const maxEventsPerColumn = 6; // Lower limit to prevent overcrowding
     
     for (const event of sortedEvents) {
       const eventX = this.getEventXPosition(event);
@@ -107,8 +107,8 @@ export class DeterministicLayout {
         // const groupEndX = group.startX + groupWidth;
         
         // Check horizontal overlap: does this event fall within this column's space?
-        // Use wider clustering threshold for better column organization
-        const clusterThreshold = baseColumnWidth * 0.8; // Cluster if within 80% of column width
+        // Use tighter clustering to create more columns
+        const clusterThreshold = baseColumnWidth * 0.4; // Only cluster if very close (40% of column width)
         if (Math.abs(eventX - group.centerX) <= clusterThreshold / 2) {
           // Add to existing group
           group.events.push(event);
@@ -181,34 +181,30 @@ export class DeterministicLayout {
    * Calculate optimal degradation to minimize total slots used
    */
   private calculateOptimalDegradation(eventCount: number): DegradationPlan {
-    if (eventCount <= 1) {
+    if (eventCount <= 2) {
+      // 1-2 events: Full cards
       return { full: eventCount, compact: 0, 'title-only': 0, 'multi-event': 0 };
     }
     
-    if (eventCount === 2) {
-      // For 2 events, use 2 full cards (one above, one below)
-      return { full: 2, compact: 0, 'title-only': 0, 'multi-event': 0 };
-    }
-    
-    if (eventCount <= 4) {
-      // For 3-4 events, use compact cards
-      return { full: 0, compact: eventCount, 'title-only': 0, 'multi-event': 0 };
-    }
-    
     if (eventCount <= 6) {
-      // For 5-6 events, still use compact cards to maintain readability
+      // 3-6 events: Compact cards
       return { full: 0, compact: eventCount, 'title-only': 0, 'multi-event': 0 };
     }
     
-    if (eventCount <= 10) {
-      // For 7-10 events, use a mix: some compact, some title-only
-      const compactCount = 4;
+    if (eventCount <= 9) {
+      // 7-9 events: Mix of compact and title-only
+      const compactCount = Math.floor(eventCount * 0.4); // 40% compact
       const titleOnlyCount = eventCount - compactCount;
       return { full: 0, compact: compactCount, 'title-only': titleOnlyCount, 'multi-event': 0 };
     }
     
-    // Only use multi-event cards for 11+ events
-    if (eventCount >= 11) {
+    if (eventCount <= 14) {
+      // 10-14 events: Title-only cards
+      return { full: 0, compact: 0, 'title-only': eventCount, 'multi-event': 0 };
+    }
+    
+    // 15+ events: Multi-event cards
+    if (eventCount >= 15) {
       const multiEventCards = Math.floor(eventCount / 5);
       const remainingEvents = eventCount % 5;
       
@@ -306,8 +302,8 @@ export class DeterministicLayout {
       
       // Adjust group position to avoid overlaps
       let adjustedCenterX = group.centerX;
-      const columnWidth = 180;
-      const columnSpacing = 20; // Minimum spacing between columns
+      const columnWidth = 150;
+      const columnSpacing = 10; // Reduced spacing for tighter packing
       
       // Check for collisions with existing columns
       for (const range of occupiedRanges) {
@@ -382,7 +378,7 @@ export class DeterministicLayout {
    */
   private positionCardsVertically(group: ColumnGroup, columnIndex: number, totalColumns: number): PositionedCard[] {
     const cards = [...group.cards];
-    const columnWidth = 180; // Slightly narrower to prevent overlaps
+    const columnWidth = 150; // Narrower columns for better distribution
     const viewportHeight = this.config.viewportHeight;
     const timelineHeight = 20; // Height reserved for timeline
     const topMargin = 20;
@@ -427,15 +423,15 @@ export class DeterministicLayout {
       }
     };
     
-    // Position above cards - closer to timeline
+    // Position above cards - pack tightly near timeline and go upward
     const positionedAbove = aboveCards.map((card, index) => {
       const cardHeight = getCardHeight(card.cardType, spaceAbove, aboveCards.length);
-      const minSpacing = 8; // Minimum spacing between cards
-      const totalHeight = aboveCards.length * cardHeight + (aboveCards.length - 1) * minSpacing;
-      const gapFromTimeline = 20; // Fixed gap from timeline
-      // Position cards from bottom up (closest to timeline)
-      const startY = Math.max(topMargin, this.timelineY - gapFromTimeline - totalHeight);
-      const yPos = startY + index * (cardHeight + minSpacing);
+      const dynamicSpacing = Math.min(8, Math.max(2, (spaceAbove - aboveCards.length * cardHeight) / (aboveCards.length + 1)));
+      const gapFromTimeline = 15; // Same gap as below for symmetry
+      
+      // Start near timeline and pack upward (reverse index for proper stacking)
+      const startY = this.timelineY - gapFromTimeline;
+      const yPos = startY - (aboveCards.length - index) * (cardHeight + dynamicSpacing);
       
       return {
         ...card,
@@ -448,14 +444,15 @@ export class DeterministicLayout {
       };
     });
     
-    // Position below cards - closer to timeline
+    // Position below cards - pack tightly from timeline
     const positionedBelow = belowCards.map((card, index) => {
       const cardHeight = getCardHeight(card.cardType, spaceBelow, belowCards.length);
-      const minSpacing = 8; // Minimum spacing between cards
-      const gapFromTimeline = 20; // Fixed gap from timeline
-      // Position cards from top down (closest to timeline)
+      const dynamicSpacing = Math.min(8, Math.max(2, (spaceBelow - belowCards.length * cardHeight) / (belowCards.length + 1)));
+      const gapFromTimeline = 15; // Reduced gap from timeline
+      
+      // Start close to timeline and pack down
       const startY = this.timelineY + gapFromTimeline;
-      const yPos = startY + index * (cardHeight + minSpacing);
+      const yPos = startY + index * (cardHeight + dynamicSpacing);
       
       return {
         ...card,

@@ -55,6 +55,9 @@ function App() {
   const overlayRef = useRef<HTMLElement | null>(null);
   const [outlineFilter, setOutlineFilter] = useState('');
 
+  // Info panels toggle
+  const [showInfoPanels, setShowInfoPanels] = useState(false);
+
   // Dragging state (for disabling overlay pointer events)
   const [dragging] = useState(false);
   // Dev options
@@ -268,6 +271,16 @@ function App() {
           <div className="flex flex-col items-center gap-2">
             <button type="button" title={devEnabled ? 'Disable Developer Options' : 'Enable Developer Options'} onClick={() => setDevEnabled((v) => !v)} className={`material-symbols-rounded rounded-md p-2 text-xs ${devEnabled ? 'bg-amber-100 text-amber-800' : 'text-gray-600 hover:bg-gray-100'}`} aria-pressed={devEnabled} aria-label="Toggle developer options">build</button>
             <button aria-label="Developer Panel" disabled={!devEnabled} title={devEnabled ? 'Developer options' : 'Enable Dev first'} className={`material-symbols-rounded rounded-md p-2 ${overlay === 'dev' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'} ${!devEnabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => devEnabled && setOverlay(overlay === 'dev' ? null : 'dev')}>settings</button>
+            <button 
+              type="button" 
+              title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'} 
+              onClick={() => setShowInfoPanels(!showInfoPanels)} 
+              className={`material-symbols-rounded rounded-md p-2 ${showInfoPanels ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100'}`} 
+              aria-pressed={showInfoPanels} 
+              aria-label="Toggle info panels"
+            >
+              info
+            </button>
             {/* Theme toggle removed */}
           </div>
         </aside>
@@ -337,7 +350,7 @@ function App() {
         <div className="absolute inset-0 ml-14 flex flex-col">
           {/* Timeline takes full available space */}
           <div className="w-full h-full relative">
-            <DeterministicLayoutComponent events={events} />
+            <DeterministicLayoutComponent events={events} showInfoPanels={showInfoPanels} />
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}
