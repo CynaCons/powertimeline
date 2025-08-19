@@ -106,4 +106,18 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-clustered-3x.png');
   });
+
+  test('Clustered x5 — screenshot', async ({ page }) => {
+    await page.goto('/');
+    await openDevPanel(page);
+    await page.getByRole('button', { name: 'Clustered' }).click();
+    await page.getByRole('button', { name: 'Clustered' }).click();
+    await page.getByRole('button', { name: 'Clustered' }).click();
+    await page.getByRole('button', { name: 'Clustered' }).click();
+    await page.getByRole('button', { name: 'Clustered' }).click();
+    await closeDevPanel(page);
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
+    await fitAll(page);
+    await saveViewportScreenshot(page, 'v5-clustered-5x.png');
+  });
 });

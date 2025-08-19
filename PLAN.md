@@ -29,14 +29,26 @@ To ensure the card placement and degradation system works perfectly before addin
 - ✅ 4.2/4.3 Horizontal Space Optimization & Smart Column Formation
 - Goal achieved: Optimal event distribution across timeline width
 
-**Stage 3: Complete Degradation System** 🚧 (Current Focus)
-- 0.4 Degradation AND Promotion (with real implementation, not placeholders)
+**Stage 3A: Fix Visual Rendering Pipeline** 🔥🔥🔥 (EMERGENCY - Current Focus)
+- Debug Timeline.tsx vs DeterministicLayoutV5 disconnect
+- Fix card positioning to use calculated layouts
+- Ensure DOM elements receive correct x,y positions
+- Goal: Visual output matches layout engine calculations
+
+**Stage 3B: Timeline Axis Implementation** 🔥🔥 (URGENT - Moved from Stage 4)
+- Phase 10.1: Add timeline axis with date labels and ticks
+- Phase 10.4: Add anchor markers at cluster centers
+- Add horizontal line at viewport center
+- Goal: Can verify temporal accuracy and clustering
+
+**Stage 3C: Complete Degradation System** 🚧 (Blocked by 3A & 3B)
+- 0.4 Degradation AND Promotion (with real implementation)
 - 0.5 Multi-Event Aggregation Policy
 - 0.5.1 Infinite Event Card (Overflow Container)
 - 3.1-3.3 All card type implementations with correct specifications
 - Goal: Handle any density scenario gracefully
 
-**Stage 4: Timeline Axis & Temporal Accuracy** 📅
+**Stage 4: [MOVED TO 3B] ~~Timeline Axis & Temporal Accuracy~~** ✅
 - 10.1 Timeline Axis Implementation (CRITICAL for verification)
 - 10.4 Timeline Anchor Markers
 - 2.1 Decorrelated Layout System (above/below independence)
@@ -71,28 +83,71 @@ To ensure the card placement and degradation system works perfectly before addin
 
 ## Current Development Status (2025-08-19)
 
-### ✅ What's Working
-- ✅ Complete v5 test suite (15 tests passing)
-- ✅ Telemetry infrastructure with real capacity metrics
-- ✅ CapacityModel.ts with corrected footprints (Full=4, Compact=2, Title=1, Multi=2 cells)
-- ✅ DeterministicLayoutV5.ts as canonical layout engine
-- ✅ Event clustering and dispatch fully implemented
-- ✅ Multi-clustered x3 scenario tested and working
-- ✅ Basic promotion logic (promotes when utilization < 60%)
-- ✅ Proximity merge for groups closer than 80px
-- ✅ Target 4-6 events per cluster band working
+### ⚠️ CRITICAL FINDINGS FROM SCREENSHOT ANALYSIS
 
-### 🔴 Critical Issues Remaining
-1. **No Timeline Axis** - Cannot verify temporal accuracy without visible axis (Stage 4)
-2. **Infinite Overflow Cards Not Implemented** - Critical for high-density scenarios (Stage 3)
-3. **Multiple Legacy Layout Engines** - Need to remove old implementations for clarity
-4. **Promotion Thresholds Need Tuning** - Currently hardcoded at 60%
+After analyzing screenshots from all test scenarios (including new Clustered x5 with 75+ events):
 
-### 🎯 Immediate Next Steps (Stage 3 Focus)
-1. Implement infinite overflow cards (Phase 0.5.1)
-2. Refine multi-event aggregation policy (Phase 0.5)
-3. Complete all card type implementations (Phase 3.1-3.3)
-4. Test with Napoleon timeline (63 events)
+#### 🔴 **BREAKING ISSUES - Visual Rendering Not Matching Layout Engine**
+1. **NO TIMELINE AXIS VISIBLE** - Complete absence of horizontal timeline, date labels, tick marks
+2. **NO VISUAL DEGRADATION** - All cards same size despite high density (Napoleon 63, Clustered x5 75+)
+3. **POOR HORIZONTAL DISTRIBUTION** - Cards bunched on left, 70% of viewport unused
+4. **NO ANCHOR MARKERS** - Missing temporal anchors and connection lines
+5. **CARD OVERLAPS** - Despite "zero-overlap guarantee" in tests
+
+#### ⚠️ **Layout Engine vs Visual Rendering Mismatch**
+- **Layout Engine (DeterministicLayoutV5)**: ✅ Tests pass, telemetry correct
+- **Visual Rendering (Timeline.tsx)**: ❌ Not implementing calculated positions
+- **Root Cause**: Disconnect between layout calculations and DOM rendering
+
+### ✅ What's Actually Working (Backend Only)
+- ✅ Complete v5 test suite (16 tests passing including x5)
+- ✅ CapacityModel.ts calculations correct
+- ✅ DeterministicLayoutV5.ts producing valid layouts
+- ✅ Telemetry reporting accurate metrics
+- ❌ BUT: Visual output doesn't match calculations
+
+### 🚨 EMERGENCY REPRIORITIZATION NEEDED
+
+#### **NEW Stage 3A: Fix Visual Rendering Pipeline** 🔥 (IMMEDIATE)
+- Fix Timeline.tsx to actually use DeterministicLayoutV5 positions
+- Ensure calculated layouts are applied to DOM elements
+- Debug why layout engine output isn't being rendered
+
+#### **NEW Stage 3B: Timeline Axis Implementation** 🔥 (URGENT)
+- **MUST DO FIRST** - Cannot verify anything without axis
+- Move Phase 10.1 here immediately
+- Add horizontal line, date labels, tick marks
+- Without this, we're flying blind
+
+#### **Stage 3C: Original Degradation System** (After 3A & 3B)
+- Now depends on fixing visual rendering first
+- Original Stage 3 items postponed
+
+### 🎯 Immediate Action Items (Today's Priority)
+1. **DEBUG**: Why is Timeline.tsx not using layout positions?
+2. **FIX**: Connect DeterministicLayoutV5 output to actual card rendering
+3. **IMPLEMENT**: Timeline axis (Phase 10.1) - CANNOT PROCEED WITHOUT THIS
+4. **VERIFY**: Visual output matches layout calculations
+
+### 🐛 Visual Bugs Discovered (From Screenshot Analysis)
+
+| Bug | Expected (ARCHITECTURE.md) | Actual (Screenshots) | Priority |
+|-----|---------------------------|---------------------|----------|
+| **No Timeline** | Horizontal line with date labels | Nothing visible | 🔥 CRITICAL |
+| **No Degradation** | Different card sizes by density | All cards identical | 🔥 CRITICAL |
+| **Bad Distribution** | Full viewport width usage | 70% empty, cards bunched left | HIGH |
+| **No Anchors** | Dots/triangles on timeline | Missing completely | HIGH |
+| **Card Overlaps** | Zero overlaps guaranteed | Cards overlapping | HIGH |
+| **No Columns** | Clear vertical columns | Random scatter | MEDIUM |
+| **Same Card Size** | Full(96px), Compact(64px), Title(32px) | All same height | MEDIUM |
+
+### 📊 Test Scenario Evidence
+
+| Scenario | Events | What Should Happen | What Actually Happens |
+|----------|--------|-------------------|----------------------|
+| **Clustered x5** | 75+ | Heavy degradation, multi-event cards | All individual cards, severe bunching |
+| **Napoleon** | 63 | Mixed card types, good distribution | All same size, poor distribution |
+| **Clustered x3** | 45 | 3 distinct clusters, some degradation | Bunched left, no degradation |
 
 Note: Section numbering below remains for continuity; the roadmap above defines the execution order.
 
