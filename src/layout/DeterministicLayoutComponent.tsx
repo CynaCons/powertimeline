@@ -29,7 +29,9 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
 
   // Create layout configuration for deterministic layout
   const config: LayoutConfig = useMemo(() => {
-    const baseConfig = createLayoutConfig(viewportSize.width, viewportSize.height);
+    // Account for sidebar width (56px) in available width calculation
+    const availableWidth = viewportSize.width - 56; // Subtract sidebar width
+    const baseConfig = createLayoutConfig(availableWidth, viewportSize.height);
     
     // Add time range calculation for proper X positioning
     if (events.length > 0) {
@@ -68,18 +70,36 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     if (typeof window === 'undefined') return;
     const { positionedCards, anchors, clusters, utilization } = layoutResult;
 
-    // Dispatch metrics
-    const groupsCount = clusters.length;
-    const clusterSizes = clusters.map((c: any) => c.events.length || 0);
-    const avgEventsPerCluster = groupsCount > 0 ? (clusterSizes.reduce((a: number, b: number) => a + b, 0) / groupsCount) : 0;
-    const largestCluster = Math.max(0, ...clusterSizes);
-    const xs = anchors.map((a: any) => a.x).sort((a: number, b: number) => a - b);
-    const pitches = xs.length > 1 ? xs.slice(1).map((x: number, i: number) => Math.abs(x - xs[i])) : [];
-    const groupPitchPx = {
-      min: pitches.length ? Math.min(...pitches) : 0,
-      max: pitches.length ? Math.max(...pitches) : 0,
-      avg: pitches.length ? pitches.reduce((a: number, b: number) => a + b, 0) / pitches.length : 0
-    };
+    // Use telemetry from layout engine if available, fallback to manual calculation
+    const engineMetrics = layoutResult.telemetryMetrics;
+    let dispatchMetrics, aggregationMetrics, infiniteMetrics;
+    
+    if (engineMetrics) {
+      dispatchMetrics = engineMetrics.dispatch;
+      aggregationMetrics = engineMetrics.aggregation;
+      infiniteMetrics = engineMetrics.infinite;
+    } else {
+      // Fallback: calculate manually if engine metrics not available
+      const groupsCount = clusters.length;
+      const clusterSizes = clusters.map((c: any) => c.events.length || 0);
+      const avgEventsPerCluster = groupsCount > 0 ? (clusterSizes.reduce((a: number, b: number) => a + b, 0) / groupsCount) : 0;
+      const largestCluster = Math.max(0, ...clusterSizes);
+      const xs = anchors.map((a: any) => a.x).sort((a: number, b: number) => a - b);
+      const pitches = xs.length > 1 ? xs.slice(1).map((x: number, i: number) => Math.abs(x - xs[i])) : [];
+      dispatchMetrics = {
+        groupCount: groupsCount,
+        avgEventsPerCluster,
+        largestCluster,
+        groupPitchPx: {
+          min: pitches.length ? Math.min(...pitches) : 0,
+          max: pitches.length ? Math.max(...pitches) : 0,
+          avg: pitches.length ? pitches.reduce((a: number, b: number) => a + b, 0) / pitches.length : 0
+        },
+        horizontalSpaceUsage: 0 // Placeholder
+      };
+      aggregationMetrics = { totalAggregations: 0, eventsAggregated: 0, clustersAffected: 0 };
+      infiniteMetrics = { enabled: false, containers: 0, eventsContained: 0, previewCount: 0, byCluster: [] };
+    }
 
     // Capacity model from layoutResult.utilization
     const totalCells = Math.max(0, utilization.totalSlots || 0);
@@ -92,7 +112,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
       x: Math.round(p.x),
       y: Math.round(p.y),
       clusterId: String(p.clusterId ?? ''),
-      isAbove: Boolean(p.y < (config.timelineY))
+      isAbove: Boolean(p.y < (config?.timelineY ?? viewportSize.height / 2))
     }));
 
     // Compare with previous snapshot to compute migrations
@@ -128,11 +148,9 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     const telemetry = {
       version: 'v5',
       events: { total: events.length },
-      groups: { count: groupsCount },
+      groups: { count: dispatchMetrics.groupCount || clusters.length },
       dispatch: {
-        avgEventsPerCluster,
-        largestCluster,
-        groupPitchPx,
+        ...dispatchMetrics,
         targetAvgEventsPerClusterBand: [4, 6] as [number, number]
       },
       capacity: {
@@ -151,8 +169,10 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         }
       },
       aggregation: {
-        totalAggregations,
-        eventsAggregated
+        ...aggregationMetrics,
+        // Keep backward compatibility with existing field names
+        totalAggregations: aggregationMetrics.totalAggregations || totalAggregations,
+        eventsAggregated: aggregationMetrics.eventsAggregated || eventsAggregated
       },
       cards: {
         single: singleEventsShown,
@@ -166,12 +186,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
       viewport: {
         width: viewportSize.width,
         height: viewportSize.height,
-        timelineY: config.timelineY
+        timelineY: config?.timelineY ?? viewportSize.height / 2
       }
     };
 
     (window as any).__ccTelemetry = telemetry;
-  }, [layoutResult, events.length, viewportSize.width, viewportSize.height, config.timelineY]);
+  }, [layoutResult, events.length, viewportSize.width, viewportSize.height, config]);
 
 
   return (
@@ -193,7 +213,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
       {/* Timeline Axis */}
       <div 
         className="absolute w-full h-1 bg-gray-700 z-10 shadow-sm"
-        style={{ top: config.timelineY - 1 }}
+        style={{ top: (config?.timelineY ?? viewportSize.height / 2) - 1 }}
         data-testid="timeline-axis"
       />
       
@@ -222,7 +242,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
             <div
               key={`tick-${i}`}
               className="absolute flex flex-col items-center"
-              style={{ left: x - 30, top: config.timelineY + 8 }}
+              style={{ left: x - 30, top: (config?.timelineY ?? viewportSize.height / 2) + 8 }}
             >
               <div className="w-0.5 h-2 bg-gray-600 -mt-2" />
               <div className="text-xs text-gray-600 mt-1 whitespace-nowrap">
@@ -243,7 +263,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
           className="absolute flex flex-col items-center"
           style={{
             left: anchor.x - 8,
-            top: config.timelineY - 8
+            top: (config?.timelineY ?? viewportSize.height / 2) - 8
           }}
         >
           {/* Anchor dot */}

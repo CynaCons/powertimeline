@@ -70,6 +70,13 @@ function App() {
   // Theme: dark-only (no data-theme switch)
   useEffect(() => { document.documentElement.removeAttribute('data-theme'); }, []);
 
+  // Debug: expose events globally for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).__debugEvents = events;
+    }
+  }, [events]);
+
   useEffect(() => {
     try { if (devEnabled) localStorage.setItem(DEV_FLAG_KEY, '1'); else localStorage.removeItem(DEV_FLAG_KEY); } catch {}
   }, [devEnabled]);

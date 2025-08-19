@@ -39,15 +39,14 @@ export interface PositionedCard {
   event: Event | Event[]; // Single event or array for multi-event cards
   x: number;           // Card center x
   y: number;           // Card center y
-  cardWidth: number;
-  cardHeight: number;
-  anchorX: number;     // Associated anchor position
-  anchorY: number;
+  width: number;       // Card width (updated from cardWidth)
+  height: number;      // Card height (updated from cardHeight)
   cardType: CardType;
-  isMultiEvent: boolean;
-  isSummaryCard: boolean;
   clusterId: string;
-  eventCount?: number; // For infinite cards
+  eventCount?: number; // For multi-event and infinite cards
+  // Infinite card specific properties
+  previewCount?: number;  // Number of events to preview in infinite card
+  overflowCount?: number; // Number of overflow events (for "+N more" display)
 }
 
 export interface LayoutConfig {
@@ -76,5 +75,10 @@ export interface LayoutResult {
     totalSlots: number;
     usedSlots: number;
     percentage: number;
+  };
+  telemetryMetrics?: {
+    dispatch: any;
+    aggregation: any;
+    infinite: any;
   };
 }

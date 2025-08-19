@@ -187,7 +187,65 @@ Anchor X = (x1 + x2) / 2
 - **Balanced columns**: Events distributed to minimize total column count
 - **Centered anchors**: Time accuracy maintained through mathematical centering
 
-## Implementation Phases
+## Phase 0: Core Implementation ✅ (COMPLETED - 2025-08-19)
+
+### 0.1 Terminology & Capacity Model ✅
+- **Cell**: Base grid unit for capacity accounting (smallest unit of space)
+- **Footprint**: Number of cells consumed by a placed card
+- **Placements**: Available candidate positions per column group 
+- **Utilization**: Percentage of total cells that are occupied
+- **Capacity Formula**: totalCells = placementsPerSide × 2 (above + below)
+
+### 0.2 Distribution & Column Grouping (Dispatch) ✅
+- Density-adaptive dispatch with target 4–6 events per cluster
+- Proximity merge rule: merge groups when inter-group gap < 80px
+- Temporal positioning using actual event dates for horizontal spread
+- Telemetry: groupCount, groupPitchPx, avgEventsPerCluster, largestCluster
+
+### 0.3 Fit Algorithm Contract ✅
+- Deterministic assignment using ordered placements
+- Zero-overlap guarantee via capacity allocation tracking
+- Stable sorting with deterministic tie-breakers (ID, title)
+- Priority scoring for consistent placement decisions
+
+### 0.4 Degradation AND Promotion ✅
+- **Corrected Cascade**: Full(4)→Compact(2)→Title-only(1)→Multi-event(4) cells
+- **1→2→4→5 Mathematics**: 1 Full = 2 Compact = 4 Title-only = 5 Multi-event entries  
+- Promotion pass when utilization < 40% (configurable threshold)
+- Telemetry: degradedCountByType, promotedCountByType
+
+### 0.5 Multi-Event Aggregation Policy ✅
+- Triggers when cluster size > threshold AND promotion budget exhausted
+- Never aggregates singleton events (maintains 1:1 visibility)
+- Multi-event cards contain up to 5 events with "+N" overflow indicators
+- Telemetry: {totalAggregations, eventsAggregated, clustersAffected}
+
+### 0.5.1 Infinite Event Card (Overflow Container) ✅
+- **Purpose**: Deterministic overflow when residual events exceed multi-event budget
+- **Footprint**: Fixed 4 cells, one per side per cluster (above/below independently)
+- **Content**: Preview top 5 events chronologically with "+N more" indicator
+- **Determinism**: Stable chronological ordering, predictable triggers
+- **Telemetry**: {enabled, containers, eventsContained, previewCount, byCluster}
+
+### 0.6 Stability & Churn Minimization ✅
+- Stable sorting with deterministic tie-breakers (date → ID → title)
+- Priority scoring based on event characteristics (duration, recency)
+- Minimal boundary shifts (50px threshold for group repositioning)
+- Local re-fit strategy to prevent cross-group migrations
+
+### 0.7 Telemetry & Tests ✅
+- Complete JSON telemetry: dispatch, capacity, aggregation, infinite metrics
+- Full v5 test suite (01–09) with telemetry assertions
+- Stable selectors: data-testid="event-card" with data-event-id, data-card-type
+- Screenshot-based visual regression testing
+
+### 0.8 Overlay/UX Updates ✅
+- Split capacity panels: Footprint (cells) vs Placements (candidates)
+- Real-time counters for promotions and aggregations applied
+- Group pitch metrics (target vs actual events/cluster)
+- Utilization percentage display with thresholds
+
+## Implementation Phases (Previous Architecture)
 
 ### Phase 1: Left-to-Right Clustering ✓
 - [x] Chronological event processing
@@ -196,14 +254,14 @@ Anchor X = (x1 + x2) / 2
 - [x] Anchor centering mathematics
 
 ### Phase 2: Deterministic Slot Allocation ✓  
-- [x] Fixed slot counts per card type (2/4/8/10)
+- [x] Fixed slot counts per card type (4/2/1/4 cells)
 - [x] Slot occupancy tracking
 - [x] Zero-overlap guarantees
 
 ### Phase 3: Mathematical Degradation ✓
 - [x] 1→2→4→5 conversion mathematics
 - [x] Optimal slot usage algorithm
-- [x] Group-level degradation decisions
+- [x] Multi-event and infinite card implementation
 
 ### Phase 4: Testing & Validation ✓
 - [x] Slot occupancy verification

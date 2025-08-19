@@ -11,24 +11,25 @@
 import type { CardType } from './types';
 
 // Card footprints in cells (vertical space consumed)
+// Following ARCHITECTURE.md degradation math: 1→2→4→5 ratio
 export const CARD_FOOTPRINTS: Record<CardType, number> = {
-  'full': 4,        // Full card takes 4 cells
-  'compact': 2,     // Compact card takes 2 cells  
-  'title-only': 1,  // Title-only card takes 1 cell
-  'multi-event': 2, // Multi-event card takes 2 cells (same as compact)
-  'infinite': 2     // Infinite overflow card takes 2 cells
+  'full': 4,        // Full card takes 4 cells (baseline)
+  'compact': 2,     // Compact card takes 2 cells (2 compacts = 1 full space)
+  'title-only': 1,  // Title-only card takes 1 cell (4 title-only = 1 full space)
+  'multi-event': 4, // Multi-event card takes 4 cells (same as full, but holds 5 events)
+  'infinite': 4     // Infinite overflow card takes 4 cells (same as multi-event)
 };
 
 // Available placements per column side (above or below timeline)
 export const PLACEMENTS_PER_SIDE = 4; // 4 placement slots above, 4 below
 
-// Degradation cascade with capacity requirements
+// Degradation cascade with capacity requirements (1→2→4→5 mathematics)
 export const DEGRADATION_CASCADE = [
   { type: 'full' as CardType, eventsPerCard: 1, footprint: 4 },
   { type: 'compact' as CardType, eventsPerCard: 1, footprint: 2 },
   { type: 'title-only' as CardType, eventsPerCard: 1, footprint: 1 },
-  { type: 'multi-event' as CardType, eventsPerCard: 5, footprint: 2 },
-  { type: 'infinite' as CardType, eventsPerCard: Infinity, footprint: 2 }
+  { type: 'multi-event' as CardType, eventsPerCard: 5, footprint: 4 },
+  { type: 'infinite' as CardType, eventsPerCard: Infinity, footprint: 4 }
 ];
 
 export interface CapacityMetrics {
