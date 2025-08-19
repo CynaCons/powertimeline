@@ -190,24 +190,73 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         />
       ))}
       
-      {/* Timeline */}
+      {/* Timeline Axis */}
       <div 
-        className="absolute w-full h-0.5 bg-gray-800 z-10"
-        style={{ top: config.timelineY }}
+        className="absolute w-full h-1 bg-gray-700 z-10 shadow-sm"
+        style={{ top: config.timelineY - 1 }}
         data-testid="timeline-axis"
       />
+      
+      {/* Timeline Date Labels */}
+      {(() => {
+        // Generate date labels based on event range
+        if (layoutResult.positionedCards.length === 0) return null;
+        
+        const dates = layoutResult.positionedCards.map(card => 
+          new Date(Array.isArray(card.event) ? card.event[0].date : card.event.date).getTime()
+        );
+        const minDate = Math.min(...dates);
+        const maxDate = Math.max(...dates);
+        const range = maxDate - minDate;
+        
+        // Generate 5-10 tick marks
+        const tickCount = Math.min(10, Math.max(5, layoutResult.clusters.length));
+        const ticks = [];
+        
+        for (let i = 0; i <= tickCount; i++) {
+          const time = minDate + (range * i / tickCount);
+          const x = 20 + ((viewportSize.width - 40) * i / tickCount);
+          const date = new Date(time);
+          
+          ticks.push(
+            <div
+              key={`tick-${i}`}
+              className="absolute flex flex-col items-center"
+              style={{ left: x - 30, top: config.timelineY + 8 }}
+            >
+              <div className="w-0.5 h-2 bg-gray-600 -mt-2" />
+              <div className="text-xs text-gray-600 mt-1 whitespace-nowrap">
+                {date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </div>
+            </div>
+          );
+        }
+        
+        return ticks;
+      })()}
       
       {/* Anchors */}
       {layoutResult.anchors.map((anchor) => (
         <div
           key={anchor.id}
           data-testid={anchor.id}
-          className="absolute w-3 h-3 bg-gray-700 border-2 border-white rounded-full"
+          className="absolute flex flex-col items-center"
           style={{
-            left: anchor.x - 6,
-            top: config.timelineY - 6
+            left: anchor.x - 8,
+            top: config.timelineY - 8
           }}
-        />
+        >
+          {/* Anchor dot */}
+          <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-sm z-20" />
+          {/* Vertical connector line */}
+          <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
+          {/* Event count badge */}
+          {anchor.eventCount > 1 && (
+            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+              {anchor.eventCount}
+            </div>
+          )}
+        </div>
       ))}
       
       {/* Cards */}
@@ -217,12 +266,17 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
           data-testid="event-card"
           data-event-id={Array.isArray(card.event) ? card.event[0].id : card.event.id}
           data-card-type={card.cardType}
-          className={`absolute bg-white rounded-lg shadow-md border border-gray-200 p-3 text-sm hover:shadow-lg transition-shadow`}
+          className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-shadow ${
+            card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
+            card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :
+            card.cardType === 'title-only' ? 'border-l-4 border-l-yellow-500 border-gray-200 p-1' :
+            'border-l-4 border-l-purple-500 border-gray-200 p-2'
+          } text-sm`}
           style={{
             left: card.x,
             top: card.y,
-            width: card.cardWidth,
-            height: card.cardHeight
+            width: card.width,
+            height: card.height
           }}
         >
           {/* Card content based on type */}

@@ -29,17 +29,18 @@ To ensure the card placement and degradation system works perfectly before addin
 - ✅ 4.2/4.3 Horizontal Space Optimization & Smart Column Formation
 - Goal achieved: Optimal event distribution across timeline width
 
-**Stage 3A: Fix Visual Rendering Pipeline** 🔥🔥🔥 (EMERGENCY - Current Focus)
-- Debug Timeline.tsx vs DeterministicLayoutV5 disconnect
-- Fix card positioning to use calculated layouts
-- Ensure DOM elements receive correct x,y positions
-- Goal: Visual output matches layout engine calculations
+**Stage 3A: Fix Visual Rendering Pipeline** ✅ (COMPLETED - 2025-08-19)
+- ✅ Debug Timeline.tsx vs DeterministicLayoutV5 disconnect (Found: card.width/height vs cardWidth/cardHeight)
+- ✅ Fix card positioning to use calculated layouts
+- ✅ Ensure DOM elements receive correct x,y positions
+- Goal achieved: Visual output now matches layout engine calculations
 
-**Stage 3B: Timeline Axis Implementation** 🔥🔥 (URGENT - Moved from Stage 4)
-- Phase 10.1: Add timeline axis with date labels and ticks
-- Phase 10.4: Add anchor markers at cluster centers
-- Add horizontal line at viewport center
-- Goal: Can verify temporal accuracy and clustering
+**Stage 3B: Timeline Axis Implementation** ✅ (COMPLETED - 2025-08-19)
+- ✅ Phase 10.1: Add timeline axis with date labels and ticks
+- ✅ Phase 10.4: Add anchor markers at cluster centers with event count badges
+- ✅ Add horizontal line at viewport center (thicker, more visible)
+- ✅ Add colored left borders to differentiate card types (blue=full, green=compact, yellow=title, purple=multi)
+- Goal achieved: Can now verify temporal accuracy and clustering
 
 **Stage 3C: Complete Degradation System** 🚧 (Blocked by 3A & 3B)
 - 0.4 Degradation AND Promotion (with real implementation)
@@ -129,17 +130,17 @@ After analyzing screenshots from all test scenarios (including new Clustered x5 
 3. **IMPLEMENT**: Timeline axis (Phase 10.1) - CANNOT PROCEED WITHOUT THIS
 4. **VERIFY**: Visual output matches layout calculations
 
-### 🐛 Visual Bugs Discovered (From Screenshot Analysis)
+### 🐛 Visual Bugs Fixed & Remaining
 
-| Bug | Expected (ARCHITECTURE.md) | Actual (Screenshots) | Priority |
-|-----|---------------------------|---------------------|----------|
-| **No Timeline** | Horizontal line with date labels | Nothing visible | 🔥 CRITICAL |
-| **No Degradation** | Different card sizes by density | All cards identical | 🔥 CRITICAL |
-| **Bad Distribution** | Full viewport width usage | 70% empty, cards bunched left | HIGH |
-| **No Anchors** | Dots/triangles on timeline | Missing completely | HIGH |
-| **Card Overlaps** | Zero overlaps guaranteed | Cards overlapping | HIGH |
-| **No Columns** | Clear vertical columns | Random scatter | MEDIUM |
-| **Same Card Size** | Full(96px), Compact(64px), Title(32px) | All same height | MEDIUM |
+| Bug | Expected | Status | Notes |
+|-----|----------|--------|-------|
+| **No Timeline** | Horizontal line with date labels | ✅ FIXED | Added thick line, date labels, tick marks |
+| **No Anchors** | Dots/triangles on timeline | ✅ FIXED | Blue dots with event count badges |
+| **Card Types** | Visual differentiation | ✅ FIXED | Colored left borders (blue/green/yellow/purple) |
+| **Card Position** | Use calculated x,y | ✅ FIXED | Fixed width/height property names |
+| **No Degradation** | Different card sizes by density | ⚠️ PARTIAL | Colors show types but sizes still same |
+| **Bad Distribution** | Full viewport width usage | ❌ TODO | Still bunched, needs better dispatch |
+| **Card Overlaps** | Zero overlaps guaranteed | ❌ TODO | Some overlaps remain |
 
 ### 📊 Test Scenario Evidence
 
