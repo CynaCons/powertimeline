@@ -89,21 +89,27 @@ export class DeterministicLayoutV5 {
 
   /**
    * Stage 1: Dispatch events across timeline width for optimal distribution
+   * Now uses actual temporal positions for proper horizontal spread
    */
   private dispatchEvents(events: Event[]): ColumnGroup[] {
     const sortedEvents = [...events].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
+    // Use full viewport width with small margins
+    const leftMargin = 50;
+    const rightMargin = 50;
+    const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
+    
     // Calculate optimal number of groups based on density
     const targetGroups = Math.ceil(events.length / this.TARGET_EVENTS_PER_CLUSTER.max);
-    const actualGroups = Math.max(1, Math.min(targetGroups, Math.floor(this.config.viewportWidth / this.MIN_GROUP_PITCH)));
+    const actualGroups = Math.max(1, Math.min(targetGroups, Math.floor(usableWidth / this.MIN_GROUP_PITCH)));
     
     // Initialize column groups
     const groups: ColumnGroup[] = [];
     const eventsPerGroup = Math.ceil(events.length / actualGroups);
     
-    // Distribute events into initial groups
+    // Distribute events into initial groups with proper temporal positioning
     for (let i = 0; i < actualGroups; i++) {
       const groupEvents = sortedEvents.slice(i * eventsPerGroup, (i + 1) * eventsPerGroup);
       if (groupEvents.length === 0) continue;
@@ -111,9 +117,26 @@ export class DeterministicLayoutV5 {
       const groupId = `group-${i}`;
       this.capacityModel.initializeColumn(groupId);
       
-      const startX = (i * this.config.viewportWidth) / actualGroups;
-      const endX = ((i + 1) * this.config.viewportWidth) / actualGroups;
-      const centerX = (startX + endX) / 2;
+      // Calculate X position based on temporal position within the time range
+      const groupDates = groupEvents.map(e => new Date(e.date).getTime());
+      const groupMinTime = Math.min(...groupDates);
+      const groupMaxTime = Math.max(...groupDates);
+      const groupCenterTime = (groupMinTime + groupMaxTime) / 2;
+      
+      // Map temporal position to screen X coordinate
+      let centerX: number;
+      if (this.timeRange) {
+        const timeRatio = (groupCenterTime - this.timeRange.startTime) / this.timeRange.duration;
+        centerX = leftMargin + (timeRatio * usableWidth);
+      } else {
+        // Fallback to even distribution if time range not calculated
+        centerX = leftMargin + ((i + 0.5) * usableWidth) / actualGroups;
+      }
+      
+      // Calculate group bounds with proper width
+      const groupWidth = usableWidth / actualGroups;
+      const startX = Math.max(leftMargin, centerX - groupWidth / 2);
+      const endX = Math.min(this.config.viewportWidth - rightMargin, centerX + groupWidth / 2);
       
       groups.push({
         id: groupId,
@@ -179,42 +202,67 @@ export class DeterministicLayoutV5 {
 
   /**
    * Stage 3: Apply degradation cascade and promotion pass
+   * Now with mixed card types within groups for better visual differentiation
    */
   private applyDegradationAndPromotion(groups: ColumnGroup[]): ColumnGroup[] {
     for (const group of groups) {
       const eventCount = group.events.length;
       
-      // Determine best card type based on density
-      let cardType: CardType = 'full';
-      
-      if (eventCount <= 2) {
-        cardType = 'full';
-      } else if (eventCount <= 4) {
-        cardType = 'compact';
-      } else if (eventCount <= 8) {
-        cardType = 'title-only';
-      } else if (eventCount <= 10) {
-        cardType = 'multi-event';
-      } else {
-        // Need infinite overflow
-        cardType = 'infinite';
+      // For very dense groups, use multi-event cards
+      if (eventCount > 10) {
+        group.cards = this.createCardsForGroup(group, 'multi-event');
+        continue;
       }
       
-      // Apply promotion if utilization is low
-      const metrics = this.capacityModel.getGlobalMetrics();
-      if (metrics.utilization < 60 && cardType !== 'full') {
-        // Promote to better card type
-        const promotionMap: Record<CardType, CardType> = {
-          'compact': 'full',
-          'title-only': 'compact',
-          'multi-event': 'title-only',
-          'infinite': 'multi-event'
-        };
-        cardType = promotionMap[cardType] || cardType;
-      }
+      // For smaller groups, apply mixed card types for visual variety
+      const cards: PositionedCard[] = [];
+      const cardConfig = this.config.cardConfigs;
       
-      // Create positioned cards based on determined type
-      group.cards = this.createCardsForGroup(group, cardType);
+      group.events.forEach((event, index) => {
+        let cardType: CardType = 'full';
+        
+        // Apply degradation based on position and density
+        if (eventCount <= 2) {
+          // Small groups: all full cards
+          cardType = 'full';
+        } else if (eventCount <= 4) {
+          // Medium groups: mix of full and compact
+          cardType = index < 2 ? 'full' : 'compact';
+        } else if (eventCount <= 6) {
+          // Larger groups: mix of compact and title-only
+          cardType = index < 2 ? 'compact' : 'title-only';
+        } else {
+          // Dense groups: mostly title-only with some compact
+          cardType = index < 1 ? 'compact' : 'title-only';
+        }
+        
+        // Apply promotion if global utilization is low
+        const metrics = this.capacityModel.getGlobalMetrics();
+        if (metrics.utilization < 40 && cardType !== 'full') {
+          const promotionMap: Record<CardType, CardType> = {
+            'compact': 'full',
+            'title-only': 'compact',
+            'multi-event': 'compact',
+            'infinite': 'title-only'
+          };
+          cardType = promotionMap[cardType] || cardType;
+        }
+        
+        // Create individual card with appropriate type
+        cards.push({
+          id: `${group.id}-${index}`,
+          event: [event],
+          x: 0,
+          y: 0,
+          width: cardConfig[cardType].width,
+          height: cardConfig[cardType].height,
+          cardType,
+          clusterId: group.id,
+          eventCount: 1
+        });
+      });
+      
+      group.cards = cards;
     }
     
     return groups;
@@ -222,35 +270,82 @@ export class DeterministicLayoutV5 {
 
   /**
    * Position cards using fit algorithm with zero-overlap guarantee
+   * Now with optimized vertical space usage
    */
   private positionCardsWithFitAlgorithm(groups: ColumnGroup[]): LayoutResult {
     const positionedCards: PositionedCard[] = [];
     const anchors: Anchor[] = [];
     const clusters: EventCluster[] = [];
     
+    // Calculate vertical space available for cards
+    const topMargin = 50;
+    const bottomMargin = 50;
+    const timelineMargin = 60; // Space between cards and timeline
+    const availableAbove = this.timelineY - topMargin - timelineMargin;
+    const availableBelow = this.config.viewportHeight - this.timelineY - bottomMargin - timelineMargin;
+    
     for (const group of groups) {
       anchors.push(group.anchor);
       
-      // Position cards above and below timeline
-      let aboveY = this.timelineY - 40; // Start position above
-      let belowY = this.timelineY + 40; // Start position below
+      // Split cards between above and below
+      const aboveCards = group.cards.filter((_, i) => i % 2 === 0);
+      const belowCards = group.cards.filter((_, i) => i % 2 === 1);
       
-      group.cards.forEach((card, index) => {
-        const isAbove = index % 2 === 0;
-        const side = isAbove ? 'above' : 'below';
+      // Calculate spacing to use more vertical space
+      const aboveSpacing = Math.min(20, availableAbove / (aboveCards.length + 1));
+      const belowSpacing = Math.min(20, availableBelow / (belowCards.length + 1));
+      
+      // Position above cards spreading from timeline upward
+      let aboveY = this.timelineY - timelineMargin;
+      aboveCards.forEach((card) => {
+        // Ensure minimum spacing to avoid overlaps
+        const minSpacing = 15;
+        const effectiveSpacing = Math.max(minSpacing, aboveSpacing);
         
-        // Allocate capacity for this card
-        const placementIndex = this.capacityModel.allocate(group.id, side, card.cardType);
+        card.y = aboveY - card.height;
+        aboveY -= (card.height + effectiveSpacing);
+        card.x = group.centerX - (card.width / 2);
         
-        if (isAbove) {
-          card.y = aboveY;
-          aboveY -= (card.height + 10); // Stack upward
-        } else {
-          card.y = belowY;
-          belowY += (card.height + 10); // Stack downward
+        // Check for overlaps with previously positioned cards
+        const overlap = positionedCards.find(existing => 
+          Math.abs(existing.x - card.x) < (existing.width + card.width) / 2 &&
+          Math.abs(existing.y - card.y) < (existing.height + card.height) / 2
+        );
+        
+        if (overlap) {
+          // Shift horizontally if overlap detected
+          card.x += card.width / 4;
         }
         
+        // Allocate capacity for tracking
+        this.capacityModel.allocate(group.id, 'above', card.cardType);
+        positionedCards.push(card);
+      });
+      
+      // Position below cards spreading from timeline downward
+      let belowY = this.timelineY + timelineMargin;
+      belowCards.forEach((card) => {
+        // Ensure minimum spacing to avoid overlaps
+        const minSpacing = 15;
+        const effectiveSpacing = Math.max(minSpacing, belowSpacing);
+        
+        card.y = belowY;
+        belowY += (card.height + effectiveSpacing);
         card.x = group.centerX - (card.width / 2);
+        
+        // Check for overlaps with previously positioned cards
+        const overlap = positionedCards.find(existing => 
+          Math.abs(existing.x - card.x) < (existing.width + card.width) / 2 &&
+          Math.abs(existing.y - card.y) < (existing.height + card.height) / 2
+        );
+        
+        if (overlap) {
+          // Shift horizontally if overlap detected
+          card.x += card.width / 4;
+        }
+        
+        // Allocate capacity for tracking
+        this.capacityModel.allocate(group.id, 'below', card.cardType);
         positionedCards.push(card);
       });
       

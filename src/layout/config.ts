@@ -20,7 +20,7 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   'multi-event': {
     type: 'multi-event',
     width: 180,
-    height: 64,
+    height: 80,
     maxEvents: 5
   },
   infinite: {
