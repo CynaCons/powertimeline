@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
-import { Stage1Demo } from './components/Stage1Demo';
 import type { Event } from './types';
 import { OutlinePanel } from './app/panels/OutlinePanel';
 import { EditorPanel } from './app/panels/EditorPanel';
@@ -14,12 +13,7 @@ import {
   seedRFKTimeline, 
   seedJFKTimeline, 
   seedNapoleonTimeline, 
-  seedIncremental as seedIncrementalUtil,
-  seedSingleColumnTest,
-  seedDualColumnTest,
-  seedCompactDegradationTest,
-  seedMultiEventTest,
-  seedInfiniteTest
+  seedIncremental as seedIncrementalUtil
 } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
@@ -48,15 +42,9 @@ function App() {
 
   // Panels & Dev toggle
   const devParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1';
-  const stage1Param = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('stage1') === '1';
   const [devEnabled, setDevEnabled] = useState<boolean>(() => {
     try { return devParam || localStorage.getItem(DEV_FLAG_KEY) === '1'; } catch { return devParam; }
   });
-  
-  // Stage 1 demo mode
-  if (stage1Param) {
-    return <Stage1Demo />;
-  }
   // Left sidebar overlays (permanent sidebar width = 56px)
   const [overlay, setOverlay] = useState<null | 'outline' | 'editor' | 'dev' | 'create'>(null);
   const overlayRef = useRef<HTMLElement | null>(null);
@@ -67,9 +55,7 @@ function App() {
 
   // Dragging state (for disabling overlay pointer events)
   const [dragging] = useState(false);
-  // Dev options
-  const [placeholderMode, setPlaceholderMode] = useState<'off'|'sparse'|'dense'>('sparse');
-  const [forceCardMode, setForceCardMode] = useState<'auto'|'full'|'compact'|'title'|'multi'>('auto');
+  // Dev options (removed unused placeholder and force card mode for Stage 1)
 
   // Announcer hook
   const { announce, renderLiveRegion } = useAnnouncer();
@@ -232,23 +218,6 @@ function App() {
   
   const clearAll = useCallback(() => { setEvents([]); }, []);
 
-  // Degradation testing seeders
-  const seedSingleColumn = useCallback(() => {
-    setEvents(() => { const next = seedSingleColumnTest([]); storageRef.current.writeThrough(next); return next; });
-  }, []);
-  const seedDualColumn = useCallback(() => {
-    setEvents(() => { const next = seedDualColumnTest([]); storageRef.current.writeThrough(next); return next; });
-  }, []);
-  const seedCompactDegradation = useCallback(() => {
-    setEvents(() => { const next = seedCompactDegradationTest([]); storageRef.current.writeThrough(next); return next; });
-  }, []);
-  const seedMultiEvent = useCallback(() => {
-    setEvents(() => { const next = seedMultiEventTest([]); storageRef.current.writeThrough(next); return next; });
-  }, []);
-  const seedInfinite = useCallback(() => {
-    setEvents(() => { const next = seedInfiniteTest([]); storageRef.current.writeThrough(next); return next; });
-  }, []);
-
   // Removed unused exportEvents function
 
   const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
@@ -346,15 +315,6 @@ function App() {
                 seedJFK={seedJFK}
                 seedNapoleon={seedNapoleon}
                 seedIncremental={seedIncremental}
-                placeholderMode={placeholderMode}
-                setPlaceholderMode={setPlaceholderMode}
-                forceCardMode={forceCardMode}
-                setForceCardMode={setForceCardMode}
-                seedSingleColumn={seedSingleColumn}
-                seedDualColumn={seedDualColumn}
-                seedCompactDegradation={seedCompactDegradation}
-                seedMultiEvent={seedMultiEvent}
-                seedInfinite={seedInfinite}
               />
             )}
           </>

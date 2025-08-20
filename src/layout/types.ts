@@ -16,6 +16,8 @@ export interface Anchor {
   y: number;        // Timeline y position
   eventIds: string[];
   eventCount: number;
+  visibleCount: number;  // Number of visible cards
+  overflowCount: number; // Number of hidden events (eventCount - visibleCount)
 }
 
 export interface EventCluster {

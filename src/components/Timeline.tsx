@@ -70,6 +70,24 @@ const Timeline: React.FC<Props> = ({
   }
   
   const dateRange = Math.max(1, maxDate - minDate);
+  
+  // Debug: Expose events info for testing
+  React.useEffect(() => {
+    (window as any).chronochartDebug = {
+      events: events,
+      sortedEvents: sortedEvents,
+      minDate: new Date(minDate).toISOString(),
+      maxDate: new Date(maxDate).toISOString(),
+      dateRange: dateRange,
+      viewWindow: { start: viewStart, end: viewEnd },
+      internalView: internalView,
+      visibleWindow: {
+        startTime: new Date(minDate + (Math.max(0, Math.min(1, Math.min(internalView.start, internalView.end))) * dateRange)).toISOString(),
+        endTime: new Date(minDate + (Math.max(0, Math.min(1, Math.max(internalView.start, internalView.end))) * dateRange)).toISOString()
+      }
+    };
+  }, [events, sortedEvents, minDate, maxDate, dateRange, viewStart, viewEnd, internalView]);
+  
   // Fit-All framing: ~5% side padding
   const sidePad = Math.max(16, Math.floor(containerWidth * 0.05));
   const timelineWidth = containerWidth - sidePad * 2; // Leave margins

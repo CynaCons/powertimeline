@@ -145,6 +145,66 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     const degradationsCount = (byTypeCounts['compact'] || 0) + (byTypeCounts['title-only'] || 0);
     const promotionsCount = 0; // Placeholder: promotion logic not implemented yet
 
+    // Half-column analysis for Stage 3 telemetry
+    const timelineY = config?.timelineY ?? viewportSize.height / 2;
+    const aboveCards = positionedCards.filter((c: any) => c.y < timelineY);
+    const belowCards = positionedCards.filter((c: any) => c.y >= timelineY);
+    
+    // Group cards by cluster/column for half-column analysis
+    const clusterMap = new Map<string, { above: any[], below: any[] }>();
+    positionedCards.forEach((card: any) => {
+      const clusterId = String(card.clusterId ?? 'default');
+      if (!clusterMap.has(clusterId)) {
+        clusterMap.set(clusterId, { above: [], below: [] });
+      }
+      const cluster = clusterMap.get(clusterId)!;
+      if (card.y < timelineY) {
+        cluster.above.push(card);
+      } else {
+        cluster.below.push(card);
+      }
+    });
+
+    // Calculate half-column metrics
+    const aboveHalfColumns = Array.from(clusterMap.values()).filter(c => c.above.length > 0);
+    const belowHalfColumns = Array.from(clusterMap.values()).filter(c => c.below.length > 0);
+    
+    const aboveEventsPerHalfColumn = aboveHalfColumns.map(c => c.above.length);
+    const belowEventsPerHalfColumn = belowHalfColumns.map(c => c.below.length);
+    
+    // Calculate temporal distribution (percentage of timeline width used)
+    const viewportWidth = viewportSize.width;
+    if (anchors.length > 1) {
+      const positions = anchors.map((a: any) => a.x).sort((a: number, b: number) => a - b);
+      const minX = Math.min(...positions);
+      const maxX = Math.max(...positions);
+      var temporalDistribution = ((maxX - minX) / viewportWidth) * 100;
+    } else {
+      var temporalDistribution = 0;
+    }
+
+    // Placement pattern validation
+    const sortedEvents = events.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedPlacements = sortedEvents.map(event => 
+      positionedCards.find(card => 
+        (Array.isArray(card.event) ? card.event[0]?.id : card.event?.id) === event.id
+      )
+    ).filter(Boolean);
+    
+    // Check alternating pattern: Event 1→above, Event 2→below, etc.
+    let alternatingPattern = true;
+    for (let i = 0; i < sortedPlacements.length && alternatingPattern; i++) {
+      const card = sortedPlacements[i];
+      const shouldBeAbove = (i % 2) === 0; // Even index (0,2,4...) should be above
+      const isAbove = card.y < timelineY;
+      if (shouldBeAbove !== isAbove) {
+        alternatingPattern = false;
+      }
+    }
+
+    // Check spatial clustering (events are clustered based on horizontal overlap, not artificial limits)
+    const spatialClustering = clusterMap.size > 1 || (clusterMap.size === 1 && positionedCards.length <= 4);
+
     const telemetry = {
       version: 'v5',
       events: { total: events.length },
@@ -183,11 +243,35 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         items: placements,
         migrations
       },
+      halfColumns: {
+        above: {
+          count: aboveHalfColumns.length,
+          totalSlots: aboveHalfColumns.length * 2, // 2 slots per half-column
+          usedSlots: aboveCards.length,
+          utilization: aboveHalfColumns.length > 0 ? (aboveCards.length / (aboveHalfColumns.length * 2)) * 100 : 0,
+          events: aboveCards.length,
+          eventsPerHalfColumn: aboveEventsPerHalfColumn
+        },
+        below: {
+          count: belowHalfColumns.length,
+          totalSlots: belowHalfColumns.length * 2, // 2 slots per half-column
+          usedSlots: belowCards.length,
+          utilization: belowHalfColumns.length > 0 ? (belowCards.length / (belowHalfColumns.length * 2)) * 100 : 0,
+          events: belowCards.length,
+          eventsPerHalfColumn: belowEventsPerHalfColumn
+        }
+      },
+      placement: {
+        alternatingPattern,
+        spatialClustering,
+        temporalDistribution
+      },
       viewport: {
         width: viewportSize.width,
         height: viewportSize.height,
         timelineY: config?.timelineY ?? viewportSize.height / 2
-      }
+      },
+      adaptive: layoutResult.telemetryMetrics?.adaptive
     };
 
     (window as any).__ccTelemetry = telemetry;
@@ -219,12 +303,10 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
       
       {/* Timeline Date Labels */}
       {(() => {
-        // Generate date labels based on event range
-        if (layoutResult.positionedCards.length === 0) return null;
+        // Generate date labels based on ALL events, not just positioned cards
+        if (events.length === 0) return null;
         
-        const dates = layoutResult.positionedCards.map(card => 
-          new Date(Array.isArray(card.event) ? card.event[0].date : card.event.date).getTime()
-        );
+        const dates = events.map(event => new Date(event.date).getTime());
         const minDate = Math.min(...dates);
         const maxDate = Math.max(...dates);
         const range = maxDate - minDate;
@@ -272,9 +354,15 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
           <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-sm z-20" />
           {/* Vertical connector line */}
           <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
-          {/* Event count badge */}
-          {anchor.eventCount > 1 && (
-            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+          {/* Overflow count badge - only show when there are hidden events */}
+          {anchor.overflowCount > 0 && (
+            <div className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30">
+              +{anchor.overflowCount}
+            </div>
+          )}
+          {/* Total event count badge for debugging (remove later) */}
+          {anchor.eventCount > 1 && anchor.overflowCount === 0 && (
+            <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
               {anchor.eventCount}
             </div>
           )}

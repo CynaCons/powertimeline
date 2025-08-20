@@ -1,8 +1,8 @@
-# ChronoChart Architecture (Deterministic Layout v4)
+# ChronoChart Architecture (Half-Column System v5)
 
 ## Overview
 
-ChronoChart renders a horizontal timeline with event cards positioned in deterministic vertical slots above and below timeline anchors. The system uses a left-to-right clustering algorithm with precise slot allocation and mathematical degradation to ensure zero overlaps and predictable behavior.
+ChronoChart renders a horizontal timeline with event cards positioned in independent half-column systems above and below the timeline. The system uses alternating placement (Event 1→above, Event 2→below) with spatial-based clustering and 2-slot half-columns to ensure optimal distribution and zero overlaps.
 
 ## Where to find what
 
@@ -38,11 +38,11 @@ ChronoChart renders a horizontal timeline with event cards positioned in determi
 
 ## Core Principles
 
-1. **Deterministic slot allocation**: Each card type has a fixed number of slots (2/4/8/10)
-2. **Mathematical degradation**: 1 Full = 2 Compact = 4 Title-only = 5 Multi-event entries
-3. **Left-to-right clustering**: Process events chronologically, group by horizontal overlap
-4. **Zero overlaps guaranteed**: Predefined slots with occupancy tracking
-5. **Centered anchors**: Time anchors positioned at center of their column groups
+1. **Independent half-column systems**: Above and below timeline sections operate independently with no cross-communication
+2. **Alternating placement**: Events placed chronologically alternating above/below (Event 1→above, Event 2→below, Event 3→above, ...)
+3. **Spatial-based clustering**: Half-columns created based on horizontal overlap detection only (no artificial event count limits)
+4. **2-slot half-columns**: Each half-column contains exactly 2 slots for full cards
+5. **Temporal anchor centering**: Timeline anchors positioned at center of half-column events
 
 ## Card Types & Slot Allocation
 
@@ -142,50 +142,116 @@ Result: 2 cards total, 15 slots used
 
 ## Layout Positioning System
 
-### Column Structure
+### Half-Column Structure
 ```
-      Column A              Column B
-   ┌─────────────┐      ┌─────────────┐
-   │ Slot 1 (E1) │      │ Slot 1 (E4) │  ← Above timeline
-   ├─────────────┤      ├─────────────┤
-   │ Slot 2 (E2) │      │ Slot 2 (E5) │
-   ├─────────────┤      ├─────────────┤
-───●─────────────●──────●─────────────●─── ← Timeline + Anchors
-   │ Slot 3 (E3) │      │ Slot 3      │
-   ├─────────────┤      ├─────────────┤
-   │ Slot 4      │      │ Slot 4      │  ← Below timeline
-   └─────────────┘      └─────────────┘
+   Above Half-Columns (Independent):
+   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+   │ Slot 1 (E1) │      │ Slot 1 (E3) │      │ Slot 1 (E5) │  
+   ├─────────────┤      ├─────────────┤      ├─────────────┤
+   │ Slot 2      │      │ Slot 2      │      │ Slot 2      │  
+   └─────────────┘      └─────────────┘      └─────────────┘
+───●─────────────●──────●─────────────●──────●─────────────●─── ← Timeline
+   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+   │ Slot 1 (E2) │      │ Slot 1 (E4) │      │ Slot 1      │  
+   ├─────────────┤      ├─────────────┤      ├─────────────┤
+   │ Slot 2      │      │ Slot 2      │      │ Slot 2      │  
+   └─────────────┘      └─────────────┘      └─────────────┘
+   Below Half-Columns (Independent):
 
-   Anchor A (centered)   Anchor B (centered)
+   Half-Column A1       Half-Column A2       Half-Column A3
+   (Above)              (Above)              (Above)
+   
+   Half-Column B1       Half-Column B2       Half-Column B3  
+   (Below)              (Below)              (Below)
+```
+
+**Key Changes from Full Columns:**
+- Above and below sections are completely independent
+- Each half-column has only 2 slots (not 4)
+- Events alternate between above/below chronologically
+- No cross-communication between above/below systems
+
+### Half-Column Alternating Algorithm
+
+**User-Specified Algorithm:**
+1. **Chronological Processing**: Sort all events by date (oldest to newest)
+2. **Alternating Placement**: Process events in order, alternating placement:
+   - Event 1 → Above timeline (Above Half-Column System)  
+   - Event 2 → Below timeline (Below Half-Column System)
+   - Event 3 → Above timeline (Above Half-Column System)
+   - Event 4 → Below timeline (Below Half-Column System)
+   - Continue pattern...
+
+3. **Independent Half-Column Creation**: Within each system (above/below):
+   - Start with leftmost event in that system
+   - Create first half-column with 2 slots
+   - For next event in same system:
+     - Check if event falls within horizontal space of existing half-columns
+     - If YES: Add to existing half-column (if slots available)
+     - If NO: Create new half-column
+   - Half-columns are created based on **spatial overlap only** (no artificial event count limits)
+
+4. **Temporal Anchor Positioning**: Each half-column's anchor positioned at center of its events' date range
+
+### Example: 6 Events Processing
+```
+Input Events (chronological): E1(Jan 1), E2(Jan 3), E3(Jan 10), E4(Jan 12), E5(Jan 20), E6(Jan 25)
+
+Step 1: Alternating Placement
+- E1(Jan 1) → Above System
+- E2(Jan 3) → Below System  
+- E3(Jan 10) → Above System
+- E4(Jan 12) → Below System
+- E5(Jan 20) → Above System
+- E6(Jan 25) → Below System
+
+Step 2: Above System Half-Column Creation
+- E1(Jan 1): Create Above Half-Column A1
+- E3(Jan 10): Check horizontal overlap with A1
+  - If overlaps: Add to A1 (slots: E1, E3)
+  - If no overlap: Create Above Half-Column A2
+- E5(Jan 20): Check overlap with existing above half-columns...
+
+Step 3: Below System Half-Column Creation (Independent)
+- E2(Jan 3): Create Below Half-Column B1
+- E4(Jan 12): Check horizontal overlap with B1
+  - If overlaps: Add to B1 (slots: E2, E4)  
+  - If no overlap: Create Below Half-Column B2
+- E6(Jan 25): Check overlap with existing below half-columns...
 ```
 
 ### Horizontal Spacing Calculation
 ```
-Column width = max(card_width, min_column_width)
-Column spacing = column_width + horizontal_gap
-Anchor position = column_center_x
+Half-Column width = max(card_width, min_half_column_width)
+Half-Column spacing = half_column_width + horizontal_gap
+Anchor position = half_column_temporal_center
 
-For Column A: events from x1 to x2
-Anchor X = (x1 + x2) / 2
+For Above Half-Column A1 with events [E1, E3]:
+Anchor X = (E1.date + E3.date) / 2 (temporal center)
 ```
 
 ## Key Guarantees
 
 ### 1. Zero Overlaps
-- **Vertical**: Each slot can only hold one card, tracked by occupancy
-- **Horizontal**: Columns are spaced by `column_width + gap`
-- **Mathematical**: Slot allocation is deterministic and predictable
+- **Vertical**: Each half-column slot can only hold one card, tracked by occupancy per side
+- **Horizontal**: Half-columns are spaced by `half_column_width + gap`
+- **Independence**: Above and below systems cannot interfere with each other
 
-### 2. Predictable Degradation
-- **1:2 ratio**: 1 Full card becomes exactly 2 Compact cards
-- **1:4 ratio**: 1 Full card becomes exactly 4 Title-only cards  
-- **1:5 ratio**: 1 Full card becomes exactly 5 Multi-event entries
-- **No partial degradation**: All cards in a group degrade together
+### 2. Alternating Distribution
+- **Chronological**: Events processed in date order for deterministic placement
+- **Balanced**: Even events go below, odd events go above timeline
+- **Predictable**: Pattern ensures roughly equal above/below distribution
 
-### 3. Optimal Space Usage
-- **Minimum slots**: Algorithm chooses degradation level requiring fewest total slots
-- **Balanced columns**: Events distributed to minimize total column count
-- **Centered anchors**: Time accuracy maintained through mathematical centering
+### 3. Spatial Clustering
+- **Horizontal Overlap**: Half-columns created only when events spatially overlap horizontally
+- **No Artificial Limits**: Removed TARGET_EVENTS_PER_CLUSTER constraints
+- **Organic Growth**: Half-columns grow based on timeline space, not event counts
+- **Independent Per Side**: Above and below clustering operates completely separately
+
+### 4. Optimal Space Usage  
+- **2-slot half-columns**: Each half-column accommodates exactly 2 full cards
+- **Temporal distribution**: Events spread across full timeline width (>50% coverage expected)
+- **Balanced utilization**: Independent above/below systems optimize space separately
 
 ## Phase 0: Core Implementation ✅ (COMPLETED - 2025-08-19)
 

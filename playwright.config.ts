@@ -27,5 +27,7 @@ export default defineConfig({
     headless: true,
     // Enable visual comparisons
     screenshot: 'only-on-failure',
+    // Use larger viewport for better screenshots
+    viewport: { width: 1920, height: 1080 },
   },
 });

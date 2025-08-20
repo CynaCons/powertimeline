@@ -16,6 +16,7 @@ import { CapacityModel, CARD_FOOTPRINTS, DEGRADATION_CASCADE } from './CapacityM
 export interface ColumnGroup {
   id: string;
   events: Event[];
+  overflowEvents?: Event[];
   startX: number;
   endX: number;
   centerX: number;
@@ -73,10 +74,11 @@ export class DeterministicLayoutV5 {
   private capacityModel: CapacityModel;
   private timeRange: { startTime: number; endTime: number; duration: number } | null = null;
   
-  // Configuration for dispatch and clustering
-  private readonly TARGET_EVENTS_PER_CLUSTER = { min: 4, max: 6 };
-  private readonly MIN_GROUP_PITCH = 120; // Minimum pixels between groups
-  private readonly PROXIMITY_MERGE_THRESHOLD = 80; // Merge groups closer than this
+  // Configuration for spatial-based clustering (Stage 3B)
+  private readonly MIN_GROUP_PITCH = 120; // Minimum pixels between groups for spatial separation
+  private readonly MIN_HALF_COLUMN_WIDTH = 100; // Minimum adaptive width (pixels)
+  private readonly MAX_HALF_COLUMN_WIDTH = 800; // Maximum adaptive width (pixels)
+  private readonly TEMPORAL_GROUPING_FACTOR = 0.07; // 7% of timeline range for grouping window
   
   // Stability & churn minimization (Phase 0.6)
   private readonly STABLE_SORT_TIE_BREAKER = true; // Use stable sorting for determinism
@@ -99,20 +101,21 @@ export class DeterministicLayoutV5 {
     // Calculate time range from actual events
     this.calculateTimeRange(events);
 
-    // Stage 1: Core Layout Foundation - Dispatch events optimally
-    const dispatchedGroups = this.dispatchEvents(events);
+    // Calculate adaptive half-column width for telemetry (Stage 3i1)
+    const adaptiveHalfColumnWidth = this.calculateAdaptiveHalfColumnWidth();
+
+    // Stage 1: Half-Column System - Dispatch events with alternating placement and spatial clustering
+    const halfColumnGroups = this.dispatchEvents(events);
     
-    // Stage 2: Clustering & Distribution - Apply left-to-right clustering
-    const clusteredGroups = this.applyLeftToRightClustering(dispatchedGroups);
-    
+    // Stage 2: Skip old clustering system - half-columns already handle spatial clustering
     // Stage 3: Complete Degradation System - Apply degradation and promotion
-    const degradedGroups = this.applyDegradationAndPromotion(clusteredGroups);
+    const degradedGroups = this.applyDegradationAndPromotion(halfColumnGroups);
     
     // Position cards with zero-overlap guarantee
     const finalResult = this.positionCardsWithFitAlgorithm(degradedGroups);
     
-    // Calculate and attach metrics
-    const metrics = this.calculateMetrics(finalResult, this.config);
+    // Calculate and attach metrics including adaptive width telemetry
+    const metrics = this.calculateMetrics(finalResult, this.config, adaptiveHalfColumnWidth);
     
     return {
       ...finalResult,
@@ -121,71 +124,169 @@ export class DeterministicLayoutV5 {
   }
 
   /**
-   * Stage 1: Dispatch events across timeline width for optimal distribution
-   * Now uses actual temporal positions for proper horizontal spread with stability
+   * Stage 3i1: Calculate half-column width based on card width for overlap detection
+   * Formula: card_width + spacing_buffer for visual overlap detection
+   */
+  private calculateAdaptiveHalfColumnWidth(): number {
+    // Use a fixed conservative width that encourages proper clustering
+    // This should be smaller than card width to force temporal grouping
+    return 200; // Smaller width forces events to share half-columns more aggressively
+  }
+
+  /**
+   * Stage 1: Half-Column Alternating Algorithm (Stage 3B)
+   * Implements chronological processing with alternating above/below placement
    */
   private dispatchEvents(events: Event[]): ColumnGroup[] {
     // Use stable sorting with deterministic tie-breakers (Phase 0.6)
     const sortedEvents = this.stableSortEvents(events);
 
-    // Use full viewport width with generous margins for better spread
-    const leftMargin = 80; // Increased from 50 for better spacing
-    const rightMargin = 80; // Increased from 50 for better spacing  
+    // Calculate adaptive half-column width based on temporal density (Stage 3i1)
+    const adaptiveHalfColumnWidth = this.calculateAdaptiveHalfColumnWidth();
+
+    // Use more horizontal space with minimal margins for better temporal accuracy
+    const leftMargin = 40;
+    const rightMargin = 40; 
     const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
     
-    // Calculate optimal number of groups based on density
-    const targetGroups = Math.ceil(events.length / this.TARGET_EVENTS_PER_CLUSTER.max);
-    const actualGroups = Math.max(1, Math.min(targetGroups, Math.floor(usableWidth / this.MIN_GROUP_PITCH)));
+    // Separate above and below half-column systems
+    const aboveHalfColumns: ColumnGroup[] = [];
+    const belowHalfColumns: ColumnGroup[] = [];
     
-    // Initialize column groups
-    const groups: ColumnGroup[] = [];
-    const eventsPerGroup = Math.ceil(events.length / actualGroups);
-    
-    // Distribute events into initial groups with proper temporal positioning
-    for (let i = 0; i < actualGroups; i++) {
-      const groupEvents = sortedEvents.slice(i * eventsPerGroup, (i + 1) * eventsPerGroup);
-      if (groupEvents.length === 0) continue;
+    // Process events chronologically with alternating placement
+    for (let i = 0; i < sortedEvents.length; i++) {
+      const event = sortedEvents[i];
+      const shouldGoAbove = (i % 2) === 0; // Even index (0,2,4...) → above, odd (1,3,5...) → below
       
-      const groupId = `group-${i}`;
-      this.capacityModel.initializeColumn(groupId);
-      
-      // Calculate X position based on temporal position within the time range
-      const groupDates = groupEvents.map(e => new Date(e.date).getTime());
-      const groupMinTime = Math.min(...groupDates);
-      const groupMaxTime = Math.max(...groupDates);
-      const groupCenterTime = (groupMinTime + groupMaxTime) / 2;
-      
-      // Map temporal position to screen X coordinate
-      let centerX: number;
+      // Calculate temporal X position for this event
+      const eventTime = new Date(event.date).getTime();
+      let eventX: number;
       if (this.timeRange) {
-        const timeRatio = (groupCenterTime - this.timeRange.startTime) / this.timeRange.duration;
-        centerX = leftMargin + (timeRatio * usableWidth);
+        const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
+        eventX = leftMargin + (timeRatio * usableWidth);
       } else {
-        // Fallback to even distribution if time range not calculated
-        centerX = leftMargin + ((i + 0.5) * usableWidth) / actualGroups;
+        // Fallback to sequential positioning
+        eventX = leftMargin + (i * usableWidth) / Math.max(1, sortedEvents.length - 1);
       }
       
-      // Calculate group bounds with proper width
-      const groupWidth = usableWidth / actualGroups;
-      const startX = Math.max(leftMargin, centerX - groupWidth / 2);
-      const endX = Math.min(this.config.viewportWidth - rightMargin, centerX + groupWidth / 2);
+      // Find or create appropriate half-column
+      const targetSystem = shouldGoAbove ? aboveHalfColumns : belowHalfColumns;
+      const existingHalfColumn = this.findOverlappingHalfColumn(targetSystem, eventX);
       
-      groups.push({
-        id: groupId,
-        events: groupEvents,
-        startX,
-        endX,
-        centerX,
-        anchor: this.createAnchor(groupEvents, centerX),
-        cards: [],
-        capacity: {
-          above: { used: 0, total: 4 },
-          below: { used: 0, total: 4 }
+      if (existingHalfColumn && existingHalfColumn.events.length < 2) {
+        // Add to existing half-column (max 2 slots)
+        existingHalfColumn.events.push(event);
+        this.updateHalfColumnBounds(existingHalfColumn, event, eventX);
+      } else if (existingHalfColumn && existingHalfColumn.events.length >= 2) {
+        // Half-column at capacity - add to overflow, don't create overlapping half-column
+        if (!existingHalfColumn.overflowEvents) {
+          existingHalfColumn.overflowEvents = [];
         }
-      });
+        existingHalfColumn.overflowEvents.push(event);
+        // Update anchor to show overflow count
+        existingHalfColumn.anchor = this.createAnchor(
+          existingHalfColumn.events, 
+          existingHalfColumn.centerX, 
+          existingHalfColumn.events.length,
+          existingHalfColumn.overflowEvents.length
+        );
+      } else {
+        // No overlap - create new half-column
+        const systemPrefix = shouldGoAbove ? 'above' : 'below';
+        const halfColumnId = `${systemPrefix}-${targetSystem.length}`;
+        
+        this.capacityModel.initializeColumn(halfColumnId);
+        
+        const newHalfColumn: ColumnGroup = {
+          id: halfColumnId,
+          events: [event],
+          startX: eventX - adaptiveHalfColumnWidth / 2,
+          endX: eventX + adaptiveHalfColumnWidth / 2,
+          centerX: eventX,
+          anchor: this.createAnchor([event], eventX),
+          cards: [],
+          capacity: {
+            above: shouldGoAbove ? { used: 0, total: 2 } : { used: 0, total: 0 },
+            below: shouldGoAbove ? { used: 0, total: 0 } : { used: 0, total: 2 }
+          }
+        };
+        
+        targetSystem.push(newHalfColumn);
+      }
     }
     
-    return groups;
+    // Ensure spatial separation to prevent overlaps (Stage 3i3)
+    this.ensureSpatialSeparation(aboveHalfColumns, usableWidth, leftMargin, adaptiveHalfColumnWidth);
+    this.ensureSpatialSeparation(belowHalfColumns, usableWidth, leftMargin, adaptiveHalfColumnWidth);
+    
+    
+    // Combine both systems for return
+    return [...aboveHalfColumns, ...belowHalfColumns];
+  }
+
+  /**
+   * Find overlapping half-column based on horizontal space
+   */
+  private findOverlappingHalfColumn(halfColumns: ColumnGroup[], eventX: number): ColumnGroup | null {
+    for (const halfColumn of halfColumns) {
+      if (eventX >= halfColumn.startX && eventX <= halfColumn.endX) {
+        return halfColumn;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Update half-column bounds when adding new event
+   */
+  private updateHalfColumnBounds(halfColumn: ColumnGroup, event: Event, eventX: number): void {
+    const eventTime = new Date(event.date).getTime();
+    const allTimes = halfColumn.events.map(e => new Date(e.date).getTime());
+    allTimes.push(eventTime);
+    
+    const minTime = Math.min(...allTimes);
+    const maxTime = Math.max(...allTimes);
+    const centerTime = (minTime + maxTime) / 2;
+    
+    // Update temporal center position
+    if (this.timeRange) {
+      const timeRatio = (centerTime - this.timeRange.startTime) / this.timeRange.duration;
+      const leftMargin = 40;
+      const usableWidth = this.config.viewportWidth - 80;
+      halfColumn.centerX = leftMargin + (timeRatio * usableWidth);
+    }
+    
+    // Update anchor with new center
+    halfColumn.anchor = this.createAnchor(halfColumn.events, halfColumn.centerX);
+  }
+
+  /**
+   * Ensure minimum spatial separation between half-columns to prevent overlaps
+   */
+  private ensureSpatialSeparation(halfColumns: ColumnGroup[], usableWidth: number, leftMargin: number, adaptiveHalfColumnWidth: number): void {
+    if (halfColumns.length <= 1) return;
+    
+    // Sort by centerX position
+    halfColumns.sort((a, b) => a.centerX - b.centerX);
+    
+    // Ensure minimum spacing between adjacent half-columns
+    for (let i = 1; i < halfColumns.length; i++) {
+      const prev = halfColumns[i - 1];
+      const current = halfColumns[i];
+      
+      const minSpacing = this.MIN_GROUP_PITCH;
+      const requiredMinX = prev.centerX + minSpacing;
+      
+      if (current.centerX < requiredMinX) {
+        // Adjust current half-column position
+        current.centerX = Math.min(requiredMinX, leftMargin + usableWidth - adaptiveHalfColumnWidth / 2);
+        current.startX = current.centerX - adaptiveHalfColumnWidth / 2;
+        current.endX = current.centerX + adaptiveHalfColumnWidth / 2;
+        
+        // Update anchor position
+        current.anchor = this.createAnchor(current.events, current.centerX);
+      }
+    }
   }
 
   /**
@@ -253,20 +354,9 @@ export class DeterministicLayoutV5 {
     };
 
     for (const group of groups) {
-      const eventCount = group.events.length;
-      
-      // Never aggregate singletons
-      if (eventCount === 1) {
-        group.cards = this.createIndividualCards(group, ['full']);
-        continue;
-      }
-
-      // Check available capacity for this group
-      const availableCapacity = this.calculateAvailableCapacity(group);
-      const optimalLayout = this.calculateOptimalLayout(group.events, availableCapacity);
-      
-      // Apply the optimal layout
-      group.cards = this.createCardsFromLayout(group, optimalLayout, aggregationMetrics);
+      // STAGE 1: Force full cards only for now
+      // Space limiting will be handled in positioning phase
+      group.cards = this.createIndividualCards(group, ['full']);
     }
 
     // Store aggregation metrics for telemetry
@@ -561,68 +651,62 @@ export class DeterministicLayoutV5 {
     const availableBelow = this.config.viewportHeight - this.timelineY - bottomMargin - timelineMargin;
     
     for (const group of groups) {
-      anchors.push(group.anchor);
+      // Calculate optimal card size to better use available space
+      const cardSpacing = 20;
+      // Half-column capacity: respect pre-determined above/below assignment
+      const maxCardsAbove = Math.floor(availableAbove / (140 + cardSpacing));
+      const maxCardsBelow = Math.floor(availableBelow / (140 + cardSpacing));
       
-      // Split cards between above and below
-      const aboveCards = group.cards.filter((_, i) => i % 2 === 0);
-      const belowCards = group.cards.filter((_, i) => i % 2 === 1);
+      const isAboveHalfColumn = group.capacity.above.total > 0;
+      const isBelowHalfColumn = group.capacity.below.total > 0;
       
-      // Calculate spacing to use more vertical space - remove the 20px cap
-      const aboveSpacing = Math.max(15, availableAbove / (aboveCards.length + 1)); // Minimum 15px, but use full space
-      const belowSpacing = Math.max(15, availableBelow / (belowCards.length + 1)); // Minimum 15px, but use full space
+      const cardsAboveLimit = isAboveHalfColumn ? Math.min(maxCardsAbove, group.cards.length) : 0;
+      const cardsBelowLimit = isBelowHalfColumn ? Math.min(maxCardsBelow, group.cards.length) : 0;
+      const totalCapacity = cardsAboveLimit + cardsBelowLimit;
       
-      // Position above cards spreading from timeline upward
+      
+      // Calculate optimal card height based on available space and card count
+      const optimalAboveHeight = cardsAboveLimit > 0 ? Math.floor((availableAbove - (cardsAboveLimit - 1) * cardSpacing) / cardsAboveLimit) : 0;
+      const optimalBelowHeight = cardsBelowLimit > 0 ? Math.floor((availableBelow - (cardsBelowLimit - 1) * cardSpacing) / cardsBelowLimit) : 0;
+      const dynamicCardHeight = Math.min(Math.max(optimalAboveHeight, optimalBelowHeight), 200); // Cap at 200px max
+      
+      // Limit cards to what actually fits
+      const actualCards = group.cards.slice(0, totalCapacity);
+      
+      // Update anchor with actual visible count
+      const updatedAnchor = this.createAnchor(group.events, group.centerX, actualCards.length);
+      anchors.push(updatedAnchor);
+      
+      // Respect half-column pre-determined position (above vs below)
+      const aboveCards = isAboveHalfColumn ? actualCards.slice(0, cardsAboveLimit) : [];
+      const belowCards = isBelowHalfColumn ? actualCards.slice(0, cardsBelowLimit) : [];
+      
+      // Position above cards with dynamic sizing and proper spacing
       let aboveY = this.timelineY - timelineMargin;
       aboveCards.forEach((card) => {
-        // Ensure minimum spacing to avoid overlaps
-        const minSpacing = 15;
-        const effectiveSpacing = Math.max(minSpacing, aboveSpacing);
-        
+        // Update card height to use more vertical space
+        card.height = dynamicCardHeight;
         card.y = aboveY - card.height;
-        aboveY -= (card.height + effectiveSpacing);
         card.x = group.centerX - (card.width / 2);
+        aboveY -= (card.height + cardSpacing);
         
-        // Check for overlaps with previously positioned cards
-        const overlap = positionedCards.find(existing => 
-          Math.abs(existing.x - card.x) < (existing.width + card.width) / 2 &&
-          Math.abs(existing.y - card.y) < (existing.height + card.height) / 2
-        );
-        
-        if (overlap) {
-          // Shift horizontally if overlap detected
-          card.x += card.width / 4;
-        }
-        
+        positionedCards.push(card);
         // Allocate capacity for tracking
         this.capacityModel.allocate(group.id, 'above', card.cardType);
-        positionedCards.push(card);
       });
       
-      // Position below cards spreading from timeline downward
+      // Position below cards with dynamic sizing and proper spacing
       let belowY = this.timelineY + timelineMargin;
       belowCards.forEach((card) => {
-        // Ensure minimum spacing to avoid overlaps
-        const minSpacing = 15;
-        const effectiveSpacing = Math.max(minSpacing, belowSpacing);
-        
+        // Update card height to use more vertical space
+        card.height = dynamicCardHeight;
         card.y = belowY;
-        belowY += (card.height + effectiveSpacing);
         card.x = group.centerX - (card.width / 2);
+        belowY += (card.height + cardSpacing);
         
-        // Check for overlaps with previously positioned cards
-        const overlap = positionedCards.find(existing => 
-          Math.abs(existing.x - card.x) < (existing.width + card.width) / 2 &&
-          Math.abs(existing.y - card.y) < (existing.height + card.height) / 2
-        );
-        
-        if (overlap) {
-          // Shift horizontally if overlap detected
-          card.x += card.width / 4;
-        }
-        
+        positionedCards.push(card);
         // Allocate capacity for tracking
         this.capacityModel.allocate(group.id, 'below', card.cardType);
-        positionedCards.push(card);
       });
       
       // Create cluster
@@ -692,18 +776,24 @@ export class DeterministicLayoutV5 {
   /**
    * Helper: Create anchor for a group of events
    */
-  private createAnchor(events: Event[], x: number): Anchor {
+  private createAnchor(events: Event[], x: number, visibleCount?: number, overflowCount?: number): Anchor {
     const dates = events.map(e => new Date(e.date).getTime());
     const minDate = Math.min(...dates);
     const maxDate = Math.max(...dates);
     const centerDate = new Date((minDate + maxDate) / 2);
+    const totalCount = events.length;
+    const visible = visibleCount ?? totalCount; // Default to all visible if not specified
+    const overflow = overflowCount ?? Math.max(0, totalCount - visible);
     
     return {
       id: `anchor-${x}`,
       x,
       y: this.timelineY,
       date: centerDate.toISOString(),
-      eventCount: events.length
+      eventIds: events.map(e => e.id),
+      eventCount: totalCount + overflow, // Include overflow in total count
+      visibleCount: visible,
+      overflowCount: overflow
     };
   }
 
@@ -729,10 +819,15 @@ export class DeterministicLayoutV5 {
   /**
    * Helper: Calculate dispatch and capacity metrics including aggregation and infinite
    */
-  private calculateMetrics(result: LayoutResult, config: LayoutConfig): { 
+  private calculateMetrics(result: LayoutResult, config: LayoutConfig, adaptiveHalfColumnWidth?: number): { 
     dispatch?: DispatchMetrics; 
     aggregation?: AggregationMetrics;
     infinite?: InfiniteMetrics;
+    adaptive?: {
+      halfColumnWidth: number;
+      temporalDensity: number;
+      temporalWindow: number;
+    };
   } {
     const groupXPositions = result.anchors.map(a => a.x).sort((a, b) => a - b);
     const pitches = groupXPositions.slice(1).map((x, i) => x - groupXPositions[i]);
@@ -768,8 +863,22 @@ export class DeterministicLayoutV5 {
       previewCount: this.infiniteMetrics.previewCount,
       byCluster: this.infiniteMetrics.byCluster
     };
+
+    // Stage 3i4: Add adaptive width telemetry
+    let adaptive: { halfColumnWidth: number; temporalDensity: number; temporalWindow: number } | undefined;
+    if (adaptiveHalfColumnWidth !== undefined && this.timeRange) {
+      const usableWidth = config.viewportWidth - 80;
+      const temporalDensity = this.timeRange.duration > 0 ? usableWidth / this.timeRange.duration : 0;
+      const temporalWindow = this.timeRange.duration * this.TEMPORAL_GROUPING_FACTOR;
+      
+      adaptive = {
+        halfColumnWidth: adaptiveHalfColumnWidth,
+        temporalDensity,
+        temporalWindow
+      };
+    }
     
-    return { dispatch, aggregation, infinite };
+    return { dispatch, aggregation, infinite, adaptive };
   }
 
   /**

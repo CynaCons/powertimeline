@@ -13,12 +13,12 @@ export function seedRandom(prev: Event[], count: number): Event[] {
   const base = Date.now() - 180 * dayMs; const next = [...prev];
   for (let i=0;i<count;i++) {
     const d = new Date(base + Math.floor(Math.random()*360)*dayMs).toISOString().slice(0,10);
-    next.push({ id: (Date.now()+Math.random()+i).toString(36), date: d, title: `Rand ${next.length+1}`, description: randLorem(2) });
+    next.push({ id: (Date.now()+Math.random()+i).toString(36), date: d, title: `Random Event ${next.length+1}`, description: randLorem(8) + ' ' + randLorem(6) + ' ' + randLorem(4) });
   }
   return next;
 }
 // Incremental testing function for gradual event addition at random timepoints
-export function seedIncremental(prev: Event[], targetCount: number): Event[] {
+export function seedIncremental(prev: Event[], addCount: number): Event[] {
   const result = [...prev];
   
   // Calculate current timeline date range or use default
@@ -37,19 +37,36 @@ export function seedIncremental(prev: Event[], targetCount: number): Event[] {
     maxDate += expansion;
   }
   
-  // Add events until we reach target count
-  while (result.length < targetCount) {
+  // Always add the requested number of events
+  for (let i = 0; i < addCount; i++) {
     const eventNumber = result.length + 1;
+    const timestamp = Date.now();
+    const randomSeed = Math.random();
     
     // Generate random date within the timeline range
     const randomTime = minDate + Math.random() * (maxDate - minDate);
     const randomDate = new Date(randomTime);
     
+    // Varied event types for clustering testing with longer descriptions
+    const eventTypes = [
+      { prefix: 'Meeting', desc: 'Comprehensive team meeting to discuss project progress, review current milestones, address blocking issues, and plan next steps for the upcoming sprint. Key stakeholders will present updates on their respective areas and we will coordinate cross-team dependencies.' },
+      { prefix: 'Review', desc: 'Detailed code review session with development team members covering recent pull requests, architectural decisions, and best practices. We will examine code quality, performance implications, security considerations, and ensure adherence to coding standards.' },
+      { prefix: 'Planning', desc: 'Strategic planning session for upcoming milestones including resource allocation, timeline estimation, risk assessment, and stakeholder alignment. We will define success criteria, identify potential blockers, and establish communication protocols for the next phase.' },
+      { prefix: 'Demo', desc: 'Product demonstration for stakeholders and clients showcasing new features, user experience improvements, and technical capabilities. This will include live demonstrations, Q&A sessions, and gathering feedback for future iterations and enhancements.' },
+      { prefix: 'Training', desc: 'Comprehensive training session covering new tools, processes, and methodologies being adopted by the team. This will include hands-on workshops, documentation review, best practices sharing, and knowledge transfer from experienced team members.' },
+      { prefix: 'Launch', desc: 'Product launch event with marketing coordination, press releases, customer communications, and post-launch monitoring. We will coordinate with multiple teams to ensure smooth deployment, track key metrics, and respond to any issues that arise.' },
+      { prefix: 'Analysis', desc: 'In-depth data analysis and performance review session examining user metrics, system performance, business KPIs, and customer feedback. We will identify trends, opportunities for improvement, and data-driven recommendations for future development priorities.' },
+      { prefix: 'Workshop', desc: 'Interactive workshop for skill development covering industry best practices, new technologies, collaborative techniques, and professional growth opportunities. Participants will engage in hands-on activities, group discussions, and practical exercises.' }
+    ];
+    
+    const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+    const uniqueId = `inc-${timestamp}-${randomSeed.toString(36).substr(2, 5)}-${i}`;
+    
     result.push({
-      id: `inc-${eventNumber}-${Date.now()}-${Math.floor(Math.random()*1000)}`, // Unique ID
-      date: randomDate.toISOString().slice(0, 10),
-      title: `Event ${eventNumber}`,
-      description: `Incremental test event ${eventNumber} - added at random timepoint`
+      id: uniqueId,
+      title: `${eventType.prefix} ${eventNumber}`,
+      description: eventType.desc,
+      date: randomDate.toISOString().slice(0, 10)
     });
   }
   
@@ -58,12 +75,12 @@ export function seedIncremental(prev: Event[], targetCount: number): Event[] {
 
 export function seedClustered(prev: Event[]): Event[] {
   const next = [...prev]; const centers = [-10,0,12].map(o => Date.now()+o*dayMs); let idx=1;
-  for (let ci=0; ci<centers.length; ci++) for (let i=0;i<10;i++) { const jitter = (Math.floor(Math.random()*7)-3)*dayMs; const d=new Date(centers[ci]+jitter).toISOString().slice(0,10); next.push({ id:(Date.now()+Math.random()+ci*100+i).toString(36), date:d, title:`Cluster ${ci+1}-${idx++}`, description:randLorem(3)});}  
+  for (let ci=0; ci<centers.length; ci++) for (let i=0;i<10;i++) { const jitter = (Math.floor(Math.random()*7)-3)*dayMs; const d=new Date(centers[ci]+jitter).toISOString().slice(0,10); next.push({ id:(Date.now()+Math.random()+ci*100+i).toString(36), date:d, title:`Cluster ${ci+1}-${idx++}`, description:randLorem(8) + ' ' + randLorem(6) + ' ' + randLorem(5)});}  
   return next;
 }
 export function seedLongRange(prev: Event[]): Event[] {
   const start=new Date('2015-01-01').getTime(); const months=60; const next=[...prev];
-  for (let i=0;i<months;i++){ const d=new Date(start+i*(dayMs*30)).toISOString().slice(0,10); next.push({ id:(Date.now()+Math.random()+i).toString(36), date:d, title:`Long ${i+1}`, description:randLorem(2)});} 
+  for (let i=0;i<months;i++){ const d=new Date(start+i*(dayMs*30)).toISOString().slice(0,10); next.push({ id:(Date.now()+Math.random()+i).toString(36), date:d, title:`Long Range Event ${i+1}`, description:randLorem(8) + ' ' + randLorem(7) + ' ' + randLorem(6)});} 
   return next;
 }
 

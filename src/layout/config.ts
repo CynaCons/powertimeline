@@ -4,8 +4,8 @@ import type { LayoutConfig, CardConfig, CardType } from './types';
 const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   full: {
     type: 'full',
-    width: 256,
-    height: 96
+    width: 280,
+    height: 140
   },
   compact: {
     type: 'compact', 
@@ -44,7 +44,7 @@ export function createLayoutConfig(
     clusterThreshold: 120, // Pixel distance for clustering events
     cardConfigs: DEFAULT_CARD_CONFIGS,
     columnSpacing: 20,     // Space between dual columns
-    rowSpacing: 10,        // Space between card rows
+    rowSpacing: 20,        // Space between card rows
     ...customConfig
   };
 }
@@ -129,14 +129,14 @@ export function getViewportSpecificConfig(width: number, height: number): Partia
       return {
         clusterThreshold: 120,
         columnSpacing: 20,
-        rowSpacing: 10,
+        rowSpacing: 20,
         cardConfigs: DEFAULT_CARD_CONFIGS
       };
     case 'ultrawide':
       return {
         clusterThreshold: 140,
         columnSpacing: 24,
-        rowSpacing: 12,
+        rowSpacing: 20,
         cardConfigs: DEFAULT_CARD_CONFIGS
       };
     default:
