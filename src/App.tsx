@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
+import { Stage1Demo } from './components/Stage1Demo';
 import type { Event } from './types';
 import { OutlinePanel } from './app/panels/OutlinePanel';
 import { EditorPanel } from './app/panels/EditorPanel';
@@ -47,9 +48,15 @@ function App() {
 
   // Panels & Dev toggle
   const devParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1';
+  const stage1Param = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('stage1') === '1';
   const [devEnabled, setDevEnabled] = useState<boolean>(() => {
     try { return devParam || localStorage.getItem(DEV_FLAG_KEY) === '1'; } catch { return devParam; }
   });
+  
+  // Stage 1 demo mode
+  if (stage1Param) {
+    return <Stage1Demo />;
+  }
   // Left sidebar overlays (permanent sidebar width = 56px)
   const [overlay, setOverlay] = useState<null | 'outline' | 'editor' | 'dev' | 'create'>(null);
   const overlayRef = useRef<HTMLElement | null>(null);
