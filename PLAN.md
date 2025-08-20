@@ -2,29 +2,29 @@
 
 ## REFACTORING PLAN - Layout Engine First Approach
 
-### Phase R1: Preserve & Consolidate Layout Engine
-- [ ] Remove DeterministicLayout.ts
-- [ ] Remove EnhancedDeterministicLayout.ts  
-- [ ] Remove DecorrelatedLayoutEngine.ts
-- [ ] Remove CorrectedSlotSystem.ts
-- [ ] Remove LayoutEngine.ts (old version)
-- [ ] Remove SingleColumnLayout.ts
-- [ ] Remove DualColumnLayout.ts
-- [ ] Remove EventClustering.ts
-- [ ] Remove EventDistribution.ts
-- [ ] Remove TimelineBounds.ts
-- [ ] Remove SlotBasedLayout.tsx
-- [ ] Remove TestSlotLayout.tsx
-- [ ] Remove TimelineWithSlots.tsx
-- [ ] Remove useSlotBasedLayout.ts
-- [ ] Rename DeterministicLayoutV5.ts to LayoutEngine.ts
+### Phase R1: Preserve & Consolidate Layout Engine ✅
+- [x] Remove DeterministicLayout.ts
+- [x] Remove EnhancedDeterministicLayout.ts  
+- [x] Remove DecorrelatedLayoutEngine.ts
+- [x] Remove CorrectedSlotSystem.ts
+- [x] Remove LayoutEngine.ts (old version)
+- [x] Remove SingleColumnLayout.ts
+- [x] Remove DualColumnLayout.ts
+- [x] Remove EventClustering.ts
+- [x] Remove EventDistribution.ts
+- [x] Remove TimelineBounds.ts
+- [x] Remove SlotBasedLayout.tsx
+- [x] Remove TestSlotLayout.tsx
+- [x] Remove TimelineWithSlots.tsx
+- [x] Remove useSlotBasedLayout.ts
+- [x] Rename DeterministicLayoutV5.ts to LayoutEngine.ts
 - [ ] Test current engine with extreme zoom scenarios
 - [ ] Verify degradation triggers properly at all zoom levels
 - [ ] Ensure temporal positioning remains accurate across zoom range
 - [ ] Document zoom behavior in engine interfaces
 
-### Phase R2: Clean Test Suite
-- [ ] Delete tests/_archive/ folder (47 test files + snapshots)
+### Phase R2: Clean Test Suite ✅
+- [x] Delete tests/_archive/ folder (47 test files + snapshots)
 - [ ] Add zoom robustness test cases
 - [ ] Add degradation boundary condition tests
 - [ ] Add performance regression tests (100+ events)
