@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Event } from '../types';
 import type { LayoutConfig } from './types';
 import { createLayoutConfig } from './config';
-import { DeterministicLayoutV5 } from './DeterministicLayoutV5';
+import { DeterministicLayoutV5 } from './LayoutEngine';
 
 interface DeterministicLayoutProps {
   events: Event[];
@@ -235,7 +235,9 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         
         for (let i = 0; i <= tickCount; i++) {
           const time = minDate + (range * i / tickCount);
-          const x = 20 + ((viewportSize.width - 40) * i / tickCount);
+          // Account for sidebar (56px) and add proper margins for date labels
+          const availableWidth = viewportSize.width - 56; // Subtract sidebar width
+          const x = 60 + ((availableWidth - 120) * i / tickCount); // 60px left margin, 60px right margin
           const date = new Date(time);
           
           ticks.push(
