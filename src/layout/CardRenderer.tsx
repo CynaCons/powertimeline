@@ -34,8 +34,8 @@ export function CardRenderer({
       data-card-type={card.cardType}
       data-cluster-id={card.clusterId}
       data-density={card.cardType}
-      data-multi={card.isMultiEvent}
-      data-summary={card.isSummaryCard}
+      data-multi={Array.isArray(card.event)}
+      data-summary={card.cardType === 'infinite'}
       className={`
         absolute cursor-pointer transition-all duration-200 ease-in-out
         ${getCardTypeStyles(card.cardType)}
@@ -43,10 +43,10 @@ export function CardRenderer({
         ${isHovered ? 'shadow-lg scale-105' : 'shadow-md'}
       `}
       style={{
-        left: card.x - card.cardWidth / 2,
-        top: card.y - card.cardHeight / 2,
-        width: card.cardWidth,
-        height: card.cardHeight,
+        left: card.x - card.width / 2,
+        top: card.y - card.height / 2,
+        width: card.width,
+        height: card.height,
         zIndex: isSelected ? 20 : (isHovered ? 15 : 10)
       }}
       onClick={handleClick}
@@ -58,18 +58,18 @@ export function CardRenderer({
       <svg
         className="absolute pointer-events-none"
         style={{
-          left: card.cardWidth / 2,
-          top: card.cardHeight / 2,
-          width: Math.abs(card.anchorX - card.x) + 20,
-          height: Math.abs(card.anchorY - card.y) + 20,
+          left: card.width / 2,
+          top: card.height / 2,
+          width: 100,
+          height: 100,
           transform: `translate(-50%, -50%)`
         }}
       >
         <line
           x1={0}
           y1={0}
-          x2={card.anchorX - card.x}
-          y2={card.anchorY - card.y}
+          x2={0}
+          y2={50}
           stroke="#9ca3af"
           strokeWidth={1}
           opacity={0.6}
@@ -205,7 +205,7 @@ function formatDate(dateString: string): string {
 }
 
 // Connector component for drawing lines from cards to anchors
-export function CardConnector({ card }: { card: PositionedCard }) {
+export function CardConnector({ card, anchorX, anchorY }: { card: PositionedCard; anchorX: number; anchorY: number }) {
   return (
     <svg
       className="absolute pointer-events-none"
@@ -220,8 +220,8 @@ export function CardConnector({ card }: { card: PositionedCard }) {
       <line
         x1={card.x}
         y1={card.y}
-        x2={card.anchorX}
-        y2={card.anchorY}
+        x2={anchorX}
+        y2={anchorY}
         stroke="#9ca3af"
         strokeWidth={1}
         opacity={0.4}

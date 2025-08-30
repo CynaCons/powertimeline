@@ -29,9 +29,8 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
 
   // Create layout configuration for deterministic layout
   const config: LayoutConfig = useMemo(() => {
-    // Account for sidebar width (56px) in available width calculation
-    const availableWidth = viewportSize.width - 56; // Subtract sidebar width
-    const baseConfig = createLayoutConfig(availableWidth, viewportSize.height);
+    // Pass full viewport width to LayoutEngine - it will handle sidebar margins internally
+    const baseConfig = createLayoutConfig(viewportSize.width, viewportSize.height);
     
     // Add time range calculation for proper X positioning
     if (events.length > 0) {
@@ -65,6 +64,56 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     return deterministicLayout.layout(events);
   }, [events, config]);
 
+  // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
+  const mergedOverflowBadges = useMemo(() => {
+    const anchors = layoutResult.anchors;
+    if (!anchors || anchors.length === 0) return [];
+    
+    const MERGE_THRESHOLD = 200; // Merge anchors within 200px for aggressive spacing
+    const overflowAnchors = anchors.filter((anchor: any) => anchor.overflowCount > 0);
+    const mergedBadges: Array<{
+      x: number;
+      y: number;
+      totalOverflow: number;
+      anchorIds: string[];
+    }> = [];
+    const processedAnchors = new Set<string>();
+    
+    // Sort anchors by X position for left-to-right processing
+    const sortedAnchors = [...overflowAnchors].sort((a: any, b: any) => a.x - b.x);
+    
+    for (const anchor of sortedAnchors) {
+      if (processedAnchors.has(anchor.id)) continue;
+      
+      // Find all nearby anchors within merge threshold (including current anchor)
+      const nearbyAnchors = sortedAnchors.filter((other: any) => 
+        !processedAnchors.has(other.id) && 
+        Math.abs(other.x - anchor.x) <= MERGE_THRESHOLD
+      );
+      
+      if (nearbyAnchors.length > 1) {
+        // Merge overflow counts from multiple anchors
+        const totalOverflow = nearbyAnchors.reduce((sum: number, a: any) => sum + a.overflowCount, 0);
+        const centroidX = nearbyAnchors.reduce((sum: number, a: any) => sum + a.x, 0) / nearbyAnchors.length;
+        
+        mergedBadges.push({
+          x: centroidX,
+          y: config.timelineY,
+          totalOverflow,
+          anchorIds: nearbyAnchors.map((a: any) => a.id)
+        });
+        
+        // Mark all anchors in group as processed
+        nearbyAnchors.forEach((a: any) => processedAnchors.add(a.id));
+      } else if (nearbyAnchors.length === 1) {
+        // Single anchor - keep individual badge but mark as processed
+        processedAnchors.add(anchor.id);
+      }
+    }
+    
+    return mergedBadges;
+  }, [layoutResult.anchors, config.timelineY]);
+
   // Telemetry: expose dispatch/capacity/placements for tests and overlays
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -72,12 +121,11 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
 
     // Use telemetry from layout engine if available, fallback to manual calculation
     const engineMetrics = layoutResult.telemetryMetrics;
-    let dispatchMetrics, aggregationMetrics, infiniteMetrics;
+    let dispatchMetrics, aggregationMetrics;
     
     if (engineMetrics) {
       dispatchMetrics = engineMetrics.dispatch;
       aggregationMetrics = engineMetrics.aggregation;
-      infiniteMetrics = engineMetrics.infinite;
     } else {
       // Fallback: calculate manually if engine metrics not available
       const groupsCount = clusters.length;
@@ -98,7 +146,6 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         horizontalSpaceUsage: 0 // Placeholder
       };
       aggregationMetrics = { totalAggregations: 0, eventsAggregated: 0, clustersAffected: 0 };
-      infiniteMetrics = { enabled: false, containers: 0, eventsContained: 0, previewCount: 0, byCluster: [] };
     }
 
     // Capacity model from layoutResult.utilization
@@ -195,6 +242,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     let alternatingPattern = true;
     for (let i = 0; i < sortedPlacements.length && alternatingPattern; i++) {
       const card = sortedPlacements[i];
+      if (!card) continue;
       const shouldBeAbove = (i % 2) === 0; // Even index (0,2,4...) should be above
       const isAbove = card.y < timelineY;
       if (shouldBeAbove !== isAbove) {
@@ -317,9 +365,13 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
         
         for (let i = 0; i <= tickCount; i++) {
           const time = minDate + (range * i / tickCount);
-          // Account for sidebar (56px) and add proper margins for date labels
-          const availableWidth = viewportSize.width - 56; // Subtract sidebar width
-          const x = 60 + ((availableWidth - 120) * i / tickCount); // 60px left margin, 60px right margin
+          // Use same margin calculation as LayoutEngine for consistency
+          const navRailWidth = 56;
+          const additionalMargin = 80; 
+          const leftMargin = navRailWidth + additionalMargin; // 136px total
+          const rightMargin = 40;
+          const usableWidth = viewportSize.width - leftMargin - rightMargin;
+          const x = leftMargin + (usableWidth * i / tickCount);
           const date = new Date(time);
           
           ticks.push(
@@ -340,32 +392,57 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
       })()}
       
       {/* Anchors */}
-      {layoutResult.anchors.map((anchor) => (
+      {layoutResult.anchors.map((anchor) => {
+        // Check if this anchor is part of a merged badge group
+        const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
+        
+        return (
+          <div
+            key={anchor.id}
+            data-testid={anchor.id}
+            className="absolute flex flex-col items-center"
+            style={{
+              left: anchor.x - 8,
+              top: (config?.timelineY ?? viewportSize.height / 2) - 8
+            }}
+          >
+            {/* Anchor dot */}
+            <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-sm z-20" />
+            {/* Vertical connector line */}
+            <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
+            
+            {/* Individual overflow badge - only show if NOT part of merged group */}
+            {anchor.overflowCount > 0 && !isMerged && (
+              <div className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30">
+                +{anchor.overflowCount}
+              </div>
+            )}
+            
+            {/* Total event count badge for debugging (remove later) */}
+            {anchor.eventCount > 1 && anchor.overflowCount === 0 && (
+              <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
+                {anchor.eventCount}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      
+      {/* Render merged overflow badges at centroids */}
+      {mergedOverflowBadges.map((badge, index) => (
         <div
-          key={anchor.id}
-          data-testid={anchor.id}
+          key={`merged-badge-${index}`}
+          data-testid={`merged-overflow-badge-${index}`}
           className="absolute flex flex-col items-center"
           style={{
-            left: anchor.x - 8,
+            left: badge.x - 8,
             top: (config?.timelineY ?? viewportSize.height / 2) - 8
           }}
         >
-          {/* Anchor dot */}
-          <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-sm z-20" />
-          {/* Vertical connector line */}
-          <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
-          {/* Overflow count badge - only show when there are hidden events */}
-          {anchor.overflowCount > 0 && (
-            <div className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30">
-              +{anchor.overflowCount}
-            </div>
-          )}
-          {/* Total event count badge for debugging (remove later) */}
-          {anchor.eventCount > 1 && anchor.overflowCount === 0 && (
-            <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
-              {anchor.eventCount}
-            </div>
-          )}
+          {/* Merged overflow badge */}
+          <div className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30">
+            +{badge.totalOverflow}
+          </div>
         </div>
       ))}
       

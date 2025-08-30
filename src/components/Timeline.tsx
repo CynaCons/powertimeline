@@ -71,6 +71,9 @@ const Timeline: React.FC<Props> = ({
   
   const dateRange = Math.max(1, maxDate - minDate);
   
+  // Support external control of view window for tests/dev via custom event
+  const [internalView, setInternalView] = React.useState<{start:number,end:number}>({ start: viewStart, end: viewEnd });
+  
   // Debug: Expose events info for testing
   React.useEffect(() => {
     (window as any).chronochartDebug = {
@@ -92,9 +95,6 @@ const Timeline: React.FC<Props> = ({
   const sidePad = Math.max(16, Math.floor(containerWidth * 0.05));
   const timelineWidth = containerWidth - sidePad * 2; // Leave margins
   const timelineLeft = sidePad; // Left margin
-  
-  // Support external control of view window for tests/dev via custom event
-  const [internalView, setInternalView] = React.useState<{start:number,end:number}>({ start: viewStart, end: viewEnd });
   React.useEffect(() => { setInternalView({ start: viewStart, end: viewEnd }); }, [viewStart, viewEnd]);
   React.useEffect(() => {
     const handler = (e: any) => {

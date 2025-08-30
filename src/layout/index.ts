@@ -1,8 +1,7 @@
 // Core layout system exports
-export { LayoutEngine } from './LayoutEngine';
+export { DeterministicLayoutV5 as LayoutEngine } from './LayoutEngine';
 export { SlotGrid } from './SlotGrid';
 export { EventClustering } from './clustering';
-export { SingleColumnLayout } from './SingleColumnLayout';
 
 // Configuration and utilities
 export { 
@@ -20,7 +19,7 @@ export { CardRenderer, CardConnector } from './CardRenderer';
 export { AnchorBadge, AnchorBadgeHtml } from './AnchorBadge';
 
 // React hooks
-export { useSlotBasedLayout, useSimpleSlotLayout } from './useSlotBasedLayout';
+// export { useSlotBasedLayout, useSimpleSlotLayout } from './useSlotBasedLayout';
 
 // Type definitions
 export type {

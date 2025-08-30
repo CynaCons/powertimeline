@@ -11,7 +11,7 @@
 
 import type { Event } from '../types';
 import type { LayoutConfig, LayoutResult, PositionedCard, CardType, EventCluster, Anchor } from './types';
-import { CapacityModel, CARD_FOOTPRINTS, DEGRADATION_CASCADE } from './CapacityModel';
+import { CapacityModel } from './CapacityModel';
 
 export interface ColumnGroup {
   id: string;
@@ -40,15 +40,6 @@ export interface DispatchMetrics {
   horizontalSpaceUsage: number; // Percentage of viewport width utilized (0-100)
 }
 
-interface LayoutPlan {
-  type: CardType;
-  cardCount: number;
-  eventsPerCard: number;
-  totalFootprint: number;
-  needsInfinite: boolean;
-  residualEvents: number;
-  infinitePreviewCount?: number;
-}
 
 interface AggregationMetrics {
   totalAggregations: number;
@@ -75,14 +66,7 @@ export class DeterministicLayoutV5 {
   private timeRange: { startTime: number; endTime: number; duration: number } | null = null;
   
   // Configuration for spatial-based clustering (Stage 3B)
-  private readonly MIN_GROUP_PITCH = 120; // Minimum pixels between groups for spatial separation
-  private readonly MIN_HALF_COLUMN_WIDTH = 100; // Minimum adaptive width (pixels)
-  private readonly MAX_HALF_COLUMN_WIDTH = 800; // Maximum adaptive width (pixels)
   private readonly TEMPORAL_GROUPING_FACTOR = 0.07; // 7% of timeline range for grouping window
-  
-  // Stability & churn minimization (Phase 0.6)
-  private readonly STABLE_SORT_TIE_BREAKER = true; // Use stable sorting for determinism
-  private readonly MIN_BOUNDARY_SHIFT = 50; // Minimum pixels to shift group boundaries
   
   constructor(config: LayoutConfig) {
     this.config = config;
@@ -124,13 +108,14 @@ export class DeterministicLayoutV5 {
   }
 
   /**
-   * Stage 3i1: Calculate half-column width based on card width for overlap detection
-   * Formula: card_width + spacing_buffer for visual overlap detection
+   * Stage 3i1: Calculate half-column width based on actual card width for proper overlap detection
+   * Formula: card_width + spacing_buffer to prevent visual collisions
    */
   private calculateAdaptiveHalfColumnWidth(): number {
-    // Use a fixed conservative width that encourages proper clustering
-    // This should be smaller than card width to force temporal grouping
-    return 200; // Smaller width forces events to share half-columns more aggressively
+    // Use actual full card width + generous spacing buffer to ensure zero overlaps
+    const fullCardWidth = this.config.cardConfigs.full.width; // 260px (reduced from 280px)
+    const spacingBuffer = 80; // Generous buffer for complete visual separation
+    return fullCardWidth + spacingBuffer; // 340px - ensures zero overlap detection
   }
 
   /**
@@ -144,8 +129,10 @@ export class DeterministicLayoutV5 {
     // Calculate adaptive half-column width based on temporal density (Stage 3i1)
     const adaptiveHalfColumnWidth = this.calculateAdaptiveHalfColumnWidth();
 
-    // Use more horizontal space with minimal margins for better temporal accuracy
-    const leftMargin = 40;
+    // Account for navigation rail + additional margin for better temporal accuracy
+    const navRailWidth = 56; // Standard navigation rail width
+    const additionalMargin = 80; // Extra spacing from nav rail (increased for all viewport sizes)
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
     const rightMargin = 40; 
     const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
     
@@ -160,29 +147,75 @@ export class DeterministicLayoutV5 {
       
       // Calculate temporal X position for this event
       const eventTime = new Date(event.date).getTime();
-      let eventX: number;
+      let eventXPos: number;
       if (this.timeRange) {
         const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
-        eventX = leftMargin + (timeRatio * usableWidth);
+        eventXPos = leftMargin + (timeRatio * usableWidth);
       } else {
         // Fallback to sequential positioning
-        eventX = leftMargin + (i * usableWidth) / Math.max(1, sortedEvents.length - 1);
+        eventXPos = leftMargin + (i * usableWidth) / Math.max(1, sortedEvents.length - 1);
       }
+      
+      // DEBUG: Log event processing
+      console.log(`\n🔍 Processing Event ${i}: "${event.title}" (${event.date})`);
+      console.log(`  - System: ${shouldGoAbove ? 'above' : 'below'}`);
+      console.log(`  - X position: ${Math.round(eventXPos)}`);
       
       // Find or create appropriate half-column
       const targetSystem = shouldGoAbove ? aboveHalfColumns : belowHalfColumns;
-      const existingHalfColumn = this.findOverlappingHalfColumn(targetSystem, eventX);
       
+      // STAGE 3i5 FIX: Check both systems for temporally close events (cross-system overflow)
+      const bothSystems = [...aboveHalfColumns, ...belowHalfColumns];
+      const anyExistingHalfColumn = this.findOverlappingHalfColumn(bothSystems, eventXPos);
+      
+      const existingHalfColumn = this.findOverlappingHalfColumn(targetSystem, eventXPos);
+      
+      // DEBUG: Log half-column detection
+      if (existingHalfColumn) {
+        console.log(`  - Found existing half-column: ${existingHalfColumn.id}`);
+        console.log(`    - Current events: ${existingHalfColumn.events.length}`);
+        console.log(`    - Events: [${existingHalfColumn.events.map(e => e.title).join(', ')}]`);
+        console.log(`    - Bounds: [${Math.round(existingHalfColumn.startX)}, ${Math.round(existingHalfColumn.endX)}]`);
+      } else {
+        console.log(`  - No overlapping half-column found`);
+        console.log(`  - Existing half-columns in system:`, targetSystem.map(hc => 
+          `${hc.id}[${Math.round(hc.startX)}, ${Math.round(hc.endX)}] (${hc.events.length} events)`
+        ));
+      }
+      
+      // Check if any half-column in the target system has space
       if (existingHalfColumn && existingHalfColumn.events.length < 2) {
         // Add to existing half-column (max 2 slots)
+        console.log(`  ✅ Adding to existing half-column (${existingHalfColumn.events.length + 1}/2 slots)`);
         existingHalfColumn.events.push(event);
-        this.updateHalfColumnBounds(existingHalfColumn, event, eventX);
-      } else if (existingHalfColumn && existingHalfColumn.events.length >= 2) {
+        this.updateHalfColumnBounds(existingHalfColumn, event, eventXPos);
+      } 
+      // Check if we should overflow to any existing half-column (cross-system)
+      else if (anyExistingHalfColumn && anyExistingHalfColumn.events.length >= 2) {
+        // Found temporally close half-column at capacity - use overflow instead of creating new half-column
+        console.log(`  🌊 CROSS-SYSTEM OVERFLOW! Using half-column ${anyExistingHalfColumn.id} overflow (${anyExistingHalfColumn.events.length} events)`);
+        if (!anyExistingHalfColumn.overflowEvents) {
+          anyExistingHalfColumn.overflowEvents = [];
+        }
+        anyExistingHalfColumn.overflowEvents.push(event);
+        console.log(`    - Added to overflow (${anyExistingHalfColumn.overflowEvents.length} overflow events)`);
+        // Update anchor to show overflow count
+        anyExistingHalfColumn.anchor = this.createAnchor(
+          anyExistingHalfColumn.events, 
+          anyExistingHalfColumn.centerX, 
+          anyExistingHalfColumn.events.length,
+          anyExistingHalfColumn.overflowEvents.length
+        );
+      }
+      // Standard same-system overflow
+      else if (existingHalfColumn && existingHalfColumn.events.length >= 2) {
         // Half-column at capacity - add to overflow, don't create overlapping half-column
+        console.log(`  🌊 OVERFLOW TRIGGERED! Half-column ${existingHalfColumn.id} at capacity (${existingHalfColumn.events.length} events)`);
         if (!existingHalfColumn.overflowEvents) {
           existingHalfColumn.overflowEvents = [];
         }
         existingHalfColumn.overflowEvents.push(event);
+        console.log(`    - Added to overflow (${existingHalfColumn.overflowEvents.length} overflow events)`);
         // Update anchor to show overflow count
         existingHalfColumn.anchor = this.createAnchor(
           existingHalfColumn.events, 
@@ -195,15 +228,18 @@ export class DeterministicLayoutV5 {
         const systemPrefix = shouldGoAbove ? 'above' : 'below';
         const halfColumnId = `${systemPrefix}-${targetSystem.length}`;
         
+        console.log(`  🆕 Creating new half-column: ${halfColumnId}`);
+        console.log(`    - Bounds: [${Math.round(eventXPos - adaptiveHalfColumnWidth / 2)}, ${Math.round(eventXPos + adaptiveHalfColumnWidth / 2)}]`);
+        
         this.capacityModel.initializeColumn(halfColumnId);
         
         const newHalfColumn: ColumnGroup = {
           id: halfColumnId,
           events: [event],
-          startX: eventX - adaptiveHalfColumnWidth / 2,
-          endX: eventX + adaptiveHalfColumnWidth / 2,
-          centerX: eventX,
-          anchor: this.createAnchor([event], eventX),
+          startX: eventXPos - adaptiveHalfColumnWidth / 2,
+          endX: eventXPos + adaptiveHalfColumnWidth / 2,
+          centerX: eventXPos,
+          anchor: this.createAnchor([event], eventXPos),
           cards: [],
           capacity: {
             above: shouldGoAbove ? { used: 0, total: 2 } : { used: 0, total: 0 },
@@ -239,7 +275,7 @@ export class DeterministicLayoutV5 {
   /**
    * Update half-column bounds when adding new event
    */
-  private updateHalfColumnBounds(halfColumn: ColumnGroup, event: Event, eventX: number): void {
+  private updateHalfColumnBounds(halfColumn: ColumnGroup, event: Event, _eventXPos: number): void {
     const eventTime = new Date(event.date).getTime();
     const allTimes = halfColumn.events.map(e => new Date(e.date).getTime());
     allTimes.push(eventTime);
@@ -251,8 +287,11 @@ export class DeterministicLayoutV5 {
     // Update temporal center position
     if (this.timeRange) {
       const timeRatio = (centerTime - this.timeRange.startTime) / this.timeRange.duration;
-      const leftMargin = 40;
-      const usableWidth = this.config.viewportWidth - 80;
+      const navRailWidth = 56;
+      const additionalMargin = 80;
+      const leftMargin = navRailWidth + additionalMargin; // 136px total
+      const rightMargin = 40;
+      const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
       halfColumn.centerX = leftMargin + (timeRatio * usableWidth);
     }
     
@@ -269,69 +308,60 @@ export class DeterministicLayoutV5 {
     // Sort by centerX position
     halfColumns.sort((a, b) => a.centerX - b.centerX);
     
+    // Use adaptive half-column width as minimum spacing to prevent overlaps
+    const minSpacing = adaptiveHalfColumnWidth; // 360px - ensures no overlap between 360px wide half-columns
+    
     // Ensure minimum spacing between adjacent half-columns
     for (let i = 1; i < halfColumns.length; i++) {
       const prev = halfColumns[i - 1];
       const current = halfColumns[i];
       
-      const minSpacing = this.MIN_GROUP_PITCH;
       const requiredMinX = prev.centerX + minSpacing;
       
       if (current.centerX < requiredMinX) {
-        // Adjust current half-column position
-        current.centerX = Math.min(requiredMinX, leftMargin + usableWidth - adaptiveHalfColumnWidth / 2);
-        current.startX = current.centerX - adaptiveHalfColumnWidth / 2;
-        current.endX = current.centerX + adaptiveHalfColumnWidth / 2;
+        // Check if we have space to move the current half-column
+        const maxPossibleX = leftMargin + usableWidth - adaptiveHalfColumnWidth / 2;
         
-        // Update anchor position
-        current.anchor = this.createAnchor(current.events, current.centerX);
+        if (requiredMinX <= maxPossibleX) {
+          // Adjust current half-column position to prevent overlap
+          console.log(`🔧 Moving half-column ${current.id} from ${Math.round(current.centerX)} to ${Math.round(requiredMinX)} to prevent overlap`);
+          current.centerX = requiredMinX;
+          current.startX = current.centerX - adaptiveHalfColumnWidth / 2;
+          current.endX = current.centerX + adaptiveHalfColumnWidth / 2;
+          
+          // Update anchor position
+          current.anchor = this.createAnchor(current.events, current.centerX);
+        } else {
+          // Not enough space - trigger overflow instead
+          console.log(`🌊 Half-column ${current.id} would exceed viewport - triggering overflow`);
+          
+          // Move events to previous half-column's overflow
+          if (!prev.overflowEvents) {
+            prev.overflowEvents = [];
+          }
+          prev.overflowEvents.push(...current.events);
+          
+          // Update previous half-column's anchor to show overflow
+          prev.anchor = this.createAnchor(
+            prev.events, 
+            prev.centerX, 
+            prev.events.length,
+            prev.overflowEvents.length
+          );
+          
+          // Mark current half-column for removal
+          current.events = [];
+          current.cards = [];
+        }
       }
     }
+    
+    // Remove empty half-columns that were overflowed
+    const filteredColumns = halfColumns.filter(hc => hc.events.length > 0);
+    halfColumns.length = 0;
+    halfColumns.push(...filteredColumns);
   }
 
-  /**
-   * Stage 2: Apply left-to-right clustering with proximity merge
-   */
-  private applyLeftToRightClustering(groups: ColumnGroup[]): ColumnGroup[] {
-    const mergedGroups: ColumnGroup[] = [];
-    let currentMerged: ColumnGroup | null = null;
-    
-    for (let i = 0; i < groups.length; i++) {
-      const group = groups[i];
-      const nextGroup = groups[i + 1];
-      
-      if (!currentMerged) {
-        currentMerged = { ...group };
-        mergedGroups.push(currentMerged);
-      }
-      
-      // Check if next group should be merged
-      if (nextGroup && (nextGroup.startX - group.endX) < this.PROXIMITY_MERGE_THRESHOLD) {
-        // Merge events
-        currentMerged.events.push(...nextGroup.events);
-        currentMerged.endX = nextGroup.endX;
-        currentMerged.centerX = (currentMerged.startX + currentMerged.endX) / 2;
-        currentMerged.anchor = this.createAnchor(currentMerged.events, currentMerged.centerX);
-        i++; // Skip next group since we merged it
-      } else {
-        currentMerged = null;
-      }
-    }
-    
-    // Split over-full groups if needed
-    const finalGroups: ColumnGroup[] = [];
-    for (const group of mergedGroups) {
-      if (group.events.length > this.TARGET_EVENTS_PER_CLUSTER.max * 2) {
-        // Split into multiple groups
-        const subGroups = this.splitGroup(group);
-        finalGroups.push(...subGroups);
-      } else {
-        finalGroups.push(group);
-      }
-    }
-    
-    return finalGroups;
-  }
 
   /**
    * Stage 3: Apply degradation cascade and promotion pass
@@ -379,232 +409,8 @@ export class DeterministicLayoutV5 {
     byCluster: []
   };
 
-  /**
-   * Calculate available capacity for a group
-   */
-  private calculateAvailableCapacity(group: ColumnGroup): number {
-    // Estimate available cells based on typical column capacity
-    // This is a simplified version - in practice would check actual slot availability
-    return 8; // 4 above + 4 below typical capacity
-  }
 
-  /**
-   * Calculate optimal layout for events given capacity constraints
-   * Now with infinite card overflow support (Phase 0.5.1)
-   */
-  private calculateOptimalLayout(events: Event[], availableCapacity: number): LayoutPlan {
-    const eventCount = events.length;
-    
-    // Configuration for infinite cards
-    const MULTI_EVENT_MAX_PER_SIDE = 2; // Maximum multi-event cards per side
-    const INFINITE_PREVIEW_K = 5; // Preview events in infinite card
-    const MAX_MULTI_EVENT_BUDGET = MULTI_EVENT_MAX_PER_SIDE * 5; // Max events in multi-event cards
-    
-    // Try different card type combinations to find optimal fit
-    const options = [
-      // Option 1: All full cards
-      { cards: [{ type: 'full', count: eventCount }], totalFootprint: eventCount * 4, needsInfinite: false },
-      // Option 2: All compact cards  
-      { cards: [{ type: 'compact', count: eventCount }], totalFootprint: eventCount * 2, needsInfinite: false },
-      // Option 3: All title-only cards
-      { cards: [{ type: 'title-only', count: eventCount }], totalFootprint: eventCount * 1, needsInfinite: false },
-      // Option 4: Multi-event cards (up to 5 events per card)
-      { 
-        cards: [{ type: 'multi-event', count: Math.ceil(eventCount / 5) }], 
-        totalFootprint: Math.ceil(eventCount / 5) * 4,
-        eventsPerCard: 5,
-        needsInfinite: false
-      }
-    ];
 
-    // Find the best option that fits within capacity
-    for (const option of options) {
-      if (option.totalFootprint <= availableCapacity) {
-        return {
-          type: option.cards[0].type,
-          cardCount: option.cards[0].count,
-          eventsPerCard: option.eventsPerCard || 1,
-          totalFootprint: option.totalFootprint,
-          needsInfinite: false,
-          residualEvents: 0
-        };
-      }
-    }
-
-    // If nothing fits, check if we can use multi-event + infinite cards
-    const multiEventCards = Math.min(MULTI_EVENT_MAX_PER_SIDE, Math.floor(availableCapacity / 4));
-    const accommodatedEvents = multiEventCards * 5;
-    const residualEvents = Math.max(0, eventCount - accommodatedEvents);
-    
-    if (residualEvents > 0 && multiEventCards > 0) {
-      // Use combination of multi-event + infinite cards
-      const infiniteCardFootprint = 4; // Fixed footprint for infinite cards
-      const totalFootprint = (multiEventCards * 4) + infiniteCardFootprint;
-      
-      if (totalFootprint <= availableCapacity) {
-        return {
-          type: 'multi-event', // Primary type
-          cardCount: multiEventCards,
-          eventsPerCard: 5,
-          totalFootprint,
-          needsInfinite: true,
-          residualEvents,
-          infinitePreviewCount: Math.min(INFINITE_PREVIEW_K, residualEvents)
-        };
-      }
-    }
-
-    // Fallback: Single infinite card containing all events
-    return {
-      type: 'infinite',
-      cardCount: 1,
-      eventsPerCard: eventCount,
-      totalFootprint: 4,
-      needsInfinite: true,
-      residualEvents: Math.max(0, eventCount - INFINITE_PREVIEW_K),
-      infinitePreviewCount: Math.min(INFINITE_PREVIEW_K, eventCount)
-    };
-  }
-
-  /**
-   * Create cards from layout plan
-   * Now with infinite card support (Phase 0.5.1)
-   */
-  private createCardsFromLayout(
-    group: ColumnGroup, 
-    layout: LayoutPlan, 
-    metrics: { totalAggregations: number; eventsAggregated: number; clustersAffected: number }
-  ): PositionedCard[] {
-    const cards: PositionedCard[] = [];
-    const cardConfig = this.config.cardConfigs;
-
-    if (layout.type === 'multi-event' && layout.needsInfinite) {
-      // Create multi-event cards + infinite overflow card
-      const eventsPerCard = Math.min(5, layout.eventsPerCard);
-      let eventIndex = 0;
-      let cardIndex = 0;
-
-      // Create multi-event cards first
-      const accommodatedEvents = layout.cardCount * eventsPerCard;
-      while (eventIndex < accommodatedEvents && eventIndex < group.events.length) {
-        const cardEvents = group.events.slice(eventIndex, eventIndex + eventsPerCard);
-        
-        cards.push({
-          id: `${group.id}-multi-${cardIndex}`,
-          event: cardEvents,
-          x: 0,
-          y: 0,
-          width: cardConfig['multi-event'].width,
-          height: cardConfig['multi-event'].height,
-          cardType: 'multi-event',
-          clusterId: group.id,
-          eventCount: cardEvents.length
-        });
-
-        // Update metrics
-        metrics.totalAggregations++;
-        metrics.eventsAggregated += cardEvents.length;
-
-        eventIndex += eventsPerCard;
-        cardIndex++;
-      }
-
-      // Create infinite overflow card for remaining events
-      if (eventIndex < group.events.length) {
-        const overflowEvents = group.events.slice(eventIndex);
-        const previewCount = layout.infinitePreviewCount || 5;
-        
-        cards.push({
-          id: `${group.id}-infinite`,
-          event: overflowEvents,
-          x: 0,
-          y: 0,
-          width: cardConfig['infinite'].width,
-          height: cardConfig['infinite'].height,
-          cardType: 'infinite',
-          clusterId: group.id,
-          eventCount: overflowEvents.length,
-          previewCount: Math.min(previewCount, overflowEvents.length),
-          overflowCount: Math.max(0, overflowEvents.length - previewCount)
-        });
-
-        // Update infinite metrics
-        this.infiniteMetrics.enabled = true;
-        this.infiniteMetrics.containers++;
-        this.infiniteMetrics.eventsContained += overflowEvents.length;
-        this.infiniteMetrics.previewCount += Math.min(previewCount, overflowEvents.length);
-      }
-
-      if (metrics.totalAggregations > 0) {
-        metrics.clustersAffected++;
-      }
-
-    } else if (layout.type === 'infinite') {
-      // Create pure infinite card
-      const previewCount = layout.infinitePreviewCount || 5;
-      
-      cards.push({
-        id: `${group.id}-infinite`,
-        event: group.events,
-        x: 0,
-        y: 0,
-        width: cardConfig['infinite'].width,
-        height: cardConfig['infinite'].height,
-        cardType: 'infinite',
-        clusterId: group.id,
-        eventCount: group.events.length,
-        previewCount: Math.min(previewCount, group.events.length),
-        overflowCount: Math.max(0, group.events.length - previewCount)
-      });
-
-      // Update infinite metrics
-      this.infiniteMetrics.enabled = true;
-      this.infiniteMetrics.containers++;
-      this.infiniteMetrics.eventsContained += group.events.length;
-      this.infiniteMetrics.previewCount += Math.min(previewCount, group.events.length);
-
-    } else if (layout.type === 'multi-event') {
-      // Create regular multi-event cards without infinite overflow
-      const eventsPerCard = Math.min(5, layout.eventsPerCard);
-      let eventIndex = 0;
-      let cardIndex = 0;
-
-      while (eventIndex < group.events.length) {
-        const cardEvents = group.events.slice(eventIndex, eventIndex + eventsPerCard);
-        
-        cards.push({
-          id: `${group.id}-multi-${cardIndex}`,
-          event: cardEvents,
-          x: 0,
-          y: 0,
-          width: cardConfig[layout.type].width,
-          height: cardConfig[layout.type].height,
-          cardType: layout.type,
-          clusterId: group.id,
-          eventCount: cardEvents.length
-        });
-
-        // Update metrics
-        if (cardEvents.length > 1) {
-          metrics.totalAggregations++;
-          metrics.eventsAggregated += cardEvents.length;
-        }
-
-        eventIndex += eventsPerCard;
-        cardIndex++;
-      }
-
-      if (metrics.totalAggregations > 0) {
-        metrics.clustersAffected++;
-      }
-
-    } else {
-      // Create individual cards
-      cards.push(...this.createIndividualCards(group, [layout.type]));
-    }
-
-    return cards;
-  }
 
   /**
    * Create individual cards for a group
@@ -613,7 +419,12 @@ export class DeterministicLayoutV5 {
     const cards: PositionedCard[] = [];
     const cardConfig = this.config.cardConfigs;
 
-    group.events.forEach((event, index) => {
+    // Only create cards for visible events (max 2 per half-column)
+    // Overflow events should not become cards - they show as badges on anchors
+    const maxCardsPerHalfColumn = 2;
+    const visibleEvents = group.events.slice(0, maxCardsPerHalfColumn);
+
+    visibleEvents.forEach((event, index) => {
       // Cycle through card types if multiple provided
       const cardType = cardTypes[index % cardTypes.length];
       
@@ -673,8 +484,16 @@ export class DeterministicLayoutV5 {
       // Limit cards to what actually fits
       const actualCards = group.cards.slice(0, totalCapacity);
       
-      // Update anchor with actual visible count
-      const updatedAnchor = this.createAnchor(group.events, group.centerX, actualCards.length);
+      // Update anchor with proper visible count and overflow count
+      const totalEvents = group.events.length + (group.overflowEvents ? group.overflowEvents.length : 0);
+      const visibleCount = actualCards.length;
+      const overflowCount = Math.max(0, totalEvents - visibleCount);
+      const updatedAnchor = this.createAnchor(
+        [...group.events, ...(group.overflowEvents || [])], 
+        group.centerX, 
+        visibleCount,
+        overflowCount
+      );
       anchors.push(updatedAnchor);
       
       // Respect half-column pre-determined position (above vs below)
@@ -712,10 +531,8 @@ export class DeterministicLayoutV5 {
       // Create cluster
       clusters.push({
         id: group.id,
-        events: group.events,
-        x: group.centerX,
-        width: group.endX - group.startX,
-        cardType: group.cards[0]?.cardType || 'full'
+        anchor: updatedAnchor,
+        events: group.events
       });
     }
     
@@ -734,53 +551,11 @@ export class DeterministicLayoutV5 {
   }
 
 
-  /**
-   * Helper: Split an over-full group into smaller groups
-   */
-  private splitGroup(group: ColumnGroup): ColumnGroup[] {
-    const maxPerGroup = this.TARGET_EVENTS_PER_CLUSTER.max;
-    const numSubGroups = Math.ceil(group.events.length / maxPerGroup);
-    const subGroups: ColumnGroup[] = [];
-    
-    const groupWidth = (group.endX - group.startX) / numSubGroups;
-    
-    for (let i = 0; i < numSubGroups; i++) {
-      const subEvents = group.events.slice(i * maxPerGroup, (i + 1) * maxPerGroup);
-      if (subEvents.length === 0) continue;
-      
-      const subGroupId = `${group.id}-${i}`;
-      this.capacityModel.initializeColumn(subGroupId);
-      
-      const startX = group.startX + (i * groupWidth);
-      const endX = startX + groupWidth;
-      const centerX = (startX + endX) / 2;
-      
-      subGroups.push({
-        id: subGroupId,
-        events: subEvents,
-        startX,
-        endX,
-        centerX,
-        anchor: this.createAnchor(subEvents, centerX),
-        cards: [],
-        capacity: {
-          above: { used: 0, total: 4 },
-          below: { used: 0, total: 4 }
-        }
-      });
-    }
-    
-    return subGroups;
-  }
 
   /**
    * Helper: Create anchor for a group of events
    */
   private createAnchor(events: Event[], x: number, visibleCount?: number, overflowCount?: number): Anchor {
-    const dates = events.map(e => new Date(e.date).getTime());
-    const minDate = Math.min(...dates);
-    const maxDate = Math.max(...dates);
-    const centerDate = new Date((minDate + maxDate) / 2);
     const totalCount = events.length;
     const visible = visibleCount ?? totalCount; // Default to all visible if not specified
     const overflow = overflowCount ?? Math.max(0, totalCount - visible);
@@ -789,7 +564,6 @@ export class DeterministicLayoutV5 {
       id: `anchor-${x}`,
       x,
       y: this.timelineY,
-      date: centerDate.toISOString(),
       eventIds: events.map(e => e.id),
       eventCount: totalCount + overflow, // Include overflow in total count
       visibleCount: visible,
@@ -806,8 +580,8 @@ export class DeterministicLayoutV5 {
     const endTime = Math.max(...dates);
     const duration = endTime - startTime;
     
-    // Add 10% padding
-    const padding = duration * 0.1;
+    // Reduce padding to 2% to keep events closer to timeline milestones
+    const padding = duration * 0.02;
     
     this.timeRange = {
       startTime: startTime - padding,
@@ -925,26 +699,7 @@ export class DeterministicLayoutV5 {
     return availableWidth > 0 ? (usedWidth / availableWidth) * 100 : 0;
   }
 
-  /**
-   * Phase 0.6: Calculate priority score for event placement stability
-   */
-  private calculatePriorityScore(event: Event): number {
-    // Simple priority scoring based on event characteristics
-    let score = 1000; // Base score
-    
-    // Add points for longer events (duration proxy via description length)
-    if (event.description && event.description.length > 100) {
-      score += 100;
-    }
-    
-    // Add points for events with more recent activity (simplified)
-    const daysSinceEvent = (Date.now() - new Date(event.date).getTime()) / (1000 * 60 * 60 * 24);
-    if (daysSinceEvent < 365) { // Within last year
-      score += Math.max(0, 50 - Math.floor(daysSinceEvent / 7)); // More recent = higher score
-    }
-    
-    return score;
-  }
+
 
   /**
    * Helper: Empty result for no events

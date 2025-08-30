@@ -43,7 +43,9 @@ export class EventClustering {
           x: eventX,
           y: this.config.timelineY,
           eventIds: [event.id],
-          eventCount: 1
+          eventCount: 1,
+          visibleCount: 1,
+          overflowCount: 0
         };
 
         clusters.push({

@@ -4,7 +4,7 @@ import type { LayoutConfig, CardConfig, CardType } from './types';
 const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   full: {
     type: 'full',
-    width: 280,
+    width: 260, // Reduced from 280px to 260px
     height: 140
   },
   compact: {

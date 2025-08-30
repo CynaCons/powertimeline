@@ -79,8 +79,9 @@ export interface LayoutResult {
     percentage: number;
   };
   telemetryMetrics?: {
-    dispatch: any;
-    aggregation: any;
-    infinite: any;
+    dispatch?: any;
+    aggregation?: any;
+    infinite?: any;
+    adaptive?: any;
   };
 }
