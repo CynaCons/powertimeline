@@ -38,7 +38,7 @@ function App() {
   const [editDescription, setEditDescription] = useState('');
 
   // View window controls via hook
-  const { viewStart, viewEnd, setWindow, nudge, zoom, animateTo } = useViewWindow(0,1);
+  const { viewStart, viewEnd, setWindow, nudge, zoom, zoomAtCursor, animateTo } = useViewWindow(0,1);
 
   // Panels & Dev toggle
   const devParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1';
@@ -144,6 +144,33 @@ function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [viewStart, viewEnd, zoom, nudge, setWindow]);
+
+  // Mouse wheel zoom with cursor positioning (no Ctrl key required)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Skip if user is scrolling in input fields or panels
+      const target = e.target as Element;
+      if (target?.closest('input, textarea, select, .panel, .overlay, .dev-panel')) {
+        return; // Allow normal scrolling in UI elements
+      }
+      
+      e.preventDefault();
+      
+      // Get cursor position
+      const cursorX = e.clientX;
+      
+      // Determine zoom direction
+      const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25;
+      
+      console.log(`App wheel zoom: deltaY=${e.deltaY}, factor=${zoomFactor}, cursorX=${cursorX}`);
+      
+      // Use cursor-centered zoom
+      zoomAtCursor(zoomFactor, cursorX, window.innerWidth);
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [zoomAtCursor]);
 
   // CRUD handlers
   const addEvent = useCallback((e: React.FormEvent) => {
@@ -324,7 +351,12 @@ function App() {
         <div className="absolute inset-0 ml-14 flex flex-col">
           {/* Timeline takes full available space */}
           <div className="w-full h-full relative">
-            <DeterministicLayoutComponent events={events} showInfoPanels={showInfoPanels} />
+            <DeterministicLayoutComponent 
+              events={events} 
+              showInfoPanels={showInfoPanels}
+              viewStart={viewStart}
+              viewEnd={viewEnd}
+            />
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}

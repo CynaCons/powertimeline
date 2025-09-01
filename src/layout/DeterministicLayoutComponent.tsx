@@ -7,9 +7,11 @@ import { DeterministicLayoutV5 } from './LayoutEngine';
 interface DeterministicLayoutProps {
   events: Event[];
   showInfoPanels?: boolean;
+  viewStart?: number;
+  viewEnd?: number;
 }
 
-export function DeterministicLayoutComponent({ events, showInfoPanels = false }: DeterministicLayoutProps) {
+export function DeterministicLayoutComponent({ events, showInfoPanels = false, viewStart = 0, viewEnd = 1 }: DeterministicLayoutProps) {
   // Dynamic viewport size
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
   const [showColumnBorders, setShowColumnBorders] = useState(false);
@@ -26,6 +28,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, []);
+
 
   // Create layout configuration for deterministic layout
   const config: LayoutConfig = useMemo(() => {
@@ -49,9 +52,32 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     return baseConfig;
   }, [viewportSize.width, viewportSize.height, events]);
 
+  // Filter events based on view window (zoom)
+  const visibleEvents = useMemo(() => {
+    if (events.length === 0 || (viewStart === 0 && viewEnd === 1)) {
+      return events; // Show all events when no zoom applied
+    }
+    
+    // Calculate time range
+    const dates = events.map(e => new Date(e.date).getTime());
+    const minDate = Math.min(...dates);
+    const maxDate = Math.max(...dates);
+    const dateRange = maxDate - minDate;
+    
+    // Calculate visible time window
+    const visibleStartTime = minDate + (dateRange * viewStart);
+    const visibleEndTime = minDate + (dateRange * viewEnd);
+    
+    // Filter events within visible window
+    return events.filter(event => {
+      const eventTime = new Date(event.date).getTime();
+      return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
+    });
+  }, [events, viewStart, viewEnd]);
+
   // Apply deterministic layout algorithm
   const layoutResult = useMemo(() => {
-    if (events.length === 0) {
+    if (visibleEvents.length === 0) {
       return {
         positionedCards: [],
         anchors: [],
@@ -61,8 +87,8 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
     }
 
     const deterministicLayout = new DeterministicLayoutV5(config);
-    return deterministicLayout.layout(events);
-  }, [events, config]);
+    return deterministicLayout.layout(visibleEvents);
+  }, [visibleEvents, config]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
@@ -327,7 +353,9 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false }:
 
 
   return (
-    <div className="absolute inset-0 bg-gray-100 overflow-hidden">
+    <div 
+      className="absolute inset-0 bg-gray-100 overflow-hidden"
+    >
       {/* Column Borders (Development Visualization) */}
       {showColumnBorders && layoutResult.columnBounds?.map((bounds, index) => (
         <div

@@ -112,10 +112,23 @@ export class DeterministicLayoutV5 {
    * Formula: card_width + spacing_buffer to prevent visual collisions
    */
   private calculateAdaptiveHalfColumnWidth(): number {
-    // Use actual full card width + generous spacing buffer to ensure zero overlaps
-    const fullCardWidth = this.config.cardConfigs.full.width; // 260px (reduced from 280px)
-    const spacingBuffer = 80; // Generous buffer for complete visual separation
-    return fullCardWidth + spacingBuffer; // 340px - ensures zero overlap detection
+    // Calculate available space after margins
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px
+    const rightMargin = 40;
+    const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
+    
+    // Use actual full card width + spacing buffer, but adapt to viewport
+    const fullCardWidth = this.config.cardConfigs.full.width; // 260px
+    const idealSpacingBuffer = 80; // Generous buffer for complete visual separation
+    const idealHalfColumnWidth = fullCardWidth + idealSpacingBuffer; // 340px
+    
+    // For narrow viewports, ensure we can fit at least 2 half-columns with minimum spacing
+    const minHalfColumnWidth = fullCardWidth + 20; // 280px minimum
+    const maxHalfColumnWidth = Math.min(idealHalfColumnWidth, usableWidth / 2.5); // Reserve space for multiple columns
+    
+    return Math.max(minHalfColumnWidth, Math.min(idealHalfColumnWidth, maxHalfColumnWidth));
   }
 
   /**
@@ -150,10 +163,22 @@ export class DeterministicLayoutV5 {
       let eventXPos: number;
       if (this.timeRange) {
         const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
-        eventXPos = leftMargin + (timeRatio * usableWidth);
+        const temporalXPos = leftMargin + (timeRatio * usableWidth);
+        
+        // Ensure card doesn't overlap navigation rail (card extends 130px left from center)
+        const cardHalfWidth = this.config.cardConfigs.full.width / 2; // 130px
+        const minCenterX = leftMargin + cardHalfWidth;
+        const maxCenterX = leftMargin + usableWidth - cardHalfWidth;
+        
+        eventXPos = Math.max(minCenterX, Math.min(maxCenterX, temporalXPos));
       } else {
         // Fallback to sequential positioning
-        eventXPos = leftMargin + (i * usableWidth) / Math.max(1, sortedEvents.length - 1);
+        const temporalXPos = leftMargin + (i * usableWidth) / Math.max(1, sortedEvents.length - 1);
+        const cardHalfWidth = this.config.cardConfigs.full.width / 2; // 130px
+        const minCenterX = leftMargin + cardHalfWidth;
+        const maxCenterX = leftMargin + usableWidth - cardHalfWidth;
+        
+        eventXPos = Math.max(minCenterX, Math.min(maxCenterX, temporalXPos));
       }
       
       // DEBUG: Log event processing
@@ -292,7 +317,14 @@ export class DeterministicLayoutV5 {
       const leftMargin = navRailWidth + additionalMargin; // 136px total
       const rightMargin = 40;
       const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
-      halfColumn.centerX = leftMargin + (timeRatio * usableWidth);
+      const temporalCenterX = leftMargin + (timeRatio * usableWidth);
+      
+      // Ensure card doesn't overlap navigation rail (card extends 130px left from center)
+      const cardHalfWidth = this.config.cardConfigs.full.width / 2; // 130px
+      const minCenterX = leftMargin + cardHalfWidth;
+      const maxCenterX = leftMargin + usableWidth - cardHalfWidth;
+      
+      halfColumn.centerX = Math.max(minCenterX, Math.min(maxCenterX, temporalCenterX));
     }
     
     // Update anchor with new center
