@@ -19,6 +19,8 @@ Chronochart is a web application that lets users build and view interactive time
 ## User Stories
 - As a user, I can add, edit, and delete events on a timeline.
 - As a user, I can zoom and pan across large timelines to explore different periods.
+- As a user, I can see a visual indicator of my current position when zoomed into a timeline.
+- As a user, I can click on a timeline overview to quickly navigate to specific time periods.
 - As a user, I can export a timeline to share with others.
 
 ## Technical Requirements
@@ -30,4 +32,6 @@ Chronochart is a web application that lets users build and view interactive time
 - Users can create and save a timeline without errors.
 - Performance remains smooth with 100 events on screen.
 - Visual UI allows having a high level perspective of the timeline AND a detailed zoomed-in experience of one or more events
+- Users can navigate to any timeline period within 2 seconds using zoom and minimap navigation
+- Zoom behavior feels stable and predictable (events stay under cursor during zoom operations)
 

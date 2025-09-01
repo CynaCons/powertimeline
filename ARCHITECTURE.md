@@ -550,3 +550,58 @@ Process Order (Critical):
 - **Screenshot comparison**: Before/after degradation states
 - **Column alignment**: Verify anchor centering per user specification
 - **Slot visualization**: Development mode slot indicators showing occupancy
+
+## Zoom & Navigation System
+
+### View Window Management
+The zoom system uses a normalized coordinate system where:
+- **0.0** = Timeline start (earliest event date)
+- **1.0** = Timeline end (latest event date)  
+- **viewStart/viewEnd** = Current visible window within [0, 1] range
+
+### Mouse Wheel Zoom  
+- **No Ctrl key required** - Direct wheel events trigger zoom
+- **Cursor-anchored** - Events under cursor stay stable during zoom
+- **Boundary-aware** - Prevents zoom beyond timeline limits
+- **Performance optimized** - <2s per operation even with 150+ events
+
+### Timeline Minimap Component (Stage 5.1)
+A horizontal timeline overview positioned above the main timeline to provide zoom context and navigation.
+
+#### Minimap Design
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [1769] ████▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ [1821] │ ← Timeline overview
+│        ├──────────┤                                       │ ← Current view window  
+│        │          │                                       │   (highlighted section)
+│        │          │                                       │
+│        └─ Event density markers                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Minimap Features
+- **Full timeline bar** - Shows complete date range with year markers
+- **View window indicator** - Highlighted section showing current zoom area
+- **Event density visualization** - Dots/bars indicating where events exist
+- **Click-to-navigate** - Click anywhere to instantly jump to that timeline area
+- **Zoom level indicator** - Visual proportion of current view vs full timeline  
+- **Responsive design** - Adapts to viewport width and timeline range
+
+#### Implementation Structure
+```
+TimelineMinimap Component:
+├── MinimapContainer (horizontal bar)
+├── MinimapBackground (full timeline range)
+├── MinimapViewWindow (current zoom area)  
+├── MinimapEventMarkers (density indicators)
+├── MinimapClickHandler (navigation)
+└── MinimapLabels (start/end dates)
+```
+
+#### Navigation Behavior
+- **Click positioning** - Click at X% on minimap → zoom to that temporal position
+- **Drag view window** - Drag highlighted area to pan timeline
+- **Proportional zoom** - Visual feedback of zoom level (window size vs full bar)
+- **Smooth transitions** - Animated navigation between timeline sections
+
+**PURPOSE**: Solves cursor positioning confusion by providing visual context of zoom position within full timeline, enabling precise temporal navigation.
