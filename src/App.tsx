@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
+import { TimelineMinimap } from './components/TimelineMinimap';
 import type { Event } from './types';
 import { OutlinePanel } from './app/panels/OutlinePanel';
 import { EditorPanel } from './app/panels/EditorPanel';
@@ -348,7 +349,19 @@ function App() {
         )}
 
         {/* Main timeline area shifts right to avoid sidebar overlap */}
-        <div className="absolute inset-0 ml-14 flex flex-col">
+        <div className="absolute inset-0 ml-14">
+          {/* Timeline minimap at top of timeline area */}
+          {events.length > 0 && (
+            <div className="absolute top-4 left-4 right-4 z-40">
+              <TimelineMinimap
+                events={events}
+                viewStart={viewStart}
+                viewEnd={viewEnd}
+                onNavigate={setWindow}
+              />
+            </div>
+          )}
+          
           {/* Timeline takes full available space */}
           <div className="w-full h-full relative">
             <DeterministicLayoutComponent 

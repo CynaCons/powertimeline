@@ -52,26 +52,66 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     let newWindowWidth = currentWindowWidth * factor;
     newWindowWidth = Math.max(0.05, Math.min(1.0, newWindowWidth)); // Min 5%, max 100%
     
-    // Calculate new bounds keeping cursor position stable
-    const halfWidth = newWindowWidth / 2;
-    let newStart = cursorTimePosition - halfWidth;
-    let newEnd = cursorTimePosition + halfWidth;
+    // Calculate new bounds keeping cursor position stable as anchor point
+    let newStart = cursorTimePosition - (newWindowWidth * cursorRatioInViewport);
+    let newEnd = newStart + newWindowWidth;
     
-    // Clamp to valid range [0, 1] while preserving cursor focus
+    // Handle boundary conditions while maintaining cursor as anchor
     if (newStart < 0) {
+      // Hit left boundary - shift window but keep cursor ratio
+      const overflow = -newStart;
       newStart = 0;
-      newEnd = Math.min(1, newWindowWidth);
+      newEnd = newWindowWidth;
+      // Only adjust if we can't maintain cursor position at all
+      if (newEnd > 1) {
+        newEnd = 1;
+        newStart = Math.max(0, 1 - newWindowWidth);
+      }
     } else if (newEnd > 1) {
+      // Hit right boundary - shift window but keep cursor ratio
+      const overflow = newEnd - 1;
       newEnd = 1;
-      newStart = Math.max(0, 1 - newWindowWidth);
+      newStart = 1 - newWindowWidth;
+      // Only adjust if we can't maintain cursor position at all
+      if (newStart < 0) {
+        newStart = 0;
+        newEnd = Math.min(1, newWindowWidth);
+      }
     }
     
-    // Ensure minimum width is maintained
+    // Ensure minimum width is maintained while keeping cursor as anchor
     const finalWidth = newEnd - newStart;
     if (finalWidth < 0.05) {
-      const center = Math.max(0.025, Math.min(0.975, cursorTimePosition));
-      newStart = center - 0.025;
-      newEnd = center + 0.025;
+      const minWidth = 0.05;
+      
+      // Calculate cursor position within the minimum window
+      const cursorOffset = minWidth * cursorRatioInViewport;
+      let minStart = cursorTimePosition - cursorOffset;
+      let minEnd = minStart + minWidth;
+      
+      // Handle boundary conditions while preserving cursor position
+      if (minStart < 0) {
+        // Left boundary: position window to keep cursor visible
+        minStart = 0;
+        minEnd = minWidth;
+        // If cursor is still within this window, we're good
+      } else if (minEnd > 1) {
+        // Right boundary: position window to keep cursor visible  
+        minEnd = 1;
+        minStart = 1 - minWidth;
+        // If cursor is still within this window, we're good
+      }
+      
+      // Final check: ensure cursor remains within the minimum window
+      if (cursorTimePosition < minStart || cursorTimePosition > minEnd) {
+        // If cursor fell outside, center the minimum window on cursor
+        const center = Math.max(minWidth/2, Math.min(1 - minWidth/2, cursorTimePosition));
+        minStart = center - minWidth/2;
+        minEnd = center + minWidth/2;
+      }
+      
+      newStart = minStart;
+      newEnd = minEnd;
     }
     
     console.log(`🔧 ZOOM RESULT: cursor=${cursorTimePosition.toFixed(3)}, window=[${newStart.toFixed(3)}, ${newEnd.toFixed(3)}]`);

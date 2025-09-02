@@ -52,10 +52,10 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     return baseConfig;
   }, [viewportSize.width, viewportSize.height, events]);
 
-  // Filter events based on view window (zoom)
-  const visibleEvents = useMemo(() => {
+  // Calculate view window time range for later card filtering
+  const viewTimeWindow = useMemo(() => {
     if (events.length === 0 || (viewStart === 0 && viewEnd === 1)) {
-      return events; // Show all events when no zoom applied
+      return null; // No filtering when showing full timeline
     }
     
     // Calculate time range
@@ -68,16 +68,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     const visibleStartTime = minDate + (dateRange * viewStart);
     const visibleEndTime = minDate + (dateRange * viewEnd);
     
-    // Filter events within visible window
-    return events.filter(event => {
-      const eventTime = new Date(event.date).getTime();
-      return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
-    });
+    return { visibleStartTime, visibleEndTime };
   }, [events, viewStart, viewEnd]);
 
-  // Apply deterministic layout algorithm
-  const layoutResult = useMemo(() => {
-    if (visibleEvents.length === 0) {
+  // Apply deterministic layout algorithm to ALL events (for proper overflow detection)
+  const fullLayoutResult = useMemo(() => {
+    if (events.length === 0) {
       return {
         positionedCards: [],
         anchors: [],
@@ -87,8 +83,29 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     }
 
     const deterministicLayout = new DeterministicLayoutV5(config);
-    return deterministicLayout.layout(visibleEvents);
-  }, [visibleEvents, config]);
+    return deterministicLayout.layout(events);
+  }, [events, config]);
+
+  // Filter positioned cards based on view window
+  const layoutResult = useMemo(() => {
+    if (!viewTimeWindow) {
+      return fullLayoutResult; // Show all cards when no zoom applied
+    }
+
+    // Filter cards to only show those within the visible time window
+    const filteredCards = fullLayoutResult.positionedCards.filter(card => {
+      const cardEvents = Array.isArray(card.event) ? card.event : [card.event];
+      return cardEvents.some(event => {
+        const eventTime = new Date(event.date).getTime();
+        return eventTime >= viewTimeWindow.visibleStartTime && eventTime <= viewTimeWindow.visibleEndTime;
+      });
+    });
+
+    return {
+      ...fullLayoutResult,
+      positionedCards: filteredCards
+    };
+  }, [fullLayoutResult, viewTimeWindow]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {

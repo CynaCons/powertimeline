@@ -81,6 +81,7 @@ export class DeterministicLayoutV5 {
     if (events.length === 0) {
       return this.emptyResult();
     }
+    
 
     // Calculate time range from actual events
     this.calculateTimeRange(events);
@@ -112,23 +113,10 @@ export class DeterministicLayoutV5 {
    * Formula: card_width + spacing_buffer to prevent visual collisions
    */
   private calculateAdaptiveHalfColumnWidth(): number {
-    // Calculate available space after margins
-    const navRailWidth = 56;
-    const additionalMargin = 80;
-    const leftMargin = navRailWidth + additionalMargin; // 136px
-    const rightMargin = 40;
-    const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
-    
-    // Use actual full card width + spacing buffer, but adapt to viewport
-    const fullCardWidth = this.config.cardConfigs.full.width; // 260px
-    const idealSpacingBuffer = 80; // Generous buffer for complete visual separation
-    const idealHalfColumnWidth = fullCardWidth + idealSpacingBuffer; // 340px
-    
-    // For narrow viewports, ensure we can fit at least 2 half-columns with minimum spacing
-    const minHalfColumnWidth = fullCardWidth + 20; // 280px minimum
-    const maxHalfColumnWidth = Math.min(idealHalfColumnWidth, usableWidth / 2.5); // Reserve space for multiple columns
-    
-    return Math.max(minHalfColumnWidth, Math.min(idealHalfColumnWidth, maxHalfColumnWidth));
+    // Use actual full card width + generous spacing buffer to ensure zero overlaps
+    const fullCardWidth = this.config.cardConfigs.full.width; // 260px (reduced from 280px)
+    const spacingBuffer = 80; // Generous buffer for complete visual separation
+    return fullCardWidth + spacingBuffer; // 340px - ensures zero overlap detection
   }
 
   /**
@@ -341,7 +329,7 @@ export class DeterministicLayoutV5 {
     halfColumns.sort((a, b) => a.centerX - b.centerX);
     
     // Use adaptive half-column width as minimum spacing to prevent overlaps
-    const minSpacing = adaptiveHalfColumnWidth; // 360px - ensures no overlap between 360px wide half-columns
+    const minSpacing = adaptiveHalfColumnWidth; // 340px - ensures no overlap between half-columns
     
     // Ensure minimum spacing between adjacent half-columns
     for (let i = 1; i < halfColumns.length; i++) {
@@ -539,6 +527,7 @@ export class DeterministicLayoutV5 {
         card.height = dynamicCardHeight;
         card.y = aboveY - card.height;
         card.x = group.centerX - (card.width / 2);
+        
         aboveY -= (card.height + cardSpacing);
         
         positionedCards.push(card);
@@ -553,6 +542,7 @@ export class DeterministicLayoutV5 {
         card.height = dynamicCardHeight;
         card.y = belowY;
         card.x = group.centerX - (card.width / 2);
+        
         belowY += (card.height + cardSpacing);
         
         positionedCards.push(card);
@@ -570,6 +560,7 @@ export class DeterministicLayoutV5 {
     
     const capacityMetrics = this.capacityModel.getGlobalMetrics();
     
+    
     return {
       positionedCards,
       anchors,
@@ -581,7 +572,6 @@ export class DeterministicLayoutV5 {
       }
     };
   }
-
 
 
   /**
