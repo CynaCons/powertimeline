@@ -71,8 +71,8 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     return { visibleStartTime, visibleEndTime };
   }, [events, viewStart, viewEnd]);
 
-  // Apply deterministic layout algorithm to ALL events (for proper overflow detection)
-  const fullLayoutResult = useMemo(() => {
+  // Apply deterministic layout algorithm with view window context
+  const layoutResult = useMemo(() => {
     if (events.length === 0) {
       return {
         positionedCards: [],
@@ -83,29 +83,11 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     }
 
     const deterministicLayout = new DeterministicLayoutV5(config);
-    return deterministicLayout.layout(events);
-  }, [events, config]);
-
-  // Filter positioned cards based on view window
-  const layoutResult = useMemo(() => {
-    if (!viewTimeWindow) {
-      return fullLayoutResult; // Show all cards when no zoom applied
-    }
-
-    // Filter cards to only show those within the visible time window
-    const filteredCards = fullLayoutResult.positionedCards.filter(card => {
-      const cardEvents = Array.isArray(card.event) ? card.event : [card.event];
-      return cardEvents.some(event => {
-        const eventTime = new Date(event.date).getTime();
-        return eventTime >= viewTimeWindow.visibleStartTime && eventTime <= viewTimeWindow.visibleEndTime;
-      });
-    });
-
-    return {
-      ...fullLayoutResult,
-      positionedCards: filteredCards
-    };
-  }, [fullLayoutResult, viewTimeWindow]);
+    
+    // Pass view window to layout algorithm for proper filtering with overflow context
+    const viewWindow = viewTimeWindow ? { viewStart, viewEnd } : undefined;
+    return deterministicLayout.layout(events, viewWindow);
+  }, [events, config, viewStart, viewEnd, viewTimeWindow]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {

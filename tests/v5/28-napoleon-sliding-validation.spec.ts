@@ -79,7 +79,7 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
         console.log(`  ✅ No card overlaps detected`);
       }
       
-      // 2. Check overflow badges are within timeline bounds
+      // 2. Check overflow badges are within timeline bounds and validate their content
       const overflowBadges = page.locator('[data-testid^="overflow-badge-"], [data-testid^="merged-overflow-badge-"]');
       const overflowCount = await overflowBadges.count();
       console.log(`  Overflow badges: ${overflowCount}`);
@@ -100,9 +100,28 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
               await page.screenshot({ path: `test-results/napoleon-badge-oob-step-${step}.png` });
               expect(withinBounds).toBe(true);
             }
+            
+            // Validate overflow badge content and numbers
+            const badgeText = await badge.textContent();
+            const badgeId = await badge.getAttribute('data-testid');
+            console.log(`    Badge ${i} (${badgeId}): "${badgeText}"`);
+            
+            // Check badge displays a valid number (should be +1, +2, +3, etc.)
+            if (badgeText && badgeText.startsWith('+')) {
+              const overflowNumber = parseInt(badgeText.slice(1));
+              if (isNaN(overflowNumber) || overflowNumber < 1) {
+                console.log(`  ❌ INVALID OVERFLOW NUMBER: Badge shows "${badgeText}", expected +[number >= 1]`);
+                await page.screenshot({ path: `test-results/napoleon-invalid-overflow-step-${step}.png` });
+                expect(overflowNumber).toBeGreaterThan(0);
+              }
+            } else {
+              console.log(`  ❌ INVALID OVERFLOW FORMAT: Badge shows "${badgeText}", expected format: +[number]`);
+              await page.screenshot({ path: `test-results/napoleon-bad-overflow-format-step-${step}.png` });
+              expect(badgeText).toMatch(/^\+\d+$/);
+            }
           }
         }
-        console.log(`  ✅ All overflow badges within bounds`);
+        console.log(`  ✅ All overflow badges within bounds and showing valid numbers`);
       }
       
       // 3. Check blue event indicators are properly positioned
@@ -249,5 +268,102 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
     }
     
     console.log('\n✅ All sliding validation completed');
+  });
+
+  test('Overflow indicators update correctly when sliding to different timeline regions', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(1000);
+    
+    // Enable dev mode and load Napoleon timeline
+    await page.click('button[aria-label="Toggle developer options"]');
+    await page.click('button[aria-label="Developer Panel"]');
+    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.waitForTimeout(500);
+    
+    const timelineArea = page.locator('.absolute.inset-0.ml-14');
+    const timelineBox = await timelineArea.boundingBox();
+    const centerX = timelineBox!.x + timelineBox!.width * 0.5;
+    const centerY = timelineBox!.y + timelineBox!.height * 0.5;
+    
+    // Zoom in significantly to focus on specific periods
+    await page.mouse.move(centerX, centerY);
+    for (let i = 0; i < 8; i++) {
+      await page.mouse.wheel(0, -100);
+      await page.waitForTimeout(100);
+    }
+    
+    // Get minimap for navigation
+    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBox = await minimapBar.boundingBox();
+    
+    // Test different timeline regions to verify overflow indicators change
+    const testRegions = [
+      { name: 'Early Period (Birth/Childhood)', position: 0.1 },
+      { name: 'Education Period', position: 0.25 },
+      { name: 'Military Rise', position: 0.4 },
+      { name: 'Emperor Period', position: 0.75 },
+      { name: 'Exile Period', position: 0.9 }
+    ];
+    
+    const regionResults: Array<{region: string, cards: number, badges: number, badgeTexts: string[]}> = [];
+    
+    for (const region of testRegions) {
+      console.log(`\n=== TESTING REGION: ${region.name} (position ${region.position}) ===`);
+      
+      // Navigate to this region via minimap
+      const clickX = minimapBox!.x + minimapBox!.width * region.position;
+      const clickY = minimapBox!.y + minimapBox!.height / 2;
+      
+      await page.mouse.click(clickX, clickY);
+      await page.waitForTimeout(500); // Allow layout to stabilize
+      
+      // Count visible cards and overflow badges
+      const cards = page.locator('[data-testid="event-card"]');
+      const cardCount = await cards.count();
+      
+      const overflowBadges = page.locator('[data-testid^="overflow-badge-"], [data-testid^="merged-overflow-badge-"]');
+      const badgeCount = await overflowBadges.count();
+      
+      // Collect overflow badge texts
+      const badgeTexts: string[] = [];
+      for (let i = 0; i < badgeCount; i++) {
+        const badgeText = await overflowBadges.nth(i).textContent();
+        if (badgeText) {
+          badgeTexts.push(badgeText);
+        }
+      }
+      
+      regionResults.push({
+        region: region.name,
+        cards: cardCount,
+        badges: badgeCount,
+        badgeTexts
+      });
+      
+      console.log(`  Region: ${region.name}`);
+      console.log(`  Visible cards: ${cardCount}`);
+      console.log(`  Overflow badges: ${badgeCount}`);
+      console.log(`  Badge texts: [${badgeTexts.join(', ')}]`);
+      
+      await page.screenshot({ path: `test-results/napoleon-region-${region.name.toLowerCase().replace(/[^a-z]/g, '-')}.png` });
+    }
+    
+    // Verify overflow indicators change across different regions
+    const uniqueBadgeTexts = new Set(regionResults.flatMap(r => r.badgeTexts));
+    console.log(`\nUnique overflow badge texts across all regions: [${Array.from(uniqueBadgeTexts).join(', ')}]`);
+    
+    // Check that overflow indicators are responsive to timeline position
+    // (Either different numbers appear in different regions, or badges appear/disappear)
+    const badgeCountsVary = regionResults.some(r => r.badges !== regionResults[0].badges);
+    const badgeTextsVary = uniqueBadgeTexts.size > 1;
+    const responsiveOverflow = badgeCountsVary || badgeTextsVary;
+    
+    if (!responsiveOverflow) {
+      console.log('❌ OVERFLOW INDICATORS NOT RESPONSIVE: Same badges appear at all timeline positions');
+      console.log('Region results:', regionResults.map(r => `${r.region}: ${r.badges} badges [${r.badgeTexts.join(', ')}]`));
+    }
+    
+    expect(responsiveOverflow).toBe(true);
+    console.log('✅ Overflow indicators update correctly across timeline regions');
   });
 });

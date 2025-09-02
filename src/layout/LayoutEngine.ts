@@ -77,7 +77,7 @@ export class DeterministicLayoutV5 {
   /**
    * Main layout function implementing Stage 1-3 of the plan
    */
-  layout(events: Event[]): LayoutResult {
+  layout(events: Event[], viewWindow?: { viewStart: number; viewEnd: number }): LayoutResult {
     if (events.length === 0) {
       return this.emptyResult();
     }
@@ -86,11 +86,30 @@ export class DeterministicLayoutV5 {
     // Calculate time range from actual events
     this.calculateTimeRange(events);
 
+    // Filter events by view window if provided (for zoomed views)
+    let layoutEvents = events;
+    if (viewWindow && (viewWindow.viewStart !== 0 || viewWindow.viewEnd !== 1)) {
+      const dates = events.map(e => new Date(e.date).getTime());
+      const minDate = Math.min(...dates);
+      const maxDate = Math.max(...dates);
+      const dateRange = maxDate - minDate;
+      
+      const visibleStartTime = minDate + (dateRange * viewWindow.viewStart);
+      const visibleEndTime = minDate + (dateRange * viewWindow.viewEnd);
+      
+      layoutEvents = events.filter(event => {
+        const eventTime = new Date(event.date).getTime();
+        return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
+      });
+      
+      console.log(`🔍 VIEW WINDOW FILTER: ${events.length} total events → ${layoutEvents.length} visible events`);
+    }
+
     // Calculate adaptive half-column width for telemetry (Stage 3i1)
     const adaptiveHalfColumnWidth = this.calculateAdaptiveHalfColumnWidth();
 
     // Stage 1: Half-Column System - Dispatch events with alternating placement and spatial clustering
-    const halfColumnGroups = this.dispatchEvents(events);
+    const halfColumnGroups = this.dispatchEvents(layoutEvents);
     
     // Stage 2: Skip old clustering system - half-columns already handle spatial clustering
     // Stage 3: Complete Degradation System - Apply degradation and promotion
