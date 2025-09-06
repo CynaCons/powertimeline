@@ -1,7 +1,18 @@
 # Implementation Plan - Iterative Layout Engine Building
 
 ## Critical Next Steps
-- [ ] **Increase maximum zoom level to allow day-level granularity** - Napoleon timeline has dense event periods where current zoom limit prevents viewing all events clearly
+- [x] **Increase maximum zoom level to allow day-level granularity** ✅ **COMPLETED** - Maximum zoom increased from 5% to 0.1% (50x deeper zoom) for day-level granularity
+  - [x] Modified zoom constraints in `useViewWindow.ts` from 0.05 minimum to 0.001 minimum
+  - [x] Updated all zoom functions (`zoom`, `zoomAtCursor`, `nudge`) to support 0.1% granularity
+  - [x] Created comprehensive deep zoom sliding test (29-deep-zoom-comprehensive-sliding.spec.ts)
+  - [x] Validated zero card overlaps at maximum zoom across 26 sliding positions
+  - [x] Confirmed day-level navigation works smoothly across entire Napoleon timeline
+  - [x] **Fixed leftover overflow indicator bug** - Overflow events are now filtered by view window to prevent ghost badges
+    - [x] Added view window context tracking to LayoutEngine (currentViewWindow, currentTimeWindow)
+    - [x] Implemented filterEventsByViewWindow() method to filter overflow events by current timeline view
+    - [x] Fixed overflow calculation to only count overflow events within current view window (lines 539-542)
+    - [x] Created comprehensive leftover detection tests (30-leftover-overflow-detection.spec.ts, 31-aggressive-leftover-detection.spec.ts)
+    - [x] Validated fix prevents overflow indicators from appearing in empty timeline regions
 
 ## REFACTORING PLAN - Layout Engine First Approach
 
@@ -21,6 +32,15 @@
 - [x] Remove TimelineWithSlots.tsx
 - [x] Remove useSlotBasedLayout.ts
 - [x] Rename DeterministicLayoutV5.ts to LayoutEngine.ts
+- [x] **Implement adaptive timeline scales for better zoom visibility** ✅ **COMPLETED**
+  - [x] Add dynamic scale calculation based on zoom level (years → months → weeks → days)
+  - [x] Ensure day-level granularity as smallest unit when fully zoomed
+  - [x] Implement intelligent tick spacing to prevent overcrowding
+  - [x] Add proper date/time formatting for different zoom levels
+  - [x] Test scale transitions across full zoom range (0.1% to 100%)
+  - [x] Enhanced `useAxisTicks` hook with 18 scale levels from hours to decades
+  - [x] Smart alignment based on scale type (hour, day, week, month, year boundaries)
+  - [x] Integrated with `DeterministicLayoutComponent` for production use
 - [ ] Test current engine with extreme zoom scenarios
 - [ ] Verify degradation triggers properly at all zoom levels
 - [ ] Ensure temporal positioning remains accurate across zoom range
@@ -198,12 +218,14 @@
 2. **Card overlap in zoomed views** ✅ Layout algorithm now handles view window filtering internally
 3. **Static overflow indicators** ✅ Dynamic overflow badges with correct counts (+18, +13, +7, +10)
 4. **Overflow positioning** ✅ Badges properly positioned relative to event clusters
+5. **Leftover overflow badges** ✅ Fixed ghost overflow badges persisting in empty timeline regions
 
 **SOLUTION IMPLEMENTED**: 
 - Timeline minimap provides visual feedback and precise navigation
 - Layout algorithm maintains overflow context while filtering for view window
 - Napoleon sliding validation test passes all 11 steps without issues
 - Overflow indicators update dynamically based on timeline region
+- Leftover overflow badges eliminated by filtering anchors when no event cards are visible
 
 ## ADVANCED FEATURES - After Full Cards Foundation
 

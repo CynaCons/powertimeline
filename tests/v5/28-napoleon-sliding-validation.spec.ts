@@ -366,4 +366,103 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
     expect(responsiveOverflow).toBe(true);
     console.log('✅ Overflow indicators update correctly across timeline regions');
   });
+
+  test('Fully zoomed-in sliding detects overflow indicator inconsistencies', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(1000);
+    
+    // Enable dev mode and load Napoleon timeline
+    await page.click('button[aria-label="Toggle developer options"]');
+    await page.click('button[aria-label="Developer Panel"]');
+    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.waitForTimeout(500);
+    
+    const timelineArea = page.locator('.absolute.inset-0.ml-14');
+    const timelineBox = await timelineArea.boundingBox();
+    const centerX = timelineBox!.x + timelineBox!.width * 0.5;
+    const centerY = timelineBox!.y + timelineBox!.height * 0.5;
+    
+    // Zoom in to MAXIMUM level to expose overflow inconsistencies
+    await page.mouse.move(centerX, centerY);
+    for (let i = 0; i < 15; i++) { // Much more aggressive zoom
+      await page.mouse.wheel(0, -100);
+      await page.waitForTimeout(50);
+    }
+    
+    console.log('🔍 TESTING FULLY ZOOMED SLIDING BEHAVIOR');
+    
+    // Get minimap elements for navigation
+    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBox = await minimapBar.boundingBox();
+    
+    // Slide through timeline at maximum zoom with smaller steps to catch inconsistencies
+    const steps = 20; // More granular steps
+    const stepSize = 1.0 / steps;
+    
+    for (let step = 0; step <= steps; step++) {
+      const targetPosition = step * stepSize;
+      console.log(`\\n=== FULL ZOOM STEP ${step}: Position ${targetPosition.toFixed(3)} ===`);
+      
+      // Navigate via minimap
+      const clickX = minimapBox!.x + minimapBox!.width * targetPosition;
+      const clickY = minimapBox!.y + minimapBox!.height / 2;
+      
+      await page.mouse.click(clickX, clickY);
+      await page.waitForTimeout(300);
+      
+      // Count elements at this zoom level
+      const cards = page.locator('[data-testid="event-card"]');
+      const cardCount = await cards.count();
+      
+      const overflowBadges = page.locator('[data-testid^="overflow-badge-"], [data-testid^="merged-overflow-badge-"]');
+      const overflowCount = await overflowBadges.count();
+      
+      // Collect detailed overflow information
+      const overflowDetails: Array<{id: string, text: string, x: number, y: number}> = [];
+      for (let i = 0; i < overflowCount; i++) {
+        const badge = overflowBadges.nth(i);
+        const badgeText = await badge.textContent();
+        const badgeId = await badge.getAttribute('data-testid');
+        const badgeBox = await badge.boundingBox();
+        
+        if (badgeText && badgeId && badgeBox) {
+          overflowDetails.push({
+            id: badgeId,
+            text: badgeText,
+            x: Math.round(badgeBox.x),
+            y: Math.round(badgeBox.y)
+          });
+        }
+      }
+      
+      console.log(`  Cards: ${cardCount}`);
+      console.log(`  Overflow badges: ${overflowCount}`);
+      if (overflowDetails.length > 0) {
+        console.log(`  Badge details:`, overflowDetails.map(b => `${b.id}="${b.text}" at (${b.x},${b.y})`).join(', '));
+      }
+      
+      // Check for overflow indicator inconsistencies
+      if (cardCount === 0 && overflowCount === 0) {
+        console.log(`  ⚠️  NO CONTENT: No cards or overflow badges at position ${targetPosition.toFixed(3)}`);
+      }
+      
+      if (cardCount > 10) {
+        console.log(`  ⚠️  HIGH DENSITY: ${cardCount} cards at max zoom - may indicate insufficient overflow triggering`);
+      }
+      
+      // Check for duplicate or inconsistent overflow badges
+      const badgeTexts = overflowDetails.map(b => b.text);
+      const uniqueTexts = new Set(badgeTexts);
+      if (badgeTexts.length > uniqueTexts.size) {
+        console.log(`  ❌ DUPLICATE OVERFLOW BADGES: Found duplicate badge texts: [${badgeTexts.join(', ')}]`);
+        await page.screenshot({ path: `test-results/napoleon-duplicate-badges-step-${step}.png` });
+        expect(badgeTexts.length).toBe(uniqueTexts.size);
+      }
+      
+      // Take screenshot for analysis
+      await page.screenshot({ path: `test-results/napoleon-fullzoom-step-${step.toString().padStart(2, '0')}.png` });
+    }
+    
+    console.log('\\n✅ Fully zoomed sliding validation completed');
+  });
 });

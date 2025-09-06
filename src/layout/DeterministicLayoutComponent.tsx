@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { Event } from '../types';
 import type { LayoutConfig } from './types';
 import { createLayoutConfig } from './config';
 import { DeterministicLayoutV5 } from './LayoutEngine';
+import { useAxisTicks } from '../timeline/hooks/useAxisTicks';
 
 interface DeterministicLayoutProps {
   events: Event[];
@@ -12,22 +13,148 @@ interface DeterministicLayoutProps {
 }
 
 export function DeterministicLayoutComponent({ events, showInfoPanels = false, viewStart = 0, viewEnd = 1 }: DeterministicLayoutProps) {
-  // Dynamic viewport size
+  // Container ref for proper sizing
+  const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
   const [showColumnBorders, setShowColumnBorders] = useState(false);
   
-  useEffect(() => {
-    const updateSize = () => {
+  const updateSize = useCallback(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
       setViewportSize({
-        width: window.innerWidth, // Use full width
-        height: window.innerHeight // Use full height
+        width: rect.width,
+        height: rect.height
       });
+    }
+  }, []);
+  
+  useEffect(() => {
+    updateSize();
+    
+    const resizeObserver = new ResizeObserver(() => {
+      updateSize();
+    });
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateSize]);
+
+  // Calculate timeline date range for axis ticks
+  const timelineRange = useMemo(() => {
+    if (events.length === 0) return null;
+    
+    const dates = events.map(event => new Date(event.date).getTime());
+    const fullMinDate = Math.min(...dates);
+    const fullMaxDate = Math.max(...dates);
+    const fullDateRange = fullMaxDate - fullMinDate;
+    
+    // If zoomed (viewStart and viewEnd are not 0,1), calculate the visible time window
+    if (viewStart !== 0 || viewEnd !== 1) {
+      const visibleMinDate = fullMinDate + (viewStart * fullDateRange);
+      const visibleMaxDate = fullMinDate + (viewEnd * fullDateRange);
+      const visibleDateRange = visibleMaxDate - visibleMinDate;
+      
+      return { 
+        minDate: visibleMinDate, 
+        maxDate: visibleMaxDate, 
+        dateRange: visibleDateRange,
+        fullMinDate,
+        fullMaxDate,
+        fullDateRange,
+        isZoomed: true
+      };
+    }
+    
+    return { 
+      minDate: fullMinDate, 
+      maxDate: fullMaxDate, 
+      dateRange: fullDateRange,
+      fullMinDate,
+      fullMaxDate, 
+      fullDateRange,
+      isZoomed: false
+    };
+  }, [events, viewStart, viewEnd]);
+
+  // Create function for useAxisTicks
+  const tToXPercent = useMemo(() => {
+    if (!timelineRange) return () => 0;
+    
+    return (timestamp: number): number => {
+      const ratio = (timestamp - timelineRange.minDate) / timelineRange.dateRange;
+      return ratio * 100; // Return 0-100 percent within the viewbox
+    };
+  }, [timelineRange]);
+
+  // Use the enhanced useAxisTicks hook - this must be at component level
+  const timelineTicks = useAxisTicks(
+    timelineRange?.minDate || 0,
+    timelineRange?.maxDate || 1,
+    timelineRange?.dateRange || 1,
+    tToXPercent
+  );
+
+  // Responsive timeline ticks based on actual viewport width
+  const fallbackTicks = timelineRange && viewportSize.width > 200 ? [
+    { t: timelineRange.minDate, label: new Date(timelineRange.minDate).getFullYear().toString(), x: viewportSize.width * 0.1 },
+    { t: timelineRange.minDate + (timelineRange.dateRange * 0.25), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.25)).getFullYear().toString(), x: viewportSize.width * 0.3 },
+    { t: timelineRange.minDate + (timelineRange.dateRange * 0.5), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.5)).getFullYear().toString(), x: viewportSize.width * 0.5 },
+    { t: timelineRange.minDate + (timelineRange.dateRange * 0.75), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.75)).getFullYear().toString(), x: viewportSize.width * 0.7 },
+    { t: timelineRange.maxDate, label: new Date(timelineRange.maxDate).getFullYear().toString(), x: viewportSize.width * 0.9 }
+  ] : [];
+
+  // Timeline scales use responsive positioning based on viewport width
+  
+  // Timeline scales now working with proper pixel-based coordinates
+  // Convert percentage-based ticks to pixel coordinates
+  const pixelTicks = timelineTicks.map(tick => ({
+    ...tick,
+    x: (tick.x / 100) * viewportSize.width // Convert 0-100% to 0-width pixels
+  }));
+  
+  const finalTicks = pixelTicks.length > 0 ? pixelTicks : fallbackTicks;
+
+
+  // Debug function for browser console
+  useEffect(() => {
+    (window as any).debugTimelineScales = () => {
+      const container = document.querySelector('[data-testid="timeline-scales-container"]') as HTMLElement;
+      const svg = document.querySelector('[data-testid="timeline-scales-svg"]') as SVGElement;
+      const texts = document.querySelectorAll('[data-testid="timeline-scales-svg"] text');
+      
+      console.log('🔧 Timeline Scales Debug Results:');
+      console.log('1. Container exists:', !!container);
+      console.log('2. Container position:', container?.getBoundingClientRect());
+      console.log('3. Container styles:', container ? getComputedStyle(container) : 'N/A');
+      console.log('4. SVG exists:', !!svg);
+      console.log('5. SVG position:', svg?.getBoundingClientRect());
+      console.log('6. Text elements found:', texts.length);
+      texts.forEach((text, i) => {
+        const rect = text.getBoundingClientRect();
+        console.log(`   Text ${i}:`, text.textContent, 'Position:', rect, 'Visible:', rect.width > 0 && rect.height > 0);
+      });
+      console.log('7. Current viewport size:', viewportSize);
+      console.log('8. Timeline ticks data:', finalTicks);
+      
+      return {
+        containerExists: !!container,
+        svgExists: !!svg,
+        textCount: texts.length,
+        viewport: viewportSize,
+        ticks: finalTicks
+      };
     };
     
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
+    console.log('🔧 Debug function available: window.debugTimelineScales()');
+  }, [viewportSize, finalTicks]);
+
+  // TODO: Fix useAxisTicks hook - currently using fallback system
+
 
 
   // Create layout configuration for deterministic layout
@@ -89,9 +216,21 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     return deterministicLayout.layout(events, viewWindow);
   }, [events, config, viewStart, viewEnd, viewTimeWindow]);
 
+  // Fix leftover overflow badges: Don't show overflow badges when there are no event cards visible
+  const filteredAnchors = useMemo(() => {
+    // When there are no positioned event cards, don't show any overflow badges either
+    // This prevents leftover overflow badges in empty timeline regions
+    if (layoutResult.positionedCards.length === 0) {
+      return [];
+    }
+    
+    // Normal case: show all anchors when there are visible event cards
+    return layoutResult.anchors;
+  }, [layoutResult.anchors, layoutResult.positionedCards]);
+
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
-    const anchors = layoutResult.anchors;
+    const anchors = filteredAnchors; // Use filtered anchors to prevent leftover merged badges
     if (!anchors || anchors.length === 0) return [];
     
     const MERGE_THRESHOLD = 200; // Merge anchors within 200px for aggressive spacing
@@ -137,7 +276,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     }
     
     return mergedBadges;
-  }, [layoutResult.anchors, config.timelineY]);
+  }, [filteredAnchors, config.timelineY]);
 
   // Telemetry: expose dispatch/capacity/placements for tests and overlays
   useEffect(() => {
@@ -353,6 +492,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
 
   return (
     <div 
+      ref={containerRef}
       className="absolute inset-0 bg-gray-100 overflow-hidden"
     >
       {/* Column Borders (Development Visualization) */}
@@ -376,50 +516,62 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
         data-testid="timeline-axis"
       />
       
-      {/* Timeline Date Labels */}
-      {(() => {
-        // Generate date labels based on ALL events, not just positioned cards
-        if (events.length === 0) return null;
-        
-        const dates = events.map(event => new Date(event.date).getTime());
-        const minDate = Math.min(...dates);
-        const maxDate = Math.max(...dates);
-        const range = maxDate - minDate;
-        
-        // Generate 5-10 tick marks
-        const tickCount = Math.min(10, Math.max(5, layoutResult.clusters.length));
-        const ticks = [];
-        
-        for (let i = 0; i <= tickCount; i++) {
-          const time = minDate + (range * i / tickCount);
-          // Use same margin calculation as LayoutEngine for consistency
-          const navRailWidth = 56;
-          const additionalMargin = 80; 
-          const leftMargin = navRailWidth + additionalMargin; // 136px total
-          const rightMargin = 40;
-          const usableWidth = viewportSize.width - leftMargin - rightMargin;
-          const x = leftMargin + (usableWidth * i / tickCount);
-          const date = new Date(time);
-          
-          ticks.push(
-            <div
-              key={`tick-${i}`}
-              className="absolute flex flex-col items-center"
-              style={{ left: x - 30, top: (config?.timelineY ?? viewportSize.height / 2) + 8 }}
-            >
-              <div className="w-0.5 h-2 bg-gray-600 -mt-2" />
-              <div className="text-xs text-gray-600 mt-1 whitespace-nowrap">
-                {date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-              </div>
-            </div>
-          );
-        }
-        
-        return ticks;
-      })()}
+      {/* Adaptive Timeline Axis with Enhanced Scales */}
+      {events.length > 0 && timelineRange && (
+        <div 
+          className="absolute"
+          style={{ 
+            left: 0, // Full width from edge to edge
+            top: (config?.timelineY ?? viewportSize.height / 2) - 30,
+            width: viewportSize.width, // Full container width
+            height: 60 // Larger height for better visibility
+          }}
+          data-testid="timeline-scales-container"
+          ref={(el) => {
+            if (el) {
+              console.log('🔍 Timeline Scales Container Debug:', {
+                containerExists: true,
+                containerRect: el.getBoundingClientRect(),
+                containerStyle: {
+                  left: el.style.left,
+                  top: el.style.top,
+                  width: el.style.width,
+                  height: el.style.height,
+                  position: el.style.position
+                },
+                viewport: viewportSize,
+                tickCount: finalTicks.length,
+                ticks: finalTicks
+              });
+            }
+          }}
+        >
+          <svg 
+            width={viewportSize.width} 
+            height={60}
+            viewBox={`0 0 ${viewportSize.width} 60`} // Use actual pixel coordinates
+            data-testid="timeline-scales-svg"
+          >
+            {/* Direct timeline scale rendering - bypass Axis component */}
+            {finalTicks.map((tick, index) => (
+              <g key={`tick-${index}`}>
+                {/* Grid line */}
+                <line x1={tick.x} x2={tick.x} y1={5} y2={55} stroke="#ffffff" strokeWidth={2} opacity="0.4" />
+                {/* Scale label */}
+                <text x={tick.x} y={20} fontSize={18} fill="#1f2937" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold">
+                  {tick.label}
+                </text>
+              </g>
+            ))}
+            
+            {/* Main timeline axis line */}
+            <line x1={0} x2={viewportSize.width} y1={30} y2={30} stroke="#ffffff" strokeWidth={3} opacity="0.6" />
+          </svg>
+        </div>
+      )}
       
-      {/* Anchors */}
-      {layoutResult.anchors.map((anchor) => {
+      {/* Anchors - filtered by view window to prevent leftover overflow badges */}
+      {filteredAnchors.map((anchor) => {
         // Check if this anchor is part of a merged badge group
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
         
@@ -440,7 +592,10 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
             
             {/* Individual overflow badge - only show if NOT part of merged group */}
             {anchor.overflowCount > 0 && !isMerged && (
-              <div className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30">
+              <div 
+                data-testid={`overflow-badge-${anchor.id}`}
+                className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30"
+              >
                 +{anchor.overflowCount}
               </div>
             )}

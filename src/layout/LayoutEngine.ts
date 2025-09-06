@@ -65,6 +65,10 @@ export class DeterministicLayoutV5 {
   private capacityModel: CapacityModel;
   private timeRange: { startTime: number; endTime: number; duration: number } | null = null;
   
+  // View window context for overflow filtering
+  private currentViewWindow: { viewStart: number; viewEnd: number } | null = null;
+  private currentTimeWindow: { visibleStartTime: number; visibleEndTime: number } | null = null;
+  
   // Configuration for spatial-based clustering (Stage 3B)
   private readonly TEMPORAL_GROUPING_FACTOR = 0.07; // 7% of timeline range for grouping window
   
@@ -82,9 +86,8 @@ export class DeterministicLayoutV5 {
       return this.emptyResult();
     }
     
-
-    // Calculate time range from actual events
-    this.calculateTimeRange(events);
+    // Store view window context for overflow filtering
+    this.currentViewWindow = viewWindow;
 
     // Filter events by view window if provided (for zoomed views)
     let layoutEvents = events;
@@ -97,13 +100,21 @@ export class DeterministicLayoutV5 {
       const visibleStartTime = minDate + (dateRange * viewWindow.viewStart);
       const visibleEndTime = minDate + (dateRange * viewWindow.viewEnd);
       
+      // Store time window for overflow event filtering
+      this.currentTimeWindow = { visibleStartTime, visibleEndTime };
+      
       layoutEvents = events.filter(event => {
         const eventTime = new Date(event.date).getTime();
         return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
       });
       
       console.log(`🔍 VIEW WINDOW FILTER: ${events.length} total events → ${layoutEvents.length} visible events`);
+    } else {
+      this.currentTimeWindow = null;
     }
+
+    // Calculate time range from filtered events (for proper viewport usage when zoomed)
+    this.calculateTimeRange(layoutEvents);
 
     // Calculate adaptive half-column width for telemetry (Stage 3i1)
     const adaptiveHalfColumnWidth = this.calculateAdaptiveHalfColumnWidth();
@@ -524,11 +535,13 @@ export class DeterministicLayoutV5 {
       const actualCards = group.cards.slice(0, totalCapacity);
       
       // Update anchor with proper visible count and overflow count
-      const totalEvents = group.events.length + (group.overflowEvents ? group.overflowEvents.length : 0);
+      // Filter overflow events by current view window to prevent leftover indicators
+      const relevantOverflowEvents = group.overflowEvents ? this.filterEventsByViewWindow(group.overflowEvents) : [];
+      const totalEvents = group.events.length + relevantOverflowEvents.length;
       const visibleCount = actualCards.length;
       const overflowCount = Math.max(0, totalEvents - visibleCount);
       const updatedAnchor = this.createAnchor(
-        [...group.events, ...(group.overflowEvents || [])], 
+        [...group.events, ...relevantOverflowEvents], 
         group.centerX, 
         visibleCount,
         overflowCount
@@ -740,7 +753,22 @@ export class DeterministicLayoutV5 {
     return availableWidth > 0 ? (usedWidth / availableWidth) * 100 : 0;
   }
 
-
+  /**
+   * Helper: Filter events by current view window to prevent leftover overflow indicators
+   */
+  private filterEventsByViewWindow(events: Event[]): Event[] {
+    if (!this.currentTimeWindow) {
+      // No view window filtering - return all events
+      return events;
+    }
+    
+    const { visibleStartTime, visibleEndTime } = this.currentTimeWindow;
+    
+    return events.filter(event => {
+      const eventTime = new Date(event.date).getTime();
+      return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
+    });
+  }
 
   /**
    * Helper: Empty result for no events
