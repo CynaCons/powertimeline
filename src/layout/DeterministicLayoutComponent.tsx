@@ -586,7 +586,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
             }}
           >
             {/* Anchor dot */}
-            <div className="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-sm z-20" />
+            <div className="w-3 h-3 bg-gray-500 border border-gray-200 shadow-sm z-20" />
             {/* Vertical connector line */}
             <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
             
