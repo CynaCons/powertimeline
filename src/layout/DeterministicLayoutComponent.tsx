@@ -575,6 +575,22 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
         // Check if this anchor is part of a merged badge group
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
         
+        // Determine if anchor's events are above or below timeline
+        const timelineY = config?.timelineY ?? viewportSize.height / 2;
+        const anchorEvents = events.filter(event => anchor.eventIds?.includes(event.id));
+        const anchorCards = layoutResult.positionedCards.filter(card => {
+          const cardEventIds = Array.isArray(card.event) 
+            ? card.event.map(e => e.id) 
+            : [card.event.id];
+          return cardEventIds.some(id => anchor.eventIds?.includes(id));
+        });
+        
+        // Determine connector direction based on card positions
+        const hasCardsAbove = anchorCards.some(card => card.y < timelineY);
+        const hasCardsBelow = anchorCards.some(card => card.y >= timelineY);
+        const connectsUp = hasCardsAbove && !hasCardsBelow;
+        const connectsDown = hasCardsBelow && !hasCardsAbove;
+        
         return (
           <div
             key={anchor.id}
@@ -587,8 +603,17 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
           >
             {/* Anchor dot */}
             <div className="w-3 h-3 bg-gray-500 border border-gray-200 shadow-sm z-20" />
-            {/* Vertical connector line */}
-            <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
+            
+            {/* Vertical connector line - points toward events */}
+            {connectsUp && (
+              <div className="w-0.5 h-6 bg-gray-400 -mt-8" /> {/* Line goes up */}
+            )}
+            {connectsDown && (
+              <div className="w-0.5 h-6 bg-gray-400 mt-0" /> {/* Line goes down */}  
+            )}
+            {!connectsUp && !connectsDown && (
+              <div className="w-0.5 h-6 bg-gray-400 -mt-2" /> {/* Default line (current behavior) */}
+            )}
             
             {/* Individual overflow badge - only show if NOT part of merged group */}
             {anchor.overflowCount > 0 && !isMerged && (
