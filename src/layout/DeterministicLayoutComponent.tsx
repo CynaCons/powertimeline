@@ -600,12 +600,6 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
               </div>
             )}
             
-            {/* Total event count badge for debugging (remove later) */}
-            {anchor.eventCount > 1 && anchor.overflowCount === 0 && (
-              <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
-                {anchor.eventCount}
-              </div>
-            )}
           </div>
         );
       })}
