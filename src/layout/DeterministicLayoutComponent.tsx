@@ -216,16 +216,39 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     return deterministicLayout.layout(events, viewWindow);
   }, [events, config, viewStart, viewEnd, viewTimeWindow]);
 
-  // Fix leftover overflow badges: Don't show overflow badges when there are no event cards visible
+  // Fix leftover anchors: Filter out anchors that don't have visible cards in current view
   const filteredAnchors = useMemo(() => {
-    // When there are no positioned event cards, don't show any overflow badges either
-    // This prevents leftover overflow badges in empty timeline regions
+    console.log(`🔍 ANCHOR FILTER START: ${layoutResult.anchors.length} anchors, ${layoutResult.positionedCards.length} cards`);
+    
+    // When there are no positioned event cards, don't show any anchors either
     if (layoutResult.positionedCards.length === 0) {
+      console.log(`🔍 ANCHOR FILTER: Returning [] because no positioned cards`);
       return [];
     }
     
-    // Normal case: show all anchors when there are visible event cards
-    return layoutResult.anchors;
+    // Filter anchors to only include those with visible cards in current view
+    const filtered = layoutResult.anchors.filter(anchor => {
+      // Check if this anchor has any corresponding visible cards
+      const anchorCards = layoutResult.positionedCards.filter(card => {
+        const cardEventIds = Array.isArray(card.event) 
+          ? card.event.map(e => e.id) 
+          : [card.event.id];
+        return cardEventIds.some(id => anchor.eventIds?.includes(id));
+      });
+      
+      // Debug logging for leftover anchor detection  
+      if (anchorCards.length === 0) {
+        console.log(`🔍 ANCHOR FILTER DEBUG: Removing anchor ${anchor.id} - no matching cards`);
+      } else {
+        console.log(`🔍 ANCHOR FILTER DEBUG: Keeping anchor ${anchor.id} - has ${anchorCards.length} matching cards`);
+      }
+      
+      // Only show anchor if it has visible cards
+      return anchorCards.length > 0;
+    });
+    
+    console.log(`🔍 ANCHOR FILTER RESULT: ${filtered.length} anchors kept`);
+    return filtered;
   }, [layoutResult.anchors, layoutResult.positionedCards]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
@@ -577,7 +600,6 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
         
         // Determine if anchor's events are above or below timeline
         const timelineY = config?.timelineY ?? viewportSize.height / 2;
-        const anchorEvents = events.filter(event => anchor.eventIds?.includes(event.id));
         const anchorCards = layoutResult.positionedCards.filter(card => {
           const cardEventIds = Array.isArray(card.event) 
             ? card.event.map(e => e.id) 
@@ -606,13 +628,13 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
             
             {/* Vertical connector line - points toward events */}
             {connectsUp && (
-              <div className="w-0.5 h-6 bg-gray-400 -mt-8" /> {/* Line goes up */}
+              <div className="w-0.5 h-6 bg-gray-400 -mt-8" />
             )}
             {connectsDown && (
-              <div className="w-0.5 h-6 bg-gray-400 mt-0" /> {/* Line goes down */}  
+              <div className="w-0.5 h-6 bg-gray-400 mt-0" />
             )}
             {!connectsUp && !connectsDown && (
-              <div className="w-0.5 h-6 bg-gray-400 -mt-2" /> {/* Default line (current behavior) */}
+              <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
             )}
             
             {/* Individual overflow badge - only show if NOT part of merged group */}

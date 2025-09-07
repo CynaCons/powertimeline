@@ -13,6 +13,12 @@
     - [x] Fixed overflow calculation to only count overflow events within current view window (lines 539-542)
     - [x] Created comprehensive leftover detection tests (30-leftover-overflow-detection.spec.ts, 31-aggressive-leftover-detection.spec.ts)
     - [x] Validated fix prevents overflow indicators from appearing in empty timeline regions
+  - [x] **Cleaned up debug tests and extended directional anchor connector tests** ✅ **COMPLETED 2025-09-07**
+    - [x] Removed all debug test files and kept only official numbered tests (01-35)
+    - [x] Extended 33-directional-anchors.spec.ts with leftover connector detection tests
+    - [x] Added zoom-based connector cleanup validation tests
+    - [x] Verified anchor filtering logic works correctly (anchors only created when needed)
+    - [x] Confirmed overflow indicator filtering fixes prevent leftover badges
 
 ## REFACTORING PLAN - Layout Engine First Approach
 
