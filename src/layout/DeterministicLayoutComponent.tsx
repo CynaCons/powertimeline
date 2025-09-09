@@ -516,6 +516,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
 
   return (
     <div 
+      key={`vw-${Number.isFinite(viewStart) ? viewStart.toFixed(3) : '0.000'}-${Number.isFinite(viewEnd) ? viewEnd.toFixed(3) : '1.000'}`}
       ref={containerRef}
       className="absolute inset-0 bg-gray-100 overflow-hidden"
     >
@@ -607,47 +608,47 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
             : [card.event.id];
           return cardEventIds.some(id => anchor.eventIds?.includes(id));
         });
-        
+        // If no matching cards, suppress this anchor entirely (belt-and-suspenders)
+        if (anchorCards.length === 0) return null;
+
         // Determine connector direction based on card positions
         const hasCardsAbove = anchorCards.some(card => card.y < timelineY);
         const hasCardsBelow = anchorCards.some(card => card.y >= timelineY);
-        const connectsUp = hasCardsAbove && !hasCardsBelow;
-        const connectsDown = hasCardsBelow && !hasCardsAbove;
+        const connectsUp = hasCardsAbove;
+        const connectsDown = hasCardsBelow;
         
         return (
           <div
             key={anchor.id}
             data-testid={anchor.id}
-            className="absolute flex flex-col items-center"
-            style={{
-              left: anchor.x - 8,
-              top: (config?.timelineY ?? viewportSize.height / 2) - 8
-            }}
+            className="absolute"
+            style={{ left: anchor.x - 8, top: (config?.timelineY ?? viewportSize.height / 2) - 8 }}
           >
-            {/* Anchor dot */}
-            <div className="w-3 h-3 bg-gray-500 border border-gray-200 shadow-sm z-20" />
-            
-            {/* Vertical connector line - points toward events */}
-            {connectsUp && (
-              <div className="w-0.5 h-6 bg-gray-400 -mt-8" />
-            )}
-            {connectsDown && (
-              <div className="w-0.5 h-6 bg-gray-400 mt-0" />
-            )}
-            {!connectsUp && !connectsDown && (
-              <div className="w-0.5 h-6 bg-gray-400 -mt-2" />
-            )}
-            
-            {/* Individual overflow badge - only show if NOT part of merged group */}
-            {anchor.overflowCount > 0 && !isMerged && (
-              <div 
-                data-testid={`overflow-badge-${anchor.id}`}
-                className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30"
-              >
-                +{anchor.overflowCount}
-              </div>
-            )}
-            
+            <div
+              data-testid="timeline-anchor"
+              className="flex flex-col items-center"
+            >
+              {/* Anchor dot */}
+              <div className="w-3 h-3 bg-gray-500 border border-gray-200 shadow-sm z-20" />
+
+              {/* Directional connector lines (render both if events exist on both sides) */}
+              {connectsUp && (
+                <div data-testid="connector-up" className="w-0.5 h-6 bg-gray-400 -mt-8" />
+              )}
+              {connectsDown && (
+                <div data-testid="connector-down" className="w-0.5 h-6 bg-gray-400 mt-0" />
+              )}
+
+              {/* Individual overflow badge - only show if NOT part of merged group */}
+              {anchor.overflowCount > 0 && !isMerged && (
+                <div 
+                  data-testid={`overflow-badge-${anchor.id}`}
+                  className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30"
+                >
+                  +{anchor.overflowCount}
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

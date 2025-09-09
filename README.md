@@ -2,6 +2,10 @@
 
 Chronochart is a modern web application for creating and visualizing timelines. 
 
+## Documentation
+
+- Software Requirements Specification (SRS): see `docs/SRS.md` for the table-format requirements with traceability to code and tests.
+
 ## Development
 
 Install dependencies and start the development server:

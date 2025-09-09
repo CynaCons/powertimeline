@@ -470,7 +470,9 @@ export class DeterministicLayoutV5 {
    * Determine the appropriate card type for a group based on event count and space constraints
    */
   private determineCardType(group: ColumnGroup): CardType {
-    const eventCount = group.events.length;
+    // Consider both primary and overflow events when selecting card type
+    const overflowLen = Array.isArray(group.overflowEvents) ? group.overflowEvents.length : 0;
+    const eventCount = group.events.length + overflowLen;
     
     // Track metrics for telemetry
     this.degradationMetrics.totalGroups++;
@@ -539,7 +541,13 @@ export class DeterministicLayoutV5 {
     // Compact cards: max 4 per half-column
     const cardType = cardTypes[0]; // Use first card type for capacity calculation
     const maxCardsPerHalfColumn = this.getMaxCardsPerHalfColumn(cardType);
-    const visibleEvents = group.events.slice(0, maxCardsPerHalfColumn);
+
+    // Build from combined pool so we can promote overflow into visible when switching to compact
+    const combined: Event[] = [
+      ...group.events,
+      ...(Array.isArray(group.overflowEvents) ? group.overflowEvents : [])
+    ];
+    const visibleEvents = combined.slice(0, maxCardsPerHalfColumn);
 
     visibleEvents.forEach((event, index) => {
       // Cycle through card types if multiple provided
@@ -557,6 +565,10 @@ export class DeterministicLayoutV5 {
         eventCount: 1
       });
     });
+
+    // Update overflowEvents to remainder for accurate anchor counts and future passes
+    const remainder = combined.slice(visibleEvents.length);
+    group.overflowEvents = remainder.length > 0 ? remainder : undefined;
 
     return cards;
   }
