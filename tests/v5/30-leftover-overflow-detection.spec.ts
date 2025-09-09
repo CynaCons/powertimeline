@@ -4,6 +4,7 @@ test.describe('Leftover Overflow Indicator Detection Tests', () => {
   test.setTimeout(60000);
 
   test('Detect leftover overflow indicators that persist in empty timeline regions', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-001' });
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -132,6 +133,7 @@ test.describe('Leftover Overflow Indicator Detection Tests', () => {
   });
 
   test('Overflow indicators should disappear when zooming out from dense regions', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-002' });
     await page.goto('/');
     await page.waitForTimeout(1000);
     

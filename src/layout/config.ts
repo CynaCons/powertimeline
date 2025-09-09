@@ -5,12 +5,12 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   full: {
     type: 'full',
     width: 260, // Reduced from 280px to 260px
-    height: 140
+    height: 169
   },
   compact: {
     type: 'compact', 
-    width: 176,
-    height: 64
+    width: 260,
+    height: 78
   },
   'title-only': {
     type: 'title-only',

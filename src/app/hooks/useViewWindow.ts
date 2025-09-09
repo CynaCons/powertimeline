@@ -59,7 +59,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     // Handle boundary conditions while maintaining cursor as anchor
     if (newStart < 0) {
       // Hit left boundary - shift window but keep cursor ratio
-      const overflow = -newStart;
+      // const overflow = -newStart; // Unused variable
       newStart = 0;
       newEnd = newWindowWidth;
       // Only adjust if we can't maintain cursor position at all
@@ -69,7 +69,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
       }
     } else if (newEnd > 1) {
       // Hit right boundary - shift window but keep cursor ratio
-      const overflow = newEnd - 1;
+      // const overflow = newEnd - 1; // Unused variable
       newEnd = 1;
       newStart = 1 - newWindowWidth;
       // Only adjust if we can't maintain cursor position at all

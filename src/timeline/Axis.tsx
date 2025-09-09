@@ -38,7 +38,7 @@ export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
     <g data-component="Axis">
       {/* Major grid lines */}
       {ticks.map(t => (
-        <line key={`g-${t.t}`} data-testid="grid-major" x1={t.x} x2={t.x} y1={2} y2={18} stroke="var(--cc-color-grid-major)" strokeWidth={0.08} />
+        <line key={`g-${t.t}`} data-testid="grid-major" x1={t.x} x2={t.x} y1={5} y2={55} stroke="#ffffff" strokeWidth={3} opacity="0.6" />
       ))}
       {/* Minor grid lines */}
       {minor.map((x, i) => (
@@ -48,10 +48,11 @@ export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
       <line
         x1={tickStart}
         x2={tickEnd}
-        y1={10}
-        y2={10}
-        stroke="var(--cc-color-axis-line)"
-        strokeWidth="var(--cc-axis-line-width,0.18)"
+        y1={30}
+        y2={30}
+        stroke="#ffffff"
+        strokeWidth="4"
+        opacity="0.8"
       />
       {/* Minor tick marks */}
       {minor.map((x, i) => (
@@ -60,7 +61,7 @@ export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
       {ticks.map(t => (
         <g key={t.t} transform={`translate(${t.x},0)`}>
           <line data-testid="axis-tick" x1={0} x2={0} y1={9.3} y2={10.7} stroke="var(--cc-color-axis-line-strong)" strokeWidth={0.16} />
-          <text data-testid="axis-label" x={0} y={11.9} fontSize={1.2} fill="var(--cc-color-axis-label)" textAnchor="middle" style={{ pointerEvents: 'none', fontWeight: 400 }}>{t.label}</text>
+          <text data-testid="axis-label" x={0} y={20} fontSize={18} fill="#ffffff" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold">{t.label}</text>
         </g>
       ))}
     </g>

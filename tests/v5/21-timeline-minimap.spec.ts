@@ -14,6 +14,7 @@ async function openDevPanel(page: any) {
 
 test.describe('Timeline Minimap Tests', () => {
   test('Minimap displays and shows timeline range', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-001' });
     await page.goto('/');
     
     // Load Napoleon timeline
@@ -38,6 +39,7 @@ test.describe('Timeline Minimap Tests', () => {
   });
   
   test('Minimap view window indicator reflects zoom state', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-002' });
     await page.goto('/');
     
     // Load Napoleon timeline
@@ -77,6 +79,7 @@ test.describe('Timeline Minimap Tests', () => {
   });
   
   test('Minimap event density markers show event distribution', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-003' });
     await page.goto('/');
     
     // Load clustered timeline with many events
@@ -99,6 +102,7 @@ test.describe('Timeline Minimap Tests', () => {
   });
   
   test('Minimap click navigation works', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-004' });
     await page.goto('/');
     
     // Load Napoleon timeline

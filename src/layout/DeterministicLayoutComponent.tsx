@@ -506,7 +506,8 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
         height: viewportSize.height,
         timelineY: config?.timelineY ?? viewportSize.height / 2
       },
-      adaptive: layoutResult.telemetryMetrics?.adaptive
+      adaptive: layoutResult.telemetryMetrics?.adaptive,
+      degradation: layoutResult.telemetryMetrics?.degradation
     };
 
     (window as any).__ccTelemetry = telemetry;
@@ -680,7 +681,9 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
             card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
             card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :
             card.cardType === 'title-only' ? 'border-l-4 border-l-yellow-500 border-gray-200 p-1' :
-            'border-l-4 border-l-purple-500 border-gray-200 p-2'
+            card.cardType === 'multi-event' ? 'border-l-4 border-l-purple-500 border-gray-200 p-2' :
+            card.cardType === 'infinite' ? 'border-l-4 border-l-red-500 border-gray-200 p-1' :
+            'border-l-4 border-l-gray-500 border-gray-200 p-2' // fallback
           } text-sm`}
           style={{
             left: card.x,
@@ -691,20 +694,32 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
         >
           {/* Card content based on type */}
           {card.cardType === 'full' && (
-            <div className="h-full flex flex-col">
-              <div className="font-semibold text-gray-900 truncate">{Array.isArray(card.event) ? card.event[0].title : card.event.title}</div>
-              <div className="text-xs text-gray-600 mt-1 line-clamp-2">{Array.isArray(card.event) ? card.event[0].description : card.event.description}</div>
+            <div className="h-full flex flex-col overflow-hidden">
+              <div className="font-semibold text-gray-900">{Array.isArray(card.event) ? card.event[0].title : card.event.title}</div>
+              {(() => {
+                const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
+                return desc ? (
+                  <div className="text-xs text-gray-600 mt-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as any, WebkitLineClamp: 8 }}>
+                    {desc}
+                  </div>
+                ) : null;
+              })()}
               <div className="text-xs text-gray-500 mt-auto">{new Date(Array.isArray(card.event) ? card.event[0].date : card.event.date).toLocaleDateString()}</div>
             </div>
           )}
           
           {card.cardType === 'compact' && (
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col overflow-hidden">
               <div className="font-semibold text-gray-900 text-sm">{Array.isArray(card.event) ? card.event[0].title : card.event.title}</div>
+              {(() => {
+                const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
+                return desc ? (
+                  <div className="text-xs text-gray-600 mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as any, WebkitLineClamp: 2 }}>
+                    {desc}
+                  </div>
+                ) : null;
+              })()}
               <div className="text-xs text-gray-500 mt-auto">{new Date(Array.isArray(card.event) ? card.event[0].date : card.event.date).toLocaleDateString()}</div>
-              {card.eventCount && card.eventCount > 1 && (
-                <div className="text-xs text-blue-600">+{card.eventCount - 1} more</div>
-              )}
             </div>
           )}
           

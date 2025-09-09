@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('v5/02 Cards placement', () => {
   test('cards render above and below the axis', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARDS-001' });
     await page.goto('/');
     // Seed RFK deterministic dataset via DevPanel
     await page.getByRole('button', { name: 'Toggle developer options' }).click();

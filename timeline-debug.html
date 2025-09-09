@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timeline Scale Debug</title>
+    <style>
+        body { background: #1f2937; color: white; font-family: Arial; }
+        .debug { margin: 10px; padding: 10px; border: 1px solid #666; }
+    </style>
+</head>
+<body>
+    <h1>Timeline Scale Debug Test</h1>
+    
+    <div class="debug">
+        <h3>Test 1: Basic SVG Text Rendering</h3>
+        <svg width="800" height="100" style="border: 1px solid white;">
+            <text x="100" y="30" fontSize="18" fill="white" fontFamily="Arial">1746</text>
+            <text x="200" y="30" fontSize="18" fill="white" fontFamily="Arial">1757</text>
+            <text x="300" y="30" fontSize="18" fill="white" fontFamily="Arial">1769</text>
+            <text x="400" y="30" fontSize="18" fill="white" fontFamily="Arial">1782</text>
+            <text x="500" y="30" fontSize="18" fill="white" fontFamily="Arial">1795</text>
+        </svg>
+    </div>
+
+    <div class="debug">
+        <h3>Test 2: Timeline Scale Container Detection</h3>
+        <p>Open browser dev tools and check:</p>
+        <ol>
+            <li>Does [data-testid="timeline-scales-container"] exist?</li>
+            <li>Does [data-testid="timeline-scales-svg"] exist?</li>
+            <li>Are there &lt;text&gt; elements inside the SVG?</li>
+            <li>What are the computed styles?</li>
+            <li>What are the bounding box coordinates?</li>
+        </ol>
+    </div>
+
+    <script>
+        console.log('Timeline Debug Test Page Loaded');
+        
+        // Test if we can find timeline scale elements
+        setTimeout(() => {
+            const container = document.querySelector('[data-testid="timeline-scales-container"]');
+            const svg = document.querySelector('[data-testid="timeline-scales-svg"]');
+            const texts = document.querySelectorAll('[data-testid="timeline-scales-svg"] text');
+            
+            console.log('🔍 Timeline Scale Element Check:');
+            console.log('Container found:', !!container);
+            console.log('SVG found:', !!svg);
+            console.log('Text elements found:', texts.length);
+            
+            if (container) {
+                const rect = container.getBoundingClientRect();
+                console.log('Container position:', rect);
+            }
+            
+            if (svg) {
+                const rect = svg.getBoundingClientRect();
+                console.log('SVG position:', rect);
+            }
+            
+            texts.forEach((text, i) => {
+                console.log(`Text ${i}:`, text.textContent, text.getBoundingClientRect());
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

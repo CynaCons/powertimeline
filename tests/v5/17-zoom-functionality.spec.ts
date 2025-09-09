@@ -7,6 +7,7 @@ async function openDevPanel(page: any) {
 
 test.describe('Zoom Functionality Tests', () => {
   test('Zoom controls should filter visible events', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-001' });
     await page.goto('/');
     
     // Load JFK timeline (16 events)
@@ -69,6 +70,7 @@ test.describe('Zoom Functionality Tests', () => {
   });
   
   test('Mouse wheel zoom should work with Ctrl key', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-002' });
     await page.goto('/');
     
     // Load JFK timeline
@@ -112,6 +114,7 @@ test.describe('Zoom Functionality Tests', () => {
   });
 
   test('Keyboard zoom shortcuts should work', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-003' });
     await page.goto('/');
     
     // Load RFK timeline
