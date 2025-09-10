@@ -121,25 +121,31 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
 
 
   // Debug function for browser console
+  const DEBUG_LAYOUT = typeof window !== 'undefined' && ((window as any).__CC_DEBUG_LAYOUT || (import.meta as any)?.env?.DEV);
+
   useEffect(() => {
     (window as any).debugTimelineScales = () => {
       const container = document.querySelector('[data-testid="timeline-scales-container"]') as HTMLElement;
       const svg = document.querySelector('[data-testid="timeline-scales-svg"]') as SVGElement;
       const texts = document.querySelectorAll('[data-testid="timeline-scales-svg"] text');
       
-      console.log('🔧 Timeline Scales Debug Results:');
-      console.log('1. Container exists:', !!container);
-      console.log('2. Container position:', container?.getBoundingClientRect());
-      console.log('3. Container styles:', container ? getComputedStyle(container) : 'N/A');
-      console.log('4. SVG exists:', !!svg);
-      console.log('5. SVG position:', svg?.getBoundingClientRect());
-      console.log('6. Text elements found:', texts.length);
+      if (DEBUG_LAYOUT) {
+        console.log('Timeline Scales Debug Results:');
+        console.log('1. Container exists:', !!container);
+        console.log('2. Container position:', container?.getBoundingClientRect());
+        console.log('3. Container styles:', container ? getComputedStyle(container) : 'N/A');
+        console.log('4. SVG exists:', !!svg);
+        console.log('5. SVG position:', svg?.getBoundingClientRect());
+        console.log('6. Text elements found:', texts.length);
+      }
       texts.forEach((text, i) => {
         const rect = text.getBoundingClientRect();
-        console.log(`   Text ${i}:`, text.textContent, 'Position:', rect, 'Visible:', rect.width > 0 && rect.height > 0);
+        if (DEBUG_LAYOUT) console.log(`   Text ${i}:`, text.textContent, 'Position:', rect, 'Visible:', rect.width > 0 && rect.height > 0);
       });
-      console.log('7. Current viewport size:', viewportSize);
-      console.log('8. Timeline ticks data:', finalTicks);
+      if (DEBUG_LAYOUT) {
+        console.log('7. Current viewport size:', viewportSize);
+        console.log('8. Timeline ticks data:', finalTicks);
+      }
       
       return {
         containerExists: !!container,
@@ -150,7 +156,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
       };
     };
     
-    console.log('🔧 Debug function available: window.debugTimelineScales()');
+    if (DEBUG_LAYOUT) console.log('Debug function available: window.debugTimelineScales()');
   }, [viewportSize, finalTicks]);
 
   // TODO: Fix useAxisTicks hook - currently using fallback system
@@ -218,11 +224,11 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
 
   // Fix leftover anchors: Filter out anchors that don't have visible cards in current view
   const filteredAnchors = useMemo(() => {
-    console.log(`🔍 ANCHOR FILTER START: ${layoutResult.anchors.length} anchors, ${layoutResult.positionedCards.length} cards`);
+    if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER START: ${layoutResult.anchors.length} anchors, ${layoutResult.positionedCards.length} cards`);
     
     // When there are no positioned event cards, don't show any anchors either
     if (layoutResult.positionedCards.length === 0) {
-      console.log(`🔍 ANCHOR FILTER: Returning [] because no positioned cards`);
+      if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER: Returning [] because no positioned cards`);
       return [];
     }
     
@@ -237,17 +243,16 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
       });
       
       // Debug logging for leftover anchor detection  
-      if (anchorCards.length === 0) {
-        console.log(`🔍 ANCHOR FILTER DEBUG: Removing anchor ${anchor.id} - no matching cards`);
-      } else {
-        console.log(`🔍 ANCHOR FILTER DEBUG: Keeping anchor ${anchor.id} - has ${anchorCards.length} matching cards`);
+      if (DEBUG_LAYOUT) {
+        if (anchorCards.length === 0) console.log(`ANCHOR FILTER: Removing anchor ${anchor.id} - no matching cards`);
+        else console.log(`ANCHOR FILTER: Keeping anchor ${anchor.id} - has ${anchorCards.length} matching cards`);
       }
       
       // Only show anchor if it has visible cards
       return anchorCards.length > 0;
     });
     
-    console.log(`🔍 ANCHOR FILTER RESULT: ${filtered.length} anchors kept`);
+    if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER RESULT: ${filtered.length} anchors kept`);
     return filtered;
   }, [layoutResult.anchors, layoutResult.positionedCards]);
 
@@ -553,8 +558,8 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
           }}
           data-testid="timeline-scales-container"
           ref={(el) => {
-            if (el) {
-              console.log('🔍 Timeline Scales Container Debug:', {
+            if (el && DEBUG_LAYOUT) {
+              console.log('Timeline Scales Container Debug:', {
                 containerExists: true,
                 containerRect: el.getBoundingClientRect(),
                 containerStyle: {
@@ -678,6 +683,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
           data-testid="event-card"
           data-event-id={Array.isArray(card.event) ? card.event[0].id : card.event.id}
           data-card-type={card.cardType}
+          data-cluster-id={card.clusterId}
           className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-shadow ${
             card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
             card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :

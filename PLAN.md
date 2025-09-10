@@ -1,6 +1,6 @@
 # ChronoChart Implementation Plan
 
-## ✅ Completed (v0.2.0)
+## Completed (v0.2.0)
 
 ### Core Layout System
 - [x] Implement LayoutEngine with half-column system
@@ -25,9 +25,9 @@
 - [x] Navigation rail with developer panel
 - [x] Minimap with transparent view window indicator
 
-## 🔄 Current Priorities
+## Current Priorities
 
-### ✅ FIXED: Degradation System Working
+### FIXED: Degradation System Working
 - [x] **Fix degradation system - groups were artificially limited to 2 events max**
 - [x] Validate degradation with Napoleon timeline and real zoom scenarios  
 - [x] Ensure green (compact) cards appear when density increases
@@ -37,14 +37,14 @@
 - [ ] Test anchor indicators and overflow coherency during zoom (partial)
 - [ ] Eliminate leftover indicators when zooming at random locations (partial)
 
-### Card Type System  
-- [x] Complete first-level degradation system (Full → Compact)
+### Card Type System
+- [x] Complete first-level degradation system (Full ��' Compact)
 - [x] Add color coding for all card types (Blue/Green/Yellow/Purple/Red)
 - [x] Fix degradation telemetry to reflect actual behavior
 - [ ] Add title-only cards for dense regions
 - [ ] Create multi-event aggregation cards
 - [ ] Add promotion/demotion logic based on available space
-- [ ] Test degradation cascade: Full → Compact → Title-only
+- [ ] Test degradation cascade: Full ��' Compact ��' Title-only
 
 ### Performance & Robustness
 - [ ] Test engine with extreme zoom scenarios (1000+ events)
@@ -60,7 +60,7 @@
 - [ ] Advanced overflow handling strategies
 - [ ] Interactive anchor hover/click behaviors
 
-## 🚀 Future Enhancements
+## Future Enhancements
 
 ### User Experience
 - [ ] Keyboard navigation support
@@ -83,7 +83,7 @@
 - [ ] Implement comprehensive error logging
 - [ ] Add automated visual regression testing
 
-## 📋 Next Release Planning
+## Next Release Planning
 
 ### v0.3.0 Goals
 - [ ] Performance optimization for large datasets
@@ -105,11 +105,57 @@
 - [ ] Full accessibility support
 - [ ] Comprehensive documentation
 - [ ] Stable API for external use
+
 ## R5: Card sizing & semi-columns (layout polish)
 - [ ] Update card configs: full=260x169, compact=260x78
-- [ ] Compact renders 1�2 body lines; full uses full height for multi-line body
+- [ ] Compact renders 1-2 body lines; full uses full height for multi-line body
 - [ ] Reduce vertical margins (top/bottom/timeline) and inter-card spacing
 - [ ] Ensure one anchor per semi-column; no anchors with no visible cards
 - [ ] Strengthen half-column horizontal spacing; no overlaps at any zoom
 - [ ] Update tests: non-overlap (Napoleon Fit-All), minimap/anchors already aligned
 - [ ] Verify v5/10 space utilization improves (higher verticalSpread)
+
+## Iteration: Layout Unification & Title-only (v0.2.1)
+- [ ] Normalize repository encoding to UTF-8; fix mojibake in docs and source
+  - [ ] Fix non-ASCII artifacts in PLAN.md, ARCHITECTURE.md, COMPLETED.md, layout files
+  - [ ] Add/prep a simple encoding check in CI (lint-only)
+- [ ] Gate verbose console logging behind a debug flag; reduce noisy logs
+  - [ ] Wrap LayoutEngine/DeterministicLayoutComponent logs behind `process.env.NODE_ENV !== 'production' && DEBUG_LAYOUT`
+  - [ ] Extract repeated magic numbers to constants
+- [ ] Extract key magic numbers (margins, thresholds) into config/constants
+  - [ ] Timeline margins, half-column spacing, merge thresholds
+- [ ] Confirm app uses DeterministicLayoutComponent + LayoutEngine exclusively
+  - [ ] Verify `App.tsx` renders DeterministicLayoutComponent path
+- [ ] Archive/mark src/components/Timeline.tsx as legacy (not used)
+  - [ ] Add header comment indicating legacy and not wired in app
+- [ ] Update ARCHITECTURE.md with single layout path and correct filenames
+  - [ ] Replace outdated references (DeterministicLayout.ts → LayoutEngine.ts)
+
+- [ ] Implement title-only selection in LayoutEngine.determineCardType with threshold
+  - [ ] Choose threshold: when eventCount > compact capacity for half-column
+  - [ ] Return 'title-only' and ensure combined pool logic still applies
+- [ ] Ensure capacity accounting + getMaxCardsPerHalfColumn reflect title-only limits
+  - [ ] Set title-only capacity to 4 per half-column (matching config)
+- [ ] Verify render path supports title-only cards
+  - [ ] Check styles (yellow left border, minimal content) present in DeterministicLayoutComponent
+- [ ] Expose telemetry counters for title-only in degradation metrics
+  - [ ] Include counts in `telemetryMetrics.degradation`
+
+- [ ] Add Playwright spec tests/v5/xx-title-only-degradation.spec.ts
+  - [ ] Seed dense cluster; assert data-card-type="title-only" present
+  - [ ] Assert no overlaps across viewport
+  - [ ] Assert one anchor per semi-column; no anchor without visible cards
+- [ ] (Optional) Add unit test for determineCardType thresholds
+- [ ] Update SRS.md Title-only requirement to Implemented/Verified once tests pass
+- [ ] Remove outdated references and fix encoding in ARCHITECTURE.md/PLAN.md
+
+- [ ] Out of scope (explicit)
+  - [ ] Multi-event aggregation cards
+  - [ ] Infinite overflow cards
+  - [ ] Promotion/demotion pass
+
+- [ ] Acceptance criteria
+  - [ ] Title-only cards render under dense conditions without overlaps
+  - [ ] Playwright title-only spec passes
+  - [ ] Encoding issues resolved in touched files; console output succinct by default
+  - [ ] Docs reflect current architecture and iteration status

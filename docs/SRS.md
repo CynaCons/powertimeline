@@ -17,6 +17,7 @@ This SRS is the single source of truth for Chronochart requirements. Each requir
 | CC-REQ-CARD-FULL-001 | Full cards: multi-line, ~169px | Full cards are ~169px tall, show multi-line body without clipping. | Approved | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 (indirect) |
 | CC-REQ-CARD-COMPACT-001 | Compact: width=full, ~78px, 1–2 lines | Compact cards have same width as full (260px), ~78px tall, and show 1–2 description lines. | Approved | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 (indirect), v5/47 |
 | CC-REQ-LAYOUT-SEMICOL-001 | Efficient semi-columns and one anchor | Reduced margins and inter-card spacing; exactly one anchor per semi-column. | Implemented | `src/layout/LayoutEngine.ts` (margins/spacing), anchor logic | v5/10, v5/33 |
+| CC-REQ-CARD-TITLE-ONLY | Title-only cards render in high density | Title-only cards appear when cluster density exceeds compact capacity, with no overlaps. | Verified | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/48 |
 | CC-REQ-OVERFLOW-001 | No leftover overflow in empty regions | Navigating to an empty period shows no leftover overflow badges. | Verified | `src/layout/LayoutEngine.ts` (view-window filtering), `src/layout/DeterministicLayoutComponent.tsx` (anchor filtering) | v5/30 |
 | CC-REQ-OVERFLOW-002 | Overflow clears on zoom out | Overflow reduces/disappears appropriately when zooming out. | Verified | Same as above | v5/30 |
 | CC-REQ-ANCHOR-001 | Anchors only for visible groups | Render an anchor only if there are visible cards (or in-view overflow) for that semi-column; suppress stale anchors. | Verified | `src/layout/DeterministicLayoutComponent.tsx` (filtered anchors), `src/layout/LayoutEngine.ts` | v5/31, v5/32, v5/33 |
@@ -40,4 +41,3 @@ This SRS is the single source of truth for Chronochart requirements. Each requir
 
 ## Recent Changes (evidence)
 - CC-REQ-SEMICOL-002 implemented and verified: `src/layout/LayoutEngine.ts` now bases degradation on total events (including overflow) and promotes overflow into visible compact cards. Test v5/47 prevents regression.
-

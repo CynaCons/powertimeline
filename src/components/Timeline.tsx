@@ -1,3 +1,7 @@
+// LEGACY NOTICE: This component implements an alternative layout path with
+// custom collision resolution. The app does not use this for v5 — the
+// deterministic layout path is `src/layout/DeterministicLayoutComponent.tsx` +
+// `src/layout/LayoutEngine.ts`. Keep for reference only.
 import React from 'react';
 import type { Event } from '../types';
 import { Node } from '../timeline/Node/Node';

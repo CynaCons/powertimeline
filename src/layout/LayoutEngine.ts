@@ -77,6 +77,20 @@ export class DeterministicLayoutV5 {
     this.capacityModel = new CapacityModel(config.viewportHeight);
   }
 
+  // Debug logging (gated)
+  private get DEBUG_LAYOUT(): boolean {
+    try {
+      // Prefer runtime flag if available, else allow in dev only
+      const w: any = (typeof window !== 'undefined') ? (window as any) : {};
+      return Boolean(w.__CC_DEBUG_LAYOUT) || Boolean((import.meta as any)?.env?.DEV);
+    } catch {
+      return false;
+    }
+  }
+  private dlog(...args: any[]) {
+    if (this.DEBUG_LAYOUT) console.log(...args);
+  }
+
   /**
    * Main layout function implementing Stage 1-3 of the plan
    */
@@ -107,7 +121,7 @@ export class DeterministicLayoutV5 {
         return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
       });
       
-      console.log(`🔍 VIEW WINDOW FILTER: ${events.length} total events → ${layoutEvents.length} visible events`);
+      this.dlog(`VIEW WINDOW FILTER: ${events.length} total events → ${layoutEvents.length} visible events`);
     } else {
       this.currentTimeWindow = null;
     }
@@ -178,7 +192,7 @@ export class DeterministicLayoutV5 {
       // Calculate temporal X position for this event
       const eventTime = new Date(event.date).getTime();
       let eventXPos: number;
-      if (this.timeRange) {
+      if (this.timeRange && this.timeRange.duration > 0) {
         const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
         const temporalXPos = leftMargin + (timeRatio * usableWidth);
         
@@ -209,7 +223,7 @@ export class DeterministicLayoutV5 {
       
       // Check if any half-column in the target system has space
       // DEGRADATION FIX: Allow groups to accumulate more events, let degradation system handle card types
-      const maxEventsPerGroup = 4; // Allow up to 4 events per group (for compact cards)
+      const maxEventsPerGroup = 8; // Allow up to 8 events per group (enable title-only degradation)
       if (existingHalfColumn && existingHalfColumn.events.length < maxEventsPerGroup) {
         // Add to existing half-column (degradation system will determine card type)
         existingHalfColumn.events.push(event);
@@ -222,7 +236,7 @@ export class DeterministicLayoutV5 {
           anyExistingHalfColumn.overflowEvents = [];
         }
         anyExistingHalfColumn.overflowEvents.push(event);
-        console.log(`    - Added to overflow (${anyExistingHalfColumn.overflowEvents.length} overflow events)`);
+        this.dlog(`    - Added to overflow (${anyExistingHalfColumn.overflowEvents.length} overflow events)`);
         // Update anchor to show overflow count
         anyExistingHalfColumn.anchor = this.createAnchor(
           anyExistingHalfColumn.events, 
@@ -234,12 +248,12 @@ export class DeterministicLayoutV5 {
       // Standard same-system overflow
       else if (existingHalfColumn && existingHalfColumn.events.length >= 2) {
         // Half-column at capacity - add to overflow, don't create overlapping half-column
-        console.log(`  🌊 OVERFLOW TRIGGERED! Half-column ${existingHalfColumn.id} at capacity (${existingHalfColumn.events.length} events)`);
+        this.dlog(`  OVERFLOW TRIGGERED! Half-column ${existingHalfColumn.id} at capacity (${existingHalfColumn.events.length} events)`);
         if (!existingHalfColumn.overflowEvents) {
           existingHalfColumn.overflowEvents = [];
         }
         existingHalfColumn.overflowEvents.push(event);
-        console.log(`    - Added to overflow (${existingHalfColumn.overflowEvents.length} overflow events)`);
+        this.dlog(`    - Added to overflow (${existingHalfColumn.overflowEvents.length} overflow events)`);
         // Update anchor to show overflow count
         existingHalfColumn.anchor = this.createAnchor(
           existingHalfColumn.events, 
@@ -252,8 +266,8 @@ export class DeterministicLayoutV5 {
         const systemPrefix = shouldGoAbove ? 'above' : 'below';
         const halfColumnId = `${systemPrefix}-${targetSystem.length}`;
         
-        console.log(`  🆕 Creating new half-column: ${halfColumnId}`);
-        console.log(`    - Bounds: [${Math.round(eventXPos - adaptiveHalfColumnWidth / 2)}, ${Math.round(eventXPos + adaptiveHalfColumnWidth / 2)}]`);
+        this.dlog(`  Creating new half-column: ${halfColumnId}`);
+        this.dlog(`    - Bounds: [${Math.round(eventXPos - adaptiveHalfColumnWidth / 2)}, ${Math.round(eventXPos + adaptiveHalfColumnWidth / 2)}]`);
         
         this.capacityModel.initializeColumn(halfColumnId);
         
@@ -355,7 +369,7 @@ export class DeterministicLayoutV5 {
         
         if (requiredMinX <= maxPossibleX) {
           // Adjust current half-column position to prevent overlap
-          console.log(`🔧 Moving half-column ${current.id} from ${Math.round(current.centerX)} to ${Math.round(requiredMinX)} to prevent overlap`);
+          this.dlog(`Moving half-column ${current.id} from ${Math.round(current.centerX)} to ${Math.round(requiredMinX)} to prevent overlap`);
           current.centerX = requiredMinX;
           current.startX = current.centerX - adaptiveHalfColumnWidth / 2;
           current.endX = current.centerX + adaptiveHalfColumnWidth / 2;
@@ -364,7 +378,7 @@ export class DeterministicLayoutV5 {
           current.anchor = this.createAnchor(current.events, current.centerX);
         } else {
           // Not enough space - trigger overflow instead
-          console.log(`🌊 Half-column ${current.id} would exceed viewport - triggering overflow`);
+          this.dlog(`Half-column ${current.id} would exceed viewport - triggering overflow`);
           
           // Move events to previous half-column's overflow
           if (!prev.overflowEvents) {
@@ -419,6 +433,7 @@ export class DeterministicLayoutV5 {
       totalGroups: 0,
       fullCardGroups: 0,
       compactCardGroups: 0,
+      titleOnlyCardGroups: 0,
       spaceReclaimed: 0,
       degradationTriggers: []
     };
@@ -453,11 +468,12 @@ export class DeterministicLayoutV5 {
     totalGroups: 0,
     fullCardGroups: 0,
     compactCardGroups: 0,
-    spaceReclaimed: 0, // vertical pixels saved by using compact cards
+    titleOnlyCardGroups: 0,
+    spaceReclaimed: 0, // vertical pixels saved by using compact/title-only cards
     degradationTriggers: [] as Array<{
       groupId: string,
       eventCount: number,
-      from: 'full',
+      from: 'full' | 'compact',
       to: 'compact' | 'title-only' | 'multi-event',
       spaceSaved: number
     }>
@@ -486,7 +502,7 @@ export class DeterministicLayoutV5 {
       // 1-2 events can use full cards
       this.degradationMetrics.fullCardGroups++;
       return 'full';
-    } else {
+    } else if (eventCount <= 4) {
       // 3+ events need compact cards to fit in half-column
       this.degradationMetrics.compactCardGroups++;
       
@@ -506,6 +522,26 @@ export class DeterministicLayoutV5 {
       });
       
       return 'compact';
+    } else {
+      // High density: more than 4 events (including overflow) -> title-only
+      this.degradationMetrics.titleOnlyCardGroups++;
+
+      const compactH = this.config.cardConfigs.compact.height;
+      const titleH = this.config.cardConfigs['title-only'].height;
+      const spaceSavedPerCard = compactH - titleH;
+      // Title-only shows up to 4 visible; approximate savings vs compact for those visible
+      const totalSpaceSaved = Math.max(0, spaceSavedPerCard * Math.min(eventCount, 4));
+
+      this.degradationMetrics.spaceReclaimed += totalSpaceSaved;
+      this.degradationMetrics.degradationTriggers.push({
+        groupId: group.id,
+        eventCount,
+        from: 'compact',
+        to: 'title-only',
+        spaceSaved: totalSpaceSaved
+      });
+
+      return 'title-only';
     }
   }
 
@@ -519,7 +555,7 @@ export class DeterministicLayoutV5 {
       case 'compact':
         return 4; // Compact cards: 4 slots per half-column
       case 'title-only':
-        return 4; // Title-only cards: 4 slots per half-column (same as compact for now)
+        return 8; // Title-only cards: allow up to 8 per half-column in high density
       case 'multi-event':
         return 2; // Multi-event cards: 2 slots per half-column (like full cards)
       case 'infinite':
@@ -748,6 +784,7 @@ export class DeterministicLayoutV5 {
       totalGroups: number;
       fullCardGroups: number;
       compactCardGroups: number;
+      titleOnlyCardGroups: number;
       degradationRate: number;
       spaceReclaimed: number;
       degradationTriggers: Array<{
@@ -818,6 +855,7 @@ export class DeterministicLayoutV5 {
       totalGroups: this.degradationMetrics.totalGroups,
       fullCardGroups: this.degradationMetrics.fullCardGroups,
       compactCardGroups: this.degradationMetrics.compactCardGroups,
+      titleOnlyCardGroups: this.degradationMetrics.titleOnlyCardGroups,
       degradationRate: this.degradationMetrics.totalGroups > 0 
         ? this.degradationMetrics.compactCardGroups / this.degradationMetrics.totalGroups 
         : 0,

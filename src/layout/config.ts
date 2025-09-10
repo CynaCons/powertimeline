@@ -14,7 +14,7 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   },
   'title-only': {
     type: 'title-only',
-    width: 140,
+    width: 260,
     height: 32
   },
   'multi-event': {

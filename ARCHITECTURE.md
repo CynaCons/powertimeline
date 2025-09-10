@@ -15,9 +15,9 @@ ChronoChart renders a horizontal timeline with event cards positioned in indepen
 - Core layout engine (deterministic + mathematical)
   - `src/layout/clustering.ts` — Left-to-right event clustering algorithm.
   - `src/layout/SlotGrid.ts` — Deterministic slot allocation and occupancy tracking.
-  - `src/layout/DeterministicLayout.ts` — Main layout engine with mathematical degradation.
-  - `src/layout/DegradationEngine.ts` — Precise 1→2→4→5 degradation mathematics.
-  - `src/layout/LayoutEngine.ts` — Orchestration & stats.
+  - `src/layout/LayoutEngine.ts` — Deterministic layout engine (degradation + orchestration + telemetry).
+  - `src/layout/DeterministicLayoutComponent.tsx` — React renderer consuming the engine output.
+  - `src/layout/DegradationEngine.ts` — (legacy/disabled) prior math prototype.
   - `src/layout/config.ts` / `src/layout/types.ts` — Card sizes/configs and types.
 
 - Timeline UI and visuals
