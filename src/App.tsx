@@ -166,7 +166,7 @@ function App() {
       console.log(`App wheel zoom: deltaY=${e.deltaY}, factor=${zoomFactor}, cursorX=${cursorX}`);
       
       // Use cursor-centered zoom
-      zoomAtCursor(zoomFactor, cursorX, window.innerWidth);
+      if (rect) {\r\n        zoomAtCursor(zoomFactor, cursorX, rect.width, rect.left, rect.width);\r\n      } else {\r\n        zoomAtCursor(zoomFactor, cursorX, window.innerWidth);\r\n      }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -392,3 +392,4 @@ function App() {
 }
 
 export default App;
+

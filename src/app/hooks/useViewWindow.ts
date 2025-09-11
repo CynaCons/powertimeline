@@ -26,7 +26,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     setWindow(center - half, center + half);
   }, [viewStart, viewEnd, setWindow]);
 
-  const zoomAtCursor = useCallback((factor: number, cursorX?: number, viewportWidth?: number) => {
+  const zoomAtCursor = useCallback((factor: number, cursorX?: number, viewportWidth?: number, containerLeft?: number, containerWidth?: number) => {
     if (cursorX === undefined || viewportWidth === undefined) {
       // Fallback to center zoom if no cursor position provided
       return zoom(factor);
@@ -34,14 +34,17 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     
     // Convert cursor X position to timeline ratio within CURRENT view window
     // Account for navigation rail (56px) and margins
+    const usingContainer = typeof containerLeft === "number" && typeof containerWidth === "number" && (containerWidth as number) > 0;
     const navRailWidth = 56;
     const additionalMargin = 80;
-    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const leftMargin = usingContainer ? additionalMargin : (navRailWidth + additionalMargin);
     const rightMargin = 40;
-    const usableWidth = viewportWidth - leftMargin - rightMargin;
+    const availableWidth = usingContainer ? (containerWidth as number) : viewportWidth;
+    const usableWidth = (availableWidth as number) - leftMargin - rightMargin;
+    const localX = usingContainer ? (cursorX - (containerLeft as number)) : cursorX;
     
     // Calculate cursor position as ratio of usable timeline width (0-1)
-    const cursorRatioInViewport = Math.max(0, Math.min(1, (cursorX - leftMargin) / usableWidth));
+    const cursorRatioInViewport = Math.max(0, Math.min(1, (localX - leftMargin) / usableWidth));
     
     // Convert viewport ratio to absolute timeline position (accounting for current view window)
     const currentWindowWidth = viewEnd - viewStart;
@@ -114,7 +117,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
       newEnd = minEnd;
     }
     
-    console.log(`🔧 ZOOM RESULT: cursor=${cursorTimePosition.toFixed(3)}, window=[${newStart.toFixed(3)}, ${newEnd.toFixed(3)}]`);
+    try { if ((window as any).__CC_DEBUG_LAYOUT) console.log(`ZOOM RESULT: cursor=${cursorTimePosition.toFixed(3)}, window=[${newStart.toFixed(3)}, ${newEnd.toFixed(3)}]`); } catch {}
     setWindow(newStart, newEnd);
   }, [viewStart, viewEnd, setWindow, zoom]);
 
@@ -135,3 +138,4 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
 
   return { viewStart, viewEnd, setWindow, nudge, zoom, zoomAtCursor, animateTo };
 }
+
