@@ -555,7 +555,8 @@ export class DeterministicLayoutV5 {
       case 'compact':
         return 4; // Compact cards: 4 slots per half-column
       case 'title-only':
-        return 8; // Title-only cards: allow up to 8 per half-column in high density
+        return 9; // Title-only cards: allow up to 9 per half-column in high density
+       // Title-only cards: allow up to 8 per half-column in high density
       case 'multi-event':
         return 2; // Multi-event cards: 2 slots per half-column (like full cards)
       case 'infinite':
@@ -719,7 +720,59 @@ export class DeterministicLayoutV5 {
     }
     
     
-    const capacityMetrics = this.capacityModel.getGlobalMetrics();
+        
+    // Final collision resolution pass (per-side) to eliminate any residual overlaps
+    const resolveOverlaps = (items: PositionedCard[], preferRight = true) => {
+      const within = (x: number, y: number, w: number, h: number) =>
+        x >= 0 && (x + w) <= this.config.viewportWidth && y >= 0 && (y + h) <= this.config.viewportHeight;
+      const collide = (a: PositionedCard, b: PositionedCard) => (
+        a.x - a.width / 2 < b.x + b.width / 2 && a.x + a.width / 2 > b.x - b.width / 2 &&
+        a.y - a.height / 2 < b.y + b.height / 2 && a.y + a.height / 2 > b.y - b.height / 2
+      );
+      const spacing = 8; // minimal gap
+      const maxPasses = 6;
+      for (let pass = 0; pass < maxPasses; pass++) {
+        let changed = false;
+        // Sort deterministically by area desc then x asc to move smaller ones first
+        const ordered = items.slice().sort((a, b) => (b.width * b.height) - (a.width * a.height) || a.x - b.x);
+        for (let i = 0; i < ordered.length; i++) {
+          for (let j = i + 1; j < ordered.length; j++) {
+            const A = ordered[i], B = ordered[j];
+            // Only handle pairs on the same side to preserve above/below bands
+            const aAbove = A.y < this.timelineY, bAbove = B.y < this.timelineY;
+            if (aAbove !== bAbove) continue;
+            if (!collide(A, B)) continue;
+            const target = preferRight ? B : A;
+            const other = preferRight ? A : B;
+            // Try horizontal nudge away from overlap
+            let nx = target.x;
+            const required = other.x + Math.sign(target.x - other.x || 1) * (other.width / 2 + target.width / 2 + spacing);
+            nx = required;
+            const ny = target.y;
+            if (within(nx - target.width / 2, ny - target.height / 2, target.width, target.height)) {
+              target.x = Math.max(target.width / 2, Math.min(this.config.viewportWidth - target.width / 2, nx));
+              changed = true;
+              continue;
+            }
+            // If horizontal fails, try vertical step within the same band
+            const step = target.height + 12;
+            let newY = ny;
+            if (aAbove) newY = Math.max(0 + target.height / 2, ny - step);
+            else newY = Math.min(this.config.viewportHeight - target.height / 2, ny + step);
+            if (within(target.x - target.width / 2, newY - target.height / 2, target.width, target.height)) {
+              target.y = newY;
+              changed = true;
+            }
+          }
+        }
+        if (!changed) break;
+      }
+    };
+    const above = positionedCards.filter(c => c.y < this.timelineY);
+    const below = positionedCards.filter(c => c.y >= this.timelineY);
+    resolveOverlaps(above, true);
+    resolveOverlaps(below, true);
+const capacityMetrics = this.capacityModel.getGlobalMetrics();
     
     
     return {
