@@ -159,3 +159,4 @@
   - [ ] Playwright title-only spec passes
   - [ ] Encoding issues resolved in touched files; console output succinct by default
   - [ ] Docs reflect current architecture and iteration status
+
