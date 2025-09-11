@@ -7,7 +7,8 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Degradation system reality check with Napoleon timeline', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  test.setTimeout(30000);
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🔬 DEGRADATION SYSTEM REALITY CHECK - Napoleon Timeline');
@@ -33,7 +34,7 @@ test('Degradation system reality check with Napoleon timeline', async ({ page })
   // Find and click Napoleon button
   const napoleonButton = page.locator('button:has-text("Napoleon 1769-1821")');
   await napoleonButton.click();
-  await page.waitForTimeout(3000); // Wait for data to load
+  await page.waitForTimeout(1500); // Wait for data to load
   
   // Close dev panel
   await page.keyboard.press('Escape');
@@ -103,7 +104,7 @@ test('Degradation system reality check with Napoleon timeline', async ({ page })
     // Progressive zoom in at this location
     for (let zoomLevel = 1; zoomLevel <= 6; zoomLevel++) {
       await page.mouse.wheel(0, -200);
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(300);
       
       // Check current state
       const cards = await page.locator('[data-testid="event-card"]').all();
@@ -148,7 +149,7 @@ test('Degradation system reality check with Napoleon timeline', async ({ page })
     console.log(`  🔄 Zooming out to check for leftovers...`);
     for (let zoomOut = 1; zoomOut <= 4; zoomOut++) {
       await page.mouse.wheel(0, 150);
-      await page.waitForTimeout(600);
+      await page.waitForTimeout(300);
     }
     
     // Check for leftover indicators
@@ -199,7 +200,7 @@ test('Degradation system reality check with Napoleon timeline', async ({ page })
 });
 
 test('Half-column degradation verification', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🏛️ HALF-COLUMN DEGRADATION VERIFICATION');
@@ -215,7 +216,7 @@ test('Half-column degradation verification', async ({ page }) => {
   await page.locator('button[aria-label="Developer Panel"]').click();
   await page.waitForTimeout(1000);
   await page.locator('button:has-text("Napoleon 1769-1821")').click();
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(1500);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(1000);
   
@@ -303,3 +304,7 @@ test('Half-column degradation verification', async ({ page }) => {
   
   console.log('✅ Half-column degradation verification completed');
 });
+
+
+
+

@@ -14,7 +14,7 @@ test.describe('Real Viewport Layout Tests', () => {
     // Add some random events (similar to user's scenario)
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: '+10' }).click(); // Creates 10 random events
+    await page.getByRole('button', { name: '10 Events' }).click(); // Creates 10 random events
     await page.waitForTimeout(1000);
     
     // Take screenshot for analysis
