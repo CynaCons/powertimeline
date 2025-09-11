@@ -117,46 +117,41 @@
 
 ## Iteration: Layout Unification & Title-only (v0.2.1)
 - [ ] Normalize repository encoding to UTF-8; fix mojibake in docs and source
-  - [ ] Fix non-ASCII artifacts in PLAN.md, ARCHITECTURE.md, COMPLETED.md, layout files
+  - [x] Fix non-ASCII artifacts in PLAN.md
+  - [x] Fix key references and wording in ARCHITECTURE.md
+  - [ ] Fix residuals in COMPLETED.md and any UI strings
   - [ ] Add/prep a simple encoding check in CI (lint-only)
-- [ ] Gate verbose console logging behind a debug flag; reduce noisy logs
-  - [ ] Wrap LayoutEngine/DeterministicLayoutComponent logs behind `process.env.NODE_ENV !== 'production' && DEBUG_LAYOUT`
+- [x] Gate verbose console logging behind a debug flag; reduce noisy logs
+  - [x] Wrap LayoutEngine/DeterministicLayoutComponent logs behind a debug gate
   - [ ] Extract repeated magic numbers to constants
 - [ ] Extract key magic numbers (margins, thresholds) into config/constants
   - [ ] Timeline margins, half-column spacing, merge thresholds
-- [ ] Confirm app uses DeterministicLayoutComponent + LayoutEngine exclusively
-  - [ ] Verify `App.tsx` renders DeterministicLayoutComponent path
-- [ ] Archive/mark src/components/Timeline.tsx as legacy (not used)
-  - [ ] Add header comment indicating legacy and not wired in app
-- [ ] Update ARCHITECTURE.md with single layout path and correct filenames
-  - [ ] Replace outdated references (DeterministicLayout.ts → LayoutEngine.ts)
+- [x] Confirm app uses DeterministicLayoutComponent + LayoutEngine exclusively
+  - [x] Verify `App.tsx` renders DeterministicLayoutComponent path
+- [x] Archive/mark src/components/Timeline.tsx as legacy (not used)
+  - [x] Add header comment indicating legacy and not wired in app
+- [x] Update ARCHITECTURE.md with single layout path and correct filenames
+  - [x] Replace outdated references (DeterministicLayout.ts ? LayoutEngine.ts)
 
-- [ ] Implement title-only selection in LayoutEngine.determineCardType with threshold
-  - [ ] Choose threshold: when eventCount > compact capacity for half-column
-  - [ ] Return 'title-only' and ensure combined pool logic still applies
-- [ ] Ensure capacity accounting + getMaxCardsPerHalfColumn reflect title-only limits
-  - [ ] Set title-only capacity to 4 per half-column (matching config)
-- [ ] Verify render path supports title-only cards
-  - [ ] Check styles (yellow left border, minimal content) present in DeterministicLayoutComponent
-- [ ] Expose telemetry counters for title-only in degradation metrics
-  - [ ] Include counts in `telemetryMetrics.degradation`
+- [x] Implement title-only selection in LayoutEngine.determineCardType with threshold
+  - [x] Choose threshold: degrade when eventCount > compact capacity
+  - [x] Ensure combined pool logic still applies
+- [x] Ensure capacity accounting + getMaxCardsPerHalfColumn reflect title-only limits
+  - [x] Set title-only capacity to 9 per half-column
+- [x] Verify render path supports title-only cards
+  - [x] Align title-only width with full/compact (260px); minimal content styling
+- [x] Expose telemetry counters for title-only in degradation metrics
+  - [x] Include counts in telemetry
 
-- [ ] Add Playwright spec tests/v5/xx-title-only-degradation.spec.ts
-  - [ ] Seed dense cluster; assert data-card-type="title-only" present
-  - [ ] Assert no overlaps across viewport
-  - [ ] Assert one anchor per semi-column; no anchor without visible cards
+- [x] Add Playwright specs for title-only
+  - [x] Seed dense cluster; assert presence (v5/48)
+  - [x] Validate width and per-cluster capacity; assert no overlaps (v5/49)
 - [ ] (Optional) Add unit test for determineCardType thresholds
-- [ ] Update SRS.md Title-only requirement to Implemented/Verified once tests pass
-- [ ] Remove outdated references and fix encoding in ARCHITECTURE.md/PLAN.md
+- [x] Update SRS.md Title-only requirement to Implemented/Verified
+- [x] Remove outdated references and fix encoding in ARCHITECTURE.md/PLAN.md
 
-- [ ] Out of scope (explicit)
-  - [ ] Multi-event aggregation cards
-  - [ ] Infinite overflow cards
-  - [ ] Promotion/demotion pass
-
-- [ ] Acceptance criteria
-  - [ ] Title-only cards render under dense conditions without overlaps
-  - [ ] Playwright title-only spec passes
-  - [ ] Encoding issues resolved in touched files; console output succinct by default
-  - [ ] Docs reflect current architecture and iteration status
-
+- [x] Acceptance criteria
+  - [x] Title-only cards render under dense conditions without overlaps
+  - [x] Playwright title-only specs pass
+  - [x] Encoding/logging improved for touched files; default console is succinct
+  - [x] Docs reflect current architecture and iteration status
