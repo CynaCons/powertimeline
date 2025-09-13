@@ -33,14 +33,12 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     }
     
     // Convert cursor X position to timeline ratio within CURRENT view window
-    // Account for navigation rail (56px) and margins
-    const usingContainer = typeof containerLeft === "number" && typeof containerWidth === "number" && (containerWidth as number) > 0;
-    const navRailWidth = 56;
-    const additionalMargin = 80;
-    const leftMargin = usingContainer ? additionalMargin : (navRailWidth + additionalMargin);
-    const rightMargin = 40;
+    // If a container rect is provided, treat it as the true viewport for the timeline canvas
+    const usingContainer = typeof containerLeft === 'number' && typeof containerWidth === 'number' && (containerWidth as number) > 0;
+    const leftMargin = usingContainer ? 0 : 96; // include rail+padding only when no container
+    const rightMargin = usingContainer ? 0 : 40;
     const availableWidth = usingContainer ? (containerWidth as number) : viewportWidth;
-    const usableWidth = (availableWidth as number) - leftMargin - rightMargin;
+    const usableWidth = Math.max(1, (availableWidth as number) - leftMargin - rightMargin);
     const localX = usingContainer ? (cursorX - (containerLeft as number)) : cursorX;
     
     // Calculate cursor position as ratio of usable timeline width (0-1)
@@ -117,7 +115,14 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
       newEnd = minEnd;
     }
     
-    try { if ((window as any).__CC_DEBUG_LAYOUT) console.log(`ZOOM RESULT: cursor=${cursorTimePosition.toFixed(3)}, window=[${newStart.toFixed(3)}, ${newEnd.toFixed(3)}]`); } catch {}
+    try {
+      const w = window as Window & { __CC_DEBUG_LAYOUT?: boolean };
+      if (w.__CC_DEBUG_LAYOUT) {
+        console.log(`ZOOM RESULT: cursor=${cursorTimePosition.toFixed(3)}, window=[${newStart.toFixed(3)}, ${newEnd.toFixed(3)}]`);
+      }
+    } catch (error) {
+      console.warn('Debug logging failed:', error);
+    }
     setWindow(newStart, newEnd);
   }, [viewStart, viewEnd, setWindow, zoom]);
 

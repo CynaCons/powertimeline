@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Degradation system basic fix validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🔧 SIMPLE DEGRADATION FIX VALIDATION');
@@ -16,12 +16,12 @@ test('Degradation system basic fix validation', async ({ page }) => {
   await page.waitForTimeout(2000);
   
   try {
-    await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 3000 });
+    await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 3000 });
   } catch {
     console.log('⚠️ Telemetry not immediately available, continuing...');
   }
   
-  const initialTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   
   console.log('📊 Initial state:', {
     telemetryAvailable: !!initialTelemetry,
@@ -82,7 +82,7 @@ test('Degradation system basic fix validation', async ({ page }) => {
     
     // Check state after zoom
     const zoomedCards = await page.locator('[data-testid="event-card"]').all();
-    const zoomedTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const zoomedTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     
     console.log(`📊 After zoom: ${zoomedCards.length} cards, degradation available: ${!!zoomedTelemetry?.degradation}`);
     
@@ -113,7 +113,7 @@ test('Degradation system basic fix validation', async ({ page }) => {
 });
 
 test('Degradation telemetry structure validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🔍 DEGRADATION TELEMETRY STRUCTURE VALIDATION');
@@ -122,7 +122,7 @@ test('Degradation telemetry structure validation', async ({ page }) => {
   
   // Check that telemetry has the expected structure
   const telemetryStructure = await page.evaluate(() => {
-    const telemetry = (window as any).__ccTelemetry;
+    const telemetry = (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry as Record<string, unknown> | null;
     
     if (!telemetry) return { available: false };
     

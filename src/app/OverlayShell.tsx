@@ -23,11 +23,11 @@ export const OverlayShell: React.FC<OverlayShellProps> = ({ id, title, dragging,
 
   return (
     <aside
-      ref={ref as any}
+      ref={ref}
       role="dialog"
       aria-modal="true"
       aria-labelledby={`dialog-title-${id}`}
-      className={`absolute left-14 top-0 bottom-0 w-80 max-w-[75vw] p-0 z-20 group ${dragging ? 'pointer-events-none' : 'pointer-events-auto'} ${className || ''}`}
+      className={`fixed left-14 top-0 bottom-0 w-80 max-w-[75vw] p-0 z-20 group overlay panel overlay-shell ${dragging ? 'pointer-events-none' : 'pointer-events-auto'} ${className || ''}`}
       style={{ pointerEvents: dragging ? 'none' : 'auto' }}
     >
       <div
@@ -42,7 +42,7 @@ export const OverlayShell: React.FC<OverlayShellProps> = ({ id, title, dragging,
             <button type="button" onClick={onClose} aria-label="Close panel" className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50">×</button>
           )}
         </div>
-        <div className="p-3 overflow-auto grow">
+        <div className="p-3 overflow-auto grow" style={{ overscrollBehavior: 'contain' }}>
           {children}
         </div>
       </div>

@@ -21,7 +21,7 @@ test.describe('v5/33 Timeline Scale Comprehensive Testing', () => {
     console.log('TEST 1: Data Generation');
     
     const dataGeneration = await page.evaluate(() => {
-      const debugFn = (window as any).debugTimelineScales;
+      const debugFn = (window as unknown as { debugTimelineScales?: () => unknown }).debugTimelineScales;
       if (debugFn) {
         return debugFn();
       }

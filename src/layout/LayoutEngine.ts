@@ -81,13 +81,17 @@ export class DeterministicLayoutV5 {
   private get DEBUG_LAYOUT(): boolean {
     try {
       // Prefer runtime flag if available, else allow in dev only
-      const w: any = (typeof window !== 'undefined') ? (window as any) : {};
-      return Boolean(w.__CC_DEBUG_LAYOUT) || Boolean((import.meta as any)?.env?.DEV);
-    } catch {
+      const w = (typeof window !== 'undefined') ? (window as unknown as Record<string, unknown>) : {};
+      return Boolean(w.__CC_DEBUG_LAYOUT) || Boolean((import.meta as { env?: { DEV?: boolean } })?.env?.DEV);
+    } catch (error) {
+      // Log error for debugging purposes but don't break functionality
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn('Failed to check debug layout flag:', error);
+      }
       return false;
     }
   }
-  private dlog(...args: any[]) {
+  private dlog(...args: unknown[]) {
     if (this.DEBUG_LAYOUT) console.log(...args);
   }
 
@@ -99,8 +103,7 @@ export class DeterministicLayoutV5 {
       return this.emptyResult();
     }
     
-    // Store view window context for overflow filtering
-    // const viewWindowContext = viewWindow || null; // Unused variable
+    // Store view window context for overflow filtering (stored in this.currentTimeWindow below)
 
     // Filter events by view window if provided (for zoomed views)
     let layoutEvents = events;
@@ -313,6 +316,7 @@ export class DeterministicLayoutV5 {
   /**
    * Update half-column bounds when adding new event
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private updateHalfColumnBounds(halfColumn: ColumnGroup, event: Event, _eventXPos: number): void {
     const eventTime = new Date(event.date).getTime();
     const allTimes = halfColumn.events.map(e => new Date(e.date).getTime());

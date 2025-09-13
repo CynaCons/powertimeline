@@ -19,5 +19,26 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Stricter TypeScript rules
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-empty-function': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'warn',
+      '@typescript-eslint/explicit-module-boundary-types': 'warn',
+      '@typescript-eslint/prefer-const': 'error',
+
+      // General code quality rules
+      'no-empty': 'error',
+      'no-console': 'warn',
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'eqeqeq': 'error',
+      'no-debugger': 'error',
+
+      // React specific rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
 ])

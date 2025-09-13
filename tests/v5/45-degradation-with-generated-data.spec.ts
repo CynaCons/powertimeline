@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Degradation system with generated dense events', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🧪 DEGRADATION SYSTEM WITH GENERATED DENSE EVENTS');
@@ -71,8 +71,9 @@ test('Degradation system with generated dense events', async ({ page }) => {
         console.log('🧪 Generated 18 events in 3 dense clusters');
         
         // Try to update timeline if possible (this might not work depending on app structure)
-        if ((window as any).setTestEvents) {
-          (window as any).setTestEvents(events);
+        const windowWithTest = window as unknown as { setTestEvents?: (events: typeof events) => void };
+        if (windowWithTest.setTestEvents) {
+          windowWithTest.setTestEvents(events);
         }
         
         return events.length;
@@ -83,15 +84,15 @@ test('Degradation system with generated dense events', async ({ page }) => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
     
-  } catch (error) {
-    console.log('⚠️ Could not generate data, testing with default state');
+  } catch (error: unknown) {
+    console.log('⚠️ Could not generate data, testing with default state:', error);
   }
 
   // Wait for data to load and telemetry to update
   await page.waitForTimeout(2000);
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 3000 });
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 3000 });
   
-  const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   console.log('📊 Data state:', {
     events: telemetry?.events?.total || 0,
     groups: telemetry?.groups?.count || 0
@@ -108,7 +109,7 @@ test('Degradation system with generated dense events', async ({ page }) => {
   }
   
   // Analyze initial state
-  let initialColorAnalysis = { blue: 0, green: 0, other: 0 };
+  const initialColorAnalysis = { blue: 0, green: 0, other: 0 };
   
   for (const card of cards.slice(0, 10)) {
     const className = await card.getAttribute('class') || '';
@@ -143,7 +144,7 @@ test('Degradation system with generated dense events', async ({ page }) => {
       const zoomedCards = await page.locator('[data-testid="event-card"]').all();
       const overflowBadges = await page.locator('.bg-red-500').all();
       
-      let colorAnalysis = { blue: 0, green: 0, other: 0 };
+      const colorAnalysis = { blue: 0, green: 0, other: 0 };
       
       for (const card of zoomedCards.slice(0, 8)) {
         const className = await card.getAttribute('class') || '';
@@ -156,7 +157,7 @@ test('Degradation system with generated dense events', async ({ page }) => {
       console.log(`    Cards: ${zoomedCards.length}, Colors: 🔵${colorAnalysis.blue} 🟢${colorAnalysis.green}, Overflow: ${overflowBadges.length}`);
       
       // Check telemetry
-      const zoomedTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+      const zoomedTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       if (zoomedTelemetry?.degradation) {
         const deg = zoomedTelemetry.degradation;
         console.log(`    Degradation: Total:${deg.totalGroups}, Full:${deg.fullCardGroups}, Compact:${deg.compactCardGroups}`);
@@ -194,7 +195,7 @@ test('Degradation system with generated dense events', async ({ page }) => {
 });
 
 test('Overflow vs degradation correlation test', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🔗 OVERFLOW vs DEGRADATION CORRELATION TEST');
@@ -214,7 +215,13 @@ test('Overflow vs degradation correlation test', async ({ page }) => {
     
     console.log('🔍 Testing overflow/degradation correlation...');
     
-    let testCases = [];
+    const testCases: Array<{
+      zoomLevel: number;
+      totalCards: number;
+      overflowBadges: number;
+      greenCards: number;
+      blueCards: number;
+    }> = [];
     
     // Test different zoom levels
     for (let zoom = 1; zoom <= 5; zoom++) {

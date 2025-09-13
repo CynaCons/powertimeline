@@ -24,10 +24,10 @@ test('Card degradation system - full to compact cards', async ({ page }) => {
   await page.waitForTimeout(2000);
 
   // Wait for telemetry to appear
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry));
-  
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
+
   // Get telemetry data
-  const telemetryData = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const telemetryData = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   expect(telemetryData).toBeTruthy();
 
   console.log('📊 Telemetry structure:', Object.keys(telemetryData));
@@ -145,10 +145,10 @@ test('Card degradation system - space efficiency validation', async ({ page }) =
   await page.waitForTimeout(1000);
   
   // Wait for telemetry
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry));
-  
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
+
   // Get telemetry data
-  const telemetryData = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const telemetryData = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   
   if (telemetryData && telemetryData.degradation) {
     const degradation = telemetryData.degradation;

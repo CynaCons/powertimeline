@@ -34,12 +34,12 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
       
       // Wait for telemetry with real data
       await page.waitForFunction(() => {
-        const telemetry = (window as any).__ccTelemetry;
-        return telemetry && telemetry.events && telemetry.events.total > 0;
+        const telemetry = (window as unknown as { __ccTelemetry?: { events?: { total?: number } } }).__ccTelemetry;
+        return telemetry && telemetry.events && telemetry.events.total && telemetry.events.total > 0;
       }, { timeout: 10000 });
-      
+
       // Get telemetry with loaded data
-      const telemetryData = await page.evaluate(() => (window as any).__ccTelemetry || null);
+      const telemetryData = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       expect(telemetryData).toBeTruthy();
       expect(telemetryData.events.total).toBeGreaterThan(0);
       
@@ -86,7 +86,7 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
         await page.waitForTimeout(800);
         
         // Get updated telemetry
-        const zoomedTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+        const zoomedTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
         
         if (zoomedTelemetry && zoomedTelemetry.degradation) {
           const degradation = zoomedTelemetry.degradation;
@@ -127,7 +127,7 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
           console.log(`🎯 Analyzing ${Math.min(cards.length, 15)} visible cards...`);
           
           const cardHeights = await Promise.all(
-            cards.slice(0, 15).map(async (card, index) => {
+            cards.slice(0, 15).map(async (card) => {
               const style = await card.getAttribute('style');
               const heightMatch = style?.match(/height:\s*(\d+)px/);
               return heightMatch ? parseInt(heightMatch[1]) : null;
@@ -196,11 +196,11 @@ test('Degradation system efficiency validation', async ({ page }) => {
       
       // Wait for data to load
       await page.waitForFunction(() => {
-        const telemetry = (window as any).__ccTelemetry;
-        return telemetry && telemetry.events && telemetry.events.total > 0;
+        const telemetry = (window as unknown as { __ccTelemetry?: { events?: { total?: number } } }).__ccTelemetry;
+        return telemetry && telemetry.events && telemetry.events.total && telemetry.events.total > 0;
       });
-      
-      const initialTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+
+      const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       console.log('📊 Clustered data loaded:', {
         events: initialTelemetry.events.total,
         groups: initialTelemetry.groups.count
@@ -220,7 +220,7 @@ test('Degradation system efficiency validation', async ({ page }) => {
       }
       
       // Get efficiency metrics
-      const efficiencyTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+      const efficiencyTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       
       if (efficiencyTelemetry && efficiencyTelemetry.degradation) {
         const degradation = efficiencyTelemetry.degradation;

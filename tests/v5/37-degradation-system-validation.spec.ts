@@ -40,10 +40,10 @@ test.describe('Degradation System Validation', () => {
       await page.waitForTimeout(2000);
 
       // Wait for telemetry to appear
-      await page.waitForFunction(() => Boolean((window as any).__ccTelemetry));
-      
+      await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
+
       // Get initial telemetry data
-      const telemetryData = await page.evaluate(() => (window as any).__ccTelemetry || null);
+      const telemetryData = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       expect(telemetryData).toBeTruthy();
 
       console.log(`📊 ${dataset.name} - Initial state:`, {
@@ -75,7 +75,7 @@ test.describe('Degradation System Validation', () => {
         await page.waitForTimeout(500);
         
         // Get updated telemetry
-        const zoomedTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+        const zoomedTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
         
         if (zoomedTelemetry && zoomedTelemetry.degradation) {
           const degradation = zoomedTelemetry.degradation;
@@ -153,7 +153,7 @@ test.describe('Degradation System Validation', () => {
     }
     
     // Wait for telemetry
-    await page.waitForFunction(() => Boolean((window as any).__ccTelemetry));
+    await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
     
     // Find dense regions by zooming in aggressively
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -169,7 +169,7 @@ test.describe('Degradation System Validation', () => {
     }
     
     // Get stress test telemetry
-    const stressTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const stressTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     
     if (stressTelemetry && stressTelemetry.degradation) {
       const degradation = stressTelemetry.degradation;
@@ -224,10 +224,10 @@ test.describe('Degradation System Validation', () => {
     
     // Load a dataset
     await page.waitForTimeout(2000);
-    await page.waitForFunction(() => Boolean((window as any).__ccTelemetry));
-    
+    await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
+
     // Get telemetry data
-    const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     
     if (telemetry) {
       console.log('📊 Available telemetry keys:', Object.keys(telemetry));

@@ -44,14 +44,14 @@ test('Degradation system investigation - Napoleon timeline', async ({ page }) =>
         }
       }
     }
-  } catch (error) {
-    console.log('⚠️ Could not access developer panel, using default data');
+  } catch (error: unknown) {
+    console.log('⚠️ Could not access developer panel, using default data:', error);
   }
 
   // Wait for telemetry and layout to update
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 5000 });
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
   
-  const initialTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   console.log('📊 Initial state:', {
     events: initialTelemetry?.events?.total || 0,
     groups: initialTelemetry?.groups?.count || 0,
@@ -75,7 +75,7 @@ test('Degradation system investigation - Napoleon timeline', async ({ page }) =>
       await page.waitForTimeout(1000);
       
       // Get current state
-      const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+      const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       const cards = await page.locator('[data-testid="event-card"]').all();
       const overflowBadges = await page.locator('.bg-red-500').all();
       
@@ -83,7 +83,6 @@ test('Degradation system investigation - Napoleon timeline', async ({ page }) =>
       const cardAnalysis = { blue: 0, green: 0, other: 0, total: cards.length };
       
       for (const card of cards.slice(0, 10)) {
-        const cardType = await card.getAttribute('data-card-type');
         const className = await card.getAttribute('class');
         
         if (className?.includes('border-l-blue-500')) {
@@ -113,13 +112,17 @@ test('Degradation system investigation - Napoleon timeline', async ({ page }) =>
         
         // Let's investigate further
         const debugInfo = await page.evaluate(() => {
-          const telemetry = (window as any).__ccTelemetry;
+          const telemetry = (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry as {
+            degradation?: unknown;
+            groups?: { count?: number };
+            events?: { total?: number };
+          } | null;
           return {
-            hasLayoutResult: !!(window as any).debugLayoutResult,
+            hasLayoutResult: !!(window as unknown as { debugLayoutResult?: unknown }).debugLayoutResult,
             degradationDefined: telemetry?.degradation !== undefined,
             degradationValue: telemetry?.degradation,
-            groupsWithEvents: telemetry?.groups?.count > 0,
-            eventsTotal: telemetry?.events?.total
+            groupsWithEvents: (telemetry?.groups?.count || 0) > 0,
+            eventsTotal: telemetry?.events?.total || 0
           };
         });
         
@@ -171,15 +174,16 @@ test('Degradation triggering investigation', async ({ page }) => {
     console.log('🧪 Created test scenario with 8 events in 8 days');
     
     // Try to update events if possible
-    if ((window as any).testUpdateEvents) {
-      (window as any).testUpdateEvents(testEvents);
+    const windowWithTest = window as unknown as { testUpdateEvents?: (events: typeof testEvents) => void };
+    if (windowWithTest.testUpdateEvents) {
+      windowWithTest.testUpdateEvents(testEvents);
     }
   });
   
   await page.waitForTimeout(2000);
   
   // Wait for telemetry
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 3000 });
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 3000 });
   
   // Zoom to create high density
   const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -197,7 +201,7 @@ test('Degradation triggering investigation', async ({ page }) => {
     }
     
     // Check if degradation was triggered
-    const finalTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const finalTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     const cards = await page.locator('[data-testid="event-card"]').all();
     
     console.log('🧪 After aggressive zoom:');

@@ -81,7 +81,7 @@ test.describe('View Window Overflow Bug Detection', () => {
       
       // Check for telemetry data from layout engine
       const telemetryData = await page.evaluate(() => {
-        return (window as any).__ccTelemetry || null;
+        return (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null;
       });
       
       if (telemetryData) {

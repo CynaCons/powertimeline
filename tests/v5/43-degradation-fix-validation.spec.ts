@@ -48,14 +48,14 @@ test('Degradation system should show green cards when overflow badges appear', a
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
     
-  } catch (error) {
-    console.log('⚠️ Could not load Napoleon dataset, proceeding with default data');
+  } catch (error: unknown) {
+    console.log('⚠️ Could not load Napoleon dataset, proceeding with default data:', error);
   }
 
   // Wait for data to load and telemetry to be available
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 5000 });
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
   
-  const initialTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   console.log('📊 Dataset loaded:', {
     events: initialTelemetry?.events?.total || 0,
     groups: initialTelemetry?.groups?.count || 0,
@@ -107,7 +107,7 @@ test('Degradation system should show green cards when overflow badges appear', a
     console.log(`  📊 Overflow badges: ${overflowBadges.length}`);
     
     // Check telemetry
-    const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     if (telemetry?.degradation) {
       const deg = telemetry.degradation;
       console.log(`  📊 Degradation: Total:${deg.totalGroups}, Full:${deg.fullCardGroups}, Compact:${deg.compactCardGroups}`);
@@ -165,7 +165,7 @@ test('Card type consistency validation', async ({ page }) => {
   
   // Wait for any content to load
   await page.waitForTimeout(2000);
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 3000 });
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 3000 });
   
   // Zoom moderately to potentially trigger some degradation
   const timelineArea = page.locator('.absolute.inset-0.ml-14');

@@ -56,21 +56,23 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
       
       // Verify appropriate time unit
       switch (level.expectedUnit) {
-        case 'year':
+        case 'year': {
           const hasYears = axisLabels.some(label => /^\d{4}$/.test(label));
           expect(hasYears).toBe(true);
           break;
+        }
           
-        case 'month':
-          const hasMonths = axisLabels.some(label => 
+        case 'month': {
+          const hasMonths = axisLabels.some(label =>
             /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(label)
           );
           expect(hasMonths).toBe(true);
           break;
+        }
           
-        case 'day':
+        case 'day': {
           // Day-level should show day numbers, day names, or detailed dates
-          const hasDays = axisLabels.some(label => 
+          const hasDays = axisLabels.some(label =>
             /^\d{1,2}$/.test(label) ||                           // Day numbers: "15"
             /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2}$/.test(label) || // "Mon 15"
             /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}$/.test(label) || // "Jan 15"
@@ -79,6 +81,7 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
           console.log(`Day-level format detected: ${hasDays}`);
           expect(hasDays).toBe(true);
           break;
+        }
       }
       
       await page.screenshot({ 

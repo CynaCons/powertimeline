@@ -41,8 +41,8 @@ test('Degradation system reality check with Napoleon timeline', async ({ page })
   await page.waitForTimeout(1000);
   
   // Step 2: Verify data loaded
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 5000 });
-  const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
+  const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   
   console.log('📊 Napoleon data loaded:', {
     events: telemetry?.events?.total || 0,
@@ -122,7 +122,7 @@ test('Degradation system reality check with Napoleon timeline', async ({ page })
       console.log(`  Zoom ${zoomLevel}: Cards:${cards.length} (🔵${blueCards} 🟢${greenCards}), Overflow:${overflowBadges.length}, Anchors:${anchors.length}`);
       
       // Check telemetry degradation
-      const currentTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+      const currentTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
       if (currentTelemetry?.degradation) {
         const deg = currentTelemetry.degradation;
         console.log(`    Telemetry: Total:${deg.totalGroups}, Full:${deg.fullCardGroups}, Compact:${deg.compactCardGroups}`);
@@ -239,7 +239,7 @@ test('Half-column degradation verification', async ({ page }) => {
     await page.waitForTimeout(1000);
     
     const cards = await page.locator('[data-testid="event-card"]').all();
-    const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     
     if (cards.length > 3) {
       console.log(`📊 Dense region found: ${cards.length} cards`);

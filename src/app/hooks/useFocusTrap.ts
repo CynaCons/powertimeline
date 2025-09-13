@@ -14,7 +14,7 @@ export function useFocusTrap(enabled: boolean, root: HTMLElement | null) {
       const last = items[items.length - 1];
       const active = document.activeElement as HTMLElement | null;
       if (e.shiftKey) {
-        if (active === first || !items.includes(active as any)) {
+        if (active === first || !items.includes(active as HTMLElement)) {
           e.preventDefault();
           last.focus();
         }

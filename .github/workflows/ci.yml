@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build check
+        run: npm run build
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  bundle-analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with analysis
+        run: npm run build:analyze
+
+      - name: Check bundle size
+        run: |
+          MAIN_SIZE=$(stat -c%s "dist/assets/index-*.js" | head -1)
+          MAX_SIZE=419430400  # 400KB in bytes
+          if [ $MAIN_SIZE -gt $MAX_SIZE ]; then
+            echo "❌ Main bundle size ($MAIN_SIZE bytes) exceeds 400KB limit"
+            exit 1
+          else
+            echo "✅ Main bundle size ($MAIN_SIZE bytes) is within 400KB limit"
+          fi

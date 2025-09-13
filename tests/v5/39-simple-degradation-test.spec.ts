@@ -38,8 +38,8 @@ test('Degradation system basic functionality', async ({ page }) => {
     }
     
     // Trigger a timeline update with our test events
-    if ((window as any).testSetEvents) {
-      (window as any).testSetEvents(sampleEvents);
+    if ((window as unknown as { testSetEvents?: (events: unknown) => void }).testSetEvents) {
+      (window as unknown as { testSetEvents?: (events: unknown) => void }).testSetEvents(sampleEvents);
     } else {
       console.log('Test event setter not available, using default data');
     }
@@ -48,10 +48,10 @@ test('Degradation system basic functionality', async ({ page }) => {
   await page.waitForTimeout(1000);
   
   // Wait for telemetry to be available
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 5000 });
-  
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
+
   // Get initial telemetry
-  const initialTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+  const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   console.log('📊 Initial state:', {
     events: initialTelemetry?.events?.total || 0,
     groups: initialTelemetry?.groups?.count || 0,
@@ -82,7 +82,7 @@ test('Degradation system basic functionality', async ({ page }) => {
     await page.waitForTimeout(400);
     
     // Check telemetry
-    const zoomedTelemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const zoomedTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     
     if (zoomedTelemetry) {
       const groups = zoomedTelemetry.groups?.count || 0;
@@ -163,13 +163,13 @@ test('Degradation telemetry consistency check', async ({ page }) => {
   console.log('\n📊 DEGRADATION TELEMETRY CONSISTENCY CHECK');
   
   // Wait for telemetry
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 5000 });
-  
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
+
   // Multiple telemetry snapshots to ensure consistency
   const snapshots = [];
   for (let i = 0; i < 3; i++) {
     await page.waitForTimeout(500);
-    const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+    const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
     snapshots.push(telemetry);
   }
   
@@ -206,22 +206,22 @@ test('Degradation system mathematical accuracy', async ({ page }) => {
   console.log('\n🧮 DEGRADATION MATHEMATICAL ACCURACY TEST');
   
   // Wait for telemetry
-  await page.waitForFunction(() => Boolean((window as any).__ccTelemetry), { timeout: 5000 });
-  
+  await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
+
   // Zoom to potentially trigger degradation
   const timelineArea = page.locator('.absolute.inset-0.ml-14');
   const timelineBox = await timelineArea.boundingBox();
   const centerX = timelineBox!.x + timelineBox!.width * 0.5;
   const centerY = timelineBox!.y + timelineBox!.height * 0.5;
-  
+
   // Moderate zoom
   await page.mouse.move(centerX, centerY);
   for (let i = 0; i < 4; i++) {
     await page.mouse.wheel(0, -100);
     await page.waitForTimeout(300);
   }
-  
-  const telemetry = await page.evaluate(() => (window as any).__ccTelemetry || null);
+
+  const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
   
   if (telemetry && telemetry.degradation && telemetry.degradation.totalGroups > 0) {
     const degradation = telemetry.degradation;

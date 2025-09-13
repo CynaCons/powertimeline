@@ -1,11 +1,17 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+﻿import { useEffect, useMemo, useRef, useState, useCallback, lazy, Suspense } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import { TimelineMinimap } from './components/TimelineMinimap';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import FitScreenIcon from '@mui/icons-material/FitScreen';
 import type { Event } from './types';
-import { OutlinePanel } from './app/panels/OutlinePanel';
-import { EditorPanel } from './app/panels/EditorPanel';
-import { CreatePanel } from './app/panels/CreatePanel';
-import { DevPanel } from './app/panels/DevPanel';
+
+// Lazy load panels and overlays for better bundle splitting
+const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
+const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
+const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
 import { EventStorage } from './lib/storage';
 import { 
   seedRandom as seedRandomUtil, 
@@ -25,10 +31,6 @@ function App() {
   // Storage
   const storageRef = useRef(new EventStorage());
   const [events, setEvents] = useState<Event[]>(() => storageRef.current.load());
-  // Reuse these as the Create panel draft fields
-  const [date, setDate] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const selected = useMemo(
     () => events.find((e) => e.id === selectedId),
@@ -42,13 +44,10 @@ function App() {
   const { viewStart, viewEnd, setWindow, nudge, zoom, zoomAtCursor, animateTo } = useViewWindow(0,1);
 
   // Panels & Dev toggle
-  const devParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1';
-  const [devEnabled, setDevEnabled] = useState<boolean>(() => {
-    try { return devParam || localStorage.getItem(DEV_FLAG_KEY) === '1'; } catch { return devParam; }
-  });
+  const devEnabled = true;
   // Left sidebar overlays (permanent sidebar width = 56px)
-  const [overlay, setOverlay] = useState<null | 'outline' | 'editor' | 'dev' | 'create'>(null);
-  const overlayRef = useRef<HTMLElement | null>(null);
+  const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'dev'>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const [outlineFilter, setOutlineFilter] = useState('');
 
   // Info panels toggle
@@ -62,18 +61,13 @@ function App() {
   const { announce, renderLiveRegion } = useAnnouncer();
 
   // Theme: dark-only (no data-theme switch)
-  useEffect(() => { document.documentElement.removeAttribute('data-theme'); }, []);
-
-  // Debug: expose events globally for debugging
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).__debugEvents = events;
+    try {
+      localStorage.removeItem(DEV_FLAG_KEY);
+    } catch (error) {
+      console.warn('Failed to remove dev flag from localStorage:', error);
     }
-  }, [events]);
-
-  useEffect(() => {
-    try { if (devEnabled) localStorage.setItem(DEV_FLAG_KEY, '1'); else localStorage.removeItem(DEV_FLAG_KEY); } catch {}
-  }, [devEnabled]);
+  }, []);
 
   // Add Esc to close overlays
   useEffect(() => {
@@ -160,13 +154,20 @@ function App() {
       // Get cursor position
       const cursorX = e.clientX;
       
+      const container = document.querySelector('.absolute.inset-0.ml-14 > .w-full.h-full.relative') as HTMLElement | null;
+      const rect = container?.getBoundingClientRect();
+      
       // Determine zoom direction
       const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25;
       
-      console.log(`App wheel zoom: deltaY=${e.deltaY}, factor=${zoomFactor}, cursorX=${cursorX}`);
+      // console.debug(`App wheel zoom: deltaY=${e.deltaY}, factor=${zoomFactor}, cursorX=${cursorX}`);
       
       // Use cursor-centered zoom
-      if (rect) {\r\n        zoomAtCursor(zoomFactor, cursorX, rect.width, rect.left, rect.width);\r\n      } else {\r\n        zoomAtCursor(zoomFactor, cursorX, window.innerWidth);\r\n      }
+      if (rect) {
+        zoomAtCursor(zoomFactor, cursorX, rect.width, rect.left, rect.width);
+      } else {
+        zoomAtCursor(zoomFactor, cursorX, window.innerWidth);
+      }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -174,28 +175,42 @@ function App() {
   }, [zoomAtCursor]);
 
   // CRUD handlers
-  const addEvent = useCallback((e: React.FormEvent) => {
-    e.preventDefault(); if (!date || !title) return;
-    const newEvent: Event = { id: Date.now().toString(), date, title, description: description || undefined };
-    setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
-    setSelectedId(newEvent.id);
-    try { announce(`Added event ${title}`); } catch {}
-    setDate(''); setTitle(''); setDescription('');
+  const saveAuthoring = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const isEdit = !!selectedId;
+    if (isEdit) {
+      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
+      try {
+        announce(`Saved changes to ${editTitle || 'event'}`);
+      } catch (error) {
+        console.warn('Failed to announce save:', error);
+      }
+    } else {
+      if (!editDate || !editTitle) return;
+      const newEvent: Event = { id: Date.now().toString(), date: editDate, title: editTitle, description: editDescription || undefined };
+      setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
+      setSelectedId(newEvent.id);
+      try {
+        announce(`Added event ${editTitle}`);
+      } catch (error) {
+        console.warn('Failed to announce add:', error);
+      }
+    }
     setOverlay(null);
-  }, [date, title, description, announce]);
-
-  const saveSelected = useCallback((e: React.FormEvent) => {
-    e.preventDefault(); if (!selectedId) return;
-    setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
-    try { announce(`Saved changes to ${editTitle || 'event'}`); } catch {}
   }, [selectedId, editDate, editTitle, editDescription, announce]);
+
+  // saveAuthoring handles both edit and create flows
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return;
     const toDelete = events.find(e => e.id === selectedId);
     setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); storageRef.current.writeThrough(next); return next; });
     setSelectedId(undefined);
-    try { announce(`Deleted ${toDelete?.title || 'event'}`); } catch {}
+    try {
+      announce(`Deleted ${toDelete?.title || 'event'}`);
+    } catch (error) {
+      console.warn('Failed to announce delete:', error);
+    }
   }, [selectedId, events, announce]);
 
   // const onDragDate = useCallback((id: string, newISODate: string) => {
@@ -273,15 +288,25 @@ function App() {
           
           {/* Navigation buttons */}
           <div className="flex flex-col items-center gap-2 mb-auto">
-            <button aria-label="Outline" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'outline' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => setOverlay(overlay === 'outline' ? null : 'outline')}>list</button>
-            <button aria-label="Editor" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'editor' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => setOverlay(overlay === 'editor' ? null : 'editor')}>edit</button>
-            <button aria-label="Create" className={`material-symbols-rounded rounded-md p-2 ${overlay === 'create' ? 'bg-indigo-600 text-white' : 'text-indigo-600 hover:bg-indigo-50'}`} onClick={() => setOverlay(overlay === 'create' ? null : 'create')}>add</button>
+            <Tooltip title="Events" placement="right">
+              <IconButton aria-label="Events" size="small" onClick={() => setOverlay(overlay === 'events' ? null : 'events')} sx={{ bgcolor: overlay === 'events' ? 'grey.900' : undefined, color: overlay === 'events' ? 'common.white' : 'text.primary', '&:hover': { bgcolor: overlay === 'events' ? 'grey.800' : 'grey.100' } }}>
+                <span className="material-symbols-rounded">list</span>
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Create" placement="right">
+              <IconButton aria-label="Create" size="small" onClick={() => { setSelectedId(undefined); setEditDate(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }} sx={{ color: 'primary.main', '&:hover': { bgcolor: 'primary.50' } }}>
+                <AddIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </div>
           
           {/* Dev toggle at bottom */}
           <div className="flex flex-col items-center gap-2">
-            <button type="button" title={devEnabled ? 'Disable Developer Options' : 'Enable Developer Options'} onClick={() => setDevEnabled((v) => !v)} className={`material-symbols-rounded rounded-md p-2 text-xs ${devEnabled ? 'bg-amber-100 text-amber-800' : 'text-gray-600 hover:bg-gray-100'}`} aria-pressed={devEnabled} aria-label="Toggle developer options">build</button>
-            <button aria-label="Developer Panel" disabled={!devEnabled} title={devEnabled ? 'Developer options' : 'Enable Dev first'} className={`material-symbols-rounded rounded-md p-2 ${overlay === 'dev' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'} ${!devEnabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => devEnabled && setOverlay(overlay === 'dev' ? null : 'dev')}>settings</button>
+            <Tooltip title="Developer options" placement="right">
+              <IconButton aria-label="Developer Panel" size="small" onClick={() => setOverlay(overlay === 'dev' ? null : 'dev')} sx={{ bgcolor: overlay === 'dev' ? 'grey.900' : undefined, color: overlay === 'dev' ? 'common.white' : 'text.primary', '&:hover': { bgcolor: overlay === 'dev' ? 'grey.800' : 'grey.100' } }}>
+                <span className="material-symbols-rounded">settings</span>
+              </IconButton>
+            </Tooltip>
             <button 
               type="button" 
               title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'} 
@@ -290,7 +315,7 @@ function App() {
               aria-pressed={showInfoPanels} 
               aria-label="Toggle info panels"
             >
-              info
+
             </button>
             {/* Theme toggle removed */}
           </div>
@@ -298,54 +323,56 @@ function App() {
 
         {/* Overlays next to the sidebar, never covering it */}
         {overlay && (
-          <>
+          <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]">
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
-            {overlay === 'outline' && (
-              <OutlinePanel
-                filtered={filteredForList}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                filter={outlineFilter}
-                setFilter={setOutlineFilter}
-                dragging={dragging}
-                onClose={() => setOverlay(null)}
-              />
+            {overlay === 'events' && (
+              <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
+                <OutlinePanel
+                  filtered={filteredForList}
+                  selectedId={selectedId}
+                  onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
+                  onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
+                  filter={outlineFilter}
+                  setFilter={setOutlineFilter}
+                  dragging={dragging}
+                  onClose={() => setOverlay(null)}
+                />
+              </Suspense>
             )}
             {overlay === 'editor' && (
-              <EditorPanel
-                selected={selected}
-                editDate={editDate} editTitle={editTitle} editDescription={editDescription}
-                setEditDate={setEditDate} setEditTitle={setEditTitle} setEditDescription={setEditDescription}
-                onSave={saveSelected} onDelete={deleteSelected}
-                dragging={dragging}
-                onClose={() => setOverlay(null)}
-              />
-            )}
-            {overlay === 'create' && (
-              <CreatePanel
-                date={date} title={title} description={description}
-                setDate={setDate} setTitle={setTitle} setDescription={setDescription}
-                onAdd={addEvent}
-                dragging={dragging}
-                onClose={() => setOverlay(null)}
-              />
+              <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-200 flex items-center justify-center">Loading...</div>}>
+                <AuthoringOverlay
+                  selected={selected}
+                  editDate={editDate}
+                  editTitle={editTitle}
+                  editDescription={editDescription}
+                  setEditDate={setEditDate}
+                  setEditTitle={setEditTitle}
+                  setEditDescription={setEditDescription}
+                  onSave={saveAuthoring}
+                  onDelete={deleteSelected}
+                  onClose={() => setOverlay(null)}
+                />
+              </Suspense>
             )}
             {overlay === 'dev' && devEnabled && (
-              <DevPanel
-                seedRandom={seedRandom}
-                seedClustered={seedClustered}
-                seedLongRange={seedLongRange}
-                clearAll={clearAll}
-                dragging={dragging}
-                onClose={() => setOverlay(null)}
-                devEnabled={devEnabled}
-                seedRFK={seedRFK}
-                seedJFK={seedJFK}
-                seedNapoleon={seedNapoleon}
-                seedIncremental={seedIncremental}
-              />
+              <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
+                <DevPanel
+                  seedRandom={seedRandom}
+                  seedClustered={seedClustered}
+                  seedLongRange={seedLongRange}
+                  clearAll={clearAll}
+                  dragging={dragging}
+                  onClose={() => setOverlay(null)}
+                  devEnabled={devEnabled}
+                  seedRFK={seedRFK}
+                  seedJFK={seedJFK}
+                  seedNapoleon={seedNapoleon}
+                  seedIncremental={seedIncremental}
+                />
+              </Suspense>
             )}
-          </>
+          </div>
         )}
 
         {/* Main timeline area shifts right to avoid sidebar overlap */}
@@ -369,12 +396,13 @@ function App() {
               showInfoPanels={showInfoPanels}
               viewStart={viewStart}
               viewEnd={viewEnd}
+              onCardDoubleClick={(id) => { setSelectedId(id); setOverlay('editor'); }}
             />
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
-                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-lg shadow-lg px-4 py-2 flex gap-2 items-center">
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95 hidden">
+                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
                   <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(-0.1)}>◀︎ Pan</button>
                   <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(0.1)}>Pan ▶︎</button>
                   <div className="w-px h-6 bg-gray-300 mx-1"></div>
@@ -382,6 +410,18 @@ function App() {
                   <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(1.25)}>－ Zoom Out</button>
                   <div className="w-px h-6 bg-gray-300 mx-1"></div>
                   <button className="rounded bg-sky-600 text-white hover:bg-sky-500 px-3 py-1.5 text-xs font-medium" onClick={() => { animateTo(0, 1); }}>Fit All</button>
+                </div>
+              </div>
+              {/* New icon-based control bar */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
+                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
+                  <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)}><span className="material-symbols-rounded">chevron_left</span></IconButton></Tooltip>
+                  <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)}><span className="material-symbols-rounded">chevron_right</span></IconButton></Tooltip>
+                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                  <Tooltip title="Zoom in" placement="top"><IconButton size="small" color="primary" onClick={() => zoom(0.8)}><AddIcon fontSize="small" /></IconButton></Tooltip>
+                  <Tooltip title="Zoom out" placement="top"><IconButton size="small" color="default" onClick={() => zoom(1.25)}><RemoveIcon fontSize="small" /></IconButton></Tooltip>
+                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                  <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }}><FitScreenIcon fontSize="small" /></IconButton></Tooltip>
                 </div>
               </div>
           </div>
@@ -392,4 +432,7 @@ function App() {
 }
 
 export default App;
+
+
+
 
