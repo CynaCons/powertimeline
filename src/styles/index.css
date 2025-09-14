@@ -1,0 +1,703 @@
+/* Global CSS Variables for Semantic Color System */
+
+:root {
+  /* Primary Colors */
+  --color-primary-50: #E3F2FD;
+  --color-primary-100: #BBDEFB;
+  --color-primary-200: #90CAF9;
+  --color-primary-300: #64B5F6;
+  --color-primary-400: #42A5F5;
+  --color-primary-500: #2196F3;
+  --color-primary-600: #1E88E5;
+  --color-primary-700: #1976D2;
+  --color-primary-800: #1565C0;
+  --color-primary-900: #0D47A1;
+
+  /* Secondary Colors */
+  --color-secondary-50: #F3E5F5;
+  --color-secondary-100: #E1BEE7;
+  --color-secondary-200: #CE93D8;
+  --color-secondary-300: #BA68C8;
+  --color-secondary-400: #AB47BC;
+  --color-secondary-500: #9C27B0;
+  --color-secondary-600: #8E24AA;
+  --color-secondary-700: #7B1FA2;
+  --color-secondary-800: #6A1B9A;
+  --color-secondary-900: #4A148C;
+
+  /* Success Colors */
+  --color-success-50: #E8F5E8;
+  --color-success-100: #C8E6C9;
+  --color-success-200: #A5D6A7;
+  --color-success-300: #81C784;
+  --color-success-400: #66BB6A;
+  --color-success-500: #4CAF50;
+  --color-success-600: #43A047;
+  --color-success-700: #388E3C;
+  --color-success-800: #2E7D32;
+  --color-success-900: #1B5E20;
+
+  /* Warning Colors */
+  --color-warning-50: #FFF3E0;
+  --color-warning-100: #FFE0B2;
+  --color-warning-200: #FFCC80;
+  --color-warning-300: #FFB74D;
+  --color-warning-400: #FFA726;
+  --color-warning-500: #FF9800;
+  --color-warning-600: #FB8C00;
+  --color-warning-700: #F57C00;
+  --color-warning-800: #EF6C00;
+  --color-warning-900: #E65100;
+
+  /* Error Colors */
+  --color-error-50: #FFEBEE;
+  --color-error-100: #FFCDD2;
+  --color-error-200: #EF9A9A;
+  --color-error-300: #E57373;
+  --color-error-400: #EF5350;
+  --color-error-500: #F44336;
+  --color-error-600: #E53935;
+  --color-error-700: #D32F2F;
+  --color-error-800: #C62828;
+  --color-error-900: #B71C1C;
+
+  /* Neutral Colors */
+  --color-neutral-0: #FFFFFF;
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F5F5F5;
+  --color-neutral-200: #EEEEEE;
+  --color-neutral-300: #E0E0E0;
+  --color-neutral-400: #BDBDBD;
+  --color-neutral-500: #9E9E9E;
+  --color-neutral-600: #757575;
+  --color-neutral-700: #616161;
+  --color-neutral-800: #424242;
+  --color-neutral-900: #212121;
+  --color-neutral-1000: #000000;
+
+  /* Semantic Light Theme Colors */
+  --color-background: var(--color-neutral-50);
+  --color-surface: var(--color-neutral-0);
+  --color-surface-elevated: var(--color-neutral-0);
+
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-disabled: var(--color-neutral-400);
+
+  --color-border-primary: var(--color-neutral-200);
+  --color-border-secondary: var(--color-neutral-300);
+  --color-border-strong: var(--color-neutral-400);
+
+  /* Shadows */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px var(--shadow-color);
+  --shadow-md: 0 4px 6px var(--shadow-color);
+  --shadow-lg: 0 10px 20px var(--shadow-color);
+  --shadow-xl: 0 20px 40px var(--shadow-color);
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-medium: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+
+  /* Border Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  /* Adjust primary colors for better dark mode contrast */
+  --color-primary-500: #64B5F6;
+  --color-primary-700: #42A5F5;
+
+  --color-success-500: #66BB6A;
+  --color-warning-500: #FFA726;
+  --color-error-500: #EF5350;
+  --color-secondary-500: #CE93D8;
+
+  /* Dark Theme Semantic Colors */
+  --color-background: #121212;
+  --color-surface: #1E1E1E;
+  --color-surface-elevated: #242424;
+
+  --color-text-primary: var(--color-neutral-0);
+  --color-text-secondary: var(--color-neutral-300);
+  --color-text-tertiary: var(--color-neutral-400);
+  --color-text-disabled: var(--color-neutral-600);
+
+  --color-border-primary: var(--color-neutral-700);
+  --color-border-secondary: var(--color-neutral-600);
+  --color-border-strong: var(--color-neutral-500);
+
+  /* Enhanced shadows for dark mode */
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px var(--shadow-color);
+  --shadow-md: 0 4px 6px var(--shadow-color);
+  --shadow-lg: 0 10px 20px var(--shadow-color);
+  --shadow-xl: 0 20px 40px var(--shadow-color);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border-primary: var(--color-neutral-800);
+    --color-border-secondary: var(--color-neutral-700);
+    --color-text-secondary: var(--color-neutral-800);
+  }
+
+  [data-theme="dark"] {
+    --color-border-primary: var(--color-neutral-200);
+    --color-border-secondary: var(--color-neutral-300);
+    --color-text-secondary: var(--color-neutral-100);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-medium: 0ms;
+    --transition-slow: 0ms;
+  }
+}
+
+/* Utility classes for CSS variables */
+.bg-surface { background-color: var(--color-surface); }
+.bg-surface-elevated { background-color: var(--color-surface-elevated); }
+.bg-background { background-color: var(--color-background); }
+
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.text-disabled { color: var(--color-text-disabled); }
+
+.border-primary { border-color: var(--color-border-primary); }
+.border-secondary { border-color: var(--color-border-secondary); }
+.border-strong { border-color: var(--color-border-strong); }
+
+/* Semantic color utilities */
+.bg-primary-50 { background-color: var(--color-primary-50); }
+.bg-primary-500 { background-color: var(--color-primary-500); }
+.bg-success-50 { background-color: var(--color-success-50); }
+.bg-success-500 { background-color: var(--color-success-500); }
+.bg-warning-50 { background-color: var(--color-warning-50); }
+.bg-warning-500 { background-color: var(--color-warning-500); }
+.bg-error-50 { background-color: var(--color-error-50); }
+.bg-error-500 { background-color: var(--color-error-500); }
+
+.text-primary-500 { color: var(--color-primary-500); }
+.text-primary-700 { color: var(--color-primary-700); }
+.text-success-500 { color: var(--color-success-500); }
+.text-success-700 { color: var(--color-success-700); }
+.text-warning-500 { color: var(--color-warning-500); }
+.text-warning-700 { color: var(--color-warning-700); }
+.text-error-500 { color: var(--color-error-500); }
+.text-error-700 { color: var(--color-error-700); }
+
+.border-primary-200 { border-color: var(--color-primary-200); }
+.border-success-200 { border-color: var(--color-success-200); }
+.border-warning-200 { border-color: var(--color-warning-200); }
+.border-error-200 { border-color: var(--color-error-200); }
+
+/* Animation classes */
+.transition-theme {
+  transition:
+    background-color var(--transition-medium),
+    color var(--transition-medium),
+    border-color var(--transition-medium),
+    box-shadow var(--transition-medium);
+}
+
+/* Smooth theme transitions for all elements */
+* {
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+/* ==========================================
+   Card Visual Enhancements v0.4.4
+   ========================================== */
+
+/* Typography Hierarchy */
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.card-description {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.card-date {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.025em;
+}
+
+.card-count {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Gradient Backgrounds for Card Types */
+.card-gradient-default {
+  background: linear-gradient(135deg, var(--color-surface) 0%, color-mix(in srgb, var(--color-surface) 95%, var(--color-primary-50)) 100%);
+}
+
+.card-gradient-milestone {
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-100) 100%);
+}
+
+.card-gradient-multi-event {
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, color-mix(in srgb, var(--color-primary-100) 80%, var(--color-secondary-50)) 100%);
+}
+
+.card-gradient-infinite {
+  background: linear-gradient(135deg, var(--color-error-50) 0%, color-mix(in srgb, var(--color-error-100) 70%, var(--color-warning-50)) 100%);
+}
+
+/* Category-based Gradients */
+.card-gradient-meeting {
+  background: linear-gradient(135deg, var(--color-secondary-50) 0%, var(--color-secondary-100) 100%);
+}
+
+.card-gradient-deadline {
+  background: linear-gradient(135deg, var(--color-error-50) 0%, var(--color-error-100) 100%);
+}
+
+.card-gradient-launch {
+  background: linear-gradient(135deg, var(--color-success-50) 0%, var(--color-success-100) 100%);
+}
+
+.card-gradient-announcement {
+  background: linear-gradient(135deg, var(--color-warning-50) 0%, var(--color-warning-100) 100%);
+}
+
+/* Elevation System */
+.card-elevation-1 {
+  box-shadow: var(--shadow-sm);
+}
+
+.card-elevation-2 {
+  box-shadow: var(--shadow-md);
+}
+
+.card-elevation-3 {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-elevation-4 {
+  box-shadow: var(--shadow-xl);
+}
+
+/* Card Hover Animations */
+.card-hover-scale {
+  transform: scale(1);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    z-index 0ms;
+}
+
+.card-hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  z-index: 15;
+}
+
+.card-hover-scale.card-selected {
+  transform: scale(1.02);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--color-primary-500);
+  z-index: 20;
+}
+
+/* Icon Styling */
+.card-icon {
+  font-size: 1rem;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.card-icon.priority-high {
+  color: var(--color-error-500);
+  opacity: 1;
+}
+
+.card-icon.priority-normal {
+  color: var(--color-neutral-500);
+}
+
+.card-icon.priority-low {
+  color: var(--color-neutral-400);
+}
+
+/* Entry/Exit Animations */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cardFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+.card-enter {
+  animation: cardFadeIn var(--transition-medium) ease-out forwards;
+}
+
+.card-exit {
+  animation: cardFadeOut var(--transition-medium) ease-in forwards;
+}
+
+/* Skeleton Card Styles */
+.skeleton-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.skeleton-text {
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-neutral-200));
+  border-radius: var(--radius-xs);
+  opacity: 0.7;
+}
+
+.skeleton-text.skeleton-title {
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.skeleton-description {
+  height: 10px;
+  margin-bottom: 4px;
+}
+
+.skeleton-text.skeleton-date {
+  height: 10px;
+  width: 60%;
+}
+
+/* ==========================================
+   Timeline Visual Enhancements v0.4.5
+   ========================================== */
+
+/* Interactive Element Visual Feedback */
+.timeline-interactive {
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.timeline-interactive::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition: all var(--transition-fast);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.timeline-interactive:hover::before {
+  background: var(--color-primary-50);
+  box-shadow: 0 0 0 1px var(--color-primary-200);
+}
+
+.timeline-interactive:focus::before {
+  background: var(--color-primary-100);
+  box-shadow: 0 0 0 2px var(--color-primary-500);
+}
+
+/* Ripple Effect for Clicks */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-primary-300);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* Enhanced Hover States */
+.timeline-hover-glow:hover {
+  filter: drop-shadow(0 0 8px var(--color-primary-400));
+}
+
+.timeline-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Loading States */
+@keyframes loadingPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.timeline-loading {
+  animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingSpinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.timeline-spinner {
+  animation: loadingSpinner 1s linear infinite;
+}
+
+/* Zoom Level Indicators */
+.zoom-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all var(--transition-fast);
+}
+
+.zoom-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Focus Indicators for Keyboard Navigation */
+.timeline-focus-ring {
+  outline: none;
+  position: relative;
+}
+
+.timeline-focus-ring:focus-visible::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--color-primary-500);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 4px var(--color-primary-200);
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Timeline Axis Enhancements */
+.timeline-major-tick:hover line {
+  stroke-width: 3;
+  filter: url(#tickGlow) brightness(1.2);
+}
+
+.timeline-tick-group:hover .timeline-label {
+  fill: var(--color-primary-600);
+  font-weight: 700;
+}
+
+.timeline-tick-group:hover line {
+  stroke: var(--color-primary-600);
+  stroke-width: 3;
+}
+
+/* Timeline Markers Animation */
+@keyframes markerPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.marker-pulse {
+  animation: markerPulse 2s ease-in-out infinite;
+}
+
+/* Minimap Enhancements */
+.minimap-hover-zone:hover {
+  background: linear-gradient(90deg,
+    var(--color-primary-50) 0%,
+    var(--color-primary-100) 50%,
+    var(--color-primary-50) 100%
+  );
+}
+
+/* Connection Line Animations */
+@keyframes connectionFlow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 20;
+  }
+}
+
+.connection-animated {
+  stroke-dasharray: 5 3;
+  animation: connectionFlow 1s linear infinite;
+}
+
+/* Pan/Zoom Visual Feedback */
+.timeline-panning {
+  cursor: grabbing !important;
+}
+
+.timeline-zooming {
+  cursor: zoom-in;
+}
+
+.timeline-zooming.zoom-out {
+  cursor: zoom-out;
+}
+
+/* Edge Bounce Effect */
+@keyframes edgeBounce {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-4px);
+  }
+}
+
+.timeline-edge-bounce {
+  animation: edgeBounce 0.3s ease-out;
+}
+
+/* Smooth Transitions for Timeline Elements */
+.timeline-element {
+  transition:
+    transform var(--transition-medium),
+    opacity var(--transition-fast),
+    filter var(--transition-fast);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .card-hover-scale {
+    transition: none;
+  }
+
+  .card-hover-scale:hover {
+    transform: none;
+  }
+
+  .card-enter,
+  .card-exit {
+    animation: none;
+  }
+
+  .skeleton-shimmer {
+    animation: none;
+  }
+
+  .timeline-interactive,
+  .timeline-element {
+    transition: none;
+  }
+
+  .ripple-effect::after,
+  .marker-pulse,
+  .connection-animated,
+  .timeline-edge-bounce {
+    animation: none;
+  }
+}

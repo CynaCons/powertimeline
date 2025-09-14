@@ -12,7 +12,7 @@ test.describe('v5/49 Title-only capacity and width', () => {
       { id: 'anchor-max-2', date: '2025-12-31', title: 'Max', description: 'anchor' },
       ...Array.from({ length: 20 }, (_, i) => mk(i))
     ];
-    await page.evaluate((evts) => localStorage.setItem('chronochart-events', JSON.stringify(evts)), events as any);
+    await page.evaluate((evts) => localStorage.setItem('chronochart-events', JSON.stringify(evts)), events);
     await page.reload();
 
     const axis = page.locator('[data-testid="timeline-axis"]');

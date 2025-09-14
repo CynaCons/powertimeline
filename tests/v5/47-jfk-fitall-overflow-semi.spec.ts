@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
+async function openDevPanel(page: unknown) {
   await page.getByRole('button', { name: 'Toggle developer options' }).click();
   await page.getByRole('button', { name: 'Developer Panel' }).click();
 }

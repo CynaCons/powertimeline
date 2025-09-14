@@ -8,9 +8,9 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
     height: 169
   },
   compact: {
-    type: 'compact', 
+    type: 'compact',
     width: 260,
-    height: 78
+    height: 92  // Increased from 78px to provide adequate space for title (2 lines) + description (1 line) + date
   },
   'title-only': {
     type: 'title-only',

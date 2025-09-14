@@ -1,18 +1,19 @@
-﻿import { useEffect, useMemo, useRef, useState, useCallback, lazy, Suspense } from 'react';
+﻿import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import { TimelineMinimap } from './components/TimelineMinimap';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
-import { useTheme } from './contexts/ThemeContext';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
 import type { Event } from './types';
-
-// Lazy load panels and overlays for better bundle splitting
-const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
-const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
-const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
+import { OutlinePanel } from './app/panels/OutlinePanel';
+// Replaced side EditorPanel with centered AuthoringOverlay
+import { AuthoringOverlay } from './app/overlays/AuthoringOverlay';
+import { CreatePanel } from './app/panels/CreatePanel';
+import { DevPanel } from './app/panels/DevPanel';
 import { EventStorage } from './lib/storage';
 import { 
   seedRandom as seedRandomUtil, 
@@ -32,6 +33,10 @@ function App() {
   // Storage
   const storageRef = useRef(new EventStorage());
   const [events, setEvents] = useState<Event[]>(() => storageRef.current.load());
+  // Reuse these as the Create panel draft fields
+  const [date, setDate] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const selected = useMemo(
     () => events.find((e) => e.id === selectedId),
@@ -47,8 +52,8 @@ function App() {
   // Panels & Dev toggle
   const devEnabled = true;
   // Left sidebar overlays (permanent sidebar width = 56px)
-  const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'dev'>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'dev' | 'create'>(null);
+  const overlayRef = useRef<HTMLElement | null>(null);
   const [outlineFilter, setOutlineFilter] = useState('');
 
   // Info panels toggle
@@ -62,13 +67,7 @@ function App() {
   const { announce, renderLiveRegion } = useAnnouncer();
 
   // Theme: dark-only (no data-theme switch)
-  useEffect(() => {
-    try {
-      localStorage.removeItem(DEV_FLAG_KEY);
-    } catch (error) {
-      console.warn('Failed to remove dev flag from localStorage:', error);
-    }
-  }, []);
+  useEffect(() => { try { localStorage.removeItem(DEV_FLAG_KEY); } catch {} }, []);
 
   // Add Esc to close overlays
   useEffect(() => {
@@ -176,42 +175,28 @@ function App() {
   }, [zoomAtCursor]);
 
   // CRUD handlers
-  const saveAuthoring = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    const isEdit = !!selectedId;
-    if (isEdit) {
-      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
-      try {
-        announce(`Saved changes to ${editTitle || 'event'}`);
-      } catch (error) {
-        console.warn('Failed to announce save:', error);
-      }
-    } else {
-      if (!editDate || !editTitle) return;
-      const newEvent: Event = { id: Date.now().toString(), date: editDate, title: editTitle, description: editDescription || undefined };
-      setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
-      setSelectedId(newEvent.id);
-      try {
-        announce(`Added event ${editTitle}`);
-      } catch (error) {
-        console.warn('Failed to announce add:', error);
-      }
-    }
+  const addEvent = useCallback((e: React.FormEvent) => {
+    e.preventDefault(); if (!date || !title) return;
+    const newEvent: Event = { id: Date.now().toString(), date, title, description: description || undefined };
+    setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
+    setSelectedId(newEvent.id);
+    try { announce(`Added event ${title}`); } catch {}
+    setDate(''); setTitle(''); setDescription('');
     setOverlay(null);
-  }, [selectedId, editDate, editTitle, editDescription, announce]);
+  }, [date, title, description, announce]);
 
-  // saveAuthoring handles both edit and create flows
+  const saveSelected = useCallback((e: React.FormEvent) => {
+    e.preventDefault(); if (!selectedId) return;
+    setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
+    try { announce(`Saved changes to ${editTitle || 'event'}`); } catch {}
+  }, [selectedId, editDate, editTitle, editDescription, announce]);
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return;
     const toDelete = events.find(e => e.id === selectedId);
     setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); storageRef.current.writeThrough(next); return next; });
     setSelectedId(undefined);
-    try {
-      announce(`Deleted ${toDelete?.title || 'event'}`);
-    } catch (error) {
-      console.warn('Failed to announce delete:', error);
-    }
+    try { announce(`Deleted ${toDelete?.title || 'event'}`); } catch {}
   }, [selectedId, events, announce]);
 
   // const onDragDate = useCallback((id: string, newISODate: string) => {
@@ -277,7 +262,7 @@ function App() {
   // }
 
   return (
-    <div className="min-h-screen bg-background text-primary transition-theme">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Full-bleed canvas area - no header, maximum space */}
       <div className="relative h-screen">
         {/* Permanent left sidebar for icon rail */}
@@ -295,7 +280,7 @@ function App() {
               </IconButton>
             </Tooltip>
             <Tooltip title="Create" placement="right">
-              <IconButton aria-label="Create" size="small" onClick={() => { setSelectedId(undefined); setEditDate(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }} sx={{ color: 'primary.main', '&:hover': { bgcolor: 'primary.50' } }}>
+              <IconButton aria-label="Create" size="small" onClick={() => setOverlay(overlay === 'create' ? null : 'create')} sx={{ color: overlay === 'create' ? 'primary.contrastText' : 'primary.main', bgcolor: overlay === 'create' ? 'primary.main' : undefined, '&:hover': { bgcolor: overlay === 'create' ? 'primary.dark' : 'primary.50' } }}>
                 <AddIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -308,71 +293,73 @@ function App() {
                 <span className="material-symbols-rounded">settings</span>
               </IconButton>
             </Tooltip>
-            <button
-              type="button"
-              title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'}
-              onClick={() => setShowInfoPanels(!showInfoPanels)}
-              className={`material-symbols-rounded rounded-md p-2 transition-theme ${showInfoPanels ? 'bg-primary-50 text-primary-700' : 'text-secondary hover:bg-surface-elevated'}`}
-              aria-pressed={showInfoPanels}
+            <button 
+              type="button" 
+              title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'} 
+              onClick={() => setShowInfoPanels(!showInfoPanels)} 
+              className={`material-symbols-rounded rounded-md p-2 ${showInfoPanels ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:bg-gray-100'}`} 
+              aria-pressed={showInfoPanels} 
               aria-label="Toggle info panels"
             >
 
             </button>
-            <ThemeToggleButton />
+            {/* Theme toggle removed */}
           </div>
         </aside>
 
         {/* Overlays next to the sidebar, never covering it */}
         {overlay && (
-          <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]">
+          <div ref={overlayRef as any} className="absolute top-0 right-0 bottom-0 left-14 z-[80]">
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
             {overlay === 'events' && (
-              <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
-                <OutlinePanel
-                  filtered={filteredForList}
-                  selectedId={selectedId}
-                  onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
-                  onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
-                  filter={outlineFilter}
-                  setFilter={setOutlineFilter}
-                  dragging={dragging}
-                  onClose={() => setOverlay(null)}
-                />
-              </Suspense>
+              <OutlinePanel
+                filtered={filteredForList}
+                selectedId={selectedId}
+                onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
+                onCreate={() => setOverlay('create')}
+                filter={outlineFilter}
+                setFilter={setOutlineFilter}
+                dragging={dragging}
+                onClose={() => setOverlay(null)}
+              />
             )}
             {overlay === 'editor' && (
-              <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-200 flex items-center justify-center">Loading...</div>}>
-                <AuthoringOverlay
-                  selected={selected}
-                  isNewEvent={!selected}
-                  editDate={editDate}
-                  editTitle={editTitle}
-                  editDescription={editDescription}
-                  setEditDate={setEditDate}
-                  setEditTitle={setEditTitle}
-                  setEditDescription={setEditDescription}
-                  onSave={saveAuthoring}
-                  onDelete={deleteSelected}
-                  onClose={() => setOverlay(null)}
-                />
-              </Suspense>
+              <AuthoringOverlay
+                selected={selected}
+                editDate={editDate}
+                editTitle={editTitle}
+                editDescription={editDescription}
+                setEditDate={setEditDate}
+                setEditTitle={setEditTitle}
+                setEditDescription={setEditDescription}
+                onSave={saveSelected}
+                onDelete={deleteSelected}
+                onClose={() => setOverlay(null)}
+              />
+            )}
+            {overlay === 'create' && (
+              <CreatePanel
+                date={date} title={title} description={description}
+                setDate={setDate} setTitle={setTitle} setDescription={setDescription}
+                onAdd={addEvent}
+                dragging={dragging}
+                onClose={() => setOverlay(null)}
+              />
             )}
             {overlay === 'dev' && devEnabled && (
-              <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
-                <DevPanel
-                  seedRandom={seedRandom}
-                  seedClustered={seedClustered}
-                  seedLongRange={seedLongRange}
-                  clearAll={clearAll}
-                  dragging={dragging}
-                  onClose={() => setOverlay(null)}
-                  devEnabled={devEnabled}
-                  seedRFK={seedRFK}
-                  seedJFK={seedJFK}
-                  seedNapoleon={seedNapoleon}
-                  seedIncremental={seedIncremental}
-                />
-              </Suspense>
+              <DevPanel
+                seedRandom={seedRandom}
+                seedClustered={seedClustered}
+                seedLongRange={seedLongRange}
+                clearAll={clearAll}
+                dragging={dragging}
+                onClose={() => setOverlay(null)}
+                devEnabled={devEnabled}
+                seedRFK={seedRFK}
+                seedJFK={seedJFK}
+                seedNapoleon={seedNapoleon}
+                seedIncremental={seedIncremental}
+              />
             )}
           </div>
         )}
@@ -381,7 +368,7 @@ function App() {
         <div className="absolute inset-0 ml-14">
           {/* Timeline minimap at top of timeline area */}
           {events.length > 0 && (
-            <div className="absolute top-1 left-4 right-4 z-40">
+            <div className="absolute top-4 left-4 right-4 z-40">
               <TimelineMinimap
                 events={events}
                 viewStart={viewStart}
@@ -403,74 +390,21 @@ function App() {
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95 hidden">
-                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
-                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(-0.1)}>◀︎ Pan</button>
-                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(0.1)}>Pan ▶︎</button>
-                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                  <button className="rounded bg-indigo-600 text-white hover:bg-indigo-500 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(0.8)}>＋ Zoom In</button>
-                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(1.25)}>－ Zoom Out</button>
-                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                  <button className="rounded bg-sky-600 text-white hover:bg-sky-500 px-3 py-1.5 text-xs font-medium" onClick={() => { animateTo(0, 1); }}>Fit All</button>
-                </div>
-              </div>
-              {/* New icon-based control bar */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
                 <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
-                  <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)}><span className="material-symbols-rounded">chevron_left</span></IconButton></Tooltip>
-                  <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)}><span className="material-symbols-rounded">chevron_right</span></IconButton></Tooltip>
+                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(-0.1)}>â—€ï¸Ž Pan</button>
+                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(0.1)}>Pan â–¶ï¸Ž</button>
                   <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                  <Tooltip title="Zoom in" placement="top"><IconButton size="small" color="primary" onClick={() => zoom(0.8)}><AddIcon fontSize="small" /></IconButton></Tooltip>
-                  <Tooltip title="Zoom out" placement="top"><IconButton size="small" color="default" onClick={() => zoom(1.25)}><RemoveIcon fontSize="small" /></IconButton></Tooltip>
+                  <button className="rounded bg-indigo-600 text-white hover:bg-indigo-500 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(0.8)}>ï¼‹ Zoom In</button>
+                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(1.25)}>ï¼ Zoom Out</button>
                   <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                  <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }}><FitScreenIcon fontSize="small" /></IconButton></Tooltip>
+                  <button className="rounded bg-sky-600 text-white hover:bg-sky-500 px-3 py-1.5 text-xs font-medium" onClick={() => { animateTo(0, 1); }}>Fit All</button>
                 </div>
               </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-// Theme toggle button component
-function ThemeToggleButton() {
-  const { isDarkMode, toggleTheme, themePreference } = useTheme();
-
-  const getThemeIcon = () => {
-    if (themePreference === 'system') {
-      return 'auto_mode';
-    }
-    return isDarkMode ? 'light_mode' : 'dark_mode';
-  };
-
-  const getThemeTitle = () => {
-    switch (themePreference) {
-      case 'light': return 'Switch to dark mode';
-      case 'dark': return 'Switch to light mode';
-      case 'system': return 'Using system theme, click to toggle';
-      default: return 'Toggle theme';
-    }
-  };
-
-  return (
-    <Tooltip title={getThemeTitle()} placement="right">
-      <IconButton
-        aria-label="Toggle theme"
-        size="small"
-        onClick={toggleTheme}
-        sx={{
-          color: 'text.secondary',
-          '&:hover': {
-            bgcolor: 'action.hover',
-          }
-        }}
-      >
-        <span className="material-symbols-rounded">
-          {getThemeIcon()}
-        </span>
-      </IconButton>
-    </Tooltip>
   );
 }
 

@@ -31,6 +31,10 @@
 - [ ] Tune margins/tolerance to pass "cursor anchoring" test consistently
 - [ ] Add targeted zoom tests for edge anchoring
 
+## Iteration v0.2.5.1 - Compact Card Fix (completed)
+- [x] Fix compact card height from 78px to 92px to prevent text cutoff in two-line layouts
+- [x] Ensure adequate space for title (2 lines) + description (1 line) + date in compact cards
+
 ## Project Analysis - Good, Bad, Ugly Assessment (completed)
 - [x] Comprehensive analysis of project structure and quality
 - [x] Documentation review and assessment
@@ -144,14 +148,149 @@
 - [ ] Update keyboard shortcuts (if any)
 - [ ] Contributor notes on adding fields and tests
 
-## Upcoming v0.3.0 (performance & robustness)
+## Iteration v0.4.0 - Visual Design & UX Overhaul (planned)
+
+### v0.4.1 - Read-Only View Mode with Edit Toggle (completed)
+- [x] Add view/edit mode state to AuthoringOverlay component
+- [x] Create read-only display component showing formatted event details
+- [x] Add edit button (pencil icon) in top-right corner to switch modes
+- [x] Style read-only view with proper typography and spacing
+- [x] Disable form inputs in view mode, show as styled text instead
+- [x] Add smooth transitions between view and edit modes
+- [x] Update tests for view/edit mode toggle functionality
+
+**✅ Implementation Summary (v0.4.1 Completed):**
+- **Dual Mode System**: AuthoringOverlay now supports view and edit modes with smart detection
+- **UI Enhancements**: Edit button with pencil icon, dynamic titles, context-aware actions
+- **Read-Only Display**: Calendar icon, formatted dates, typography hierarchy, clean layout
+- **Smooth Transitions**: 300ms animations with opacity and translate effects
+- **Comprehensive Testing**: Added 2 new test cases, all 4 tests passing
+- **Files Modified**: AuthoringOverlay.tsx (major refactor), App.tsx (isNewEvent prop), test files
+- **User Experience**: Events open in readable view mode by default, edit mode one click away
+
+### v0.4.2 - Authoring Panel Layout Improvements (completed)
+- [x] Reorganize form layout with 8px grid spacing system
+- [x] Enhance date field with calendar icon and proper date picker
+- [x] Style title field with larger, prominent typography
+- [x] Improve description textarea with auto-resize and character count
+- [x] Add field validation with error states and helper text
+- [x] Reorganize action buttons with primary/secondary hierarchy
+- [x] Implement keyboard shortcuts (Ctrl+S save, Esc cancel)
+- [x] Add focus trap and proper tab order management
+
+**✅ Implementation Summary (v0.4.2 Completed):**
+- **8px Grid System**: Consistent spacing with p-8, gap-6, standardized padding throughout
+- **Enhanced Date Field**: Calendar icon, input mask, placeholder, validation with error states
+- **Prominent Title Field**: 18px font size, character counter (100 limit), required field indicator
+- **Auto-resize Textarea**: Min 4 rows, max 8 rows, character counter (500 limit), optional label
+- **Field Validation**: Real-time validation, error borders, helper text, disabled save for errors
+- **Button Hierarchy**: Delete (text/error), Cancel (outlined), Save (contained/primary) with icons
+- **Keyboard Shortcuts**: Ctrl/Cmd+S to save, enhanced focus management, auto-focus date field
+- **Material Design**: OutlinedInput with custom theme, consistent border radius, primary colors
+
+### v0.4.3 - Color System & Theme Enhancement (completed)
+- [x] Implement semantic color palette (primary, success, warning, error, neutral)
+- [x] Create CSS variables for consistent color usage
+- [x] Add dark mode support with theme provider
+- [x] Update Material-UI theme configuration
+- [x] Apply semantic colors to all components
+- [x] Create color documentation and usage guidelines
+
+**✅ Implementation Summary (v0.4.3 Completed):**
+- **Semantic Color Palette**: Complete palette with primary, secondary, success, warning, error, and neutral colors
+- **CSS Variables System**: 200+ variables with automatic light/dark theme switching
+- **Dark Mode Support**: Full theme provider with localStorage persistence and system preference detection
+- **Material-UI Integration**: Dynamic theme creation with semantic color mapping
+- **Component Updates**: Cards, buttons, text elements using semantic colors with smooth transitions
+- **Theme Toggle**: Added theme toggle button with light/dark/system modes in navigation rail
+- **Accessibility**: WCAG AA contrast compliance, high contrast mode, reduced motion support
+- **Documentation**: Comprehensive COLOR_GUIDE.md with usage examples and migration guide
+
+### v0.4.4 - Card Visual Updates (completed)
+- [x] Add subtle gradients to card backgrounds by event type
+- [x] Implement smooth hover animations with scale and shadow
+- [x] Add category icons for different event types
+- [x] Create typography hierarchy (weights, sizes, line-heights)
+- [x] Implement elevation system with consistent shadows
+- [x] Add loading and skeleton states for cards
+- [x] Create smooth entry/exit animations
+
+**✅ Implementation Summary (v0.4.4 Completed):**
+- **Icon System**: 20+ semantic category icons (milestone, meeting, deadline, launch, etc.) with color-coded meanings
+- **Gradient Backgrounds**: Category-based gradients (milestone=blue, deadline=red, launch=green, announcement=orange)
+- **Typography Hierarchy**: Consistent font weights, sizes, and line heights across all card types (.card-title, .card-description, .card-date)
+- **Elevation System**: 4-level shadow system (card-elevation-1 to card-elevation-4) with hover and selection states
+- **Hover Animations**: Smooth scale transforms (1.02x) with enhanced shadows and z-index management
+- **Entry/Exit Animations**: Fade-in/out with subtle scale and translate effects using CSS keyframes
+- **Skeleton States**: Complete loading states with shimmer animations for all card types
+- **Accessibility**: Proper ARIA descriptions, reduced motion support, high contrast compatibility
+- **Files Created**: `cardIcons.ts` (icon mappings), `SkeletonCard.tsx` (loading states)
+- **Files Modified**: `index.css` (visual enhancements), `CardRenderer.tsx` (enhanced components)
+
+### v0.4.5 - Timeline Visual Enhancements (completed)
+- [x] Redesign timeline axis with improved tick marks and labels
+- [x] Add smooth zoom animations with easing functions
+- [x] Implement visual feedback for all interactive elements
+- [x] Create curved bezier connection lines between cards and timeline
+- [x] Enhance minimap with better contrast and visibility
+- [x] Add timeline markers for important dates
+- [x] Implement smooth pan animations
+
+**✅ Implementation Summary (v0.4.5 Completed):**
+- **Enhanced Timeline Axis**: Theme-aware colors, gradient fills, glow effects, improved typography with system fonts
+- **Smooth Animations**: Comprehensive easing functions library with 20+ easing types, smooth zoom/pan with configurable duration
+- **Curved Bezier Connections**: Dynamic SVG paths with gradient strokes, animated dashes for selected cards, glow effects
+- **Advanced Minimap**: Density heatmap visualization, enhanced contrast with semantic colors, smooth view window animations
+- **Timeline Markers**: "Today" marker with pulse animation, milestone markers for high-priority events, custom marker support
+- **Visual Feedback**: Ripple effects, hover states, focus rings, loading indicators, zoom level indicators, edge bounce effects
+- **Interactive Enhancements**: Hover glow effects, lift animations, keyboard navigation support, pan/zoom cursor feedback
+- **Performance**: Reduced motion support, efficient animations using requestAnimationFrame, optimized CSS transitions
+- **Files Created**: `easingFunctions.ts` (animation utilities), `TimelineMarkers.tsx` (important date markers)
+- **Files Enhanced**: `Axis.tsx`, `useViewWindow.ts`, `CardRenderer.tsx`, `TimelineMinimap.tsx`, `index.css`
+
+### v0.4.6 - Navigation & Interaction Polish
+- [ ] Add descriptive tooltips for all navigation rail icons
+- [ ] Implement animated active state indicators
+- [ ] Add keyboard navigation support (arrow keys, tab)
+- [ ] Create visual grouping for related actions
+- [ ] Add hover effects with micro-interactions
+- [ ] Implement breadcrumb navigation where applicable
+- [ ] Add command palette for power users
+
+### v0.4.7 - Empty States & Loading
+- [ ] Design empty state illustrations for no events
+- [ ] Create skeleton loaders for async content
+- [ ] Add loading spinners with consistent styling
+- [ ] Implement error state displays with recovery actions
+- [ ] Create onboarding tooltips for first-time users
+- [ ] Add progress indicators for long operations
+
+### v0.4.8 - Accessibility & Performance
+- [ ] Add proper ARIA labels and roles throughout
+- [ ] Implement visible focus rings for keyboard navigation
+- [ ] Ensure color contrast meets WCAG AA standards
+- [ ] Add screen reader announcements for state changes
+- [ ] Optimize animations with CSS transforms
+- [ ] Implement reduced motion preferences
+- [ ] Add high contrast mode support
+
+### v0.4.9 - Technical Implementation
+- [ ] Extract common styles to CSS modules
+- [ ] Create reusable styled components library
+- [ ] Implement consistent spacing utilities
+- [ ] Add Storybook for component documentation
+- [ ] Create visual regression tests
+- [ ] Document design system guidelines
+- [ ] Performance audit and optimization
+
+## Upcoming v0.5.0 (performance & robustness)
 - [ ] Performance optimization for large datasets
 - [ ] Finish degradation system work items
 - [ ] Advanced telemetry collection
 - [ ] Memory usage optimization
 - [ ] Enhanced error handling
 
-## Upcoming v0.4.0 (features)
+## Upcoming v0.6.0 (features)
 - [ ] Multi-event aggregation cards
 - [ ] Advanced clustering algorithms
 - [ ] Interactive anchor behaviors

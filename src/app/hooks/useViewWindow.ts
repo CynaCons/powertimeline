@@ -1,14 +1,41 @@
 import { useCallback, useRef, useState } from 'react';
+import { animate, easeOutCubic } from '../../utils/easingFunctions';
 
 export function useViewWindow(initialStart = 0, initialEnd = 1) {
   const [viewStart, setViewStart] = useState(initialStart);
   const [viewEnd, setViewEnd] = useState(initialEnd);
   const animRef = useRef<number | null>(null);
+  const cancelAnimationRef = useRef<(() => void) | null>(null);
 
   const setWindow = useCallback((start: number, end: number) => {
     setViewStart(Math.max(0, Math.min(1, start)));
     setViewEnd(Math.max(0, Math.min(1, end)));
   }, []);
+
+  const animateToWindow = useCallback((targetStart: number, targetEnd: number, duration = 400) => {
+    // Cancel any existing animation
+    if (cancelAnimationRef.current) {
+      cancelAnimationRef.current();
+    }
+
+    const currentStart = viewStart;
+    const currentEnd = viewEnd;
+    const startDelta = targetStart - currentStart;
+    const endDelta = targetEnd - currentEnd;
+
+    cancelAnimationRef.current = animate(0, 1, {
+      duration,
+      easing: easeOutCubic,
+      onUpdate: (progress) => {
+        const newStart = currentStart + startDelta * progress;
+        const newEnd = currentEnd + endDelta * progress;
+        setWindow(newStart, newEnd);
+      },
+      onComplete: () => {
+        cancelAnimationRef.current = null;
+      }
+    });
+  }, [viewStart, viewEnd, setWindow]);
 
   const nudge = useCallback((delta: number) => {
     const width = Math.max(viewEnd - viewStart, 0.001);
@@ -25,6 +52,23 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     half = Math.max(0.0005, Math.min(0.5, half)); // Allow zoom down to 0.1% of timeline (day-level granularity)
     setWindow(center - half, center + half);
   }, [viewStart, viewEnd, setWindow]);
+
+  const smoothZoom = useCallback((factor: number, duration = 300) => {
+    const center = (viewStart + viewEnd) / 2;
+    let half = ((viewEnd - viewStart) / 2) * factor;
+    half = Math.max(0.0005, Math.min(0.5, half));
+    animateToWindow(center - half, center + half, duration);
+  }, [viewStart, viewEnd, animateToWindow]);
+
+  const smoothPan = useCallback((delta: number, duration = 250) => {
+    const width = Math.max(viewEnd - viewStart, 0.001);
+    let start = viewStart + delta;
+    let end = viewEnd + delta;
+    if (start < 0) { end -= start; start = 0; }
+    if (end > 1) { start -= end - 1; end = 1; }
+    if (end - start < width) end = start + width;
+    animateToWindow(start, end, duration);
+  }, [viewStart, viewEnd, animateToWindow]);
 
   const zoomAtCursor = useCallback((factor: number, cursorX?: number, viewportWidth?: number, containerLeft?: number, containerWidth?: number) => {
     if (cursorX === undefined || viewportWidth === undefined) {
@@ -141,6 +185,17 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     animRef.current = requestAnimationFrame(step);
   }, [viewStart, viewEnd, setWindow]);
 
-  return { viewStart, viewEnd, setWindow, nudge, zoom, zoomAtCursor, animateTo };
+  return {
+    viewStart,
+    viewEnd,
+    setWindow,
+    nudge,
+    zoom,
+    zoomAtCursor,
+    animateTo,
+    smoothZoom,
+    smoothPan,
+    animateToWindow
+  };
 }
 

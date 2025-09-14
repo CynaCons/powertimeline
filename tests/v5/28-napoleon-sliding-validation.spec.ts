@@ -26,8 +26,7 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
     // Get minimap elements
     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
     const minimapBox = await minimapBar.boundingBox();
-    const viewWindow = page.locator('.bg-transparent.border-blue-500');
-    
+
     // Define sliding steps (10 steps from start to end)
     const steps = 10;
     const stepSize = 1.0 / steps;

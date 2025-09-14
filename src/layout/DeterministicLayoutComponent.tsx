@@ -10,9 +10,10 @@ interface DeterministicLayoutProps {
   showInfoPanels?: boolean;
   viewStart?: number;
   viewEnd?: number;
+  onCardDoubleClick?: (id: string) => void;
 }
 
-export function DeterministicLayoutComponent({ events, showInfoPanels = false, viewStart = 0, viewEnd = 1 }: DeterministicLayoutProps) {
+export function DeterministicLayoutComponent({ events, showInfoPanels = false, viewStart = 0, viewEnd = 1, onCardDoubleClick }: DeterministicLayoutProps) {
   // Container ref for proper sizing
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
@@ -697,6 +698,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
             top: card.y,
             width: card.width,
             height: card.height
+          }}
+          onDoubleClick={() => {
+            try {
+              const id = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
+              if (onCardDoubleClick) onCardDoubleClick(id);
+            } catch {}
           }}
         >
           {/* Card content based on type */}

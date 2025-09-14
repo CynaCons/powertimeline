@@ -21,6 +21,7 @@ export function TimelineMinimap({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartViewStart, setDragStartViewStart] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
   const minimapRef = useRef<HTMLDivElement>(null);
   
   // Calculate timeline date range
@@ -122,6 +123,28 @@ export function TimelineMinimap({
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
+  // Generate density heatmap gradient
+  const generateDensityGradient = useCallback((markers: { position: number; event: Event }[]) => {
+    if (markers.length === 0) return 'transparent';
+
+    // Create density buckets across the timeline
+    const buckets = new Array(20).fill(0);
+    markers.forEach(marker => {
+      const bucketIndex = Math.floor(marker.position * (buckets.length - 1));
+      buckets[bucketIndex]++;
+    });
+
+    const maxDensity = Math.max(...buckets, 1);
+    const gradientStops = buckets.map((density, index) => {
+      const position = (index / (buckets.length - 1)) * 100;
+      const intensity = density / maxDensity;
+      const opacity = Math.max(0.1, intensity * 0.6);
+      return `rgba(33, 150, 243, ${opacity}) ${position}%`;
+    }).join(', ');
+
+    return `linear-gradient(90deg, ${gradientStops})`;
+  }, []);
+
   // Format date for display
   const formatYear = (date: Date) => {
     return date.getFullYear().toString();
@@ -129,49 +152,93 @@ export function TimelineMinimap({
 
   // Don't render if no events
   if (events.length === 0) {
-    return null;
+    return (
+      <div className={`relative bg-surface border border-primary rounded-lg p-3 ${className}`}>
+        <div className="flex items-center justify-center text-secondary text-sm">
+          No events to display
+        </div>
+      </div>
+    );
   }
 
+
   return (
-    <div className={`relative bg-gray-50 border border-gray-200 rounded-md p-2 ${className}`}>
-      {/* Compact timeline bar with dates inline */}
-      <div className="flex items-center gap-3">
-        <span className="text-xs text-gray-600 flex-shrink-0">{formatYear(timelineRange.startDate)}</span>
+    <div
+      className={`relative bg-surface border border-primary rounded px-2 py-1 transition-all duration-300 ease-out shadow-sm hover:shadow-md ${className}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Enhanced timeline bar with dates inline */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs text-secondary font-medium flex-shrink-0 transition-colors duration-200">
+          {formatYear(timelineRange.startDate)}
+        </span>
         
-        {/* Minimap timeline bar */}
-        <div 
+        {/* Enhanced minimap timeline bar */}
+        <div
           ref={minimapRef}
-          className="relative h-4 bg-gray-200 rounded cursor-pointer hover:bg-gray-250 transition-colors flex-1"
+          className="relative h-2 bg-neutral-200 rounded cursor-pointer hover:bg-neutral-300 transition-all duration-300 ease-out flex-1 shadow-inner"
           onClick={handleMinimapClick}
+          style={{
+            background: `linear-gradient(90deg, var(--color-neutral-200) 0%, var(--color-neutral-100) 50%, var(--color-neutral-200) 100%)`
+          }}
         >
-          {/* Event density markers */}
+          {/* Density heatmap background */}
+          <div
+            className="absolute inset-0 rounded opacity-30"
+            style={{
+              background: generateDensityGradient(eventMarkers)
+            }}
+          />
+          {/* Enhanced event density markers */}
           {eventMarkers.map((marker, index) => (
             <div
               key={index}
-              className="absolute top-0 w-0.5 h-4 bg-blue-400 opacity-60"
-              style={{ left: `${marker.position * 100}%` }}
+              className="absolute top-0 w-0.5 h-2 bg-primary-500 opacity-60 hover:opacity-100 transition-all duration-200 ease-out transform hover:scale-110"
+              style={{
+                left: `${marker.position * 100}%`,
+                transform: `translateX(-50%) ${isHovering ? 'scaleY(1.2)' : ''}`,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+              }}
               title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
             />
           ))}
           
-          {/* Current view window indicator - draggable and transparent */}
+          {/* Enhanced current view window indicator */}
           <div
-            className={`absolute top-0 h-4 bg-transparent border border-blue-500 border-opacity-60 rounded ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            className={`absolute top-0 h-2 rounded transition-all duration-200 ease-out ${
+              isDragging ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
             style={{
               left: `${viewStart * 100}%`,
-              width: `${(viewEnd - viewStart) * 100}%`
+              width: `${(viewEnd - viewStart) * 100}%`,
+              background: 'linear-gradient(90deg, rgba(33, 150, 243, 0.3) 0%, rgba(33, 150, 243, 0.5) 50%, rgba(33, 150, 243, 0.3) 100%)',
+              border: '1px solid var(--color-primary-500)',
+              borderRadius: '4px',
+              boxShadow: isHovering ? '0 0 6px rgba(33, 150, 243, 0.4)' : '0 1px 2px rgba(0,0,0,0.1)'
             }}
             onMouseDown={handleViewWindowMouseDown}
           >
-            {/* View window handle indicators - small and subtle */}
-            <div className="absolute -left-0.5 top-0.5 w-1 h-3 bg-blue-600 rounded-sm opacity-80"></div>
-            <div className="absolute -right-0.5 top-0.5 w-1 h-3 bg-blue-600 rounded-sm opacity-80"></div>
+            {/* Enhanced view window handles */}
+            <div className="absolute -left-0.5 top-0 w-0.5 h-2 bg-primary-600 rounded-l opacity-80 transition-all duration-200 hover:opacity-100"></div>
+            <div className="absolute -right-0.5 top-0 w-0.5 h-2 bg-primary-600 rounded-r opacity-80 transition-all duration-200 hover:opacity-100"></div>
+
+            {/* View window content indicator */}
+            <div className="absolute inset-0.5 bg-primary-400 opacity-10 rounded-sm"></div>
           </div>
         </div>
-        
-        <span className="text-xs text-gray-600 flex-shrink-0">{formatYear(timelineRange.endDate)}</span>
-        <span className="text-xs text-gray-400 flex-shrink-0">Timeline Overview</span>
-        <span className="text-xs text-gray-500 flex-shrink-0">{events.length} events</span>
+
+        <span className="text-xs text-secondary font-medium flex-shrink-0 transition-colors duration-200">
+          {formatYear(timelineRange.endDate)}
+        </span>
+        <div className="flex items-center gap-2 text-xs text-tertiary">
+          <span className="bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded-full font-medium">
+            {events.length} events
+          </span>
+          <span className="hidden sm:inline opacity-70">
+            Timeline Overview
+          </span>
+        </div>
       </div>
     </div>
   );

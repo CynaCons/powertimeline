@@ -83,5 +83,6 @@ export interface LayoutResult {
     aggregation?: any;
     infinite?: any;
     adaptive?: any;
+    degradation?: any;
   };
 }

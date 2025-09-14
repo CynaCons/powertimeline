@@ -25,7 +25,7 @@ test.describe('v5/48 Title-only degradation', () => {
 
     await page.evaluate((events) => {
       localStorage.setItem('chronochart-events', JSON.stringify(events));
-    }, denseEvents as any);
+    }, denseEvents);
 
     await page.reload();
 
@@ -33,7 +33,7 @@ test.describe('v5/48 Title-only degradation', () => {
     await expect(page.locator('[data-testid="timeline-axis"]')).toBeVisible();
 
     // Read telemetry for debugging and assertion
-    const telemetry = await page.evaluate(() => (window as any).__ccTelemetry);
+    const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry);
     // eslint-disable-next-line no-console
     console.log('telemetry.degradation', telemetry?.degradation);
     // Ensure at least one title-only card is rendered

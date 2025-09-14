@@ -17,7 +17,7 @@ interface DevPanelProps {
 
 export const DevPanel: React.FC<DevPanelProps> = ({ seedRandom, seedClustered, seedLongRange, clearAll, dragging, onClose, devEnabled, seedRFK, seedJFK, seedNapoleon, seedIncremental }) => {
   return (
-    <OverlayShell id="dev" title="Developer Options - Stage 1 (Full Cards)" dragging={dragging} onClose={onClose}>
+    <OverlayShell id="dev" title="Developer Options - Stage 1 (Full Cards)" dragging={dragging} onClose={onClose} className="dev-panel">
       <div className="flex flex-col gap-3 text-[11px]">
         
         {/* Basic Seeds */}

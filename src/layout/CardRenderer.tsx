@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PositionedCard, CardType } from './types';
 import type { Event } from '../types';
+import { getEventIcon, getEventTypeIcon, getPriorityIcon } from './cardIcons';
 
 interface CardRendererProps {
   card: PositionedCard;
@@ -10,13 +11,16 @@ interface CardRendererProps {
   onDoubleClick?: (card: PositionedCard) => void;
 }
 
-export function CardRenderer({ 
-  card, 
-  isSelected = false, 
-  isHovered = false, 
-  onClick, 
-  onDoubleClick 
+export function CardRenderer({
+  card,
+  isSelected = false,
+  isHovered = false,
+  onClick,
+  onDoubleClick
 }: CardRendererProps) {
+  const event = Array.isArray(card.event) ? card.event[0] : card.event;
+  const gradientClass = getGradientClass(card.cardType, event.category);
+  const elevationClass = getElevationClass(card.cardType, isSelected, isHovered);
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClick?.(card);
@@ -37,10 +41,11 @@ export function CardRenderer({
       data-multi={Array.isArray(card.event)}
       data-summary={card.cardType === 'infinite'}
       className={`
-        absolute cursor-pointer transition-all duration-200 ease-in-out
+        absolute cursor-pointer card-hover-scale card-enter
         ${getCardTypeStyles(card.cardType)}
-        ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
-        ${isHovered ? 'shadow-lg scale-105' : 'shadow-md'}
+        ${gradientClass}
+        ${elevationClass}
+        ${isSelected ? 'card-selected' : ''}
       `}
       style={{
         left: card.x - card.width / 2,
@@ -54,25 +59,43 @@ export function CardRenderer({
     >
       {renderCardContent(card)}
       
-      {/* Connector line to anchor */}
+      {/* Curved connector line to anchor */}
       <svg
         className="absolute pointer-events-none"
         style={{
-          left: card.width / 2,
-          top: card.height / 2,
-          width: 100,
-          height: 100,
-          transform: `translate(-50%, -50%)`
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: '100px',
+          transform: `translate(0, ${card.height}px)`,
+          overflow: 'visible'
         }}
       >
-        <line
-          x1={0}
-          y1={0}
-          x2={0}
-          y2={50}
-          stroke="#9ca3af"
-          strokeWidth={1}
-          opacity={0.6}
+        <defs>
+          <linearGradient id={`connector-gradient-${card.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="var(--color-primary-400)" stopOpacity="0.8" />
+            <stop offset="50%" stopColor="var(--color-primary-500)" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="var(--color-primary-600)" stopOpacity="0.3" />
+          </linearGradient>
+          {isSelected && (
+            <filter id={`connector-glow-${card.id}`}>
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          )}
+        </defs>
+        <path
+          d={generateConnectorPath(card)}
+          stroke={`url(#connector-gradient-${card.id})`}
+          strokeWidth={isSelected ? 2.5 : 1.5}
+          fill="none"
+          opacity={isSelected ? 0.9 : 0.6}
+          filter={isSelected ? `url(#connector-glow-${card.id})` : undefined}
+          className="transition-all duration-300 ease-out"
+          strokeDasharray={isHovered ? "5,3" : undefined}
         />
       </svg>
     </div>
@@ -80,22 +103,69 @@ export function CardRenderer({
 }
 
 function getCardTypeStyles(cardType: CardType): string {
-  const baseStyles = 'bg-white border rounded-lg overflow-hidden';
-  
+  const baseStyles = 'border rounded-lg overflow-hidden transition-theme';
+
   switch (cardType) {
     case 'full':
-      return `${baseStyles} border-gray-200 p-4`;
+      return `${baseStyles} border-primary p-4`;
     case 'compact':
-      return `${baseStyles} border-gray-200 p-3`;
+      return `${baseStyles} border-primary p-3`;
     case 'title-only':
-      return `${baseStyles} border-gray-200 p-2`;
+      return `${baseStyles} border-primary p-2`;
     case 'multi-event':
-      return `${baseStyles} border-blue-200 bg-blue-50 p-3`;
+      return `${baseStyles} border-primary-200 p-3`;
     case 'infinite':
-      return `${baseStyles} border-red-200 bg-red-50 p-2`;
+      return `${baseStyles} border-error-200 p-2`;
     default:
       return baseStyles;
   }
+}
+
+function getGradientClass(cardType: CardType, category?: string): string {
+  if (category && ['milestone', 'meeting', 'deadline', 'launch', 'announcement'].includes(category)) {
+    return `card-gradient-${category}`;
+  }
+
+  switch (cardType) {
+    case 'multi-event':
+      return 'card-gradient-multi-event';
+    case 'infinite':
+      return 'card-gradient-infinite';
+    default:
+      return 'card-gradient-default';
+  }
+}
+
+function getElevationClass(cardType: CardType, isSelected: boolean, isHovered: boolean): string {
+  if (isSelected) return 'card-elevation-3';
+  if (isHovered) return 'card-elevation-2';
+
+  switch (cardType) {
+    case 'infinite':
+      return 'card-elevation-2';
+    case 'multi-event':
+      return 'card-elevation-1';
+    default:
+      return 'card-elevation-1';
+  }
+}
+
+function generateConnectorPath(card: PositionedCard): string {
+  const startX = card.width / 2;
+  const startY = 0;
+  const endX = startX;
+  const endY = 80; // Reduced distance to match smaller timeline axis
+
+  // Calculate control points for bezier curve
+  const controlDistance = 30; // Reduced for smaller curve
+  const horizontalOffset = Math.max(-20, Math.min(20, (card.x - 400) * 0.03)); // Subtle curve based on position
+
+  const control1X = startX + horizontalOffset;
+  const control1Y = startY + controlDistance;
+  const control2X = endX - horizontalOffset;
+  const control2Y = endY - controlDistance;
+
+  return `M ${startX} ${startY} C ${control1X} ${control1Y}, ${control2X} ${control2Y}, ${endX} ${endY}`;
 }
 
 function renderCardContent(card: PositionedCard): React.ReactNode {
@@ -118,15 +188,38 @@ function renderCardContent(card: PositionedCard): React.ReactNode {
 }
 
 function FullCardContent({ event }: { event: Event }) {
+  const eventIcon = getEventIcon(event);
+  const priorityIcon = getPriorityIcon(event.priority);
+
   return (
     <div className="h-full flex flex-col">
-      <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mb-1">
-        {event.title}
-      </h3>
-      <p className="text-xs text-gray-600 mb-2 flex-1 line-clamp-3">
+      <div className="flex items-start justify-between mb-1">
+        <h3 className="card-title text-primary line-clamp-2 flex-1 pr-2">
+          {event.title}
+        </h3>
+        <div className="flex items-center gap-1">
+          {event.priority && event.priority !== 'normal' && (
+            <span
+              className={`card-icon priority-${event.priority} material-symbols-rounded`}
+              style={{ fontSize: '0.75rem' }}
+              title={priorityIcon.description}
+            >
+              {priorityIcon.icon}
+            </span>
+          )}
+          <span
+            className="card-icon material-symbols-rounded"
+            style={{ color: eventIcon.color, fontSize: '0.875rem' }}
+            title={eventIcon.description}
+          >
+            {eventIcon.icon}
+          </span>
+        </div>
+      </div>
+      <p className="card-description text-secondary mb-2 flex-1 line-clamp-3">
         {event.description}
       </p>
-      <div className="text-xs text-gray-500 font-medium">
+      <div className="card-date text-tertiary">
         {formatDate(event.date)}
       </div>
     </div>
@@ -134,15 +227,26 @@ function FullCardContent({ event }: { event: Event }) {
 }
 
 function CompactCardContent({ event }: { event: Event }) {
+  const eventIcon = getEventIcon(event);
+
   return (
     <div className="h-full flex flex-col">
-      <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mb-1">
-        {event.title}
-      </h3>
-      <p className="text-xs text-gray-600 line-clamp-1 flex-1">
+      <div className="flex items-start justify-between mb-1">
+        <h3 className="card-title text-primary line-clamp-2 flex-1 pr-2">
+          {event.title}
+        </h3>
+        <span
+          className="card-icon material-symbols-rounded flex-shrink-0"
+          style={{ color: eventIcon.color, fontSize: '0.75rem' }}
+          title={eventIcon.description}
+        >
+          {eventIcon.icon}
+        </span>
+      </div>
+      <p className="card-description text-secondary line-clamp-1 flex-1">
         {event.description}
       </p>
-      <div className="text-xs text-gray-500">
+      <div className="card-date text-tertiary">
         {formatDate(event.date)}
       </div>
     </div>
@@ -150,12 +254,23 @@ function CompactCardContent({ event }: { event: Event }) {
 }
 
 function TitleOnlyCardContent({ event }: { event: Event }) {
+  const eventIcon = getEventIcon(event);
+
   return (
     <div className="h-full flex flex-col justify-center">
-      <h3 className="font-bold text-sm text-gray-900 line-clamp-1 mb-1">
-        {event.title}
-      </h3>
-      <div className="text-xs text-gray-500">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="card-title text-primary line-clamp-1 flex-1 pr-2">
+          {event.title}
+        </h3>
+        <span
+          className="card-icon material-symbols-rounded flex-shrink-0"
+          style={{ color: eventIcon.color, fontSize: '0.75rem' }}
+          title={eventIcon.description}
+        >
+          {eventIcon.icon}
+        </span>
+      </div>
+      <div className="card-date text-tertiary">
         {formatDate(event.date)}
       </div>
     </div>
@@ -163,19 +278,35 @@ function TitleOnlyCardContent({ event }: { event: Event }) {
 }
 
 function MultiEventCardContent({ events }: { events: Event[] }) {
+  const typeIcon = getEventTypeIcon('multi-event');
+
   return (
     <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-2">
+        <span className="card-title text-primary">
+          Multiple Events
+        </span>
+        <span
+          className="card-icon material-symbols-rounded"
+          style={{ color: typeIcon.color }}
+          title={typeIcon.description}
+        >
+          {typeIcon.icon}
+        </span>
+      </div>
       <div className="flex-1 space-y-1">
-        {events.slice(0, 3).map((event, index) => (
-          <div key={event.id} className="text-sm text-gray-900">
-            <span className="font-medium">{event.title}</span>
-            {index < events.length - 1 && index < 2 && (
-              <hr className="my-1 border-gray-200" />
-            )}
+        {events.slice(0, 3).map((event) => (
+          <div key={event.id} className="card-description text-primary truncate">
+            • {event.title}
           </div>
         ))}
+        {events.length > 3 && (
+          <div className="card-description text-secondary italic">
+            +{events.length - 3} more
+          </div>
+        )}
       </div>
-      <div className="text-xs text-blue-600 font-medium mt-1">
+      <div className="card-date text-primary-700">
         {events.length} events
       </div>
     </div>
@@ -183,12 +314,21 @@ function MultiEventCardContent({ events }: { events: Event[] }) {
 }
 
 function InfiniteCardContent({ count }: { count: number }) {
+  const typeIcon = getEventTypeIcon('infinite');
+
   return (
     <div className="h-full flex flex-col justify-center items-center">
-      <div className="text-lg font-bold text-red-600">
+      <span
+        className="card-icon material-symbols-rounded mb-1"
+        style={{ color: typeIcon.color, fontSize: '1.25rem' }}
+        title={typeIcon.description}
+      >
+        {typeIcon.icon}
+      </span>
+      <div className="card-count text-error-700">
         {count}
       </div>
-      <div className="text-xs text-red-600 font-medium">
+      <div className="card-date text-error-700">
         events
       </div>
     </div>

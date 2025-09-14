@@ -36,32 +36,115 @@ export const Axis: React.FC<AxisProps> = ({ ticks, tickStart, tickEnd }) => {
 
   return (
     <g data-component="Axis">
-      {/* Major grid lines */}
+      <defs>
+        {/* Gradient definitions for enhanced visuals */}
+        <linearGradient id="majorTickGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="var(--color-primary-300)" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="var(--color-primary-400)" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="var(--color-primary-500)" stopOpacity="0.3" />
+        </linearGradient>
+        <linearGradient id="axisLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="var(--color-primary-400)" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="var(--color-primary-500)" stopOpacity="1" />
+          <stop offset="100%" stopColor="var(--color-primary-400)" stopOpacity="0.8" />
+        </linearGradient>
+        <filter id="tickGlow">
+          <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* Major grid lines with gradient and glow */}
       {ticks.map(t => (
-        <line key={`g-${t.t}`} data-testid="grid-major" x1={t.x} x2={t.x} y1={5} y2={55} stroke="#ffffff" strokeWidth={3} opacity="0.6" />
+        <g key={`g-${t.t}`} className="timeline-major-tick">
+          <line
+            data-testid="grid-major"
+            x1={t.x}
+            x2={t.x}
+            y1={8}
+            y2={22}
+            stroke="url(#majorTickGradient)"
+            strokeWidth={2.5}
+            filter="url(#tickGlow)"
+            className="transition-all duration-300 ease-out"
+          />
+        </g>
       ))}
+
       {/* Minor grid lines */}
       {minor.map((x, i) => (
-        <line key={`gm-${i}-${x}`} data-testid="grid-minor" x1={x} x2={x} y1={3} y2={17} stroke="var(--cc-color-grid-minor)" strokeWidth={0.06} />
+        <line
+          key={`gm-${i}-${x}`}
+          data-testid="grid-minor"
+          x1={x}
+          x2={x}
+          y1={12}
+          y2={18}
+          stroke="var(--color-border-primary)"
+          strokeWidth={0.8}
+          opacity={0.4}
+          className="transition-all duration-300 ease-out"
+        />
       ))}
-      {/* Main axis line (stroke width driven by CSS variable, fallback inline) */}
+
+      {/* Main axis line with gradient */}
       <line
         x1={tickStart}
         x2={tickEnd}
-        y1={30}
-        y2={30}
-        stroke="#ffffff"
-        strokeWidth="4"
-        opacity="0.8"
+        y1={15}
+        y2={15}
+        stroke="url(#axisLineGradient)"
+        strokeWidth="3"
+        filter="url(#tickGlow)"
+        className="transition-all duration-300 ease-out"
       />
+
       {/* Minor tick marks */}
       {minor.map((x, i) => (
-        <line key={`m-${i}-${x}`} x1={x} x2={x} y1={9.55} y2={10.45} stroke="var(--cc-color-axis-line-strong)" strokeWidth={0.14} />
+        <line
+          key={`m-${i}-${x}`}
+          x1={x}
+          x2={x}
+          y1={14}
+          y2={16}
+          stroke="var(--color-primary-600)"
+          strokeWidth={1}
+          opacity={0.6}
+          className="transition-all duration-300 ease-out"
+        />
       ))}
+
+      {/* Major tick marks and labels with enhanced styling */}
       {ticks.map(t => (
-        <g key={t.t} transform={`translate(${t.x},0)`}>
-          <line data-testid="axis-tick" x1={0} x2={0} y1={9.3} y2={10.7} stroke="var(--cc-color-axis-line-strong)" strokeWidth={0.16} />
-          <text data-testid="axis-label" x={0} y={20} fontSize={18} fill="#ffffff" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold">{t.label}</text>
+        <g key={t.t} transform={`translate(${t.x},0)`} className="timeline-tick-group">
+          <line
+            data-testid="axis-tick"
+            x1={0}
+            x2={0}
+            y1={12}
+            y2={18}
+            stroke="var(--color-primary-500)"
+            strokeWidth={2.5}
+            filter="url(#tickGlow)"
+            className="transition-all duration-300 ease-out"
+          />
+          <text
+            data-testid="axis-label"
+            x={0}
+            y={10}
+            fontSize={16}
+            fill="var(--color-text-primary)"
+            textAnchor="middle"
+            fontFamily="var(--font-sans, system-ui, sans-serif)"
+            fontWeight="600"
+            className="timeline-label transition-all duration-300 ease-out select-none"
+            style={{ letterSpacing: '0.025em' }}
+          >
+            {t.label}
+          </text>
         </g>
       ))}
     </g>

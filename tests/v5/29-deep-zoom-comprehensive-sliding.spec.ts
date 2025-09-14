@@ -365,7 +365,7 @@ test.describe('Deep Zoom Comprehensive Sliding Tests', () => {
             cardTitles.push(title);
           }
         }
-      } catch (e) {
+      } catch (_) {
         cardTitles.push(`error-cards-${cardCount}`);
       }
       
