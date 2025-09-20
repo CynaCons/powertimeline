@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useRef, useState, useCallback, lazy, Suspense } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
-import { TimelineMinimap } from './components/TimelineMinimap';
+import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
+import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from './contexts/ThemeContext';
@@ -8,19 +9,24 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
 import type { Event } from './types';
+import type { Command } from './components/CommandPalette';
 
-// Lazy load panels and overlays for better bundle splitting
+// Lazy load panels, overlays and heavy components for better bundle splitting
 const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
 const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
-const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
+// DevPanel temporarily replaced with inline implementation
+// const DevPanel = lazy(() => import('./app/panels/DevPanel'));
+const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
+const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
 import { EventStorage } from './lib/storage';
-import { 
-  seedRandom as seedRandomUtil, 
-  seedClustered as seedClusteredUtil, 
-  seedLongRange as seedLongRangeUtil, 
-  seedRFKTimeline, 
-  seedJFKTimeline, 
-  seedNapoleonTimeline, 
+import {
+  seedRandom as seedRandomUtil,
+  seedClustered as seedClusteredUtil,
+  seedLongRange as seedLongRangeUtil,
+  seedRFKTimeline,
+  seedJFKTimeline,
+  seedNapoleonTimeline,
+  seedDeGaulleTimeline,
   seedIncremental as seedIncrementalUtil
 } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
@@ -33,6 +39,8 @@ function App() {
   const storageRef = useRef(new EventStorage());
   const [events, setEvents] = useState<Event[]>(() => storageRef.current.load());
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
   const selected = useMemo(
     () => events.find((e) => e.id === selectedId),
     [events, selectedId]
@@ -60,6 +68,9 @@ function App() {
 
   // Announcer hook
   const { announce, renderLiveRegion } = useAnnouncer();
+
+  // Navigation and theme hooks
+  const { toggleTheme } = useTheme();
 
   // Theme: dark-only (no data-theme switch)
   useEffect(() => {
@@ -251,6 +262,13 @@ function App() {
     storageRef.current.writeThrough(data);
     setSelectedId(undefined);
   }, []);
+
+  const seedDeGaulle = useCallback(() => {
+    const data = seedDeGaulleTimeline();
+    setEvents(data);
+    storageRef.current.writeThrough(data);
+    setSelectedId(undefined);
+  }, []);
   
   const seedIncremental = useCallback((targetCount: number) => {
     setEvents(prev => { 
@@ -271,43 +289,172 @@ function App() {
     return sortedForList.filter((e) => (e.title || '').toLowerCase().includes(q) || e.date.includes(q));
   }, [sortedForList, outlineFilter]);
 
-  // Create flow helpers
-  // function openCreate(dateISO: string) {
-  //   setDate(dateISO); setTitle(''); setDescription(''); setOverlay('create');
-  // }
+  // Navigation actions
+  const openEvents = useCallback(() => {
+    setOverlay(overlay === 'events' ? null : 'events');
+    setActiveNavItem('events');
+  }, [overlay]);
+
+  const openCreate = useCallback(() => {
+    setSelectedId(undefined);
+    setEditDate('');
+    setEditTitle('');
+    setEditDescription('');
+    setOverlay('editor');
+    setActiveNavItem('create');
+  }, []);
+
+  const openDev = useCallback(() => {
+    setOverlay(overlay === 'dev' ? null : 'dev');
+    setActiveNavItem('dev');
+  }, [overlay]);
+
+  const closeOverlay = useCallback(() => {
+    setOverlay(null);
+    setActiveNavItem(null);
+  }, []);
+
+  // Navigation rail items
+  const navigationItems = useMemo(() => [
+    {
+      id: 'events',
+      label: 'Events',
+      icon: 'list',
+      shortcut: 'Alt+E',
+      onClick: openEvents,
+      isActive: overlay === 'events',
+    },
+    {
+      id: 'create',
+      label: 'Create',
+      icon: <AddIcon fontSize="small" />,
+      shortcut: 'Alt+C',
+      onClick: openCreate,
+      color: 'primary.main',
+    },
+  ], [overlay, openEvents, openCreate]);
+
+  const utilityItems = useMemo(() => [
+    {
+      id: 'dev',
+      label: 'Developer Panel',
+      icon: 'settings',
+      shortcut: 'Alt+D',
+      onClick: openDev,
+      isActive: overlay === 'dev',
+    },
+  ], [overlay, openDev]);
+
+  // Command palette commands
+  const commands: Command[] = useMemo(() => [
+    {
+      id: 'open-events',
+      title: 'Open Events Panel',
+      description: 'Browse and manage all events',
+      icon: 'list',
+      shortcut: 'Alt+E',
+      category: 'navigation',
+      action: openEvents,
+      aliases: ['events', 'list', 'browse'],
+    },
+    {
+      id: 'create-event',
+      title: 'Create New Event',
+      description: 'Add a new event to the timeline',
+      icon: 'add_circle',
+      shortcut: 'Alt+C',
+      category: 'create',
+      action: openCreate,
+      aliases: ['new', 'add', 'create'],
+    },
+    {
+      id: 'dev-panel',
+      title: 'Open Developer Panel',
+      description: 'Access developer tools and options',
+      icon: 'code',
+      shortcut: 'Alt+D',
+      category: 'dev',
+      action: openDev,
+      aliases: ['dev', 'debug', 'tools'],
+    },
+    {
+      id: 'toggle-theme',
+      title: 'Toggle Theme',
+      description: 'Switch between light and dark themes',
+      icon: 'palette',
+      shortcut: 'Alt+T',
+      category: 'theme',
+      action: toggleTheme,
+      aliases: ['theme', 'dark', 'light'],
+    },
+    {
+      id: 'close-overlay',
+      title: 'Close Panel',
+      description: 'Close the currently open panel',
+      icon: 'close',
+      shortcut: 'Escape',
+      category: 'navigation',
+      action: closeOverlay,
+      aliases: ['close', 'hide', 'dismiss'],
+    },
+  ], [openEvents, openCreate, openDev, toggleTheme, closeOverlay]);
+
+  // Keyboard shortcuts
+  useNavigationShortcuts({
+    openEvents,
+    openCreate,
+    openDev,
+    toggleTheme,
+    closeOverlay,
+  });
+
+  useCommandPaletteShortcuts(() => setCommandPaletteOpen(true));
+
+  // Update active nav item based on overlay
+  useEffect(() => {
+    switch (overlay) {
+      case 'events':
+        setActiveNavItem('events');
+        break;
+      case 'editor':
+        setActiveNavItem('create');
+        break;
+      case 'dev':
+        setActiveNavItem('dev');
+        break;
+      default:
+        setActiveNavItem(null);
+    }
+  }, [overlay]);
 
   return (
     <div className="min-h-screen bg-background text-primary transition-theme">
       {/* Full-bleed canvas area - no header, maximum space */}
       <div className="relative h-screen">
-        {/* Permanent left sidebar for icon rail */}
+        {/* Enhanced Navigation Rail */}
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
           {/* ChronoChart logo at top */}
           <div className="mb-4 p-2 text-xs font-bold tracking-wide text-gray-800 text-center leading-tight">
             <div>CC</div>
           </div>
-          
-          {/* Navigation buttons */}
-          <div className="flex flex-col items-center gap-2 mb-auto">
-            <Tooltip title="Events" placement="right">
-              <IconButton aria-label="Events" size="small" onClick={() => setOverlay(overlay === 'events' ? null : 'events')} sx={{ bgcolor: overlay === 'events' ? 'grey.900' : undefined, color: overlay === 'events' ? 'common.white' : 'text.primary', '&:hover': { bgcolor: overlay === 'events' ? 'grey.800' : 'grey.100' } }}>
-                <span className="material-symbols-rounded">list</span>
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Create" placement="right">
-              <IconButton aria-label="Create" size="small" onClick={() => { setSelectedId(undefined); setEditDate(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }} sx={{ color: 'primary.main', '&:hover': { bgcolor: 'primary.50' } }}>
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </div>
-          
-          {/* Dev toggle at bottom */}
-          <div className="flex flex-col items-center gap-2">
-            <Tooltip title="Developer options" placement="right">
-              <IconButton aria-label="Developer Panel" size="small" onClick={() => setOverlay(overlay === 'dev' ? null : 'dev')} sx={{ bgcolor: overlay === 'dev' ? 'grey.900' : undefined, color: overlay === 'dev' ? 'common.white' : 'text.primary', '&:hover': { bgcolor: overlay === 'dev' ? 'grey.800' : 'grey.100' } }}>
-                <span className="material-symbols-rounded">settings</span>
-              </IconButton>
-            </Tooltip>
+
+          {/* Main Navigation */}
+          <NavigationRail
+            items={navigationItems}
+            activeItemId={activeNavItem || undefined}
+          />
+
+          {/* Visual separator */}
+          <div className="nav-group-separator my-4"></div>
+
+          {/* Utility Navigation */}
+          <NavigationRail
+            items={utilityItems}
+            activeItemId={activeNavItem || undefined}
+          />
+
+          {/* Bottom actions */}
+          <div className="flex flex-col items-center gap-2 mt-auto">
             <button
               type="button"
               title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'}
@@ -316,7 +463,7 @@ function App() {
               aria-pressed={showInfoPanels}
               aria-label="Toggle info panels"
             >
-
+              info
             </button>
             <ThemeToggleButton />
           </div>
@@ -358,21 +505,75 @@ function App() {
               </Suspense>
             )}
             {overlay === 'dev' && devEnabled && (
-              <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
-                <DevPanel
-                  seedRandom={seedRandom}
-                  seedClustered={seedClustered}
-                  seedLongRange={seedLongRange}
-                  clearAll={clearAll}
-                  dragging={dragging}
-                  onClose={() => setOverlay(null)}
-                  devEnabled={devEnabled}
-                  seedRFK={seedRFK}
-                  seedJFK={seedJFK}
-                  seedNapoleon={seedNapoleon}
-                  seedIncremental={seedIncremental}
-                />
-              </Suspense>
+              <div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-20">
+                <div className="p-4">
+                  <h2 className="text-lg font-bold mb-4">Developer Panel</h2>
+                  <p className="text-sm text-gray-600 mb-4">Events: {events.length}</p>
+
+                  <div className="mb-4">
+                    <h3 className="text-md font-semibold mb-2">Sample Data</h3>
+                    <div className="space-y-1 mb-4">
+                      <button onClick={seedRFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">RFK 1968</button>
+                      <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK</button>
+                      <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon</button>
+                      <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">De Gaulle</button>
+                      <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Random (10)</button>
+                      <button onClick={seedClustered} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Clustered</button>
+                      <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Long Range</button>
+                      <button onClick={() => seedIncremental(5)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Incremental (5)</button>
+                      <button onClick={clearAll} className="block w-full text-left px-2 py-1 hover:bg-red-100 text-red-700 text-sm">Clear All</button>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <h3 className="text-md font-semibold mb-2">Timeline Export/Import</h3>
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        className="rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3 py-1"
+                        disabled={events.length === 0}
+                        title={events.length === 0 ? "No events to export" : `Export ${events.length} events to YAML file`}
+                        onClick={() => {
+                          try {
+                            console.log('Export clicked - testing yamlSerializer...');
+                            import('./utils/yamlSerializer').then(yaml => {
+                              console.log('yamlSerializer loaded successfully:', yaml);
+                              alert('YAML module loaded successfully! Export would work.');
+                            }).catch(err => {
+                              console.error('Failed to load yamlSerializer:', err);
+                              alert('Failed to load YAML module: ' + err.message);
+                            });
+                          } catch (err) {
+                            console.error('Error testing yamlSerializer:', err);
+                            alert('Error testing YAML module: ' + (err as Error).message);
+                          }
+                        }}
+                      >
+                        📤 Export YAML ({events.length})
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded border border-green-300 bg-white text-green-700 hover:bg-green-50 px-3 py-1"
+                        title="Import timeline from YAML file"
+                        onClick={() => alert('Import functionality would go here')}
+                      >
+                        📁 Import YAML
+                      </button>
+                    </div>
+
+                    <div className="text-gray-500 text-xs">
+                      YAML format allows sharing timelines between users and applications
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setOverlay(null)}
+                    className="mt-4 px-3 py-1 bg-gray-500 text-white rounded text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -382,12 +583,14 @@ function App() {
           {/* Timeline minimap at top of timeline area */}
           {events.length > 0 && (
             <div className="absolute top-1 left-4 right-4 z-40">
-              <TimelineMinimap
-                events={events}
-                viewStart={viewStart}
-                viewEnd={viewEnd}
-                onNavigate={setWindow}
-              />
+              <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
+                <TimelineMinimap
+                  events={events}
+                  viewStart={viewStart}
+                  viewEnd={viewEnd}
+                  onNavigate={setWindow}
+                />
+              </Suspense>
             </div>
           )}
           
@@ -428,51 +631,25 @@ function App() {
               </div>
           </div>
         </div>
+
+
+        {/* Command Palette */}
+        <Suspense fallback={null}>
+          <CommandPalette
+            isOpen={commandPaletteOpen}
+            onClose={() => setCommandPaletteOpen(false)}
+            commands={commands}
+            placeholder="Search commands... (Ctrl+K)"
+          />
+        </Suspense>
+
+        {/* Live region for announcements */}
+        {renderLiveRegion()}
       </div>
     </div>
   );
 }
 
-// Theme toggle button component
-function ThemeToggleButton() {
-  const { isDarkMode, toggleTheme, themePreference } = useTheme();
-
-  const getThemeIcon = () => {
-    if (themePreference === 'system') {
-      return 'auto_mode';
-    }
-    return isDarkMode ? 'light_mode' : 'dark_mode';
-  };
-
-  const getThemeTitle = () => {
-    switch (themePreference) {
-      case 'light': return 'Switch to dark mode';
-      case 'dark': return 'Switch to light mode';
-      case 'system': return 'Using system theme, click to toggle';
-      default: return 'Toggle theme';
-    }
-  };
-
-  return (
-    <Tooltip title={getThemeTitle()} placement="right">
-      <IconButton
-        aria-label="Toggle theme"
-        size="small"
-        onClick={toggleTheme}
-        sx={{
-          color: 'text.secondary',
-          '&:hover': {
-            bgcolor: 'action.hover',
-          }
-        }}
-      >
-        <span className="material-symbols-rounded">
-          {getThemeIcon()}
-        </span>
-      </IconButton>
-    </Tooltip>
-  );
-}
 
 export default App;
 

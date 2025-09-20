@@ -4,8 +4,7 @@ test.describe('v5/02 Cards placement', () => {
   test('cards render above and below the axis', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARDS-001' });
     await page.goto('/');
-    // Seed RFK deterministic dataset via DevPanel
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    // Seed RFK deterministic dataset via DevPanel through navigation rail
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
 

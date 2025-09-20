@@ -17,7 +17,7 @@ test.describe('v5/03 Non-overlap fit', () => {
   test('cards do not significantly overlap', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARDS-002' });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
 
@@ -41,7 +41,7 @@ test.describe('v5/03 Non-overlap fit', () => {
   test('Napoleon at Fit-All has no card overlaps', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-LAYOUT-001' });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
     await page.waitForTimeout(500);

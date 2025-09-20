@@ -297,7 +297,7 @@ export function seedInfiniteTest(_prev: Event[]): Event[] {
   // Create way too many events to force infinite cards (50+ events)
   const base = Date.now() - 25 * dayMs;
   const events: Event[] = [];
-  
+
   for (let i = 0; i < 50; i++) {
     const d = new Date(base + i * 0.5 * dayMs).toISOString().slice(0, 10);
     events.push({
@@ -307,6 +307,260 @@ export function seedInfiniteTest(_prev: Event[]): Event[] {
       description: `Event ${i + 1} in extreme density test that should trigger infinite cards.`
     });
   }
-  
+
+  return events;
+}
+
+// Historical curated dataset: Charles de Gaulle comprehensive timeline (1890-1970).
+// Detailed life events with historical context and links to audio/video media where available.
+export function seedDeGaulleTimeline(): Event[] {
+  const events: Event[] = [
+    // Early Life and Education
+    {
+      id: 'cdg-birth',
+      date: '1890-11-22',
+      title: 'Charles de Gaulle Born',
+      description: 'Born in Lille to Henri de Gaulle (teacher and headmaster) and Jeanne Maillot-Delannoy. Raised in a devout Catholic, conservative family with strong literary and intellectual traditions. His father ran a Jesuit college, shaping his early education and values.'
+    },
+    {
+      id: 'cdg-education',
+      date: '1909-09-01',
+      title: 'Enters Saint-Cyr Military Academy',
+      description: 'Begins military education at Saint-Cyr, France\'s premier military academy. Excels in history and literature while developing his strategic thinking. Graduates 13th out of 210 cadets in 1912, earning commission as second lieutenant.'
+    },
+
+    // World War I
+    {
+      id: 'cdg-first-command',
+      date: '1913-10-01',
+      title: 'First Military Assignment',
+      description: 'Assigned to 33rd Infantry Regiment in Arras under Colonel (later Marshal) Philippe Pétain. This mentorship with Pétain profoundly influences his early military thinking and understanding of defensive strategy.'
+    },
+    {
+      id: 'cdg-verdun-wounded',
+      date: '1916-03-02',
+      title: 'Wounded and Captured at Verdun',
+      description: 'Captain de Gaulle leads his company at Douaumont during the Battle of Verdun. Wounded by bayonet and gas, then captured by German forces. Spends 32 months as POW, making five unsuccessful escape attempts while developing his theories on modern warfare.'
+    },
+
+    // Interwar Period - Military Theorist
+    {
+      id: 'cdg-marriage',
+      date: '1921-04-07',
+      title: 'Marries Yvonne Vendroux',
+      description: 'Marries Yvonne Vendroux in Calais. Their union produces three children: Philippe (1921), Élisabeth (1924), and Anne (1928-1948), who was born with Down syndrome and remained close to her father throughout his life.'
+    },
+    {
+      id: 'cdg-war-college',
+      date: '1924-11-01',
+      title: 'École de Guerre Studies',
+      description: 'Attends French War College (École Supérieure de Guerre). His thesis advocating mobile warfare and armored divisions conflicts with prevailing defensive doctrine. Graduates 52nd out of 129, his independent thinking noted but not appreciated by instructors.'
+    },
+    {
+      id: 'cdg-enemy-sword',
+      date: '1932-01-01',
+      title: 'Publishes "The Edge of the Sword"',
+      description: 'First major work on military leadership and strategy. Argues for the need for exceptional leaders in times of crisis and advocates for professional military élites. Establishes his reputation as military intellectual and strategic thinker.'
+    },
+    {
+      id: 'cdg-towards-army',
+      date: '1934-01-01',
+      title: 'Publishes "Towards a Professional Army"',
+      description: 'Revolutionary military treatise advocating for mechanized warfare, armored divisions, and mobile tactics. Predicts future of warfare will favor offensive operations using tanks and aircraft. Largely ignored by French high command but studied by German officers including Heinz Guderian.'
+    },
+
+    // World War II - The Call and Free France
+    {
+      id: 'cdg-colonel',
+      date: '1937-12-25',
+      title: 'Promoted to Colonel',
+      description: 'Commands 507th Tank Regiment. Continues developing and testing theories of armored warfare despite institutional resistance. His practical experience with tanks reinforces his conviction about mechanized warfare\'s future importance.'
+    },
+    {
+      id: 'cdg-undersecretary',
+      date: '1940-06-06',
+      title: 'Appointed Undersecretary of War',
+      description: 'Prime Minister Paul Reynaud appoints de Gaulle Undersecretary of State for National Defense and War. At 49, becomes youngest general in French Army. Advocates for continuing resistance from North Africa and maintaining alliance with Britain.'
+    },
+    {
+      id: 'cdg-london-arrival',
+      date: '1940-06-17',
+      title: 'Flies to London',
+      description: 'Leaves France for London on Churchill\'s aircraft as Pétain government seeks armistice. Meets with Churchill to discuss continued resistance. Prepares to broadcast message of defiance against German occupation and Vichy collaboration.'
+    },
+    {
+      id: 'cdg-appeal',
+      date: '1940-06-18',
+      title: 'Appeal of 18 June 1940',
+      description: 'Broadcasts historic speech from BBC Studio B calling for French resistance: "France has lost a battle, but France has not lost the war." Marks birth of Free France movement. Only a few hundred hear live broadcast, but message spreads and becomes symbol of resistance. Media: Audio - BBC Archive Original Recording - URL: https://www.bbc.co.uk/archive/the-appeal-of-18-june-1940/zdnpd6f'
+    },
+    {
+      id: 'cdg-death-sentence',
+      date: '1940-08-02',
+      title: 'Condemned to Death by Vichy',
+      description: 'Vichy government sentences de Gaulle to death in absentia for treason and desertion. Confiscates all his property. This definitive break with Pétain regime solidifies his position as leader of French resistance and external opposition.'
+    },
+    {
+      id: 'cdg-free-france',
+      date: '1940-10-27',
+      title: 'Manifesto of Free France',
+      description: 'Establishes formal organizational structure of Free France in London. Creates French National Committee as provisional government. Begins organizing Free French forces and coordinating with resistance networks in occupied France and colonies.'
+    },
+
+    // Free French Leadership
+    {
+      id: 'cdg-brazzaville',
+      date: '1940-10-28',
+      title: 'Brazzaville Declaration',
+      description: 'French Equatorial Africa rallies to Free France under Governor Félix Éboué. Establishes Brazzaville as administrative capital of Free France in Africa. Demonstrates growing legitimacy and provides territorial base for resistance government.'
+    },
+    {
+      id: 'cdg-roosevelt-tension',
+      date: '1942-07-01',
+      title: 'Tensions with Roosevelt Administration',
+      description: 'FDR considers de Gaulle difficult and prefers dealing with other French leaders. De Gaulle insists on French sovereignty and rejects Allied attempts to impose leadership. These tensions persist throughout war but ultimately strengthen de Gaulle\'s position as undisputed French leader.'
+    },
+    {
+      id: 'cdg-cfln',
+      date: '1943-06-03',
+      title: 'French Committee of National Liberation',
+      description: 'Co-chairs CFLN with General Henri Giraud in Algiers, then outmaneuvers him to become sole leader. Unifies external and internal resistance under single command. Gains increasing Allied recognition as legitimate representative of France.'
+    },
+    {
+      id: 'cdg-liberation-paris',
+      date: '1944-08-25',
+      title: 'Liberation of Paris',
+      description: 'Enters liberated Paris and delivers speech from Hôtel de Ville: "Paris! Paris outraged! Paris broken! Paris martyred! But Paris liberated!" Massive crowds celebrate as de Gaulle walks down Champs-Élysées. Media: Video - Liberation Parade Footage - URL: https://www.ina.fr/video/I05077138'
+    },
+    {
+      id: 'cdg-provisional-govt',
+      date: '1944-09-09',
+      title: 'Head of Provisional Government',
+      description: 'Officially recognized as head of French Provisional Government by Allies. Begins process of restoring French state institutions, purging collaborators, and rebuilding France\'s international position. Faces immediate challenges of reconstruction and Communist influence.'
+    },
+
+    // Post-War Politics and Resignation
+    {
+      id: 'cdg-first-resignation',
+      date: '1946-01-20',
+      title: 'First Resignation from Power',
+      description: 'Resigns as head of Provisional Government, frustrated by party politics and constitutional limitations. Famous parting words: "The exclusive regime of parties has returned. I disapprove of it." Retreats to Colombey-les-Deux-Églises to write memoirs.'
+    },
+    {
+      id: 'cdg-rpf-founding',
+      date: '1947-04-14',
+      title: 'Founds Rally of French People (RPF)',
+      description: 'Creates new political movement advocating for strong presidential system and opposing both Communism and "sterile" party politics. Initially attracts massive support with rallies drawing hundreds of thousands. Challenges Fourth Republic\'s parliamentary system.'
+    },
+    {
+      id: 'cdg-memoirs-volume1',
+      date: '1954-10-01',
+      title: 'Publishes "War Memoirs" Volume 1',
+      description: 'First volume of monumental three-volume war memoirs: "The Call to Honour (1940-1942)." Literary masterpiece combining historical account with philosophical reflection. Establishes his version of events and reinforces his historical stature.'
+    },
+
+    // Return to Power - Fifth Republic
+    {
+      id: 'cdg-algeria-crisis',
+      date: '1958-05-13',
+      title: 'Algeria Crisis Calls Him Back',
+      description: 'Military coup in Algeria threatens civil war in France. Political establishment turns to de Gaulle as only figure capable of resolving crisis. Army and settlers believe he will keep Algeria French, while others hope he can negotiate peace.'
+    },
+    {
+      id: 'cdg-return-power',
+      date: '1958-06-01',
+      title: 'Returns as Prime Minister',
+      description: 'National Assembly votes him emergency powers and mandate to draft new constitution. At 67, begins final phase of political career. Immediately sets about creating stronger executive system and resolving Algerian War.'
+    },
+    {
+      id: 'cdg-fifth-republic',
+      date: '1958-10-04',
+      title: 'Fifth Republic Constitution Adopted',
+      description: 'New constitution approved by referendum with 79% approval. Creates strong presidency with significant powers over foreign policy, defense, and constitutional matters. Establishes system allowing for stable government and decisive leadership.'
+    },
+    {
+      id: 'cdg-president-elected',
+      date: '1958-12-21',
+      title: 'Elected First President of Fifth Republic',
+      description: 'Elected President by electoral college of 80,000 local representatives. Receives 78% of votes. Inauguration begins 11-year presidency that transforms France\'s institutions, international position, and self-image.'
+    },
+
+    // Presidential Years - Major Policies and Crises
+    {
+      id: 'cdg-algerian-independence',
+      date: '1962-07-03',
+      title: 'Algerian Independence',
+      description: 'Algeria becomes independent after Évian Accords. De Gaulle\'s gradual shift from "Algérie française" to negotiated independence nearly triggers military coup. His success in ending eight-year war while avoiding civil war demonstrates political mastery.'
+    },
+    {
+      id: 'cdg-direct-election',
+      date: '1962-10-28',
+      title: 'Direct Presidential Election Reform',
+      description: 'Constitutional referendum establishes direct election of President by universal suffrage. Passes with 62% despite opposition from all parties. Strengthens presidency and creates direct link between president and people, bypassing traditional political intermediaries.'
+    },
+    {
+      id: 'cdg-franco-german',
+      date: '1963-01-22',
+      title: 'Élysée Treaty with Germany',
+      description: 'Signs friendship treaty with Chancellor Konrad Adenauer, formally ending centuries of Franco-German hostility. Creates institutional framework for cooperation and consultation. Foundation stone of European integration and post-war reconciliation.'
+    },
+    {
+      id: 'cdg-nuclear-force',
+      date: '1960-02-13',
+      title: 'First French Nuclear Test',
+      description: 'France detonates first atomic bomb in Sahara, becoming world\'s fourth nuclear power. "Gerboise Bleue" test demonstrates French independence from American and Soviet nuclear umbrellas. Cornerstone of Gaullist defense policy and international status.'
+    },
+    {
+      id: 'cdg-nato-withdrawal',
+      date: '1966-03-07',
+      title: 'Withdraws from NATO Integrated Command',
+      description: 'Announces France\'s withdrawal from NATO\'s integrated military command while remaining in Alliance. Expels NATO headquarters from France. Demonstrates independence from American leadership while maintaining Western solidarity during Cold War.'
+    },
+    {
+      id: 'cdg-quebec-libre',
+      date: '1967-07-24',
+      title: 'Vive le Québec libre!',
+      description: 'Shouts "Long live free Quebec!" from Montreal City Hall balcony during official visit to Canada. Creates major diplomatic crisis with Ottawa but electrifies Quebec independence movement. Media: Video - Quebec Speech at Montreal City Hall - URL: https://www.ina.fr/video/CAF97059589'
+    },
+    {
+      id: 'cdg-may68-crisis',
+      date: '1968-05-30',
+      title: 'May 1968 Crisis Speech',
+      description: 'After mysteriously disappearing for 24 hours (secretly consulting with military), delivers decisive radio address dissolving National Assembly and calling for order. Massive counter-demonstration supports him. Successfully navigates greatest domestic crisis of presidency. Media: Audio - May 30 Radio Address - URL: https://www.ina.fr/audio/PHD85005080'
+    },
+
+    // Final Years and Legacy
+    {
+      id: 'cdg-reelection',
+      date: '1965-12-19',
+      title: 'Re-elected President',
+      description: 'Wins second term in runoff against François Mitterrand (55% to 45%). First president elected by direct universal suffrage. Victory margin smaller than expected, showing some erosion of support but confirming his dominance of French politics.'
+    },
+    {
+      id: 'cdg-referendum-defeat',
+      date: '1969-04-27',
+      title: 'Referendum Defeat',
+      description: 'Referendum on Senate reform and regional reorganization fails with 52.4% voting "No." Having staked his presidency on the outcome, prepares to honor his commitment to resign if defeated. Represents end of an era in French politics.'
+    },
+    {
+      id: 'cdg-final-resignation',
+      date: '1969-04-28',
+      title: 'Final Resignation',
+      description: 'Announces resignation effective at midnight: "I am ceasing to exercise my functions as President of the Republic." Keeps his word given before referendum. Retires permanently to Colombey-les-Deux-Églises to complete his memoirs. Media: Audio - Resignation Statement - URL: https://www.ina.fr/audio/PHD86005261'
+    },
+    {
+      id: 'cdg-death',
+      date: '1970-11-09',
+      title: 'Death at Colombey',
+      description: 'Dies suddenly of aneurysm at La Boisserie, his home in Colombey-les-Deux-Églises, while watching television news. Last words reportedly: "It hurts." His death marks end of an era. Body lies in state at Notre-Dame before burial in village cemetery as he requested.'
+    },
+    {
+      id: 'cdg-funeral',
+      date: '1970-11-12',
+      title: 'State Funeral and Burial',
+      description: 'Dual ceremony: intimate burial in Colombey attended by family and villagers as he wished, followed by memorial service at Notre-Dame attended by 80 heads of state including Nixon, Brezhnev, and most world leaders. Represents final tribute to his global stature. Media: Video - State Funeral Coverage - URL: https://www.ina.fr/video/CAF86004389'
+    }
+  ];
+
   return events;
 }

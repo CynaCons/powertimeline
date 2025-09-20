@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('v5/06 Degrade & Promote (telemetry)', () => {
   test('degradation counts and placeholders present', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
 

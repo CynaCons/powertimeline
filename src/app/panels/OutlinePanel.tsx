@@ -43,35 +43,19 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
         </div>
       )}
       <List sx={{ mt: 1, maxHeight: '70vh', overflow: 'auto', pr: 1 }}>
-        {filtered.map((ev, idx) => (
+        {filtered.map((ev) => (
           <li key={ev.id}>
-            <div className="group">
-              <ListItemButton
-                selected={ev.id === selectedId}
-                onClick={() => onSelect(ev.id)}
-                sx={{ '&.Mui-selected': { bgcolor: 'action.selected' }, '&:hover': { bgcolor: 'action.hover' } }}
-              >
-                <ListItemText
-                  primary={ev.title || '(untitled)'}
-                  secondary={ev.date}
-                  primaryTypographyProps={{ noWrap: true }}
-                />
-              </ListItemButton>
-              {onCreate && (
-                <div className="flex items-center justify-center py-1">
-                  <button
-                    type="button"
-                    data-testid={`events-inline-add-${idx}`}
-                    onClick={onCreate}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 rounded border border-dashed border-indigo-300 text-indigo-700 hover:bg-indigo-50 px-2 py-0.5 text-[11px]"
-                    aria-label="Add event here"
-                    title="Add event"
-                  >
-                    +
-                  </button>
-                </div>
-              )}
-            </div>
+            <ListItemButton
+              selected={ev.id === selectedId}
+              onClick={() => onSelect(ev.id)}
+              sx={{ '&.Mui-selected': { bgcolor: 'action.selected' }, '&:hover': { bgcolor: 'action.hover' } }}
+            >
+              <ListItemText
+                primary={ev.title || '(untitled)'}
+                secondary={ev.date}
+                primaryTypographyProps={{ noWrap: true }}
+              />
+            </ListItemButton>
           </li>
         ))}
         {onCreate && (

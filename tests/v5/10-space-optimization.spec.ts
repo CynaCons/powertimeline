@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
   test('validates horizontal space usage telemetry exists', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
 
@@ -24,7 +24,7 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
 
   test('validates spatial distribution metrics for dense scenarios', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
 
@@ -52,7 +52,7 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
 
   test('validates screen real estate usage with actual card positions', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'Long-range' }).click();
 
@@ -111,7 +111,7 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
 
   test('validates anti-clustering behavior for sparse data', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
 

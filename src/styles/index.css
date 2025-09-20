@@ -700,4 +700,206 @@
   .timeline-edge-bounce {
     animation: none;
   }
+
+  .nav-button-ripple,
+  .nav-icon-spin,
+  .nav-active-indicator {
+    animation: none;
+  }
+}
+
+/* ================================
+ * Navigation & Interaction Styles
+ * ================================ */
+
+/* Navigation Rail Styles */
+.navigation-rail {
+  position: relative;
+}
+
+.nav-button {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple Effect for Button Clicks */
+.nav-button-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Icon Animations */
+.nav-icon {
+  transition: transform var(--transition-medium);
+}
+
+.nav-button:hover .nav-icon {
+  transform: scale(1.1);
+}
+
+.nav-button:active .nav-icon {
+  transform: scale(0.95);
+}
+
+/* Spinning Icons for Loading States */
+.nav-icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Active State Indicator */
+.nav-active-indicator {
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 3px;
+  height: 20px;
+  background: var(--color-primary-500);
+  border-radius: 2px;
+  transform: translateY(-50%) scaleY(0);
+  transform-origin: center;
+  transition: transform var(--transition-medium);
+}
+
+.nav-button[data-active="true"] .nav-active-indicator {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* Focus Ring Enhancement */
+.nav-button:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Magnetic Hover Effect */
+.nav-button-magnetic {
+  transition: transform var(--transition-fast);
+}
+
+/* Tooltip Enhancement */
+.tooltip-trigger {
+  display: inline-block;
+}
+
+.tooltip-content kbd {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* Command Palette Styles */
+.command-palette-backdrop {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.command-item-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Breadcrumb Enhancement */
+.breadcrumb-container {
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+[data-theme="dark"] .breadcrumb-container {
+  border-bottom-color: var(--color-neutral-700);
+}
+
+/* Enhanced Keyboard Shortcuts Display */
+kbd {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75em;
+  padding: 2px 6px;
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] kbd {
+  background: var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  border-color: var(--color-neutral-600);
+}
+
+/* Visual Grouping in Navigation */
+.nav-group-separator {
+  width: 20px;
+  height: 1px;
+  background: var(--color-neutral-300);
+  margin: 8px auto;
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .nav-group-separator {
+  background: var(--color-neutral-600);
+}
+
+/* Interactive State Enhancements */
+.interactive-element {
+  transition: all var(--transition-medium);
+}
+
+.interactive-element:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-elevation-2);
+}
+
+.interactive-element:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-elevation-1);
+}
+
+/* Sound Effect Visual Feedback */
+.sound-feedback {
+  position: relative;
+}
+
+.sound-feedback::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: var(--color-primary-500);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: soundPulse 0.3s ease-out;
+}
+
+@keyframes soundPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
 }

@@ -122,7 +122,7 @@ function generateAlignedTicks(
   const { minDate, maxDate, leftMargin, usableWidth, maxTicks = 50 } = config;
   const totalRange = maxDate - minDate;
   
-  let current = new Date(startDate);
+  const current = new Date(startDate);
   let tickCount = 0;
   
   // Align to natural boundaries

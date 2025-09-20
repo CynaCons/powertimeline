@@ -32,7 +32,7 @@ export const OverlayShell: React.FC<OverlayShellProps> = ({ id, title, dragging,
     >
       <div
         className="h-full bg-white text-gray-900 border-r border-gray-200 shadow-md flex flex-col transition-opacity"
-        style={{ opacity: 0.1 }}
+        style={{ opacity: 1 }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = '1'; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = '0.1'; }}
       >

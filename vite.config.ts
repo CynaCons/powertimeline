@@ -17,25 +17,47 @@ export default defineConfig(({ mode }) => ({
     // Manual chunks for better bundle distribution
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Vendor chunks
-          'react-vendor': ['react', 'react-dom'],
-          'mui-vendor': ['@mui/material', '@mui/icons-material'],
-          'mui-emotion': ['@emotion/react', '@emotion/styled'],
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@emotion')) {
+              return 'mui-emotion';
+            }
+            if (id.includes('@mui/material')) {
+              // Split Material-UI into smaller chunks
+              if (id.includes('Tooltip') || id.includes('Popover') || id.includes('Modal')) {
+                return 'mui-overlays';
+              }
+              if (id.includes('Button') || id.includes('IconButton') || id.includes('Fab')) {
+                return 'mui-buttons';
+              }
+              if (id.includes('Input') || id.includes('TextField') || id.includes('Select')) {
+                return 'mui-inputs';
+              }
+              return 'mui-core';
+            }
+            if (id.includes('@mui/icons-material')) {
+              return 'mui-icons';
+            }
+            return 'vendor-misc';
+          }
+
           // Application chunks
-          'layout-engine': [
-            './src/layout/LayoutEngine.ts',
-            './src/layout/DeterministicLayoutComponent.tsx',
-            './src/layout/clustering.ts',
-            './src/layout/SlotGrid.ts',
-            './src/layout/CapacityModel.ts'
-          ],
-          'timeline-components': [
-            './src/components/Timeline.tsx',
-            './src/components/TimelineMinimap.tsx',
-            './src/timeline/Axis.tsx',
-            './src/timeline/hooks/useAxisTicks.ts'
-          ]
+          if (id.includes('/layout/')) {
+            return 'layout-engine';
+          }
+          if (id.includes('/timeline/') || id.includes('TimelineMinimap')) {
+            return 'timeline-components';
+          }
+          if (id.includes('/panels/') || id.includes('/overlays/')) {
+            return 'ui-panels';
+          }
+          if (id.includes('/components/')) {
+            return 'ui-components';
+          }
         }
       }
     },

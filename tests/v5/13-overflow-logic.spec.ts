@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Toggle developer options' }).click();
+  
   await page.getByRole('button', { name: 'Developer Panel' }).click();
 }
 
@@ -100,8 +100,8 @@ test.describe('Overflow Logic Tests', () => {
     }
     
     // Check RFK overlaps
-    let rfkCards = await page.locator('[data-testid="event-card"]').all();
-    let rfkBoxes = [];
+    const rfkCards = await page.locator('[data-testid="event-card"]').all();
+    const rfkBoxes = [];
     for (const card of rfkCards) {
       const box = await card.boundingBox();
       if (box) rfkBoxes.push(box);
@@ -153,8 +153,8 @@ test.describe('Overflow Logic Tests', () => {
     }
     
     // Check JFK overlaps
-    let jfkCards = await page.locator('[data-testid="event-card"]').all();
-    let jfkBoxes = [];
+    const jfkCards = await page.locator('[data-testid="event-card"]').all();
+    const jfkBoxes = [];
     for (const card of jfkCards) {
       const box = await card.boundingBox();
       if (box) jfkBoxes.push(box);

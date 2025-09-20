@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 test.describe('v5/05 Capacity model (telemetry)', () => {
   test('reports total/used cells and utilization', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Toggle developer options' }).click();
+    
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
 

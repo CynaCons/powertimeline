@@ -34,7 +34,7 @@ test.describe('v5/48 Title-only degradation', () => {
 
     // Read telemetry for debugging and assertion
     const telemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry);
-    // eslint-disable-next-line no-console
+     
     console.log('telemetry.degradation', telemetry?.degradation);
     // Ensure at least one title-only card is rendered
     const titleOnly = page.locator('[data-testid="event-card"][data-card-type="title-only"]');
