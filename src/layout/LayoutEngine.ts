@@ -694,7 +694,9 @@ export class DeterministicLayoutV5 {
         const belowCards = isBelowHalfColumn ? actualCards.slice(0, cardsBelowLimit) : [];
         
         // Position above cards with dynamic sizing and proper spacing
-        let aboveY = this.timelineY - timelineMargin;
+        // Add extra spacing to create room for upper anchor line
+        const upperAnchorSpacing = 15; // Additional space for upper anchor line
+        let aboveY = this.timelineY - timelineMargin - upperAnchorSpacing;
         aboveCards.forEach((card) => {
           // Use card config height for positioning
           card.height = cardHeight;
@@ -709,7 +711,9 @@ export class DeterministicLayoutV5 {
         });
         
         // Position below cards with dynamic sizing and proper spacing
-        let belowY = this.timelineY + timelineMargin;
+        // Add extra spacing to create room for lower anchor line
+        const lowerAnchorSpacing = 15; // Additional space for lower anchor line
+        let belowY = this.timelineY + timelineMargin + lowerAnchorSpacing;
         belowCards.forEach((card) => {
           // Use card config height for positioning
           card.height = cardHeight;
@@ -848,10 +852,17 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
         eventXPos = this.config.viewportWidth / 2;
       }
 
+      // Calculate anchor Y position based on cluster position (split-level system)
+      const upperAnchorSpacing = 15;
+      const lowerAnchorSpacing = 15;
+      const anchorY = clusterPosition === 'above'
+        ? this.timelineY - (upperAnchorSpacing / 2) // Upper anchor line
+        : this.timelineY + (lowerAnchorSpacing / 2); // Lower anchor line
+
       anchors.push({
         id: `anchor-event-${event.id}`,
         x: eventXPos,
-        y: this.timelineY,
+        y: anchorY,
         eventIds: [event.id],
         eventCount: 1,
         visibleCount: 1,

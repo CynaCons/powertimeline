@@ -740,6 +740,44 @@
 
 **🔧 Files Modified:** EnhancedTimelineAxis.tsx, DeterministicLayoutComponent.tsx, useAxisTicks.ts
 
+## Iteration v0.2.16 - Split-Level Anchor System (in progress)
+
+**🎯 Objective:** Create visual separation between upper and lower anchors by positioning them on distinct horizontal lines, providing clear spatial organization and improved timeline clarity.
+
+### Current Achievement ✅
+- [x] **Precise Event Positioning**: Anchors now positioned at exact event dates instead of cluster centers
+- [x] **Individual Event Anchors**: Each event has its own anchor at precise timeline position
+- [x] **Cluster Awareness**: Anchors know their cluster membership and upper/lower positioning
+- [x] **Backward Compatibility**: Existing clustering and degradation systems preserved
+
+### Next: Split-Level Visual Organization 🎯
+
+#### Problem Analysis
+- **Current State**: All anchors positioned at same timeline Y level regardless of event placement
+- **Issue**: Upper and lower event anchors visually overlap on single horizontal line
+- **User Feedback**: Need visual separation between upper and lower anchors
+
+#### Solution: Dual-Level Anchor System
+- [ ] **Move Upper Cards Higher**: Shift all above-timeline cards up by 10-15px to create space
+- [ ] **Move Lower Cards Lower**: Shift all below-timeline cards down by 10-15px to create space
+- [ ] **Upper Anchor Line**: Position upper-cluster anchors on dedicated horizontal line above timeline
+- [ ] **Lower Anchor Line**: Position lower-cluster anchors on dedicated horizontal line below timeline
+- [ ] **Central Timeline Area**: Create clear 20-30px central zone for enhanced timeline axis
+
+#### Implementation Plan
+1. **Adjust Card Positioning**: Modify LayoutEngine to add vertical spacing offset
+2. **Split Anchor Y Positioning**: Update DeterministicLayoutComponent anchor rendering
+3. **Update Connector Lines**: Ensure connectors properly reach new anchor positions
+4. **Visual Testing**: Verify clear separation and improved readability
+
+#### Expected Result
+- **Clear Visual Hierarchy**: Upper events → Upper anchors → Timeline → Lower anchors → Lower events
+- **Reduced Visual Clutter**: No more overlapping anchors on timeline
+- **Better Readability**: Easy to distinguish event groupings and temporal relationships
+- **Enhanced Timeline**: Central area dedicated to timeline axis and selection overlays
+
+**🔧 Files to Modify:** LayoutEngine.ts, DeterministicLayoutComponent.tsx
+
 ## Upcoming v0.5.0 (performance & robustness)
 - [ ] Performance optimization for large datasets
 - [ ] Finish degradation system work items

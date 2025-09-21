@@ -648,7 +648,7 @@ export function DeterministicLayoutComponent({
             key={anchor.id}
             data-testid={anchor.id}
             className="absolute"
-            style={{ left: anchor.x - 8, top: (config?.timelineY ?? viewportSize.height / 2) - 8 }}
+            style={{ left: anchor.x - 8, top: anchor.y - 8 }}
           >
             <div
               data-testid="timeline-anchor"
@@ -659,10 +659,10 @@ export function DeterministicLayoutComponent({
 
               {/* Directional connector lines (render both if events exist on both sides) */}
               {connectsUp && (
-                <div data-testid="connector-up" className="w-0.5 h-6 bg-gray-400 -mt-8" />
+                <div data-testid="connector-up" className="w-0.5 h-4 bg-gray-400 -mt-6" />
               )}
               {connectsDown && (
-                <div data-testid="connector-down" className="w-0.5 h-6 bg-gray-400 mt-0" />
+                <div data-testid="connector-down" className="w-0.5 h-4 bg-gray-400 mt-2" />
               )}
 
               {/* Individual overflow badge - only show if NOT part of merged group */}
