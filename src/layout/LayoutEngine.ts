@@ -671,15 +671,23 @@ export class DeterministicLayoutV5 {
       const visibleCount = actualCards.length;
       const overflowCount = Math.max(0, totalRelevantEvents - visibleCount);
       
-      // Only add anchor if it has visible cards OR overflow within current view window
+      // Only add anchors if we have visible cards OR overflow within current view window
       if (visibleCount > 0 || overflowCount > 0) {
-        const updatedAnchor = this.createAnchor(
-          [...relevantGroupEvents, ...relevantOverflowEvents], 
-          group.centerX, 
-          visibleCount,
-          overflowCount
-        );
-        anchors.push(updatedAnchor);
+        // Create individual anchors for each event at precise timeline positions
+        const clusterPosition: 'above' | 'below' = isAboveHalfColumn ? 'above' : 'below';
+        const eventAnchors = this.createEventAnchors(relevantGroupEvents, group.id, clusterPosition);
+        anchors.push(...eventAnchors);
+
+        // Also create overflow event anchors if any
+        if (relevantOverflowEvents.length > 0) {
+          const overflowAnchors = this.createEventAnchors(relevantOverflowEvents, group.id, clusterPosition);
+          // Mark overflow anchors as having overflow
+          overflowAnchors.forEach(anchor => {
+            anchor.overflowCount = 1; // Each overflow event contributes to overflow count
+            anchor.visibleCount = 0; // Overflow events are not visible
+          });
+          anchors.push(...overflowAnchors);
+        }
         
         // Respect half-column pre-determined position (above vs below)
         const aboveCards = isAboveHalfColumn ? actualCards.slice(0, cardsAboveLimit) : [];
@@ -715,10 +723,16 @@ export class DeterministicLayoutV5 {
           this.capacityModel.allocate(group.id, 'below', card.cardType);
         });
         
-        // Create cluster
+        // Create cluster with a representative anchor (for backwards compatibility)
+        const clusterAnchor = this.createAnchor(
+          [...relevantGroupEvents, ...relevantOverflowEvents],
+          group.centerX,
+          visibleCount,
+          overflowCount
+        );
         clusters.push({
           id: group.id,
-          anchor: updatedAnchor,
+          anchor: clusterAnchor,
           events: group.events
         });
       }
@@ -794,13 +808,13 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
 
 
   /**
-   * Helper: Create anchor for a group of events
+   * Helper: Create anchor for a group of events (legacy method - now used for cluster group anchors)
    */
   private createAnchor(events: Event[], x: number, visibleCount?: number, overflowCount?: number): Anchor {
     const totalCount = events.length;
     const visible = visibleCount ?? totalCount; // Default to all visible if not specified
     const overflow = overflowCount ?? Math.max(0, totalCount - visible);
-    
+
     return {
       id: `anchor-${x}`,
       x,
@@ -808,8 +822,48 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
       eventIds: events.map(e => e.id),
       eventCount: totalCount + overflow, // Include overflow in total count
       visibleCount: visible,
-      overflowCount: overflow
+      overflowCount: overflow,
+      isClusterGroup: true
     };
+  }
+
+  /**
+   * Helper: Create individual anchors for each event at precise timeline positions
+   */
+  private createEventAnchors(events: Event[], clusterId: string, clusterPosition: 'above' | 'below'): Anchor[] {
+    const anchors: Anchor[] = [];
+
+    for (const event of events) {
+      const eventTime = getEventTimestamp(event);
+      let eventXPos: number;
+
+      // Calculate precise X position for this event
+      if (this.timeRange && this.timeRange.duration > 0) {
+        const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
+        const leftMargin = 70; // Navigation rail width
+        const usableWidth = this.config.viewportWidth - 140; // Account for both sides
+        eventXPos = leftMargin + (timeRatio * usableWidth);
+      } else {
+        // Fallback positioning
+        eventXPos = this.config.viewportWidth / 2;
+      }
+
+      anchors.push({
+        id: `anchor-event-${event.id}`,
+        x: eventXPos,
+        y: this.timelineY,
+        eventIds: [event.id],
+        eventCount: 1,
+        visibleCount: 1,
+        overflowCount: 0,
+        eventId: event.id,
+        clusterId: clusterId,
+        clusterPosition: clusterPosition,
+        isClusterGroup: false
+      });
+    }
+
+    return anchors;
   }
 
   /**

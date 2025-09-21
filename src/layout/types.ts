@@ -12,12 +12,17 @@ export interface Slot {
 
 export interface Anchor {
   id: string;
-  x: number;        // Horizontal position on timeline
+  x: number;        // Horizontal position on timeline (now at precise event date)
   y: number;        // Timeline y position
   eventIds: string[];
   eventCount: number;
   visibleCount: number;  // Number of visible cards
   overflowCount: number; // Number of hidden events (eventCount - visibleCount)
+  // New fields for event-specific positioning
+  eventId?: string;     // Single event this anchor represents (for event-specific anchors)
+  clusterId?: string;   // ID of the cluster this anchor belongs to
+  clusterPosition?: 'above' | 'below'; // Whether this anchor's events are above or below timeline
+  isClusterGroup?: boolean; // Whether this is a cluster group anchor vs individual event anchor
 }
 
 export interface EventCluster {
