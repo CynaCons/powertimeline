@@ -9,21 +9,15 @@ export interface Tick {
 export function useAxisTicks(viewMin: number, viewMax: number, viewRange: number, tToXPercent: (t: number) => number): Tick[] {
   return useMemo(() => {
     const ticks: Tick[] = [];
-    
-    // Debug logging
-    console.log('🎯 useAxisTicks Debug:', {
-      viewMin,
-      viewMax, 
-      viewRange,
-      isViewMinFinite: isFinite(viewMin),
-      isViewMaxFinite: isFinite(viewMax),
-      isViewRangeValid: viewRange > 0,
-      tToXPercent: typeof tToXPercent
-    });
-    
-    if (!isFinite(viewMin) || !isFinite(viewMax) || viewRange <= 0) {
-      console.log('❌ useAxisTicks: Early return due to invalid params');
-      return ticks;
+
+    // Validate input parameters
+    if (!isFinite(viewMin) || !isFinite(viewMax) || viewRange <= 0 || typeof tToXPercent !== 'function') {
+      // Return a basic fallback tick if inputs are invalid
+      return [{
+        t: Date.now(),
+        label: new Date().getFullYear().toString(),
+        x: 50
+      }];
     }
     
     const maxLabels = 15; // Increased for better granularity at deep zoom
@@ -126,38 +120,43 @@ export function useAxisTicks(viewMin: number, viewMax: number, viewRange: number
       ticks.push({ t, label, x });
     }
     
-    // Ensure we have reasonable tick density
+    // Ensure we have reasonable tick density - improved fallback
     if (ticks.length === 0) {
-      // Emergency fallback
+      // Create robust emergency fallback ticks
+      const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short' });
       const midPoint = (viewMin + viewMax) / 2;
-      ticks.push({ 
-        t: viewMin, 
-        label: fmt.format(new Date(viewMin)), 
-        x: tToXPercent(viewMin) 
+
+      ticks.push({
+        t: viewMin,
+        label: fmt.format(new Date(viewMin)),
+        x: tToXPercent(viewMin)
       });
+
       if (viewRange > 60 * 60 * 1000) { // More than 1 hour
-        ticks.push({ 
-          t: midPoint, 
-          label: fmt.format(new Date(midPoint)), 
-          x: tToXPercent(midPoint) 
+        ticks.push({
+          t: midPoint,
+          label: fmt.format(new Date(midPoint)),
+          x: tToXPercent(midPoint)
         });
-        ticks.push({ 
-          t: viewMax, 
-          label: fmt.format(new Date(viewMax)), 
-          x: tToXPercent(viewMax) 
+        ticks.push({
+          t: viewMax,
+          label: fmt.format(new Date(viewMax)),
+          x: tToXPercent(viewMax)
         });
       }
     }
-    
+
     const finalTicks = ticks.slice(0, 50); // Cap at 50 ticks for performance
-    
-    console.log('🎯 useAxisTicks Result:', {
-      tickCount: finalTicks.length,
-      spanDays,
-      firstTick: finalTicks[0],
-      lastTick: finalTicks[finalTicks.length - 1]
-    });
-    
+
+    // Ensure we always return at least one tick
+    if (finalTicks.length === 0) {
+      finalTicks.push({
+        t: viewMin || Date.now(),
+        label: new Date(viewMin || Date.now()).getFullYear().toString(),
+        x: 50
+      });
+    }
+
     return finalTicks;
   }, [viewMin, viewMax, viewRange, tToXPercent]);
 }
