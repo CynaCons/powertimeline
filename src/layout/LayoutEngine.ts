@@ -12,6 +12,7 @@
 import type { Event } from '../types';
 import type { LayoutConfig, LayoutResult, PositionedCard, CardType, EventCluster, Anchor } from './types';
 import { CapacityModel } from './CapacityModel';
+import { getEventTimestamp } from '../lib/time';
 
 export interface ColumnGroup {
   id: string;
@@ -108,7 +109,7 @@ export class DeterministicLayoutV5 {
     // Filter events by view window if provided (for zoomed views)
     let layoutEvents = events;
     if (viewWindow && (viewWindow.viewStart !== 0 || viewWindow.viewEnd !== 1)) {
-      const dates = events.map(e => new Date(e.date).getTime());
+      const dates = events.map(e => getEventTimestamp(e));
       const minDate = Math.min(...dates);
       const maxDate = Math.max(...dates);
       const dateRange = maxDate - minDate;
@@ -120,7 +121,7 @@ export class DeterministicLayoutV5 {
       this.currentTimeWindow = { visibleStartTime, visibleEndTime };
       
       layoutEvents = events.filter(event => {
-        const eventTime = new Date(event.date).getTime();
+        const eventTime = getEventTimestamp(event);
         return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
       });
       
@@ -193,7 +194,7 @@ export class DeterministicLayoutV5 {
       const shouldGoAbove = (i % 2) === 0; // Even index (0,2,4...) → above, odd (1,3,5...) → below
       
       // Calculate temporal X position for this event
-      const eventTime = new Date(event.date).getTime();
+      const eventTime = getEventTimestamp(event);
       let eventXPos: number;
       if (this.timeRange && this.timeRange.duration > 0) {
         const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
@@ -318,8 +319,8 @@ export class DeterministicLayoutV5 {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private updateHalfColumnBounds(halfColumn: ColumnGroup, event: Event, _eventXPos: number): void {
-    const eventTime = new Date(event.date).getTime();
-    const allTimes = halfColumn.events.map(e => new Date(e.date).getTime());
+    const eventTime = getEventTimestamp(event);
+    const allTimes = halfColumn.events.map(e => getEventTimestamp(e));
     allTimes.push(eventTime);
     
     const minTime = Math.min(...allTimes);
@@ -815,7 +816,7 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
    * Helper: Calculate time range from events
    */
   private calculateTimeRange(events: Event[]): void {
-    const dates = events.map(e => new Date(e.date).getTime());
+    const dates = events.map(e => getEventTimestamp(e));
     const startTime = Math.min(...dates);
     const endTime = Math.max(...dates);
     const duration = endTime - startTime;
@@ -928,8 +929,8 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
    */
   private stableSortEvents(events: Event[]): Event[] {
     return [...events].sort((a, b) => {
-      const timeA = new Date(a.date).getTime();
-      const timeB = new Date(b.date).getTime();
+      const timeA = getEventTimestamp(a);
+      const timeB = getEventTimestamp(b);
       
       // Primary sort: by date
       if (timeA !== timeB) {
@@ -979,7 +980,7 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
     const { visibleStartTime, visibleEndTime } = this.currentTimeWindow;
     
     return events.filter(event => {
-      const eventTime = new Date(event.date).getTime();
+      const eventTime = getEventTimestamp(event);
       return eventTime >= visibleStartTime && eventTime <= visibleEndTime;
     });
   }

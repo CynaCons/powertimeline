@@ -10,8 +10,8 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType>({
   isDarkMode: false,
-  toggleTheme: () => {},
-  setTheme: () => {},
+  toggleTheme: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+  setTheme: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   themePreference: 'system'
 });
 

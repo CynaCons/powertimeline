@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -76,7 +77,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     const allEventTitles = await page.locator('[data-testid="event-card"] h3').allTextContents();
     
     // Also check if we have any timeline labels showing dates beyond April
-    const allTimelineText = await page.locator('.timeline-axis').allTextContents().catch(() => []);
+    await page.locator('.timeline-axis').allTextContents().catch(() => []);
     
     const debugInfo = await page.evaluate(() => {
       const debug = (window as any).chronochartDebug;

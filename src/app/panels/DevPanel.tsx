@@ -16,6 +16,7 @@ interface DevPanelProps {
   seedNapoleon: () => void;
   seedDeGaulle: () => void;
   seedIncremental: (n: number) => void;
+  seedMinuteTest: () => void;
   // Export/Import functionality
   events: Event[];
   onImportEvents: (events: Event[]) => void;
@@ -23,7 +24,7 @@ interface DevPanelProps {
 
 export const DevPanel: React.FC<DevPanelProps> = ({
   seedRandom, seedClustered, seedLongRange, clearAll, dragging, onClose, devEnabled,
-  seedRFK, seedJFK, seedNapoleon, seedDeGaulle, seedIncremental, events, onImportEvents
+  seedRFK, seedJFK, seedNapoleon, seedDeGaulle, seedIncremental, seedMinuteTest, events, onImportEvents
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -121,6 +122,17 @@ export const DevPanel: React.FC<DevPanelProps> = ({
             <button type="button" className="rounded border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 px-3 py-1" onClick={seedJFK} title="Load JFK presidency timeline (replaces current events)">JFK 1961-63</button>
             <button type="button" className="rounded border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 px-3 py-1" onClick={seedNapoleon} title="Load Napoleon Bonaparte timeline (replaces current events)">Napoleon 1769-1821</button>
             <button type="button" className="rounded border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 px-3 py-1" onClick={seedDeGaulle} title="Load Charles de Gaulle comprehensive timeline with media links (replaces current events)">De Gaulle 1890-1970</button>
+          </div>
+        </div>
+
+        {/* Minute-Level Precision Testing */}
+        <div>
+          <div className="text-gray-700 font-medium text-xs mb-2">Minute-Level Precision Testing</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" className="rounded border border-orange-300 bg-white text-orange-700 hover:bg-orange-50 px-3 py-1" onClick={seedMinuteTest} title="Load single-day timeline with minute-level precision for testing deep zoom">⏰ Minute Test</button>
+          </div>
+          <div className="text-gray-500 text-xs mt-1">
+            10 events in a single day with minute precision. Zoom in deep to see hour and minute ticks.
           </div>
         </div>
         

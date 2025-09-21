@@ -27,25 +27,38 @@ import {
   seedJFKTimeline,
   seedNapoleonTimeline,
   seedDeGaulleTimeline,
-  seedIncremental as seedIncrementalUtil
+  seedIncremental as seedIncrementalUtil,
+  seedMinuteTest as seedMinuteTestUtil
 } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
 
 const DEV_FLAG_KEY = 'chronochart-dev';
 
+
 function App() {
   // Storage
   const storageRef = useRef(new EventStorage());
   const [events, setEvents] = useState<Event[]>(() => storageRef.current.load());
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+  const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  // Timeline selection drag state
+  const [timelineSelection, setTimelineSelection] = useState<{
+    isSelecting: boolean;
+    startX: number;
+    currentX: number;
+    containerLeft: number;
+    containerWidth: number;
+  } | null>(null);
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
   const selected = useMemo(
     () => events.find((e) => e.id === selectedId),
     [events, selectedId]
   );
   const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
@@ -129,10 +142,11 @@ function App() {
   useEffect(() => {
     if (selected) {
       setEditDate(selected.date);
+      setEditTime(selected.time ?? '');
       setEditTitle(selected.title);
       setEditDescription(selected.description ?? '');
     } else {
-      setEditDate(''); setEditTitle(''); setEditDescription('');
+      setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription('');
     }
   }, [selectedId, selected]);
 
@@ -171,10 +185,27 @@ function App() {
       
       // Determine zoom direction
       const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25;
-      
-      // console.debug(`App wheel zoom: deltaY=${e.deltaY}, factor=${zoomFactor}, cursorX=${cursorX}`);
-      
-      // Use cursor-centered zoom
+
+      // Check if we should use hover-centered zoom
+      if (hoveredEventId) {
+        // Find the hovered card element and use its screen position for zoom
+        const cardElement = document.querySelector(`[data-event-id="${hoveredEventId}"]`) as HTMLElement;
+        if (cardElement) {
+          const cardRect = cardElement.getBoundingClientRect();
+          const cardCenterX = cardRect.left + cardRect.width / 2;
+
+          // Use the card's visual position for zoom (keep it stable under cursor)
+          if (rect) {
+            zoomAtCursor(zoomFactor, cardCenterX, rect.width, rect.left, rect.width);
+            return;
+          } else {
+            zoomAtCursor(zoomFactor, cardCenterX, window.innerWidth);
+            return;
+          }
+        }
+      }
+
+      // Fall back to cursor-centered zoom
       if (rect) {
         zoomAtCursor(zoomFactor, cursorX, rect.width, rect.left, rect.width);
       } else {
@@ -184,14 +215,95 @@ function App() {
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [zoomAtCursor]);
+  }, [zoomAtCursor, hoveredEventId]);
+
+  // Timeline selection drag handlers
+  const handleTimelineMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only start selection on the timeline area, not on cards or other elements
+    const target = e.target as Element;
+    if (target?.closest('[data-testid="event-card"]') || target?.closest('.panel') || target?.closest('.overlay')) {
+      return; // Don't start selection if clicking on cards or UI elements
+    }
+
+    const container = document.querySelector('.absolute.inset-0.ml-14 > .w-full.h-full.relative') as HTMLElement;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const startX = e.clientX - rect.left;
+
+    setTimelineSelection({
+      isSelecting: true,
+      startX,
+      currentX: startX,
+      containerLeft: rect.left,
+      containerWidth: rect.width
+    });
+
+    e.preventDefault();
+  }, []);
+
+  const handleTimelineMouseMove = useCallback((e: MouseEvent) => {
+    if (!timelineSelection?.isSelecting) return;
+
+    const currentX = e.clientX - timelineSelection.containerLeft;
+    setTimelineSelection(prev => prev ? {
+      ...prev,
+      currentX: Math.max(0, Math.min(timelineSelection.containerWidth, currentX))
+    } : null);
+  }, [timelineSelection]);
+
+  const handleTimelineMouseUp = useCallback(() => {
+    if (!timelineSelection?.isSelecting) return;
+
+    const { startX, currentX, containerWidth } = timelineSelection;
+
+    // Calculate timeline positions (0-1) for the selection
+    const leftMargin = 96; // rail + padding
+    const rightMargin = 40;
+    const usableWidth = containerWidth - leftMargin - rightMargin;
+
+    const minX = Math.min(startX, currentX);
+    const maxX = Math.max(startX, currentX);
+
+    // Convert screen coordinates to timeline positions
+    const startPos = Math.max(0, Math.min(1, (minX - leftMargin) / usableWidth));
+    const endPos = Math.max(0, Math.min(1, (maxX - leftMargin) / usableWidth));
+
+    // Convert view positions to actual timeline positions
+    const currentWindowWidth = viewEnd - viewStart;
+    const selectionStart = viewStart + (startPos * currentWindowWidth);
+    const selectionEnd = viewStart + (endPos * currentWindowWidth);
+
+    // Only zoom if selection is meaningful (at least 20px wide)
+    if (Math.abs(maxX - minX) > 20) {
+      setWindow(
+        Math.max(0, Math.min(1, selectionStart)),
+        Math.max(0, Math.min(1, selectionEnd))
+      );
+    }
+
+    setTimelineSelection(null);
+  }, [timelineSelection, viewStart, viewEnd, setWindow]);
+
+  // Add global mouse listeners for drag
+  useEffect(() => {
+    if (!timelineSelection?.isSelecting) return;
+
+    document.addEventListener('mousemove', handleTimelineMouseMove);
+    document.addEventListener('mouseup', handleTimelineMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleTimelineMouseMove);
+      document.removeEventListener('mouseup', handleTimelineMouseUp);
+    };
+  }, [handleTimelineMouseMove, handleTimelineMouseUp, timelineSelection?.isSelecting]);
 
   // CRUD handlers
   const saveAuthoring = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     const isEdit = !!selectedId;
     if (isEdit) {
-      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
+      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, time: editTime || undefined, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
       try {
         announce(`Saved changes to ${editTitle || 'event'}`);
       } catch (error) {
@@ -199,7 +311,7 @@ function App() {
       }
     } else {
       if (!editDate || !editTitle) return;
-      const newEvent: Event = { id: Date.now().toString(), date: editDate, title: editTitle, description: editDescription || undefined };
+      const newEvent: Event = { id: Date.now().toString(), date: editDate, time: editTime || undefined, title: editTitle, description: editDescription || undefined };
       setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
       setSelectedId(newEvent.id);
       try {
@@ -209,7 +321,7 @@ function App() {
       }
     }
     setOverlay(null);
-  }, [selectedId, editDate, editTitle, editDescription, announce]);
+  }, [selectedId, editDate, editTime, editTitle, editDescription, announce]);
 
   // saveAuthoring handles both edit and create flows
 
@@ -269,12 +381,19 @@ function App() {
     storageRef.current.writeThrough(data);
     setSelectedId(undefined);
   }, []);
-  
+
+  const seedMinuteTest = useCallback(() => {
+    const data = seedMinuteTestUtil();
+    setEvents(data);
+    storageRef.current.writeThrough(data);
+    setSelectedId(undefined);
+  }, []);
+
   const seedIncremental = useCallback((targetCount: number) => {
-    setEvents(prev => { 
-      const next = seedIncrementalUtil(prev, targetCount); 
-      storageRef.current.writeThrough(next); 
-      return next; 
+    setEvents(prev => {
+      const next = seedIncrementalUtil(prev, targetCount);
+      storageRef.current.writeThrough(next);
+      return next;
     });
   }, []);
   
@@ -479,7 +598,7 @@ function App() {
                   filtered={filteredForList}
                   selectedId={selectedId}
                   onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
-                  onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
+                  onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
                   filter={outlineFilter}
                   setFilter={setOutlineFilter}
                   dragging={dragging}
@@ -493,9 +612,11 @@ function App() {
                   selected={selected}
                   isNewEvent={!selected}
                   editDate={editDate}
+                  editTime={editTime}
                   editTitle={editTitle}
                   editDescription={editDescription}
                   setEditDate={setEditDate}
+                  setEditTime={setEditTime}
                   setEditTitle={setEditTitle}
                   setEditDescription={setEditDescription}
                   onSave={saveAuthoring}
@@ -517,6 +638,7 @@ function App() {
                       <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK</button>
                       <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon</button>
                       <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">De Gaulle</button>
+                      <button onClick={seedMinuteTest} className="block w-full text-left px-2 py-1 hover:bg-orange-100 text-orange-700 text-sm">⏰ Minute Test</button>
                       <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Random (10)</button>
                       <button onClick={seedClustered} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Clustered</button>
                       <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Long Range</button>
@@ -595,14 +717,37 @@ function App() {
           )}
           
           {/* Timeline takes full available space */}
-          <div className="w-full h-full relative">
-            <DeterministicLayoutComponent 
-              events={events} 
+          <div
+            className="w-full h-full relative"
+            onMouseDown={handleTimelineMouseDown}
+            style={{ cursor: timelineSelection?.isSelecting ? 'crosshair' : 'default' }}
+          >
+            <DeterministicLayoutComponent
+              events={events}
               showInfoPanels={showInfoPanels}
               viewStart={viewStart}
               viewEnd={viewEnd}
+              hoveredEventId={hoveredEventId}
               onCardDoubleClick={(id) => { setSelectedId(id); setOverlay('editor'); }}
+              onCardMouseEnter={(id) => setHoveredEventId(id)}
+              onCardMouseLeave={() => setHoveredEventId(undefined)}
             />
+
+            {/* Timeline selection overlay */}
+            {timelineSelection?.isSelecting && (
+              <div
+                className="absolute pointer-events-none z-30"
+                style={{
+                  left: Math.min(timelineSelection.startX, timelineSelection.currentX),
+                  top: 0,
+                  width: Math.abs(timelineSelection.currentX - timelineSelection.startX),
+                  height: '100%',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgb(59, 130, 246)',
+                  boxShadow: '0 0 10px rgba(59, 130, 246, 0.3)'
+                }}
+              />
+            )}
               {renderLiveRegion()}
               
               {/* Bottom centered control bar overlay - highly transparent by default */}

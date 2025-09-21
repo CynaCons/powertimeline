@@ -1,19 +1,48 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { Event } from '../types';
-import type { LayoutConfig } from './types';
+import type { LayoutConfig, PositionedCard, Anchor, EventCluster } from './types';
+
+interface TelemetryData {
+  placements?: {
+    items?: Array<{
+      id: string;
+      x: number;
+      y: number;
+      clusterId: string;
+    }>;
+  };
+}
+
+interface WindowWithTelemetry extends Window {
+  __ccTelemetry?: TelemetryData;
+}
 import { createLayoutConfig } from './config';
 import { DeterministicLayoutV5 } from './LayoutEngine';
 import { useAxisTicks } from '../timeline/hooks/useAxisTicks';
+import { EnhancedTimelineAxis } from '../components/EnhancedTimelineAxis';
+import { getEventTimestamp, formatEventDateTime } from '../lib/time';
 
 interface DeterministicLayoutProps {
   events: Event[];
   showInfoPanels?: boolean;
   viewStart?: number;
   viewEnd?: number;
+  hoveredEventId?: string;
   onCardDoubleClick?: (id: string) => void;
+  onCardMouseEnter?: (id: string) => void;
+  onCardMouseLeave?: () => void;
 }
 
-export function DeterministicLayoutComponent({ events, showInfoPanels = false, viewStart = 0, viewEnd = 1, onCardDoubleClick }: DeterministicLayoutProps) {
+export function DeterministicLayoutComponent({
+  events,
+  showInfoPanels = false,
+  viewStart = 0,
+  viewEnd = 1,
+  hoveredEventId,
+  onCardDoubleClick,
+  onCardMouseEnter,
+  onCardMouseLeave
+}: DeterministicLayoutProps) {
   // Container ref for proper sizing
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
@@ -49,7 +78,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
   const timelineRange = useMemo(() => {
     if (events.length === 0) return null;
     
-    const dates = events.map(event => new Date(event.date).getTime());
+    const dates = events.map(event => getEventTimestamp(event));
     const fullMinDate = Math.min(...dates);
     const fullMaxDate = Math.max(...dates);
     const fullDateRange = fullMaxDate - fullMinDate;
@@ -122,10 +151,10 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
 
 
   // Debug function for browser console
-  const DEBUG_LAYOUT = typeof window !== 'undefined' && ((window as any).__CC_DEBUG_LAYOUT || (import.meta as any)?.env?.DEV);
+  const DEBUG_LAYOUT = typeof window !== 'undefined' && ((window as Window & { __CC_DEBUG_LAYOUT?: boolean }).__CC_DEBUG_LAYOUT || (import.meta as ImportMeta & { env?: { DEV?: boolean } })?.env?.DEV);
 
   useEffect(() => {
-    (window as any).debugTimelineScales = () => {
+    (window as Window & { debugTimelineScales?: () => unknown }).debugTimelineScales = () => {
       const container = document.querySelector('[data-testid="timeline-scales-container"]') as HTMLElement;
       const svg = document.querySelector('[data-testid="timeline-scales-svg"]') as SVGElement;
       const texts = document.querySelectorAll('[data-testid="timeline-scales-svg"] text');
@@ -158,7 +187,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     };
     
     if (DEBUG_LAYOUT) console.log('Debug function available: window.debugTimelineScales()');
-  }, [viewportSize, finalTicks]);
+  }, [viewportSize, finalTicks, DEBUG_LAYOUT]);
 
   // TODO: Fix useAxisTicks hook - currently using fallback system
 
@@ -171,7 +200,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     
     // Add time range calculation for proper X positioning
     if (events.length > 0) {
-      const dates = events.map(e => new Date(e.date).getTime());
+      const dates = events.map(e => getEventTimestamp(e));
       const minTime = Math.min(...dates);
       const maxTime = Math.max(...dates);
       const padding = (maxTime - minTime) * 0.1; // 10% padding
@@ -193,7 +222,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     }
     
     // Calculate time range
-    const dates = events.map(e => new Date(e.date).getTime());
+    const dates = events.map(e => getEventTimestamp(e));
     const minDate = Math.min(...dates);
     const maxDate = Math.max(...dates);
     const dateRange = maxDate - minDate;
@@ -255,7 +284,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     
     if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER RESULT: ${filtered.length} anchors kept`);
     return filtered;
-  }, [layoutResult.anchors, layoutResult.positionedCards]);
+  }, [layoutResult.anchors, layoutResult.positionedCards, DEBUG_LAYOUT]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
@@ -263,7 +292,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     if (!anchors || anchors.length === 0) return [];
     
     const MERGE_THRESHOLD = 200; // Merge anchors within 200px for aggressive spacing
-    const overflowAnchors = anchors.filter((anchor: any) => anchor.overflowCount > 0);
+    const overflowAnchors = anchors.filter((anchor: Anchor) => anchor.overflowCount > 0);
     const mergedBadges: Array<{
       x: number;
       y: number;
@@ -273,31 +302,31 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     const processedAnchors = new Set<string>();
     
     // Sort anchors by X position for left-to-right processing
-    const sortedAnchors = [...overflowAnchors].sort((a: any, b: any) => a.x - b.x);
+    const sortedAnchors = [...overflowAnchors].sort((a: Anchor, b: Anchor) => a.x - b.x);
     
     for (const anchor of sortedAnchors) {
       if (processedAnchors.has(anchor.id)) continue;
       
       // Find all nearby anchors within merge threshold (including current anchor)
-      const nearbyAnchors = sortedAnchors.filter((other: any) => 
+      const nearbyAnchors = sortedAnchors.filter((other: Anchor) =>
         !processedAnchors.has(other.id) && 
         Math.abs(other.x - anchor.x) <= MERGE_THRESHOLD
       );
       
       if (nearbyAnchors.length > 1) {
         // Merge overflow counts from multiple anchors
-        const totalOverflow = nearbyAnchors.reduce((sum: number, a: any) => sum + a.overflowCount, 0);
-        const centroidX = nearbyAnchors.reduce((sum: number, a: any) => sum + a.x, 0) / nearbyAnchors.length;
+        const totalOverflow = nearbyAnchors.reduce((sum: number, a: Anchor) => sum + a.overflowCount, 0);
+        const centroidX = nearbyAnchors.reduce((sum: number, a: Anchor) => sum + a.x, 0) / nearbyAnchors.length;
         
         mergedBadges.push({
           x: centroidX,
           y: config.timelineY,
           totalOverflow,
-          anchorIds: nearbyAnchors.map((a: any) => a.id)
+          anchorIds: nearbyAnchors.map((a: Anchor) => a.id)
         });
         
         // Mark all anchors in group as processed
-        nearbyAnchors.forEach((a: any) => processedAnchors.add(a.id));
+        nearbyAnchors.forEach((a: Anchor) => processedAnchors.add(a.id));
       } else if (nearbyAnchors.length === 1) {
         // Single anchor - keep individual badge but mark as processed
         processedAnchors.add(anchor.id);
@@ -322,10 +351,10 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     } else {
       // Fallback: calculate manually if engine metrics not available
       const groupsCount = clusters.length;
-      const clusterSizes = clusters.map((c: any) => c.events.length || 0);
+      const clusterSizes = clusters.map((c: EventCluster) => c.events.length || 0);
       const avgEventsPerCluster = groupsCount > 0 ? (clusterSizes.reduce((a: number, b: number) => a + b, 0) / groupsCount) : 0;
       const largestCluster = Math.max(0, ...clusterSizes);
-      const xs = anchors.map((a: any) => a.x).sort((a: number, b: number) => a - b);
+      const xs = anchors.map((a: Anchor) => a.x).sort((a: number, b: number) => a - b);
       const pitches = xs.length > 1 ? xs.slice(1).map((x: number, i: number) => Math.abs(x - xs[i])) : [];
       dispatchMetrics = {
         groupCount: groupsCount,
@@ -347,7 +376,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     const utilPct = Math.max(0, Math.min(100, utilization.percentage || 0));
 
     // Placements for stability
-    const placements = positionedCards.map((p: any) => ({
+    const placements = positionedCards.map((p: PositionedCard) => ({
       id: String(Array.isArray(p.event) ? p.event[0]?.id ?? p.id : p.event?.id ?? p.id),
       x: Math.round(p.x),
       y: Math.round(p.y),
@@ -356,12 +385,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     }));
 
     // Compare with previous snapshot to compute migrations
-    const prev = (window as any).__ccTelemetry as any | undefined;
+    const prev = (window as WindowWithTelemetry).__ccTelemetry;
     let migrations = 0;
     if (prev && Array.isArray(prev.placements?.items)) {
-      const prevMap: Map<string, any> = new Map(prev.placements.items.map((it: any) => [String(it.id), it]));
+      const prevMap = new Map(prev.placements!.items!.map(it => [String(it.id), it]));
       for (const cur of placements) {
-        const old: any = prevMap.get(String(cur.id));
+        const old = prevMap.get(String(cur.id));
         if (!old) continue;
         const movedFar = Math.abs((old.x ?? 0) - cur.x) > 40 || Math.abs((old.y ?? 0) - cur.y) > 32;
         const clusterChanged = String(old.clusterId) !== String(cur.clusterId);
@@ -370,16 +399,16 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     }
 
     // Card type counts and aggregation/degradation metrics
-    const byTypeCounts: Record<string, number> = positionedCards.reduce((acc: Record<string, number>, c: any) => {
+    const byTypeCounts: Record<string, number> = positionedCards.reduce((acc: Record<string, number>, c: PositionedCard) => {
       const t = String(c.cardType);
       acc[t] = (acc[t] || 0) + 1;
       return acc;
     }, {});
-    const multiEventCards = positionedCards.filter((c: any) => c.cardType === 'multi-event');
+    const multiEventCards = positionedCards.filter((c: PositionedCard) => c.cardType === 'multi-event');
     const totalAggregations = multiEventCards.length;
-    const eventsAggregated = multiEventCards.reduce((sum: number, c: any) => sum + (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)), 0);
+    const eventsAggregated = multiEventCards.reduce((sum: number, c: PositionedCard) => sum + (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)), 0);
     const singleEventsShown = positionedCards
-      .filter((c: any) => (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)) === 1)
+      .filter((c: PositionedCard) => (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)) === 1)
       .length;
     const summaryContained = 0; // Placeholder until 'infinite' summary cards are surfaced in UI
     const degradationsCount = (byTypeCounts['compact'] || 0) + (byTypeCounts['title-only'] || 0);
@@ -387,12 +416,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
 
     // Half-column analysis for Stage 3 telemetry
     const timelineY = config?.timelineY ?? viewportSize.height / 2;
-    const aboveCards = positionedCards.filter((c: any) => c.y < timelineY);
-    const belowCards = positionedCards.filter((c: any) => c.y >= timelineY);
+    const aboveCards = positionedCards.filter((c: PositionedCard) => c.y < timelineY);
+    const belowCards = positionedCards.filter((c: PositionedCard) => c.y >= timelineY);
     
     // Group cards by cluster/column for half-column analysis
-    const clusterMap = new Map<string, { above: any[], below: any[] }>();
-    positionedCards.forEach((card: any) => {
+    const clusterMap = new Map<string, { above: PositionedCard[], below: PositionedCard[] }>();
+    positionedCards.forEach((card: PositionedCard) => {
       const clusterId = String(card.clusterId ?? 'default');
       if (!clusterMap.has(clusterId)) {
         clusterMap.set(clusterId, { above: [], below: [] });
@@ -414,17 +443,15 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
     
     // Calculate temporal distribution (percentage of timeline width used)
     const viewportWidth = viewportSize.width;
-    if (anchors.length > 1) {
-      const positions = anchors.map((a: any) => a.x).sort((a: number, b: number) => a - b);
+    const temporalDistribution = anchors.length > 1 ? (() => {
+      const positions = anchors.map((a: Anchor) => a.x).sort((a: number, b: number) => a - b);
       const minX = Math.min(...positions);
       const maxX = Math.max(...positions);
-      var temporalDistribution = ((maxX - minX) / viewportWidth) * 100;
-    } else {
-      var temporalDistribution = 0;
-    }
+      return ((maxX - minX) / viewportWidth) * 100;
+    })() : 0;
 
     // Placement pattern validation
-    const sortedEvents = events.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedEvents = events.slice().sort((a, b) => getEventTimestamp(a) - getEventTimestamp(b));
     const sortedPlacements = sortedEvents.map(event => 
       positionedCards.find(card => 
         (Array.isArray(card.event) ? card.event[0]?.id : card.event?.id) === event.id
@@ -516,8 +543,8 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
       degradation: layoutResult.telemetryMetrics?.degradation
     };
 
-    (window as any).__ccTelemetry = telemetry;
-  }, [layoutResult, events.length, viewportSize.width, viewportSize.height, config]);
+    (window as WindowWithTelemetry).__ccTelemetry = telemetry;
+  }, [layoutResult, events, viewportSize.width, viewportSize.height, config]);
 
 
   return (
@@ -540,65 +567,26 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
         />
       ))}
       
-      {/* Timeline Axis */}
-      <div 
-        className="absolute w-full h-1 bg-gray-700 z-10 shadow-sm"
-        style={{ top: (config?.timelineY ?? viewportSize.height / 2) - 1 }}
-        data-testid="timeline-axis"
-      />
-      
-      {/* Adaptive Timeline Axis with Enhanced Scales */}
+      {/* Enhanced Timeline Axis with multi-level labels and visual improvements */}
       {events.length > 0 && timelineRange && (
-        <div 
-          className="absolute"
-          style={{ 
-            left: 0, // Full width from edge to edge
-            top: (config?.timelineY ?? viewportSize.height / 2) - 30,
-            width: viewportSize.width, // Full container width
-            height: 60 // Larger height for better visibility
-          }}
-          data-testid="timeline-scales-container"
-          ref={(el) => {
-            if (el && DEBUG_LAYOUT) {
-              console.log('Timeline Scales Container Debug:', {
-                containerExists: true,
-                containerRect: el.getBoundingClientRect(),
-                containerStyle: {
-                  left: el.style.left,
-                  top: el.style.top,
-                  width: el.style.width,
-                  height: el.style.height,
-                  position: el.style.position
-                },
-                viewport: viewportSize,
-                tickCount: finalTicks.length,
-                ticks: finalTicks
-              });
+        <EnhancedTimelineAxis
+          timelineRange={timelineRange}
+          viewportSize={viewportSize}
+          timelineY={config?.timelineY ?? viewportSize.height / 2}
+          baseTicks={finalTicks}
+          onDateHover={(date) => {
+            // Optional: Add date hover functionality
+            if (DEBUG_LAYOUT && date) {
+              console.log('Timeline hover:', date.toLocaleDateString());
             }
           }}
-        >
-          <svg 
-            width={viewportSize.width} 
-            height={60}
-            viewBox={`0 0 ${viewportSize.width} 60`} // Use actual pixel coordinates
-            data-testid="timeline-scales-svg"
-          >
-            {/* Direct timeline scale rendering - bypass Axis component */}
-            {finalTicks.map((tick, index) => (
-              <g key={`tick-${index}`}>
-                {/* Grid line */}
-                <line x1={tick.x} x2={tick.x} y1={5} y2={55} stroke="#ffffff" strokeWidth={2} opacity="0.4" />
-                {/* Scale label */}
-                <text x={tick.x} y={20} fontSize={18} fill="#1f2937" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold">
-                  {tick.label}
-                </text>
-              </g>
-            ))}
-            
-            {/* Main timeline axis line */}
-            <line x1={0} x2={viewportSize.width} y1={30} y2={30} stroke="#ffffff" strokeWidth={3} opacity="0.6" />
-          </svg>
-        </div>
+          onTimelineClick={(date) => {
+            // Optional: Add timeline click functionality
+            if (DEBUG_LAYOUT) {
+              console.log('Timeline clicked at:', date.toLocaleDateString());
+            }
+          }}
+        />
       )}
       
       {/* Anchors - filtered by view window to prevent leftover overflow badges */}
@@ -685,25 +673,47 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
           data-event-id={Array.isArray(card.event) ? card.event[0].id : card.event.id}
           data-card-type={card.cardType}
           data-cluster-id={card.clusterId}
-          className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-shadow ${
+          className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${
             card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
             card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :
             card.cardType === 'title-only' ? 'border-l-4 border-l-yellow-500 border-gray-200 p-1' :
             card.cardType === 'multi-event' ? 'border-l-4 border-l-purple-500 border-gray-200 p-2' :
             card.cardType === 'infinite' ? 'border-l-4 border-l-red-500 border-gray-200 p-1' :
             'border-l-4 border-l-gray-500 border-gray-200 p-2' // fallback
-          } text-sm`}
+          } ${(() => {
+            const eventId = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
+            if (hoveredEventId === eventId) return 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg';
+            return '';
+          })()} text-sm`}
           style={{
             left: card.x,
             top: card.y,
             width: card.width,
-            height: card.height
+            height: card.height,
+            zIndex: (() => {
+              const eventId = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
+              if (hoveredEventId === eventId) return 20;
+              return 10;
+            })()
           }}
           onDoubleClick={() => {
             try {
               const id = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
               if (onCardDoubleClick) onCardDoubleClick(id);
-            } catch {}
+            } catch {
+              // Ignore card interaction errors
+            }
+          }}
+          onMouseEnter={() => {
+            try {
+              const id = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
+              if (onCardMouseEnter) onCardMouseEnter(id);
+            } catch {
+              // Ignore card interaction errors
+            }
+          }}
+          onMouseLeave={() => {
+            if (onCardMouseLeave) onCardMouseLeave();
           }}
         >
           {/* Card content based on type */}
@@ -713,12 +723,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
               {(() => {
                 const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
                 return desc ? (
-                  <div className="text-xs text-gray-600 mt-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as any, WebkitLineClamp: 8 }}>
+                  <div className="text-xs text-gray-600 mt-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as React.CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 8 }}>
                     {desc}
                   </div>
                 ) : null;
               })()}
-              <div className="text-xs text-gray-500 mt-auto">{new Date(Array.isArray(card.event) ? card.event[0].date : card.event.date).toLocaleDateString()}</div>
+              <div className="text-xs text-gray-500 mt-auto">{formatEventDateTime(Array.isArray(card.event) ? card.event[0] : card.event)}</div>
             </div>
           )}
           
@@ -728,12 +738,12 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
               {(() => {
                 const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
                 return desc ? (
-                  <div className="text-xs text-gray-600 mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as any, WebkitLineClamp: 2 }}>
+                  <div className="text-xs text-gray-600 mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as React.CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 2 }}>
                     {desc}
                   </div>
                 ) : null;
               })()}
-              <div className="text-xs text-gray-500 mt-auto">{new Date(Array.isArray(card.event) ? card.event[0].date : card.event.date).toLocaleDateString()}</div>
+              <div className="text-xs text-gray-500 mt-auto">{formatEventDateTime(Array.isArray(card.event) ? card.event[0] : card.event)}</div>
             </div>
           )}
           
@@ -848,7 +858,7 @@ export function DeterministicLayoutComponent({ events, showInfoPanels = false, v
           </div>
           {/* Promotions and Aggregations counters */}
           {(() => {
-            const byType: Record<string, number> = layoutResult.positionedCards.reduce((acc: Record<string, number>, c: any) => {
+            const byType: Record<string, number> = layoutResult.positionedCards.reduce((acc: Record<string, number>, c: PositionedCard) => {
               const t = String(c.cardType);
               acc[t] = (acc[t] || 0) + 1;
               return acc;

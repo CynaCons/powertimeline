@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -19,7 +20,6 @@ test.describe('Navigation Rail Overlap Tests', () => {
     await page.screenshot({ path: 'test-results/navigation-rail-overlap-test.png' });
     
     // Get navigation rail bounds (left sidebar)
-    const navRail = page.locator('[data-testid="navigation-rail"], nav, aside, .sidebar, .nav-rail').first();
     let navRailBounds = null;
     
     // Try to find navigation rail by different selectors
@@ -69,7 +69,6 @@ test.describe('Navigation Rail Overlap Tests', () => {
       const cardBounds = await cards[i].boundingBox();
       if (cardBounds) {
         const cardLeftEdge = cardBounds.x;
-        const cardRightEdge = cardBounds.x + cardBounds.width;
         
         minCardLeftEdge = Math.min(minCardLeftEdge, cardLeftEdge);
         

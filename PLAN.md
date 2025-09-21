@@ -205,6 +205,245 @@
 - **Functionality Preserved**: All seeding buttons, export/import UI, event counting
 - **Test Status**: All YAML functionality tests passing
 
+## Iteration v0.2.10 - Enhanced Timeline Axis & Date Labels (completed)
+
+**✅ Mission Accomplished:** Transformed the timeline from a basic gray line into a visually rich, informative axis with adaptive date labeling, hover interactions, and season markers.
+
+### Enhanced Timeline Axis ✨
+- [x] Replace simple gray line with graduated timeline bar with gradient design
+- [x] Add tick marks at regular intervals with varying heights (major/minor)
+- [x] Implement multi-level date labels (Year → Month → Day hierarchy)
+- [x] Add visual markers for quarters/seasons with subtle background shading
+- [x] Create hover state showing exact date at cursor position
+- [x] Add "today" marker for current date reference with red indicator
+
+### Adaptive Date Labeling System 📅
+- [x] **Primary labels**: Years in bold, larger font (14px)
+- [x] **Secondary labels**: Months in medium size when zoomed (12px)
+- [x] **Tertiary labels**: Days when deeply zoomed (10px)
+- [x] Smart label collision detection to prevent overlap
+- [x] Fade out less important labels based on zoom level
+- [x] Implement responsive label density based on viewport width and span
+
+### Visual Timeline Grid 📏
+- [x] Add season/quarter backgrounds with very light colors (Spring: green, Summer: yellow, Autumn: orange, Winter: blue)
+- [x] Enhanced tick marks with graduated heights and opacity
+- [x] Hover tooltip showing exact date at cursor position
+- [x] Interactive timeline with crosshair cursor for future click functionality
+
+### Minute-Level Precision Extension ⏰
+- [x] **Quaternary labels**: Hours and minutes for precise timeline navigation
+- [x] **Hour ticks**: Display when zoomed to less than 1 day (adaptive step: 1h, 2h, 6h, 12h)
+- [x] **Minute ticks**: Display when zoomed to less than 2 hours (step: 5, 10, 15, 30 minutes)
+- [x] **Smart tooltip**: Show full date-time when zoomed to minute level
+- [x] **Collision prevention**: Extended to quaternary level to prevent label crowding
+- [x] **Event interface extension**: Added optional `time?: string` field for HH:MM precision
+- [x] **Timeline integration**: All date parsing now supports optional time components
+- [x] **Display formatting**: Card dates show time when available
+- [x] **Deep zoom capability**: Zoom limits extended to 0.002% (minute-level granularity)
+- [x] **Test data creation**: Added `seedMinuteTest()` with 10 events across a single day
+- [x] **UI integration**: "⏰ Minute Test" button in Developer Panel for easy testing
+- [x] **Calendar widget**: Material-UI DatePicker with clickable calendar icon for date selection
+- [x] **Time input field**: Optional HH:MM time input with validation and clock icon
+- [x] **Enhanced event editor**: Side-by-side date and time fields in responsive grid layout
+
+**📊 Technical Implementation:**
+- **Component**: Created `EnhancedTimelineAxis.tsx` with full SVG-based rendering
+- **Features**: Multi-level ticks (year/month/day/hour/minute), season backgrounds, today marker, adaptive hover tooltips
+- **Integration**: Replaced basic timeline axis in `DeterministicLayoutComponent`
+- **Testing**: Updated foundation test to use new `enhanced-timeline-axis` test ID
+- **Performance**: Efficient memo-based tick calculation and responsive rendering
+- **Precision**: Supports minute-level timeline navigation for detailed event scheduling
+- **Interactivity**: Mouse tracking, hover states, click preparation for future features
+
+## Iteration v0.2.11 - Editor Panel Calendar & Time Fixes (completed)
+
+**✅ Mission Accomplished:** Fixed editor panel crashes, implemented functional calendar picker with Material-UI DatePicker, added optional time input field, and updated all tests to work with the new components.
+
+### Editor Panel Crash Resolution ✅
+- [x] Diagnose and fix DatePicker component crashes in AuthoringOverlay
+- [x] Add `enableAccessibleFieldDOMStructure={false}` to resolve MUI X accessibility error
+- [x] Install @mui/x-date-pickers and dayjs for proper calendar functionality
+- [x] Replace non-functional calendar icon with working DatePicker widget
+
+### Enhanced Date & Time Input ✅
+- [x] Implement Material-UI DatePicker with calendar popup functionality
+- [x] Add optional time input field with HH:MM format and validation
+- [x] Create LocalizationProvider wrapper with dayjs adapter
+- [x] Add proper form validation for date and time fields
+- [x] Include character counters for title (100 chars) and description (500 chars)
+
+### Save Button Logic & Validation ✅
+- [x] Implement proper form validation with real-time error checking
+- [x] Fix Save button enable/disable logic for required fields
+- [x] Add touch state tracking for proper validation timing
+- [x] Ensure Save button only enables when date and title are valid
+
+### Test Suite Updates ✅
+- [x] Update all 6 authoring overlay tests to work with DatePicker
+- [x] Fix test selectors for new field labels ('Date *', 'Title *')
+- [x] Correct calendar icon test to check for DatePicker button
+- [x] Fix validation test to properly interact with DatePicker input
+- [x] Ensure all tests pass (6/6 passing)
+
+**📊 Technical Details:**
+- **Issue**: DatePicker was causing app crashes due to MUI X accessibility structure
+- **Solution**: Added enableAccessibleFieldDOMStructure={false} and proper LocalizationProvider
+- **Calendar Function**: Fully working calendar popup with date selection
+- **Time Field**: Optional HH:MM input with schedule icon and validation
+- **Form Logic**: Enhanced with proper validation, error states, and Save button control
+- **Test Coverage**: All 6 tests updated and passing with new DatePicker interaction patterns
+
+## Iteration v0.2.12 - Event-Centered Zoom Feature (completed)
+
+**✅ Mission Accomplished:** Implemented smart zoom functionality that centers on hovered or selected event cards instead of cursor position, making timeline navigation more intuitive and event-focused.
+
+### Enhanced Zoom Behavior ✅
+- [x] Add hoveredEventId state tracking for mouse hover detection
+- [x] Create calculateEventPosition helper function for timeline position calculation
+- [x] Extend useViewWindow hook with zoomAtPosition function
+- [x] Implement event-centered zoom logic with fallback to cursor zoom
+
+### Interactive Event Cards ✅
+- [x] Add hover detection with onMouseEnter/onMouseLeave handlers
+- [x] Add single-click selection in addition to existing double-click behavior
+- [x] Implement visual feedback for hovered events (ring-1 ring-blue-300)
+- [x] Implement visual feedback for selected events (ring-2 ring-blue-500)
+- [x] Add proper z-index layering for hovered/selected states
+
+### Smart Zoom Logic ✅
+- [x] Priority system: selected events > hovered events > cursor position
+- [x] Calculate event timeline position based on date/time and event range
+- [x] Center zoom on event position using new zoomAtPosition function
+- [x] Maintain zoom boundaries and minimum/maximum zoom levels
+- [x] Seamless fallback to cursor-centered zoom when no event is active
+
+### User Experience ✅
+- [x] Hover over event card → card becomes zoom anchor point
+- [x] Click to select event → event remains zoom anchor until deselected
+- [x] Visual indicators clearly show which event is active for zoom
+- [x] Smooth zoom transitions centered on event dates
+- [x] Improved timeline navigation for precise event examination
+
+**📊 Technical Implementation:**
+- **State Management**: Added hoveredEventId alongside existing selectedId state
+- **Event Positioning**: calculateEventPosition() converts event date/time to 0-1 timeline position
+- **Zoom Enhancement**: zoomAtPosition() function in useViewWindow for event-centered zooming
+- **Visual Feedback**: Ring effects and z-index layering for clear hover/selection states
+- **Priority Logic**: hoveredEventId || selectedId determines zoom anchor with cursor fallback
+- **Performance**: Efficient event position calculation with timestamp-based range mapping
+
+## Iteration v0.2.13 - Timeline Drag-to-Zoom Selection (completed)
+
+**✅ Mission Accomplished:** Implemented intuitive drag selection on the timeline that allows users to click, drag, and release to zoom to a specific time range, providing precise timeline navigation control.
+
+### Drag Selection Interaction ✅
+- [x] Add timeline selection state with drag tracking
+- [x] Implement mouse down/move/up handlers for drag detection
+- [x] Prevent selection on event cards and UI elements (only on timeline background)
+- [x] Add minimum selection threshold (20px) to prevent accidental micro-selections
+
+### Visual Selection Feedback ✅
+- [x] Add translucent blue selection overlay during drag
+- [x] Show selection rectangle from start to current mouse position
+- [x] Change cursor to crosshair during selection
+- [x] High z-index (30) to appear above all timeline content
+
+### Coordinate Conversion & Zoom ✅
+- [x] Convert screen coordinates to timeline positions (0-1 range)
+- [x] Account for navigation rail and padding margins (96px left, 40px right)
+- [x] Map selection to current view window for accurate positioning
+- [x] Use setWindow() to zoom to selected time range on release
+
+### Smart Selection Logic ✅
+- [x] Only start selection on timeline background (not on cards/UI)
+- [x] Global mouse listeners for smooth drag tracking
+- [x] Boundary clamping to keep selection within timeline area
+- [x] Bidirectional selection (left-to-right or right-to-left)
+
+**📊 Technical Implementation:**
+- **State**: timelineSelection with isSelecting, startX, currentX, containerLeft, containerWidth
+- **Event Handling**: onMouseDown on timeline container, global mousemove/mouseup listeners
+- **Visual Overlay**: Absolute positioned div with blue background and border
+- **Coordinate Math**: Screen pixels → viewport ratios → timeline positions → view window
+- **Smart Detection**: Element traversal to avoid starting selection on interactive elements
+
+### User Experience
+- Click and drag on empty timeline area → blue selection rectangle appears
+- Drag in any direction → selection follows mouse movement
+- Release mouse → timeline zooms to show selected time range
+- Cards and UI elements → normal interaction (no selection interference)
+- Minimum drag distance → prevents accidental tiny selections
+
+## Iteration v0.2.14 - Enhanced Anchor Points & Visual Clarity
+
+**🎯 Objective:** Make timeline anchors highly visible, interactive, and informative with clear visual feedback and category-based styling.
+
+### Current Problems Identified
+- Anchor dots are tiny (3x3px) gray circles that are barely visible
+- No visual feedback when hovering over anchors
+- Anchors don't indicate the date they represent
+- No visual grouping of events at the same date
+
+### Enhanced Anchor Design 🎯
+- [ ] Increase anchor size from 3x3px to 8x8px minimum
+- [ ] Use filled circles with white borders for better visibility
+- [ ] Color-code anchors based on event category/importance
+- [ ] Add hover effect: expand to 12x12px with date tooltip
+- [ ] Pulse animation for anchors with multiple events
+- [ ] Diamond shape for milestone events
+- [ ] Shadow effects for depth and prominence
+
+### Interactive Anchor Features 🖱️
+- [ ] Click on timeline to create event at that date
+- [ ] Double-click anchor to zoom to that date
+- [ ] Hover tooltips showing event count and date
+- [ ] Visual feedback for anchor states (hover, active, selected)
+- [ ] Snap-to-date when dragging events near anchors
+
+## Iteration v0.2.12 - Curved Connectors & Visual Flow
+
+**🎯 Objective:** Replace thin straight connector lines with elegant curved connections that create visual flow and hierarchy between timeline and events.
+
+### Current Problems Identified
+- Connector lines are thin (0.5px) gray lines that get lost visually
+- Straight lines create harsh, mechanical appearance
+- No visual distinction between different types of connections
+
+### Curved Connector System 🌊
+- [ ] Increase line thickness from 0.5px to 2px
+- [ ] Implement smooth bezier curves instead of straight lines
+- [ ] Use gradient fade from anchor to card
+- [ ] Color match connectors with anchor points
+- [ ] Animated trace effect on hover
+- [ ] Dotted/dashed lines for tentative dates
+
+### Advanced Connector Features 🔗
+- [ ] Different curve styles for different event types
+- [ ] Connector bundling for multiple events at same date
+- [ ] Fade connectors when not relevant to current focus
+- [ ] Smooth transitions when events move or resize
+- [ ] Performance optimization for many connectors
+
+## Iteration v0.2.14 - Date Formatting & Localization
+
+**🎯 Objective:** Standardize date display across the application with proper formatting, localization support, and user preferences.
+
+### Date Formatting Consistency 🌍
+- [ ] Standardize all dates to consistent ISO format display
+- [ ] Configurable date format preferences (US/EU/ISO)
+- [ ] Relative date display option ("3 days ago", "next week")
+- [ ] Era notation for historical dates (BCE/CE)
+- [ ] Localization support with proper formatting
+- [ ] Time zone handling for international users
+
+### Advanced Date Features 📆
+- [ ] Smart date parsing for flexible input
+- [ ] Date validation with helpful error messages
+- [ ] Auto-complete for date entry
+- [ ] Date picker integration
+- [ ] Historical calendar support (Julian/Gregorian)
+
 ## Iteration v0.2.6 - Quality & Technical Debt Cleanup (completed - 42c5bd7)
 
 **🎯 Major Achievements:** ESLint errors reduced 93% (297→20), Bundle size reduced 59% (508KB→207KB), Comprehensive development workflow improvements, Test infrastructure stabilization, CI/CD pipeline implementation

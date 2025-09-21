@@ -3,6 +3,10 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { Dayjs } from 'dayjs';
 import type { Event } from '../../types';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -12,14 +16,27 @@ interface ReadOnlyEventViewProps {
 }
 
 function ReadOnlyEventView({ event }: ReadOnlyEventViewProps) {
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const formatDateTime = (event: Event): string => {
+    if (event.time) {
+      const dateTime = new Date(`${event.date} ${event.time}`);
+      return dateTime.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } else {
+      const date = new Date(event.date);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
   };
 
   return (
@@ -27,7 +44,7 @@ function ReadOnlyEventView({ event }: ReadOnlyEventViewProps) {
       {/* Date display */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <span className="material-symbols-rounded text-base">calendar_today</span>
-        <time dateTime={event.date}>{formatDate(event.date)}</time>
+        <time dateTime={event.date}>{formatDateTime(event)}</time>
       </div>
 
       {/* Title display */}
@@ -60,9 +77,11 @@ interface AuthoringOverlayProps {
   selected?: Event;
   isNewEvent?: boolean;
   editDate: string;
+  editTime: string;
   editTitle: string;
   editDescription: string;
   setEditDate: (v: string) => void;
+  setEditTime: (v: string) => void;
   setEditTitle: (v: string) => void;
   setEditDescription: (v: string) => void;
   onSave: (e: React.FormEvent) => void;
@@ -74,9 +93,11 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   selected,
   isNewEvent = false,
   editDate,
+  editTime,
   editTitle,
   editDescription,
   setEditDate,
+  setEditTime,
   setEditTitle,
   setEditDescription,
   onSave,
@@ -85,8 +106,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [isEditMode, setIsEditMode] = useState(isNewEvent || !selected);
-  const [errors, setErrors] = useState({ date: '', title: '', description: '' });
-  const [touched, setTouched] = useState({ date: false, title: false, description: false });
+  const [errors, setErrors] = useState({ date: '', time: '', title: '', description: '' });
+  const [touched, setTouched] = useState({ date: false, time: false, title: false, description: false });
   useFocusTrap(true, rootRef.current);
 
   useEffect(() => {
@@ -125,25 +146,32 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
     return '';
   };
 
+  const validateTime = (value: string): string => {
+    if (!value.trim()) return ''; // Time is optional
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(value)) return 'Invalid time format (use HH:MM)';
+    return '';
+  };
+
   const validateDescription = (value: string): string => {
     if (value.length > 500) return 'Description must be less than 500 characters';
     return '';
   };
 
   // Enhanced change handlers with validation
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEditDate(value);
-    if (touched.date) {
-      setErrors(prev => ({ ...prev, date: validateDate(value) }));
-    }
-  };
-
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEditTitle(value);
     if (touched.title) {
       setErrors(prev => ({ ...prev, title: validateTitle(value) }));
+    }
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEditTime(value);
+    if (touched.time) {
+      setErrors(prev => ({ ...prev, time: validateTime(value) }));
     }
   };
 
@@ -156,14 +184,14 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   };
 
   // Blur handlers to trigger validation
-  const handleDateBlur = () => {
-    setTouched(prev => ({ ...prev, date: true }));
-    setErrors(prev => ({ ...prev, date: validateDate(editDate) }));
-  };
-
   const handleTitleBlur = () => {
     setTouched(prev => ({ ...prev, title: true }));
     setErrors(prev => ({ ...prev, title: validateTitle(editTitle) }));
+  };
+
+  const handleTimeBlur = () => {
+    setTouched(prev => ({ ...prev, time: true }));
+    setErrors(prev => ({ ...prev, time: validateTime(editTime) }));
   };
 
   const handleDescriptionBlur = () => {
@@ -172,7 +200,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   };
 
   // Check if form has errors
-  const hasErrors = errors.date || errors.title || errors.description;
+  const hasErrors = errors.date || errors.time || errors.title || errors.description;
 
   // Auto-focus date field when entering edit mode
   useEffect(() => {
@@ -247,31 +275,67 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
             >
               {isEditMode && (
                 <form onSubmit={onSave} className="grid grid-cols-1 gap-6 h-full">
-                  {/* Enhanced Date Field */}
-                  <div className="space-y-1">
-                    <TextField
-                      label="Date *"
-                      variant="outlined"
-                      value={editDate}
-                      onChange={handleDateChange}
-                      onBlur={handleDateBlur}
-                      error={touched.date && !!errors.date}
-                      helperText={touched.date && errors.date ? errors.date : "Format: YYYY-MM-DD"}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <span className="material-symbols-rounded text-gray-500 text-lg">event</span>
-                          </InputAdornment>
-                        ),
-                      }}
-                      inputProps={{
-                        placeholder: "YYYY-MM-DD",
-                        pattern: "\\d{4}-\\d{2}-\\d{2}"
-                      }}
-                      fullWidth
-                      autoFocus
-                    />
-                  </div>
+                  {/* Date and Time Fields */}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Enhanced Date Field with Calendar Picker */}
+                      <div className="space-y-1">
+                        <DatePicker
+                          label="Date *"
+                          value={editDate ? dayjs(editDate) : null}
+                          onChange={(newValue: Dayjs | null) => {
+                            const dateString = newValue ? newValue.format('YYYY-MM-DD') : '';
+                            setEditDate(dateString);
+                            if (touched.date) {
+                              setErrors(prev => ({ ...prev, date: validateDate(dateString) }));
+                            }
+                          }}
+                          onClose={() => {
+                            setTouched(prev => ({ ...prev, date: true }));
+                            setErrors(prev => ({ ...prev, date: validateDate(editDate) }));
+                          }}
+                          enableAccessibleFieldDOMStructure={false}
+                          slots={{
+                            textField: (props) => (
+                              <TextField
+                                {...props}
+                                variant="outlined"
+                                fullWidth
+                                autoFocus
+                                error={touched.date && !!errors.date}
+                                helperText={touched.date && errors.date ? errors.date : "Click calendar icon to select"}
+                              />
+                            )
+                          }}
+                        />
+                      </div>
+
+                      {/* Optional Time Field */}
+                      <div className="space-y-1">
+                        <TextField
+                          label="Time (Optional)"
+                          variant="outlined"
+                          value={editTime}
+                          onChange={handleTimeChange}
+                          onBlur={handleTimeBlur}
+                          error={touched.time && !!errors.time}
+                          helperText={touched.time && errors.time ? errors.time : "Format: HH:MM (24-hour)"}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <span className="material-symbols-rounded text-gray-500 text-lg">schedule</span>
+                              </InputAdornment>
+                            ),
+                          }}
+                          inputProps={{
+                            placeholder: "14:30",
+                            pattern: "\\d{2}:\\d{2}"
+                          }}
+                          fullWidth
+                        />
+                      </div>
+                    </div>
+                  </LocalizationProvider>
 
                   {/* Enhanced Title Field */}
                   <div className="space-y-1">

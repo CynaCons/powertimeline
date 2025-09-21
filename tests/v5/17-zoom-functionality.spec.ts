@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -96,13 +97,17 @@ test.describe('Zoom Functionality Tests', () => {
       await page.mouse.move(centerX, centerY);
       
       // Test Ctrl+Wheel zoom in (negative deltaY = zoom in)
-      await page.mouse.wheel(0, -100, { modifiers: ['Control'] });
+      await page.keyboard.down('Control');
+      await page.mouse.wheel(0, -100);
+      await page.keyboard.up('Control');
       await page.waitForTimeout(300);
       const wheelZoomInCards = await page.locator('[data-testid="event-card"]').count();
       console.log(`Ctrl+Wheel zoom in: ${wheelZoomInCards} cards`);
       
       // Test Ctrl+Wheel zoom out (positive deltaY = zoom out)
-      await page.mouse.wheel(0, 100, { modifiers: ['Control'] });
+      await page.keyboard.down('Control');
+      await page.mouse.wheel(0, 100);
+      await page.keyboard.up('Control');
       await page.waitForTimeout(300);
       const wheelZoomOutCards = await page.locator('[data-testid="event-card"]').count();
       console.log(`Ctrl+Wheel zoom out: ${wheelZoomOutCards} cards`);

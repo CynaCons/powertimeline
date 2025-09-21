@@ -76,9 +76,9 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     await expect(page.getByText('Edit Event')).toBeVisible();
 
     // Should show form fields
-    await expect(page.getByLabel('Date')).toBeVisible();
-    await expect(page.getByLabel('Title')).toBeVisible();
-    await expect(page.getByLabel('Description')).toBeVisible();
+    await expect(page.getByLabel('Date *')).toBeVisible();
+    await expect(page.getByLabel('Title *')).toBeVisible();
+    await expect(page.getByLabel('Description (Optional)')).toBeVisible();
 
     // Should have Save and Cancel buttons
     await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
@@ -98,9 +98,9 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     await expect(page.getByText('Create Event')).toBeVisible();
 
     // Should show form fields immediately
-    await expect(page.getByLabel('Date')).toBeVisible();
-    await expect(page.getByLabel('Title')).toBeVisible();
-    await expect(page.getByLabel('Description')).toBeVisible();
+    await expect(page.getByLabel('Date *')).toBeVisible();
+    await expect(page.getByLabel('Title *')).toBeVisible();
+    await expect(page.getByLabel('Description (Optional)')).toBeVisible();
 
     // Should not have edit button (already in edit mode)
     await expect(page.getByRole('button', { name: 'Edit event' })).not.toBeVisible();
@@ -115,10 +115,10 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     const overlay = page.locator('[data-testid="authoring-overlay"]');
     await expect(overlay).toBeVisible();
 
-    // Should show enhanced date field with calendar icon
+    // Should show enhanced date field with calendar picker button
     const dateField = page.getByLabel('Date *');
     await expect(dateField).toBeVisible();
-    await expect(page.locator('.material-symbols-rounded:has-text("event")')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Choose date/ })).toBeVisible();
 
     // Should show title field with character counter
     const titleField = page.getByLabel('Title *');
@@ -156,8 +156,11 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     const saveButton = page.getByRole('button', { name: 'Save' });
     await expect(saveButton).toBeDisabled();
 
-    // Fill in date and title to enable save
-    await page.getByLabel('Date *').fill('2024-12-25');
+    // Fill in date using DatePicker - try finding the actual input field
+    const dateField = page.getByLabel('Date *');
+    await dateField.click();
+    await dateField.fill('12/25/2024');
+
     await page.getByLabel('Title *').fill('Christmas Day');
 
     // Save button should now be enabled

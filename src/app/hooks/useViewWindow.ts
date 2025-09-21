@@ -38,7 +38,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
   }, [viewStart, viewEnd, setWindow]);
 
   const nudge = useCallback((delta: number) => {
-    const width = Math.max(viewEnd - viewStart, 0.001);
+    const width = Math.max(viewEnd - viewStart, 0.00002);
     let start = viewStart + delta; let end = viewEnd + delta;
     if (start < 0) { end -= start; start = 0; }
     if (end > 1) { start -= end - 1; end = 1; }
@@ -49,19 +49,19 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
   const zoom = useCallback((factor: number) => {
     const center = (viewStart + viewEnd) / 2;
     let half = ((viewEnd - viewStart) / 2) * factor;
-    half = Math.max(0.0005, Math.min(0.5, half)); // Allow zoom down to 0.1% of timeline (day-level granularity)
+    half = Math.max(0.00001, Math.min(0.5, half)); // Allow zoom down to 0.002% of timeline (minute-level granularity)
     setWindow(center - half, center + half);
   }, [viewStart, viewEnd, setWindow]);
 
   const smoothZoom = useCallback((factor: number, duration = 300) => {
     const center = (viewStart + viewEnd) / 2;
     let half = ((viewEnd - viewStart) / 2) * factor;
-    half = Math.max(0.0005, Math.min(0.5, half));
+    half = Math.max(0.00001, Math.min(0.5, half));
     animateToWindow(center - half, center + half, duration);
   }, [viewStart, viewEnd, animateToWindow]);
 
   const smoothPan = useCallback((delta: number, duration = 250) => {
-    const width = Math.max(viewEnd - viewStart, 0.001);
+    const width = Math.max(viewEnd - viewStart, 0.00002);
     let start = viewStart + delta;
     let end = viewEnd + delta;
     if (start < 0) { end -= start; start = 0; }
@@ -69,6 +69,38 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     if (end - start < width) end = start + width;
     animateToWindow(start, end, duration);
   }, [viewStart, viewEnd, animateToWindow]);
+
+  const zoomAtPosition = useCallback((factor: number, targetPosition: number) => {
+    // targetPosition should be a value between 0 and 1 representing position on timeline
+    const targetPos = Math.max(0, Math.min(1, targetPosition));
+
+    // Calculate new window width
+    let newWindowWidth = (viewEnd - viewStart) * factor;
+    newWindowWidth = Math.max(0.00001, Math.min(1.0, newWindowWidth)); // Min 0.002%, max 100%
+
+    // Calculate new bounds keeping target position as anchor point
+    let newStart = targetPos - (newWindowWidth * 0.5); // Center the zoom on target position
+    let newEnd = newStart + newWindowWidth;
+
+    // Handle boundary conditions
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = newWindowWidth;
+      if (newEnd > 1) {
+        newEnd = 1;
+        newStart = Math.max(0, 1 - newWindowWidth);
+      }
+    } else if (newEnd > 1) {
+      newEnd = 1;
+      newStart = 1 - newWindowWidth;
+      if (newStart < 0) {
+        newStart = 0;
+        newEnd = Math.min(1, newWindowWidth);
+      }
+    }
+
+    setWindow(newStart, newEnd);
+  }, [viewStart, viewEnd, setWindow]);
 
   const zoomAtCursor = useCallback((factor: number, cursorX?: number, viewportWidth?: number, containerLeft?: number, containerWidth?: number) => {
     if (cursorX === undefined || viewportWidth === undefined) {
@@ -95,7 +127,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     
     // Calculate new window width
     let newWindowWidth = currentWindowWidth * factor;
-    newWindowWidth = Math.max(0.001, Math.min(1.0, newWindowWidth)); // Min 0.1%, max 100% (day-level granularity)
+    newWindowWidth = Math.max(0.00002, Math.min(1.0, newWindowWidth)); // Min 0.002%, max 100% (minute-level granularity)
     
     // Calculate new bounds keeping cursor position stable as anchor point
     let newStart = cursorTimePosition - (newWindowWidth * cursorRatioInViewport);
@@ -126,8 +158,8 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     
     // Ensure minimum width is maintained while keeping cursor as anchor
     const finalWidth = newEnd - newStart;
-    if (finalWidth < 0.001) {
-      const minWidth = 0.001;
+    if (finalWidth < 0.00002) {
+      const minWidth = 0.00002;
       
       // Calculate cursor position within the minimum window
       const cursorOffset = minWidth * cursorRatioInViewport;
@@ -192,6 +224,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     nudge,
     zoom,
     zoomAtCursor,
+    zoomAtPosition,
     animateTo,
     smoothZoom,
     smoothPan,

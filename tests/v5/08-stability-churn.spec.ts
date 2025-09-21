@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 
 test.describe('v5/08 Stability & churn (telemetry)', () => {
-  test('small viewport change preserves placements (limited migrations)', async ({ page, browserName }) => {
+  test('small viewport change preserves placements (limited migrations)', async ({ page }) => {
     await page.goto('/');
     
     await page.getByRole('button', { name: 'Developer Panel' }).click();

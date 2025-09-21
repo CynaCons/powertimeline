@@ -221,7 +221,7 @@ export function seedNapoleonTimeline(): Event[] {
 }
 
 // Degradation testing seeders
-export function seedSingleColumnTest(_prev: Event[]): Event[] {
+export function seedSingleColumnTest(): Event[] {
   // Create exactly enough events to fill a single column (6-8 events)
   const base = Date.now() - 30 * dayMs;
   const events: Event[] = [];
@@ -239,11 +239,33 @@ export function seedSingleColumnTest(_prev: Event[]): Event[] {
   return events;
 }
 
-export function seedDualColumnTest(_prev: Event[]): Event[] {
+export function seedMinuteTest(): Event[] {
+  // Create events with minute-level precision for testing timeline zoom
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Start at midnight
+  const baseDate = today.toISOString().slice(0, 10); // YYYY-MM-DD format
+
+  const events: Event[] = [
+    { id: 'minute-01', date: baseDate, time: '09:00', title: 'Morning Meeting', description: 'Team standup meeting to discuss daily goals and priorities.' },
+    { id: 'minute-02', date: baseDate, time: '09:30', title: 'Coffee Break', description: 'Quick coffee break with colleagues in the kitchen area.' },
+    { id: 'minute-03', date: baseDate, time: '10:15', title: 'Client Call', description: 'Important client presentation about Q4 deliverables.' },
+    { id: 'minute-04', date: baseDate, time: '11:45', title: 'Code Review', description: 'Reviewing pull requests and discussing implementation details.' },
+    { id: 'minute-05', date: baseDate, time: '12:30', title: 'Lunch Break', description: 'Lunch at the local restaurant with the development team.' },
+    { id: 'minute-06', date: baseDate, time: '14:00', title: 'Design Session', description: 'Collaborative design session for the new timeline feature.' },
+    { id: 'minute-07', date: baseDate, time: '15:20', title: 'Bug Triage', description: 'Prioritizing and assigning critical bugs found in testing.' },
+    { id: 'minute-08', date: baseDate, time: '16:45', title: 'Sprint Planning', description: 'Planning next sprint goals and story point estimation.' },
+    { id: 'minute-09', date: baseDate, time: '17:30', title: 'Demo Prep', description: 'Preparing demonstration materials for tomorrow\'s client demo.' },
+    { id: 'minute-10', date: baseDate, time: '18:15', title: 'Team Sync', description: 'End-of-day sync to review progress and plan tomorrow.' }
+  ];
+
+  return events;
+}
+
+export function seedDualColumnTest(): Event[] {
   // Create enough events to require dual columns (12-16 events)
   const base = Date.now() - 30 * dayMs;
   const events: Event[] = [];
-  
+
   for (let i = 0; i < 12; i++) {
     const d = new Date(base + i * 2 * dayMs).toISOString().slice(0, 10);
     events.push({
@@ -257,7 +279,7 @@ export function seedDualColumnTest(_prev: Event[]): Event[] {
   return events;
 }
 
-export function seedCompactDegradationTest(_prev: Event[]): Event[] {
+export function seedCompactDegradationTest(): Event[] {
   // Create enough events to force compact degradation (18-24 events)
   const base = Date.now() - 30 * dayMs;
   const events: Event[] = [];
@@ -275,7 +297,7 @@ export function seedCompactDegradationTest(_prev: Event[]): Event[] {
   return events;
 }
 
-export function seedMultiEventTest(_prev: Event[]): Event[] {
+export function seedMultiEventTest(): Event[] {
   // Create enough events to force multi-event cards (30+ events)
   const base = Date.now() - 20 * dayMs;
   const events: Event[] = [];
@@ -293,7 +315,7 @@ export function seedMultiEventTest(_prev: Event[]): Event[] {
   return events;
 }
 
-export function seedInfiniteTest(_prev: Event[]): Event[] {
+export function seedInfiniteTest(): Event[] {
   // Create way too many events to force infinite cards (50+ events)
   const base = Date.now() - 25 * dayMs;
   const events: Event[] = [];

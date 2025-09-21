@@ -15,3 +15,44 @@ export function formatISODate(input: string): string {
 	const iso = d.toISOString();
 	return iso.slice(0, 10);
 }
+
+/**
+ * Get the full timestamp for an event that may have an optional time component.
+ * If event has a time field, combines date and time. Otherwise uses date only.
+ * Returns timestamp in milliseconds.
+ */
+export function getEventTimestamp(event: { date: string; time?: string }): number {
+	if (event.time) {
+		// Combine date and time: "YYYY-MM-DD" + " " + "HH:MM"
+		const dateTimeString = `${event.date} ${event.time}`;
+		const timestamp = new Date(dateTimeString).getTime();
+		if (!isNaN(timestamp)) {
+			return timestamp;
+		}
+	}
+
+	// Fallback to date only
+	return new Date(event.date).getTime();
+}
+
+/**
+ * Format an event's date and optional time for display.
+ * If event has time, shows both date and time. Otherwise shows date only.
+ */
+export function formatEventDateTime(event: { date: string; time?: string }): string {
+	const timestamp = getEventTimestamp(event);
+	const date = new Date(timestamp);
+
+	if (event.time) {
+		return date.toLocaleDateString('en-US', {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+			hour: 'numeric',
+			minute: '2-digit',
+			hour12: true
+		});
+	} else {
+		return date.toLocaleDateString();
+	}
+}

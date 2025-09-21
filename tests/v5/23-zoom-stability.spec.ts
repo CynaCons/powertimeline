@@ -244,7 +244,9 @@ test.describe('Timeline Zoom Stability Tests', () => {
       // Record initial view window
       const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
       const initialBox = await initialViewWindow.boundingBox();
+      // Calculate initial view center for reference (used for debugging)
       const initialViewCenter = (initialBox!.x + initialBox!.width * 0.5 - timelineBox!.x) / timelineBox!.width;
+      void initialViewCenter; // Mark as used for debugging purposes
       
       // Zoom in 3 times
       for (let i = 0; i < 3; i++) {

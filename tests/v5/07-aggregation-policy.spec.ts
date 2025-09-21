@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 
 test.describe('v5/07 Aggregation policy (telemetry)', () => {
