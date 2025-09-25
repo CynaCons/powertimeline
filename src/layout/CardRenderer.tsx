@@ -31,10 +31,14 @@ export function CardRenderer({
     onDoubleClick?.(card);
   };
 
+  // Get the event date for data attribute (handle both single event and multi-event cards)
+  const eventDate = Array.isArray(card.event) ? card.event[0]?.date : card.event.date;
+
   return (
     <div
       data-testid="event-card"
       data-event-id={card.id}
+      data-event-date={eventDate}
       data-card-type={card.cardType}
       data-cluster-id={card.clusterId}
       data-density={card.cardType}

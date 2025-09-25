@@ -47,6 +47,9 @@ export function DeterministicLayoutComponent({
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
   const [showColumnBorders, setShowColumnBorders] = useState(false);
+
+  // State for anchor-card pair highlighting
+  const [hoveredPairEventId, setHoveredPairEventId] = useState<string | null>(null);
   
   const updateSize = useCallback(() => {
     if (containerRef.current) {
@@ -77,21 +80,28 @@ export function DeterministicLayoutComponent({
   // Calculate timeline date range for axis ticks
   const timelineRange = useMemo(() => {
     if (events.length === 0) return null;
-    
+
     const dates = events.map(event => getEventTimestamp(event));
-    const fullMinDate = Math.min(...dates);
-    const fullMaxDate = Math.max(...dates);
-    const fullDateRange = fullMaxDate - fullMinDate;
-    
+    const rawMinDate = Math.min(...dates);
+    const rawMaxDate = Math.max(...dates);
+    const rawDateRange = rawMaxDate - rawMinDate;
+
+    // Add 2% padding to match LayoutEngine's time range calculation (lines 898-904)
+    // This ensures hover dates align with anchor positions
+    const padding = rawDateRange * 0.02;
+    const fullMinDate = rawMinDate - padding;
+    const fullMaxDate = rawMaxDate + padding;
+    const fullDateRange = rawDateRange + (padding * 2);
+
     // If zoomed (viewStart and viewEnd are not 0,1), calculate the visible time window
     if (viewStart !== 0 || viewEnd !== 1) {
       const visibleMinDate = fullMinDate + (viewStart * fullDateRange);
       const visibleMaxDate = fullMinDate + (viewEnd * fullDateRange);
       const visibleDateRange = visibleMaxDate - visibleMinDate;
-      
-      return { 
-        minDate: visibleMinDate, 
-        maxDate: visibleMaxDate, 
+
+      return {
+        minDate: visibleMinDate,
+        maxDate: visibleMaxDate,
         dateRange: visibleDateRange,
         fullMinDate,
         fullMaxDate,
@@ -99,13 +109,13 @@ export function DeterministicLayoutComponent({
         isZoomed: true
       };
     }
-    
-    return { 
-      minDate: fullMinDate, 
-      maxDate: fullMaxDate, 
+
+    return {
+      minDate: fullMinDate,
+      maxDate: fullMaxDate,
       dateRange: fullDateRange,
       fullMinDate,
-      fullMaxDate, 
+      fullMaxDate,
       fullDateRange,
       isZoomed: false
     };
@@ -129,23 +139,39 @@ export function DeterministicLayoutComponent({
     tToXPercent
   );
 
-  // Responsive timeline ticks based on actual viewport width
-  const fallbackTicks = timelineRange && viewportSize.width > 200 ? [
-    { t: timelineRange.minDate, label: new Date(timelineRange.minDate).getFullYear().toString(), x: viewportSize.width * 0.1 },
-    { t: timelineRange.minDate + (timelineRange.dateRange * 0.25), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.25)).getFullYear().toString(), x: viewportSize.width * 0.3 },
-    { t: timelineRange.minDate + (timelineRange.dateRange * 0.5), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.5)).getFullYear().toString(), x: viewportSize.width * 0.5 },
-    { t: timelineRange.minDate + (timelineRange.dateRange * 0.75), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.75)).getFullYear().toString(), x: viewportSize.width * 0.7 },
-    { t: timelineRange.maxDate, label: new Date(timelineRange.maxDate).getFullYear().toString(), x: viewportSize.width * 0.9 }
-  ] : [];
+  // Responsive timeline ticks based on actual viewport width - using margined coordinate system
+  const fallbackTicks = timelineRange && viewportSize.width > 200 ? (() => {
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const usableWidth = viewportSize.width - leftMargin - rightMargin;
+
+    return [
+      { t: timelineRange.minDate, label: new Date(timelineRange.minDate).getFullYear().toString(), x: leftMargin + usableWidth * 0.05 },
+      { t: timelineRange.minDate + (timelineRange.dateRange * 0.25), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.25)).getFullYear().toString(), x: leftMargin + usableWidth * 0.25 },
+      { t: timelineRange.minDate + (timelineRange.dateRange * 0.5), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.5)).getFullYear().toString(), x: leftMargin + usableWidth * 0.5 },
+      { t: timelineRange.minDate + (timelineRange.dateRange * 0.75), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.75)).getFullYear().toString(), x: leftMargin + usableWidth * 0.75 },
+      { t: timelineRange.maxDate, label: new Date(timelineRange.maxDate).getFullYear().toString(), x: leftMargin + usableWidth * 0.95 }
+    ];
+  })() : [];
 
   // Timeline scales use responsive positioning based on viewport width
   
   // Timeline scales now working with proper pixel-based coordinates
-  // Convert percentage-based ticks to pixel coordinates
-  const pixelTicks = timelineTicks.map(tick => ({
-    ...tick,
-    x: (tick.x / 100) * viewportSize.width // Convert 0-100% to 0-width pixels
-  }));
+  // Convert percentage-based ticks to pixel coordinates using the SAME coordinate system as cards/anchors
+  const pixelTicks = timelineTicks.map(tick => {
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const usableWidth = viewportSize.width - leftMargin - rightMargin;
+
+    return {
+      ...tick,
+      x: leftMargin + (tick.x / 100) * usableWidth // Convert 0-100% to margined coordinate system
+    };
+  });
   
   const finalTicks = pixelTicks.length > 0 ? pixelTicks : fallbackTicks;
 
@@ -220,17 +246,23 @@ export function DeterministicLayoutComponent({
     if (events.length === 0 || (viewStart === 0 && viewEnd === 1)) {
       return null; // No filtering when showing full timeline
     }
-    
-    // Calculate time range
+
+    // Calculate time range with same 2% padding as LayoutEngine and timelineRange
     const dates = events.map(e => getEventTimestamp(e));
-    const minDate = Math.min(...dates);
-    const maxDate = Math.max(...dates);
-    const dateRange = maxDate - minDate;
-    
-    // Calculate visible time window
-    const visibleStartTime = minDate + (dateRange * viewStart);
-    const visibleEndTime = minDate + (dateRange * viewEnd);
-    
+    const rawMinDate = Math.min(...dates);
+    const rawMaxDate = Math.max(...dates);
+    const rawDateRange = rawMaxDate - rawMinDate;
+
+    // Add 2% padding to match other time range calculations
+    const padding = rawDateRange * 0.02;
+    const paddedMinDate = rawMinDate - padding;
+    // const paddedMaxDate = rawMaxDate + padding;
+    const paddedDateRange = rawDateRange + (padding * 2);
+
+    // Calculate visible time window using padded dates
+    const visibleStartTime = paddedMinDate + (paddedDateRange * viewStart);
+    const visibleEndTime = paddedMinDate + (paddedDateRange * viewEnd);
+
     return { visibleStartTime, visibleEndTime };
   }, [events, viewStart, viewEnd]);
 
@@ -252,39 +284,15 @@ export function DeterministicLayoutComponent({
     return deterministicLayout.layout(events, viewWindow);
   }, [events, config, viewStart, viewEnd, viewTimeWindow]);
 
-  // Fix leftover anchors: Filter out anchors that don't have visible cards in current view
+  // Always show all anchors - they should persist even during card degradation
   const filteredAnchors = useMemo(() => {
-    if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER START: ${layoutResult.anchors.length} anchors, ${layoutResult.positionedCards.length} cards`);
-    
-    // When there are no positioned event cards, don't show any anchors either
-    if (layoutResult.positionedCards.length === 0) {
-      if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER: Returning [] because no positioned cards`);
-      return [];
-    }
-    
-    // Filter anchors to only include those with visible cards in current view
-    const filtered = layoutResult.anchors.filter(anchor => {
-      // Check if this anchor has any corresponding visible cards
-      const anchorCards = layoutResult.positionedCards.filter(card => {
-        const cardEventIds = Array.isArray(card.event) 
-          ? card.event.map(e => e.id) 
-          : [card.event.id];
-        return cardEventIds.some(id => anchor.eventIds?.includes(id));
-      });
-      
-      // Debug logging for leftover anchor detection  
-      if (DEBUG_LAYOUT) {
-        if (anchorCards.length === 0) console.log(`ANCHOR FILTER: Removing anchor ${anchor.id} - no matching cards`);
-        else console.log(`ANCHOR FILTER: Keeping anchor ${anchor.id} - has ${anchorCards.length} matching cards`);
-      }
-      
-      // Only show anchor if it has visible cards
-      return anchorCards.length > 0;
-    });
-    
-    if (DEBUG_LAYOUT) console.log(`ANCHOR FILTER RESULT: ${filtered.length} anchors kept`);
-    return filtered;
-  }, [layoutResult.anchors, layoutResult.positionedCards, DEBUG_LAYOUT]);
+    if (DEBUG_LAYOUT) console.log(`ANCHOR PERSISTENCE: Showing all ${layoutResult.anchors.length} anchors regardless of card visibility`);
+
+    // Return all anchors without filtering - anchors should always be visible
+    // even when cards are degraded or hidden. This ensures timeline reference points
+    // remain consistent and anchor-timeline alignment is preserved.
+    return layoutResult.anchors;
+  }, [layoutResult.anchors, DEBUG_LAYOUT]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
@@ -627,7 +635,7 @@ export function DeterministicLayoutComponent({
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
         
         // Determine if anchor's events are above or below timeline
-        const timelineY = config?.timelineY ?? viewportSize.height / 2;
+        // const timelineY = config?.timelineY ?? viewportSize.height / 2;
         const anchorCards = layoutResult.positionedCards.filter(card => {
           const cardEventIds = Array.isArray(card.event) 
             ? card.event.map(e => e.id) 
@@ -638,10 +646,10 @@ export function DeterministicLayoutComponent({
         if (anchorCards.length === 0) return null;
 
         // Determine connector direction based on card positions
-        const hasCardsAbove = anchorCards.some(card => card.y < timelineY);
-        const hasCardsBelow = anchorCards.some(card => card.y >= timelineY);
-        const connectsUp = hasCardsAbove;
-        const connectsDown = hasCardsBelow;
+        // const hasCardsAbove = anchorCards.some(card => card.y < timelineY);
+        // const hasCardsBelow = anchorCards.some(card => card.y >= timelineY);
+        // const connectsUp = hasCardsAbove;
+        // const connectsDown = hasCardsBelow;
         
         return (
           <div
@@ -652,18 +660,37 @@ export function DeterministicLayoutComponent({
           >
             <div
               data-testid="timeline-anchor"
-              className="flex flex-col items-center"
+              className="flex flex-col items-center cursor-pointer"
+              onMouseEnter={() => {
+                // Set hover state for the event this anchor represents
+                if (anchor.eventId) {
+                  setHoveredPairEventId(anchor.eventId);
+                }
+              }}
+              onMouseLeave={() => {
+                setHoveredPairEventId(null);
+              }}
             >
-              {/* Anchor dot */}
-              <div className="w-3 h-3 bg-gray-500 border border-gray-200 shadow-sm z-20" />
-
-              {/* Directional connector lines (render both if events exist on both sides) */}
-              {connectsUp && (
-                <div data-testid="connector-up" className="w-0.5 h-4 bg-gray-400 -mt-6" />
-              )}
-              {connectsDown && (
-                <div data-testid="connector-down" className="w-0.5 h-4 bg-gray-400 mt-2" />
-              )}
+              {/* Dark-metallic diamond anchor icon with coherent highlighting */}
+              <div
+                className={`w-3 h-3 border shadow-md z-20 transform rotate-45 transition-all duration-200 ${
+                  hoveredPairEventId === anchor.eventId
+                    ? 'scale-125 border-blue-400 shadow-blue-400/50 shadow-lg'
+                    : 'border-neutral-600'
+                }`}
+                style={{
+                  background: hoveredPairEventId === anchor.eventId
+                    ? 'linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%)'
+                    : 'linear-gradient(135deg, var(--color-neutral-700) 0%, var(--color-neutral-800) 50%, var(--color-neutral-700) 100%)',
+                  borderRadius: '1px',
+                  borderColor: hoveredPairEventId === anchor.eventId
+                    ? 'var(--color-primary-400)'
+                    : 'var(--color-neutral-600)',
+                  boxShadow: hoveredPairEventId === anchor.eventId
+                    ? '0 0 8px rgba(66, 165, 245, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                }}
+              />
 
               {/* Individual overflow badge - only show if NOT part of merged group */}
               {anchor.overflowCount > 0 && !isMerged && (
@@ -715,6 +742,7 @@ export function DeterministicLayoutComponent({
           } ${(() => {
             const eventId = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
             if (hoveredEventId === eventId) return 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg';
+            if (hoveredPairEventId === eventId) return 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg';
             return '';
           })()} text-sm`}
           style={{
@@ -725,6 +753,7 @@ export function DeterministicLayoutComponent({
             zIndex: (() => {
               const eventId = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
               if (hoveredEventId === eventId) return 20;
+              if (hoveredPairEventId === eventId) return 19;
               return 10;
             })()
           }}
@@ -739,12 +768,18 @@ export function DeterministicLayoutComponent({
           onMouseEnter={() => {
             try {
               const id = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
+              // Set pair highlighting for this card
+              setHoveredPairEventId(id);
+              // Call existing handler
               if (onCardMouseEnter) onCardMouseEnter(id);
             } catch {
               // Ignore card interaction errors
             }
           }}
           onMouseLeave={() => {
+            // Clear pair highlighting
+            setHoveredPairEventId(null);
+            // Call existing handler
             if (onCardMouseLeave) onCardMouseLeave();
           }}
         >

@@ -59,7 +59,13 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          const x = ((timestamp - minDate) / dateRange) * viewportSize.width;
+          // Use the same margined coordinate system as cards/anchors
+          const navRailWidth = 56;
+          const additionalMargin = 80;
+          const leftMargin = navRailWidth + additionalMargin; // 136px total
+          const rightMargin = 40;
+          const usableWidth = viewportSize.width - leftMargin - rightMargin;
+          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
           const label = date.toLocaleDateString('en-US', { month: 'short' });
 
           // Don't add if too close to existing primary tick
@@ -91,7 +97,13 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          const x = ((timestamp - minDate) / dateRange) * viewportSize.width;
+          // Use the same margined coordinate system as cards/anchors
+          const navRailWidth = 56;
+          const additionalMargin = 80;
+          const leftMargin = navRailWidth + additionalMargin; // 136px total
+          const rightMargin = 40;
+          const usableWidth = viewportSize.width - leftMargin - rightMargin;
+          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
           const label = date.getDate().toString();
 
           // Don't add if too close to existing ticks
@@ -122,7 +134,13 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          const x = ((timestamp - minDate) / dateRange) * viewportSize.width;
+          // Use the same margined coordinate system as cards/anchors
+          const navRailWidth = 56;
+          const additionalMargin = 80;
+          const leftMargin = navRailWidth + additionalMargin; // 136px total
+          const rightMargin = 40;
+          const usableWidth = viewportSize.width - leftMargin - rightMargin;
+          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
           const label = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             hour12: true
@@ -159,7 +177,13 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          const x = ((timestamp - minDate) / dateRange) * viewportSize.width;
+          // Use the same margined coordinate system as cards/anchors
+          const navRailWidth = 56;
+          const additionalMargin = 80;
+          const leftMargin = navRailWidth + additionalMargin; // 136px total
+          const rightMargin = 40;
+          const usableWidth = viewportSize.width - leftMargin - rightMargin;
+          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
           const label = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -245,7 +269,16 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     setHoverX(x);
 
     if (onDateHover) {
-      const ratio = x / viewportSize.width;
+      // Use the same margined coordinate system as cards/anchors
+      const navRailWidth = 56;
+      const additionalMargin = 80;
+      const leftMargin = navRailWidth + additionalMargin; // 136px total
+      const rightMargin = 40;
+      const usableWidth = viewportSize.width - leftMargin - rightMargin;
+
+      // Calculate ratio within the usable content area
+      const adjustedX = Math.max(0, x - leftMargin);
+      const ratio = Math.min(1, Math.max(0, adjustedX / usableWidth));
       const timestamp = timelineRange.minDate + (ratio * timelineRange.dateRange);
       onDateHover(new Date(timestamp));
     }
@@ -260,7 +293,17 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     if (onTimelineClick) {
       const rect = e.currentTarget.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const ratio = x / viewportSize.width;
+
+      // Use the same margined coordinate system as hover date calculation
+      const navRailWidth = 56;
+      const additionalMargin = 80;
+      const leftMargin = navRailWidth + additionalMargin; // 136px total
+      const rightMargin = 40;
+      const usableWidth = viewportSize.width - leftMargin - rightMargin;
+
+      // Calculate ratio within the usable content area
+      const adjustedX = Math.max(0, x - leftMargin);
+      const ratio = Math.min(1, Math.max(0, adjustedX / usableWidth));
       const timestamp = timelineRange.minDate + (ratio * timelineRange.dateRange);
       onTimelineClick(new Date(timestamp));
     }
@@ -269,7 +312,17 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
   // Get date at hover position
   const hoverDate = useMemo(() => {
     if (hoverX === null) return null;
-    const ratio = hoverX / viewportSize.width;
+
+    // Use the same margined coordinate system as cards/anchors
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const usableWidth = viewportSize.width - leftMargin - rightMargin;
+
+    // Calculate ratio within the usable content area
+    const adjustedX = Math.max(0, hoverX - leftMargin);
+    const ratio = Math.min(1, Math.max(0, adjustedX / usableWidth));
     const timestamp = timelineRange.minDate + (ratio * timelineRange.dateRange);
     return new Date(timestamp);
   }, [hoverX, timelineRange, viewportSize.width]);

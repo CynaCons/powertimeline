@@ -27,6 +27,7 @@ import {
   seedJFKTimeline,
   seedNapoleonTimeline,
   seedDeGaulleTimeline,
+  seedFrenchRevolutionTimeline,
   seedIncremental as seedIncrementalUtil,
   seedMinuteTest as seedMinuteTestUtil
 } from './lib/devSeed';
@@ -196,7 +197,7 @@ function App() {
 
           // Use the card's visual position for zoom (keep it stable under cursor)
           if (rect) {
-            zoomAtCursor(zoomFactor, cardCenterX, rect.width, rect.left, rect.width);
+            zoomAtCursor(zoomFactor, cardCenterX, window.innerWidth, rect.left, rect.width);
             return;
           } else {
             zoomAtCursor(zoomFactor, cardCenterX, window.innerWidth);
@@ -207,7 +208,7 @@ function App() {
 
       // Fall back to cursor-centered zoom
       if (rect) {
-        zoomAtCursor(zoomFactor, cursorX, rect.width, rect.left, rect.width);
+        zoomAtCursor(zoomFactor, cursorX, window.innerWidth, rect.left, rect.width);
       } else {
         zoomAtCursor(zoomFactor, cursorX, window.innerWidth);
       }
@@ -377,6 +378,13 @@ function App() {
 
   const seedDeGaulle = useCallback(() => {
     const data = seedDeGaulleTimeline();
+    setEvents(data);
+    storageRef.current.writeThrough(data);
+    setSelectedId(undefined);
+  }, []);
+
+  const seedFrenchRevolution = useCallback(() => {
+    const data = seedFrenchRevolutionTimeline();
     setEvents(data);
     storageRef.current.writeThrough(data);
     setSelectedId(undefined);
@@ -638,6 +646,7 @@ function App() {
                       <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK</button>
                       <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon</button>
                       <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">De Gaulle</button>
+                      <button onClick={seedFrenchRevolution} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">French Revolution</button>
                       <button onClick={seedMinuteTest} className="block w-full text-left px-2 py-1 hover:bg-orange-100 text-orange-700 text-sm">⏰ Minute Test</button>
                       <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Random (10)</button>
                       <button onClick={seedClustered} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Clustered</button>
@@ -736,17 +745,33 @@ function App() {
             {/* Timeline selection overlay */}
             {timelineSelection?.isSelecting && (
               <div
-                className="absolute pointer-events-none z-30"
+                className="absolute pointer-events-none z-30 transition-all duration-75 ease-out"
                 style={{
                   left: Math.min(timelineSelection.startX, timelineSelection.currentX),
                   top: 0,
                   width: Math.abs(timelineSelection.currentX - timelineSelection.startX),
                   height: '100%',
-                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                  border: '1px solid rgb(59, 130, 246)',
-                  boxShadow: '0 0 10px rgba(59, 130, 246, 0.3)'
+                  background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)',
+                  border: '2px solid rgb(59, 130, 246)',
+                  borderRadius: '4px',
+                  boxShadow: '0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.1)'
                 }}
-              />
+              >
+                {/* Left edge indicator */}
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-lg"
+                  style={{ marginLeft: '-1px' }}
+                />
+                {/* Right edge indicator */}
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-1 bg-blue-500 shadow-lg"
+                  style={{ marginRight: '-1px' }}
+                />
+                {/* Selection info overlay */}
+                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-lg font-mono">
+                  Select to Zoom
+                </div>
+              </div>
             )}
               {renderLiveRegion()}
               

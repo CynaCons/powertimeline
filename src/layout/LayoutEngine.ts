@@ -103,20 +103,27 @@ export class DeterministicLayoutV5 {
     if (events.length === 0) {
       return this.emptyResult();
     }
-    
+
+
     // Store view window context for overflow filtering (stored in this.currentTimeWindow below)
 
     // Filter events by view window if provided (for zoomed views)
     let layoutEvents = events;
     if (viewWindow && (viewWindow.viewStart !== 0 || viewWindow.viewEnd !== 1)) {
       const dates = events.map(e => getEventTimestamp(e));
-      const minDate = Math.min(...dates);
-      const maxDate = Math.max(...dates);
-      const dateRange = maxDate - minDate;
-      
-      const visibleStartTime = minDate + (dateRange * viewWindow.viewStart);
-      const visibleEndTime = minDate + (dateRange * viewWindow.viewEnd);
-      
+      const rawMinDate = Math.min(...dates);
+      const rawMaxDate = Math.max(...dates);
+      const rawDateRange = rawMaxDate - rawMinDate;
+
+      // Add 2% padding to match other time range calculations (DeterministicLayoutComponent and LayoutEngine.calculateTimeRange)
+      const padding = rawDateRange * 0.02;
+      const paddedMinDate = rawMinDate - padding;
+      // const paddedMaxDate = rawMaxDate + padding;
+      const paddedDateRange = rawDateRange + (padding * 2);
+
+      const visibleStartTime = paddedMinDate + (paddedDateRange * viewWindow.viewStart);
+      const visibleEndTime = paddedMinDate + (paddedDateRange * viewWindow.viewEnd);
+
       // Store time window for overflow event filtering
       this.currentTimeWindow = { visibleStartTime, visibleEndTime };
       
@@ -130,8 +137,23 @@ export class DeterministicLayoutV5 {
       this.currentTimeWindow = null;
     }
 
-    // Calculate time range from filtered events (for proper viewport usage when zoomed)
-    this.calculateTimeRange(layoutEvents);
+    // Calculate time range - use view window range when zoomed to maintain alignment
+    if (viewWindow && this.currentTimeWindow) {
+      // When zoomed, use the view window time range for consistent anchor-timeline alignment
+      const { visibleStartTime, visibleEndTime } = this.currentTimeWindow;
+      const visibleDuration = visibleEndTime - visibleStartTime;
+
+      this.timeRange = {
+        startTime: visibleStartTime,
+        endTime: visibleEndTime,
+        duration: visibleDuration
+      };
+
+      this.dlog(`ZOOM TIME RANGE: Using view window range ${new Date(visibleStartTime).toISOString()} to ${new Date(visibleEndTime).toISOString()}`);
+    } else {
+      // When not zoomed, calculate from all events as before
+      this.calculateTimeRange(layoutEvents);
+    }
 
     // Calculate adaptive half-column width for telemetry (Stage 3i1)
     const adaptiveHalfColumnWidth = this.calculateAdaptiveHalfColumnWidth();
@@ -358,8 +380,8 @@ export class DeterministicLayoutV5 {
     // Sort by centerX position
     halfColumns.sort((a, b) => a.centerX - b.centerX);
     
-    // Use adaptive half-column width as minimum spacing to prevent overlaps
-    const minSpacing = adaptiveHalfColumnWidth; // 340px - ensures no overlap between half-columns
+    // CC-REQ-LAYOUT-004: Adjustable horizontal cluster spacing - reduced for tighter visual organization
+    const minSpacing = adaptiveHalfColumnWidth * 0.75; // 255px (was 340px) - tighter spacing between clusters
     
     // Ensure minimum spacing between adjacent half-columns
     for (let i = 1; i < halfColumns.length; i++) {
@@ -665,29 +687,36 @@ export class DeterministicLayoutV5 {
       // Filter overflow events by current view window to prevent leftover indicators
       const relevantOverflowEvents = group.overflowEvents ? this.filterEventsByViewWindow(group.overflowEvents) : [];
       
-      // Also filter main group events by view window to check if anchor is relevant
-      const relevantGroupEvents = this.filterEventsByViewWindow(group.events);
+      // CC-REQ-ANCHOR-004: For anchor persistence, don't filter events by view window
+      // Anchors should always be visible regardless of view window to maintain timeline reference
+      const relevantGroupEvents = group.events;
       const totalRelevantEvents = relevantGroupEvents.length + relevantOverflowEvents.length;
       const visibleCount = actualCards.length;
       const overflowCount = Math.max(0, totalRelevantEvents - visibleCount);
-      
-      // Only add anchors if we have visible cards OR overflow within current view window
-      if (visibleCount > 0 || overflowCount > 0) {
+
+
+      // CC-REQ-ANCHOR-004: Always create anchors for events in view window, regardless of card visibility
+      // Anchors should be persistent even when cards are completely degraded away
+      if (relevantGroupEvents.length > 0) {
         // Create individual anchors for each event at precise timeline positions
         const clusterPosition: 'above' | 'below' = isAboveHalfColumn ? 'above' : 'below';
         const eventAnchors = this.createEventAnchors(relevantGroupEvents, group.id, clusterPosition);
+
+        // Distribute overflow count among visible anchors
+        if (overflowCount > 0 && eventAnchors.length > 0) {
+          // For simplicity, assign all overflow to the last visible anchor in the cluster
+          // This represents the overflow for the entire cluster group
+          const lastAnchor = eventAnchors[eventAnchors.length - 1];
+          lastAnchor.overflowCount = overflowCount;
+          lastAnchor.visibleCount = visibleCount;
+
+          this.dlog(`  Assigned overflow count ${overflowCount} to anchor ${lastAnchor.id} in cluster ${group.id}`);
+        }
+
         anchors.push(...eventAnchors);
 
-        // Also create overflow event anchors if any
-        if (relevantOverflowEvents.length > 0) {
-          const overflowAnchors = this.createEventAnchors(relevantOverflowEvents, group.id, clusterPosition);
-          // Mark overflow anchors as having overflow
-          overflowAnchors.forEach(anchor => {
-            anchor.overflowCount = 1; // Each overflow event contributes to overflow count
-            anchor.visibleCount = 0; // Overflow events are not visible
-          });
-          anchors.push(...overflowAnchors);
-        }
+        // Note: No longer creating separate overflow anchors - overflow is represented
+        // by overflow count on visible anchors instead
         
         // Respect half-column pre-determined position (above vs below)
         const aboveCards = isAboveHalfColumn ? actualCards.slice(0, cardsAboveLimit) : [];
@@ -695,7 +724,7 @@ export class DeterministicLayoutV5 {
         
         // Position above cards with dynamic sizing and proper spacing
         // Add extra spacing to create room for upper anchor line
-        const upperAnchorSpacing = 15; // Additional space for upper anchor line
+        const upperAnchorSpacing = 25; // Additional space for upper anchor line
         let aboveY = this.timelineY - timelineMargin - upperAnchorSpacing;
         aboveCards.forEach((card) => {
           // Use card config height for positioning
@@ -712,7 +741,7 @@ export class DeterministicLayoutV5 {
         
         // Position below cards with dynamic sizing and proper spacing
         // Add extra spacing to create room for lower anchor line
-        const lowerAnchorSpacing = 15; // Additional space for lower anchor line
+        const lowerAnchorSpacing = 25; // Additional space for lower anchor line
         let belowY = this.timelineY + timelineMargin + lowerAnchorSpacing;
         belowCards.forEach((card) => {
           // Use card config height for positioning
@@ -841,11 +870,15 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
       const eventTime = getEventTimestamp(event);
       let eventXPos: number;
 
-      // Calculate precise X position for this event
+      // Calculate precise X position for this event using the same coordinate system as cards
       if (this.timeRange && this.timeRange.duration > 0) {
         const timeRatio = (eventTime - this.timeRange.startTime) / this.timeRange.duration;
-        const leftMargin = 70; // Navigation rail width
-        const usableWidth = this.config.viewportWidth - 140; // Account for both sides
+        // Use same margin calculation as card positioning (lines 181-185)
+        const navRailWidth = 56;
+        const additionalMargin = 80;
+        const leftMargin = navRailWidth + additionalMargin; // 136px total
+        const rightMargin = 40;
+        const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
         eventXPos = leftMargin + (timeRatio * usableWidth);
       } else {
         // Fallback positioning
@@ -853,8 +886,9 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
       }
 
       // Calculate anchor Y position based on cluster position (split-level system)
-      const upperAnchorSpacing = 15;
-      const lowerAnchorSpacing = 15;
+      // Increased spacing to create more visual separation without vertical lines
+      const upperAnchorSpacing = 25;
+      const lowerAnchorSpacing = 25;
       const anchorY = clusterPosition === 'above'
         ? this.timelineY - (upperAnchorSpacing / 2) // Upper anchor line
         : this.timelineY + (lowerAnchorSpacing / 2); // Lower anchor line
