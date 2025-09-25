@@ -431,6 +431,40 @@ function App() {
     setActiveNavItem('create');
   }, []);
 
+  // Event navigation functions
+  const navigateToPreviousEvent = useCallback(() => {
+    const sortedEvents = [...events].sort((a, b) =>
+      new Date(a.date + (a.time || '00:00')).getTime() - new Date(b.date + (b.time || '00:00')).getTime()
+    );
+    const currentIndex = sortedEvents.findIndex(e => e.id === selectedId);
+    if (currentIndex > 0) {
+      setSelectedId(sortedEvents[currentIndex - 1].id);
+    }
+  }, [events, selectedId]);
+
+  const navigateToNextEvent = useCallback(() => {
+    const sortedEvents = [...events].sort((a, b) =>
+      new Date(a.date + (a.time || '00:00')).getTime() - new Date(b.date + (b.time || '00:00')).getTime()
+    );
+    const currentIndex = sortedEvents.findIndex(e => e.id === selectedId);
+    if (currentIndex >= 0 && currentIndex < sortedEvents.length - 1) {
+      setSelectedId(sortedEvents[currentIndex + 1].id);
+    }
+  }, [events, selectedId]);
+
+  const selectEvent = useCallback((eventId: string) => {
+    setSelectedId(eventId);
+  }, []);
+
+  const createNewEvent = useCallback(() => {
+    setSelectedId(undefined);
+    setEditDate('');
+    setEditTime('');
+    setEditTitle('');
+    setEditDescription('');
+    // Keep the overlay open so user can create the new event
+  }, []);
+
   const openDev = useCallback(() => {
     setOverlay(overlay === 'dev' ? null : 'dev');
     setActiveNavItem('dev');
@@ -630,6 +664,11 @@ function App() {
                   onSave={saveAuthoring}
                   onDelete={deleteSelected}
                   onClose={() => setOverlay(null)}
+                  allEvents={events}
+                  onNavigatePrev={navigateToPreviousEvent}
+                  onNavigateNext={navigateToNextEvent}
+                  onSelectEvent={selectEvent}
+                  onCreateNew={createNewEvent}
                 />
               </Suspense>
             )}
@@ -709,22 +748,23 @@ function App() {
           </div>
         )}
 
+        {/* Timeline minimap positioned fixed to ensure proper z-index layering above overlays */}
+        {events.length > 0 && (
+          <div className="fixed top-1 left-20 right-4 z-[90] pointer-events-auto">
+            <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
+              <TimelineMinimap
+                events={events}
+                viewStart={viewStart}
+                viewEnd={viewEnd}
+                onNavigate={setWindow}
+                highlightedEventId={selectedId}
+              />
+            </Suspense>
+          </div>
+        )}
+
         {/* Main timeline area shifts right to avoid sidebar overlap */}
         <div className="absolute inset-0 ml-14">
-          {/* Timeline minimap at top of timeline area */}
-          {events.length > 0 && (
-            <div className="absolute top-1 left-4 right-4 z-40">
-              <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
-                <TimelineMinimap
-                  events={events}
-                  viewStart={viewStart}
-                  viewEnd={viewEnd}
-                  onNavigate={setWindow}
-                />
-              </Suspense>
-            </div>
-          )}
-          
           {/* Timeline takes full available space */}
           <div
             className="w-full h-full relative"

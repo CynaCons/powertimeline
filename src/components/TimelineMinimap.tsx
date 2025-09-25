@@ -7,14 +7,16 @@ interface TimelineMinimapProps {
   viewEnd: number;
   onNavigate: (start: number, end: number) => void;
   className?: string;
+  highlightedEventId?: string;
 }
 
-export function TimelineMinimap({ 
-  events, 
-  viewStart, 
-  viewEnd, 
-  onNavigate, 
-  className = "" 
+export function TimelineMinimap({
+  events,
+  viewStart,
+  viewEnd,
+  onNavigate,
+  className = "",
+  highlightedEventId
 }: TimelineMinimapProps) {
   
   // Drag state for view window sliding
@@ -191,18 +193,25 @@ export function TimelineMinimap({
             }}
           />
           {/* Enhanced event density markers */}
-          {eventMarkers.map((marker, index) => (
-            <div
-              key={index}
-              className="absolute top-0 w-0.5 h-2 bg-primary-500 opacity-60 hover:opacity-100 transition-all duration-200 ease-out transform hover:scale-110"
-              style={{
-                left: `${marker.position * 100}%`,
-                transform: `translateX(-50%) ${isHovering ? 'scaleY(1.2)' : ''}`,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-              }}
-              title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
-            />
-          ))}
+          {eventMarkers.map((marker, index) => {
+            const isHighlighted = highlightedEventId === marker.event.id;
+            return (
+              <div
+                key={index}
+                className={`absolute top-0 transition-all duration-200 ease-out transform hover:scale-110 ${
+                  isHighlighted
+                    ? 'w-2 h-3 bg-red-600 opacity-100 animate-pulse border border-white shadow-lg rounded-sm'
+                    : 'w-0.5 h-2 bg-primary-500 opacity-60 hover:opacity-100'
+                }`}
+                style={{
+                  left: `${marker.position * 100}%`,
+                  transform: `translateX(-50%) ${isHovering ? 'scaleY(1.2)' : ''}`,
+                  boxShadow: isHighlighted ? '0 2px 8px rgba(220, 38, 38, 0.5)' : '0 1px 3px rgba(0,0,0,0.2)'
+                }}
+                title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
+              />
+            );
+          })}
           
           {/* Enhanced current view window indicator */}
           <div
