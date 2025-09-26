@@ -300,6 +300,37 @@
 
 ---
 
+## Task 2025-09-26 - README Refresh
+**Goal:** Improve contributor onboarding and usage guidance in README.md
+
+- [ ] Evaluate current README coverage and gaps
+- [ ] Define target structure and key sections
+- [ ] Align content with existing architecture/docs references
+- [ ] Update README.md with new guidance and examples
+- [ ] Validate formatting and linting requirements
+
+## Task 2025-09-26 - Authoring Overlay Prop Alignment
+**Goal:** Resolve TypeScript build failure by aligning editor overlay props with new navigation features
+
+- [ ] Compare `AuthoringOverlay` prop interface with `App.tsx` usage
+- [ ] Implement navigation panel updates and required props
+- [ ] Verify build locally with `npm run build`
+- [ ] Document results and testing status
+
+---
+
+## Task 2025-09-26 - Deploy Latest Changes
+**Goal:** Stage, commit, and push current Chronochart updates to main
+
+- [x] Document deployment plan in PLAN.md
+- [x] Verify working tree status and run `npm run build`
+- [x] Stage files and prepare commit details
+- [x] Add lint-staged TypeScript project script and update config
+- [x] Commit changes with summary message
+- [ ] Push commit to origin/main and verify
+
+---
+
 ## Iteration v0.3.0 - Enhanced Event Editor
 **Goal:** Add comprehensive event navigation and editing improvements
 

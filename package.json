@@ -56,7 +56,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
-      "tsc --noEmit --skipLibCheck"
+      "node scripts/typecheck-lint-staged.mjs"
     ]
   }
 }
