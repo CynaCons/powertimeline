@@ -300,37 +300,6 @@
 
 ---
 
-## Task 2025-09-26 - README Refresh
-**Goal:** Improve contributor onboarding and usage guidance in README.md
-
-- [ ] Evaluate current README coverage and gaps
-- [ ] Define target structure and key sections
-- [ ] Align content with existing architecture/docs references
-- [ ] Update README.md with new guidance and examples
-- [ ] Validate formatting and linting requirements
-
-## Task 2025-09-26 - Authoring Overlay Prop Alignment
-**Goal:** Resolve TypeScript build failure by aligning editor overlay props with new navigation features
-
-- [ ] Compare `AuthoringOverlay` prop interface with `App.tsx` usage
-- [ ] Implement navigation panel updates and required props
-- [ ] Verify build locally with `npm run build`
-- [ ] Document results and testing status
-
----
-
-## Task 2025-09-26 - Deploy Latest Changes
-**Goal:** Stage, commit, and push current Chronochart updates to main
-
-- [x] Document deployment plan in PLAN.md
-- [x] Verify working tree status and run `npm run build`
-- [x] Stage files and prepare commit details
-- [x] Add lint-staged TypeScript project script and update config
-- [x] Commit changes with summary message
-- [x] Push commit to origin/main and verify
-
----
-
 ## Iteration v0.3.0 - Enhanced Event Editor
 **Goal:** Add comprehensive event navigation and editing improvements
 
@@ -384,29 +353,437 @@
 
 ---
 
-## Upcoming v0.5.0 (Performance & Robustness)
-**Goal:** Optimize performance for large datasets and improve system robustness
+## Iteration v0.3.1 - Documentation & Authoring Hardening
+**Goal:** Stabilize authoring overlay integration, refresh contributor docs, and ensure deployment tooling is reliable
 
-- [ ] Performance optimization for large datasets
-- [ ] Finish degradation system work items
-- [ ] Advanced telemetry collection
-- [ ] Memory usage optimization
-- [ ] Enhanced error handling
+- [x] Refresh README with quick links, setup, testing, and troubleshooting guidance
+- [x] Align `AuthoringOverlay` props and layout with navigation panel requirements
+- [x] Validate `npm run build` locally after overlay updates
+- [x] Introduce lint-staged TypeScript project script for bundler-aware checks
+- [x] Stage, commit, and push updates to `main`, documenting progress in PLAN
 
-## Upcoming v0.6.0 (Features)
-**Goal:** Add advanced features and interactivity
+---
 
-- [ ] Multi-event aggregation cards
-- [ ] Advanced clustering algorithms
-- [ ] Interactive anchor behaviors
-- [ ] Mobile/touch support
-- [ ] Accessibility compliance
+# Major Cleanup Phase (v0.3.x Continuation)
 
-## v1.0.0 Goals
-**Goal:** Production-ready release with complete feature set
+**Preparing the codebase for the collaborative platform transformation starting in v0.4.x**
 
-- [ ] Production-ready performance
-- [ ] Complete test coverage
-- [ ] Full accessibility support
-- [ ] Comprehensive documentation
-- [ ] Stable API for external use
+## Iteration v0.3.2 - Critical Code Quality Fixes
+**Goal:** Eliminate all ESLint errors and fix immediate technical debt
+
+**Validation:** All ESLint errors resolved, build passes, tests still pass
+
+- [ ] Fix all 17 ESLint errors (no-explicit-any, unused variables, switch case declarations)
+  - [ ] Replace `any` types in `src/layout/types.ts` (5 errors)
+  - [ ] Replace `any` types in `src/timeline/Node/Node.tsx` (3 errors)
+  - [ ] Replace `any` type in `src/utils/performanceMonitor.ts` (1 error)
+  - [ ] Replace `any` type in `src/utils/yamlSerializer.ts` (1 error)
+  - [ ] Fix unused variables in `src/utils/timelineTickGenerator.ts` (2 errors)
+  - [ ] Fix switch case declarations in `src/utils/timelineTickGenerator.ts` (4 errors)
+  - [ ] Fix React Hook dependency warning in `src/timeline/hooks/useSlotLayout.ts`
+- [ ] Update package.json version from 0.2.0 to 0.3.0
+- [ ] Clean up disabled files: remove or re-enable `.disabled` files
+  - [ ] Evaluate `src/layout/DegradationEngine.ts.disabled`
+  - [ ] Evaluate `src/pages/SlotLayoutTest.tsx.disabled`
+- [ ] Resolve outstanding TODOs
+  - [ ] Complete Firebase config in `src/lib/firebase.ts`
+  - [ ] Fix useAxisTicks hook in `src/layout/DeterministicLayoutComponent.tsx`
+
+**Validation Tests:**
+- [ ] Run `npm run lint` → 0 errors
+- [ ] Run `npm run typecheck` → passes
+- [ ] Run `npm run build` → successful build
+- [ ] Run 3 foundation tests → all pass
+- [ ] Manual test: French Revolution timeline loads and functions correctly
+
+## Iteration v0.3.3 - Architecture Refactoring
+**Goal:** Extract Dev Panel from App.tsx and improve component organization
+
+**Validation:** App.tsx significantly reduced, all functionality preserved
+
+- [ ] Extract inline Dev Panel (lines 675-747) from App.tsx into `src/app/panels/DevPanel.tsx`
+- [ ] Reduce App.tsx from 869 lines to under 600 lines
+- [ ] Add React Error Boundaries to prevent app crashes
+  - [ ] Create `src/components/ErrorBoundary.tsx`
+  - [ ] Wrap main App components with error boundaries
+- [ ] Standardize component patterns (choose function vs arrow function style)
+- [ ] Clean up commented code and unused imports in App.tsx
+- [ ] Improve separation of concerns: UI vs business logic
+
+**Validation Tests:**
+- [ ] Dev Panel functions identically after extraction
+- [ ] All sample data buttons work (French Revolution, RFK, etc.)
+- [ ] Timeline export/import functionality preserved
+- [ ] Error boundary triggers on intentional error (test crash)
+- [ ] App continues working after component crash within boundary
+
+## Iteration v0.3.4 - Layout Engine Modularization
+**Goal:** Split the 1,100+ line LayoutEngine.ts into focused modules
+
+**Validation:** Layout functionality unchanged, code organization improved
+
+- [ ] Split `DeterministicLayoutV5` class into focused modules:
+  - [ ] `src/layout/engine/DispatchEngine.ts` - Event dispatching and half-columns
+  - [ ] `src/layout/engine/DegradationEngine.ts` - Card type degradation system
+  - [ ] `src/layout/engine/PositioningEngine.ts` - Card positioning and collision resolution
+  - [ ] `src/layout/engine/MetricsCalculator.ts` - Telemetry and metrics
+- [ ] Maintain single entry point through `src/layout/LayoutEngine.ts`
+- [ ] Add comprehensive JSDoc documentation to new modules
+- [ ] Keep all existing telemetry and debugging functionality
+
+**Validation Tests:**
+- [ ] All 65+ playwright tests continue to pass
+- [ ] Layout telemetry data matches previous values
+- [ ] Performance remains identical (no regression)
+- [ ] French Revolution timeline layout identical to v0.3.0
+- [ ] Degradation system functions correctly (full → compact → title-only)
+
+## Iteration v0.3.5 - Production Readiness Improvements
+**Goal:** Add environment configuration and error tracking foundation
+
+**Validation:** App works in both development and production modes
+
+- [ ] Add environment configuration system
+  - [ ] Create `src/config/environment.ts` for dev/prod settings
+  - [ ] Move Firebase config to environment variables
+  - [ ] Add development vs production mode detection
+- [ ] Improve bundle optimization
+  - [ ] Audit MUI imports for tree shaking
+  - [ ] Optimize lazy loading strategy
+  - [ ] Review bundle analyzer results
+- [ ] Add error tracking foundation (prepare for production monitoring)
+  - [ ] Create error logging utilities
+  - [ ] Add basic performance monitoring hooks
+- [ ] Security audit preparation
+  - [ ] Review dependency vulnerabilities with `npm audit`
+  - [ ] Secure Firebase configuration for production
+
+**Validation Tests:**
+- [ ] `npm run build` produces optimized production build
+- [ ] Production build runs correctly with `npm run preview`
+- [ ] Bundle size not significantly increased
+- [ ] All lazy-loaded components load correctly
+- [ ] Development mode still has debug features
+- [ ] Production mode has clean console output
+
+## Iteration v0.3.6 - Event Panel Interactive Highlighting
+**Goal:** Add visual connection between event panel and timeline through hover highlighting
+
+**Validation:** Hover interactions work smoothly without performance impact
+
+- [ ] Implement event hover highlighting system in OutlinePanel
+  - [ ] Add onMouseEnter/onMouseLeave handlers to ListItemButton components
+  - [ ] Create new state for panel-hovered event ID
+  - [ ] Pass hover callbacks through OutlinePanel props interface
+- [ ] Connect panel hover state to main App.tsx state management
+  - [ ] Add panelHoveredEventId state to App.tsx
+  - [ ] Pass hover handlers from App.tsx to OutlinePanel
+  - [ ] Update hoveredEventId state when panel items are hovered
+- [ ] Enhance timeline rendering to show panel-hover highlighting
+  - [ ] Update DeterministicLayoutComponent to receive panelHoveredEventId
+  - [ ] Add visual highlighting for anchors when event is hovered in panel
+  - [ ] Add visual highlighting for event cards when event is hovered in panel
+  - [ ] Use distinct visual style (different from regular hover/selection)
+- [ ] Implement cross-highlighting visual design
+  - [ ] Panel hover → Timeline anchor: glowing ring or pulsing animation
+  - [ ] Panel hover → Timeline card: subtle border highlight or glow effect
+  - [ ] Ensure highlighting is distinct from selection and regular hover states
+  - [ ] Use consistent color scheme (possibly green to distinguish from red selection)
+
+**Technical Implementation:**
+- [ ] Update OutlinePanel interface to include hover callbacks
+- [ ] Modify App.tsx to manage panel hover state separately from timeline hover
+- [ ] Update CardRenderer to handle panel-hover highlighting state
+- [ ] Ensure hover performance doesn't cause layout thrashing
+- [ ] Add proper cleanup of hover states when panel closes
+
+**Validation Tests:**
+- [ ] Open Events panel → hover over event items highlights corresponding timeline elements
+- [ ] Timeline highlighting appears instantly on panel hover (no delay/lag)
+- [ ] Timeline highlighting disappears when mouse leaves panel item
+- [ ] Panel highlighting works independently of timeline hover states
+- [ ] No visual conflicts between selection, hover, and panel-hover states
+- [ ] Performance test: Rapid hovering over panel items doesn't cause frame drops
+- [ ] Cross-browser test: Hover highlighting works in Chrome, Firefox, Safari
+
+**User Experience Goals:**
+- [ ] Intuitive visual connection between panel list and timeline elements
+- [ ] Helps users quickly locate events on busy timelines
+- [ ] Smooth, responsive interaction without visual glitches
+- [ ] Clear distinction between different interaction states (hover vs select vs panel-hover)
+
+## Iteration v0.3.7 - Product Vision Evolution & PRD Update
+**Goal:** Update product requirements to reflect collaborative platform transformation
+
+**Validation:** PRD clearly articulates the "GitHub for Timelines" vision and roadmap
+
+- [ ] Update PRD.md with collaborative platform vision
+  - [ ] Transform from "timeline visualization tool" to "collaborative documentation platform"
+  - [ ] Add "GitHub for Timelines" concept with fork/merge workflow
+  - [ ] Update goals to include user accounts, version control, and social features
+  - [ ] Revise non-goals to reflect platform ambitions
+- [ ] Add new user stories for collaborative features
+  - [ ] Timeline forking and attribution
+  - [ ] Version history and merge requests
+  - [ ] User profiles and discovery
+  - [ ] Social engagement and following
+- [ ] Update technical requirements for backend integration
+  - [ ] Firebase Firestore for metadata and user management
+  - [ ] Cloud Storage for timeline content files
+  - [ ] Authentication and authorization systems
+  - [ ] API design for collaborative features
+- [ ] Define new success metrics for platform adoption
+  - [ ] User registration and retention rates
+  - [ ] Timeline creation and sharing metrics
+  - [ ] Fork and merge activity
+  - [ ] Community engagement indicators
+
+**Validation Tests:**
+- [ ] PRD clearly explains the platform transformation from v0.4.x onwards
+- [ ] Stakeholders can understand the "GitHub for Timelines" concept
+- [ ] Technical requirements align with v0.4.x-v0.8.x implementation plan
+- [ ] Success metrics enable tracking of platform growth and engagement
+
+---
+
+# Major Platform Evolution (v0.4.x+)
+
+ChronoChart evolves from a timeline visualization tool into a collaborative platform for documenting events. Think "GitHub for Timelines" - users can create timelines, fork others' work, and contribute to collective documentation of history.
+
+## Phase 1: Backend Foundation (v0.4.x)
+**Goal: Transform ChronoChart into "GitHub for Timelines" with git-based storage and Google Auth**
+
+### v0.4.0 - Internal Git-Based Timeline Storage Infrastructure & Rebranding
+**Goal:** Establish internal git repository system for timeline storage with JSON format and rebrand to PowerTimeline
+
+**Validation:** Timelines can be saved/loaded from internal git repositories with proper version history, and app is rebranded to PowerTimeline
+
+- [ ] **Rebrand ChronoChart to PowerTimeline**
+  - [ ] Update package.json name from "chronochart" to "powertimeline"
+  - [ ] Update HTML title and meta tags to "PowerTimeline"
+  - [ ] Update app header and branding throughout UI
+  - [ ] Update README.md with PowerTimeline name and description
+  - [ ] Update Firebase project configuration for PowerTimeline
+- [ ] Set up internal Git repository management system (using NodeGit or simple-git)
+- [ ] Create timeline repository structure and storage directory (timelines/user/timeline-name)
+- [ ] Convert timeline data format from YAML to JSON for better AI integration
+- [ ] Implement internal git repository creation for new timelines
+- [ ] Add JSON serialization/deserialization utilities
+- [ ] Create timeline-to-git commit workflow within internal storage
+- [ ] Implement basic timeline loading from internal git repositories
+- [ ] Add version history tracking through internal git commits
+- [ ] Test git integration with sample French Revolution timeline
+
+**Technical Implementation:**
+- [ ] Install and configure Git libraries for Node.js (simple-git or NodeGit)
+- [ ] Design JSON schema for timeline data (events, metadata, configuration)
+- [ ] Create `src/services/InternalGitService.ts` for repository operations
+- [ ] Create `src/utils/jsonSerializer.ts` replacing yamlSerializer
+- [ ] Set up internal storage directory structure for timeline repositories
+- [ ] Update timeline loading/saving logic to use internal git backend
+
+**Validation Tests:**
+- [ ] App displays "PowerTimeline" branding throughout UI
+- [ ] Package.json reflects new "powertimeline" name
+- [ ] Firebase hosting works with PowerTimeline configuration
+- [ ] Create new timeline → generates new git repository
+- [ ] Save timeline changes → creates new git commit with proper message
+- [ ] Load timeline → retrieves latest version from git repository
+- [ ] View timeline history → shows git commit log with changes
+- [ ] JSON format → timeline data correctly serialized/deserialized
+
+### v0.4.1 - Demo Users System (Development Phase)
+**Goal:** Implement demo user system with 2-3 predefined users for development
+
+**Validation:** Demo users can switch between profiles and own their timelines
+
+- [ ] Create demo user profiles (Alice, Bob, Charlie) with sample data
+- [ ] Implement user switching interface in app header
+- [ ] Add user profile display (name, avatar, demo status)
+- [ ] Implement user ownership validation for timeline creation/editing
+- [ ] Create user context and state management for demo users
+- [ ] Restrict timeline editing to timeline owners only
+- [ ] Add user switching functionality between demo profiles
+- [ ] Pre-populate demo users with sample timelines
+
+**Demo User Profiles:**
+- [ ] Alice: Historian specializing in French Revolution timelines
+- [ ] Bob: World War researcher with military history focus
+- [ ] Charlie: Modern politics timeline creator
+
+**Technical Implementation:**
+- [ ] Create `src/services/DemoAuthService.ts` for user switching
+- [ ] Create demo user data structure and profiles
+- [ ] Add user context provider to App.tsx for demo users
+- [ ] Create user profile components and switching UI
+- [ ] Update timeline ownership model for demo users
+- [ ] Add demo user guards for timeline editing functions
+
+**Validation Tests:**
+- [ ] Switch to Alice → can edit Alice's timelines, cannot edit Bob's
+- [ ] Switch to Bob → can edit Bob's timelines, cannot edit Alice's
+- [ ] Create timeline as Alice → repository created under Alice's namespace
+- [ ] Timeline ownership correctly enforced across user switches
+
+### v0.4.2 - Landing Page & Timeline Discovery
+**Goal:** Create home page for timeline management and discovery
+
+**Validation:** Users can discover, manage, and navigate timelines from central hub
+
+- [ ] Design and implement landing page layout
+- [ ] Create "My Timelines" section showing user's owned timelines
+- [ ] Add "My Pull Requests" section for PRs on user's timelines
+- [ ] Implement "Most Popular Timelines" discovery feed
+- [ ] Add "Most Active Timelines" (recent commits/edits) feed
+- [ ] Create timeline card components with metadata display
+- [ ] Add navigation from landing page to timeline viewer/editor
+- [ ] Implement public timeline browsing without authentication
+- [ ] Add timeline search functionality
+
+**Landing Page Sections:**
+- [ ] Header with user profile and sign-in/out
+- [ ] "My Timelines" - user's created timelines with edit buttons
+- [ ] "My Pull Requests" - PRs submitted to user's timelines
+- [ ] "Popular Timelines" - most viewed public timelines
+- [ ] "Active Timelines" - recently updated timelines
+- [ ] Timeline search bar and filtering options
+
+**Technical Implementation:**
+- [ ] Create `src/pages/LandingPage.tsx` as new home page
+- [ ] Update routing to use landing page as default route
+- [ ] Create timeline discovery API endpoints
+- [ ] Implement timeline statistics tracking (views, commits)
+- [ ] Add timeline card components with metadata display
+- [ ] Create navigation flow from landing page to timeline viewer
+
+**Validation Tests:**
+- [ ] Landing page loads with all sections populated
+- [ ] "My Timelines" shows user's timelines with correct metadata
+- [ ] Timeline cards navigate to correct timeline viewer/editor
+- [ ] Popular timelines show actual usage statistics
+- [ ] Search functionality returns relevant timeline results
+- [ ] Anonymous users can browse popular/active timelines
+
+### v0.4.3 - Public Timeline Sharing & URLs
+**Goal:** Enable public timeline access via GitHub-style URLs
+
+**Validation:** Timelines accessible via user/timeline-name URLs, shareable without accounts
+
+- [ ] Implement GitHub-style URL routing (chronochart.com/user/timeline-name)
+- [ ] Create public timeline viewer (read-only for non-owners)
+- [ ] Add timeline metadata display (title, description, author, creation date)
+- [ ] Implement public timeline sharing functionality
+- [ ] Add social sharing buttons and meta tags for link previews
+- [ ] Create timeline embed functionality for external websites
+- [ ] Add timeline statistics display (views, forks, commits)
+
+**URL Structure:**
+- [ ] `/user/timeline-name` - public timeline viewer
+- [ ] `/user/timeline-name/edit` - timeline editor (owner only)
+- [ ] `/user/timeline-name/history` - timeline version history
+- [ ] `/user` - user profile page with timeline list
+
+**Technical Implementation:**
+- [ ] Update React Router for parameterized timeline routes
+- [ ] Create public timeline viewer component
+- [ ] Add timeline metadata management system
+- [ ] Implement view counting and statistics tracking
+- [ ] Create sharing utilities and social meta tags
+
+**Validation Tests:**
+- [ ] Public URL loads timeline correctly for anonymous users
+- [ ] Timeline owner can access edit mode via /edit route
+- [ ] Non-owners cannot access edit mode (redirected to view mode)
+- [ ] Timeline statistics update correctly (views, shares)
+- [ ] Social sharing generates correct preview cards
+
+## Phase 2: Version Control (v0.5.x)
+**Goal: Git-like versioning and collaboration**
+
+### v0.5.0 - Version History
+- [ ] Every save creates new version with changelog
+- [ ] Version browser UI with diff viewer
+- [ ] Revert to previous versions
+- [ ] Version statistics and analytics
+
+### v0.5.1 - Forking System
+- [ ] Fork button and confirmation flow
+- [ ] Fork relationship tracking and display
+- [ ] Attribution system for original authors
+- [ ] Fork statistics (how many times forked)
+
+### v0.5.2 - Merge System
+- [ ] Timeline merge request workflow
+- [ ] Side-by-side timeline comparison tool
+- [ ] Cherry-pick events between timelines
+- [ ] Merge conflict resolution interface
+- [ ] Merge editor with Git-like operations
+
+## Phase 3: Discovery & Social (v0.6.x)
+**Goal: Make content discoverable and social**
+
+### v0.6.0 - Home Page & Discovery
+- [ ] Timeline gallery with grid/list views
+- [ ] Category system and tagging
+- [ ] Search functionality across all public timelines
+- [ ] Featured timeline curation
+
+### v0.6.1 - Social Features
+- [ ] Follow users and timelines for updates
+- [ ] Activity feed showing timeline updates
+- [ ] View counts and engagement metrics
+- [ ] Timeline collections and playlists
+
+### v0.6.2 - Trending & Recommendations
+- [ ] Trending timelines algorithm
+- [ ] Popular timelines by views/forks
+- [ ] Personalized timeline recommendations
+- [ ] "Related timelines" suggestions
+
+## Phase 4: Rich Media (v0.7.x)
+**Goal: Handle multimedia content and archival**
+
+### v0.7.0 - Media Attachments
+- [ ] Image and video uploads for events
+- [ ] Link previews with automatic metadata
+- [ ] Media gallery view for timelines
+- [ ] Media organization and tagging
+
+### v0.7.1 - Content Archival
+- [ ] Automatic web page snapshots (Wayback Machine style)
+- [ ] Social media post archival and screenshots
+- [ ] PDF and document storage
+- [ ] Link rot prevention and backup
+
+### v0.7.2 - Timeline Merging
+- [ ] Cross-timeline event correlation
+- [ ] Merge timelines to create comprehensive views
+- [ ] Event deduplication and conflict resolution
+- [ ] Multi-source event verification
+
+## Phase 5: AI Integration (v0.8.x)
+**Goal: AI-powered timeline assistance**
+
+### v0.8.0 - AI Chat Interface
+- [ ] Sidebar chatbot for timeline Q&A
+- [ ] Natural language event creation
+- [ ] Timeline summarization and insights
+- [ ] Event date/time assistance
+
+### v0.8.1 - AI-Powered Automation
+- [ ] Auto-suggest related events from news feeds
+- [ ] Timeline gap detection and suggestions
+- [ ] Fact-checking assistance and source verification
+- [ ] Automated timeline generation from text sources
+
+## Milestone: v1.0.0 - Full Platform Launch
+**Goal: Production-ready collaborative timeline platform**
+
+- [ ] All core platform features implemented and tested
+- [ ] Scalable infrastructure supporting thousands of users
+- [ ] Comprehensive documentation and API
+- [ ] Mobile-responsive design
+- [ ] Enterprise features and security
+- [ ] Community moderation tools
+- [ ] Analytics and reporting dashboard
+- [ ] Monetization system implementation

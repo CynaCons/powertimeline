@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (keep secrets private)
+.env
+.env.local
+.env.production
+
 # Vite cache
 .vite/
 

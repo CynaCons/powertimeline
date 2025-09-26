@@ -6,15 +6,25 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration - all values must be provided via environment variables
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBbLPldENZCEzrxj-yihb03KVyPAguUlBA",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "chronochart-da87a.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "chronochart-da87a",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "chronochart-da87a.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "256415279975",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:256415279975:web:a75a451e81189019979dc2",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-HWJ2TYBHJK"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// Validate that all required config values are present
+const requiredConfig = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+const missingConfig = requiredConfig.filter(key => !firebaseConfig[key as keyof typeof firebaseConfig]);
+
+if (missingConfig.length > 0) {
+  console.error('Missing Firebase configuration:', missingConfig);
+  throw new Error(`Missing Firebase environment variables: ${missingConfig.map(key => `VITE_FIREBASE_${key.toUpperCase()}`).join(', ')}`);
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
