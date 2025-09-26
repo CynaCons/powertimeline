@@ -63,7 +63,7 @@ function determineTimeUnit(rangeMs: number): TimeRange {
 /**
  * Format date label based on the time unit being displayed
  */
-function formatDateLabel(date: Date, unit: TimeRange['unit'], _isFirst: boolean, _isLast: boolean): string {
+function formatDateLabel(date: Date, unit: TimeRange['unit']): string {
   // const options: Intl.DateTimeFormatOptions = {}; // Unused variable
   
   switch (unit) {
@@ -100,9 +100,10 @@ function formatDateLabel(date: Date, unit: TimeRange['unit'], _isFirst: boolean,
     case 'year':
       return date.getFullYear().toString();
     
-    case 'decade':
+    case 'decade': {
       const decade = Math.floor(date.getFullYear() / 10) * 10;
       return `${decade}s`;
+    }
     
     default:
       return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -133,13 +134,14 @@ function generateAlignedTicks(
     case 'day':
       current.setHours(0, 0, 0, 0);
       break;
-    case 'week':
+    case 'week': {
       // Align to Monday
       const dayOfWeek = current.getDay();
       const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
       current.setDate(current.getDate() + daysToMonday);
       current.setHours(0, 0, 0, 0);
       break;
+    }
     case 'month':
       current.setDate(1);
       current.setHours(0, 0, 0, 0);
@@ -148,12 +150,13 @@ function generateAlignedTicks(
       current.setMonth(0, 1);
       current.setHours(0, 0, 0, 0);
       break;
-    case 'decade':
+    case 'decade': {
       const year = current.getFullYear();
       const decadeStart = Math.floor(year / 10) * 10;
       current.setFullYear(decadeStart, 0, 1);
       current.setHours(0, 0, 0, 0);
       break;
+    }
   }
   
   while (current <= endDate && tickCount < maxTicks) {
@@ -207,7 +210,7 @@ function generateAlignedTicks(
         time: timestamp,
         x,
         level,
-        label: showLabel ? formatDateLabel(current, timeRange.unit, tickCount === 0, false) : undefined,
+        label: showLabel ? formatDateLabel(current, timeRange.unit) : undefined,
         date: new Date(current)
       });
     }
