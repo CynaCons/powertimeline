@@ -6,7 +6,8 @@ import App from './App.tsx'
 import { ThemeProvider, CssBaseline } from '@mui/material'
 import { createAppTheme } from './styles/theme'
 import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
-import './lib/firebase'
+// Firebase disabled for now - will be enabled in v0.4.x when needed
+// import './lib/firebase'
 
 // App wrapper to provide dynamic theme based on context
 function AppWithTheme() {
