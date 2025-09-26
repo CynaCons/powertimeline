@@ -10,93 +10,140 @@ This SRS is the single source of truth for Chronochart requirements. Each requir
 
 ### 1. Foundation & Core Rendering
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-FOUND-001 | Axis visible on load | App renders a visible timeline axis element. | Verified | `src/layout/DeterministicLayoutComponent.tsx` (axis), `src/App.tsx` | v5/01 |
-| CC-REQ-CARDS-001 | Cards above/below axis | Seeded data renders at least one card above and one below the axis. | Verified | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-FOUND-001 | App renders a visible timeline axis element on load | `src/layout/DeterministicLayoutComponent.tsx`, `src/App.tsx` | v5/01 |
+| CC-REQ-CARDS-001 | Seeded data renders at least one card above and one below the axis | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
 
 ### 2. Card Layout & Positioning
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-LAYOUT-001 | No overlaps at any zoom | Across zoom levels and view windows, visible cards never overlap for baseline datasets and while navigating. | Verified | `src/layout/LayoutEngine.ts` (positioning/separation), `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/29 |
-| CC-REQ-LAYOUT-SEMICOL-001 | Efficient semi-columns and one anchor | Reduced margins and inter-card spacing; exactly one anchor per semi-column. | Implemented | `src/layout/LayoutEngine.ts` (margins/spacing), anchor logic | v5/10, v5/33 |
-| CC-REQ-LAYOUT-002 | Navigation rail clearance | Event cards must not be positioned behind the navigation rail, maintaining adequate left margin. | Verified | `src/layout/LayoutEngine.ts` (margin calculations) | v5/14 |
-| CC-REQ-LAYOUT-003 | Alternating pattern | Events should alternate between upper and lower semi-columns for visual balance when possible. | Verified | `src/layout/LayoutEngine.ts` (placement logic) | v5/12 |
-| CC-REQ-LAYOUT-004 | Adjustable horizontal cluster spacing | Horizontal spacing between event clusters should be configurable to optimize visual density while preventing overlap. | Implemented | `src/layout/LayoutEngine.ts` (minSpacing = 0.75 * adaptiveHalfColumnWidth) | v5/61-anchor-persistence ✅ |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-LAYOUT-001 | Across zoom levels and view windows, visible cards never overlap for baseline datasets and while navigating | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/29 |
+| CC-REQ-LAYOUT-SEMICOL-001 | Reduced margins and inter-card spacing with exactly one anchor per semi-column | `src/layout/LayoutEngine.ts` | v5/10, v5/33 |
+| CC-REQ-LAYOUT-002 | Event cards are not positioned behind the navigation rail, maintaining adequate left margin | `src/layout/LayoutEngine.ts` | v5/14 |
+| CC-REQ-LAYOUT-003 | Events alternate between upper and lower semi-columns for visual balance when possible | `src/layout/LayoutEngine.ts` | v5/12 |
+| CC-REQ-LAYOUT-004 | Horizontal spacing between event clusters is configurable to optimize visual density while preventing overlap | `src/layout/LayoutEngine.ts` | v5/61-anchor-persistence |
 
 ### 3. Card Types & Degradation
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-CARD-FULL-001 | Full cards: multi-line, ~169px | Full cards are ~169px tall, show multi-line body without clipping. | Approved | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 (indirect) |
-| CC-REQ-CARD-COMPACT-001 | Compact: width=full, ~78px, 1–2 lines | Compact cards have same width as full (260px), ~78px tall, and show 1–2 description lines. | Approved | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 (indirect), v5/47 |
-| CC-REQ-CARD-TITLE-ONLY | Title-only cards render in high density | Title-only cards appear when cluster density exceeds compact capacity, with no overlaps. | Verified | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/48 |
-| CC-REQ-SEMICOL-002 | No "2 full + overflow" semi-column | If a semi-column totals 3–4 events, degrade to compact and show them without overflow; overflow only after visible budget is exceeded. | Verified | `src/layout/LayoutEngine.ts` (degradation + combined pool), `src/layout/config.ts` | v5/47 |
-| CC-REQ-DEGRADATION-001 | Progressive degradation system | Cards automatically degrade from full → compact → title-only based on density to prevent overlaps. | Verified | `src/layout/LayoutEngine.ts` (degradation logic) | v5/36, v5/37, v5/38, v5/39 |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-CARD-FULL-001 | Full cards are ~169px tall and show multi-line body without clipping | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 |
+| CC-REQ-CARD-COMPACT-001 | Compact cards have same width as full (260px), ~78px tall, and show 1–2 description lines | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/47 |
+| CC-REQ-CARD-TITLE-ONLY | Title-only cards appear when cluster density exceeds compact capacity, with no overlaps | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/48 |
+| CC-REQ-SEMICOL-002 | If a semi-column totals 3–4 events, degrade to compact and show them without overflow; overflow only after visible budget is exceeded | `src/layout/LayoutEngine.ts`, `src/layout/config.ts` | v5/47 |
+| CC-REQ-DEGRADATION-001 | Cards automatically degrade from full → compact → title-only based on density to prevent overlaps | `src/layout/LayoutEngine.ts` | v5/36, v5/37, v5/38, v5/39 |
 
 ### 4. Overflow & Capacity Management
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-OVERFLOW-001 | No leftover overflow in empty regions | Navigating to an empty period shows no leftover overflow badges. | Verified | `src/layout/LayoutEngine.ts` (view-window filtering), `src/layout/DeterministicLayoutComponent.tsx` (anchor filtering) | v5/30 |
-| CC-REQ-OVERFLOW-002 | Overflow clears on zoom out | Overflow reduces/disappears appropriately when zooming out. | Verified | Same as above | v5/30 |
-| CC-REQ-OVERFLOW-003 | Overflow indicators display | When events exceed capacity, overflow badges (+N) appear showing hidden event count. | Implemented | `src/layout/LayoutEngine.ts` (overflow calculation), `src/layout/DeterministicLayoutComponent.tsx` (badge rendering) | v5/56 |
-| CC-REQ-OVERFLOW-004 | Overflow label spacing | Overflow indicators maintain minimum spacing to prevent visual overlap. | Verified | `src/layout/DeterministicLayoutComponent.tsx` (badge positioning) | v5/15 |
-| CC-REQ-CAPACITY-001 | Capacity model telemetry | System reports total/used cells and utilization metrics for monitoring. | Verified | `src/layout/LayoutEngine.ts` (telemetry) | v5/05 |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-OVERFLOW-001 | Navigating to an empty period shows no leftover overflow badges | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/30 |
+| CC-REQ-OVERFLOW-002 | Overflow reduces/disappears appropriately when zooming out | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/30 |
+| CC-REQ-OVERFLOW-003 | When events exceed capacity, overflow badges (+N) appear showing hidden event count | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/56 |
+| CC-REQ-OVERFLOW-004 | Overflow indicators maintain minimum spacing to prevent visual overlap | `src/layout/DeterministicLayoutComponent.tsx` | v5/15 |
+| CC-REQ-CAPACITY-001 | System reports total/used cells and utilization metrics for monitoring | `src/layout/LayoutEngine.ts` | v5/05 |
 
 ### 5. Anchors & Timeline Alignment
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-ANCHOR-001 | Anchors only for visible groups | Render an anchor only if there are visible cards (or in-view overflow) for that semi-column; suppress stale anchors. | Verified | `src/layout/DeterministicLayoutComponent.tsx` (filtered anchors), `src/layout/LayoutEngine.ts` | v5/31, v5/32, v5/33 |
-| CC-REQ-ANCHOR-002 | Anchors align with timeline dates | Anchor X positions precisely match corresponding event dates on timeline axis at all zoom levels. | Implemented | `src/layout/LayoutEngine.ts` (createEventAnchors), coordinate system alignment | v5/57 |
-| CC-REQ-ANCHOR-003 | Directional anchor placement | Anchors connect to their respective event clusters with clear visual grouping. | Verified | `src/layout/DeterministicLayoutComponent.tsx` (anchor rendering) | v5/33 |
-| CC-REQ-ANCHOR-004 | Persistent anchor visibility | Anchors remain visible at all times regardless of card degradation state; anchors provide timeline reference even when cards are hidden. | Implemented | `src/layout/LayoutEngine.ts` (anchor creation without view window filtering) | v5/61-anchor-persistence ✅ |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-ANCHOR-001 | Render an anchor only if there are visible cards (or in-view overflow) for that semi-column; suppress stale anchors | `src/layout/DeterministicLayoutComponent.tsx`, `src/layout/LayoutEngine.ts` | v5/31, v5/32, v5/33 |
+| CC-REQ-ANCHOR-002 | Anchor X positions precisely match corresponding event dates on timeline axis at all zoom levels | `src/layout/LayoutEngine.ts` | v5/57 |
+| CC-REQ-ANCHOR-003 | Anchors connect to their respective event clusters with clear visual grouping | `src/layout/DeterministicLayoutComponent.tsx` | v5/33 |
+| CC-REQ-ANCHOR-004 | Anchors remain visible at all times regardless of card degradation state; anchors provide timeline reference even when cards are hidden | `src/layout/LayoutEngine.ts` | v5/61-anchor-persistence |
 
 ### 6. Zoom & Navigation
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-ZOOM-001 | Zoom behavior + cursor anchoring | Zoom filters visible events; cursor-anchored zoom keeps time under cursor stable; boundaries clamp. | Verified | `src/App.tsx`, `src/app/hooks/useViewWindow.ts` | v5/17, v5/20, v5/24 |
-| CC-REQ-ZOOM-002 | Zoom stability | Zoom operations maintain event positions relative to cursor and handle edge cases gracefully. | Verified | `src/app/hooks/useViewWindow.ts` (zoom logic) | v5/18, v5/19, v5/23 |
-| CC-REQ-ZOOM-003 | Deep zoom functionality | System supports maximum zoom down to minute-level precision with appropriate scaling. | Verified | `src/app/hooks/useViewWindow.ts` (zoom boundaries) | v5/25, v5/29 |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-ZOOM-001 | Zoom filters visible events; cursor-anchored zoom keeps time under cursor stable; boundaries clamp | `src/App.tsx`, `src/app/hooks/useViewWindow.ts` | v5/17, v5/20, v5/24 |
+| CC-REQ-ZOOM-002 | Zoom operations maintain event positions relative to cursor and handle edge cases gracefully | `src/app/hooks/useViewWindow.ts` | v5/18, v5/19, v5/23 |
+| CC-REQ-ZOOM-003 | System supports maximum zoom down to minute-level precision with appropriate scaling | `src/app/hooks/useViewWindow.ts` | v5/25, v5/29 |
 
 ### 7. Minimap
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-MINIMAP-001 | Minimap basics + click | Minimap shows range and density; click moves the view window. | Verified | `src/components/TimelineMinimap.tsx` | v5/21, v5/22 |
-| CC-REQ-MINIMAP-002 | Minimap drag/window sync | Dragging minimap window updates main view; window reflects zoom. | Verified | `src/components/TimelineMinimap.tsx` | v5/26, v5/27, v5/24 |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-MINIMAP-001 | Minimap shows range and density; click moves the view window | `src/components/TimelineMinimap.tsx` | v5/21, v5/22 |
+| CC-REQ-MINIMAP-002 | Dragging minimap window updates main view; window reflects zoom | `src/components/TimelineMinimap.tsx` | v5/26, v5/27, v5/24 |
 
 ### 8. Timeline Axis & Scales
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-AXIS-001 | Adaptive timeline scales | Labels adapt across zooms (decades→years→months/days/hours) with readable density. | Verified | `src/timeline/hooks/useAxisTicks.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/34, v5/35 |
-| CC-REQ-AXIS-002 | Timeline scale-date alignment | Timeline scale labels must accurately correspond to actual event dates; hovering over scale positions should show correct dates matching scale labels. | Implemented | `src/components/EnhancedTimelineAxis.tsx` (hover calculation), `src/timeline/hooks/useAxisTicks.ts` | v5/62-timeline-scale-date-alignment ⚠️ |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-AXIS-001 | Labels adapt across zooms (decades→years→months/days/hours) with readable density | `src/timeline/hooks/useAxisTicks.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/34, v5/35 |
+| CC-REQ-AXIS-002 | Timeline scale labels accurately correspond to actual event dates; hovering over scale positions shows correct dates matching scale labels | `src/components/EnhancedTimelineAxis.tsx`, `src/timeline/hooks/useAxisTicks.ts` | v5/62-timeline-scale-date-alignment |
 
 ### 9. User Interface & Panels
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-UI-001 | Panel visibility control | Navigation panels can be toggled and maintain proper visibility states. | Verified | `src/app/OverlayShell.tsx`, `src/components/NavigationRail.tsx` | v5/50, v5/52 |
-| CC-REQ-UI-002 | Authoring overlay functionality | Event creation and editing interface provides form validation and proper data handling. | Verified | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
-| CC-REQ-UI-003 | Navigation enhancements | Navigation rail provides intuitive access to features with keyboard support. | Verified | `src/components/NavigationRail.tsx` | v5/55 |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-UI-001 | Navigation panels can be toggled and maintain proper visibility states | `src/app/OverlayShell.tsx`, `src/components/NavigationRail.tsx` | v5/50, v5/52 |
+| CC-REQ-UI-002 | Event creation and editing interface provides form validation and proper data handling | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
+| CC-REQ-UI-003 | Navigation rail provides intuitive access to features with keyboard support | `src/components/NavigationRail.tsx` | v5/55 |
 
 ### 10. Data Management & Export
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-DATA-001 | YAML export/import | Timeline data can be exported to and imported from YAML format with validation. | Verified | `src/utils/yamlSerializer.ts` | v5/55 (yaml) |
-| CC-REQ-DATA-002 | Data persistence | Timeline events are stored and retrieved reliably across sessions. | Verified | `src/lib/storage.ts` | - |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-DATA-001 | Timeline data can be exported to and imported from YAML format with validation | `src/utils/yamlSerializer.ts` | v5/55 |
+| CC-REQ-DATA-002 | Timeline events are stored and retrieved reliably across sessions | `src/lib/storage.ts` | - |
 
 ### 11. Visual Design & Theming
 
-| ID | Title | Acceptance (summary) | Status | Code (primary) | Tests |
-|---|---|---|---|---|---|
-| CC-REQ-VISUAL-001 | Card color system | Events display with category-based color coding for visual organization. | Verified | `src/layout/cardIcons.ts`, `src/styles/colors.ts` | v5/40, v5/41 |
-| CC-REQ-VISUAL-002 | Theme support | Application supports light/dark theme switching with consistent styling. | Verified | `src/contexts/ThemeContext.tsx`, `src/styles/theme.ts` | - |
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-VISUAL-001 | Events display with category-based color coding for visual organization | `src/layout/cardIcons.ts`, `src/styles/colors.ts` | v5/40, v5/41 |
+| CC-REQ-VISUAL-002 | Application supports light/dark theme switching with consistent styling | `src/contexts/ThemeContext.tsx`, `src/styles/theme.ts` | - |
+
+### 12. Core Timeline Components
+
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-TIMELINE-CORE-001 | Timeline axis is displayed in the middle with events positioned above and below | `src/layout/DeterministicLayoutComponent.tsx`, `src/components/EnhancedTimelineAxis.tsx` | v5/01, v5/02 |
+| CC-REQ-TIMELINE-CORE-002 | Hovering over timeline displays date tooltip at cursor position | `src/components/EnhancedTimelineAxis.tsx` | v5/62-timeline-scale-date-alignment |
+| CC-REQ-TIMELINE-CORE-003 | Timeline scales adapt from decades to hours based on zoom level with readable density | `src/utils/timelineTickGenerator.ts`, `src/components/EnhancedTimelineAxis.tsx` | v5/34, v5/35 |
+
+### 13. Event Cards
+
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-CARDS-DISPLAY-001 | Event cards display with title, date, and description fields | `src/layout/CardRenderer.tsx`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
+| CC-REQ-CARDS-DISPLAY-002 | Cards have three display types: full (~169px), compact (~78px), and title-only | `src/layout/config.ts`, `src/layout/LayoutEngine.ts` | v5/03, v5/47, v5/48 |
+| CC-REQ-CARDS-DISPLAY-003 | Cards are color-coded by card type (full, compact, title-only) for visual distinction | `src/layout/cardIcons.ts`, `src/styles/colors.ts` | v5/40, v5/41 |
+
+### 14. Navigation & Panels
+
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-NAV-RAIL-001 | Navigation rail is displayed on the left with icon buttons for panel access | `src/components/NavigationRail.tsx`, `src/App.tsx` | v5/50 |
+| CC-REQ-PANELS-EVENTS-001 | Events panel displays list of all events with search and filter functionality | `src/app/overlays/ViewingOverlay.tsx` | v5/50, v5/52 |
+| CC-REQ-PANELS-EVENTS-002 | Events panel includes "+" button to create new events | `src/app/overlays/ViewingOverlay.tsx` | - |
+| CC-REQ-PANELS-DEV-001 | Developer panel provides data seeding and debugging tools | `src/App.tsx` | - |
+
+### 15. Event Interaction
+
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-INTERACTION-FOCUS-001 | Events can be focused by hovering over cards, anchors, or panel items | Event focus system | - |
+| CC-REQ-INTERACTION-FOCUS-002 | Focused events are highlighted across all views (card, anchor, minimap, panel) | Event focus system | - |
+| CC-REQ-INTERACTION-CLICK-001 | Clicking an event card opens it in the authoring overlay for editing | `src/layout/CardRenderer.tsx`, `src/App.tsx` | v5/51 |
+
+### 16. Authoring Mode
+
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-AUTHORING-OVERLAY-001 | Authoring overlay allows creating and editing events with form interface | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
+| CC-REQ-AUTHORING-FORM-001 | Authoring form includes title, date, time, description, and category fields | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
+| CC-REQ-AUTHORING-VALID-001 | Authoring overlay validates required fields before saving events | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
+
+### 17. Enhanced Minimap System
+
+| ID | Requirement | Code | Tests |
+|---|---|---|---|
+| CC-REQ-MINIMAP-ENHANCED-001 | Minimap displays at the top, shows visual indicators for every timeline event, highlights the currently viewed portion of the timeline (zoom level), highlights the currently focused event (via mouse over cards, anchors, or panels), and remains visible when authoring panels are overlayed | `src/components/TimelineMinimap.tsx` | v5/21, v5/22, v5/63 |
 
 ## Non-Functional Requirements
 

@@ -13,8 +13,8 @@ export default defineConfig({
     // Configure screenshot comparisons
     toHaveScreenshot: { threshold: 0.2 }
   },
-  // Add retry logic for flaky tests
-  retries: process.env.CI ? 2 : 1,
+  // No retries - want clear pass/fail status
+  retries: 0,
   webServer: {
     // Use a fixed non-default port to avoid clashing with a manually running Vite dev server
     command: 'npm run dev -- --port=5174 --strictPort',
