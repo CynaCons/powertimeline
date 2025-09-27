@@ -17,7 +17,7 @@ interface WindowWithTelemetry extends Window {
   __ccTelemetry?: TelemetryData;
 }
 import { createLayoutConfig } from './config';
-import { DeterministicLayoutV5 } from './LayoutEngine';
+import { DeterministicLayoutV5, type DispatchMetrics, type AggregationMetrics } from './LayoutEngine';
 import { useAxisTicks } from '../timeline/hooks/useAxisTicks';
 import { EnhancedTimelineAxis } from '../components/EnhancedTimelineAxis';
 import { getEventTimestamp, formatEventDateTime } from '../lib/time';
@@ -351,7 +351,7 @@ export function DeterministicLayoutComponent({
 
     // Use telemetry from layout engine if available, fallback to manual calculation
     const engineMetrics = layoutResult.telemetryMetrics;
-    let dispatchMetrics, aggregationMetrics;
+    let dispatchMetrics: DispatchMetrics | undefined, aggregationMetrics: AggregationMetrics | undefined;
     
     if (engineMetrics) {
       dispatchMetrics = engineMetrics.dispatch;
@@ -484,9 +484,9 @@ export function DeterministicLayoutComponent({
     const telemetry = {
       version: 'v5',
       events: { total: events.length },
-      groups: { count: dispatchMetrics.groupCount || clusters.length },
+      groups: { count: dispatchMetrics?.groupCount || clusters.length },
       dispatch: {
-        ...dispatchMetrics,
+        ...(dispatchMetrics || {}),
         targetAvgEventsPerClusterBand: [4, 6] as [number, number]
       },
       capacity: {
@@ -505,10 +505,10 @@ export function DeterministicLayoutComponent({
         }
       },
       aggregation: {
-        ...aggregationMetrics,
+        ...(aggregationMetrics || {}),
         // Keep backward compatibility with existing field names
-        totalAggregations: aggregationMetrics.totalAggregations || totalAggregations,
-        eventsAggregated: aggregationMetrics.eventsAggregated || eventsAggregated
+        totalAggregations: aggregationMetrics?.totalAggregations || totalAggregations,
+        eventsAggregated: aggregationMetrics?.eventsAggregated || eventsAggregated
       },
       cards: {
         single: singleEventsShown,

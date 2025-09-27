@@ -93,7 +93,7 @@ export function exportToYAML(events: Event[], options: ExportOptions = {}): stri
  */
 export function importFromYAML(yamlContent: string): ImportResult {
   try {
-    const parsed = yaml.load(yamlContent) as any;
+    const parsed = yaml.load(yamlContent) as unknown;
 
     // Validate basic structure
     if (!parsed || typeof parsed !== 'object') {
@@ -103,14 +103,16 @@ export function importFromYAML(yamlContent: string): ImportResult {
       };
     }
 
-    if (!parsed.timeline) {
+    const parsedObj = parsed as Record<string, unknown>;
+
+    if (!parsedObj.timeline) {
       return {
         success: false,
         error: 'Invalid timeline format: Missing "timeline" root property'
       };
     }
 
-    const timeline = parsed.timeline;
+    const timeline = parsedObj.timeline as Record<string, unknown>;
 
     // Validate events array
     if (!timeline.events || !Array.isArray(timeline.events)) {
@@ -169,7 +171,7 @@ export function importFromYAML(yamlContent: string): ImportResult {
     return {
       success: true,
       events,
-      metadata: timeline.metadata
+      metadata: timeline.metadata as TimelineMetadata | undefined
     };
 
   } catch (error) {

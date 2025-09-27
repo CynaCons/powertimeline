@@ -42,13 +42,13 @@ export interface DispatchMetrics {
 }
 
 
-interface AggregationMetrics {
+export interface AggregationMetrics {
   totalAggregations: number;
   eventsAggregated: number;
   clustersAffected: number;
 }
 
-interface InfiniteMetrics {
+export interface InfiniteMetrics {
   enabled: boolean;
   containers: number;
   eventsContained: number;
@@ -58,6 +58,28 @@ interface InfiniteMetrics {
     side: 'above' | 'below';
     eventsContained: number;
   }>;
+}
+
+export interface DegradationMetrics {
+  totalGroups: number;
+  fullCardGroups: number;
+  compactCardGroups: number;
+  titleOnlyCardGroups: number;
+  degradationRate: number;
+  spaceReclaimed: number;
+  degradationTriggers: Array<{
+    groupId: string;
+    eventCount: number;
+    from: string;
+    to: string;
+    spaceSaved: number;
+  }>;
+}
+
+export interface AdaptiveMetrics {
+  halfColumnWidth: number;
+  temporalDensity: number;
+  temporalWindow: number;
 }
 
 export class DeterministicLayoutV5 {
@@ -933,30 +955,12 @@ const capacityMetrics = this.capacityModel.getGlobalMetrics();
   /**
    * Helper: Calculate dispatch and capacity metrics including aggregation and infinite
    */
-  private calculateMetrics(result: LayoutResult, config: LayoutConfig, adaptiveHalfColumnWidth?: number): { 
-    dispatch?: DispatchMetrics; 
+  private calculateMetrics(result: LayoutResult, config: LayoutConfig, adaptiveHalfColumnWidth?: number): {
+    dispatch?: DispatchMetrics;
     aggregation?: AggregationMetrics;
     infinite?: InfiniteMetrics;
-    degradation?: {
-      totalGroups: number;
-      fullCardGroups: number;
-      compactCardGroups: number;
-      titleOnlyCardGroups: number;
-      degradationRate: number;
-      spaceReclaimed: number;
-      degradationTriggers: Array<{
-        groupId: string;
-        eventCount: number;
-        from: string;
-        to: string;
-        spaceSaved: number;
-      }>;
-    };
-    adaptive?: {
-      halfColumnWidth: number;
-      temporalDensity: number;
-      temporalWindow: number;
-    };
+    degradation?: DegradationMetrics;
+    adaptive?: AdaptiveMetrics;
   } {
     const groupXPositions = result.anchors.map(a => a.x).sort((a, b) => a - b);
     const pitches = groupXPositions.slice(1).map((x, i) => x - groupXPositions[i]);

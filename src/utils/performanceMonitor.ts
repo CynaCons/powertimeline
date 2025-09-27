@@ -6,6 +6,16 @@ interface PerformanceMetrics {
   timestamp: number;
 }
 
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: PerformanceMemory;
+}
+
 class PerformanceMonitor {
   private metrics: PerformanceMetrics[] = [];
   private renderStartTime: number = 0;
@@ -47,8 +57,8 @@ class PerformanceMonitor {
 
   getMemoryUsage(): number {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      return memory.usedJSHeapSize / 1024 / 1024; // Convert to MB
+      const memory = (performance as PerformanceWithMemory).memory;
+      return memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // Convert to MB
     }
     return 0;
   }

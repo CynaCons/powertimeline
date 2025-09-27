@@ -115,7 +115,7 @@ export const Node: React.FC<NodeProps> = ({
     overflow: 'hidden',
     // Title: two-line clamp for full/compact, single-line for minimal
     display: contentDensity === 'minimal' ? 'block' : '-webkit-box',
-    WebkitBoxOrient: contentDensity === 'minimal' ? undefined as any : ('vertical' as any),
+    WebkitBoxOrient: contentDensity === 'minimal' ? undefined : 'vertical',
     WebkitLineClamp: contentDensity === 'minimal' ? undefined : 2,
     textOverflow: 'ellipsis',
     whiteSpace: contentDensity === 'minimal' ? 'nowrap' : undefined,
@@ -148,7 +148,7 @@ export const Node: React.FC<NodeProps> = ({
             style={{
               overflow: 'hidden',
               display: '-webkit-box',
-              WebkitBoxOrient: 'vertical' as any,
+              WebkitBoxOrient: 'vertical',
       WebkitLineClamp: contentDensity === 'full' ? 3 : contentDensity === 'compact' ? 1 : 0,
   wordBreak: 'break-word',
   overflowWrap: 'anywhere',

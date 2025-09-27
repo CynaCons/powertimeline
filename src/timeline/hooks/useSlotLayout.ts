@@ -170,5 +170,5 @@ export function useSlotLayout(
       svgHeight, // Expose svgHeight for Timeline component
       timelineY  // Expose timeline position
     };
-  }, [events, options?.devMode, options?.densityCount, options?.maxColumns, options?.horizontalGap]);
+  }, [events, options?.horizontalGap]);
 }

@@ -1,4 +1,11 @@
 import type { Event } from '../types';
+import type {
+  DispatchMetrics,
+  AggregationMetrics,
+  InfiniteMetrics,
+  DegradationMetrics,
+  AdaptiveMetrics
+} from './LayoutEngine';
 
 // Core slot-based positioning types
 export interface Slot {
@@ -84,10 +91,10 @@ export interface LayoutResult {
     percentage: number;
   };
   telemetryMetrics?: {
-    dispatch?: any;
-    aggregation?: any;
-    infinite?: any;
-    adaptive?: any;
-    degradation?: any;
+    dispatch?: DispatchMetrics;
+    aggregation?: AggregationMetrics;
+    infinite?: InfiniteMetrics;
+    adaptive?: AdaptiveMetrics;
+    degradation?: DegradationMetrics;
   };
 }
