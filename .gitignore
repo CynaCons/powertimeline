@@ -25,6 +25,10 @@ test-results/
 playwright-report/
 blob-report/
 
+# Temporary artifacts
+tmp/
+temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

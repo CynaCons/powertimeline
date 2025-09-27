@@ -10,10 +10,12 @@ This SRS is the single source of truth for Chronochart requirements. Each requir
 
 ### 1. Foundation & Core Rendering
 
-| ID | Requirement | Code | Tests |
+➡️ See [`SRS_FOUNDATION.md`](SRS_FOUNDATION.md) for detailed acceptance criteria and change history.
+
+| ID | Requirement (summary) | Code | Tests |
 |---|---|---|---|
-| CC-REQ-FOUND-001 | App renders a visible timeline axis element on load | `src/layout/DeterministicLayoutComponent.tsx`, `src/App.tsx` | v5/01 |
-| CC-REQ-CARDS-001 | Seeded data renders at least one card above and one below the axis | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
+| CC-REQ-FOUND-001 | Timeline axis appears within 1s of startup with ticks and accessibility hooks | `src/layout/DeterministicLayoutComponent.tsx`, `src/App.tsx` | v5/01 |
+| CC-REQ-CARDS-001 | Default seed renders balanced cards above/below axis with visible content | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
 
 ### 2. Card Layout & Positioning
 

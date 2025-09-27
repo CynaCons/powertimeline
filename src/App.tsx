@@ -594,9 +594,13 @@ function App() {
       <div className="relative h-screen">
         {/* Enhanced Navigation Rail */}
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
-          {/* ChronoChart logo at top */}
-          <div className="mb-4 p-2 text-xs font-bold tracking-wide text-gray-800 text-center leading-tight">
-            <div>CC</div>
+          {/* PowerTimeline logo at top */}
+          <div className="mb-4 p-1 text-center">
+            <img
+              src="/assets/images/logo.png"
+              alt="PowerTimeline"
+              className="w-10 h-10 object-contain"
+            />
           </div>
 
           {/* Main Navigation */}

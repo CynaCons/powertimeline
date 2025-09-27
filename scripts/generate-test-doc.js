@@ -1,6 +1,26 @@
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const summary = JSON.parse(fs.readFileSync('test-summary.json', 'utf8'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, '..');
+const outputDir = path.join(repoRoot, 'tmp', 'test-docs');
+
+fs.mkdirSync(outputDir, { recursive: true });
+
+const summaryPathCandidates = [
+  path.join(outputDir, 'test-summary.json'),
+  path.join(repoRoot, 'test-summary.json')
+];
+
+const summaryPath = summaryPathCandidates.find((candidate) => fs.existsSync(candidate));
+
+if (!summaryPath) {
+  throw new Error('Missing test-summary.json. Expected at tmp/test-docs/ or repository root.');
+}
+
+const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
 
 const mapping = {
   'v5/01-foundation.smoke.spec.ts': {
@@ -388,7 +408,7 @@ for (const category of categoryOrder) {
   }
 }
 
-fs.writeFileSync('generated-tests-table.md', tableLines.join('\n'));
+fs.writeFileSync(path.join(outputDir, 'generated-tests-table.md'), tableLines.join('\n'));
 
 const categorySummary = [];
 for (const category of categoryOrder) {
@@ -407,7 +427,7 @@ for (const row of categorySummary) {
   summaryLines.push(`| ${row.category} | ${row.total} | ${row.passing} | ${row.failing} | ${row.passRate}% |`);
 }
 
-fs.writeFileSync('generated-category-summary.md', summaryLines.join('\n'));
+fs.writeFileSync(path.join(outputDir, 'generated-category-summary.md'), summaryLines.join('\n'));
 
 const overallSpecs = summary.summary.reduce((acc, entry) => acc + entry.specs.length, 0);
 const overallPassingSpecs = summary.summary.reduce((acc, entry) => acc + entry.specs.filter((spec) => spec.ok).length, 0);
@@ -420,4 +440,4 @@ const overall = {
   playwrightTestsFailing: overallFailingSpecs,
   totalPlaywrightTests: overallSpecs
 };
-fs.writeFileSync('generated-overall-summary.json', JSON.stringify(overall, null, 2));
+fs.writeFileSync(path.join(outputDir, 'generated-overall-summary.json'), JSON.stringify(overall, null, 2));

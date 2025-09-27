@@ -297,6 +297,18 @@
 - [x] Execute comprehensive Playwright run
   - Run on 2025-09-26 (Playwright v1.54.2): 49 passed / 116 failed (see docs/TESTS.md update in progress)
 - [ ] Update docs/TESTS.md with latest outcomes
+  - [x] Review generated summary artifacts (tests table, category summary, overall metrics)
+  - [x] Refresh docs/TESTS.md content with current Playwright results
+  - [ ] Log documentation refresh completion in PLAN and task tracker
+- [x] Relocate generated Playwright artifacts into tmp staging
+  - [x] Add tmp/ directory to .gitignore and planning checklists
+  - [x] Update reporting scripts to emit files into tmp/test-docs
+  - [x] Regenerate artifacts in tmp/test-docs and remove root-level copies
+- [x] Root directory housekeeping (retain .claude/ and .grok/)
+  - [x] Remove tracked dist/ bundle output
+  - [x] Remove tracked .vite/ cache directory
+  - [x] Remove tracked .env.local secrets file
+  - [x] Ensure tmp/test-docs artifacts remain untracked
 
 ---
 ## Iteration v0.3.0 - Enhanced Event Editor
