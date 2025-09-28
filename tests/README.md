@@ -66,4 +66,9 @@ npx playwright test tests/v5/02-cards-placement.spec.ts --headed
 
 # Run just telemetry tests
 npx playwright test tests/v5/0{4,5,6,7}-*.spec.ts
+
+# Capture a JSON summary and update docs/TESTS.md
+npm run test:update-doc
 ```
+
+> The command above surfaces Playwright's exit code; it still refreshes the documentation even when the suite fails.

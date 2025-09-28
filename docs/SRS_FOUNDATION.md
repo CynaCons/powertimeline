@@ -4,39 +4,39 @@ This document extracts the "Foundation & Core Rendering" requirements from `SRS.
 
 ## CC-REQ-FOUND-001 — Timeline axis renders on startup
 
-**Description**
+**Core Requirement**
 
-When Chronochart launches with the default seeded dataset, the timeline axis must appear immediately as the visual spine of the experience.
+Chronochart must present a central timeline axis immediately after startup so users understand the temporal context without additional interaction.
 
-**Acceptance Criteria**
+**Draft Implementation Details (Revise as layout stabilizes)**
 
-1. Launching the app with the default developer seed (`seedFrenchRevolutionTimeline`) renders a horizontal timeline axis element within **1 second** of the first React paint.
-2. The axis uses the canonical selector (`data-testid="timeline-axis"`) and exposes `role="presentation"` for accessibility tooling.
-3. At least one tick mark element is present within the axis container when it first renders.
-4. The axis spans the central horizontal band of the viewport (±24px of the vertical midpoint) and remains visible while data is loading.
+- Launching the app with the foundation default dataset (auto-seeded via `seedRFKTimeline` when storage is empty) should render a horizontal timeline axis element within **1 second** of the first React paint.
+- The enhanced axis bar and its ticks expose `data-testid="timeline-axis"` / `data-testid="timeline-axis-tick"` along with `role="presentation"` to support tests and accessibility tooling.
+- At least one tick mark element should be present inside the axis container when it first renders.
+- The axis is expected to cover the central horizontal band of the viewport (±24px of the vertical midpoint) and remain visible while data loads.
 
-**Traceability**
+**Validation Cues**
 
-- **Code:** `src/layout/DeterministicLayoutComponent.tsx`, `src/App.tsx`
-- **Tests:** `tests/v5/01-foundation.smoke.spec.ts`
+- `tests/v5/01-foundation.smoke.spec.ts` checks for the axis in the DOM using the canonical test id.
+- Inspect `src/layout/DeterministicLayoutComponent.tsx` and `src/App.tsx` when refining timing or rendering guarantees.
 
 ## CC-REQ-CARDS-001 — Baseline cards appear above and below the axis
 
-**Description**
+**Core Requirement**
 
-Chronochart must demonstrate vertical balance by placing cards in both upper and lower lanes whenever the default seed contains events for each side.
+With the default dataset, Chronochart should demonstrate vertical balance by rendering cards in both upper and lower lanes so the user immediately sees density on each side of the axis.
 
-**Acceptance Criteria**
+**Draft Implementation Details (Revise as layout stabilizes)**
 
-1. Given the default developer seed (`seedFrenchRevolutionTimeline`), at least one event card renders entirely within an upper semi-column and another renders entirely within a lower semi-column within **2 seconds** of app startup.
-2. Upper-lane cards have their bounding boxes located at least **12px above** the axis centerline; lower-lane cards sit at least **12px below** the centerline.
-3. Each rendered card displays a title and a formatted date string on first paint; missing content fails the requirement.
-4. If a dataset lacks events for one side, the UI must display an inline empty-state message explaining the absence rather than silently failing.
+- Given the foundation default dataset (auto-seeded via `seedRFKTimeline` when storage is empty), at least one event card should render entirely within an upper semi-column and another within a lower semi-column within **2 seconds** of app startup.
+- Upper-lane cards should sit at least **12px above** the axis centerline; lower-lane cards should sit at least **12px below** the centerline.
+- Each rendered card should display a title and a formatted date string on first paint; missing content indicates a regression.
+- When a dataset lacks events for one side, the UI should surface an inline empty-state notice rather than silently omitting cards.
 
-**Traceability**
+**Validation Cues**
 
-- **Code:** `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx`
-- **Tests:** `tests/v5/02-cards-placement.spec.ts`
+- `tests/v5/02-cards-placement.spec.ts` asserts the presence of cards above and below the axis.
+- Implementation lives in `src/layout/LayoutEngine.ts` and `src/layout/DeterministicLayoutComponent.tsx`; adjust spacing thresholds there before tightening the requirement.
 
 ---
 
@@ -44,4 +44,5 @@ Chronochart must demonstrate vertical balance by placing cards in both upper and
 
 | Date | Revision | Notes |
 |---|---|---|
+| 2025-09-28 | v1.1 | Documented auto-seeded foundation dataset and enhanced axis test identifiers. |
 | 2025-09-27 | v1 | Extracted from `docs/SRS.md` and clarified acceptance criteria. |

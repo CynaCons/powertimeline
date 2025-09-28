@@ -382,6 +382,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
           height={6}
           fill="url(#timelineGradient)"
           filter="url(#timelineShadow)"
+          data-testid="timeline-axis"
           rx={3}
         />
 
@@ -398,7 +399,12 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
           const opacity = isPrimary ? 1 : isSecondary ? 0.8 : 0.6;
 
           return (
-            <g key={`enhanced-tick-${index}`}>
+            <g
+              key={`enhanced-tick-${index}`}
+              data-testid="timeline-axis-tick"
+              data-tick-level={tick.level}
+              data-tick-type={tick.type}
+            >
               {/* Tick mark */}
               <line
                 x1={tick.x}

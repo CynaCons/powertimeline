@@ -22,6 +22,14 @@ if (!summaryPath) {
 
 const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
 
+const args = process.argv.slice(2);
+const shouldWriteDoc = args.includes('--write-doc');
+const runDate = new Date().toISOString().slice(0, 10);
+const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
+const playwrightVersionRaw = packageJson.devDependencies?.['@playwright/test'] || packageJson.dependencies?.['@playwright/test'] || '';
+const playwrightVersion = playwrightVersionRaw.replace(/^[^0-9]*/, '') || 'unknown';
+const runnerCommand = 'npm run test:update-doc';
+
 const mapping = {
   'v5/01-foundation.smoke.spec.ts': {
     category: 'Foundation & Core Tests',
@@ -398,7 +406,7 @@ for (const category of Object.keys(grouped)) {
 }
 
 let tableLines = [];
-tableLines.push('| Test File | Summary | Category | Linked Requirements | Status (2025-09-26) |');
+tableLines.push(`| Test File | Summary | Category | Linked Requirements | Status (${runDate}) |`);
 tableLines.push('|---|---|---|---|---|');
 for (const category of categoryOrder) {
   if (!grouped[category]) continue;
@@ -441,3 +449,45 @@ const overall = {
   totalPlaywrightTests: overallSpecs
 };
 fs.writeFileSync(path.join(outputDir, 'generated-overall-summary.json'), JSON.stringify(overall, null, 2));
+
+if (shouldWriteDoc) {
+  const docPath = path.join(repoRoot, 'docs', 'TESTS.md');
+  if (!fs.existsSync(docPath)) {
+    throw new Error('Expected docs/TESTS.md to exist when using --write-doc');
+  }
+
+  const docContent = fs.readFileSync(docPath, 'utf8');
+
+  const runSummaryContent = [
+    `- **Date:** ${runDate}`,
+    `- **Runner:** \`${runnerCommand}\` (Playwright ${playwrightVersion})`,
+    `- **Spec files:** ${overall.specFilesPassing} passing / ${overall.specFilesFailing} failing (${overall.totalSpecFiles} total)`,
+    `- **Individual tests:** ${overall.playwrightTestsPassing} passing / ${overall.playwrightTestsFailing} failing (${overall.totalPlaywrightTests} total)`
+  ].join('\n');
+
+  const detailsContent = tableLines.join('\n');
+  const categorySummaryContent = summaryLines.join('\n');
+
+  let updatedDoc = replaceGeneratedSection(docContent, 'RUN-SUMMARY', runSummaryContent);
+  updatedDoc = replaceGeneratedSection(updatedDoc, 'DETAILS', detailsContent);
+  updatedDoc = replaceGeneratedSection(updatedDoc, 'CATEGORY-SUMMARY', categorySummaryContent);
+
+  fs.writeFileSync(docPath, updatedDoc);
+}
+
+function replaceGeneratedSection(source, marker, innerContent) {
+  const startMarker = `<!-- GENERATED:${marker} -->`;
+  const endMarker = `<!-- /GENERATED:${marker} -->`;
+  const startIndex = source.indexOf(startMarker);
+  const endIndex = source.indexOf(endMarker);
+
+  if (startIndex === -1 || endIndex === -1) {
+    throw new Error(`Missing markers ${startMarker} or ${endMarker} in docs/TESTS.md`);
+  }
+
+  const before = source.slice(0, startIndex);
+  const after = source.slice(endIndex + endMarker.length);
+  const replacement = `${startMarker}\n${innerContent}\n${endMarker}`;
+
+  return `${before}${replacement}${after}`;
+}

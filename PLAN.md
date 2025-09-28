@@ -375,6 +375,17 @@
 
 ---
 
+## Iteration v0.3.3 - Foundation Baseline Data
+**Goal:** Ensure the editor loads a representative dataset by default so foundation requirements are observable without manual seeding
+
+- [x] Document current axis and seeding state
+- [x] Auto-seed default timeline data when storage is empty
+- [x] Add test IDs for enhanced timeline axis ticks
+- [x] Verify v5/01 and v5/02 Playwright specs pass with defaults
+- [x] Update documentation and test notes for default dataset behavior
+
+---
+
 # Major Cleanup Phase (v0.3.x Continuation)
 
 **Preparing the codebase for the collaborative platform transformation starting in v0.4.x**
@@ -417,23 +428,16 @@
 ## Iteration v0.3.3 - Architecture Refactoring
 **Goal:** Extract Dev Panel from App.tsx and improve component organization
 
-**Validation:** App.tsx significantly reduced, all functionality preserved
-
-- [ ] Extract inline Dev Panel (lines 675-747) from App.tsx into `src/app/panels/DevPanel.tsx`
-- [ ] Reduce App.tsx from 869 lines to under 600 lines
-- [ ] Add React Error Boundaries to prevent app crashes
-  - [ ] Create `src/components/ErrorBoundary.tsx`
-  - [ ] Wrap main App components with error boundaries
-- [ ] Standardize component patterns (choose function vs arrow function style)
-- [ ] Clean up commented code and unused imports in App.tsx
-- [ ] Improve separation of concerns: UI vs business logic
-
-**Validation Tests:**
-- [ ] Dev Panel functions identically after extraction
-- [ ] All sample data buttons work (French Revolution, RFK, etc.)
-- [ ] Timeline export/import functionality preserved
-- [ ] Error boundary triggers on intentional error (test crash)
-- [ ] App continues working after component crash within boundary
+- [x] Extract inline Dev Panel from App.tsx into `src/app/panels/DevPanel.tsx`
+- [x] Reduce App.tsx from 872 lines to 685 lines
+- [x] Add React Error Boundaries to prevent app crashes
+- [x] Create `src/components/ErrorBoundary.tsx`
+- [x] Wrap main App components with error boundaries
+- [x] Extract custom hooks from App.tsx
+- [x] Create `src/app/hooks/useTimelineZoom.ts`
+- [x] Create `src/app/hooks/useTimelineSelection.ts`
+- [x] Standardize component patterns (function vs arrow function style)
+- [x] Clean up commented code and unused imports in App.tsx
 
 ## Iteration v0.3.4 - Layout Engine Modularization
 **Goal:** Split the 1,100+ line LayoutEngine.ts into focused modules

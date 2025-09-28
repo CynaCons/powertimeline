@@ -4,12 +4,11 @@ test.describe('v5/02 Cards placement', () => {
   test('cards render above and below the axis', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARDS-001' });
     await page.goto('/');
-    // Seed RFK deterministic dataset via DevPanel through navigation rail
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
 
-  const cards = page.locator('[data-testid="event-card"]');
-  expect(await cards.count()).toBeGreaterThan(0);
+    const cards = page.locator('[data-testid="event-card"]');
+    await expect(cards.first()).toBeVisible();
+
+    expect(await cards.count()).toBeGreaterThan(0);
 
     const axis = page.locator('[data-testid="timeline-axis"]').first();
     const axisBox = await axis.boundingBox();

@@ -4,15 +4,19 @@ This document tracks Playwright regression coverage for ChronoChart and is updat
 
 ## Latest Playwright Run
 
-- **Date:** 2025-09-26
-- **Runner:** `npm run test` (Playwright v1.54.2)
+<!-- GENERATED:RUN-SUMMARY -->
+- **Date:** 2025-09-28
+- **Runner:** `npm run test:update-doc` (Playwright 1.54.2)
 - **Spec files:** 8 passing / 57 failing (65 total)
 - **Individual tests:** 95 passing / 82 failing (177 total)
+<!-- /GENERATED:RUN-SUMMARY -->
+
 - **Notes:** Telemetry-focused suites continue to pass; layout, zoom, minimap, and degradation suites require follow-up.
 
 ## Detailed Results
 
-| Test File | Summary | Category | Linked Requirements | Status (2025-09-26) |
+<!-- GENERATED:DETAILS -->
+| Test File | Summary | Category | Linked Requirements | Status (2025-09-28) |
 |---|---|---|---|---|
 | **Foundation & Core Tests** | | | | |
 | v5/01-foundation.smoke.spec.ts | Verifies app loads and timeline axis is visible | Foundation & Core Tests | CC-REQ-FOUND-001 | ✅ Pass |
@@ -92,9 +96,11 @@ This document tracks Playwright regression coverage for ChronoChart and is updat
 | v5/09-seeding-scenarios.spec.ts | Covers seeded historical scenarios and screenshot baselines | Integration & Scenarios Tests | - | ❌ Fail — RFK 1968 — timeline date range coverage |
 | v5/59-necker-demo.spec.ts | Demonstrates Necker event alignment issue and resolution | Integration & Scenarios Tests | - | ❌ Fail — Demonstrate Necker event alignment issue and fix |
 | v5/60-necker-zoom-demo.spec.ts | Shows Necker alignment across multiple zoom levels | Integration & Scenarios Tests | - | ❌ Fail — Demonstrate Necker event alignment at multiple zoom levels |
+<!-- /GENERATED:DETAILS -->
 
 ## Category Summary
 
+<!-- GENERATED:CATEGORY-SUMMARY -->
 | Category | Total Tests | Passing | Failing | Pass Rate |
 |---|---|---|---|---|
 | Foundation & Core Tests | 3 | 1 | 2 | 33% |
@@ -110,6 +116,18 @@ This document tracks Playwright regression coverage for ChronoChart and is updat
 | Data Management Tests | 1 | 0 | 1 | 0% |
 | Visual Design Tests | 2 | 0 | 2 | 0% |
 | Integration & Scenarios Tests | 3 | 0 | 3 | 0% |
+<!-- /GENERATED:CATEGORY-SUMMARY -->
+
+## Updating This Document
+
+Run the automated refresh script whenever you need to capture a new Playwright run:
+
+```powershell
+npm run test:update-doc
+```
+
+This command executes the v5 suite with the JSON reporter, regenerates the sections marked above, and leaves raw artifacts under `tmp/test-docs/`.
+It exits with the same status as Playwright, so expect a non-zero code while failures remain.
 
 ## Version History
 

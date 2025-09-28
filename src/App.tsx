@@ -14,8 +14,7 @@ import type { Command } from './components/CommandPalette';
 // Lazy load panels, overlays and heavy components for better bundle splitting
 const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
 const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
-// DevPanel temporarily replaced with inline implementation
-// const DevPanel = lazy(() => import('./app/panels/DevPanel'));
+const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
 import { EventStorage } from './lib/storage';
@@ -33,6 +32,9 @@ import {
 } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
+import { useTimelineZoom } from './app/hooks/useTimelineZoom';
+import { useTimelineSelection } from './app/hooks/useTimelineSelection';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const DEV_FLAG_KEY = 'chronochart-dev';
 
@@ -40,19 +42,20 @@ const DEV_FLAG_KEY = 'chronochart-dev';
 function App() {
   // Storage
   const storageRef = useRef(new EventStorage());
-  const [events, setEvents] = useState<Event[]>(() => storageRef.current.load());
+  const [events, setEvents] = useState<Event[]>(() => {
+    const stored = storageRef.current.load();
+    if (stored.length > 0) {
+      return stored;
+    }
+
+    const defaultSeed = seedRFKTimeline();
+    storageRef.current.writeThrough(defaultSeed);
+    return defaultSeed;
+  });
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
-  // Timeline selection drag state
-  const [timelineSelection, setTimelineSelection] = useState<{
-    isSelecting: boolean;
-    startX: number;
-    currentX: number;
-    containerLeft: number;
-    containerWidth: number;
-  } | null>(null);
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
   const selected = useMemo(
     () => events.find((e) => e.id === selectedId),
@@ -66,8 +69,11 @@ function App() {
   // View window controls via hook
   const { viewStart, viewEnd, setWindow, nudge, zoom, zoomAtCursor, animateTo } = useViewWindow(0,1);
 
+  // Timeline interaction hooks
+  useTimelineZoom({ zoomAtCursor, hoveredEventId });
+  const { timelineSelection, handleTimelineMouseDown } = useTimelineSelection({ viewStart, viewEnd, setWindow });
+
   // Panels & Dev toggle
-  const devEnabled = true;
   // Left sidebar overlays (permanent sidebar width = 56px)
   const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'dev'>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -167,137 +173,7 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [viewStart, viewEnd, zoom, nudge, setWindow]);
 
-  // Mouse wheel zoom with cursor positioning (no Ctrl key required)
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      // Skip if user is scrolling in input fields or panels
-      const target = e.target as Element;
-      if (target?.closest('input, textarea, select, .panel, .overlay, .dev-panel')) {
-        return; // Allow normal scrolling in UI elements
-      }
-      
-      e.preventDefault();
-      
-      // Get cursor position
-      const cursorX = e.clientX;
-      
-      const container = document.querySelector('.absolute.inset-0.ml-14 > .w-full.h-full.relative') as HTMLElement | null;
-      const rect = container?.getBoundingClientRect();
-      
-      // Determine zoom direction
-      const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25;
 
-      // Check if we should use hover-centered zoom
-      if (hoveredEventId) {
-        // Find the hovered card element and use its screen position for zoom
-        const cardElement = document.querySelector(`[data-event-id="${hoveredEventId}"]`) as HTMLElement;
-        if (cardElement) {
-          const cardRect = cardElement.getBoundingClientRect();
-          const cardCenterX = cardRect.left + cardRect.width / 2;
-
-          // Use the card's visual position for zoom (keep it stable under cursor)
-          if (rect) {
-            zoomAtCursor(zoomFactor, cardCenterX, window.innerWidth, rect.left, rect.width);
-            return;
-          } else {
-            zoomAtCursor(zoomFactor, cardCenterX, window.innerWidth);
-            return;
-          }
-        }
-      }
-
-      // Fall back to cursor-centered zoom
-      if (rect) {
-        zoomAtCursor(zoomFactor, cursorX, window.innerWidth, rect.left, rect.width);
-      } else {
-        zoomAtCursor(zoomFactor, cursorX, window.innerWidth);
-      }
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [zoomAtCursor, hoveredEventId]);
-
-  // Timeline selection drag handlers
-  const handleTimelineMouseDown = useCallback((e: React.MouseEvent) => {
-    // Only start selection on the timeline area, not on cards or other elements
-    const target = e.target as Element;
-    if (target?.closest('[data-testid="event-card"]') || target?.closest('.panel') || target?.closest('.overlay')) {
-      return; // Don't start selection if clicking on cards or UI elements
-    }
-
-    const container = document.querySelector('.absolute.inset-0.ml-14 > .w-full.h-full.relative') as HTMLElement;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const startX = e.clientX - rect.left;
-
-    setTimelineSelection({
-      isSelecting: true,
-      startX,
-      currentX: startX,
-      containerLeft: rect.left,
-      containerWidth: rect.width
-    });
-
-    e.preventDefault();
-  }, []);
-
-  const handleTimelineMouseMove = useCallback((e: MouseEvent) => {
-    if (!timelineSelection?.isSelecting) return;
-
-    const currentX = e.clientX - timelineSelection.containerLeft;
-    setTimelineSelection(prev => prev ? {
-      ...prev,
-      currentX: Math.max(0, Math.min(timelineSelection.containerWidth, currentX))
-    } : null);
-  }, [timelineSelection]);
-
-  const handleTimelineMouseUp = useCallback(() => {
-    if (!timelineSelection?.isSelecting) return;
-
-    const { startX, currentX, containerWidth } = timelineSelection;
-
-    // Calculate timeline positions (0-1) for the selection
-    const leftMargin = 96; // rail + padding
-    const rightMargin = 40;
-    const usableWidth = containerWidth - leftMargin - rightMargin;
-
-    const minX = Math.min(startX, currentX);
-    const maxX = Math.max(startX, currentX);
-
-    // Convert screen coordinates to timeline positions
-    const startPos = Math.max(0, Math.min(1, (minX - leftMargin) / usableWidth));
-    const endPos = Math.max(0, Math.min(1, (maxX - leftMargin) / usableWidth));
-
-    // Convert view positions to actual timeline positions
-    const currentWindowWidth = viewEnd - viewStart;
-    const selectionStart = viewStart + (startPos * currentWindowWidth);
-    const selectionEnd = viewStart + (endPos * currentWindowWidth);
-
-    // Only zoom if selection is meaningful (at least 20px wide)
-    if (Math.abs(maxX - minX) > 20) {
-      setWindow(
-        Math.max(0, Math.min(1, selectionStart)),
-        Math.max(0, Math.min(1, selectionEnd))
-      );
-    }
-
-    setTimelineSelection(null);
-  }, [timelineSelection, viewStart, viewEnd, setWindow]);
-
-  // Add global mouse listeners for drag
-  useEffect(() => {
-    if (!timelineSelection?.isSelecting) return;
-
-    document.addEventListener('mousemove', handleTimelineMouseMove);
-    document.addEventListener('mouseup', handleTimelineMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleTimelineMouseMove);
-      document.removeEventListener('mouseup', handleTimelineMouseUp);
-    };
-  }, [handleTimelineMouseMove, handleTimelineMouseUp, timelineSelection?.isSelecting]);
 
   // CRUD handlers
   const saveAuthoring = useCallback((e: React.FormEvent) => {
@@ -338,14 +214,6 @@ function App() {
     }
   }, [selectedId, events, announce]);
 
-  // const onDragDate = useCallback((id: string, newISODate: string) => {
-  //   // write-through during drag
-  //   setEvents(prev => {
-  //     const next = prev.map(ev => ev.id === id ? { ...ev, date: newISODate } : ev);
-  //     storageRef.current.writeThrough(next);
-  //     return next;
-  //   });
-  // }, []);
 
   // Dev helpers using utilities
   const seedRandom = useCallback((count: number) => {
@@ -639,115 +507,71 @@ function App() {
           <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]">
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
             {overlay === 'events' && (
-              <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
-                <OutlinePanel
-                  filtered={filteredForList}
-                  selectedId={selectedId}
-                  onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
-                  onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
-                  filter={outlineFilter}
-                  setFilter={setOutlineFilter}
-                  dragging={dragging}
-                  onClose={() => setOverlay(null)}
-                />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
+                  <OutlinePanel
+                    filtered={filteredForList}
+                    selectedId={selectedId}
+                    onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
+                    onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
+                    filter={outlineFilter}
+                    setFilter={setOutlineFilter}
+                    dragging={dragging}
+                    onClose={() => setOverlay(null)}
+                  />
+                </Suspense>
+              </ErrorBoundary>
             )}
             {overlay === 'editor' && (
-              <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-200 flex items-center justify-center">Loading...</div>}>
-                <AuthoringOverlay
-                  selected={selected}
-                  isNewEvent={!selected}
-                  editDate={editDate}
-                  editTime={editTime}
-                  editTitle={editTitle}
-                  editDescription={editDescription}
-                  setEditDate={setEditDate}
-                  setEditTime={setEditTime}
-                  setEditTitle={setEditTitle}
-                  setEditDescription={setEditDescription}
-                  onSave={saveAuthoring}
-                  onDelete={deleteSelected}
-                  onClose={() => setOverlay(null)}
-                  allEvents={events}
-                  onNavigatePrev={navigateToPreviousEvent}
-                  onNavigateNext={navigateToNextEvent}
-                  onSelectEvent={selectEvent}
-                  onCreateNew={createNewEvent}
-                />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-200 flex items-center justify-center">Loading...</div>}>
+                  <AuthoringOverlay
+                    selected={selected}
+                    isNewEvent={!selected}
+                    editDate={editDate}
+                    editTime={editTime}
+                    editTitle={editTitle}
+                    editDescription={editDescription}
+                    setEditDate={setEditDate}
+                    setEditTime={setEditTime}
+                    setEditTitle={setEditTitle}
+                    setEditDescription={setEditDescription}
+                    onSave={saveAuthoring}
+                    onDelete={deleteSelected}
+                    onClose={() => setOverlay(null)}
+                    allEvents={events}
+                    onNavigatePrev={navigateToPreviousEvent}
+                    onNavigateNext={navigateToNextEvent}
+                    onSelectEvent={selectEvent}
+                    onCreateNew={createNewEvent}
+                  />
+                </Suspense>
+              </ErrorBoundary>
             )}
-            {overlay === 'dev' && devEnabled && (
-              <div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-20">
-                <div className="p-4">
-                  <h2 className="text-lg font-bold mb-4">Developer Panel</h2>
-                  <p className="text-sm text-gray-600 mb-4">Events: {events.length}</p>
-
-                  <div className="mb-4">
-                    <h3 className="text-md font-semibold mb-2">Sample Data</h3>
-                    <div className="space-y-1 mb-4">
-                      <button onClick={seedRFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">RFK 1968</button>
-                      <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK</button>
-                      <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon</button>
-                      <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">De Gaulle</button>
-                      <button onClick={seedFrenchRevolution} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">French Revolution</button>
-                      <button onClick={seedMinuteTest} className="block w-full text-left px-2 py-1 hover:bg-orange-100 text-orange-700 text-sm">⏰ Minute Test</button>
-                      <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Random (10)</button>
-                      <button onClick={seedClustered} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Clustered</button>
-                      <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Long Range</button>
-                      <button onClick={() => seedIncremental(5)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Incremental (5)</button>
-                      <button onClick={clearAll} className="block w-full text-left px-2 py-1 hover:bg-red-100 text-red-700 text-sm">Clear All</button>
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <h3 className="text-md font-semibold mb-2">Timeline Export/Import</h3>
-                    <div className="space-y-2">
-                      <button
-                        type="button"
-                        className="rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3 py-1"
-                        disabled={events.length === 0}
-                        title={events.length === 0 ? "No events to export" : `Export ${events.length} events to YAML file`}
-                        onClick={() => {
-                          try {
-                            console.log('Export clicked - testing yamlSerializer...');
-                            import('./utils/yamlSerializer').then(yaml => {
-                              console.log('yamlSerializer loaded successfully:', yaml);
-                              alert('YAML module loaded successfully! Export would work.');
-                            }).catch(err => {
-                              console.error('Failed to load yamlSerializer:', err);
-                              alert('Failed to load YAML module: ' + err.message);
-                            });
-                          } catch (err) {
-                            console.error('Error testing yamlSerializer:', err);
-                            alert('Error testing YAML module: ' + (err as Error).message);
-                          }
-                        }}
-                      >
-                        📤 Export YAML ({events.length})
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded border border-green-300 bg-white text-green-700 hover:bg-green-50 px-3 py-1"
-                        title="Import timeline from YAML file"
-                        onClick={() => alert('Import functionality would go here')}
-                      >
-                        📁 Import YAML
-                      </button>
-                    </div>
-
-                    <div className="text-gray-500 text-xs">
-                      YAML format allows sharing timelines between users and applications
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setOverlay(null)}
-                    className="mt-4 px-3 py-1 bg-gray-500 text-white rounded text-sm"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
+            {overlay === 'dev' && (
+              <ErrorBoundary>
+                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
+                  <DevPanel
+                    seedRandom={seedRandom}
+                    seedClustered={seedClustered}
+                    seedLongRange={seedLongRange}
+                    clearAll={clearAll}
+                    onClose={() => setOverlay(null)}
+                    seedRFK={seedRFK}
+                    seedJFK={seedJFK}
+                    seedNapoleon={seedNapoleon}
+                    seedDeGaulle={seedDeGaulle}
+                    seedFrenchRevolution={seedFrenchRevolution}
+                    seedIncremental={seedIncremental}
+                    seedMinuteTest={seedMinuteTest}
+                    events={events}
+                    onImportEvents={(importedEvents) => {
+                      setEvents(importedEvents);
+                      storageRef.current.writeThrough(importedEvents);
+                    }}
+                  />
+                </Suspense>
+              </ErrorBoundary>
             )}
           </div>
         )}
@@ -775,16 +599,18 @@ function App() {
             onMouseDown={handleTimelineMouseDown}
             style={{ cursor: timelineSelection?.isSelecting ? 'crosshair' : 'default' }}
           >
-            <DeterministicLayoutComponent
-              events={events}
-              showInfoPanels={showInfoPanels}
-              viewStart={viewStart}
-              viewEnd={viewEnd}
-              hoveredEventId={hoveredEventId}
-              onCardDoubleClick={(id) => { setSelectedId(id); setOverlay('editor'); }}
-              onCardMouseEnter={(id) => setHoveredEventId(id)}
-              onCardMouseLeave={() => setHoveredEventId(undefined)}
-            />
+            <ErrorBoundary>
+              <DeterministicLayoutComponent
+                events={events}
+                showInfoPanels={showInfoPanels}
+                viewStart={viewStart}
+                viewEnd={viewEnd}
+                hoveredEventId={hoveredEventId}
+                onCardDoubleClick={(id) => { setSelectedId(id); setOverlay('editor'); }}
+                onCardMouseEnter={(id) => setHoveredEventId(id)}
+                onCardMouseLeave={() => setHoveredEventId(undefined)}
+              />
+            </ErrorBoundary>
 
             {/* Timeline selection overlay */}
             {timelineSelection?.isSelecting && (
@@ -817,21 +643,8 @@ function App() {
                 </div>
               </div>
             )}
-              {renderLiveRegion()}
-              
-              {/* Bottom centered control bar overlay - highly transparent by default */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95 hidden">
-                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
-                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(-0.1)}>◀︎ Pan</button>
-                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => nudge(0.1)}>Pan ▶︎</button>
-                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                  <button className="rounded bg-indigo-600 text-white hover:bg-indigo-500 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(0.8)}>＋ Zoom In</button>
-                  <button className="rounded bg-gray-800 text-white hover:bg-gray-700 px-3 py-1.5 text-xs font-medium" onClick={() => zoom(1.25)}>－ Zoom Out</button>
-                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                  <button className="rounded bg-sky-600 text-white hover:bg-sky-500 px-3 py-1.5 text-xs font-medium" onClick={() => { animateTo(0, 1); }}>Fit All</button>
-                </div>
-              </div>
-              {/* New icon-based control bar */}
+
+              {/* Icon-based control bar */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
                 <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
                   <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)}><span className="material-symbols-rounded">chevron_left</span></IconButton></Tooltip>
