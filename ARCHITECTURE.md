@@ -1,8 +1,8 @@
-# ChronoChart Architecture (Half-Column System v5)
+# PowerTimeline Architecture (Half-Column System v5)
 
 ## Overview
 
-ChronoChart renders a horizontal timeline with event cards positioned in independent half-column systems above and below the timeline. The system uses alternating placement (Event 1→above, Event 2→below) with spatial-based clustering and 2-slot half-columns to ensure optimal distribution and zero overlaps.
+PowerTimeline renders a horizontal timeline with event cards positioned in independent half-column systems above and below the timeline. The system uses alternating placement (Event 1→above, Event 2→below) with spatial-based clustering and 2-slot half-columns to ensure optimal distribution and zero overlaps.
 
 ## Where to find what
 

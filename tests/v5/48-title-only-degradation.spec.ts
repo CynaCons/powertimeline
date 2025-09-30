@@ -24,7 +24,7 @@ test.describe('v5/48 Title-only degradation', () => {
     ];
 
     await page.evaluate((events) => {
-      localStorage.setItem('chronochart-events', JSON.stringify(events));
+      localStorage.setItem('powertimeline-events', JSON.stringify(events));
     }, denseEvents);
 
     await page.reload();

@@ -1,11 +1,14 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import type { Tick as AxisTick, TickScaleKind } from '../timeline/hooks/useAxisTicks';
+
+type VisualTickType = TickScaleKind | 'minute' | 'quarter' | 'season';
 
 interface Tick {
   t: number;
   label: string;
   x: number;
   level: 'primary' | 'secondary' | 'tertiary' | 'quaternary';
-  type: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'quarter' | 'season';
+  type: VisualTickType;
 }
 
 interface TimelineRange {
@@ -19,7 +22,7 @@ interface EnhancedTimelineAxisProps {
   timelineRange: TimelineRange;
   viewportSize: { width: number; height: number };
   timelineY: number;
-  baseTicks: Array<{ t: number; label: string; x: number }>;
+  baseTicks: AxisTick[];
   onDateHover?: (date: Date | null) => void;
   onTimelineClick?: (date: Date) => void;
 }
@@ -33,25 +36,41 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
   onTimelineClick
 }) => {
   const [hoverX, setHoverX] = useState<number | null>(null);
+  const axisSpanDays = timelineRange.dateRange / (24 * 60 * 60 * 1000);
 
   // Generate enhanced ticks with multiple levels
   const enhancedTicks = useMemo(() => {
     const ticks: Tick[] = [];
     const { minDate, maxDate, dateRange } = timelineRange;
     const spanDays = dateRange / (24 * 60 * 60 * 1000);
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const usableWidth = Math.max(1, viewportSize.width - leftMargin - rightMargin);
+    const projectX = (timestamp: number) => leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
+    const baseScaleSet = new Set<TickScaleKind>(baseTicks.map(tick => tick.scale));
+    const baseHasMonthScale = baseScaleSet.has('month');
+    const baseHasDayScale = baseScaleSet.has('day');
+    const baseHasHourScale = baseScaleSet.has('hour');
+    const monthAsPrimary = baseScaleSet.size === 1 && baseHasMonthScale;
 
     // Primary ticks (years) - always shown
     baseTicks.forEach(tick => {
+      const level: Tick['level'] = tick.scale === 'month' && !monthAsPrimary ? 'secondary' : 'primary';
       ticks.push({
-        ...tick,
-        level: 'primary',
-        type: 'year'
+        t: tick.t,
+        label: tick.label,
+        x: tick.x,
+        level,
+        type: tick.scale
       });
     });
 
-    // Secondary ticks (months) - shown when zoomed to < 5 years
-    if (spanDays < 365 * 5) {
-      const monthStep = Math.max(1, Math.floor(spanDays / 365 * 12 / 12)); // Adjust density
+    // Secondary ticks (months) - shown when zoomed to < 12 years
+    if (spanDays < 365 * 12 && !baseHasMonthScale) {
+      const approxMonths = Math.max(1, Math.floor(spanDays / 30));
+      const monthStep = Math.max(1, Math.ceil(approxMonths / 16));
       const startDate = new Date(minDate);
       startDate.setDate(1);
       startDate.setHours(0, 0, 0, 0);
@@ -59,18 +78,13 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          // Use the same margined coordinate system as cards/anchors
-          const navRailWidth = 56;
-          const additionalMargin = 80;
-          const leftMargin = navRailWidth + additionalMargin; // 136px total
-          const rightMargin = 40;
-          const usableWidth = viewportSize.width - leftMargin - rightMargin;
-          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
-          const label = date.toLocaleDateString('en-US', { month: 'short' });
+          const x = projectX(timestamp);
+          const labelOptions: Intl.DateTimeFormatOptions = spanDays > 365 ? { month: 'short', year: '2-digit' } : { month: 'short' };
+          const label = date.toLocaleDateString('en-US', labelOptions);
 
           // Don't add if too close to existing primary tick
           const tooClose = ticks.some(existing =>
-            existing.level === 'primary' && Math.abs(existing.x - x) < 50
+            existing.level === 'primary' && Math.abs(existing.x - x) < 40
           );
 
           if (!tooClose) {
@@ -89,32 +103,42 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     }
 
     // Tertiary ticks (days) - shown when zoomed to < 3 months
-    if (spanDays < 90 && spanDays >= 1) {
-      const dayStep = Math.max(1, Math.floor(spanDays / 20)); // Max 20 day labels
+  if (!baseHasDayScale && spanDays < 90 && spanDays > 0) {
+      const dayStep = Math.max(1, Math.floor(spanDays / 20)); // Max ~20 day labels
       const startDate = new Date(minDate);
       startDate.setHours(0, 0, 0, 0);
 
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          // Use the same margined coordinate system as cards/anchors
-          const navRailWidth = 56;
-          const additionalMargin = 80;
-          const leftMargin = navRailWidth + additionalMargin; // 136px total
-          const rightMargin = 40;
-          const usableWidth = viewportSize.width - leftMargin - rightMargin;
-          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
-          const label = date.getDate().toString();
+          const x = projectX(timestamp);
+          const includeWeekday = spanDays <= 14;
+          const includeMonth = spanDays <= 45;
+          const label = date.toLocaleDateString('en-US', {
+            weekday: includeWeekday ? 'short' : undefined,
+            month: includeMonth ? 'short' : undefined,
+            day: 'numeric'
+          }).replace(',', '');
+
+          const dayLabelLevel: Tick['level'] = includeWeekday ? 'secondary' : 'tertiary';
 
           // Don't add if too close to existing ticks
-          const tooClose = ticks.some(existing => Math.abs(existing.x - x) < 30);
+          const tooClose = ticks.some(existing => {
+            if (existing.type === 'hour' || existing.type === 'minute') {
+              return false;
+            }
+            if (existing.type === 'day' && dayLabelLevel === existing.level) {
+              return Math.abs(existing.x - x) < 24;
+            }
+            return Math.abs(existing.x - x) < 30;
+          });
 
           if (!tooClose) {
             ticks.push({
               t: timestamp,
               label,
               x,
-              level: 'tertiary',
+              level: dayLabelLevel,
               type: 'day'
             });
           }
@@ -125,7 +149,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     }
 
     // Quaternary ticks (hours) - shown when zoomed to < 1 day
-    if (spanDays < 1) {
+  if (!baseHasHourScale && spanDays < 1) {
       const spanHours = spanDays * 24;
       const hourStep = spanHours < 6 ? 1 : spanHours < 12 ? 2 : spanHours < 24 ? 6 : 12;
       const startDate = new Date(minDate);
@@ -134,13 +158,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          // Use the same margined coordinate system as cards/anchors
-          const navRailWidth = 56;
-          const additionalMargin = 80;
-          const leftMargin = navRailWidth + additionalMargin; // 136px total
-          const rightMargin = 40;
-          const usableWidth = viewportSize.width - leftMargin - rightMargin;
-          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
+          const x = projectX(timestamp);
           const label = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             hour12: true
@@ -165,7 +183,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     }
 
     // Minute ticks - shown when zoomed to < 2 hours
-    if (spanDays < (2 / 24)) {
+  if (spanDays < (2 / 24)) {
       const spanMinutes = spanDays * 24 * 60;
       const minuteStep = spanMinutes < 30 ? 5 : spanMinutes < 60 ? 10 : spanMinutes < 120 ? 15 : 30;
       const startDate = new Date(minDate);
@@ -177,13 +195,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
       for (let date = new Date(startDate); date.getTime() <= maxDate; ) {
         const timestamp = date.getTime();
         if (timestamp >= minDate && timestamp <= maxDate) {
-          // Use the same margined coordinate system as cards/anchors
-          const navRailWidth = 56;
-          const additionalMargin = 80;
-          const leftMargin = navRailWidth + additionalMargin; // 136px total
-          const rightMargin = 40;
-          const usableWidth = viewportSize.width - leftMargin - rightMargin;
-          const x = leftMargin + ((timestamp - minDate) / dateRange) * usableWidth;
+          const x = projectX(timestamp);
           const label = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -390,10 +402,25 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
         {enhancedTicks.map((tick, index) => {
           const isPrimary = tick.level === 'primary';
           const isSecondary = tick.level === 'secondary';
+          const isDayLabel = tick.type === 'day';
+          const isHourLabel = tick.type === 'hour';
+          const isMinuteLabel = tick.type === 'minute';
 
           const tickHeight = isPrimary ? 20 : isSecondary ? 15 : 10;
           const tickY = 40 - tickHeight / 2;
-          const labelY = isPrimary ? 15 : isSecondary ? 65 : 70;
+          let labelY: number;
+          if (isHourLabel || isMinuteLabel) {
+            labelY = 70;
+          } else if (isDayLabel && axisSpanDays <= 14) {
+            labelY = 18;
+          } else if (isPrimary) {
+            labelY = 15;
+          } else if (isSecondary) {
+            labelY = 65;
+          } else {
+            labelY = 70;
+          }
+
           const fontSize = isPrimary ? 14 : isSecondary ? 12 : 10;
           const fontWeight = isPrimary ? 'bold' : isSecondary ? '600' : 'normal';
           const opacity = isPrimary ? 1 : isSecondary ? 0.8 : 0.6;
@@ -418,6 +445,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 
               {/* Label */}
               <text
+                data-testid="axis-label"
                 x={tick.x}
                 y={labelY}
                 fontSize={fontSize}

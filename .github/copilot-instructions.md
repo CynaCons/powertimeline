@@ -1,4 +1,4 @@
-# Chronochart AI Implementation Guide
+# PowerTimeline AI Implementation Guide
 
 ## Core guardrails
 - Always start by capturing a task list with the todo manager **and** reflect work in `PLAN.md` checklists; keep both in sync as you progress.

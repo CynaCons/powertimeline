@@ -36,7 +36,7 @@ import { useTimelineZoom } from './app/hooks/useTimelineZoom';
 import { useTimelineSelection } from './app/hooks/useTimelineSelection';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
-const DEV_FLAG_KEY = 'chronochart-dev';
+const DEV_FLAG_KEY = 'powertimeline-dev';
 
 
 function App() {

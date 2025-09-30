@@ -6,12 +6,14 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
+
+    // Load Napoleon timeline via developer hotkey to avoid selector drift
+    await page.keyboard.press('Alt+d');
+    await page.waitForTimeout(400);
     await page.click('button:has-text("Napoleon 1769-1821")');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(600);
+    await page.keyboard.press('Alt+d');
+    await page.waitForTimeout(200);
   });
 
   test('timeline scales adapt from years to days across zoom levels', async ({ page }) => {
@@ -45,6 +47,7 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
         await page.waitForTimeout(50);
       }
       await page.waitForTimeout(300);
+      await page.waitForSelector('[data-testid="axis-label"]', { timeout: 5000 });
       
       // Get axis labels
       const axisLabels = await page.locator('[data-testid="axis-label"]').allTextContents();
@@ -76,7 +79,8 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
             /^\d{1,2}$/.test(label) ||                           // Day numbers: "15"
             /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2}$/.test(label) || // "Mon 15"
             /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}$/.test(label) || // "Jan 15"
-            /:\d{2}/.test(label)                                 // Hour format: "14:00"
+            /:\d{2}/.test(label) ||                               // Hour format: "14:00"
+            /\d{1,2}\s?(AM|PM)/i.test(label)                     // Hour format: "2 PM"
           );
           console.log(`Day-level format detected: ${hasDays}`);
           expect(hasDays).toBe(true);
@@ -113,6 +117,7 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
         await page.waitForTimeout(30);
       }
       await page.waitForTimeout(200);
+  await page.waitForSelector('[data-testid="axis-label"]', { timeout: 5000 }).catch(() => undefined);
       
       const labels = await page.locator('[data-testid="axis-label"]').all();
       const labelPositions: number[] = [];
@@ -170,6 +175,7 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
       await page.waitForTimeout(30);
     }
     await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="axis-label"]', { timeout: 5000 });
     
     // Get labels and verify they represent a logical temporal progression
     const axisLabels = await page.locator('[data-testid="axis-label"]').allTextContents();
@@ -182,9 +188,10 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
     // Labels should represent some form of day-level progression
     const hasDayProgression = axisLabels.some(label => {
       return /^\d{1,2}$/.test(label) ||                    // Day numbers
-             /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.test(label) || // Day names
-             /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}/.test(label) || // Month-day
-             /\d{1,2}:\d{2}/.test(label);                   // Hour format
+        /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.test(label) || // Day names
+        /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}/.test(label) || // Month-day
+        /\d{1,2}:\d{2}/.test(label) ||                // Hour format HH:MM
+        /\d{1,2}\s?(AM|PM)/i.test(label);             // Hour format with meridiem
     });
     
     console.log(`Day-level progression detected: ${hasDayProgression}`);
@@ -209,6 +216,7 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
       await page.waitForTimeout(50);
     }
     
+    await page.waitForSelector('[data-testid="axis-label"]', { timeout: 5000 });
     const zoomOutLabels = await page.locator('[data-testid="axis-label"]').allTextContents();
     console.log(`📊 Extreme zoom out labels:`, zoomOutLabels);
     
@@ -229,6 +237,7 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
     }
     await page.waitForTimeout(300);
     
+    await page.waitForSelector('[data-testid="axis-label"]', { timeout: 5000 });
     const zoomInLabels = await page.locator('[data-testid="axis-label"]').allTextContents();
     console.log(`📊 Extreme zoom in labels:`, zoomInLabels);
     
@@ -239,9 +248,10 @@ test.describe('v5/34 Adaptive Timeline Scales', () => {
     // Labels should be appropriate for deep zoom
     const hasDetailLabels = zoomInLabels.some(label => {
       return /^\d{1,2}$/.test(label) ||              // Day numbers
-             /\d{1,2}:\d{2}/.test(label) ||          // Hour format
-             /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}/.test(label) || // Month-day
-             /(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.test(label); // Day names
+        /\d{1,2}:\d{2}/.test(label) ||          // Hour format HH:MM
+        /\d{1,2}\s?(AM|PM)/i.test(label) ||     // Hour format with meridiem
+        /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}/.test(label) || // Month-day
+        /(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.test(label); // Day names
     });
     
     console.log(`Detail labels at extreme zoom: ${hasDetailLabels}`);

@@ -241,7 +241,7 @@ Historical Datasets Added
 Space Optimization & UI Refinement
 - [x] Move controls (Pan/Zoom/Fit All) to centered bottom overlay bar
 - [x] Remove Export function to declutter interface
-- [x] Remove top app bar and integrate ChronoChart logo into navigation rail
+- [x] Remove top app bar and integrate PowerTimeline logo into navigation rail
 - [x] Move Dev toggle from header to navigation rail
 - [x] Maximize timeline viewport by reclaiming header space
 

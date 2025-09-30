@@ -34,6 +34,31 @@ async function saveViewportScreenshot(page: any, name: string) {
   await page.screenshot({ path: stablePath, fullPage: false });
 }
 
+async function logTickSpread(page: any, label: string) {
+  const debug = await page.evaluate(() => (window as any).debugTimelineScales?.());
+  if (!debug) {
+    console.log(`[timeline] ${label}: debugTimelineScales unavailable`);
+    return { spread: 0, tickCount: 0 };
+  }
+  const ticks = Array.isArray(debug.ticks) ? debug.ticks : [];
+  if (ticks.length === 0) {
+    console.log(`[timeline] ${label}: no ticks`, debug);
+    return { spread: 0, tickCount: 0 };
+  }
+  const xs = ticks
+    .map((tick: { x: number }) => Number.isFinite(tick.x) ? tick.x : null)
+    .filter((x: number | null): x is number => x !== null);
+  if (xs.length === 0) {
+    console.log(`[timeline] ${label}: tick coordinates unavailable`, debug);
+    return { spread: 0, tickCount: ticks.length };
+  }
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const spread = maxX - minX;
+  console.log(`[timeline] ${label}: ticks=${ticks.length} minX=${minX.toFixed(1)} maxX=${maxX.toFixed(1)} spread=${spread.toFixed(1)}`);
+  return { spread, tickCount: ticks.length };
+}
+
 test.describe('v5/09 Seeding scenarios and screenshots', () => {
   test('RFK 1968 — screenshot', async ({ page }) => {
     await page.goto('/');
@@ -42,6 +67,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await closeDevPanel(page);
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
+  const { spread } = await logTickSpread(page, 'RFK 1968');
+  expect(spread).toBeGreaterThan(1200);
     await saveViewportScreenshot(page, 'v5-rfk-1968.png');
   });
 
@@ -80,7 +107,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await page.locator('.timeline-axis').allTextContents().catch(() => []);
     
     const debugInfo = await page.evaluate(() => {
-      const debug = (window as any).chronochartDebug;
+      const debug = (window as any).powerTimelineDebug;
       return {
         eventsCount: debug?.events?.length || 0,
         minDate: debug?.minDate,
@@ -107,8 +134,10 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     expect(uniqueMonths.has('May 1968')).toBe(true); // Now works!
     expect(uniqueMonths.has('Jun 1968')).toBe(true); // Now works!
     
-    // Cards are still limited to 2, but timeline range is fixed
-    expect(cardCount).toBe(2); // Currently showing only 2 cards (capacity issue remains)
+    // All RFK events should now render without truncation
+    expect(cardCount).toBe(10);
+  const { spread } = await logTickSpread(page, 'RFK 1968 coverage');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('JFK 1961-63 — screenshot', async ({ page }) => {
@@ -119,6 +148,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-jfk-1961-63.png');
+  const { spread } = await logTickSpread(page, 'JFK 1961-63');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('Napoleon 1769-1821 — screenshot', async ({ page }) => {
@@ -129,6 +160,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-napoleon-1769-1821.png');
+  const { spread } = await logTickSpread(page, 'Napoleon 1769-1821');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('Long-range — screenshot', async ({ page }) => {
@@ -139,6 +172,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-long-range.png');
+  const { spread } = await logTickSpread(page, 'Long-range');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('Clustered x1 — screenshot', async ({ page }) => {
@@ -149,6 +184,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-clustered-1x.png');
+  const { spread } = await logTickSpread(page, 'Clustered x1');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('Clustered x2 — screenshot', async ({ page }) => {
@@ -160,6 +197,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-clustered-2x.png');
+  const { spread } = await logTickSpread(page, 'Clustered x2');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('Clustered x3 — screenshot', async ({ page }) => {
@@ -172,6 +211,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-clustered-3x.png');
+  const { spread } = await logTickSpread(page, 'Clustered x3');
+  expect(spread).toBeGreaterThan(1200);
   });
 
   test('Clustered x5 — screenshot', async ({ page }) => {
@@ -186,5 +227,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-clustered-5x.png');
+    const { spread } = await logTickSpread(page, 'Clustered x5');
+    expect(spread).toBeGreaterThan(1200);
   });
 });

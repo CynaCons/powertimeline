@@ -10,7 +10,7 @@ import type { Event } from '../types';
  *     description: "Optional description"
  *     created: "2024-01-01T00:00:00.000Z"
  *     version: "1.0"
- *     exported_by: "Chronochart v0.2.8"
+ *     exported_by: "PowerTimeline v0.2.8"
  *   events:
  *     - id: "event-1"
  *       date: "1961-01-20"
@@ -56,7 +56,7 @@ export function exportToYAML(events: Event[], options: ExportOptions = {}): stri
     description: options.description,
     created: new Date().toISOString(),
     version: "1.0",
-    exported_by: "Chronochart v0.2.8"
+    exported_by: "PowerTimeline v0.2.8"
   };
 
   // Clean events for export (remove any internal properties)

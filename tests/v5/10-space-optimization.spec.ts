@@ -97,17 +97,18 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
     });
 
     expect(spatialMetrics.cards).toBeGreaterThan(0);
+    expect(spatialMetrics.spatial).toBeTruthy();
 
     // ARCHITECTURE.md requirement: "maximize screen real estate usage"
     // Should use reasonable portion of available space
     if (spatialMetrics.cards > 2) {
-      expect(spatialMetrics.spatial.horizontalSpread).toBeGreaterThan(20); // At least 20% width usage
-      expect(spatialMetrics.spatial.verticalSpread).toBeGreaterThan(10); // At least 10% height usage
+      expect(spatialMetrics.spatial!.horizontalSpread).toBeGreaterThan(20); // At least 20% width usage
+      expect(spatialMetrics.spatial!.verticalSpread).toBeGreaterThan(10); // At least 10% height usage
     }
 
     // Cards shouldn't be bunched only on left side
     const leftThreshold = spatialMetrics.viewport.width * 0.3; // First 30% of screen
-    expect(spatialMetrics.spatial.rightmostX).toBeGreaterThan(leftThreshold);
+    expect(spatialMetrics.spatial!.rightmostX).toBeGreaterThan(leftThreshold);
   });
 
   test('validates anti-clustering behavior for sparse data', async ({ page }) => {

@@ -87,7 +87,7 @@ test.describe('Overflow Logic Tests', () => {
     
     // Count and verify RFK events
     const rfkTotalEvents = await page.evaluate(() => {
-      const state = JSON.parse(localStorage.getItem('chronochart-events') || '[]');
+      const state = JSON.parse(localStorage.getItem('powertimeline-events') || '[]');
       return state.length;
     });
     
@@ -138,7 +138,7 @@ test.describe('Overflow Logic Tests', () => {
     
     // Count and verify JFK events
     const jfkTotalEvents = await page.evaluate(() => {
-      const state = JSON.parse(localStorage.getItem('chronochart-events') || '[]');
+      const state = JSON.parse(localStorage.getItem('powertimeline-events') || '[]');
       return state.length;
     });
     

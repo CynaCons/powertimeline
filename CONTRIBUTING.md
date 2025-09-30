@@ -1,4 +1,4 @@
-# Contributing to Chronochart
+# Contributing to PowerTimeline
 
 ## Code Style Guidelines
 

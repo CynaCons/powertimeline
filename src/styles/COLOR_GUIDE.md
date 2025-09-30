@@ -1,6 +1,6 @@
 # Color System & Theme Guide
 
-Chronochart uses a comprehensive semantic color system based on Material Design 3 principles with full dark mode support.
+PowerTimeline uses a comprehensive semantic color system based on Material Design 3 principles with full dark mode support.
 
 ## Overview
 

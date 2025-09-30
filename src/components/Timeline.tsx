@@ -80,7 +80,7 @@ const Timeline: React.FC<Props> = ({
   
   // Debug: Expose events info for testing
   React.useEffect(() => {
-    (window as unknown as Record<string, unknown>).chronochartDebug = {
+    (window as unknown as Record<string, unknown>).powerTimelineDebug = {
       events: events,
       sortedEvents: sortedEvents,
       minDate: new Date(minDate).toISOString(),
@@ -107,8 +107,8 @@ const Timeline: React.FC<Props> = ({
         setInternalView({ start, end });
       }
     };
-    window.addEventListener('chronochart:setViewWindow', handler as EventListener);
-    return () => window.removeEventListener('chronochart:setViewWindow', handler as EventListener);
+    window.addEventListener('powertimeline:setViewWindow', handler as EventListener);
+    return () => window.removeEventListener('powertimeline:setViewWindow', handler as EventListener);
   }, []);
 
   // Visible window derived from normalized viewStart/viewEnd

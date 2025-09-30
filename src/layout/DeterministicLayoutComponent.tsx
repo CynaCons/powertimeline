@@ -18,7 +18,7 @@ interface WindowWithTelemetry extends Window {
 }
 import { createLayoutConfig } from './config';
 import { DeterministicLayoutV5, type DispatchMetrics, type AggregationMetrics } from './LayoutEngine';
-import { useAxisTicks } from '../timeline/hooks/useAxisTicks';
+import { useAxisTicks, type Tick } from '../timeline/hooks/useAxisTicks';
 import { EnhancedTimelineAxis } from '../components/EnhancedTimelineAxis';
 import { getEventTimestamp, formatEventDateTime } from '../lib/time';
 
@@ -122,37 +122,52 @@ export function DeterministicLayoutComponent({
   }, [events, viewStart, viewEnd]);
 
   // Create function for useAxisTicks
-  const tToXPercent = useMemo(() => {
+  const timestampToPixel = useMemo(() => {
     if (!timelineRange) return () => 0;
-    
+
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const usableWidth = Math.max(1, viewportSize.width - leftMargin - rightMargin);
+    const effectiveRange = timelineRange.dateRange > 0 ? timelineRange.dateRange : 1;
+
     return (timestamp: number): number => {
-      const ratio = (timestamp - timelineRange.minDate) / timelineRange.dateRange;
-      return ratio * 100; // Return 0-100 percent within the viewbox
+      if (!Number.isFinite(timestamp)) return leftMargin;
+      const ratio = (timestamp - timelineRange.minDate) / effectiveRange;
+      return leftMargin + ratio * usableWidth;
     };
-  }, [timelineRange]);
+  }, [timelineRange, viewportSize.width]);
 
   // Use the enhanced useAxisTicks hook - this must be at component level
   const timelineTicks = useAxisTicks(
     timelineRange?.minDate || 0,
     timelineRange?.maxDate || 1,
     timelineRange?.dateRange || 1,
-    tToXPercent
+    timestampToPixel
   );
 
   // Responsive timeline ticks based on actual viewport width - using margined coordinate system
-  const fallbackTicks = timelineRange && viewportSize.width > 200 ? (() => {
+  const fallbackTicks: Tick[] = timelineRange && viewportSize.width > 200 ? (() => {
     const navRailWidth = 56;
     const additionalMargin = 80;
     const leftMargin = navRailWidth + additionalMargin; // 136px total
     const rightMargin = 40;
     const usableWidth = viewportSize.width - leftMargin - rightMargin;
 
+    const makeYearTick = (time: number, x: number): Tick => ({
+      t: time,
+      label: new Date(time).getFullYear().toString(),
+      x,
+      scale: 'year'
+    });
+
     return [
-      { t: timelineRange.minDate, label: new Date(timelineRange.minDate).getFullYear().toString(), x: leftMargin + usableWidth * 0.05 },
-      { t: timelineRange.minDate + (timelineRange.dateRange * 0.25), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.25)).getFullYear().toString(), x: leftMargin + usableWidth * 0.25 },
-      { t: timelineRange.minDate + (timelineRange.dateRange * 0.5), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.5)).getFullYear().toString(), x: leftMargin + usableWidth * 0.5 },
-      { t: timelineRange.minDate + (timelineRange.dateRange * 0.75), label: new Date(timelineRange.minDate + (timelineRange.dateRange * 0.75)).getFullYear().toString(), x: leftMargin + usableWidth * 0.75 },
-      { t: timelineRange.maxDate, label: new Date(timelineRange.maxDate).getFullYear().toString(), x: leftMargin + usableWidth * 0.95 }
+      makeYearTick(timelineRange.minDate, leftMargin + usableWidth * 0.05),
+      makeYearTick(timelineRange.minDate + timelineRange.dateRange * 0.25, leftMargin + usableWidth * 0.25),
+      makeYearTick(timelineRange.minDate + timelineRange.dateRange * 0.5, leftMargin + usableWidth * 0.5),
+      makeYearTick(timelineRange.minDate + timelineRange.dateRange * 0.75, leftMargin + usableWidth * 0.75),
+      makeYearTick(timelineRange.maxDate, leftMargin + usableWidth * 0.95)
     ];
   })() : [];
 
@@ -160,20 +175,7 @@ export function DeterministicLayoutComponent({
   
   // Timeline scales now working with proper pixel-based coordinates
   // Convert percentage-based ticks to pixel coordinates using the SAME coordinate system as cards/anchors
-  const pixelTicks = timelineTicks.map(tick => {
-    const navRailWidth = 56;
-    const additionalMargin = 80;
-    const leftMargin = navRailWidth + additionalMargin; // 136px total
-    const rightMargin = 40;
-    const usableWidth = viewportSize.width - leftMargin - rightMargin;
-
-    return {
-      ...tick,
-      x: leftMargin + (tick.x / 100) * usableWidth // Convert 0-100% to margined coordinate system
-    };
-  });
-  
-  const finalTicks = pixelTicks.length > 0 ? pixelTicks : fallbackTicks;
+  const finalTicks = timelineTicks.length > 0 ? timelineTicks : fallbackTicks;
 
 
   // Debug function for browser console

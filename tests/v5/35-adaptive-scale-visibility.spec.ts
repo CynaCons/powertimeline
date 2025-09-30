@@ -137,7 +137,7 @@ test.describe('v5/35 Adaptive Scale Visibility Tests', () => {
               case 'day':
                 return /^\d{1,2}$/.test(label) || /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2}$/.test(label); // "15" or "Mon 15"
               case 'hour':
-                return /\d{1,2}:\d{2}/.test(label); // "14:00"
+                return /\d{1,2}:\d{2}/.test(label) || /\d{1,2}\s?(AM|PM)/i.test(label); // "14:00" or "2 PM"
               default:
                 return false;
             }
@@ -186,8 +186,9 @@ test.describe('v5/35 Adaptive Scale Visibility Tests', () => {
     await page.waitForTimeout(500);
     
     // Test navigation to different timeline periods
-    const minimap = page.locator('.relative.h-4.bg-gray-200, [data-testid="minimap"]').first();
-    const minimapBox = await minimap.boundingBox();
+  const minimap = page.locator('[data-testid="timeline-minimap"]').first();
+  await expect(minimap).toBeVisible({ timeout: 10000 });
+  const minimapBox = await minimap.boundingBox();
     
     if (minimapBox) {
       const navigationPoints = [

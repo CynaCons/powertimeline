@@ -1,6 +1,6 @@
-# ChronoChart Card Type Color System
+# PowerTimeline Card Type Color System
 
-This document defines the visual color coding system for different card types in ChronoChart. Each card type has a distinctive left border color to help users quickly identify the level of detail and space optimization being used.
+This document defines the visual color coding system for different card types in PowerTimeline. Each card type has a distinctive left border color to help users quickly identify the level of detail and space optimization being used.
 
 ## Color Scheme
 

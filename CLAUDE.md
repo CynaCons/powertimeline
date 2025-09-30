@@ -1,6 +1,6 @@
-# Copilot Instructions for Chronochart
+# Copilot Instructions for PowerTimeline
 
-You are developping Chronochart, a web application designed to visualize and edit timelines and events in a modern way.
+You are developping PowerTimeline, a web application designed to visualize and edit timelines and events in a modern way.
 
 # Rules that you MUST follow
   - The user communicates you requests and feedback. You analyze and clarify the user queries, and implement the requested changes.

@@ -1,6 +1,6 @@
-# Chronochart
+# PowerTimeline
 
-Chronochart is a React + TypeScript application for creating, exploring, and editing richly detailed historical timelines. It ships with a deterministic layout engine, adaptive zoom controls, and authoring tools designed for dense datasets.
+PowerTimeline is a React + TypeScript application for creating, exploring, and editing richly detailed historical timelines. It ships with a deterministic layout engine, adaptive zoom controls, and authoring tools designed for dense datasets.
 
 ## Quick links
 
@@ -71,7 +71,7 @@ Without these variables the analytics module should be disabled in future iterat
 
 ## Testing & QA
 
-Chronochart relies on [Playwright](https://playwright.dev/) for end-to-end validation. Tests live under `tests/` and are grouped by feature domain (layout, zoom, minimap, authoring, etc.).
+PowerTimeline relies on [Playwright](https://playwright.dev/) for end-to-end validation. Tests live under `tests/` and are grouped by feature domain (layout, zoom, minimap, authoring, etc.).
 
 ```bash
 npm test

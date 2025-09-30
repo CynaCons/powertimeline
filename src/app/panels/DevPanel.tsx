@@ -106,15 +106,15 @@ export function DevPanel({
           <h3 className="text-md font-semibold mb-2">Sample Data</h3>
           <div className="space-y-1 mb-4">
             <button onClick={seedRFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">RFK 1968</button>
-            <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK</button>
-            <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon</button>
+            <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK 1961-63</button>
+            <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon 1769-1821</button>
             <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">De Gaulle</button>
             <button onClick={seedFrenchRevolution} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">French Revolution</button>
             <button onClick={seedMinuteTest} className="block w-full text-left px-2 py-1 hover:bg-orange-100 text-orange-700 text-sm">⏰ Minute Test</button>
             <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Random (10)</button>
             <button onClick={seedClustered} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Clustered</button>
-            <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Long Range</button>
-            <button onClick={() => seedIncremental(5)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Incremental (5)</button>
+            <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Long-range</button>
+            <button onClick={() => seedIncremental(5)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">+5</button>
             <button onClick={clearAll} className="block w-full text-left px-2 py-1 hover:bg-red-100 text-red-700 text-sm">Clear All</button>
           </div>
         </div>

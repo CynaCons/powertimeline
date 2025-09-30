@@ -1,10 +1,10 @@
-# Chronochart YAML Timeline Format
+# PowerTimeline YAML Timeline Format
 
-This document describes the YAML format used by Chronochart for timeline export and import.
+This document describes the YAML format used by PowerTimeline for timeline export and import.
 
 ## Format Overview
 
-Chronochart uses a structured YAML format that includes metadata about the timeline and an array of events. This format is human-readable and can be easily shared between users or edited in any text editor.
+PowerTimeline uses a structured YAML format that includes metadata about the timeline and an array of events. This format is human-readable and can be easily shared between users or edited in any text editor.
 
 ## Schema Structure
 
@@ -15,7 +15,7 @@ timeline:
     description: "Optional timeline description"
     created: "2024-01-01T00:00:00.000Z"
     version: "1.0"
-    exported_by: "Chronochart v0.2.8"
+    exported_by: "PowerTimeline v0.2.8"
   events:
     - id: "event-1"
       date: "1961-01-20"
@@ -80,7 +80,7 @@ timeline:
     description: "Key events during John F. Kennedy's presidency"
     created: "2024-01-15T10:30:00.000Z"
     version: "1.0"
-    exported_by: "Chronochart v0.2.8"
+    exported_by: "PowerTimeline v0.2.8"
   events:
     - id: "jfk-inauguration"
       date: "1961-01-20"
@@ -99,7 +99,7 @@ timeline:
       category: "politics"
 ```
 
-## Usage in Chronochart
+## Usage in PowerTimeline
 
 ### Exporting
 1. Open the Developer Panel (Alt+D or click the settings icon)
@@ -114,7 +114,7 @@ timeline:
 
 ## Error Handling
 
-When importing, Chronochart validates:
+When importing, PowerTimeline validates:
 - YAML syntax correctness
 - Required field presence
 - Data type correctness

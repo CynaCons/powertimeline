@@ -10,6 +10,8 @@ const outputDir = path.join(repoRoot, 'tmp', 'test-docs');
 fs.mkdirSync(outputDir, { recursive: true });
 
 const summaryPathCandidates = [
+  path.join(outputDir, 'test-results.json'),
+  path.join(repoRoot, 'test-results.json'),
   path.join(outputDir, 'test-summary.json'),
   path.join(repoRoot, 'test-summary.json')
 ];
@@ -20,15 +22,33 @@ if (!summaryPath) {
   throw new Error('Missing test-summary.json. Expected at tmp/test-docs/ or repository root.');
 }
 
-const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+const rawData = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
 
 const args = process.argv.slice(2);
 const shouldWriteDoc = args.includes('--write-doc');
-const runDate = new Date().toISOString().slice(0, 10);
+
+const normalized = normalizeSummaryData(rawData);
+const summary = {
+  counts: normalized.counts,
+  summary: normalized.summaryEntries
+};
+
+const metadata = normalized.metadata || {};
 const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
-const playwrightVersionRaw = packageJson.devDependencies?.['@playwright/test'] || packageJson.dependencies?.['@playwright/test'] || '';
+const playwrightVersionRaw = metadata.playwrightVersion || packageJson.devDependencies?.['@playwright/test'] || packageJson.dependencies?.['@playwright/test'] || '';
 const playwrightVersion = playwrightVersionRaw.replace(/^[^0-9]*/, '') || 'unknown';
+const runDate = metadata.startTime ? new Date(metadata.startTime).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
 const runnerCommand = 'npm run test:update-doc';
+
+const persistedSummary = {
+  ...summary,
+  metadata: {
+    startTime: metadata.startTime,
+    playwrightVersion
+  }
+};
+
+fs.writeFileSync(path.join(outputDir, 'test-summary.json'), JSON.stringify(persistedSummary, null, 2));
 
 const mapping = {
   'v5/01-foundation.smoke.spec.ts': {
@@ -374,30 +394,45 @@ const categoryOrder = [
   'Integration & Scenarios Tests'
 ];
 
-const statusByFile = Object.fromEntries(summary.summary.map((entry) => [
+const statusByFile = new Map(summary.summary.map((entry) => [
   entry.file,
   {
     ok: entry.ok,
-    failingSpecs: entry.specs.filter((spec) => !spec.ok).map((spec) => spec.title)
+    failingSpecs: entry.specs.filter((spec) => !spec.ok).map((spec) => spec.title),
+    totalSpecs: entry.specs.length,
+    passingSpecs: entry.specs.filter((spec) => spec.ok).length
   }
 ]));
 
-const missing = Object.keys(statusByFile).filter((file) => !mapping[file]);
-if (missing.length) {
-  throw new Error(`Missing mapping entries for files: ${missing.join(', ')}`);
+const unknownFiles = Array.from(statusByFile.keys()).filter((file) => !mapping[file]);
+if (unknownFiles.length) {
+  throw new Error(`Missing mapping entries for files: ${unknownFiles.join(', ')}`);
 }
 
 const grouped = {};
 for (const [file, meta] of Object.entries(mapping)) {
-  const status = statusByFile[file];
+  const status = statusByFile.get(file);
   const category = meta.category;
   if (!grouped[category]) {
     grouped[category] = [];
   }
+  let statusCode = 'not-run';
+  let statusText = '⚪ Not run';
+  if (status) {
+    if (status.ok) {
+      statusCode = 'pass';
+      statusText = '✅ Pass';
+    } else {
+      statusCode = 'fail';
+      const detail = status.failingSpecs[0] ? ` — ${status.failingSpecs[0]}` : '';
+      statusText = `❌ Fail${detail}`;
+    }
+  }
   grouped[category].push({
     file,
     ...meta,
-    statusText: status.ok ? '✅ Pass' : `❌ Fail${status.failingSpecs.length ? ` — ${status.failingSpecs[0]}` : ''}`
+    statusText,
+    statusCode
   });
 }
 
@@ -422,7 +457,7 @@ const categorySummary = [];
 for (const category of categoryOrder) {
   if (!grouped[category]) continue;
   const total = grouped[category].length;
-  const passing = grouped[category].filter((row) => row.statusText.startsWith('✅')).length;
+  const passing = grouped[category].filter((row) => row.statusCode === 'pass').length;
   const failing = total - passing;
   const passRate = total ? Math.round((passing / total) * 100) : 0;
   categorySummary.push({ category, total, passing, failing, passRate });
@@ -490,4 +525,78 @@ function replaceGeneratedSection(source, marker, innerContent) {
   const replacement = `${startMarker}\n${innerContent}\n${endMarker}`;
 
   return `${before}${replacement}${after}`;
+}
+
+function normalizeSummaryData(data) {
+  if (Array.isArray(data.summary) && data.counts) {
+    return {
+      summaryEntries: data.summary,
+      counts: data.counts,
+      metadata: {
+        startTime: data.metadata?.startTime,
+        playwrightVersion: data.metadata?.playwrightVersion || data.playwrightVersion
+      }
+    };
+  }
+
+  return buildSummaryFromResults(data);
+}
+
+function buildSummaryFromResults(results) {
+  const fileMap = new Map();
+
+  const visitSuite = (suite) => {
+    for (const spec of suite.specs || []) {
+      const file = spec.file || suite.file || 'unknown';
+      const ok = computeSpecOk(spec);
+      const entry = fileMap.get(file);
+      const specRecord = { title: spec.title, ok };
+      if (entry) {
+        entry.specs.push(specRecord);
+        entry.ok = entry.ok && ok;
+      } else {
+        fileMap.set(file, { file, specs: [specRecord], ok });
+      }
+    }
+
+    for (const child of suite.suites || []) {
+      visitSuite(child);
+    }
+  };
+
+  for (const suite of results.suites || []) {
+    visitSuite(suite);
+  }
+
+  const summaryEntries = Array.from(fileMap.values())
+    .map((entry) => ({
+      file: entry.file,
+      specs: entry.specs,
+      ok: entry.specs.every((spec) => spec.ok)
+    }))
+    .sort((a, b) => a.file.localeCompare(b.file));
+
+  const counts = {
+    passed: summaryEntries.filter((entry) => entry.ok).length,
+    failed: summaryEntries.filter((entry) => !entry.ok).length
+  };
+
+  const metadata = {
+    startTime: results.stats?.startTime,
+    playwrightVersion: results.config?.version
+  };
+
+  return { summaryEntries, counts, metadata };
+}
+
+function computeSpecOk(spec) {
+  if (typeof spec.ok === 'boolean') {
+    return spec.ok;
+  }
+  if (Array.isArray(spec.tests)) {
+    return spec.tests.every((test) =>
+      (test.results || []).every((result) => result.status === 'passed')
+    );
+  }
+  return false;
 }

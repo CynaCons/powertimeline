@@ -1,9 +1,9 @@
-# Chronochart Software Requirements Specification (SRS)
+# PowerTimeline Software Requirements Specification (SRS)
 
-This SRS is the single source of truth for Chronochart requirements. Each requirement has a stable ID and a table entry with acceptance, status, primary code references, and linked tests. Status lifecycle: Proposed → Approved → Implemented → Verified.
+This SRS is the single source of truth for PowerTimeline requirements. Each requirement has a stable ID and a table entry with acceptance, status, primary code references, and linked tests. Status lifecycle: Proposed → Approved → Implemented → Verified.
 
 ## Overview
-- Product: Chronochart — interactive historical timeline explorer.
+- Product: PowerTimeline — interactive historical timeline explorer.
 - Scope: Timeline rendering, card layout and overflow, anchors, zoom/pan, minimap, and axis scales. Out of scope: accounts, collaboration, media.
 
 ## Functional Requirements by Feature Area
@@ -19,13 +19,7 @@ This SRS is the single source of truth for Chronochart requirements. Each requir
 
 ### 2. Card Layout & Positioning
 
-| ID | Requirement | Code | Tests |
-|---|---|---|---|
-| CC-REQ-LAYOUT-001 | Across zoom levels and view windows, visible cards never overlap for baseline datasets and while navigating | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/29 |
-| CC-REQ-LAYOUT-SEMICOL-001 | Reduced margins and inter-card spacing with exactly one anchor per semi-column | `src/layout/LayoutEngine.ts` | v5/10, v5/33 |
-| CC-REQ-LAYOUT-002 | Event cards are not positioned behind the navigation rail, maintaining adequate left margin | `src/layout/LayoutEngine.ts` | v5/14 |
-| CC-REQ-LAYOUT-003 | Events alternate between upper and lower semi-columns for visual balance when possible | `src/layout/LayoutEngine.ts` | v5/12 |
-| CC-REQ-LAYOUT-004 | Horizontal spacing between event clusters is configurable to optimize visual density while preventing overlap | `src/layout/LayoutEngine.ts` | v5/61-anchor-persistence |
+➡️ See [`SRS_LAYOUT.md`](SRS_LAYOUT.md) for detailed acceptance criteria, implementation notes, and change history covering the layout engine and positioning guarantees.
 
 ### 3. Card Types & Degradation
 
@@ -75,8 +69,8 @@ This SRS is the single source of truth for Chronochart requirements. Each requir
 
 | ID | Requirement | Code | Tests |
 |---|---|---|---|
-| CC-REQ-AXIS-001 | Labels adapt across zooms (decades→years→months/days/hours) with readable density | `src/timeline/hooks/useAxisTicks.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/34, v5/35 |
-| CC-REQ-AXIS-002 | Timeline scale labels accurately correspond to actual event dates; hovering over scale positions shows correct dates matching scale labels | `src/components/EnhancedTimelineAxis.tsx`, `src/timeline/hooks/useAxisTicks.ts` | v5/62-timeline-scale-date-alignment |
+| CC-REQ-AXIS-001 | Labels adapt across zooms (decades→years→months/days/hours) with readable density; sub-14-day windows promote day headers to the upper tier while hour labels shift to the lower tier for clarity | `src/timeline/hooks/useAxisTicks.ts`, `src/components/EnhancedTimelineAxis.tsx`, `src/layout/DeterministicLayoutComponent.tsx` | v5/34, v5/35 |
+| CC-REQ-AXIS-002 | Timeline scale labels accurately correspond to actual event dates; hovering over scale positions shows correct dates matching scale labels; year-scale spans cap primary tick density at ≤16 for readability | `src/components/EnhancedTimelineAxis.tsx`, `src/timeline/hooks/useAxisTicks.ts` | v5/62-timeline-scale-date-alignment |
 
 ### 9. User Interface & Panels
 

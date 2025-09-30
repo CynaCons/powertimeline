@@ -10,26 +10,32 @@ const outputDir = path.join(repoRoot, 'tmp', 'test-docs');
 
 fs.mkdirSync(outputDir, { recursive: true });
 
-const summaryPath = path.join(outputDir, 'test-summary.json');
-const summaryArgPath = path.relative(repoRoot, summaryPath).split(path.sep).join(path.posix.sep);
+const resultsPath = path.join(outputDir, 'test-results.json');
+const resultsArgPath = path.relative(repoRoot, resultsPath).split(path.sep).join(path.posix.sep);
 
 const passthroughArgs = process.argv.slice(2);
 
-const playwrightArgs = [
-  'playwright',
-  'test',
-  `--reporter=list,json=${summaryArgPath}`,
-  ...passthroughArgs
-];
+const quotedArgs = passthroughArgs.map((arg) => JSON.stringify(arg)).join(' ');
 
-const playwrightResult = spawnSync('npx', playwrightArgs, {
+const reportersFlag = '--reporter="list,json"';
+const command = `npx playwright test ${reportersFlag}${quotedArgs ? ` ${quotedArgs}` : ''}`;
+
+const playwrightResult = spawnSync(command, {
   stdio: 'inherit',
   cwd: repoRoot,
-  shell: true
+  shell: true,
+  env: {
+    ...process.env,
+    PLAYWRIGHT_JSON_OUTPUT_NAME: resultsArgPath
+  }
 });
 
 if (playwrightResult.error) {
   throw playwrightResult.error;
+}
+
+if (!fs.existsSync(resultsPath)) {
+  throw new Error(`Expected Playwright to emit JSON results at ${resultsArgPath}`);
 }
 
 const generatorArgs = [
