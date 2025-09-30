@@ -71,6 +71,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 |---|---|---|---|
 | CC-REQ-AXIS-001 | Labels adapt across zooms (decades→years→months/days/hours) with readable density; sub-14-day windows promote day headers to the upper tier while hour labels shift to the lower tier for clarity | `src/timeline/hooks/useAxisTicks.ts`, `src/components/EnhancedTimelineAxis.tsx`, `src/layout/DeterministicLayoutComponent.tsx` | v5/34, v5/35 |
 | CC-REQ-AXIS-002 | Timeline scale labels accurately correspond to actual event dates; hovering over scale positions shows correct dates matching scale labels; year-scale spans cap primary tick density at ≤16 for readability | `src/components/EnhancedTimelineAxis.tsx`, `src/timeline/hooks/useAxisTicks.ts` | v5/62-timeline-scale-date-alignment |
+| CC-REQ-AXIS-003 | Timeline axis renders as a solid black bar with black tick marks and black scale labels (no gradients or opacity effects) across all zoom levels | `src/components/EnhancedTimelineAxis.tsx`, `src/styles/colors.ts`, `src/styles/tokens.css` | `tests/v5/64-axis-black-styling.spec.ts` |
 
 ### 9. User Interface & Panels
 

@@ -393,6 +393,17 @@
 - [x] Verify v5/01 and v5/02 Playwright specs pass with defaults
 - [x] Update documentation and test notes for default dataset behavior
 
+## Task 2025-09-30 - Axis Readability Hardening
+**Goal:** Preserve the dark metallic axis aesthetic while ensuring WCAG AA contrast for scale text.
+
+- [x] Audit existing axis palette and capture contrast gaps
+- [x] Reaffirm dark gradient treatment for the axis bar
+- [ ] Capture updated axis screenshot for documentation refresh
+- [x] Finalize axis styling: axis bar, tick marks, and labels render solid black with no gradients or opacity tricks in `src/components/EnhancedTimelineAxis.tsx`
+- [x] Add CC-REQ-AXIS-003 Playwright coverage in `tests/v5/64-axis-black-styling.spec.ts`
+- [x] Update SRS with contrast requirement entry reflecting dark-axis context
+- [ ] Add automated visual regression coverage for axis palette
+
 # Major Cleanup Phase (v0.3.x Continuation)
 
 **Preparing the codebase for the collaborative platform transformation starting in v0.4.x**
@@ -518,6 +529,14 @@ The modularization is structurally complete but needs debugging to restore full 
 - [ ] Security audit preparation
   - [ ] Review dependency vulnerabilities with `npm audit`
   - [ ] Secure Firebase configuration for production
+- [x] Tone down minimap focus overlay
+  - [ ] Restyle minimap view window to light grey with background z-index so events remain prominent
+- [ ] Persistent selection differentiation
+  - [ ] Use distinct colors for selected anchors/events versus hover state
+  - [ ] Persist selection until another node is selected or user clicks empty canvas
+- [ ] Sync minimap hover highlights
+  - [ ] Mirror card/anchor hover states onto minimap markers for rapid orientation
+  - [ ] Include OutlinePanel hover interactions in minimap highlighting
 
 **Validation Tests:**
 - [ ] `npm run build` produces optimized production build

@@ -374,26 +374,13 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
           />
         ))}
 
-        {/* Enhanced timeline axis - graduated bar with gradient */}
-        <defs>
-          <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#374151" stopOpacity={0.8} />
-            <stop offset="50%" stopColor="#1f2937" stopOpacity={0.9} />
-            <stop offset="100%" stopColor="#111827" stopOpacity={0.8} />
-          </linearGradient>
-          <filter id="timelineShadow">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.3"/>
-          </filter>
-        </defs>
-
         {/* Main timeline bar */}
         <rect
           x={0}
           y={37}
           width={viewportSize.width}
           height={6}
-          fill="url(#timelineGradient)"
-          filter="url(#timelineShadow)"
+          fill="#000000"
           data-testid="timeline-axis"
           rx={3}
         />
@@ -423,7 +410,8 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 
           const fontSize = isPrimary ? 14 : isSecondary ? 12 : 10;
           const fontWeight = isPrimary ? 'bold' : isSecondary ? '600' : 'normal';
-          const opacity = isPrimary ? 1 : isSecondary ? 0.8 : 0.6;
+          const tickStrokeColor = '#000000';
+          const labelColor = '#000000';
 
           return (
             <g
@@ -438,9 +426,9 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
                 x2={tick.x}
                 y1={tickY}
                 y2={tickY + tickHeight}
-                stroke={isPrimary ? "#1f2937" : isSecondary ? "#374151" : "#6b7280"}
+                stroke={tickStrokeColor}
                 strokeWidth={isPrimary ? 2 : 1.5}
-                opacity={opacity}
+                opacity={1}
               />
 
               {/* Label */}
@@ -449,11 +437,11 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
                 x={tick.x}
                 y={labelY}
                 fontSize={fontSize}
-                fill="#1f2937"
+                fill={labelColor}
                 textAnchor="middle"
                 fontFamily="system-ui, -apple-system, sans-serif"
                 fontWeight={fontWeight}
-                opacity={opacity}
+                opacity={1}
               >
                 {tick.label}
               </text>
