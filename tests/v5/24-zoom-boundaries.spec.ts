@@ -6,9 +6,9 @@ test.describe('Timeline Zoom Boundary Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -25,12 +25,15 @@ test.describe('Timeline Zoom Boundary Tests', () => {
       await page.mouse.wheel(0, -100);
       await page.waitForTimeout(100);
     }
-    
-    // Check view window position
-    const viewWindow = page.locator('.bg-blue-500.bg-opacity-15');
+
+    // Check view window position in minimap
+    const minimap = page.locator('[data-testid="timeline-minimap"]');
+    const minimapBar = minimap.locator('.h-2').first();
+    const minimapBox = await minimapBar.boundingBox();
+    const viewWindow = minimap.locator('.cursor-grab, .cursor-grabbing').first();
     const box = await viewWindow.boundingBox();
-    const viewStart = (box!.x - timelineBox!.x) / timelineBox!.width;
-    const viewEnd = (box!.x + box!.width - timelineBox!.x) / timelineBox!.width;
+    const viewStart = (box!.x - minimapBox!.x) / minimapBox!.width;
+    const viewEnd = (box!.x + box!.width - minimapBox!.x) / minimapBox!.width;
     
     console.log(`Left boundary zoom: viewStart=${viewStart}, viewEnd=${viewEnd}`);
     
@@ -46,9 +49,9 @@ test.describe('Timeline Zoom Boundary Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -65,12 +68,15 @@ test.describe('Timeline Zoom Boundary Tests', () => {
       await page.mouse.wheel(0, -100);
       await page.waitForTimeout(100);
     }
-    
-    // Check view window position
-    const viewWindow = page.locator('.bg-blue-500.bg-opacity-15');
+
+    // Check view window position in minimap
+    const minimap = page.locator('[data-testid="timeline-minimap"]');
+    const minimapBar = minimap.locator('.h-2').first();
+    const minimapBox = await minimapBar.boundingBox();
+    const viewWindow = minimap.locator('.cursor-grab, .cursor-grabbing').first();
     const box = await viewWindow.boundingBox();
-    const viewStart = (box!.x - timelineBox!.x) / timelineBox!.width;
-    const viewEnd = (box!.x + box!.width - timelineBox!.x) / timelineBox!.width;
+    const viewStart = (box!.x - minimapBox!.x) / minimapBox!.width;
+    const viewEnd = (box!.x + box!.width - minimapBox!.x) / minimapBox!.width;
     
     console.log(`Right boundary zoom: viewStart=${viewStart}, viewEnd=${viewEnd}`);
     
@@ -86,9 +92,9 @@ test.describe('Timeline Zoom Boundary Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -103,12 +109,15 @@ test.describe('Timeline Zoom Boundary Tests', () => {
       await page.mouse.wheel(0, -100);
       await page.waitForTimeout(50);
     }
-    
-    // Check view window is still valid
-    const zoomedInWindow = page.locator('.bg-blue-500.bg-opacity-15');
+
+    // Check view window is still valid in minimap
+    const minimap = page.locator('[data-testid="timeline-minimap"]');
+    const minimapBar = minimap.locator('.h-2').first();
+    const minimapBox = await minimapBar.boundingBox();
+    const zoomedInWindow = minimap.locator('.cursor-grab, .cursor-grabbing').first();
     const zoomedBox = await zoomedInWindow.boundingBox();
-    const zoomedStart = (zoomedBox!.x - timelineBox!.x) / timelineBox!.width;
-    const zoomedWidth = zoomedBox!.width / timelineBox!.width;
+    const zoomedStart = (zoomedBox!.x - minimapBox!.x) / minimapBox!.width;
+    const zoomedWidth = zoomedBox!.width / minimapBox!.width;
     
     console.log(`Extreme zoom in: start=${zoomedStart}, width=${zoomedWidth}`);
     
@@ -118,7 +127,7 @@ test.describe('Timeline Zoom Boundary Tests', () => {
     expect(zoomedStart + zoomedWidth).toBeLessThanOrEqual(1.1);
     
     // Reset and test extreme zoom out
-    await page.click('button:has-text("Fit All")');
+    await page.getByRole('button', { name: 'Fit All' }).click();
     await page.waitForTimeout(300);
     
     // Extreme zoom out (should stay at full view)
@@ -126,10 +135,10 @@ test.describe('Timeline Zoom Boundary Tests', () => {
       await page.mouse.wheel(0, 200);
       await page.waitForTimeout(50);
     }
-    
-    const zoomedOutWindow = page.locator('.bg-blue-500.bg-opacity-15');
+
+    const zoomedOutWindow = minimap.locator('.cursor-grab, .cursor-grabbing').first();
     const zoomedOutBox = await zoomedOutWindow.boundingBox();
-    const zoomedOutWidth = zoomedOutBox!.width / timelineBox!.width;
+    const zoomedOutWidth = zoomedOutBox!.width / minimapBox!.width;
     
     console.log(`Extreme zoom out width: ${zoomedOutWidth}`);
     

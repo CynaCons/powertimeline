@@ -20,7 +20,12 @@ export function useTimelineSelection({ viewStart, viewEnd, setWindow }: UseTimel
   const handleTimelineMouseDown = useCallback((e: React.MouseEvent) => {
     // Only start selection on the timeline area, not on cards or other elements
     const target = e.target as Element;
-    if (target?.closest('[data-testid="event-card"]') || target?.closest('.panel') || target?.closest('.overlay')) {
+    if (
+      target?.closest('[data-testid="event-card"]') ||
+      target?.closest('[data-testid="timeline-anchor"]') ||
+      target?.closest('.panel') ||
+      target?.closest('.overlay')
+    ) {
       return; // Don't start selection if clicking on cards or UI elements
     }
 

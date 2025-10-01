@@ -22,7 +22,7 @@ test.describe('Degradation System Validation', () => {
   
   for (const dataset of DATASETS) {
     test(`Card degradation system - ${dataset.name}`, async ({ page }) => {
-      await page.goto('http://localhost:5179');
+      await page.goto('/');
 
       // Wait for timeline to load
       await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
@@ -140,7 +140,7 @@ test.describe('Degradation System Validation', () => {
   }
   
   test('Degradation system stress test - Dense regions', async ({ page }) => {
-    await page.goto('http://localhost:5179');
+    await page.goto('/');
     await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
     
     console.log('\n🔥 DEGRADATION STRESS TEST - Dense Timeline Regions');
@@ -217,7 +217,7 @@ test.describe('Degradation System Validation', () => {
   });
   
   test('Degradation system telemetry accuracy', async ({ page }) => {
-    await page.goto('http://localhost:5179');
+    await page.goto('/');
     await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
     
     console.log('\n📊 TELEMETRY ACCURACY TEST');

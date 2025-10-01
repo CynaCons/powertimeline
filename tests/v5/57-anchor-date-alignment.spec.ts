@@ -6,7 +6,7 @@ async function openDevPanel(page: any) {
 }
 
 async function getTimelineAxisBounds(page: any) {
-  const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+  const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
   const timelineBox = await timelineAxis.boundingBox();
   expect(timelineBox).toBeTruthy();
   return timelineBox;
@@ -29,7 +29,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.screenshot({ path: 'test-results/anchor-alignment-default.png' });
 
     // Get timeline axis element to understand coordinate system
-    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
     expect(await timelineAxis.count()).toBeGreaterThan(0);
 
     const timelineBox = await timelineAxis.boundingBox();
@@ -128,7 +128,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     // Verify that anchors still align properly with timeline
     // This test should FAIL initially due to coordinate system mismatch
-    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
     const timelineBox = await timelineAxis.boundingBox();
 
     if (timelineBox) {
@@ -173,7 +173,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.screenshot({ path: 'test-results/anchor-alignment-precise.png' });
 
     // Get timeline ticks and anchors
-    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
     const anchors = page.locator('[data-testid^="anchor-event-"]');
 
     const anchorCount = await anchors.count();

@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Degradation system basic functionality', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
 
   // Wait for timeline to load
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
@@ -157,7 +157,7 @@ test('Degradation system basic functionality', async ({ page }) => {
 });
 
 test('Degradation telemetry consistency check', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n📊 DEGRADATION TELEMETRY CONSISTENCY CHECK');
@@ -200,7 +200,7 @@ test('Degradation telemetry consistency check', async ({ page }) => {
 });
 
 test('Degradation system mathematical accuracy', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🧮 DEGRADATION MATHEMATICAL ACCURACY TEST');

@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Card color system visual demo', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n🎨 CARD COLOR SYSTEM VISUAL DEMO');

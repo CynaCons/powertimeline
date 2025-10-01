@@ -73,6 +73,18 @@ function App() {
   useTimelineZoom({ zoomAtCursor, hoveredEventId });
   const { timelineSelection, handleTimelineMouseDown } = useTimelineSelection({ viewStart, viewEnd, setWindow });
 
+  const handleTimelineMouseDownWithSelection = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as Element | null;
+    const interactedWithCard = target?.closest('[data-testid="event-card"]');
+    const interactedWithAnchor = target?.closest('[data-testid="timeline-anchor"]');
+
+    if (!interactedWithCard && !interactedWithAnchor) {
+      setSelectedId(undefined);
+    }
+
+    handleTimelineMouseDown(e);
+  }, [handleTimelineMouseDown, setSelectedId]);
+
   // Panels & Dev toggle
   // Left sidebar overlays (permanent sidebar width = 56px)
   const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'dev'>(null);
@@ -518,6 +530,8 @@ function App() {
                     setFilter={setOutlineFilter}
                     dragging={dragging}
                     onClose={() => setOverlay(null)}
+                    onHover={(id) => setHoveredEventId(id)}
+                    onHoverEnd={() => setHoveredEventId(undefined)}
                   />
                 </Suspense>
               </ErrorBoundary>
@@ -586,6 +600,7 @@ function App() {
                 viewEnd={viewEnd}
                 onNavigate={setWindow}
                 highlightedEventId={selectedId}
+                hoveredEventId={hoveredEventId}
               />
             </Suspense>
           </div>
@@ -596,7 +611,7 @@ function App() {
           {/* Timeline takes full available space */}
           <div
             className="w-full h-full relative"
-            onMouseDown={handleTimelineMouseDown}
+            onMouseDown={handleTimelineMouseDownWithSelection}
             style={{ cursor: timelineSelection?.isSelecting ? 'crosshair' : 'default' }}
           >
             <ErrorBoundary>
@@ -609,6 +624,8 @@ function App() {
                 onCardDoubleClick={(id) => { setSelectedId(id); setOverlay('editor'); }}
                 onCardMouseEnter={(id) => setHoveredEventId(id)}
                 onCardMouseLeave={() => setHoveredEventId(undefined)}
+                selectedEventId={selectedId}
+                onEventSelect={setSelectedId}
               />
             </ErrorBoundary>
 

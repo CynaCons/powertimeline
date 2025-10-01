@@ -6,9 +6,9 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -33,7 +33,7 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
     await page.screenshot({ path: 'test-results/minimap-sync-initial.png' });
     
     // Drag view window to a different position
-    const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    const viewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const box = await viewWindow.boundingBox();
     const viewWindowCenterX = box!.x + box!.width / 2;
     const viewWindowCenterY = box!.y + box!.height / 2;
@@ -74,13 +74,13 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     // Start with full timeline view
-    await page.click('button:has-text("Fit All")');
+    await page.getByRole('button', { name: 'Fit All' }).click();
     await page.waitForTimeout(300);
     
     // Count initial overflow indicators
@@ -89,7 +89,7 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
     console.log(`Initial overflow badges: ${initialOverflowCount}`);
     
     // Click on minimap to zoom to a specific area (left 20% of timeline)
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.h-2').first();
     const minimapBox = await minimapBar.boundingBox();
     const clickX = minimapBox!.x + minimapBox!.width * 0.2; // Click at 20% position
     const clickY = minimapBox!.y + minimapBox!.height / 2;
@@ -118,9 +118,9 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     // Zoom in to make a focused view
@@ -142,7 +142,7 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
     console.log(`Initial blue event indicators: ${initialBlueCount}`);
     
     // Use minimap to navigate to different area
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.h-2').first();
     const minimapBox = await minimapBar.boundingBox();
     const clickX = minimapBox!.x + minimapBox!.width * 0.8; // Navigate to 80% of timeline
     const clickY = minimapBox!.y + minimapBox!.height / 2;

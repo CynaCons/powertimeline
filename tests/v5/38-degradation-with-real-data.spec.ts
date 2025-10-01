@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Degradation system with Napoleon dataset - Real data validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
 
   // Wait for timeline to load
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
@@ -20,13 +20,13 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
   console.log('\n🔍 DEGRADATION SYSTEM TEST WITH REAL NAPOLEON DATA');
   
   // Open developer panel to access dataset controls
-  const devToggle = page.locator('button:has-text("Developer Panel")');
+  const devToggle = page.getByRole('button', { name: 'Developer Panel' });
   if (await devToggle.count() > 0) {
     await devToggle.click();
     await page.waitForTimeout(500);
-    
+
     // Load Napoleon dataset
-    const napoleonButton = page.locator('button:has-text("Napoleon 1769-1821")');
+    const napoleonButton = page.getByRole('button', { name: 'Napoleon 1769-1821' });
     if (await napoleonButton.count() > 0) {
       console.log('📚 Loading Napoleon dataset...');
       await napoleonButton.click();
@@ -176,7 +176,7 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
 });
 
 test('Degradation system efficiency validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n⚡ DEGRADATION EFFICIENCY VALIDATION');

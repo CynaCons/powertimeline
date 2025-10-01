@@ -6,7 +6,7 @@ async function openDevPanel(page: any) {
 }
 
 async function getTimelineAxisBounds(page: any) {
-  const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+  const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
   const timelineBox = await timelineAxis.boundingBox();
   expect(timelineBox).toBeTruthy();
   return timelineBox;
@@ -174,9 +174,9 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
     // Test different density scenarios
     const densityTests = [
-      { name: 'Simple Incremental (3 events)', button: '+3' },
-      { name: 'Medium density (10 events)', button: '+10' },
-      { name: 'High density (Napoleon)', button: 'Napoleon' }
+      { name: 'Simple Incremental (5 events)', button: '+5' },
+      { name: 'Medium density (10 events)', button: 'Random (10)' },
+      { name: 'High density (Napoleon)', button: 'Napoleon 1769-1821' }
     ];
 
     for (const density of densityTests) {

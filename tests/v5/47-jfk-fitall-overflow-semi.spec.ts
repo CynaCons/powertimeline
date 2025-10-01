@@ -12,6 +12,7 @@ test.describe('JFK Fit-All overflow vs full-cards (semi-column)', () => {
     await page.goto('/');
     await openDevPanel(page);
     await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(600);
 
     // Fit All view

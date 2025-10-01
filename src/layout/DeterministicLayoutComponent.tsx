@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import type { CSSProperties } from 'react';
 import type { Event } from '../types';
 import type { LayoutConfig, PositionedCard, Anchor, EventCluster } from './types';
 
@@ -31,6 +32,8 @@ interface DeterministicLayoutProps {
   onCardDoubleClick?: (id: string) => void;
   onCardMouseEnter?: (id: string) => void;
   onCardMouseLeave?: () => void;
+  selectedEventId?: string;
+  onEventSelect?: (eventId: string) => void;
 }
 
 export function DeterministicLayoutComponent({
@@ -41,7 +44,9 @@ export function DeterministicLayoutComponent({
   hoveredEventId,
   onCardDoubleClick,
   onCardMouseEnter,
-  onCardMouseLeave
+  onCardMouseLeave,
+  selectedEventId,
+  onEventSelect
 }: DeterministicLayoutProps) {
   // Container ref for proper sizing
   const containerRef = useRef<HTMLDivElement>(null);
@@ -647,6 +652,33 @@ export function DeterministicLayoutComponent({
         // If no matching cards, suppress this anchor entirely (belt-and-suspenders)
         if (anchorCards.length === 0) return null;
 
+        const anchorEventIds = [
+          ...(anchor.eventIds ?? []),
+          ...(anchor.eventId ? [anchor.eventId] : [])
+        ];
+        const primaryAnchorEventId = anchor.eventId ?? anchor.eventIds?.[0] ?? null;
+        const isAnchorHovered = hoveredPairEventId ? anchorEventIds.includes(hoveredPairEventId) : false;
+        const isAnchorSelected = selectedEventId ? anchorEventIds.includes(selectedEventId) : false;
+
+        const anchorVisualStyle: CSSProperties = isAnchorSelected
+          ? {
+              background: 'linear-gradient(135deg, #fcd34d 0%, #d97706 100%)',
+              borderColor: '#fbbf24',
+              boxShadow: '0 0 10px rgba(251, 191, 36, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.35)'
+            }
+          : isAnchorHovered
+            ? {
+                background: 'linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%)',
+                borderColor: 'var(--color-primary-400)',
+                boxShadow: '0 0 8px rgba(66, 165, 245, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+              }
+            : {
+                background: 'linear-gradient(135deg, var(--color-neutral-700) 0%, var(--color-neutral-800) 50%, var(--color-neutral-700) 100%)',
+                borderColor: 'var(--color-neutral-600)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+              };
+        anchorVisualStyle.borderRadius = '1px';
+
         // Determine connector direction based on card positions
         // const hasCardsAbove = anchorCards.some(card => card.y < timelineY);
         // const hasCardsBelow = anchorCards.some(card => card.y >= timelineY);
@@ -663,35 +695,31 @@ export function DeterministicLayoutComponent({
             <div
               data-testid="timeline-anchor"
               className="flex flex-col items-center cursor-pointer"
+              aria-selected={isAnchorSelected}
+              data-selected={isAnchorSelected || undefined}
               onMouseEnter={() => {
-                // Set hover state for the event this anchor represents
-                if (anchor.eventId) {
-                  setHoveredPairEventId(anchor.eventId);
+                if (primaryAnchorEventId) {
+                  setHoveredPairEventId(primaryAnchorEventId);
+                  if (onCardMouseEnter) onCardMouseEnter(primaryAnchorEventId);
                 }
               }}
               onMouseLeave={() => {
                 setHoveredPairEventId(null);
+                if (onCardMouseLeave) onCardMouseLeave();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (primaryAnchorEventId && onEventSelect) {
+                  onEventSelect(primaryAnchorEventId);
+                }
               }}
             >
               {/* Dark-metallic diamond anchor icon with coherent highlighting */}
               <div
                 className={`w-3 h-3 border shadow-md z-20 transform rotate-45 transition-all duration-200 ${
-                  hoveredPairEventId === anchor.eventId
-                    ? 'scale-125 border-blue-400 shadow-blue-400/50 shadow-lg'
-                    : 'border-neutral-600'
+                  isAnchorSelected ? 'scale-125' : isAnchorHovered ? 'scale-110' : ''
                 }`}
-                style={{
-                  background: hoveredPairEventId === anchor.eventId
-                    ? 'linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%)'
-                    : 'linear-gradient(135deg, var(--color-neutral-700) 0%, var(--color-neutral-800) 50%, var(--color-neutral-700) 100%)',
-                  borderRadius: '1px',
-                  borderColor: hoveredPairEventId === anchor.eventId
-                    ? 'var(--color-primary-400)'
-                    : 'var(--color-neutral-600)',
-                  boxShadow: hoveredPairEventId === anchor.eventId
-                    ? '0 0 8px rgba(66, 165, 245, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                    : '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                }}
+                style={anchorVisualStyle}
               />
 
               {/* Individual overflow badge - only show if NOT part of merged group */}
@@ -727,64 +755,80 @@ export function DeterministicLayoutComponent({
       ))}
       
       {/* Cards */}
-      {layoutResult.positionedCards.map((card) => (
-        <div
-          key={card.id}
-          data-testid="event-card"
-          data-event-id={Array.isArray(card.event) ? card.event[0].id : card.event.id}
-          data-card-type={card.cardType}
-          data-cluster-id={card.clusterId}
-          className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${
-            card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
-            card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :
-            card.cardType === 'title-only' ? 'border-l-4 border-l-yellow-500 border-gray-200 p-1' :
-            card.cardType === 'multi-event' ? 'border-l-4 border-l-purple-500 border-gray-200 p-2' :
-            card.cardType === 'infinite' ? 'border-l-4 border-l-red-500 border-gray-200 p-1' :
-            'border-l-4 border-l-gray-500 border-gray-200 p-2' // fallback
-          } ${(() => {
-            const eventId = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
-            if (hoveredEventId === eventId) return 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg';
-            if (hoveredPairEventId === eventId) return 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg';
-            return '';
-          })()} text-sm`}
-          style={{
-            left: card.x,
-            top: card.y,
-            width: card.width,
-            height: card.height,
-            zIndex: (() => {
-              const eventId = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
-              if (hoveredEventId === eventId) return 20;
-              if (hoveredPairEventId === eventId) return 19;
-              return 10;
-            })()
-          }}
-          onDoubleClick={() => {
-            try {
-              const id = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
-              if (onCardDoubleClick) onCardDoubleClick(id);
-            } catch {
-              // Ignore card interaction errors
-            }
-          }}
-          onMouseEnter={() => {
-            try {
-              const id = String(Array.isArray(card.event) ? card.event[0].id : card.event.id);
-              // Set pair highlighting for this card
-              setHoveredPairEventId(id);
-              // Call existing handler
-              if (onCardMouseEnter) onCardMouseEnter(id);
-            } catch {
-              // Ignore card interaction errors
-            }
-          }}
-          onMouseLeave={() => {
-            // Clear pair highlighting
-            setHoveredPairEventId(null);
-            // Call existing handler
-            if (onCardMouseLeave) onCardMouseLeave();
-          }}
-        >
+      {layoutResult.positionedCards.map((card) => {
+        const cardEventIds = Array.isArray(card.event)
+          ? card.event.map((event) => event.id)
+          : [card.event.id];
+        const primaryCardEventId = cardEventIds[0];
+        const isCardSelected = selectedEventId ? cardEventIds.includes(selectedEventId) : false;
+        const isCardHovered = hoveredEventId ? cardEventIds.includes(hoveredEventId) : false;
+        const isCardPairHovered = hoveredPairEventId ? cardEventIds.includes(hoveredPairEventId) : false;
+
+        const cardTypeClass =
+          card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
+          card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :
+          card.cardType === 'title-only' ? 'border-l-4 border-l-yellow-500 border-gray-200 p-1' :
+          card.cardType === 'multi-event' ? 'border-l-4 border-l-purple-500 border-gray-200 p-2' :
+          card.cardType === 'infinite' ? 'border-l-4 border-l-red-500 border-gray-200 p-1' :
+          'border-l-4 border-l-gray-500 border-gray-200 p-2';
+
+        const cardHighlightClasses = isCardSelected
+          ? 'ring-2 ring-amber-400 ring-opacity-80 outline outline-2 outline-offset-2 outline-amber-300 shadow-xl'
+          : isCardHovered
+            ? 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg'
+            : isCardPairHovered
+              ? 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg'
+              : '';
+
+        const cardStyle: CSSProperties = {
+          left: card.x,
+          top: card.y,
+          width: card.width,
+          height: card.height,
+          zIndex: isCardSelected ? 25 : isCardHovered ? 22 : isCardPairHovered ? 21 : 10,
+          backgroundColor: isCardSelected ? 'rgba(254, 243, 199, 0.45)' : undefined,
+          boxShadow: isCardSelected ? '0 12px 24px rgba(251, 191, 36, 0.25)' : undefined
+        };
+
+        return (
+          <div
+            key={card.id}
+            data-testid="event-card"
+            data-event-id={primaryCardEventId}
+            data-card-type={card.cardType}
+            data-cluster-id={card.clusterId}
+            className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} text-sm`}
+            style={cardStyle}
+            aria-selected={isCardSelected}
+            data-selected={isCardSelected || undefined}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (primaryCardEventId && onEventSelect) {
+                onEventSelect(primaryCardEventId);
+              }
+            }}
+            onDoubleClick={() => {
+              try {
+                if (primaryCardEventId && onCardDoubleClick) onCardDoubleClick(primaryCardEventId);
+              } catch {
+                // Ignore card interaction errors
+              }
+            }}
+            onMouseEnter={() => {
+              try {
+                if (primaryCardEventId) {
+                  setHoveredPairEventId(primaryCardEventId);
+                }
+                if (primaryCardEventId && onCardMouseEnter) onCardMouseEnter(primaryCardEventId);
+              } catch {
+                // Ignore card interaction errors
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredPairEventId(null);
+              if (onCardMouseLeave) onCardMouseLeave();
+            }}
+          >
           {/* Card content based on type */}
           {card.cardType === 'full' && (
             <div className="h-full flex flex-col overflow-hidden">
@@ -792,7 +836,7 @@ export function DeterministicLayoutComponent({
               {(() => {
                 const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
                 return desc ? (
-                  <div className="text-xs text-gray-600 mt-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as React.CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 8 }}>
+                  <div className="text-xs text-gray-600 mt-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 8 }}>
                     {desc}
                   </div>
                 ) : null;
@@ -807,7 +851,7 @@ export function DeterministicLayoutComponent({
               {(() => {
                 const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
                 return desc ? (
-                  <div className="text-xs text-gray-600 mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as React.CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 2 }}>
+                  <div className="text-xs text-gray-600 mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 2 }}>
                     {desc}
                   </div>
                 ) : null;
@@ -841,7 +885,8 @@ export function DeterministicLayoutComponent({
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
       
       {/* Info Panels - Only show when enabled */}
       {showInfoPanels && (

@@ -8,9 +8,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -27,7 +27,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
       await page.waitForTimeout(50);
     }
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     // Test different timeline positions with predictable event distributions
@@ -202,9 +202,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -221,7 +221,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
       await page.waitForTimeout(50);
     }
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     // Test sequence: Same position at different zoom levels
@@ -344,9 +344,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -363,7 +363,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
       await page.waitForTimeout(50);
     }
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     // First, navigate to a region that SHOULD have anchors and connectors
@@ -461,9 +461,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -548,9 +548,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -561,7 +561,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     console.log('🔍 TESTING REALISTIC LEFTOVER CONNECTOR DETECTION');
     console.log('Flow: zoom in → zoom out → zoom in elsewhere → check for leftovers');
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     // STEP 1: Start zoomed out (baseline)

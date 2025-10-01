@@ -6,9 +6,9 @@ test.describe('Timeline Minimap Drag Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     // Zoom in to make view window smaller for easier dragging
@@ -26,7 +26,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
     }
     
     // Get initial view window position
-    const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const initialViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const initialBox = await initialViewWindow.boundingBox();
     const initialStart = (initialBox!.x - timelineBox!.x) / timelineBox!.width;
     
@@ -45,7 +45,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
     await page.waitForTimeout(200);
     
     // Check final view window position
-    const finalViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const finalViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const finalBox = await finalViewWindow.boundingBox();
     const finalStart = (finalBox!.x - timelineBox!.x) / timelineBox!.width;
     
@@ -63,9 +63,9 @@ test.describe('Timeline Minimap Drag Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -82,7 +82,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
     }
     
     // Test dragging beyond right boundary
-    const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    const viewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const box = await viewWindow.boundingBox();
     const viewWindowCenterX = box!.x + box!.width / 2;
     const viewWindowCenterY = box!.y + box!.height / 2;
@@ -98,7 +98,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
     await page.waitForTimeout(200);
     
     // Check final position doesn't exceed boundaries
-    const finalViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const finalViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const finalBox = await finalViewWindow.boundingBox();
     const finalEnd = (finalBox!.x + finalBox!.width - timelineBox!.x) / timelineBox!.width;
     
@@ -115,7 +115,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
     
     await page.waitForTimeout(200);
     
-    const leftBoundaryWindow = page.locator('.bg-transparent.border-blue-500');
+    const leftBoundaryWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const leftBox = await leftBoundaryWindow.boundingBox();
     const leftStart = (leftBox!.x - timelineBox!.x) / timelineBox!.width;
     
@@ -132,9 +132,9 @@ test.describe('Timeline Minimap Drag Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -151,7 +151,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
     }
     
     // Check hover cursor on view window
-    const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    const viewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing');
     const box = await viewWindow.boundingBox();
     const viewWindowCenterX = box!.x + box!.width / 2;
     const viewWindowCenterY = box!.y + box!.height / 2;

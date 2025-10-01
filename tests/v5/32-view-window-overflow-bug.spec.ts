@@ -8,9 +8,9 @@ test.describe('View Window Overflow Bug Detection', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -28,7 +28,7 @@ test.describe('View Window Overflow Bug Detection', () => {
       await page.waitForTimeout(100);
     }
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     // Navigate to the busiest period to force overflow creation
@@ -70,7 +70,7 @@ test.describe('View Window Overflow Bug Detection', () => {
       console.log(`\n--- Checking ${region.name} (${region.pos}) ---`);
       
       clickX = minimapBox!.x + minimapBox!.width * region.pos;
-      clickY = minimapBar!.y + minimapBox!.height / 2;
+      clickY = minimapBox!.y + minimapBox!.height / 2;
       await page.mouse.click(clickX, clickY);
       await page.waitForTimeout(200);
       
@@ -160,9 +160,9 @@ test.describe('View Window Overflow Bug Detection', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -179,7 +179,7 @@ test.describe('View Window Overflow Bug Detection', () => {
       await page.waitForTimeout(50);
     }
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     console.log('\n=== Testing dramatic view window jumps at maximum zoom ===');

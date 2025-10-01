@@ -41,10 +41,15 @@ test.describe('v5/03 Non-overlap fit', () => {
   test('Napoleon at Fit-All has no card overlaps', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-LAYOUT-001' });
     await page.goto('/');
-    
+
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
     await page.waitForTimeout(500);
+
+    // Close the dev panel before clicking Fit All to avoid overlay blocking the button
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
     await page.getByRole('button', { name: 'Fit All' }).click();
     await page.waitForTimeout(500);
 

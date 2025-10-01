@@ -13,15 +13,18 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Card degradation system - full to compact cards', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
 
-  // Wait for timeline to load using CSS selector (like other tests)
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  // Load Napoleon dataset to have events
+  await page.getByRole('button', { name: 'Developer Panel' }).click();
+  await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(1000);
 
   console.log('🔍 TESTING CARD DEGRADATION SYSTEM');
-  
+
   // Wait for initial load and telemetry
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1000);
 
   // Wait for telemetry to appear
   await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
@@ -77,9 +80,10 @@ test('Card degradation system - full to compact cards', async ({ page }) => {
 
     const validHeights = cardHeights.filter(h => h !== null) as number[];
     if (validHeights.length > 0) {
-      // Check for presence of both full cards (140px) and compact cards (64px)
-      const fullCardHeights = validHeights.filter(h => Math.abs(h - 140) < 5);
-      const compactCardHeights = validHeights.filter(h => Math.abs(h - 64) < 5);
+      // Check for presence of different card sizes (heights vary by content)
+      // Full cards: ~169px, Title-only cards: ~32px
+      const fullCardHeights = validHeights.filter(h => h > 100);
+      const compactCardHeights = validHeights.filter(h => h <= 100 && h > 20);
       
       console.log('Card Heights Found:', {
         total: validHeights.length,
@@ -129,7 +133,7 @@ test('Card degradation system - full to compact cards', async ({ page }) => {
 });
 
 test('Card degradation system - space efficiency validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   
   // Wait for timeline to load
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });

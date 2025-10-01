@@ -8,9 +8,9 @@ test.describe('Aggressive Leftover Overflow Detection', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -18,7 +18,7 @@ test.describe('Aggressive Leftover Overflow Detection', () => {
     const centerX = timelineBox!.x + timelineBox!.width * 0.5;
     const centerY = timelineBox!.y + timelineBox!.height * 0.5;
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     console.log('🔍 AGGRESSIVE LEFTOVER OVERFLOW TESTING');
@@ -172,9 +172,9 @@ test.describe('Aggressive Leftover Overflow Detection', () => {
     await page.waitForTimeout(1000);
     
     // Load Napoleon timeline
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("Napoleon 1769-1821")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -191,7 +191,7 @@ test.describe('Aggressive Leftover Overflow Detection', () => {
       await page.waitForTimeout(25);
     }
     
-    const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    const minimapBar = page.locator('[data-testid="timeline-minimap"]').locator('.relative.h-2');
     const minimapBox = await minimapBar.boundingBox();
     
     // Test sequence: Create overflow → Navigate away → Return → Check for ghost overflow

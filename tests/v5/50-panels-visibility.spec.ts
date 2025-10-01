@@ -24,8 +24,8 @@ test.describe('v5/50 Panels visibility and sizing', () => {
     const overlay = page.locator('[data-testid="authoring-overlay"]');
     await expect(overlay).toBeVisible();
 
-    await expect(page.getByLabel('Date')).toBeVisible();
-    await expect(page.getByLabel('Title')).toBeVisible();
+    await expect(page.getByRole('textbox', { name: /Date/i })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: /Title/i })).toBeVisible();
 
     const box = await overlay.boundingBox();
     const viewport = page.viewportSize();
@@ -35,8 +35,13 @@ test.describe('v5/50 Panels visibility and sizing', () => {
   test('Dev panel is visible and full-height', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.waitForTimeout(500);
 
-    const panel = page.locator('aside[role="dialog"][aria-labelledby="dialog-title-dev"]');
+    // Check panel by looking for dev panel heading
+    const panelHeading = page.getByRole('heading', { name: 'Developer Panel' });
+    await expect(panelHeading).toBeVisible();
+
+    const panel = page.locator('aside[role="dialog"]').first();
     await expect(panel).toBeVisible();
 
     const box = await panel.boundingBox();

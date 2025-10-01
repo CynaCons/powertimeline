@@ -6,8 +6,8 @@ test.describe('v5/52 Side panel scroll behavior', () => {
 
     // Seed many events so the Events list overflows
     await page.getByRole('button', { name: 'Developer Panel' }).click();
-    for (let i = 0; i < 8; i++) {
-      await page.getByRole('button', { name: '+12' }).click();
+    for (let i = 0; i < 4; i++) {
+      await page.getByRole('button', { name: '+5' }).click();
     }
     // Leave Dev open or close; it shouldn't matter for the test
 

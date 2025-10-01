@@ -2,8 +2,11 @@
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
-  
   await page.getByRole('button', { name: 'Developer Panel' }).click();
+}
+
+async function closeDevPanel(page: any) {
+  await page.keyboard.press('Escape');
 }
 
 test.describe('Zoom Functionality Tests', () => {
@@ -15,6 +18,7 @@ test.describe('Zoom Functionality Tests', () => {
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clear All' }).click();
     await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await closeDevPanel(page);
     await page.waitForTimeout(1000);
     
     // Count cards at full zoom (Fit All)
@@ -27,7 +31,7 @@ test.describe('Zoom Functionality Tests', () => {
     await page.screenshot({ path: 'test-results/zoom-full.png' });
     
     // Zoom in using the zoom button
-    await page.getByRole('button', { name: '＋ Zoom In' }).click();
+    await page.getByRole('button', { name: 'Zoom in' }).click();
     await page.waitForTimeout(500);
     const zoomedInCards = await page.locator('[data-testid="event-card"]').count();
     console.log(`Zoomed in: ${zoomedInCards} cards visible`);
@@ -36,7 +40,7 @@ test.describe('Zoom Functionality Tests', () => {
     await page.screenshot({ path: 'test-results/zoom-in.png' });
     
     // Zoom in more
-    await page.getByRole('button', { name: '＋ Zoom In' }).click();
+    await page.getByRole('button', { name: 'Zoom in' }).click();
     await page.waitForTimeout(500);
     const deepZoomCards = await page.locator('[data-testid="event-card"]').count();
     console.log(`Deep zoom: ${deepZoomCards} cards visible`);
@@ -45,7 +49,7 @@ test.describe('Zoom Functionality Tests', () => {
     await page.screenshot({ path: 'test-results/zoom-deep.png' });
     
     // Zoom out to test reverse direction
-    await page.getByRole('button', { name: '－ Zoom Out' }).click();
+    await page.getByRole('button', { name: 'Zoom out' }).click();
     await page.waitForTimeout(500);
     const zoomedOutCards = await page.locator('[data-testid="event-card"]').count();
     console.log(`Zoomed out: ${zoomedOutCards} cards visible`);
@@ -78,6 +82,7 @@ test.describe('Zoom Functionality Tests', () => {
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clear All' }).click();
     await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await closeDevPanel(page);
     await page.waitForTimeout(1000);
     
     // Get initial card count
@@ -126,6 +131,7 @@ test.describe('Zoom Functionality Tests', () => {
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clear All' }).click();
     await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await closeDevPanel(page);
     await page.waitForTimeout(1000);
     
     // Get initial card count

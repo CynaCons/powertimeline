@@ -8,6 +8,7 @@ interface TimelineMinimapProps {
   onNavigate: (start: number, end: number) => void;
   className?: string;
   highlightedEventId?: string;
+  hoveredEventId?: string;
 }
 
 export function TimelineMinimap({
@@ -16,7 +17,8 @@ export function TimelineMinimap({
   viewEnd,
   onNavigate,
   className = "",
-  highlightedEventId
+  highlightedEventId,
+  hoveredEventId
 }: TimelineMinimapProps) {
   
   // Drag state for view window sliding
@@ -195,19 +197,34 @@ export function TimelineMinimap({
           />
           {/* Enhanced event density markers */}
           {eventMarkers.map((marker, index) => {
-            const isHighlighted = highlightedEventId === marker.event.id;
+            const isSelected = highlightedEventId === marker.event.id;
+            const isHovered = hoveredEventId === marker.event.id && !isSelected;
+            const baseTransform = isHovering ? 'scaleY(1.2)' : '';
+            const activeTransform = isHovering ? 'scaleY(1.1)' : '';
             return (
               <div
                 key={index}
-                className={`absolute top-0 transition-all duration-200 ease-out transform hover:scale-110 ${
-                  isHighlighted
-                    ? 'w-2 h-3 bg-red-600 opacity-100 animate-pulse border border-white shadow-lg rounded-sm'
-                    : 'w-0.5 h-2 bg-primary-500 opacity-60 hover:opacity-100'
+                className={`absolute transition-all duration-200 ease-out transform ${
+                  isSelected
+                    ? 'w-1.5 h-3 bg-amber-400 opacity-100 border border-white shadow-lg rounded-sm'
+                    : isHovered
+                      ? 'w-1.5 h-2.5 bg-sky-400 opacity-100 border border-white shadow-md rounded-sm'
+                      : 'top-0 w-0.5 h-2 bg-primary-500 opacity-60 hover:opacity-100'
                 }`}
                 style={{
                   left: `${marker.position * 100}%`,
-                  transform: `translateX(-50%) ${isHovering ? 'scaleY(1.2)' : ''}`,
-                  boxShadow: isHighlighted ? '0 2px 8px rgba(220, 38, 38, 0.5)' : '0 1px 3px rgba(0,0,0,0.2)'
+                  top: isSelected || isHovered ? '50%' : 0,
+                  transform: isSelected
+                    ? `translate(-50%, -50%) ${activeTransform}`
+                    : isHovered
+                      ? `translate(-50%, -50%) ${activeTransform}`
+                      : `translateX(-50%) ${baseTransform}`,
+                  boxShadow: isSelected
+                    ? '0 0 8px rgba(251, 191, 36, 0.55), 0 2px 6px rgba(251, 191, 36, 0.35)'
+                    : isHovered
+                      ? '0 0 8px rgba(56, 189, 248, 0.45), 0 2px 6px rgba(56, 189, 248, 0.25)'
+                      : '0 1px 3px rgba(0,0,0,0.2)',
+                  zIndex: isSelected ? 4 : isHovered ? 3 : 2
                 }}
                 title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
               />
@@ -216,25 +233,27 @@ export function TimelineMinimap({
           
           {/* Enhanced current view window indicator */}
           <div
-            className={`absolute top-0 h-2 rounded transition-all duration-200 ease-out ${
+            className={`absolute rounded transition-all duration-200 ease-out ${
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
             }`}
             style={{
               left: `${viewStart * 100}%`,
               width: `${(viewEnd - viewStart) * 100}%`,
-              background: 'linear-gradient(90deg, rgba(33, 150, 243, 0.3) 0%, rgba(33, 150, 243, 0.5) 50%, rgba(33, 150, 243, 0.3) 100%)',
-              border: '1px solid var(--color-primary-500)',
-              borderRadius: '4px',
-              boxShadow: isHovering ? '0 0 6px rgba(33, 150, 243, 0.4)' : '0 1px 2px rgba(0,0,0,0.1)'
+              background: 'rgba(209, 213, 219, 0.32)',
+              border: '1px solid rgba(148, 163, 184, 0.6)',
+              borderRadius: '6px',
+              boxShadow: isHovering ? '0 0 4px rgba(148, 163, 184, 0.28)' : '0 1px 2px rgba(15, 23, 42, 0.08)',
+              top: '-1px',
+              height: 'calc(100% + 2px)',
+              zIndex: 1
             }}
             onMouseDown={handleViewWindowMouseDown}
           >
-            {/* Enhanced view window handles */}
-            <div className="absolute -left-0.5 top-0 w-0.5 h-2 bg-primary-600 rounded-l opacity-80 transition-all duration-200 hover:opacity-100"></div>
-            <div className="absolute -right-0.5 top-0 w-0.5 h-2 bg-primary-600 rounded-r opacity-80 transition-all duration-200 hover:opacity-100"></div>
-
             {/* View window content indicator */}
-            <div className="absolute inset-0.5 bg-primary-400 opacity-10 rounded-sm"></div>
+            <div
+              className="absolute bg-neutral-300 opacity-20 rounded-sm"
+              style={{ inset: '3px 2px' }}
+            ></div>
           </div>
         </div>
 

@@ -6,7 +6,7 @@ test.describe('v5/53 Inline "+" affordances open Create overlay', () => {
 
     // Seed a few events so list exists
     await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: '5 Events' }).click();
+    await page.getByRole('button', { name: '+5' }).click();
     // Close Dev to avoid overlay intercepts
     await page.getByRole('button', { name: 'Developer Panel' }).click();
 

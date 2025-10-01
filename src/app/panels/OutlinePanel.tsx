@@ -16,9 +16,11 @@ interface OutlinePanelProps {
   setFilter: (v: string) => void;
   dragging: boolean;
   onClose: () => void;
+  onHover?: (id: string) => void;
+  onHoverEnd?: () => void;
 }
 
-export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId, onSelect, onCreate, filter, setFilter, dragging, onClose }) => {
+export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId, onSelect, onCreate, filter, setFilter, dragging, onClose, onHover, onHoverEnd }) => {
   return (
     <OverlayShell id="events" title="Events" dragging={dragging} onClose={onClose}>
       <TextField
@@ -48,6 +50,8 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
             <ListItemButton
               selected={ev.id === selectedId}
               onClick={() => onSelect(ev.id)}
+              onMouseEnter={() => onHover?.(ev.id)}
+              onMouseLeave={() => onHoverEnd?.()}
               sx={{ '&.Mui-selected': { bgcolor: 'action.selected' }, '&:hover': { bgcolor: 'action.hover' } }}
             >
               <ListItemText

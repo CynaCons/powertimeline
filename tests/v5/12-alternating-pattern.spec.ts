@@ -13,28 +13,27 @@ async function closeDevPanel(page: any) {
 test.describe('Alternating Pattern Tests', () => {
   test('Simple incremental events — alternating pattern', async ({ page }) => {
     await page.goto('/');
-    
-    // Clear and add 6 incremental events
+
+    // Clear and add 5 incremental events
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: '+3' }).click();
-    await page.getByRole('button', { name: '+3' }).click();
+    await page.getByRole('button', { name: '+5' }).click();
     await closeDevPanel(page);
     await page.waitForTimeout(1000);
-    
+
     const telemetry = await page.evaluate(() => (window as any).__ccTelemetry);
-    
-    console.log('6 Events Telemetry:', JSON.stringify({
+
+    console.log('5 Events Telemetry:', JSON.stringify({
       totalEvents: telemetry.events.total,
       aboveHalfColumns: telemetry.halfColumns.above,
       belowHalfColumns: telemetry.halfColumns.below,
       alternatingPattern: telemetry.placement.alternatingPattern
     }, null, 2));
-    
-    // With 6 events: should be 3 above (events 0,2,4) + 3 below (events 1,3,5)
-    expect(telemetry.events.total).toBe(6);
-    expect(telemetry.halfColumns.above.events + telemetry.halfColumns.below.events).toBeLessThanOrEqual(6);
-    
+
+    // With 5 events: should have alternating above/below placement
+    expect(telemetry.events.total).toBe(5);
+    expect(telemetry.halfColumns.above.events + telemetry.halfColumns.below.events).toBeLessThanOrEqual(5);
+
     // Check if we have better distribution
     const aboveEvents = telemetry.halfColumns.above.events;
     const belowEvents = telemetry.halfColumns.below.events;

@@ -4,7 +4,7 @@ This document tracks completed iterations and checklist items moved from PLAN.md
 
 ---
 
-## Iteration 12: MUI Panel Migration (panels only) ✅
+## Iteration v0.1.12 - MUI Panel Migration (panels only) ✅
 - [x] Adopt Material UI for panels/overlays/outline; keep SVG timeline custom.
 - [x] Migrate OutlinePanel to MUI TextField + List/ListItemButton while preserving role names and labels used by tests ("Outline", "Filter outline").
 - [x] Migrate EditorPanel to MUI TextField + Button + Stack keeping button names (Save/Delete) and labels (Date/Title/Description) for Playwright selectors.
@@ -14,7 +14,31 @@ This document tracks completed iterations and checklist items moved from PLAN.md
 
 ---
 
-## Iteration 10: Visual + Interaction Refinement (spec & implementation) ✅
+## Iteration v0.1.11 - Completed items snapshot ✅
+- [x] Add curated historical seed dataset (RFK campaign & assassination timeline) to DevPanel for a "real" example timeline (clears existing events before seeding).
+- [x] Node card redesign: flat rectangle (no radius), dark grey fill, thin white outline; collapsed shows only title; click to expand with translucent background & full description; click outside collapses; in expanded mode clicking title/description enters inline edit with Save/Cancel buttons (fresh implementation replacing prior buggy inline editing logic).
+- [x] Add curated historical seed dataset (JFK presidency key events & assassination timeline) to DevPanel.
+- [x] Fix inline editing visibility: expanded height now adapts to form; inputs & Save/Cancel always visible; editing border highlight added.
+- [x] Add node expansion/edit regression test using RFK dataset (verifies expanded description visibility & inline edit form renders; will surface current visual/HTML issues if failing).
+- [x] Regression: Ambiguous accessible name for Dev buttons (two "Developer" roles) causing strict mode failure—differentiate labels. (Header keeps "Toggle developer options"; rail now "Developer Panel")
+- [x] Regression: Removed inline edit input aria-labels (Inline Title / Inline Description) breaking existing tests—restore or update tests. (Restored aria-label attributes)
+- [x] Regression: Missing data-testid="card-description" in expanded cards; tests fail to detect description—reintroduced.
+- [x] Regression: Grid lines test failing—verify stroke values still match var(--cc-color-grid-major/minor) or adjust test/token. (Updated test to count lines via data-testid; vertical line visibility heuristic avoided.)
+- [x] Regression: Inline edit smoke test timing out—ensure double-click still sets editing flag before awaiting inputs (Adjusted: select then Enter + waits for foreignObject & inputs).
+- [x] Diagnostic: Investigate node expansion click interception (rfk-california blocked by rfk-funeral). Create dedicated debug Playwright spec with geometry/z-order/pointer-events dump. (Completed: debug-expansion.spec.ts added.)
+- [x] Diagnostic: Log DOM order & overlapping bounding boxes; capture data-selected/data-expanded before/after click; keyboard fallback attempt. (Completed in debug spec snapshots.)
+- [x] Fix: Remove oversized transparent hit rectangle causing click interception & invisible content when expanded; restrict hit area to painted shapes and normalize foreignObject font sizing (content previously appeared zoomed/overflowing). (Completed)
+- [x] Fix: Normalize foreignObject typography (consistent px sizes) & remove scaling multipliers that produced apparent zoom/clipping inside expanded card. (Completed)
+- [x] Simplification: Removed dragging, editing, and expansion logic from nodes; nodes now always render full title + description in a modern static card (foreignObject) with streamlined styling. (Completed)
+- [x] Convention Update: Added rule to instructions forbidding prompting user to choose technical options; agent decides and documents in PLAN.md.
+- [x] Add remediation plan: reintroduce dynamic height & width calculation based on wrapped text; scale typography to fit computed card box; ensure single anchor rect per event. (Planned)
+- [x] Implement improved Node sizing logic using prior wrap utilities but permanently expanded (no editing/drag). (Initial pass: dynamic wrapping & height; removed hard labelY clamp to reduce vertical clipping)
+- [x] Replace rounded card (rx>0) with flat rectangle per new visual guidance; adjust foreignObject inner div (remove xmlns attr to show text). (DONE)
+- [x] Fix hidden card text: reintroduce XHTML namespace via spread (avoids TS error) + add fallback SVG text for debugging. (DONE)
+
+---
+
+## Iteration v0.1.10 - Visual + Interaction Refinement (spec & implementation) ✅
 - Goal: Apply BF6-inspired dark visual language, improve legibility & density handling, overhaul card rendering & editing UX, and enhance temporal scaffolding (grid/separators) while preserving performance & a11y.
 - Acceptance: Maintained 24/24 existing tests; added new tests for grid lines, multi-row lanes, editing controls; kept 120-event performance smoke under prior runtime.
 
@@ -71,7 +95,7 @@ P2 — Documentation (carryover) ✅
 
 ---
 
-## Iteration 9: Architecture Split & Modularization ✅
+## Iteration v0.1.9 - Architecture Split & Modularization ✅
 - Objective: Decompose monolithic App.tsx / timeline implementation into modular components, hooks, and utilities without altering external behavior or test selectors.
 - Steps Completed:
   - Step 1: Overlays & focus trap (OverlayShell, panels, useFocusTrap)
@@ -81,13 +105,13 @@ P2 — Documentation (carryover) ✅
   - Step 5: Timeline hooks & utils (useAxisTicks, useLanes, time, text)
   - Step 6: App libs & hooks (storage, devSeed, useViewWindow, useAnnouncer)
   - Step 7: Style tokens (tokens.css, background/focus/axis variable integration)
-  - Additional: Minor unlabeled ticks (promoted from P2), persistence write-through during drag, lane instrumentation, multi-line clamp & tooltips, capped lane system (2/4 lanes)
+- Additional: Minor unlabeled ticks (promoted from P2), persistence write-through during drag, lane instrumentation, multi-line clamp & tooltips, capped lane system (2/4 lanes)
 - Guardrails: DOM order + data-testids preserved (axis-tick, axis-label, range-bar, range-start, range-end, anchor-date, card-description, create-plus, data-event-id)
 - Result: 24/24 Playwright tests passing post-refactor; improved modularity for future Iterations.
 
 ---
 
-## Iteration 8: Card Polish, Density Layout, and Adaptive Axis ✅
+## Iteration v0.1.8 - Card Polish, Density Layout, and Adaptive Axis ✅
 - Visual system update (steel/teal + dark attachment cards)
   - [x] Switch connectors to straight line with square endpoints (attachment style).
   - [x] Apply steel/teal track gradient and harmonized axis/label colors.
@@ -110,11 +134,11 @@ P2 — Documentation (carryover) ✅
 - Robust drag lifecycle
   - [x] Commit-on-drop; global pointer handlers; preview date shown during drag; label visible during select/drag.
 - Tests (green: 24/24)
-  - [x] Overlay pointer-events, connectors presence, label density, keyboard nudge with aria-live, performance, background theme, create-plus, Fit All, editor/outline, left rail.
+  - [x] Overlay pointer-events, connectors presence, label density, keyboard nudging with aria-live, performance, background theme, create-plus, Fit All, editor/outline, left rail.
 
 ---
 
-## Iteration 7: Spatial UI Overhaul (BF6-inspired) ✅
+## Iteration v0.1.7 - Spatial UI Overhaul (BF6-inspired) ✅
 - [x] Full-bleed canvas; permanent left icon rail; overlays never cover the rail.
 - [x] Translucent dark overlays with blur; compact outline list.
 - [x] Smaller anchors; refined connectors (later superseded by attachment style).
@@ -126,7 +150,7 @@ P2 — Documentation (carryover) ✅
 
 ---
 
-## Iteration 6: UI & UX Overhaul ✅
+## Iteration v0.1.6 - UI & UX Overhaul ✅
 - [x] Wheel zoom at cursor with clamped bounds; keyboard shortcutsa (+/−, arrows, Home/End).
 - [x] Centered timeline; outline/editor panels; left rail toggles.
 - [x] Selection styling without heavy focus ring; stems start at node boundary.
@@ -135,48 +159,48 @@ P2 — Documentation (carryover) ✅
 
 ---
 
-## Iteration 5: Export & Sharing ✅
+## Iteration v0.1.5 - Export & Sharing ✅
 - [x] Export events as JSON.
 
 ---
 
-## Iteration 4: Timeline Navigation ✅
+## Iteration v0.1.4 - Timeline Navigation ✅
 - [x] Zoom/pan view window; performance with ~100–120 events.
 - [x] Commit-on-drop; debounced persistence; memoized sorting and Node component.
 
 ---
 
-## Iteration 3: Event Editing & Deletion ✅
+## Iteration v0.1.3 - Event Editing & Deletion ✅
 - [x] Select, edit, delete; drag nodes along track to change date; tests added.
 
 ---
 
-## Iteration 2: Event Creation ✅
+## Iteration v0.1.2 - Event Creation ✅
 - [x] Data model; add form; persist to localStorage; render on timeline; tests added.
 
 ---
 
-## Iteration 1: Project Scaffold ✅
+## Iteration v0.1.1 - Project Scaffold ✅
 - [x] Vite + React + TS + Tailwind; baseline styles; initial SVG timeline; initial smoke test.
 
 ---
 
-## Refinements ✅
+## Iteration v0.1.0 - Refinements ✅
 - [x] Anchor refinement: shrink anchors to 0.8 units and lighten to grey squares (feedback adjustment).
 - [x] Small light grey squares: further reduce anchor size to 0.6 units and update colors to lighter grey (#e5e7eb) for improved visual hierarchy.
 
 ---
 
-## REBUILD: Timeline UI from Scratch - Completed Iterations
+## Iteration v0.0.1 - REBUILD: Timeline UI from Scratch - Completed Iterations ✅
 
-### Iteration 1: Foundation ✅
+### Iteration v0.0.1.1 - Foundation ✅
 - [x] Create full-screen grid background (12x12 CSS grid)
 - [x] Draw horizontal timeline line in center  
 - [x] Ensure grid covers ENTIRE available space (no centering, no margins)
 - [x] Verify layout works at different viewport sizes
 - [x] Clean slate implementation with Tailwind CSS Grid
 
-### Iteration 2: Event Cards ✅
+### Iteration v0.0.1.2 - Event Cards ✅
 **Test file**: `cards.spec.ts`
 
 Card Rendering
@@ -199,7 +223,7 @@ Positioning
 - [x] Allow slight left/right shifting for card width accommodation
 - [x] Ensure cards remain fully visible in viewport
 
-### Iteration 3: Card Layout & Distribution ✅ (Extended)
+### Iteration v0.0.1.3 - Card Layout & Distribution ✅ (Extended)
 **Test files**: `layout.spec.ts`, `seeding-visual.spec.ts`
 
 Vertical Distribution
@@ -257,9 +281,9 @@ Grid-Based Card Layout System
 
 ---
 
-## Iteration 4: Intelligent Timeline System
+## Iteration v0.0.4 - Intelligent Timeline System ✅
 
-### Phase A: Adaptive Card Content ✅
+### Phase v0.0.4A - Adaptive Card Content ✅
 **Goal**: Cards adapt content display based on available space and dataset density
 - [x] Detect when dataset is dense (e.g., >30 events)
 - [x] Implement title-only mode for dense datasets
@@ -270,7 +294,7 @@ Grid-Based Card Layout System
 - [x] Grid utilization increased from 20 to 48 cards with smaller sizes
 - [x] Comprehensive testing across all density levels
 
-### Phase B: Intelligent Positioning Algorithm ✅
+### Phase v0.0.4B - Intelligent Positioning Algorithm ✅
 **Goal**: Replace grid system with anchor-relative positioning
 - [x] Cards positioned above/below their chronological anchors
 - [x] Dynamic connector lines from anchors to cards
@@ -280,7 +304,7 @@ Grid-Based Card Layout System
 - [x] Seamless fallback to grid system for dense datasets
 - [x] Maintains chronological accuracy with improved flexibility
 
-### Phase C: Anchor Fusion System ✅
+### Phase v0.0.4C - Anchor Fusion System ✅
 **Goal**: Handle time-dense periods elegantly  
 - [x] Detect events within close time proximity
 - [x] Fuse nearby anchors with count badges
@@ -291,7 +315,7 @@ Grid-Based Card Layout System
 - [x] Maximum 8 events per cluster to prevent over-fusion
 - [x] Increased timeline capacity through intelligent event grouping
 
-### Phase E: Vertical Column System ✅
+### Phase v0.0.4E - Vertical Column System ✅
 **Completed**: Implementation of systematic vertical positioning with progressive column expansion
 
 ### Core System Implementation
@@ -320,7 +344,7 @@ Grid-Based Card Layout System
 
 ---
 
-## Iteration 4 Phase F: Architecture Documentation ✅
+## Iteration v0.0.4F - Architecture Documentation ✅
 **Completed**: Comprehensive technical documentation of positioning system
 
 - [x] **ARCHITECTURE.md Created**: Full technical specification document
@@ -331,25 +355,3 @@ Grid-Based Card Layout System
 - [x] **Performance Analysis**: Big-O complexity analysis and optimization notes
 
 ---
-
-## Iteration 11: Completed items snapshot ✅
-- [x] Add curated historical seed dataset (RFK campaign & assassination timeline) to DevPanel for a "real" example timeline (clears existing events before seeding).
-- [x] Node card redesign: flat rectangle (no radius), dark grey fill, thin white outline; collapsed shows only title; click to expand with translucent background & full description; click outside collapses; in expanded mode clicking title/description enters inline edit with Save/Cancel buttons (fresh implementation replacing prior buggy inline editing logic).
-- [x] Add curated historical seed dataset (JFK presidency key events & assassination timeline) to DevPanel.
-- [x] Fix inline editing visibility: expanded height now adapts to form; inputs & Save/Cancel always visible; editing border highlight added.
-- [x] Add node expansion/edit regression test using RFK dataset (verifies expanded description visibility & inline edit form renders; will surface current visual/HTML issues if failing).
-- [x] Regression: Ambiguous accessible name for Dev buttons (two "Developer" roles) causing strict mode failure—differentiate labels. (Header keeps "Toggle developer options"; rail now "Developer Panel")
-- [x] Regression: Removed inline edit input aria-labels (Inline Title / Inline Description) breaking existing tests—restore or update tests. (Restored aria-label attributes)
-- [x] Regression: Missing data-testid="card-description" in expanded cards; tests fail to detect description—reintroduced.
-- [x] Regression: Grid lines test failing—verify stroke values still match var(--cc-color-grid-major/minor) or adjust test/token. (Updated test to count lines via data-testid; vertical line visibility heuristic avoided.)
-- [x] Regression: Inline edit smoke test timing out—ensure double-click still sets editing flag before awaiting inputs (Adjusted: select then Enter + waits for foreignObject & inputs).
-- [x] Diagnostic: Investigate node expansion click interception (rfk-california blocked by rfk-funeral). Create dedicated debug Playwright spec with geometry/z-order/pointer-events dump. (Completed: debug-expansion.spec.ts added.)
-- [x] Diagnostic: Log DOM order & overlapping bounding boxes; capture data-selected/data-expanded before/after click; keyboard fallback attempt. (Completed in debug spec snapshots.)
-- [x] Fix: Remove oversized transparent hit rectangle causing click interception & invisible content when expanded; restrict hit area to painted shapes and normalize foreignObject font sizing (content previously appeared zoomed/overflowing). (Completed)
-- [x] Fix: Normalize foreignObject typography (consistent px sizes) & remove scaling multipliers that produced apparent zoom/clipping inside expanded card. (Completed)
-- [x] Simplification: Removed dragging, editing, and expansion logic from nodes; nodes now always render full title + description in a modern static card (foreignObject) with streamlined styling. (Completed)
-- [x] Convention Update: Added rule to instructions forbidding prompting user to choose technical options; agent decides and documents in PLAN.md.
-- [x] Add remediation plan: reintroduce dynamic height & width calculation based on wrapped text; scale typography to fit computed card box; ensure single anchor rect per event. (Planned)
-- [x] Implement improved Node sizing logic using prior wrap utilities but permanently expanded (no editing/drag). (Initial pass: dynamic wrapping & height; removed hard labelY clamp to reduce vertical clipping)
-- [x] Replace rounded card (rx>0) with flat rectangle per new visual guidance; adjust foreignObject inner div (remove xmlns attr to show text). (DONE)
-- [x] Fix hidden card text: reintroduce XHTML namespace via spread (avoids TS error) + add fallback SVG text for debugging. (DONE)

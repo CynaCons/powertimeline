@@ -14,7 +14,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Card color system - Visual validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
 
   // Wait for timeline to load
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
@@ -127,7 +127,7 @@ test('Card color system - Visual validation', async ({ page }) => {
 });
 
 test('Card color accessibility and consistency', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n♿ CARD COLOR ACCESSIBILITY TEST');
@@ -176,7 +176,7 @@ test('Card color accessibility and consistency', async ({ page }) => {
 });
 
 test('Card color documentation validation', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n📋 CARD COLOR DOCUMENTATION VALIDATION');
@@ -215,7 +215,7 @@ test('Card color documentation validation', async ({ page }) => {
 });
 
 test('Card color degradation progression', async ({ page }) => {
-  await page.goto('http://localhost:5179');
+  await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
 
   console.log('\n📊 CARD COLOR DEGRADATION PROGRESSION TEST');

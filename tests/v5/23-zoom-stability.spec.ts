@@ -6,9 +6,9 @@ test.describe('Timeline Zoom Stability Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     // Position cursor at fixed location (50% across timeline)
@@ -18,7 +18,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     const cursorY = timelineBox!.y + timelineBox!.height * 0.5;
     
     // Get initial minimap view window position
-    const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const initialViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     const initialBox = await initialViewWindow.boundingBox();
     const initialCenter = initialBox!.x + initialBox!.width * 0.5;
     
@@ -38,7 +38,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     }
     
     // Check final view window position - should be close to initial
-    const finalViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const finalViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     const finalBox = await finalViewWindow.boundingBox();
     const finalCenter = finalBox!.x + finalBox!.width * 0.5;
     
@@ -59,9 +59,9 @@ test.describe('Timeline Zoom Stability Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -80,7 +80,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     }
     
     // Check view window didn't stick to left edge
-    const leftViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const leftViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     const leftBox = await leftViewWindow.boundingBox();
     const leftPosition = (leftBox!.x - timelineBox!.x) / timelineBox!.width;
     
@@ -88,7 +88,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     expect(leftPosition).toBeGreaterThan(0.05); // Should not stick to absolute left
     
     // Reset and test right boundary
-    await page.click('button:has-text("Fit All")');
+    await page.getByRole('button', { name: 'Fit All' }).click();
     await page.waitForTimeout(300);
     
     // Test zoom at right boundary (90% from left edge)
@@ -102,7 +102,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     }
     
     // Check view window didn't stick to right edge
-    const rightViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const rightViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     const rightBox = await rightViewWindow.boundingBox();
     const rightPosition = (rightBox!.x + rightBox!.width - timelineBox!.x) / timelineBox!.width;
     
@@ -117,9 +117,9 @@ test.describe('Timeline Zoom Stability Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -128,7 +128,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     const cursorY = timelineBox!.y + timelineBox!.height * 0.5;
     
     // Record initial view window
-    const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const initialViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     const initialBox = await initialViewWindow.boundingBox();
     const initialLeft = initialBox!.x;
     const initialWidth = initialBox!.width;
@@ -150,7 +150,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     }
     
     // Check final view window
-    const finalViewWindow = page.locator('.bg-transparent.border-blue-500');
+    const finalViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     const finalBox = await finalViewWindow.boundingBox();
     const finalLeft = finalBox!.x;
     const finalWidth = finalBox!.width;
@@ -178,9 +178,9 @@ test.describe('Timeline Zoom Stability Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -198,7 +198,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     }
     
     // Verify view window is still valid
-    const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    const viewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
     await expect(viewWindow).toBeVisible();
     
     const box = await viewWindow.boundingBox();
@@ -221,9 +221,9 @@ test.describe('Timeline Zoom Stability Tests', () => {
     await page.waitForTimeout(1000);
     
     // Enable dev mode and load test events
-    await page.click('button[aria-label="Toggle developer options"]');
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.click('button:has-text("JFK 1961-63")');
+    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await page.keyboard.press('Escape'); // Close dev panel
     await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -235,14 +235,14 @@ test.describe('Timeline Zoom Stability Tests', () => {
     
     for (const position of testPositions) {
       // Reset zoom
-      await page.click('button:has-text("Fit All")');
+      await page.getByRole('button', { name: 'Fit All' }).click();
       await page.waitForTimeout(300);
       
       const cursorX = timelineBox!.x + timelineBox!.width * position;
       await page.mouse.move(cursorX, cursorY);
       
       // Record initial view window
-      const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+      const initialViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
       const initialBox = await initialViewWindow.boundingBox();
       // Calculate initial view center for reference (used for debugging)
       const initialViewCenter = (initialBox!.x + initialBox!.width * 0.5 - timelineBox!.x) / timelineBox!.width;
@@ -255,7 +255,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
       }
       
       // Check cursor is still over the same relative timeline position
-      const finalViewWindow = page.locator('.bg-transparent.border-blue-500');
+      const finalViewWindow = page.locator('[data-testid="timeline-minimap"]').locator('.cursor-grab, .cursor-grabbing').first();
       const finalBox = await finalViewWindow.boundingBox();
       const finalViewStart = (finalBox!.x - timelineBox!.x) / timelineBox!.width;
       const finalViewEnd = (finalBox!.x + finalBox!.width - timelineBox!.x) / timelineBox!.width;
