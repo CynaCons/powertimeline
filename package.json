@@ -24,10 +24,8 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.11.3",
-    "@openai/codex": "^0.41.0",
     "@types/js-yaml": "^4.0.9",
     "dayjs": "^1.11.18",
-    "firebase": "^12.3.0",
     "js-yaml": "^4.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
