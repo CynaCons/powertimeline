@@ -371,6 +371,11 @@ const mapping = {
     summary: 'Ensures minimap stays visible and highlights under overlays',
     requirements: '-'
   },
+  'v5/64-axis-black-styling.spec.ts': {
+    category: 'Timeline Axis Tests',
+    summary: 'Ensures axis bar, ticks, and labels render solid black',
+    requirements: 'CC-REQ-AXIS-003'
+  },
   'v5/65-minimap-manual-verification.spec.ts': {
     category: 'Minimap Tests',
     summary: 'Manual minimap verification for z-index and loading integrity',

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Tooltip, type TooltipProps, styled } from '@mui/material';
+import Tooltip, { type TooltipProps } from '@mui/material/Tooltip';
+import { styled } from '@mui/material/styles';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface EnhancedTooltipProps extends Omit<TooltipProps, 'title'> {

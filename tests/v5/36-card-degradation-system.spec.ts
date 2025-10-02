@@ -106,23 +106,20 @@ test('Card degradation system - full to compact cards', async ({ page }) => {
   await page.keyboard.press('Equal'); // Zoom in more
   await page.waitForTimeout(1000);
 
-  // Check telemetry again after zooming
-  const zoomedTelemetryText = await page.textContent('[data-testid="telemetry-display"]');
-  const zoomedDegradationMatch = zoomedTelemetryText!.match(/"degradation":\s*{[^}]+}/);
-  
-  if (zoomedDegradationMatch) {
-    const zoomedDegradationData = JSON.parse(`{${zoomedDegradationMatch[0]}}`);
-    
+  // Check telemetry again after zooming - access directly from window object
+  const zoomedTelemetry = await page.evaluate(() => (window as any).__ccTelemetry);
+
+  if (zoomedTelemetry?.degradation) {
     console.log('Degradation Metrics After Zoom:', {
-      totalGroups: zoomedDegradationData.degradation.totalGroups,
-      fullCardGroups: zoomedDegradationData.degradation.fullCardGroups,
-      compactCardGroups: zoomedDegradationData.degradation.compactCardGroups,
-      degradationRate: zoomedDegradationData.degradation.degradationRate,
-      spaceReclaimed: zoomedDegradationData.degradation.spaceReclaimed
+      totalGroups: zoomedTelemetry.degradation.totalGroups,
+      fullCardGroups: zoomedTelemetry.degradation.fullCardGroups,
+      compactCardGroups: zoomedTelemetry.degradation.compactCardGroups,
+      degradationRate: zoomedTelemetry.degradation.degradationRate,
+      spaceReclaimed: zoomedTelemetry.degradation.spaceReclaimed
     });
-    
+
     // After zooming in, we might expect more compact cards due to higher density
-    expect(zoomedDegradationData.degradation.totalGroups).toBeGreaterThan(0);
+    expect(zoomedTelemetry.degradation.totalGroups).toBeGreaterThan(0);
   }
 
   // Reset zoom

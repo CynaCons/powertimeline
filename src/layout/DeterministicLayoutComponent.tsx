@@ -22,6 +22,10 @@ import { DeterministicLayoutV5, type DispatchMetrics, type AggregationMetrics } 
 import { useAxisTicks, type Tick } from '../timeline/hooks/useAxisTicks';
 import { EnhancedTimelineAxis } from '../components/EnhancedTimelineAxis';
 import { getEventTimestamp, formatEventDateTime } from '../lib/time';
+import { environment } from '../config/environment';
+import { performanceMonitor } from '../utils/performanceMonitor';
+
+const monitoringEnabled = environment.flags.enableTelemetry || environment.isDevelopment;
 
 interface DeterministicLayoutProps {
   events: Event[];
@@ -285,10 +289,22 @@ export function DeterministicLayoutComponent({
     }
 
     const deterministicLayout = new DeterministicLayoutV5(config);
-    
-    // Pass view window to layout algorithm for proper filtering with overflow context
-    const viewWindow = viewTimeWindow ? { viewStart, viewEnd } : undefined;
-    return deterministicLayout.layout(events, viewWindow);
+
+    const shouldMeasureLayout = monitoringEnabled && typeof performance !== 'undefined';
+
+    if (shouldMeasureLayout) {
+      performanceMonitor.startLayoutMeasurement();
+    }
+
+    try {
+      // Pass view window to layout algorithm for proper filtering with overflow context
+      const viewWindow = viewTimeWindow ? { viewStart, viewEnd } : undefined;
+      return deterministicLayout.layout(events, viewWindow);
+    } finally {
+      if (shouldMeasureLayout) {
+        performanceMonitor.endLayoutMeasurement();
+      }
+    }
   }, [events, config, viewStart, viewEnd, viewTimeWindow]);
 
   // Always show all anchors - they should persist even during card degradation

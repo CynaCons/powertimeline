@@ -35,11 +35,13 @@ import { useAnnouncer } from './app/hooks/useAnnouncer';
 import { useTimelineZoom } from './app/hooks/useTimelineZoom';
 import { useTimelineSelection } from './app/hooks/useTimelineSelection';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { usePerformanceMonitoring } from './app/hooks/usePerformanceMonitoring';
 
 const DEV_FLAG_KEY = 'powertimeline-dev';
 
 
 function App() {
+  usePerformanceMonitoring();
   // Storage
   const storageRef = useRef(new EventStorage());
   const [events, setEvents] = useState<Event[]>(() => {

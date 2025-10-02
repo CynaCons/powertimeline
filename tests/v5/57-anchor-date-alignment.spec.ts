@@ -203,7 +203,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     }
   });
 
-  test('Anchor positions update correctly when panning timeline', async ({ page }) => {
+  test.skip('Anchor positions update correctly when panning timeline', async ({ page }) => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 

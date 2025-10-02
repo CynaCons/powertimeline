@@ -1840,3 +1840,2300 @@ Minute test anchors: 1
 [2m[WebServer] [22m[2m17:50:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
 [2m[WebServer] [22m[2m17:51:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
 [2m[WebServer] [22m[2m17:51:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:28:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:28:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:28:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:28:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:40:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:40:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:41:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:41:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:44:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:44:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:45:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:47:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:47:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:48:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:48:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:48:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:48:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:49:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:49:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:49:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:49:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:49:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:49:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:56:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m19:56:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:02:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:02:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:03:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:03:15[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:06:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:06:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:06:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:06:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:19:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:19:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:23[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:37[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:20:52[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:21:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:21:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m20:21:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:02:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:04:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:38:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:38:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:38:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:41:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m21:41:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:06:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:06:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:06:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:06:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:07:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:07:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:12:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:12:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/main.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:13:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/main.tsx[22m Could not Fast Refresh ("true" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m[WebServer] [22m[2m22:13:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msrc/main.tsx[22m
+[2m[WebServer] [22m[2m22:13:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/main.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:13:42[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31merror while updating dependencies:
+[2m[WebServer] [22mError: ENOENT: no such file or directory, open 'C:\dev\public-repo\chronochart\node_modules\firebase\analytics\dist\esm\index.esm.js'
+[2m[WebServer] [22m    at async open (node:internal/fs/promises:633:25)
+[2m[WebServer] [22m    at async Object.readFile (node:internal/fs/promises:1237:14)
+[2m[WebServer] [22m    at async extractExportsData (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11331:23)
+[2m[WebServer] [22m    at async file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11138:23
+[2m[WebServer] [22m    at async Promise.all (index 22)
+[2m[WebServer] [22m    at async prepareEsbuildOptimizerRun (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11136:2)[39m
+[2m[WebServer] [22m[2m22:13:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:44[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31merror while updating dependencies:
+[2m[WebServer] [22mError: ENOENT: no such file or directory, open 'C:\dev\public-repo\chronochart\node_modules\firebase\analytics\dist\esm\index.esm.js'
+[2m[WebServer] [22m    at async open (node:internal/fs/promises:633:25)
+[2m[WebServer] [22m    at async Object.readFile (node:internal/fs/promises:1237:14)
+[2m[WebServer] [22m    at async extractExportsData (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11331:23)
+[2m[WebServer] [22m    at async file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11138:23
+[2m[WebServer] [22m    at async Promise.all (index 22)
+[2m[WebServer] [22m    at async prepareEsbuildOptimizerRun (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11136:2)[39m
+[2m[WebServer] [22m[2m22:13:44[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:45[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31merror while updating dependencies:
+[2m[WebServer] [22mError: ENOENT: no such file or directory, open 'C:\dev\public-repo\chronochart\node_modules\firebase\analytics\dist\esm\index.esm.js'
+[2m[WebServer] [22m    at async open (node:internal/fs/promises:633:25)
+[2m[WebServer] [22m    at async Object.readFile (node:internal/fs/promises:1237:14)
+[2m[WebServer] [22m    at async extractExportsData (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11331:23)
+[2m[WebServer] [22m    at async file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11138:23
+[2m[WebServer] [22m    at async Promise.all (index 22)
+[2m[WebServer] [22m    at async prepareEsbuildOptimizerRun (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11136:2)[39m
+[2m[WebServer] [22m[2m22:13:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:13:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/NavigationRail.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:13:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:14:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/EnhancedTooltip.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:14:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:14:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/CommandPalette.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:14:32[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:14:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:14:47[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:18:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/main.tsx[22m
+[2m[WebServer] [22m[2m22:18:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:19:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:19:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/main.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:19:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:20:10[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31merror while updating dependencies:
+[2m[WebServer] [22mError: ENOENT: no such file or directory, open 'C:\dev\public-repo\chronochart\node_modules\firebase\analytics\dist\esm\index.esm.js'
+[2m[WebServer] [22m    at async open (node:internal/fs/promises:633:25)
+[2m[WebServer] [22m    at async Object.readFile (node:internal/fs/promises:1237:14)
+[2m[WebServer] [22m    at async extractExportsData (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11331:23)
+[2m[WebServer] [22m    at async file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11138:23
+[2m[WebServer] [22m    at async Promise.all (index 22)
+[2m[WebServer] [22m    at async prepareEsbuildOptimizerRun (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11136:2)[39m
+[2m[WebServer] [22m[2m22:20:33[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:31:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/main.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:31:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:31:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/DeterministicLayoutComponent.tsx, /src/index.css[22m
+[2m[WebServer] [22m[2m22:32:46[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:35:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:35:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:36:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m22:36:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m23:15:00[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31merror while updating dependencies:
+[2m[WebServer] [22mError: ENOENT: no such file or directory, open 'C:\dev\public-repo\chronochart\node_modules\firebase\analytics\dist\esm\index.esm.js'
+[2m[WebServer] [22m    at async open (node:internal/fs/promises:633:25)
+[2m[WebServer] [22m    at async Object.readFile (node:internal/fs/promises:1237:14)
+[2m[WebServer] [22m    at async extractExportsData (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11331:23)
+[2m[WebServer] [22m    at async file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11138:23
+[2m[WebServer] [22m    at async Promise.all (index 22)
+[2m[WebServer] [22m    at async prepareEsbuildOptimizerRun (file:///C:/dev/public-repo/chronochart/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:11136:2)[39m
+[2m[WebServer] [22m[2m23:15:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m23:15:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m[WebServer] [22m[2m23:15:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+
+
+  1) tests\v5\18-zoom-stability.spec.ts:87:3 › Zoom Stability Tests › Visual integrity during zoom operations 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: 'Fit All' })[22m
+    [2m    - locator resolved to <button tabindex="0" type="button" aria-label="Fit all" data-mui-internal-clone-element="true" class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInfo MuiIconButton-sizeSmall css-1h2y67d-MuiButtonBase-root-MuiIconButton-root">…</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    13 × waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+
+
+      102 |       { name: 'zoom-out-1x', action: () => page.mouse.wheel(0, 100) },
+      103 |       { name: 'zoom-out-2x', action: () => page.mouse.wheel(0, 100) },
+    > 104 |       { name: 'fit-all', action: () => page.getByRole('button', { name: 'Fit All' }).click() }
+          |                                                                                      ^
+      105 |     ];
+      106 |     
+      107 |     for (const level of zoomLevels) {
+        at Object.action (C:\dev\public-repo\chronochart\tests\v5\18-zoom-stability.spec.ts:104:86)
+        at C:\dev\public-repo\chronochart\tests\v5\18-zoom-stability.spec.ts:109:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-18-zoom-stability-Zoom--584aa-rity-during-zoom-operations\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-18-zoom-stability-Zoom--584aa-rity-during-zoom-operations\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-18-zoom-stability-Zoom--584aa-rity-during-zoom-operations\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-18-zoom-stability-Zoom--584aa-rity-during-zoom-operations\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\v5\18-zoom-stability.spec.ts:160:3 › Zoom Stability Tests › Zoom range limits and boundary behavior 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      193 |     
+      194 |     // System should remain functional at extremes
+    > 195 |     expect(maxZoomCards).toBeGreaterThan(0);
+          |                          ^
+      196 |     expect(minZoomCards).toBeGreaterThan(0);
+      197 |     
+      198 |     // Test recovery with Fit All
+        at C:\dev\public-repo\chronochart\tests\v5\18-zoom-stability.spec.ts:195:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-18-zoom-stability-Zoom--6a485-imits-and-boundary-behavior\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-18-zoom-stability-Zoom--6a485-imits-and-boundary-behavior\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-18-zoom-stability-Zoom--6a485-imits-and-boundary-behavior\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-18-zoom-stability-Zoom--6a485-imits-and-boundary-behavior\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\v5\18-zoom-stability.spec.ts:207:3 › Zoom Stability Tests › Multi-timeline zoom consistency 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: 'Fit All' })[22m
+    [2m    - locator resolved to <button tabindex="0" type="button" aria-label="Fit all" data-mui-internal-clone-element="true" class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInfo MuiIconButton-sizeSmall css-1h2y67d-MuiButtonBase-root-MuiIconButton-root">…</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    17 × waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+
+
+      242 |       
+      243 |       // Zoom out (return to fit all)
+    > 244 |       await page.getByRole('button', { name: 'Fit All' }).click();
+          |                                                           ^
+      245 |       await page.waitForTimeout(500);
+      246 |       
+      247 |       const zoomedOutCards = await page.locator('[data-testid="event-card"]').count();
+        at C:\dev\public-repo\chronochart\tests\v5\18-zoom-stability.spec.ts:244:59
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-18-zoom-stability-Zoom--645a9-i-timeline-zoom-consistency\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-18-zoom-stability-Zoom--645a9-i-timeline-zoom-consistency\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-18-zoom-stability-Zoom--645a9-i-timeline-zoom-consistency\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-18-zoom-stability-Zoom--645a9-i-timeline-zoom-consistency\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\v5\19-zoom-edge-cases.spec.ts:19:3 › Zoom Edge Cases Tests › Extreme zoom limits should not break system 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      44 |     
+      45 |     // Should show at least 1 card and system should not crash
+    > 46 |     expect(maxZoomCards).toBeGreaterThan(0);
+         |                          ^
+      47 |     
+      48 |     // Test extreme zoom out (simulate 25 aggressive zoom out operations)
+      49 |     console.log('Testing extreme zoom out limits...');
+        at C:\dev\public-repo\chronochart\tests\v5\19-zoom-edge-cases.spec.ts:46:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-19-zoom-edge-cases-Zoom-d4d44-its-should-not-break-system\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-19-zoom-edge-cases-Zoom-d4d44-its-should-not-break-system\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-19-zoom-edge-cases-Zoom-d4d44-its-should-not-break-system\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-19-zoom-edge-cases-Zoom-d4d44-its-should-not-break-system\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) tests\v5\19-zoom-edge-cases.spec.ts:156:3 › Zoom Edge Cases Tests › Zoom performance with dense datasets 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: 'Fit All' })[22m
+    [2m    - locator resolved to <button tabindex="0" type="button" aria-label="Fit all" data-mui-internal-clone-element="true" class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInfo MuiIconButton-sizeSmall css-1h2y67d-MuiButtonBase-root-MuiIconButton-root">…</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    17 × waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+
+
+      196 |         await page.mouse.wheel(0, step.wheel);
+      197 |       } else {
+    > 198 |         await page.getByRole('button', { name: 'Fit All' }).click();
+          |                                                             ^
+      199 |       }
+      200 |       
+      201 |       await page.waitForTimeout(300);
+        at C:\dev\public-repo\chronochart\tests\v5\19-zoom-edge-cases.spec.ts:198:61
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-19-zoom-edge-cases-Zoom-94147-ormance-with-dense-datasets\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-19-zoom-edge-cases-Zoom-94147-ormance-with-dense-datasets\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-19-zoom-edge-cases-Zoom-94147-ormance-with-dense-datasets\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-19-zoom-edge-cases-Zoom-94147-ormance-with-dense-datasets\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) tests\v5\20-timeline-cursor-zoom.spec.ts:123:3 › Timeline Cursor Zoom Tests › Timeline axis cursor positioning - Napoleon 1800 area 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m49[39m
+    Received:   [31m50[39m
+
+      172 |     
+      173 |     // Should focus on 1800 period
+    > 174 |     expect(zoomedCards).toBeLessThan(initialCards);
+          |                         ^
+      175 |     expect(has1800Events).toBe(true);
+      176 |   });
+      177 |   
+        at C:\dev\public-repo\chronochart\tests\v5\20-timeline-cursor-zoom.spec.ts:174:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-20-timeline-cursor-zoom-4c938-ioning---Napoleon-1800-area\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-20-timeline-cursor-zoom-4c938-ioning---Napoleon-1800-area\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-20-timeline-cursor-zoom-4c938-ioning---Napoleon-1800-area\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-20-timeline-cursor-zoom-4c938-ioning---Napoleon-1800-area\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) tests\v5\21-timeline-minimap.spec.ts:45:3 › Timeline Minimap Tests › Minimap view window indicator reflects zoom state 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('[data-testid="timeline-minimap"]').locator('.bg-blue-600.bg-opacity-30')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('[data-testid="timeline-minimap"]').locator('.bg-blue-600.bg-opacity-30')[22m
+
+
+      62 |     const viewWindow = minimap.locator('.bg-blue-600.bg-opacity-30');
+      63 |     
+    > 64 |     await expect(viewWindow).toBeVisible();
+         |                              ^
+      65 |     await page.screenshot({ path: 'test-results/minimap-full-view.png' });
+      66 |     
+      67 |     // Get initial view window width
+        at C:\dev\public-repo\chronochart\tests\v5\21-timeline-minimap.spec.ts:64:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-21-timeline-minimap-Tim-1e9fd-dicator-reflects-zoom-state\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-21-timeline-minimap-Tim-1e9fd-dicator-reflects-zoom-state\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-21-timeline-minimap-Tim-1e9fd-dicator-reflects-zoom-state\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-21-timeline-minimap-Tim-1e9fd-dicator-reflects-zoom-state\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) tests\v5\21-timeline-minimap.spec.ts:86:3 › Timeline Minimap Tests › Minimap event density markers show event distribution 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m5[39m
+    Received:   [31m0[39m
+
+      102 |     
+      103 |     // Should have multiple event markers for clustered data
+    > 104 |     expect(markerCount).toBeGreaterThan(5);
+          |                         ^
+      105 |     
+      106 |     await page.screenshot({ path: 'test-results/minimap-event-markers.png' });
+      107 |   });
+        at C:\dev\public-repo\chronochart\tests\v5\21-timeline-minimap.spec.ts:104:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-21-timeline-minimap-Tim-2b4f9-ers-show-event-distribution\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-21-timeline-minimap-Tim-2b4f9-ers-show-event-distribution\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-21-timeline-minimap-Tim-2b4f9-ers-show-event-distribution\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-21-timeline-minimap-Tim-2b4f9-ers-show-event-distribution\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) tests\v5\21-timeline-minimap.spec.ts:109:3 › Timeline Minimap Tests › Minimap click navigation works 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-gray-200')[22m
+
+
+      141 |     // Click on right side of minimap (should navigate to end of timeline)
+      142 |     const minimap = page.locator('.bg-gray-200'); // Minimap timeline bar
+    > 143 |     const minimapBox = await minimap.boundingBox();
+          |                                      ^
+      144 |     
+      145 |     if (minimapBox) {
+      146 |       // Click at 80% across minimap (should focus on later events)
+        at C:\dev\public-repo\chronochart\tests\v5\21-timeline-minimap.spec.ts:143:38
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-21-timeline-minimap-Tim-92322-imap-click-navigation-works\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-21-timeline-minimap-Tim-92322-imap-click-navigation-works\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-21-timeline-minimap-Tim-92322-imap-click-navigation-works\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-21-timeline-minimap-Tim-92322-imap-click-navigation-works\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) tests\v5\22-minimap-basic.spec.ts:4:3 › Timeline Minimap Basic Tests › Page loads correctly without minimap when no events 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mnot[2m.[22mtoBeVisible[2m()[22m
+
+    Locator: locator('text=Timeline Overview')
+    Expected: not visible
+    Received: visible
+    Call log:
+    [2m  - Expect "not toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('text=Timeline Overview')[22m
+    [2m    13 × locator resolved to <span class="hidden sm:inline opacity-70">Timeline Overview</span>[22m
+    [2m       - unexpected value "visible"[22m
+
+
+       8 |     // Minimap should not be visible when no events
+       9 |     const minimapText = page.locator('text=Timeline Overview');
+    > 10 |     await expect(minimapText).not.toBeVisible();
+         |                                   ^
+      11 |     
+      12 |     // Main app should still be functional  
+      13 |     const sidebar = page.locator('aside.bg-white'); // Main sidebar
+        at C:\dev\public-repo\chronochart\tests\v5\22-minimap-basic.spec.ts:10:35
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-22-minimap-basic-Timeli-cf91b-hout-minimap-when-no-events\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-22-minimap-basic-Timeli-cf91b-hout-minimap-when-no-events\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-22-minimap-basic-Timeli-cf91b-hout-minimap-when-no-events\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-22-minimap-basic-Timeli-cf91b-hout-minimap-when-no-events\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) tests\v5\22-minimap-basic.spec.ts:19:3 › Timeline Minimap Basic Tests › Minimap shows event density markers 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      34 |     
+      35 |     // Should have some event markers for default events
+    > 36 |     expect(markerCount).toBeGreaterThan(0);
+         |                         ^
+      37 |     
+      38 |     await page.screenshot({ path: 'test-results/minimap-event-markers-default.png' });
+      39 |   });
+        at C:\dev\public-repo\chronochart\tests\v5\22-minimap-basic.spec.ts:36:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-22-minimap-basic-Timeli-688cf-shows-event-density-markers\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-22-minimap-basic-Timeli-688cf-shows-event-density-markers\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-22-minimap-basic-Timeli-688cf-shows-event-density-markers\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-22-minimap-basic-Timeli-688cf-shows-event-density-markers\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) tests\v5\22-minimap-basic.spec.ts:41:3 › Timeline Minimap Basic Tests › Minimap view window indicator is visible 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('.bg-transparent.border-blue-500')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      51 |     // Check for view window indicator (highlighted section)
+      52 |     const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 53 |     await expect(viewWindow).toBeVisible();
+         |                              ^
+      54 |     
+      55 |     // Should have view window handles
+      56 |     const handles = page.locator('.bg-blue-600').filter({ hasNot: page.locator('.bg-opacity-15') });
+        at C:\dev\public-repo\chronochart\tests\v5\22-minimap-basic.spec.ts:53:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-22-minimap-basic-Timeli-c486a-window-indicator-is-visible\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-22-minimap-basic-Timeli-c486a-window-indicator-is-visible\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-22-minimap-basic-Timeli-c486a-window-indicator-is-visible\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-22-minimap-basic-Timeli-c486a-window-indicator-is-visible\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) tests\v5\23-zoom-stability.spec.ts:4:3 › Timeline Zoom Stability Tests › Cursor position remains stable during repeated zoom cycles 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      20 |     // Get initial minimap view window position
+      21 |     const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 22 |     const initialBox = await initialViewWindow.boundingBox();
+         |                                                ^
+      23 |     const initialCenter = initialBox!.x + initialBox!.width * 0.5;
+      24 |     
+      25 |     console.log(`Initial view window center: ${initialCenter}`);
+        at C:\dev\public-repo\chronochart\tests\v5\23-zoom-stability.spec.ts:22:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-009e0-during-repeated-zoom-cycles\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-23-zoom-stability-Timel-009e0-during-repeated-zoom-cycles\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-009e0-during-repeated-zoom-cycles\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-23-zoom-stability-Timel-009e0-during-repeated-zoom-cycles\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) tests\v5\23-zoom-stability.spec.ts:57:3 › Timeline Zoom Stability Tests › Zoom behavior at timeline boundaries 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      82 |     // Check view window didn't stick to left edge
+      83 |     const leftViewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 84 |     const leftBox = await leftViewWindow.boundingBox();
+         |                                          ^
+      85 |     const leftPosition = (leftBox!.x - timelineBox!.x) / timelineBox!.width;
+      86 |     
+      87 |     console.log(`Left boundary zoom position: ${leftPosition}`);
+        at C:\dev\public-repo\chronochart\tests\v5\23-zoom-stability.spec.ts:84:42
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-fc45d-vior-at-timeline-boundaries\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-23-zoom-stability-Timel-fc45d-vior-at-timeline-boundaries\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-fc45d-vior-at-timeline-boundaries\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-23-zoom-stability-Timel-fc45d-vior-at-timeline-boundaries\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) tests\v5\23-zoom-stability.spec.ts:115:3 › Timeline Zoom Stability Tests › Zoom reversibility test 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      130 |     // Record initial view window
+      131 |     const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 132 |     const initialBox = await initialViewWindow.boundingBox();
+          |                                                ^
+      133 |     const initialLeft = initialBox!.x;
+      134 |     const initialWidth = initialBox!.width;
+      135 |     
+        at C:\dev\public-repo\chronochart\tests\v5\23-zoom-stability.spec.ts:132:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-9c88c-sts-Zoom-reversibility-test\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-23-zoom-stability-Timel-9c88c-sts-Zoom-reversibility-test\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-9c88c-sts-Zoom-reversibility-test\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-23-zoom-stability-Timel-9c88c-sts-Zoom-reversibility-test\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) tests\v5\23-zoom-stability.spec.ts:176:3 › Timeline Zoom Stability Tests › Rapid zoom changes do not cause view window corruption 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('.bg-transparent.border-blue-500')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      200 |     // Verify view window is still valid
+      201 |     const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 202 |     await expect(viewWindow).toBeVisible();
+          |                              ^
+      203 |     
+      204 |     const box = await viewWindow.boundingBox();
+      205 |     const position = (box!.x - timelineBox!.x) / timelineBox!.width;
+        at C:\dev\public-repo\chronochart\tests\v5\23-zoom-stability.spec.ts:202:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-66094-ause-view-window-corruption\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-23-zoom-stability-Timel-66094-ause-view-window-corruption\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-66094-ause-view-window-corruption\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-23-zoom-stability-Timel-66094-ause-view-window-corruption\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) tests\v5\23-zoom-stability.spec.ts:219:3 › Timeline Zoom Stability Tests › Zoom with cursor at different screen positions 
+
+    TimeoutError: page.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('button:has-text("Fit All")')[22m
+
+
+      236 |     for (const position of testPositions) {
+      237 |       // Reset zoom
+    > 238 |       await page.click('button:has-text("Fit All")');
+          |                  ^
+      239 |       await page.waitForTimeout(300);
+      240 |       
+      241 |       const cursorX = timelineBox!.x + timelineBox!.width * position;
+        at C:\dev\public-repo\chronochart\tests\v5\23-zoom-stability.spec.ts:238:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-e97d3--different-screen-positions\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-23-zoom-stability-Timel-e97d3--different-screen-positions\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-23-zoom-stability-Timel-e97d3--different-screen-positions\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-23-zoom-stability-Timel-e97d3--different-screen-positions\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) tests\v5\24-zoom-boundaries.spec.ts:4:3 › Timeline Zoom Boundary Tests › Zoom does not stick to timeline start boundary 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-blue-500.bg-opacity-15')[22m
+
+
+      29 |     // Check view window position
+      30 |     const viewWindow = page.locator('.bg-blue-500.bg-opacity-15');
+    > 31 |     const box = await viewWindow.boundingBox();
+         |                                  ^
+      32 |     const viewStart = (box!.x - timelineBox!.x) / timelineBox!.width;
+      33 |     const viewEnd = (box!.x + box!.width - timelineBox!.x) / timelineBox!.width;
+      34 |     
+        at C:\dev\public-repo\chronochart\tests\v5\24-zoom-boundaries.spec.ts:31:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-24-zoom-boundaries-Time-fa8dc--to-timeline-start-boundary\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-24-zoom-boundaries-Time-fa8dc--to-timeline-start-boundary\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-24-zoom-boundaries-Time-fa8dc--to-timeline-start-boundary\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-24-zoom-boundaries-Time-fa8dc--to-timeline-start-boundary\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) tests\v5\24-zoom-boundaries.spec.ts:44:3 › Timeline Zoom Boundary Tests › Zoom does not stick to timeline end boundary 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-blue-500.bg-opacity-15')[22m
+
+
+      69 |     // Check view window position
+      70 |     const viewWindow = page.locator('.bg-blue-500.bg-opacity-15');
+    > 71 |     const box = await viewWindow.boundingBox();
+         |                                  ^
+      72 |     const viewStart = (box!.x - timelineBox!.x) / timelineBox!.width;
+      73 |     const viewEnd = (box!.x + box!.width - timelineBox!.x) / timelineBox!.width;
+      74 |     
+        at C:\dev\public-repo\chronochart\tests\v5\24-zoom-boundaries.spec.ts:71:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-24-zoom-boundaries-Time-8e2fe-ck-to-timeline-end-boundary\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-24-zoom-boundaries-Time-8e2fe-ck-to-timeline-end-boundary\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-24-zoom-boundaries-Time-8e2fe-ck-to-timeline-end-boundary\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-24-zoom-boundaries-Time-8e2fe-ck-to-timeline-end-boundary\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) tests\v5\24-zoom-boundaries.spec.ts:84:3 › Timeline Zoom Boundary Tests › Extreme zoom levels maintain valid view window 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-blue-500.bg-opacity-15')[22m
+
+
+      107 |     // Check view window is still valid
+      108 |     const zoomedInWindow = page.locator('.bg-blue-500.bg-opacity-15');
+    > 109 |     const zoomedBox = await zoomedInWindow.boundingBox();
+          |                                            ^
+      110 |     const zoomedStart = (zoomedBox!.x - timelineBox!.x) / timelineBox!.width;
+      111 |     const zoomedWidth = zoomedBox!.width / timelineBox!.width;
+      112 |     
+        at C:\dev\public-repo\chronochart\tests\v5\24-zoom-boundaries.spec.ts:109:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-24-zoom-boundaries-Time-1b333--maintain-valid-view-window\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-24-zoom-boundaries-Time-1b333--maintain-valid-view-window\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-24-zoom-boundaries-Time-1b333--maintain-valid-view-window\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-24-zoom-boundaries-Time-1b333--maintain-valid-view-window\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) tests\v5\25-max-zoom-sliding.spec.ts:4:3 › Maximum Zoom Sliding Tests › View window should not slide when at maximum zoom level 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      27 |     // Record view window position at max zoom
+      28 |     const maxZoomWindow = page.locator('.bg-transparent.border-blue-500');
+    > 29 |     const maxZoomBox = await maxZoomWindow.boundingBox();
+         |                                            ^
+      30 |     const maxZoomStart = (maxZoomBox!.x - timelineBox!.x) / timelineBox!.width;
+      31 |     const maxZoomWidth = maxZoomBox!.width / timelineBox!.width;
+      32 |     
+        at C:\dev\public-repo\chronochart\tests\v5\25-max-zoom-sliding.spec.ts:29:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-25-max-zoom-sliding-Max-ee90d--when-at-maximum-zoom-level\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-25-max-zoom-sliding-Max-ee90d--when-at-maximum-zoom-level\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-25-max-zoom-sliding-Max-ee90d--when-at-maximum-zoom-level\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-25-max-zoom-sliding-Max-ee90d--when-at-maximum-zoom-level\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) tests\v5\25-max-zoom-sliding.spec.ts:62:3 › Maximum Zoom Sliding Tests › Max zoom maintains cursor position under different cursor locations 
+
+    TimeoutError: page.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('button:has-text("Fit All")')[22m
+
+
+      79 |     for (const position of testPositions) {
+      80 |       // Reset zoom
+    > 81 |       await page.click('button:has-text("Fit All")');
+         |                  ^
+      82 |       await page.waitForTimeout(300);
+      83 |       
+      84 |       const cursorX = timelineBox!.x + timelineBox!.width * position;
+        at C:\dev\public-repo\chronochart\tests\v5\25-max-zoom-sliding.spec.ts:81:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-25-max-zoom-sliding-Max-e540a--different-cursor-locations\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-25-max-zoom-sliding-Max-e540a--different-cursor-locations\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-25-max-zoom-sliding-Max-e540a--different-cursor-locations\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-25-max-zoom-sliding-Max-e540a--different-cursor-locations\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) tests\v5\25-max-zoom-sliding.spec.ts:130:3 › Maximum Zoom Sliding Tests › Minimum zoom window width is enforced and stable 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      153 |     // Check minimum window width is enforced
+      154 |     const minZoomWindow = page.locator('.bg-transparent.border-blue-500');
+    > 155 |     const minZoomBox = await minZoomWindow.boundingBox();
+          |                                            ^
+      156 |     const minZoomWidth = minZoomBox!.width / timelineBox!.width;
+      157 |     
+      158 |     console.log(`Minimum zoom width achieved: ${minZoomWidth}`);
+        at C:\dev\public-repo\chronochart\tests\v5\25-max-zoom-sliding.spec.ts:155:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-25-max-zoom-sliding-Max-3ee23-idth-is-enforced-and-stable\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-25-max-zoom-sliding-Max-3ee23-idth-is-enforced-and-stable\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-25-max-zoom-sliding-Max-3ee23-idth-is-enforced-and-stable\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-25-max-zoom-sliding-Max-3ee23-idth-is-enforced-and-stable\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) tests\v5\26-minimap-drag.spec.ts:4:3 › Timeline Minimap Drag Tests › View window can be dragged to slide timeline position 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      28 |     // Get initial view window position
+      29 |     const initialViewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 30 |     const initialBox = await initialViewWindow.boundingBox();
+         |                                                ^
+      31 |     const initialStart = (initialBox!.x - timelineBox!.x) / timelineBox!.width;
+      32 |     
+      33 |     console.log(`Initial view window position: ${initialStart}`);
+        at C:\dev\public-repo\chronochart\tests\v5\26-minimap-drag.spec.ts:30:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-26-minimap-drag-Timelin-b8693--to-slide-timeline-position\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-26-minimap-drag-Timelin-b8693--to-slide-timeline-position\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-26-minimap-drag-Timelin-b8693--to-slide-timeline-position\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-26-minimap-drag-Timelin-b8693--to-slide-timeline-position\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  25) tests\v5\26-minimap-drag.spec.ts:61:3 › Timeline Minimap Drag Tests › View window drag respects timeline boundaries 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      84 |     // Test dragging beyond right boundary
+      85 |     const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 86 |     const box = await viewWindow.boundingBox();
+         |                                  ^
+      87 |     const viewWindowCenterX = box!.x + box!.width / 2;
+      88 |     const viewWindowCenterY = box!.y + box!.height / 2;
+      89 |     
+        at C:\dev\public-repo\chronochart\tests\v5\26-minimap-drag.spec.ts:86:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-26-minimap-drag-Timelin-bec56-espects-timeline-boundaries\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-26-minimap-drag-Timelin-bec56-espects-timeline-boundaries\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-26-minimap-drag-Timelin-bec56-espects-timeline-boundaries\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-26-minimap-drag-Timelin-bec56-espects-timeline-boundaries\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  26) tests\v5\26-minimap-drag.spec.ts:130:3 › Timeline Minimap Drag Tests › Drag provides visual feedback with cursor changes 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      153 |     // Check hover cursor on view window
+      154 |     const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 155 |     const box = await viewWindow.boundingBox();
+          |                                  ^
+      156 |     const viewWindowCenterX = box!.x + box!.width / 2;
+      157 |     const viewWindowCenterY = box!.y + box!.height / 2;
+      158 |     
+        at C:\dev\public-repo\chronochart\tests\v5\26-minimap-drag.spec.ts:155:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-26-minimap-drag-Timelin-89ad4-eedback-with-cursor-changes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-26-minimap-drag-Timelin-89ad4-eedback-with-cursor-changes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-26-minimap-drag-Timelin-89ad4-eedback-with-cursor-changes\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-26-minimap-drag-Timelin-89ad4-eedback-with-cursor-changes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  27) tests\v5\27-minimap-timeline-sync.spec.ts:4:3 › Minimap Timeline Synchronization Tests › Timeline events update when minimap view window is dragged 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.bg-transparent.border-blue-500')[22m
+
+
+      35 |     // Drag view window to a different position
+      36 |     const viewWindow = page.locator('.bg-transparent.border-blue-500');
+    > 37 |     const box = await viewWindow.boundingBox();
+         |                                  ^
+      38 |     const viewWindowCenterX = box!.x + box!.width / 2;
+      39 |     const viewWindowCenterY = box!.y + box!.height / 2;
+      40 |     const dragDistance = timelineBox!.width * 0.3; // Drag 30% to the right
+        at C:\dev\public-repo\chronochart\tests\v5\27-minimap-timeline-sync.spec.ts:37:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-27-minimap-timeline-syn-da6b5-imap-view-window-is-dragged\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-27-minimap-timeline-syn-da6b5-imap-view-window-is-dragged\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-27-minimap-timeline-syn-da6b5-imap-view-window-is-dragged\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-27-minimap-timeline-syn-da6b5-imap-view-window-is-dragged\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  28) tests\v5\27-minimap-timeline-sync.spec.ts:72:3 › Minimap Timeline Synchronization Tests › Overflow indicators update when zooming via minimap click 
+
+    TimeoutError: page.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('button:has-text("Fit All")')[22m
+
+
+      81 |     
+      82 |     // Start with full timeline view
+    > 83 |     await page.click('button:has-text("Fit All")');
+         |                ^
+      84 |     await page.waitForTimeout(300);
+      85 |     
+      86 |     // Count initial overflow indicators
+        at C:\dev\public-repo\chronochart\tests\v5\27-minimap-timeline-sync.spec.ts:83:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-27-minimap-timeline-syn-02faa-n-zooming-via-minimap-click\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-27-minimap-timeline-syn-02faa-n-zooming-via-minimap-click\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-27-minimap-timeline-syn-02faa-n-zooming-via-minimap-click\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-27-minimap-timeline-syn-02faa-n-zooming-via-minimap-click\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  29) tests\v5\27-minimap-timeline-sync.spec.ts:116:3 › Minimap Timeline Synchronization Tests › Blue event indicators respond to minimap navigation 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      144 |     // Use minimap to navigate to different area
+      145 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 146 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      147 |     const clickX = minimapBox!.x + minimapBox!.width * 0.8; // Navigate to 80% of timeline
+      148 |     const clickY = minimapBox!.y + minimapBox!.height / 2;
+      149 |     
+        at C:\dev\public-repo\chronochart\tests\v5\27-minimap-timeline-sync.spec.ts:146:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-27-minimap-timeline-syn-986ed-spond-to-minimap-navigation\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-27-minimap-timeline-syn-986ed-spond-to-minimap-navigation\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-27-minimap-timeline-syn-986ed-spond-to-minimap-navigation\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-27-minimap-timeline-syn-986ed-spond-to-minimap-navigation\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  30) tests\v5\28-napoleon-sliding-validation.spec.ts:4:3 › Napoleon Timeline Sliding Validation Tests › Step-by-step sliding from beginning to end detects layout issues 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      26 |     // Get minimap elements
+      27 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 28 |     const minimapBox = await minimapBar.boundingBox();
+         |                                         ^
+      29 |
+      30 |     // Define sliding steps (10 steps from start to end)
+      31 |     const steps = 10;
+        at C:\dev\public-repo\chronochart\tests\v5\28-napoleon-sliding-validation.spec.ts:28:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-ef193-o-end-detects-layout-issues\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-28-napoleon-sliding-val-ef193-o-end-detects-layout-issues\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-ef193-o-end-detects-layout-issues\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-28-napoleon-sliding-val-ef193-o-end-detects-layout-issues\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31) tests\v5\28-napoleon-sliding-validation.spec.ts:166:3 › Napoleon Timeline Sliding Validation Tests › Detect anchor point positioning issues during sliding 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      188 |     // Test sliding via minimap drag
+      189 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 190 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      191 |     
+      192 |     // Slide through timeline by dragging view window
+      193 |     const slideSteps = 5;
+        at C:\dev\public-repo\chronochart\tests\v5\28-napoleon-sliding-validation.spec.ts:190:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-36b6b-oning-issues-during-sliding\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-28-napoleon-sliding-val-36b6b-oning-issues-during-sliding\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-36b6b-oning-issues-during-sliding\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-28-napoleon-sliding-val-36b6b-oning-issues-during-sliding\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  32) tests\v5\28-napoleon-sliding-validation.spec.ts:272:3 › Napoleon Timeline Sliding Validation Tests › Overflow indicators update correctly when sliding to different timeline regions 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      294 |     // Get minimap for navigation
+      295 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 296 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      297 |     
+      298 |     // Test different timeline regions to verify overflow indicators change
+      299 |     const testRegions = [
+        at C:\dev\public-repo\chronochart\tests\v5\28-napoleon-sliding-validation.spec.ts:296:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-fb3e3--different-timeline-regions\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-28-napoleon-sliding-val-fb3e3--different-timeline-regions\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-fb3e3--different-timeline-regions\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-28-napoleon-sliding-val-fb3e3--different-timeline-regions\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  33) tests\v5\28-napoleon-sliding-validation.spec.ts:369:3 › Napoleon Timeline Sliding Validation Tests › Fully zoomed-in sliding detects overflow indicator inconsistencies 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      393 |     // Get minimap elements for navigation
+      394 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 395 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      396 |     
+      397 |     // Slide through timeline at maximum zoom with smaller steps to catch inconsistencies
+      398 |     const steps = 20; // More granular steps
+        at C:\dev\public-repo\chronochart\tests\v5\28-napoleon-sliding-validation.spec.ts:395:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-f2de2-w-indicator-inconsistencies\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-28-napoleon-sliding-val-f2de2-w-indicator-inconsistencies\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-28-napoleon-sliding-val-f2de2-w-indicator-inconsistencies\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-28-napoleon-sliding-val-f2de2-w-indicator-inconsistencies\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  34) tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:6:3 › Deep Zoom Comprehensive Sliding Tests › Maximum zoom level sliding with no overlaps and consistent overflow indicators 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      29 |     // Get minimap for precise navigation
+      30 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 31 |     const minimapBox = await minimapBar.boundingBox();
+         |                                         ^
+      32 |     
+      33 |     console.log('📊 STARTING COMPREHENSIVE SLIDING AT MAXIMUM ZOOM LEVEL');
+      34 |     
+        at C:\dev\public-repo\chronochart\tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:31:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-29-deep-zoom-comprehens-ed59b-sistent-overflow-indicators\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-29-deep-zoom-comprehens-ed59b-sistent-overflow-indicators\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-29-deep-zoom-comprehens-ed59b-sistent-overflow-indicators\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-29-deep-zoom-comprehens-ed59b-sistent-overflow-indicators\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  35) tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:162:3 › Deep Zoom Comprehensive Sliding Tests › Deep zoom overflow indicator transitions are consistent and logical 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      185 |     
+      186 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 187 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      188 |     
+      189 |     // Test specific dense regions of Napoleon timeline for consistency
+      190 |     const testRegions = [
+        at C:\dev\public-repo\chronochart\tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:187:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-29-deep-zoom-comprehens-a0e43--are-consistent-and-logical\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-29-deep-zoom-comprehens-a0e43--are-consistent-and-logical\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-29-deep-zoom-comprehens-a0e43--are-consistent-and-logical\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-29-deep-zoom-comprehens-a0e43--are-consistent-and-logical\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  36) tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:303:3 › Deep Zoom Comprehensive Sliding Tests › Day-level zoom granularity provides meaningful content separation 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      325 |     
+      326 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 327 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      328 |     
+      329 |     // Test micro-navigation at day level around a dense period (around 1800 - Consulate period)
+      330 |     const basePosition = 0.35; // Around 1800, dense period
+        at C:\dev\public-repo\chronochart\tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:327:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-29-deep-zoom-comprehens-26f76-aningful-content-separation\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-29-deep-zoom-comprehens-26f76-aningful-content-separation\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-29-deep-zoom-comprehens-26f76-aningful-content-separation\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-29-deep-zoom-comprehens-26f76-aningful-content-separation\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  37) tests\v5\30-leftover-overflow-detection.spec.ts:6:3 › Leftover Overflow Indicator Detection Tests › Detect leftover overflow indicators that persist in empty timeline regions 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      29 |     
+      30 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 31 |     const minimapBox = await minimapBar.boundingBox();
+         |                                         ^
+      32 |     
+      33 |     console.log('🔍 TESTING FOR LEFTOVER OVERFLOW INDICATORS');
+      34 |     
+        at C:\dev\public-repo\chronochart\tests\v5\30-leftover-overflow-detection.spec.ts:31:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-30-leftover-overflow-de-44676-t-in-empty-timeline-regions\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-30-leftover-overflow-de-44676-t-in-empty-timeline-regions\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-30-leftover-overflow-de-44676-t-in-empty-timeline-regions\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-30-leftover-overflow-de-44676-t-in-empty-timeline-regions\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  38) tests\v5\30-leftover-overflow-detection.spec.ts:219:3 › Leftover Overflow Indicator Detection Tests › Navigate to completely different timeline positions to force overflow recalculation 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      240 |     
+      241 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 242 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      243 |     
+      244 |     console.log('🔍 TESTING OVERFLOW RECALCULATION ON POSITION JUMPS');
+      245 |     
+        at C:\dev\public-repo\chronochart\tests\v5\30-leftover-overflow-detection.spec.ts:242:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-30-leftover-overflow-de-24e2e-orce-overflow-recalculation\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-30-leftover-overflow-de-24e2e-orce-overflow-recalculation\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-30-leftover-overflow-de-24e2e-orce-overflow-recalculation\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-30-leftover-overflow-de-24e2e-orce-overflow-recalculation\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  39) tests\v5\31-aggressive-leftover-detection.spec.ts:6:3 › Aggressive Leftover Overflow Detection › Force leftover overflow by rapid navigation and zoom changes 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      20 |     
+      21 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 22 |     const minimapBox = await minimapBar.boundingBox();
+         |                                         ^
+      23 |     
+      24 |     console.log('🔍 AGGRESSIVE LEFTOVER OVERFLOW TESTING');
+      25 |     
+        at C:\dev\public-repo\chronochart\tests\v5\31-aggressive-leftover-detection.spec.ts:22:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-31-aggressive-leftover--58d7b-navigation-and-zoom-changes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-31-aggressive-leftover--58d7b-navigation-and-zoom-changes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-31-aggressive-leftover--58d7b-navigation-and-zoom-changes\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-31-aggressive-leftover--58d7b-navigation-and-zoom-changes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  40) tests\v5\31-aggressive-leftover-detection.spec.ts:170:3 › Aggressive Leftover Overflow Detection › Detect overflow indicators that survive view window changes 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      193 |     
+      194 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 195 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      196 |     
+      197 |     // Test sequence: Create overflow → Navigate away → Return → Check for ghost overflow
+      198 |     const testSequence = [
+        at C:\dev\public-repo\chronochart\tests\v5\31-aggressive-leftover-detection.spec.ts:195:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-31-aggressive-leftover--db086-survive-view-window-changes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-31-aggressive-leftover--db086-survive-view-window-changes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-31-aggressive-leftover--db086-survive-view-window-changes\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-31-aggressive-leftover--db086-survive-view-window-changes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  41) tests\v5\32-view-window-overflow-bug.spec.ts:6:3 › View Window Overflow Bug Detection › Reproduce leftover overflow by resetting zoom constraints temporarily 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      30 |     
+      31 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 32 |     const minimapBox = await minimapBar.boundingBox();
+         |                                         ^
+      33 |     
+      34 |     // Navigate to the busiest period to force overflow creation
+      35 |     let clickX = minimapBox!.x + minimapBox!.width * 0.6; // 1810s period
+        at C:\dev\public-repo\chronochart\tests\v5\32-view-window-overflow-bug.spec.ts:32:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-32-view-window-overflow-06764-oom-constraints-temporarily\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-32-view-window-overflow-06764-oom-constraints-temporarily\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-32-view-window-overflow-06764-oom-constraints-temporarily\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-32-view-window-overflow-06764-oom-constraints-temporarily\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  42) tests\v5\32-view-window-overflow-bug.spec.ts:158:3 › View Window Overflow Bug Detection › Test overflow persistence when view window changes dramatically 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      181 |     
+      182 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 183 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      184 |     
+      185 |     console.log('\n=== Testing dramatic view window jumps at maximum zoom ===');
+      186 |     
+        at C:\dev\public-repo\chronochart\tests\v5\32-view-window-overflow-bug.spec.ts:183:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-32-view-window-overflow-b0b3a-window-changes-dramatically\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-32-view-window-overflow-b0b3a-window-changes-dramatically\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-32-view-window-overflow-b0b3a-window-changes-dramatically\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-32-view-window-overflow-b0b3a-window-changes-dramatically\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  43) tests\v5\33-directional-anchors.spec.ts:6:3 › Timeline Anchor Directional Connectors › Verify anchor connectors point toward events (above/below timeline) 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      29 |     
+      30 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 31 |     const minimapBox = await minimapBar.boundingBox();
+         |                                         ^
+      32 |     
+      33 |     // Test different timeline positions with predictable event distributions
+      34 |     const testScenarios = [
+        at C:\dev\public-repo\chronochart\tests\v5\33-directional-anchors.spec.ts:31:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--24543-vents-above-below-timeline-\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-33-directional-anchors--24543-vents-above-below-timeline-\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--24543-vents-above-below-timeline-\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-33-directional-anchors--24543-vents-above-below-timeline-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  44) tests\v5\33-directional-anchors.spec.ts:200:3 › Timeline Anchor Directional Connectors › Verify connectors update correctly when view changes 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      223 |     
+      224 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 225 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      226 |     
+      227 |     // Test sequence: Same position at different zoom levels
+      228 |     const testPosition = 0.6; // Busy period
+        at C:\dev\public-repo\chronochart\tests\v5\33-directional-anchors.spec.ts:225:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--f17d1-correctly-when-view-changes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-33-directional-anchors--f17d1-correctly-when-view-changes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--f17d1-correctly-when-view-changes\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-33-directional-anchors--f17d1-correctly-when-view-changes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  45) tests\v5\33-directional-anchors.spec.ts:342:3 › Timeline Anchor Directional Connectors › Detect leftover anchor connectors that persist when navigating to empty regions 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      365 |     
+      366 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 367 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      368 |     
+      369 |     // First, navigate to a region that SHOULD have anchors and connectors
+      370 |     console.log('\n=== STEP 1: Navigate to DENSE region (should have anchors/connectors) ===');
+        at C:\dev\public-repo\chronochart\tests\v5\33-directional-anchors.spec.ts:367:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--8f6ba-navigating-to-empty-regions\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-33-directional-anchors--8f6ba-navigating-to-empty-regions\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--8f6ba-navigating-to-empty-regions\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-33-directional-anchors--8f6ba-navigating-to-empty-regions\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  46) tests\v5\33-directional-anchors.spec.ts:546:3 › Timeline Anchor Directional Connectors › Detect leftover connectors through realistic zoom/navigate cycles 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.relative.h-4.bg-gray-200')[22m
+
+
+      563 |     
+      564 |     const minimapBar = page.locator('.relative.h-4.bg-gray-200');
+    > 565 |     const minimapBox = await minimapBar.boundingBox();
+          |                                         ^
+      566 |     
+      567 |     // STEP 1: Start zoomed out (baseline)
+      568 |     console.log('\n=== STEP 1: Start zoomed out (baseline) ===');
+        at C:\dev\public-repo\chronochart\tests\v5\33-directional-anchors.spec.ts:565:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--1bf69-listic-zoom-navigate-cycles\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-33-directional-anchors--1bf69-listic-zoom-navigate-cycles\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-33-directional-anchors--1bf69-listic-zoom-navigate-cycles\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-33-directional-anchors--1bf69-listic-zoom-navigate-cycles\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  47) tests\v5\33-timeline-separators.spec.ts:6:3 › v5/33 Timeline Scale Comprehensive Testing › Timeline scales - complete functionality verification 
+
+    Error: Timeline scales failed - container element missing from DOM
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      57 |     if (containerExists === 0) {
+      58 |       console.log('❌ DOM: Container missing - TIMELINE SCALES NOT WORKING');
+    > 59 |       expect(false, 'Timeline scales failed - container element missing from DOM').toBe(true);
+         |                                                                                    ^
+      60 |       return;
+      61 |     }
+      62 |     console.log('✅ DOM: Container exists');
+        at C:\dev\public-repo\chronochart\tests\v5\33-timeline-separators.spec.ts:59:84
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-33-timeline-separators--88b0e--functionality-verification\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-33-timeline-separators--88b0e--functionality-verification\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-33-timeline-separators--88b0e--functionality-verification\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-33-timeline-separators--88b0e--functionality-verification\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  48) tests\v5\36-card-degradation-system.spec.ts:15:1 › Card degradation system - full to compact cards 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      93 |       
+      94 |       // Expect at least one type of card height
+    > 95 |       expect(fullCardHeights.length + compactCardHeights.length).toBeGreaterThan(0);
+         |                                                                  ^
+      96 |     }
+      97 |   }
+      98 |
+        at C:\dev\public-repo\chronochart\tests\v5\36-card-degradation-system.spec.ts:95:66
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-36-card-degradation-sys-2c2ca-tem---full-to-compact-cards\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-36-card-degradation-sys-2c2ca-tem---full-to-compact-cards\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-36-card-degradation-sys-2c2ca-tem---full-to-compact-cards\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-36-card-degradation-sys-2c2ca-tem---full-to-compact-cards\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  49) tests\v5\38-degradation-with-real-data.spec.ts:14:1 › Degradation system with Napoleon dataset - Real data validation 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      172 |   } else {
+      173 |     console.log('❌ Developer Panel toggle not found');
+    > 174 |     expect(false).toBe(true); // Fail the test if we can't open the dev panel
+          |                   ^
+      175 |   }
+      176 | });
+      177 |
+        at C:\dev\public-repo\chronochart\tests\v5\38-degradation-with-real-data.spec.ts:174:19
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-38-degradation-with-rea-25449-aset---Real-data-validation\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-38-degradation-with-rea-25449-aset---Real-data-validation\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-38-degradation-with-rea-25449-aset---Real-data-validation\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-38-degradation-with-rea-25449-aset---Real-data-validation\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  50) tests\v5\47-jfk-fitall-overflow-semi.spec.ts:9:3 › JFK Fit-All overflow vs full-cards (semi-column) › No semi-column shows 2 full cards plus overflow badge 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: 'Fit All' })[22m
+    [2m    - locator resolved to <button tabindex="0" type="button" aria-label="Fit all" data-mui-internal-clone-element="true" class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInfo MuiIconButton-sizeSmall css-1h2y67d-MuiButtonBase-root-MuiIconButton-root">…</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    16 × waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div class="absolute top-0 right-0 bottom-0 left-14 z-[80]">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+
+
+      16 |
+      17 |     // Fit All view
+    > 18 |     await page.getByRole('button', { name: 'Fit All' }).click();
+         |                                                         ^
+      19 |     await page.waitForTimeout(800);
+      20 |
+      21 |     // Save a screenshot for analysis
+        at C:\dev\public-repo\chronochart\tests\v5\47-jfk-fitall-overflow-semi.spec.ts:18:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-47-jfk-fitall-overflow--f7c63-l-cards-plus-overflow-badge\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-47-jfk-fitall-overflow--f7c63-l-cards-plus-overflow-badge\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-47-jfk-fitall-overflow--f7c63-l-cards-plus-overflow-badge\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-47-jfk-fitall-overflow--f7c63-l-cards-plus-overflow-badge\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  51) tests\v5\48-title-only-degradation.spec.ts:4:3 › v5/48 Title-only degradation › dense clusters trigger title-only cards without overlaps 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      39 |     // Ensure at least one title-only card is rendered
+      40 |     const titleOnly = page.locator('[data-testid="event-card"][data-card-type="title-only"]');
+    > 41 |     expect(await titleOnly.count()).toBeGreaterThan(0);
+         |                                     ^
+      42 |
+      43 |     // No overlaps across all cards
+      44 |     const overlaps = await page.evaluate(() => {
+        at C:\dev\public-repo\chronochart\tests\v5\48-title-only-degradation.spec.ts:41:37
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-48-title-only-degradati-04b6f-only-cards-without-overlaps\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-48-title-only-degradati-04b6f-only-cards-without-overlaps\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-48-title-only-degradati-04b6f-only-cards-without-overlaps\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-48-title-only-degradati-04b6f-only-cards-without-overlaps\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  52) tests\v5\50-panels-visibility.spec.ts:19:3 › v5/50 Panels visibility and sizing › Create opens centered authoring overlay (replacing side Create panel) 
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByLabel('Date') resolved to 2 elements:
+        1) <input id="«rj»" type="text" autocomplete="off" value="MM/DD/YYYY" inputmode="numeric" aria-invalid="false" placeholder="MM/DD/YYYY" aria-describedby="«rj»-helper-text" class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd css-nd4r6y-MuiInputBase-input-MuiOutlinedInput-input"/> aka getByRole('textbox', { name: 'Date *' })
+        2) <button tabindex="0" type="button" aria-label="Choose date" class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium css-zdhmqn-MuiButtonBase-root-MuiIconButton-root">…</button> aka getByRole('button', { name: 'Choose date' })
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByLabel('Date')[22m
+
+
+      25 |     await expect(overlay).toBeVisible();
+      26 |
+    > 27 |     await expect(page.getByLabel('Date')).toBeVisible();
+         |                                           ^
+      28 |     await expect(page.getByLabel('Title')).toBeVisible();
+      29 |
+      30 |     const box = await overlay.boundingBox();
+        at C:\dev\public-repo\chronochart\tests\v5\50-panels-visibility.spec.ts:27:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-50-panels-visibility-v5-428fb-eplacing-side-Create-panel-\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-50-panels-visibility-v5-428fb-eplacing-side-Create-panel-\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-50-panels-visibility-v5-428fb-eplacing-side-Create-panel-\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-50-panels-visibility-v5-428fb-eplacing-side-Create-panel-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  53) tests\v5\50-panels-visibility.spec.ts:35:3 › v5/50 Panels visibility and sizing › Dev panel is visible and full-height 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('aside[role="dialog"][aria-labelledby="dialog-title-dev"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('aside[role="dialog"][aria-labelledby="dialog-title-dev"]')[22m
+
+
+      38 |
+      39 |     const panel = page.locator('aside[role="dialog"][aria-labelledby="dialog-title-dev"]');
+    > 40 |     await expect(panel).toBeVisible();
+         |                         ^
+      41 |
+      42 |     const box = await panel.boundingBox();
+      43 |     const viewport = page.viewportSize();
+        at C:\dev\public-repo\chronochart\tests\v5\50-panels-visibility.spec.ts:40:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-50-panels-visibility-v5-62fb1--is-visible-and-full-height\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-50-panels-visibility-v5-62fb1--is-visible-and-full-height\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-50-panels-visibility-v5-62fb1--is-visible-and-full-height\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-50-panels-visibility-v5-62fb1--is-visible-and-full-height\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  54) tests\v5\52-panel-scroll-behavior.spec.ts:4:3 › v5/52 Side panel scroll behavior › scroll wheel over Events panel scrolls the panel (not the canvas) 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: '+12' })[22m
+
+
+       8 |     await page.getByRole('button', { name: 'Developer Panel' }).click();
+       9 |     for (let i = 0; i < 8; i++) {
+    > 10 |       await page.getByRole('button', { name: '+12' }).click();
+         |                                                       ^
+      11 |     }
+      12 |     // Leave Dev open or close; it shouldn't matter for the test
+      13 |
+        at C:\dev\public-repo\chronochart\tests\v5\52-panel-scroll-behavior.spec.ts:10:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-52-panel-scroll-behavio-8ad12-s-the-panel-not-the-canvas-\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-52-panel-scroll-behavio-8ad12-s-the-panel-not-the-canvas-\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-52-panel-scroll-behavio-8ad12-s-the-panel-not-the-canvas-\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-52-panel-scroll-behavio-8ad12-s-the-panel-not-the-canvas-\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  55) tests\v5\53-inline-plus-create.spec.ts:4:3 › v5/53 Inline "+" affordances open Create overlay › top and bottom add buttons open Create 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByRole('button', { name: '5 Events' })[22m
+
+
+       7 |     // Seed a few events so list exists
+       8 |     await page.getByRole('button', { name: 'Developer Panel' }).click();
+    >  9 |     await page.getByRole('button', { name: '5 Events' }).click();
+         |                                                          ^
+      10 |     // Close Dev to avoid overlay intercepts
+      11 |     await page.getByRole('button', { name: 'Developer Panel' }).click();
+      12 |
+        at C:\dev\public-repo\chronochart\tests\v5\53-inline-plus-create.spec.ts:9:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-53-inline-plus-create-v-1b747-tom-add-buttons-open-Create\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-53-inline-plus-create-v-1b747-tom-add-buttons-open-Create\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-53-inline-plus-create-v-1b747-tom-add-buttons-open-Create\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-53-inline-plus-create-v-1b747-tom-add-buttons-open-Create\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  56) tests\v5\55-navigation-enhancements.spec.ts:25:3 › v5/55 Enhanced Navigation & Interaction › command palette opens with Ctrl+K and searches commands 
+
+    Error: [31mTimed out 2000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('div:has-text("Search commands")').first()
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 2000ms[22m
+    [2m  - waiting for locator('div:has-text("Search commands")').first()[22m
+
+
+      31 |     // Command palette should be visible
+      32 |     const commandPalette = page.locator('div:has-text("Search commands")').first();
+    > 33 |     await expect(commandPalette).toBeVisible({ timeout: 2000 });
+         |                                  ^
+      34 |
+      35 |     // Search for "events"
+      36 |     await page.keyboard.type('events');
+        at C:\dev\public-repo\chronochart\tests\v5\55-navigation-enhancements.spec.ts:33:34
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-55-navigation-enhanceme-0bedc-trl-K-and-searches-commands\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-55-navigation-enhanceme-0bedc-trl-K-and-searches-commands\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-55-navigation-enhanceme-0bedc-trl-K-and-searches-commands\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-55-navigation-enhanceme-0bedc-trl-K-and-searches-commands\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  57) tests\v5\55-navigation-enhancements.spec.ts:58:3 › v5/55 Enhanced Navigation & Interaction › breadcrumb navigation shows when panel is open 
+
+    Error: [31mTimed out 2000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('text="Timeline"')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 2000ms[22m
+    [2m  - waiting for locator('text="Timeline"')[22m
+
+
+      64 |     // Breadcrumb should be visible
+      65 |     const breadcrumb = page.locator('text="Timeline"');
+    > 66 |     await expect(breadcrumb).toBeVisible({ timeout: 2000 });
+         |                              ^
+      67 |
+      68 |     const eventsBreadcrumb = page.locator('text="Events"');
+      69 |     await expect(eventsBreadcrumb).toBeVisible({ timeout: 2000 });
+        at C:\dev\public-repo\chronochart\tests\v5\55-navigation-enhancements.spec.ts:66:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-55-navigation-enhanceme-02ef5-on-shows-when-panel-is-open\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-55-navigation-enhanceme-02ef5-on-shows-when-panel-is-open\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-55-navigation-enhanceme-02ef5-on-shows-when-panel-is-open\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-55-navigation-enhanceme-02ef5-on-shows-when-panel-is-open\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  58) tests\v5\56-overflow-indicators-visibility.spec.ts:71:3 › Overflow Indicators Visibility Tests › Overflow badges disappear when zooming out reduces density 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m1[39m
+    Received:   [31m2[39m
+
+      105 |
+      106 |     // Overflow should reduce or disappear when zoomed out
+    > 107 |     expect(wideOverflowCount).toBeLessThan(denseOverflowCount + 1,
+          |                               ^
+      108 |       'Overflow badges should reduce when zooming out decreases density');
+      109 |   });
+      110 |
+        at C:\dev\public-repo\chronochart\tests\v5\56-overflow-indicators-visibility.spec.ts:107:31
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-56-overflow-indicators--e0dd3-zooming-out-reduces-density\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-56-overflow-indicators--e0dd3-zooming-out-reduces-density\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-56-overflow-indicators--e0dd3-zooming-out-reduces-density\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-56-overflow-indicators--e0dd3-zooming-out-reduces-density\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  59) tests\v5\57-anchor-date-alignment.spec.ts:16:3 › Anchor-Timeline Date Alignment Tests › Anchors align with corresponding timeline dates at default zoom 
+
+    Error: locator.boundingBox: Error: strict mode violation: locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]') resolved to 2 elements:
+        1) <div class="absolute" data-testid="enhanced-timeline-axis">…</div> aka getByTestId('enhanced-timeline-axis')
+        2) <rect x="0" y="37" rx="3" height="6" width="1864" fill="#000000" data-testid="timeline-axis"></rect> aka getByTestId('timeline-axis')
+
+    Call log:
+    [2m  - waiting for locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]')[22m
+
+
+      33 |     expect(await timelineAxis.count()).toBeGreaterThan(0);
+      34 |
+    > 35 |     const timelineBox = await timelineAxis.boundingBox();
+         |                                            ^
+      36 |     expect(timelineBox).toBeTruthy();
+      37 |
+      38 |     // Get anchors and their positions
+        at C:\dev\public-repo\chronochart\tests\v5\57-anchor-date-alignment.spec.ts:35:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-57-anchor-date-alignmen-2471c-eline-dates-at-default-zoom\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-57-anchor-date-alignmen-2471c-eline-dates-at-default-zoom\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-57-anchor-date-alignmen-2471c-eline-dates-at-default-zoom\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-57-anchor-date-alignmen-2471c-eline-dates-at-default-zoom\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  60) tests\v5\57-anchor-date-alignment.spec.ts:82:3 › Anchor-Timeline Date Alignment Tests › Anchors maintain date alignment when zooming in 
+
+    Error: locator.boundingBox: Error: strict mode violation: locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]') resolved to 2 elements:
+        1) <div class="absolute" data-testid="enhanced-timeline-axis">…</div> aka getByTestId('enhanced-timeline-axis')
+        2) <rect x="0" y="37" rx="3" height="6" width="1864" fill="#000000" data-testid="timeline-axis"></rect> aka getByTestId('timeline-axis')
+
+    Call log:
+    [2m  - waiting for locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]')[22m
+
+
+      130 |     // This test should FAIL initially due to coordinate system mismatch
+      131 |     const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+    > 132 |     const timelineBox = await timelineAxis.boundingBox();
+          |                                            ^
+      133 |
+      134 |     if (timelineBox) {
+      135 |       for (let i = 0; i < Math.min(zoomedAnchorCount, 5); i++) {
+        at C:\dev\public-repo\chronochart\tests\v5\57-anchor-date-alignment.spec.ts:132:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-57-anchor-date-alignmen-a76d3-e-alignment-when-zooming-in\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-57-anchor-date-alignmen-a76d3-e-alignment-when-zooming-in\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-57-anchor-date-alignmen-a76d3-e-alignment-when-zooming-in\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-57-anchor-date-alignmen-a76d3-e-alignment-when-zooming-in\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  61) tests\v5\57-anchor-date-alignment.spec.ts:154:3 › Anchor-Timeline Date Alignment Tests › Anchors align with timeline tick marks for corresponding dates 
+
+    Error: locator.boundingBox: Error: strict mode violation: locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]') resolved to 2 elements:
+        1) <div class="absolute" data-testid="enhanced-timeline-axis">…</div> aka getByTestId('enhanced-timeline-axis')
+        2) <rect x="0" y="37" rx="3" height="6" width="1864" fill="#000000" data-testid="timeline-axis"></rect> aka getByTestId('timeline-axis')
+
+    Call log:
+    [2m  - waiting for locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]')[22m
+
+
+      182 |     if (anchorCount > 0) {
+      183 |       // Verify anchors are positioned correctly relative to timeline
+    > 184 |       const timelineBox = await timelineAxis.boundingBox();
+          |                                              ^
+      185 |
+      186 |       if (timelineBox) {
+      187 |         for (let i = 0; i < Math.min(anchorCount, 3); i++) {
+        at C:\dev\public-repo\chronochart\tests\v5\57-anchor-date-alignment.spec.ts:184:46
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-57-anchor-date-alignmen-43be5-rks-for-corresponding-dates\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-57-anchor-date-alignmen-43be5-rks-for-corresponding-dates\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-57-anchor-date-alignmen-43be5-rks-for-corresponding-dates\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-57-anchor-date-alignmen-43be5-rks-for-corresponding-dates\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  62) tests\v5\57-anchor-date-alignment.spec.ts:206:3 › Anchor-Timeline Date Alignment Tests › Anchor positions update correctly when panning timeline 
+
+    Error: worker process exited unexpectedly (code=3221225794, signal=null)
+
+  63) tests\v5\58-comprehensive-anchor-alignment.spec.ts:38:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchors align precisely with event dates across multiple timelines 
+
+    Error: locator.boundingBox: Error: strict mode violation: locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]') resolved to 2 elements:
+        1) <div class="absolute" data-testid="enhanced-timeline-axis">…</div> aka getByTestId('enhanced-timeline-axis')
+        2) <rect x="0" y="37" rx="3" height="6" width="1864" fill="#000000" data-testid="timeline-axis"></rect> aka getByTestId('timeline-axis')
+
+    Call log:
+    [2m  - waiting for locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]')[22m
+
+
+       8 | async function getTimelineAxisBounds(page: any) {
+       9 |   const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+    > 10 |   const timelineBox = await timelineAxis.boundingBox();
+         |                                          ^
+      11 |   expect(timelineBox).toBeTruthy();
+      12 |   return timelineBox;
+      13 | }
+        at getTimelineAxisBounds (C:\dev\public-repo\chronochart\tests\v5\58-comprehensive-anchor-alignment.spec.ts:10:42)
+        at C:\dev\public-repo\chronochart\tests\v5\58-comprehensive-anchor-alignment.spec.ts:54:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-58-comprehensive-anchor-e6b9c-s-across-multiple-timelines\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-58-comprehensive-anchor-e6b9c-s-across-multiple-timelines\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-58-comprehensive-anchor-e6b9c-s-across-multiple-timelines\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-58-comprehensive-anchor-e6b9c-s-across-multiple-timelines\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  64) tests\v5\58-comprehensive-anchor-alignment.spec.ts:81:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchor alignment accuracy improves with zoom level 
+
+    Error: locator.boundingBox: Error: strict mode violation: locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]') resolved to 2 elements:
+        1) <div class="absolute" data-testid="enhanced-timeline-axis">…</div> aka getByTestId('enhanced-timeline-axis')
+        2) <rect x="0" y="37" rx="3" height="6" width="1864" fill="#000000" data-testid="timeline-axis"></rect> aka getByTestId('timeline-axis')
+
+    Call log:
+    [2m  - waiting for locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]')[22m
+
+
+       8 | async function getTimelineAxisBounds(page: any) {
+       9 |   const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]');
+    > 10 |   const timelineBox = await timelineAxis.boundingBox();
+         |                                          ^
+      11 |   expect(timelineBox).toBeTruthy();
+      12 |   return timelineBox;
+      13 | }
+        at getTimelineAxisBounds (C:\dev\public-repo\chronochart\tests\v5\58-comprehensive-anchor-alignment.spec.ts:10:42)
+        at C:\dev\public-repo\chronochart\tests\v5\58-comprehensive-anchor-alignment.spec.ts:108:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\v5-58-comprehensive-anchor-30811-cy-improves-with-zoom-level\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\v5-58-comprehensive-anchor-30811-cy-improves-with-zoom-level\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-58-comprehensive-anchor-30811-cy-improves-with-zoom-level\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-58-comprehensive-anchor-30811-cy-improves-with-zoom-level\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  65) tests\v5\58-comprehensive-anchor-alignment.spec.ts:129:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchor positions remain stable during rapid zoom changes 
+
+    Error: browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> C:\Users\cynak\AppData\Local\ms-playwright\chromium_headless_shell-1181\chrome-win\headless_shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\cynak\AppData\Local\Temp\playwright_chromiumdev_profile-RqgmvK --remote-debugging-pipe --no-startup-window
+    <launched> pid=44004
+    Call log:
+    [2m  - <launching> C:\Users\cynak\AppData\Local\ms-playwright\chromium_headless_shell-1181\chrome-win\headless_shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=C:\Users\cynak\AppData\Local\Temp\playwright_chromiumdev_profile-RqgmvK --remote-debugging-pipe --no-startup-window[22m
+    [2m  - <launched> pid=44004[22m
+
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\v5-58-comprehensive-anchor-a4a7c-e-during-rapid-zoom-changes\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\v5-58-comprehensive-anchor-a4a7c-e-during-rapid-zoom-changes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  66) tests\v5\58-comprehensive-anchor-alignment.spec.ts:169:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchor alignment accuracy with different event densities 
+
+    Error: worker process exited unexpectedly (code=3221225794, signal=null)
+
+  67) tests\v5\62-timeline-scale-date-alignment.spec.ts:4:3 › Timeline Scale-Date Alignment › Timeline scale labels match actual hover dates (CC-REQ-AXIS-002) 
+
+    Error: worker process exited unexpectedly (code=3221225794, signal=null)
+
+  68) tests\v5\63-minimap-overlay-visibility.spec.ts:30:3 › Minimap Visibility During Authoring Overlay › minimap should remain visible and ungreyed when authoring overlay is open 
+
+    Error: worker process exited unexpectedly (code=3221225794, signal=null)
+
+  69) tests\v5\64-axis-black-styling.spec.ts:6:3 › v5/64 Axis black styling › axis bar, ticks, and labels render solid black 
+
+    Error: worker process exited unexpectedly (code=3221225794, signal=null)
+
+  69 failed
+    tests\v5\18-zoom-stability.spec.ts:87:3 › Zoom Stability Tests › Visual integrity during zoom operations 
+    tests\v5\18-zoom-stability.spec.ts:160:3 › Zoom Stability Tests › Zoom range limits and boundary behavior 
+    tests\v5\18-zoom-stability.spec.ts:207:3 › Zoom Stability Tests › Multi-timeline zoom consistency 
+    tests\v5\19-zoom-edge-cases.spec.ts:19:3 › Zoom Edge Cases Tests › Extreme zoom limits should not break system 
+    tests\v5\19-zoom-edge-cases.spec.ts:156:3 › Zoom Edge Cases Tests › Zoom performance with dense datasets 
+    tests\v5\20-timeline-cursor-zoom.spec.ts:123:3 › Timeline Cursor Zoom Tests › Timeline axis cursor positioning - Napoleon 1800 area 
+    tests\v5\21-timeline-minimap.spec.ts:45:3 › Timeline Minimap Tests › Minimap view window indicator reflects zoom state 
+    tests\v5\21-timeline-minimap.spec.ts:86:3 › Timeline Minimap Tests › Minimap event density markers show event distribution 
+    tests\v5\21-timeline-minimap.spec.ts:109:3 › Timeline Minimap Tests › Minimap click navigation works 
+    tests\v5\22-minimap-basic.spec.ts:4:3 › Timeline Minimap Basic Tests › Page loads correctly without minimap when no events 
+    tests\v5\22-minimap-basic.spec.ts:19:3 › Timeline Minimap Basic Tests › Minimap shows event density markers 
+    tests\v5\22-minimap-basic.spec.ts:41:3 › Timeline Minimap Basic Tests › Minimap view window indicator is visible 
+    tests\v5\23-zoom-stability.spec.ts:4:3 › Timeline Zoom Stability Tests › Cursor position remains stable during repeated zoom cycles 
+    tests\v5\23-zoom-stability.spec.ts:57:3 › Timeline Zoom Stability Tests › Zoom behavior at timeline boundaries 
+    tests\v5\23-zoom-stability.spec.ts:115:3 › Timeline Zoom Stability Tests › Zoom reversibility test 
+    tests\v5\23-zoom-stability.spec.ts:176:3 › Timeline Zoom Stability Tests › Rapid zoom changes do not cause view window corruption 
+    tests\v5\23-zoom-stability.spec.ts:219:3 › Timeline Zoom Stability Tests › Zoom with cursor at different screen positions 
+    tests\v5\24-zoom-boundaries.spec.ts:4:3 › Timeline Zoom Boundary Tests › Zoom does not stick to timeline start boundary 
+    tests\v5\24-zoom-boundaries.spec.ts:44:3 › Timeline Zoom Boundary Tests › Zoom does not stick to timeline end boundary 
+    tests\v5\24-zoom-boundaries.spec.ts:84:3 › Timeline Zoom Boundary Tests › Extreme zoom levels maintain valid view window 
+    tests\v5\25-max-zoom-sliding.spec.ts:4:3 › Maximum Zoom Sliding Tests › View window should not slide when at maximum zoom level 
+    tests\v5\25-max-zoom-sliding.spec.ts:62:3 › Maximum Zoom Sliding Tests › Max zoom maintains cursor position under different cursor locations 
+    tests\v5\25-max-zoom-sliding.spec.ts:130:3 › Maximum Zoom Sliding Tests › Minimum zoom window width is enforced and stable 
+    tests\v5\26-minimap-drag.spec.ts:4:3 › Timeline Minimap Drag Tests › View window can be dragged to slide timeline position 
+    tests\v5\26-minimap-drag.spec.ts:61:3 › Timeline Minimap Drag Tests › View window drag respects timeline boundaries 
+    tests\v5\26-minimap-drag.spec.ts:130:3 › Timeline Minimap Drag Tests › Drag provides visual feedback with cursor changes 
+    tests\v5\27-minimap-timeline-sync.spec.ts:4:3 › Minimap Timeline Synchronization Tests › Timeline events update when minimap view window is dragged 
+    tests\v5\27-minimap-timeline-sync.spec.ts:72:3 › Minimap Timeline Synchronization Tests › Overflow indicators update when zooming via minimap click 
+    tests\v5\27-minimap-timeline-sync.spec.ts:116:3 › Minimap Timeline Synchronization Tests › Blue event indicators respond to minimap navigation 
+    tests\v5\28-napoleon-sliding-validation.spec.ts:4:3 › Napoleon Timeline Sliding Validation Tests › Step-by-step sliding from beginning to end detects layout issues 
+    tests\v5\28-napoleon-sliding-validation.spec.ts:166:3 › Napoleon Timeline Sliding Validation Tests › Detect anchor point positioning issues during sliding 
+    tests\v5\28-napoleon-sliding-validation.spec.ts:272:3 › Napoleon Timeline Sliding Validation Tests › Overflow indicators update correctly when sliding to different timeline regions 
+    tests\v5\28-napoleon-sliding-validation.spec.ts:369:3 › Napoleon Timeline Sliding Validation Tests › Fully zoomed-in sliding detects overflow indicator inconsistencies 
+    tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:6:3 › Deep Zoom Comprehensive Sliding Tests › Maximum zoom level sliding with no overlaps and consistent overflow indicators 
+    tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:162:3 › Deep Zoom Comprehensive Sliding Tests › Deep zoom overflow indicator transitions are consistent and logical 
+    tests\v5\29-deep-zoom-comprehensive-sliding.spec.ts:303:3 › Deep Zoom Comprehensive Sliding Tests › Day-level zoom granularity provides meaningful content separation 
+    tests\v5\30-leftover-overflow-detection.spec.ts:6:3 › Leftover Overflow Indicator Detection Tests › Detect leftover overflow indicators that persist in empty timeline regions 
+    tests\v5\30-leftover-overflow-detection.spec.ts:219:3 › Leftover Overflow Indicator Detection Tests › Navigate to completely different timeline positions to force overflow recalculation 
+    tests\v5\31-aggressive-leftover-detection.spec.ts:6:3 › Aggressive Leftover Overflow Detection › Force leftover overflow by rapid navigation and zoom changes 
+    tests\v5\31-aggressive-leftover-detection.spec.ts:170:3 › Aggressive Leftover Overflow Detection › Detect overflow indicators that survive view window changes 
+    tests\v5\32-view-window-overflow-bug.spec.ts:6:3 › View Window Overflow Bug Detection › Reproduce leftover overflow by resetting zoom constraints temporarily 
+    tests\v5\32-view-window-overflow-bug.spec.ts:158:3 › View Window Overflow Bug Detection › Test overflow persistence when view window changes dramatically 
+    tests\v5\33-directional-anchors.spec.ts:6:3 › Timeline Anchor Directional Connectors › Verify anchor connectors point toward events (above/below timeline) 
+    tests\v5\33-directional-anchors.spec.ts:200:3 › Timeline Anchor Directional Connectors › Verify connectors update correctly when view changes 
+    tests\v5\33-directional-anchors.spec.ts:342:3 › Timeline Anchor Directional Connectors › Detect leftover anchor connectors that persist when navigating to empty regions 
+    tests\v5\33-directional-anchors.spec.ts:546:3 › Timeline Anchor Directional Connectors › Detect leftover connectors through realistic zoom/navigate cycles 
+    tests\v5\33-timeline-separators.spec.ts:6:3 › v5/33 Timeline Scale Comprehensive Testing › Timeline scales - complete functionality verification 
+    tests\v5\36-card-degradation-system.spec.ts:15:1 › Card degradation system - full to compact cards 
+    tests\v5\38-degradation-with-real-data.spec.ts:14:1 › Degradation system with Napoleon dataset - Real data validation 
+    tests\v5\47-jfk-fitall-overflow-semi.spec.ts:9:3 › JFK Fit-All overflow vs full-cards (semi-column) › No semi-column shows 2 full cards plus overflow badge 
+    tests\v5\48-title-only-degradation.spec.ts:4:3 › v5/48 Title-only degradation › dense clusters trigger title-only cards without overlaps 
+    tests\v5\50-panels-visibility.spec.ts:19:3 › v5/50 Panels visibility and sizing › Create opens centered authoring overlay (replacing side Create panel) 
+    tests\v5\50-panels-visibility.spec.ts:35:3 › v5/50 Panels visibility and sizing › Dev panel is visible and full-height 
+    tests\v5\52-panel-scroll-behavior.spec.ts:4:3 › v5/52 Side panel scroll behavior › scroll wheel over Events panel scrolls the panel (not the canvas) 
+    tests\v5\53-inline-plus-create.spec.ts:4:3 › v5/53 Inline "+" affordances open Create overlay › top and bottom add buttons open Create 
+    tests\v5\55-navigation-enhancements.spec.ts:25:3 › v5/55 Enhanced Navigation & Interaction › command palette opens with Ctrl+K and searches commands 
+    tests\v5\55-navigation-enhancements.spec.ts:58:3 › v5/55 Enhanced Navigation & Interaction › breadcrumb navigation shows when panel is open 
+    tests\v5\56-overflow-indicators-visibility.spec.ts:71:3 › Overflow Indicators Visibility Tests › Overflow badges disappear when zooming out reduces density 
+    tests\v5\57-anchor-date-alignment.spec.ts:16:3 › Anchor-Timeline Date Alignment Tests › Anchors align with corresponding timeline dates at default zoom 
+    tests\v5\57-anchor-date-alignment.spec.ts:82:3 › Anchor-Timeline Date Alignment Tests › Anchors maintain date alignment when zooming in 
+    tests\v5\57-anchor-date-alignment.spec.ts:154:3 › Anchor-Timeline Date Alignment Tests › Anchors align with timeline tick marks for corresponding dates 
+    tests\v5\57-anchor-date-alignment.spec.ts:206:3 › Anchor-Timeline Date Alignment Tests › Anchor positions update correctly when panning timeline 
+    tests\v5\58-comprehensive-anchor-alignment.spec.ts:38:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchors align precisely with event dates across multiple timelines 
+    tests\v5\58-comprehensive-anchor-alignment.spec.ts:81:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchor alignment accuracy improves with zoom level 
+    tests\v5\58-comprehensive-anchor-alignment.spec.ts:129:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchor positions remain stable during rapid zoom changes 
+    tests\v5\58-comprehensive-anchor-alignment.spec.ts:169:3 › Comprehensive Anchor-Timeline Date Alignment Tests › Anchor alignment accuracy with different event densities 
+    tests\v5\62-timeline-scale-date-alignment.spec.ts:4:3 › Timeline Scale-Date Alignment › Timeline scale labels match actual hover dates (CC-REQ-AXIS-002) 
+    tests\v5\63-minimap-overlay-visibility.spec.ts:30:3 › Minimap Visibility During Authoring Overlay › minimap should remain visible and ungreyed when authoring overlay is open 
+    tests\v5\64-axis-black-styling.spec.ts:6:3 › v5/64 Axis black styling › axis bar, ticks, and labels render solid black 
+  8 did not run
+  89 passed (12.2h)

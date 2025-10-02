@@ -1,5 +1,8 @@
 import React from 'react';
-import { Breadcrumbs, Link, Typography, Box } from '@mui/material';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import { NavigateNext as NavigateNextIcon } from '@mui/icons-material';
 
 export interface BreadcrumbItem {

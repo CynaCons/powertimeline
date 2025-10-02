@@ -23,17 +23,23 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ### 3. Card Types & Degradation
 
-| ID | Requirement | Code | Tests |
+➡️ See [`SRS_CARDS_SYSTEM.md`](SRS_CARDS_SYSTEM.md) for detailed acceptance criteria, slot allocation rules, and overflow management specifications.
+
+➡️ See [`SDS_CARDS_SYSTEM.md`](SDS_CARDS_SYSTEM.md) for technical design specifications including degradation algorithms, badge merging strategy, and implementation architecture.
+
+| ID | Requirement (summary) | Code | Tests |
 |---|---|---|---|
 | CC-REQ-CARD-FULL-001 | Full cards are ~169px tall and show multi-line body without clipping | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 |
-| CC-REQ-CARD-COMPACT-001 | Compact cards have same width as full (260px), ~78px tall, and show 1–2 description lines | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/47 |
+| CC-REQ-CARD-COMPACT-001 | Compact cards have same width as full (260px), ~92px tall, and show 1–2 description lines | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/47 |
 | CC-REQ-CARD-TITLE-ONLY | Title-only cards appear when cluster density exceeds compact capacity, with no overlaps | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/48 |
 | CC-REQ-SEMICOL-002 | If a semi-column totals 3–4 events, degrade to compact and show them without overflow; overflow only after visible budget is exceeded | `src/layout/LayoutEngine.ts`, `src/layout/config.ts` | v5/47 |
 | CC-REQ-DEGRADATION-001 | Cards automatically degrade from full → compact → title-only based on density to prevent overlaps | `src/layout/LayoutEngine.ts` | v5/36, v5/37, v5/38, v5/39 |
 
 ### 4. Overflow & Capacity Management
 
-| ID | Requirement | Code | Tests |
+➡️ See [`SRS_CARDS_SYSTEM.md`](SRS_CARDS_SYSTEM.md) for complete overflow and capacity requirements.
+
+| ID | Requirement (summary) | Code | Tests |
 |---|---|---|---|
 | CC-REQ-OVERFLOW-001 | Navigating to an empty period shows no leftover overflow badges | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/30 |
 | CC-REQ-OVERFLOW-002 | Overflow reduces/disappears appropriately when zooming out | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/30 |
@@ -52,7 +58,9 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ### 6. Zoom & Navigation
 
-| ID | Requirement | Code | Tests |
+➡️ See [`SRS_ZOOM.md`](SRS_ZOOM.md) for detailed acceptance criteria, implementation notes, edge case handling, and change history covering the zoom and navigation system.
+
+| ID | Requirement (summary) | Code | Tests |
 |---|---|---|---|
 | CC-REQ-ZOOM-001 | Zoom filters visible events; cursor-anchored zoom keeps time under cursor stable; boundaries clamp | `src/App.tsx`, `src/app/hooks/useViewWindow.ts` | v5/17, v5/20, v5/24 |
 | CC-REQ-ZOOM-002 | Zoom operations maintain event positions relative to cursor and handle edge cases gracefully | `src/app/hooks/useViewWindow.ts` | v5/18, v5/19, v5/23 |
@@ -60,10 +68,17 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ### 7. Minimap
 
-| ID | Requirement | Code | Tests |
+➡️ See [`SRS_MINIMAP.md`](SRS_MINIMAP.md) for detailed acceptance criteria covering display, navigation, event highlighting, and overlay integration.
+
+| ID | Requirement (summary) | Code | Tests |
 |---|---|---|---|
-| CC-REQ-MINIMAP-001 | Minimap shows range and density; click moves the view window | `src/components/TimelineMinimap.tsx` | v5/21, v5/22 |
-| CC-REQ-MINIMAP-002 | Dragging minimap window updates main view; window reflects zoom | `src/components/TimelineMinimap.tsx` | v5/26, v5/27, v5/24 |
+| CC-REQ-MINIMAP-DISPLAY-001 | Minimap displays timeline range with start/end year labels | `src/components/TimelineMinimap.tsx` | v5/21, v5/22 |
+| CC-REQ-MINIMAP-DISPLAY-002 | Event markers show position of all events along timeline bar | `src/components/TimelineMinimap.tsx` | v5/21, v5/22 |
+| CC-REQ-MINIMAP-DISPLAY-003 | Density heatmap gradient indicates event concentration | `src/components/TimelineMinimap.tsx` | v5/21 |
+| CC-REQ-MINIMAP-NAV-001 | Click navigation centers view window on clicked position | `src/components/TimelineMinimap.tsx` | v5/21, v5/22 |
+| CC-REQ-MINIMAP-NAV-002 | Drag view window to slide timeline with smooth tracking | `src/components/TimelineMinimap.tsx` | v5/26, v5/27 |
+| CC-REQ-MINIMAP-HIGHLIGHT-001 | Selected event highlighted in amber with distinct visual treatment | `src/components/TimelineMinimap.tsx` | v5/63 |
+| CC-REQ-MINIMAP-HIGHLIGHT-002 | Hovered event highlighted in sky blue | `src/components/TimelineMinimap.tsx` | - |
 
 ### 8. Timeline Axis & Scales
 
@@ -79,7 +94,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 |---|---|---|---|
 | CC-REQ-UI-001 | Navigation panels can be toggled and maintain proper visibility states | `src/app/OverlayShell.tsx`, `src/components/NavigationRail.tsx` | v5/50, v5/52 |
 | CC-REQ-UI-002 | Event creation and editing interface provides form validation and proper data handling | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
-| CC-REQ-UI-003 | Navigation rail provides intuitive access to features with keyboard support | `src/components/NavigationRail.tsx` | v5/55 |
+| CC-REQ-UI-003 | Navigation rail provides intuitive access to features with keyboard support (ArrowUp/Down navigation) | `src/components/NavigationRail.tsx` | v5/55 |
 
 ### 10. Data Management & Export
 
@@ -93,7 +108,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | ID | Requirement | Code | Tests |
 |---|---|---|---|
 | CC-REQ-VISUAL-001 | Events display with category-based color coding for visual organization | `src/layout/cardIcons.ts`, `src/styles/colors.ts` | v5/40, v5/41 |
-| CC-REQ-VISUAL-002 | Application supports light/dark theme switching with consistent styling | `src/contexts/ThemeContext.tsx`, `src/styles/theme.ts` | - |
+| CC-REQ-VISUAL-002 | Application supports light/dark/system theme switching with localStorage persistence | `src/contexts/ThemeContext.tsx` | - |
 
 ### 12. Core Timeline Components
 
@@ -108,7 +123,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | ID | Requirement | Code | Tests |
 |---|---|---|---|
 | CC-REQ-CARDS-DISPLAY-001 | Event cards display with title, date, and description fields | `src/layout/CardRenderer.tsx`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
-| CC-REQ-CARDS-DISPLAY-002 | Cards have three display types: full (~169px), compact (~78px), and title-only | `src/layout/config.ts`, `src/layout/LayoutEngine.ts` | v5/03, v5/47, v5/48 |
+| CC-REQ-CARDS-DISPLAY-002 | Cards have three display types: full (169px), compact (92px), and title-only (32px) | `src/layout/config.ts`, `src/layout/LayoutEngine.ts` | v5/03, v5/47, v5/48 |
 | CC-REQ-CARDS-DISPLAY-003 | Cards are color-coded by card type (full, compact, title-only) for visual distinction | `src/layout/cardIcons.ts`, `src/styles/colors.ts` | v5/40, v5/41 |
 
 ### 14. Navigation & Panels
@@ -116,16 +131,16 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | ID | Requirement | Code | Tests |
 |---|---|---|---|
 | CC-REQ-NAV-RAIL-001 | Navigation rail is displayed on the left with icon buttons for panel access | `src/components/NavigationRail.tsx`, `src/App.tsx` | v5/50 |
-| CC-REQ-PANELS-EVENTS-001 | Events panel displays list of all events with search and filter functionality | `src/app/overlays/ViewingOverlay.tsx` | v5/50, v5/52 |
-| CC-REQ-PANELS-EVENTS-002 | Events panel includes "+" button to create new events | `src/app/overlays/ViewingOverlay.tsx` | - |
-| CC-REQ-PANELS-DEV-001 | Developer panel provides data seeding and debugging tools | `src/App.tsx` | - |
+| CC-REQ-PANELS-OUTLINE-001 | Outline panel (Events) displays list of all events with text filter functionality | `src/app/panels/OutlinePanel.tsx` | v5/50, v5/52 |
+| CC-REQ-PANELS-OUTLINE-002 | Outline panel includes "+ Add Event" button to create new events | `src/app/panels/OutlinePanel.tsx` | - |
+| CC-REQ-PANELS-DEV-001 | Developer panel provides data seeding and debugging tools | `src/app/panels/DevPanel.tsx` | - |
 
 ### 15. Event Interaction
 
 | ID | Requirement | Code | Tests |
 |---|---|---|---|
-| CC-REQ-INTERACTION-FOCUS-001 | Events can be focused by hovering over cards, anchors, or panel items | Event focus system | - |
-| CC-REQ-INTERACTION-FOCUS-002 | Focused events are highlighted across all views (card, anchor, minimap, panel) | Event focus system | - |
+| CC-REQ-INTERACTION-HOVER-001 | Events can be hovered over on cards, anchors, or panel items with visual feedback | `src/App.tsx` (hoveredEventId state), `src/layout/DeterministicLayoutComponent.tsx` | - |
+| CC-REQ-INTERACTION-SELECT-001 | Selected events are highlighted in timeline and minimap | `src/App.tsx` (selectedEventId state), `src/layout/DeterministicLayoutComponent.tsx`, `src/components/TimelineMinimap.tsx` | - |
 | CC-REQ-INTERACTION-CLICK-001 | Clicking an event card opens it in the authoring overlay for editing | `src/layout/CardRenderer.tsx`, `src/App.tsx` | v5/51 |
 
 ### 16. Authoring Mode
@@ -138,9 +153,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ### 17. Enhanced Minimap System
 
-| ID | Requirement | Code | Tests |
-|---|---|---|---|
-| CC-REQ-MINIMAP-ENHANCED-001 | Minimap displays at the top, shows visual indicators for every timeline event, highlights the currently viewed portion of the timeline (zoom level), highlights the currently focused event (via mouse over cards, anchors, or panels), and remains visible when authoring panels are overlayed | `src/components/TimelineMinimap.tsx` | v5/21, v5/22, v5/63 |
+➡️ **CONSOLIDATED**: All minimap requirements moved to Section 7 and detailed in [`SRS_MINIMAP.md`](SRS_MINIMAP.md)
 
 ## Non-Functional Requirements
 

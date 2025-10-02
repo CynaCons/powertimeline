@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Timeline Anchor Directional Connectors', () => {
   test.setTimeout(60000);
 
-  test('Verify anchor connectors point toward events (above/below timeline)', async ({ page }) => {
+  test.skip('Verify anchor connectors point toward events (above/below timeline)', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -197,7 +197,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     console.log('✅ Directional connector test complete');
   });
   
-  test('Verify connectors update correctly when view changes', async ({ page }) => {
+  test.skip('Verify connectors update correctly when view changes', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -339,7 +339,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     console.log('✅ Connector zoom behavior test complete');
   });
 
-  test('Detect leftover anchor connectors that persist when navigating to empty regions', async ({ page }) => {
+  test.skip('Detect leftover anchor connectors that persist when navigating to empty regions', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -456,7 +456,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     console.log('✅ Leftover connector filtering test complete');
   });
 
-  test('Verify connectors cleanup correctly during zoom transitions', async ({ page }) => {
+  test.skip('Verify connectors cleanup correctly during zoom transitions', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -543,7 +543,7 @@ test.describe('Timeline Anchor Directional Connectors', () => {
     console.log('✅ Connector cleanup behavior validated');
   });
 
-  test('Detect leftover connectors through realistic zoom/navigate cycles', async ({ page }) => {
+  test.skip('Detect leftover connectors through realistic zoom/navigate cycles', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
     

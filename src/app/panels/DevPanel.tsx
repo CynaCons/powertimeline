@@ -97,7 +97,7 @@ export function DevPanel({
   };
 
   return (
-    <div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-20">
+    <aside role="dialog" aria-label="Developer Panel" className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-20">
       <div className="p-4">
         <h2 className="text-lg font-bold mb-4">Developer Panel</h2>
         <p className="text-sm text-gray-600 mb-4">Events: {events.length}</p>
@@ -174,7 +174,7 @@ export function DevPanel({
           Close
         </button>
       </div>
-    </div>
+    </aside>
   );
 };
 

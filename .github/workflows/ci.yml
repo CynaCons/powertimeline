@@ -61,18 +61,75 @@ jobs:
 
     - name: Check bundle size
       run: |
-        BUNDLE_SIZE=$(du -sb dist/ | cut -f1)
-        MAX_SIZE=3000000  # 3MB limit for Material-UI app with timeline features
-        # Note: MUI alone is ~260KB gzipped. With React, timeline components,
-        # and icons, 2-3MB uncompressed is reasonable. Served with gzip compression
-        # the actual transfer size is much smaller (~500-800KB).
-        echo "Bundle size: $BUNDLE_SIZE bytes"
-        echo "Max allowed: $MAX_SIZE bytes"
-        if [ $BUNDLE_SIZE -gt $MAX_SIZE ]; then
-          echo "❌ Bundle size exceeds limit\!"
+        echo "📦 Analyzing bundle sizes (gzipped - as served to users)..."
+        echo ""
+
+        # Calculate gzipped JavaScript size
+        JS_SIZE=$(find dist/assets -name "*.js" -type f -exec gzip -c {} \; | wc -c)
+        JS_SIZE_KB=$((JS_SIZE / 1024))
+
+        # Calculate gzipped CSS size
+        CSS_SIZE=$(find dist/assets -name "*.css" -type f -exec gzip -c {} \; | wc -c)
+        CSS_SIZE_KB=$((CSS_SIZE / 1024))
+
+        # Calculate image sizes (already compressed, served as-is)
+        IMAGE_SIZE=$(find dist -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.svg" -o -name "*.webp" \) -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$1} END {print s}' || find dist -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.svg" -o -name "*.webp" \) -exec stat -c%s {} \; | awk '{s+=$1} END {print s}')
+        IMAGE_SIZE_KB=$((IMAGE_SIZE / 1024))
+
+        # Total transfer size (what users actually download)
+        TOTAL_TRANSFER=$((JS_SIZE + CSS_SIZE + IMAGE_SIZE))
+        TOTAL_TRANSFER_KB=$((TOTAL_TRANSFER / 1024))
+
+        echo "JavaScript (gzipped):  ${JS_SIZE_KB} KB"
+        echo "CSS (gzipped):         ${CSS_SIZE_KB} KB"
+        echo "Images:                ${IMAGE_SIZE_KB} KB"
+        echo "─────────────────────────────────────"
+        echo "Total transfer size:   ${TOTAL_TRANSFER_KB} KB"
+        echo ""
+
+        # Set limits based on industry standards for React + MUI apps
+        MAX_JS=400000      # 400 KB gzipped JS (generous for MUI + React)
+        MAX_CSS=50000      # 50 KB gzipped CSS
+        MAX_IMAGES=1200000 # 1.2 MB total images
+        MAX_TOTAL=1500000  # 1.5 MB total transfer
+
+        FAILED=0
+
+        if [ $JS_SIZE -gt $MAX_JS ]; then
+          echo "❌ JavaScript bundle exceeds limit: ${JS_SIZE_KB} KB > $((MAX_JS / 1024)) KB"
+          FAILED=1
+        else
+          echo "✅ JavaScript bundle within limit: ${JS_SIZE_KB} KB <= $((MAX_JS / 1024)) KB"
+        fi
+
+        if [ $CSS_SIZE -gt $MAX_CSS ]; then
+          echo "❌ CSS bundle exceeds limit: ${CSS_SIZE_KB} KB > $((MAX_CSS / 1024)) KB"
+          FAILED=1
+        else
+          echo "✅ CSS bundle within limit: ${CSS_SIZE_KB} KB <= $((MAX_CSS / 1024)) KB"
+        fi
+
+        if [ $IMAGE_SIZE -gt $MAX_IMAGES ]; then
+          echo "❌ Images exceed limit: ${IMAGE_SIZE_KB} KB > $((MAX_IMAGES / 1024)) KB"
+          FAILED=1
+        else
+          echo "✅ Images within limit: ${IMAGE_SIZE_KB} KB <= $((MAX_IMAGES / 1024)) KB"
+        fi
+
+        if [ $TOTAL_TRANSFER -gt $MAX_TOTAL ]; then
+          echo "❌ Total transfer size exceeds limit: ${TOTAL_TRANSFER_KB} KB > $((MAX_TOTAL / 1024)) KB"
+          FAILED=1
+        else
+          echo "✅ Total transfer size within limit: ${TOTAL_TRANSFER_KB} KB <= $((MAX_TOTAL / 1024)) KB"
+        fi
+
+        if [ $FAILED -eq 1 ]; then
+          echo ""
+          echo "❌ Bundle size check failed!"
           exit 1
         else
-          echo "✅ Bundle size within limits"
+          echo ""
+          echo "✅ All bundle size checks passed!"
         fi
 
   test-foundation:

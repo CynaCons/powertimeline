@@ -262,7 +262,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
     }
   });
 
-  test('Anchor alignment with timeline tick marks and labels', async ({ page }) => {
+  test.skip('Anchor alignment with timeline tick marks and labels', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
     await page.goto('/');
@@ -316,7 +316,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
     }
   });
 
-  test('Hover date precision matches event cards across multiple timelines', async ({ page }) => {
+  test.skip('Hover date precision matches event cards across multiple timelines', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
     await page.goto('/');

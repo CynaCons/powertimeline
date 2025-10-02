@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { IconButton } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import { EnhancedTooltip } from './EnhancedTooltip';
 import { useTheme } from '../contexts/ThemeContext';
 

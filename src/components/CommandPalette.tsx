@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Modal, Box, InputBase, List, ListItem, ListItemIcon, ListItemText, Typography, Fade } from '@mui/material';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import InputBase from '@mui/material/InputBase';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
+import Fade from '@mui/material/Fade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 export interface Command {
