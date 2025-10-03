@@ -63,7 +63,7 @@
 - [x] Validate core functionality after infrastructure fixes
 - [x] Establish working pre-commit hooks
 - [x] Create CI/CD pipeline for automated quality assurance
-- [x] Address large bundle sizes (600KB total → 560KB optimized)
+- [x] Address large bundle sizes (600KB total 560KB optimized)
 - [x] Refactor App.tsx complexity (100+ lines with mixed concerns)
 - [x] Remove debug code and development artifacts
 - [x] Configuration consolidation
@@ -80,7 +80,7 @@
 - [x] Implement file upload interface
 - [x] Parse YAML and validate structure
 - [x] Convert imported data to internal Event format
-- [x] Test export/import roundtrip (export → import → verify)
+- [x] Test export/import roundtrip (export import verify)
 
 ## Iteration v0.2.9 - Critical Runtime Fixes
 **Goal:** Resolve critical application startup and runtime errors
@@ -97,7 +97,7 @@
 
 - [x] Replace simple gray line with graduated timeline bar with gradient design
 - [x] Add tick marks at regular intervals with varying heights (major/minor)
-- [x] Implement multi-level date labels (Year → Month → Day hierarchy)
+- [x] Implement multi-level date labels (Year Month Day hierarchy)
 - [x] Add visual markers for quarters/seasons with subtle background shading
 - [x] Create hover state showing exact date at cursor position
 - [x] Add "today" marker for current date reference with red indicator
@@ -236,7 +236,7 @@
 - [x] Identify root cause: Time range mismatch between positioning systems
 - [x] Unify coordinate systems to use margined coordinates
 - [x] Add 2% padding to timeline range in DeterministicLayoutComponent.tsx
-- [x] Achieve 82% reduction in date alignment error (85 → 15 days)
+- [x] Achieve 82% reduction in date alignment error (85 15 days)
 - [x] Document known zoom alignment issue for future improvement
 
 ## Iteration v0.2.19.1 - Layout Refinements: Spacing & Anchor Persistence
@@ -303,21 +303,21 @@
 **Goal:** Run the full Playwright suite and sync TESTS.md with current pass/fail results
 
 - [x] Execute comprehensive Playwright run
-  - Run on 2025-09-26 (Playwright v1.54.2): 49 passed / 116 failed (see docs/TESTS.md update in progress)
-  - Run on 2025-09-29 (Playwright v1.54.2): 16 passing / 42 failing spec files (45 passing / 120 failing tests)
+ - Run on 2025-09-26 (Playwright v1.54.2): 49 passed / 116 failed (see docs/TESTS.md update in progress)
+ - Run on 2025-09-29 (Playwright v1.54.2): 16 passing / 42 failing spec files (45 passing / 120 failing tests)
 - [x] Update docs/TESTS.md with latest outcomes
-  - [x] Review generated summary artifacts (tests table, category summary, overall metrics)
-  - [x] Refresh docs/TESTS.md content with current Playwright results
-  - [x] Log documentation refresh completion in PLAN and task tracker
+ - [x] Review generated summary artifacts (tests table, category summary, overall metrics)
+ - [x] Refresh docs/TESTS.md content with current Playwright results
+ - [x] Log documentation refresh completion in PLAN and task tracker
 - [x] Relocate generated Playwright artifacts into tmp staging
-  - [x] Add tmp/ directory to .gitignore and planning checklists
-  - [x] Update reporting scripts to emit files into tmp/test-docs
-  - [x] Regenerate artifacts in tmp/test-docs and remove root-level copies
+ - [x] Add tmp/ directory to .gitignore and planning checklists
+ - [x] Update reporting scripts to emit files into tmp/test-docs
+ - [x] Regenerate artifacts in tmp/test-docs and remove root-level copies
 - [x] Root directory housekeeping (retain .claude/ and .grok/)
-  - [x] Remove tracked dist/ bundle output
-  - [x] Remove tracked .vite/ cache directory
-  - [x] Remove tracked .env.local secrets file
-  - [x] Ensure tmp/test-docs artifacts remain untracked
+ - [x] Remove tracked dist/ bundle output
+ - [x] Remove tracked .vite/ cache directory
+ - [x] Remove tracked .env.local secrets file
+ - [x] Ensure tmp/test-docs artifacts remain untracked
 
 ---
 ## Iteration v0.3.0 - Enhanced Event Editor
@@ -408,33 +408,33 @@
 
 **Preparing the codebase for the collaborative platform transformation starting in v0.4.x**
 
-## Iteration v0.3.2 - Critical Code Quality Fixes ✅ COMPLETED
+## Iteration v0.3.2 - Critical Code Quality Fixes COMPLETED
 **Goal:** Eliminate all ESLint errors and fix immediate technical debt
 
-**Validation:** ✅ All ESLint errors resolved, build passes, tests still pass
+**Validation:** All ESLint errors resolved, build passes, tests still pass
 
 - [x] **ESLint Error Elimination**: Configure ESLint to eliminate blocking errors
-  - [x] Configure `@typescript-eslint/no-explicit-any` as warning instead of error
-  - [x] Fix switch case declarations in `src/utils/timelineTickGenerator.ts` (block scoping)
-  - [x] Remove unused variables from `src/utils/timelineTickGenerator.ts`
+ - [x] Configure `@typescript-eslint/no-explicit-any` as warning instead of error
+ - [x] Fix switch case declarations in `src/utils/timelineTickGenerator.ts` (block scoping)
+ - [x] Remove unused variables from `src/utils/timelineTickGenerator.ts`
 - [x] **Build and Test Validation**
-  - [x] Run `npm run lint` → 0 errors, 11 warnings (non-blocking)
-  - [x] Run `npm run typecheck` → passes
-  - [x] Run `npm run build` → successful build
-  - [x] Foundation tests → pass
+ - [x] Run `npm run lint` 0 errors, 11 warnings (non-blocking)
+ - [x] Run `npm run typecheck` passes
+ - [x] Run `npm run build` successful build
+ - [x] Foundation tests pass
 - [x] **Remaining Code Quality Improvements**
-  - [x] Replace `any` types in `src/layout/types.ts` (5 warnings)
-  - [x] Replace `any` types in `src/timeline/Node/Node.tsx` (3 warnings)
-  - [x] Replace `any` type in `src/utils/performanceMonitor.ts` (1 warning)
-  - [x] Replace `any` type in `src/utils/yamlSerializer.ts` (1 warning)
-  - [x] Fix React Hook dependency warning in `src/timeline/hooks/useSlotLayout.ts`
+ - [x] Replace `any` types in `src/layout/types.ts` (5 warnings)
+ - [x] Replace `any` types in `src/timeline/Node/Node.tsx` (3 warnings)
+ - [x] Replace `any` type in `src/utils/performanceMonitor.ts` (1 warning)
+ - [x] Replace `any` type in `src/utils/yamlSerializer.ts` (1 warning)
+ - [x] Fix React Hook dependency warning in `src/timeline/hooks/useSlotLayout.ts`
 - [x] **Project Cleanup**
-  - [x] Update package.json version from 0.2.0 to 0.3.0
-  - [x] Clean up disabled files: remove or re-enable `.disabled` files
-  - [x] Fix additional ESLint error in scripts/generate-test-doc.js (require → import)
-  - [ ] Resolve outstanding TODOs in Firebase config and useAxisTicks hook
+ - [x] Update package.json version from 0.2.0 to 0.3.0
+ - [x] Clean up disabled files: remove or re-enable `.disabled` files
+ - [x] Fix additional ESLint error in scripts/generate-test-doc.js (require import)
+ - [ ] Resolve outstanding TODOs in Firebase config and useAxisTicks hook
 
-**✅ COMPLETION SUMMARY:**
+** COMPLETION SUMMARY:**
 - Eliminated all 10 TypeScript `any` type warnings with proper interfaces
 - Fixed React Hook dependency warning in useSlotLayout.ts
 - Updated package version to 0.3.0
@@ -457,24 +457,24 @@
 - [x] Standardize component patterns (function vs arrow function style)
 - [x] Clean up commented code and unused imports in App.tsx
 
-## Iteration v0.3.4 - Layout Engine Modularization ✅
+## Iteration v0.3.4 - Layout Engine Modularization 
 **Goal:** Split the 1,100+ line `LayoutEngine.ts` into focused modules while preserving layout behavior.
 
 - [x] Split `DeterministicLayoutV5` into focused modules:
-  - [x] `src/layout/engine/DispatchEngine.ts` — event dispatching and half-columns
-  - [x] `src/layout/engine/DegradationEngine.ts` — card type degradation system
-  - [x] `src/layout/engine/PositioningEngine.ts` — card positioning and collision resolution
-  - [x] `src/layout/engine/MetricsCalculator.ts` — telemetry and metrics
+ - [x] `src/layout/engine/DispatchEngine.ts` event dispatching and half-columns
+ - [x] `src/layout/engine/DegradationEngine.ts` card type degradation system
+ - [x] `src/layout/engine/PositioningEngine.ts` card positioning and collision resolution
+ - [x] `src/layout/engine/MetricsCalculator.ts` telemetry and metrics
 - [x] Maintain single entry point through `src/layout/LayoutEngine.ts`
 - [x] Add comprehensive JSDoc documentation to new modules
 - [x] Keep all existing telemetry and debugging functionality
 - [x] Reduce `LayoutEngine.ts` from 1,104 lines to 296 lines (73% reduction)
 - [x] Rename `COMPLETED.md` iteration headings to PLAN-style semantic versions while preserving legacy content
-- [ ] ⚠️ IMPORTANT: Document Dev Panel button identifiers and prohibit renaming without updating associated Playwright tests (v5 suite depends on exact labels)
+- [ ] IMPORTANT: Document Dev Panel button identifiers and prohibit renaming without updating associated Playwright tests (v5 suite depends on exact labels)
 - [x] Fix all tests that were broken after 0.3.4 reworks
 - [x] Update TESTS.md with final pass/fail counts (2025-10-01)
 
-### Layout Parity Restorations ✅ COMPLETED
+### Layout Parity Restorations COMPLETED
 **Goal:** Restore legacy visuals after modular layout engine refactor
 
 - [x] Re-align semi-column card offsets to legacy spacing baselines
@@ -492,27 +492,27 @@
 **Validation:** App works in both development and production modes
 
 - [x] Add environment configuration system
-  - [x] Create `src/config/environment.ts` for dev/prod settings
-  - [x] Move Firebase config to environment variables (deployment uses GitHub Actions secrets)
-  - [x] Add development vs production mode detection
+ - [x] Create `src/config/environment.ts` for dev/prod settings
+ - [x] Move Firebase config to environment variables (deployment uses GitHub Actions secrets)
+ - [x] Add development vs production mode detection
 - [x] Improve bundle optimization
-  - [x] Audit MUI imports for tree shaking
-  - [x] Optimize lazy loading strategy
-  - [x] Review bundle analyzer results
+ - [x] Audit MUI imports for tree shaking
+ - [x] Optimize lazy loading strategy
+ - [x] Review bundle analyzer results
 - [x] Add error tracking foundation (prepare for production monitoring)
-  - [x] Create error logging utilities
-  - [x] Add basic performance monitoring hooks
+ - [x] Create error logging utilities
+ - [x] Add basic performance monitoring hooks
 - [x] Security audit preparation
-  - [x] Review dependency vulnerabilities with `npm audit`
-  - [x] Secure Firebase configuration for production (managed via GitHub Actions secret storage)
+ - [x] Review dependency vulnerabilities with `npm audit`
+ - [x] Secure Firebase configuration for production (managed via GitHub Actions secret storage)
 - [x] Tone down minimap focus overlay
-  - [x] Restyle minimap view window to light grey with background z-index so events remain prominent (implemented alongside overlay polish)
+ - [x] Restyle minimap view window to light grey with background z-index so events remain prominent (implemented alongside overlay polish)
 - [x] Persistent selection differentiation
-  - [x] Use distinct colors for selected anchors/events versus hover state
-  - [x] Persist selection until another node is selected or user clicks empty canvas
+ - [x] Use distinct colors for selected anchors/events versus hover state
+ - [x] Persist selection until another node is selected or user clicks empty canvas
 - [x] Sync minimap hover highlights
-  - [x] Mirror card/anchor hover states onto minimap markers for rapid orientation
-  - [x] Include OutlinePanel hover interactions in minimap highlighting
+ - [x] Mirror card/anchor hover states onto minimap markers for rapid orientation
+ - [x] Include OutlinePanel hover interactions in minimap highlighting
 
 **Validation Tests:**
 - [x] `npm run build` produces optimized production build
@@ -528,23 +528,23 @@
 **Validation:** Hover interactions work smoothly without performance impact
 
 - [ ] Implement event hover highlighting system in OutlinePanel
-  - [ ] Add onMouseEnter/onMouseLeave handlers to ListItemButton components
-  - [ ] Create new state for panel-hovered event ID
-  - [ ] Pass hover callbacks through OutlinePanel props interface
+ - [ ] Add onMouseEnter/onMouseLeave handlers to ListItemButton components
+ - [ ] Create new state for panel-hovered event ID
+ - [ ] Pass hover callbacks through OutlinePanel props interface
 - [ ] Connect panel hover state to main App.tsx state management
-  - [ ] Add panelHoveredEventId state to App.tsx
-  - [ ] Pass hover handlers from App.tsx to OutlinePanel
-  - [ ] Update hoveredEventId state when panel items are hovered
+ - [ ] Add panelHoveredEventId state to App.tsx
+ - [ ] Pass hover handlers from App.tsx to OutlinePanel
+ - [ ] Update hoveredEventId state when panel items are hovered
 - [ ] Enhance timeline rendering to show panel-hover highlighting
-  - [ ] Update DeterministicLayoutComponent to receive panelHoveredEventId
-  - [ ] Add visual highlighting for anchors when event is hovered in panel
-  - [ ] Add visual highlighting for event cards when event is hovered in panel
-  - [ ] Use distinct visual style (different from regular hover/selection)
+ - [ ] Update DeterministicLayoutComponent to receive panelHoveredEventId
+ - [ ] Add visual highlighting for anchors when event is hovered in panel
+ - [ ] Add visual highlighting for event cards when event is hovered in panel
+ - [ ] Use distinct visual style (different from regular hover/selection)
 - [ ] Implement cross-highlighting visual design
-  - [ ] Panel hover → Timeline anchor: glowing ring or pulsing animation
-  - [ ] Panel hover → Timeline card: subtle border highlight or glow effect
-  - [ ] Ensure highlighting is distinct from selection and regular hover states
-  - [ ] Use consistent color scheme (possibly green to distinguish from red selection)
+ - [ ] Panel hover Timeline anchor: glowing ring or pulsing animation
+ - [ ] Panel hover Timeline card: subtle border highlight or glow effect
+ - [ ] Ensure highlighting is distinct from selection and regular hover states
+ - [ ] Use consistent color scheme (possibly green to distinguish from red selection)
 
 **Technical Implementation:**
 - [ ] Update OutlinePanel interface to include hover callbacks
@@ -554,7 +554,7 @@
 - [ ] Add proper cleanup of hover states when panel closes
 
 **Validation Tests:**
-- [ ] Open Events panel → hover over event items highlights corresponding timeline elements
+- [ ] Open Events panel hover over event items highlights corresponding timeline elements
 - [ ] Timeline highlighting appears instantly on panel hover (no delay/lag)
 - [ ] Timeline highlighting disappears when mouse leaves panel item
 - [ ] Panel highlighting works independently of timeline hover states
@@ -568,43 +568,55 @@
 - [ ] Smooth, responsive interaction without visual glitches
 - [ ] Clear distinction between different interaction states (hover vs select vs panel-hover)
 
-## Iteration v0.3.7 - Documentation & Test Suite Fixes ✅ COMPLETED
+## Iteration v0.3.7 - Documentation & Test Suite Fixes COMPLETED
 **Goal:** Improve documentation organization, CI bundle size validation, and achieve 100% test pass rate
 
 **Validation:** SRS documentation is modular, CI validates real-world bundle sizes, all tests passing
 
 - [x] **Image Optimization**
-  - [x] Install sharp package for automated image optimization
-  - [x] Create `scripts/optimize-images.mjs` to compress PNG files
-  - [x] Add `npm run optimize:images` script to package.json
-  - [x] Optimize logo.png and favicon.png (1006 KB → 413 KB each, 58.9% reduction)
-  - [x] Reduce bundle from 2.98 MB → 2.0 MB (950 KB savings)
+ - [x] Install sharp package for automated image optimization
+ - [x] Create `scripts/optimize-images.mjs` to compress PNG files
+ - [x] Add `npm run optimize:images` script to package.json
+ - [x] Optimize logo.png and favicon.png (1006 KB 413 KB each, 58.9% reduction)
+ - [x] Reduce bundle from 2.98 MB 2.0 MB (950 KB savings)
 - [x] **CI Bundle Size Check Modernization**
-  - [x] Replace uncompressed size check with gzipped size validation
-  - [x] Separate JavaScript, CSS, and image size limits
-  - [x] Set realistic limits: 400 KB JS (gzipped), 50 KB CSS (gzipped), 1.2 MB images, 1.5 MB total
-  - [x] Provide detailed breakdown of what users actually download
+ - [x] Replace uncompressed size check with gzipped size validation
+ - [x] Separate JavaScript, CSS, and image size limits
+ - [x] Set realistic limits: 400 KB JS (gzipped), 50 KB CSS (gzipped), 1.2 MB images, 1.5 MB total
+ - [x] Provide detailed breakdown of what users actually download
 - [x] **SRS Documentation Modularization**
-  - [x] Extract Zoom & Navigation section to `SRS_ZOOM.md`
-  - [x] Extract Card System & Overflow to `SRS_CARDS_SYSTEM.md`
-  - [x] Create `SDS_CARDS_SYSTEM.md` design specification document
-  - [x] Conduct comprehensive UI requirements audit
-  - [x] Create `SRS_UI_AUDIT.md` documenting all UI requirement fixes
-  - [x] Fix 7 incorrect UI requirements (wrong component names, outdated dimensions, vague references)
-  - [x] Extract Minimap section to `SRS_MINIMAP.md` with improved granularity
-  - [x] Split 3 vague minimap requirements into 12 focused, testable requirements
-  - [x] Follow pattern established by `SRS_FOUNDATION.md` and `SRS_LAYOUT.md`
-  - [x] Add detailed acceptance criteria and implementation notes
-  - [x] Document edge cases discovered during test suite validation
-  - [x] Update main `SRS.md` to reference modular documentation
+ - [x] Extract Zoom & Navigation section to `SRS_ZOOM.md`
+ - [x] Extract Card System & Overflow to `SRS_CARDS_SYSTEM.md`
+ - [x] Create `SDS_CARDS_SYSTEM.md` design specification document
+ - [x] Conduct comprehensive UI requirements audit
+ - [x] Create `SRS_UI_AUDIT.md` documenting all UI requirement fixes
+ - [x] Fix 7 incorrect UI requirements (wrong component names, outdated dimensions, vague references)
+ - [x] Extract Minimap section to `SRS_MINIMAP.md` with improved granularity
+ - [x] Split 3 vague minimap requirements into 12 focused, testable requirements
+ - [x] Follow pattern established by `SRS_FOUNDATION.md` and `SRS_LAYOUT.md`
+ - [x] Add detailed acceptance criteria and implementation notes
+ - [x] Document edge cases discovered during test suite validation
+ - [x] Update main `SRS.md` to reference modular documentation
+- [x] **Card System Simplification** ✅ COMPLETED (2025-10-03)
+ - [x] Remove legacy multi-event/infinite card references from layout telemetry and UI
+ - [x] Update documentation to reflect full/compact/title-only cascade
+ - [x] Refresh card color tests to cover the streamlined palette
+ - [x] Remove unused AggregationMetrics interface and related telemetry code
+ - [x] Clean up ARCHITECTURE.md to remove multi-event and infinite card sections
+ - [x] Clean up SDS_CARDS_SYSTEM.md to remove legacy card type references
+ - [x] Fix build error (unused setShowColumnBorders variable)
+ - [x] Verify all critical tests pass (11 foundation, degradation, and card tests passing)
+ - [x] Verify production build succeeds (114.02 KB gzipped)
+ - [x] Fix TESTS.md update script timeout issue
+ - [x] Document workaround for long-running test suite (use generator directly or run in background)
 - [x] **Test Suite Fixes & Achievement**
-  - [x] Fixed 7 failing tests across 5 test files
-  - [x] 166/166 tests passing (152 running + 14 skipped = 100% pass rate)
-  - [x] Fixed DevPanel accessibility (aside role=dialog)
-  - [x] Fixed telemetry access in degradation tests
-  - [x] Skipped tests for unimplemented features (connectors, keyboard panning)
-  - [x] Documented test coverage in `SRS_ZOOM.md`, `SRS_CARDS_SYSTEM.md`, and `SRS_MINIMAP.md`
-  - [x] Updated TESTS.md with comprehensive test status
+ - [x] Fixed 7 failing tests across 5 test files
+ - [x] 166/166 tests passing (152 running + 14 skipped = 100% pass rate)
+ - [x] Fixed DevPanel accessibility (aside role=dialog)
+ - [x] Fixed telemetry access in degradation tests
+ - [x] Skipped tests for unimplemented features (connectors, keyboard panning)
+ - [x] Documented test coverage in `SRS_ZOOM.md`, `SRS_CARDS_SYSTEM.md`, and `SRS_MINIMAP.md`
+ - [x] Updated TESTS.md with comprehensive test status
 
 **Bundle Analysis Results:**
 - JavaScript (gzipped): ~275 KB
@@ -626,25 +638,25 @@
 **Validation:** PRD clearly articulates the "GitHub for Timelines" vision and roadmap
 
 - [ ] Update PRD.md with collaborative platform vision
-  - [ ] Transform from "timeline visualization tool" to "collaborative documentation platform"
-  - [ ] Add "GitHub for Timelines" concept with fork/merge workflow
-  - [ ] Update goals to include user accounts, version control, and social features
-  - [ ] Revise non-goals to reflect platform ambitions
+ - [ ] Transform from "timeline visualization tool" to "collaborative documentation platform"
+ - [ ] Add "GitHub for Timelines" concept with fork/merge workflow
+ - [ ] Update goals to include user accounts, version control, and social features
+ - [ ] Revise non-goals to reflect platform ambitions
 - [ ] Add new user stories for collaborative features
-  - [ ] Timeline forking and attribution
-  - [ ] Version history and merge requests
-  - [ ] User profiles and discovery
-  - [ ] Social engagement and following
+ - [ ] Timeline forking and attribution
+ - [ ] Version history and merge requests
+ - [ ] User profiles and discovery
+ - [ ] Social engagement and following
 - [ ] Update technical requirements for backend integration
-  - [ ] Firebase Firestore for metadata and user management
-  - [ ] Cloud Storage for timeline content files
-  - [ ] Authentication and authorization systems
-  - [ ] API design for collaborative features
+ - [ ] Firebase Firestore for metadata and user management
+ - [ ] Cloud Storage for timeline content files
+ - [ ] Authentication and authorization systems
+ - [ ] API design for collaborative features
 - [ ] Define new success metrics for platform adoption
-  - [ ] User registration and retention rates
-  - [ ] Timeline creation and sharing metrics
-  - [ ] Fork and merge activity
-  - [ ] Community engagement indicators
+ - [ ] User registration and retention rates
+ - [ ] Timeline creation and sharing metrics
+ - [ ] Fork and merge activity
+ - [ ] Community engagement indicators
 
 **Validation Tests:**
 - [ ] PRD clearly explains the platform transformation from v0.4.x onwards
@@ -667,11 +679,11 @@ PowerTimeline evolves from a timeline visualization tool into a collaborative pl
 **Validation:** Timelines can be saved/loaded from internal git repositories with proper version history, and app is rebranded to PowerTimeline
 
 - [ ] **Rebrand PowerTimeline to PowerTimeline**
-  - [ ] Update package.json name from "powertimeline" to "powertimeline"
-  - [ ] Update HTML title and meta tags to "PowerTimeline"
-  - [ ] Update app header and branding throughout UI
-  - [ ] Update README.md with PowerTimeline name and description
-  - [ ] Update Firebase project configuration for PowerTimeline
+ - [ ] Update package.json name from "powertimeline" to "powertimeline"
+ - [ ] Update HTML title and meta tags to "PowerTimeline"
+ - [ ] Update app header and branding throughout UI
+ - [ ] Update README.md with PowerTimeline name and description
+ - [ ] Update Firebase project configuration for PowerTimeline
 - [ ] Set up internal Git repository management system (using NodeGit or simple-git)
 - [ ] Create timeline repository structure and storage directory (timelines/user/timeline-name)
 - [ ] Convert timeline data format from YAML to JSON for better AI integration
@@ -694,11 +706,11 @@ PowerTimeline evolves from a timeline visualization tool into a collaborative pl
 - [ ] App displays "PowerTimeline" branding throughout UI
 - [ ] Package.json reflects new "powertimeline" name
 - [ ] Firebase hosting works with PowerTimeline configuration
-- [ ] Create new timeline → generates new git repository
-- [ ] Save timeline changes → creates new git commit with proper message
-- [ ] Load timeline → retrieves latest version from git repository
-- [ ] View timeline history → shows git commit log with changes
-- [ ] JSON format → timeline data correctly serialized/deserialized
+- [ ] Create new timeline generates new git repository
+- [ ] Save timeline changes creates new git commit with proper message
+- [ ] Load timeline retrieves latest version from git repository
+- [ ] View timeline history shows git commit log with changes
+- [ ] JSON format timeline data correctly serialized/deserialized
 
 ### v0.4.1 - Demo Users System (Development Phase)
 **Goal:** Implement demo user system with 2-3 predefined users for development
@@ -728,9 +740,9 @@ PowerTimeline evolves from a timeline visualization tool into a collaborative pl
 - [ ] Add demo user guards for timeline editing functions
 
 **Validation Tests:**
-- [ ] Switch to Alice → can edit Alice's timelines, cannot edit Bob's
-- [ ] Switch to Bob → can edit Bob's timelines, cannot edit Alice's
-- [ ] Create timeline as Alice → repository created under Alice's namespace
+- [ ] Switch to Alice can edit Alice's timelines, cannot edit Bob's
+- [ ] Switch to Bob can edit Bob's timelines, cannot edit Alice's
+- [ ] Create timeline as Alice repository created under Alice's namespace
 - [ ] Timeline ownership correctly enforced across user switches
 
 ### v0.4.2 - Landing Page & Timeline Discovery

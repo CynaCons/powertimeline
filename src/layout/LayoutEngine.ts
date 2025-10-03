@@ -11,8 +11,6 @@
  * - Full cards: 4 cells footprint
  * - Compact cards: 2 cells footprint
  * - Title-only cards: 1 cell footprint
- * - Multi-event cards: 2 cells footprint (holds up to 5 events)
- * - Infinite cards: 2 cells footprint (overflow container)
  */
 
 import type { Event } from '../types';
@@ -53,24 +51,6 @@ export interface DispatchMetrics {
     avg: number;
   };
   horizontalSpaceUsage: number; // Percentage of viewport width utilized (0-100)
-}
-
-export interface AggregationMetrics {
-  totalAggregations: number;
-  eventsAggregated: number;
-  clustersAffected: number;
-}
-
-export interface InfiniteMetrics {
-  enabled: boolean;
-  containers: number;
-  eventsContained: number;
-  previewCount: number;
-  byCluster: Array<{
-    clusterId: string;
-    side: 'above' | 'below';
-    eventsContained: number;
-  }>;
 }
 
 export interface DegradationMetrics {
@@ -248,8 +228,6 @@ export class DeterministicLayoutV5 {
     const metrics = this.metricsCalculator.calculateMetrics(
       result,
       this.config,
-      this.degradationEngine.getAggregationMetrics(),
-      this.degradationEngine.getInfiniteMetrics(),
       this.degradationEngine.getDegradationMetrics(),
       adaptiveHalfColumnWidth,
       this.timeRange

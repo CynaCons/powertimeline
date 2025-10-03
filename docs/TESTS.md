@@ -121,7 +121,9 @@ This document tracks Playwright regression coverage for PowerTimeline and is upd
 
 ## Updating This Document
 
-Run the automated refresh script whenever you need to capture a new Playwright run:
+### Full Test Suite + Update (10-15 minutes)
+
+Run the automated refresh script to execute all tests and update this document:
 
 ```powershell
 npm run test:update-doc
@@ -129,6 +131,18 @@ npm run test:update-doc
 
 This command executes the v5 suite with the JSON reporter, regenerates the sections marked above, and leaves raw artifacts under `tmp/test-docs/`.
 It exits with the same status as Playwright, so expect a non-zero code while failures remain.
+
+**Note:** Running all 169 tests takes 10-15 minutes. The script will appear to hang but is actually running tests.
+
+### Quick Update from Existing Results (instant)
+
+If you just want to regenerate TESTS.md from the most recent test run without re-running all tests:
+
+```powershell
+node scripts/generate-test-doc.js --write-doc
+```
+
+This uses the cached results from `tmp/test-docs/test-results.json` and completes instantly.
 
 ## Version History
 

@@ -17,17 +17,6 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
     width: 260,
     height: 32
   },
-  'multi-event': {
-    type: 'multi-event',
-    width: 180,
-    height: 80,
-    maxEvents: 5
-  },
-  infinite: {
-    type: 'infinite',
-    width: 160,
-    height: 40
-  }
 };
 
 export function createLayoutConfig(

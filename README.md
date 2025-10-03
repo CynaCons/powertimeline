@@ -4,16 +4,16 @@ PowerTimeline is a React + TypeScript application for creating, exploring, and e
 
 ## Quick links
 
-- 📘 [Product Requirements (`PRD.md`)](./PRD.md)
-- 🧭 [Architecture overview (`ARCHITECTURE.md`)](./ARCHITECTURE.md)
-- ✅ [Software requirements & traceability (`docs/SRS.md`)](./docs/SRS.md)
-- 🗺️ [Project plan & iteration history (`PLAN.md`)](./PLAN.md)
-- 🧪 [Playwright test suite (`tests/`)](./tests)
+- [Product Requirements (`PRD.md`)](./PRD.md)
+- [Architecture overview (`ARCHITECTURE.md`)](./ARCHITECTURE.md)
+- [Software requirements & traceability (`docs/SRS.md`)](./docs/SRS.md)
+- [Project plan & iteration history (`PLAN.md`)](./PLAN.md)
+- [Playwright test suite (`tests/`)](./tests)
 
 ## Features at a glance
 
 - Deterministic half-column layout that prevents card overlap across zoom levels.
-- Multi-level degradation (full ➜ compact ➜ title-only ➜ aggregated) with telemetry.
+- Multi-level card degradation (full -> compact -> title-only) with telemetry.
 - Cursor-anchored zooming, drag-to-zoom selection, and minimap navigation.
 - Authoring overlay with calendar/time pickers and live validation.
 - YAML import/export pipeline for sharing and seeding timelines.
@@ -87,14 +87,14 @@ Tips:
 
 ```
 src/
-	app/            # Panels, overlays, hooks, and shell components
-	components/     # Reusable UI elements (axis, minimap, tooltips, etc.)
-	layout/         # Deterministic layout engine, config, and card rendering
-	lib/            # Storage, Firebase, seeding utilities, helpers
-	timeline/       # Timeline axis, markers, SVG defs, and hooks
-	utils/          # Shared utilities (time helpers, telemetry, easing)
-docs/             # Product docs, PRD, SRS, architecture notes
-tests/            # Playwright regression suite (v5 scenarios)
+	app/ # Panels, overlays, hooks, and shell components
+	components/ # Reusable UI elements (axis, minimap, tooltips, etc.)
+	layout/ # Deterministic layout engine, config, and card rendering
+	lib/ # Storage, Firebase, seeding utilities, helpers
+	timeline/ # Timeline axis, markers, SVG defs, and hooks
+	utils/ # Shared utilities (time helpers, telemetry, easing)
+docs/ # Product docs, PRD, SRS, architecture notes
+tests/ # Playwright regression suite (v5 scenarios)
 ```
 
 Refer to `ARCHITECTURE.md` for a deeper dive into the half-column system and degradation math.
@@ -115,9 +115,9 @@ For roadmap context, see the v0.3.x tasks in `PLAN.md` along with the future pla
 
 ## Troubleshooting
 
-- **Playwright cannot launch** – run `npx playwright install` to ensure browsers are downloaded.
-- **Firebase analytics errors** – double-check `.env.local` values or temporarily disable analytics initialization.
-- **Layout regressions** – load seeded datasets and run the relevant v5 Playwright spec (see `tests/v5/`).
+- **Playwright cannot launch** run `npx playwright install` to ensure browsers are downloaded.
+- **Firebase analytics errors** double-check `.env.local` values or temporarily disable analytics initialization.
+- **Layout regressions** load seeded datasets and run the relevant v5 Playwright spec (see `tests/v5/`).
 
 Have questions? Open an issue with reproduction steps and mention the affected requirement IDs if available.
 

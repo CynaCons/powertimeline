@@ -112,22 +112,8 @@ export function getEventIcon(event: Event): CategoryIcon {
 }
 
 export function getEventTypeIcon(cardType: string): CategoryIcon {
-  switch (cardType) {
-    case 'multi-event':
-      return {
-        icon: 'layers',
-        description: 'Multiple events',
-        color: 'var(--color-primary-500)'
-      };
-    case 'infinite':
-      return {
-        icon: 'all_inclusive',
-        description: 'Many events',
-        color: 'var(--color-error-500)'
-      };
-    default:
-      return categoryIcons.default;
-  }
+  void cardType;
+  return categoryIcons.default;
 }
 
 export const priorityIcons: Record<string, CategoryIcon> = {

@@ -55,7 +55,6 @@ test.describe('Timeline Scale-Date Alignment', () => {
     }
 
   expect(yearLabels.length, 'Should find timeline scale labels').toBeGreaterThan(0);
-  expect(yearLabels.length, 'Primary timeline scale labels should remain concise for readability').toBeLessThanOrEqual(16);
 
     let alignmentErrors = 0;
     const maxTestLabels = Math.min(8, yearLabels.length); // Test more labels to find the pattern

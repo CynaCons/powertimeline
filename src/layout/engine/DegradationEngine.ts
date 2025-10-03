@@ -3,14 +3,14 @@
  *
  * Handles the intelligent card type selection and degradation based on:
  * - Event density and space constraints
- * - Card type capacity (full → compact → title-only → multi-event)
+ * - Card type capacity (full -> compact -> title-only)
  * - Degradation metrics and telemetry tracking
  * - Individual card creation with proper positioning
  */
 
 import type { Event } from '../../types';
 import type { LayoutConfig, PositionedCard, CardType } from '../types';
-import type { ColumnGroup, DegradationMetrics, AggregationMetrics, InfiniteMetrics } from '../LayoutEngine';
+import type { ColumnGroup, DegradationMetrics } from '../LayoutEngine';
 
 export class DegradationEngine {
   private config: LayoutConfig;
@@ -26,20 +26,6 @@ export class DegradationEngine {
     degradationTriggers: []
   };
 
-  private aggregationMetrics: AggregationMetrics = {
-    totalAggregations: 0,
-    eventsAggregated: 0,
-    clustersAffected: 0
-  };
-
-  private infiniteMetrics: InfiniteMetrics = {
-    enabled: false,
-    containers: 0,
-    eventsContained: 0,
-    previewCount: 0,
-    byCluster: []
-  };
-
   constructor(config: LayoutConfig) {
     this.config = config;
   }
@@ -52,29 +38,15 @@ export class DegradationEngine {
   }
 
   /**
-   * Get current aggregation metrics for telemetry
-   */
-  getAggregationMetrics(): AggregationMetrics {
-    return { ...this.aggregationMetrics };
-  }
-
-  /**
-   * Get current infinite metrics for telemetry
-   */
-  getInfiniteMetrics(): InfiniteMetrics {
-    return { ...this.infiniteMetrics };
-  }
-
-  /**
    * Apply degradation and promotion logic to column groups
-   * STAGE 1: Implement first level of degradation (full → compact)
+   * STAGE 1: Implement first level of degradation (full -> compact)
    */
   applyDegradationAndPromotion(groups: ColumnGroup[]): ColumnGroup[] {
     // Reset metrics for new layout calculation
     this.resetMetrics();
 
     for (const group of groups) {
-      // STAGE 1: Implement first level of degradation (full → compact)
+      // STAGE 1: Implement first level of degradation (full -> compact)
       const cardType = this.determineCardType(group);
       group.cards = this.createIndividualCards(group, [cardType]);
     }
@@ -86,20 +58,6 @@ export class DegradationEngine {
    * Reset all metrics for new calculation cycle
    */
   private resetMetrics(): void {
-    this.aggregationMetrics = {
-      totalAggregations: 0,
-      eventsAggregated: 0,
-      clustersAffected: 0
-    };
-
-    this.infiniteMetrics = {
-      enabled: false,
-      containers: 0,
-      eventsContained: 0,
-      previewCount: 0,
-      byCluster: []
-    };
-
     this.degradationMetrics = {
       totalGroups: 0,
       fullCardGroups: 0,
@@ -122,7 +80,7 @@ export class DegradationEngine {
     // Track metrics for telemetry
     this.degradationMetrics.totalGroups++;
 
-    // First level of degradation: full → compact
+    // First level of degradation: full -> compact
     // Based on architecture: Half-column with >2 events should use compact cards
     // Full cards: 2 slots per half-column (max 2 events)
     // Compact cards: 4 slots per half-column (max 4 events)
@@ -136,9 +94,9 @@ export class DegradationEngine {
       this.degradationMetrics.compactCardGroups++;
 
       // Calculate space saved by degradation
-      const fullCardHeight = this.config.cardConfigs.full.height; // 140px
-      const compactCardHeight = this.config.cardConfigs.compact.height; // 64px
-      const spaceSavedPerCard = fullCardHeight - compactCardHeight; // 76px per card
+      const fullCardHeight = this.config.cardConfigs.full.height;
+      const compactCardHeight = this.config.cardConfigs.compact.height;
+      const spaceSavedPerCard = fullCardHeight - compactCardHeight;
       const totalSpaceSaved = spaceSavedPerCard * eventCount;
 
       this.degradationMetrics.spaceReclaimed += totalSpaceSaved;
@@ -158,7 +116,6 @@ export class DegradationEngine {
       const compactH = this.config.cardConfigs.compact.height;
       const titleH = this.config.cardConfigs['title-only'].height;
       const spaceSavedPerCard = compactH - titleH;
-      // Title-only shows up to 4 visible; approximate savings vs compact for those visible
       const totalSpaceSaved = Math.max(0, spaceSavedPerCard * Math.min(eventCount, 4));
 
       this.degradationMetrics.spaceReclaimed += totalSpaceSaved;
@@ -185,10 +142,6 @@ export class DegradationEngine {
         return 4; // Compact cards: 4 slots per half-column
       case 'title-only':
         return 9; // Title-only cards: allow up to 9 per half-column in high density
-      case 'multi-event':
-        return 2; // Multi-event cards: 2 slots per half-column (like full cards)
-      case 'infinite':
-        return 2; // Infinite cards: 2 slots per half-column (like full cards)
       default:
         return 2; // Default to full card capacity
     }
@@ -220,14 +173,13 @@ export class DegradationEngine {
 
       cards.push({
         id: `${group.id}-${index}`,
-        event: [event],
+        event,
         x: 0,
         y: 0,
         width: cardConfig[cardType].width,
         height: cardConfig[cardType].height,
         cardType,
-        clusterId: group.id,
-        eventCount: 1
+        clusterId: group.id
       });
     });
 

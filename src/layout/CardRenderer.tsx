@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PositionedCard, CardType } from './types';
 import type { Event } from '../types';
-import { getEventIcon, getEventTypeIcon, getPriorityIcon } from './cardIcons';
+import { getEventIcon, getPriorityIcon } from './cardIcons';
 
 interface CardRendererProps {
   card: PositionedCard;
@@ -18,7 +18,7 @@ export function CardRenderer({
   onClick,
   onDoubleClick
 }: CardRendererProps) {
-  const event = Array.isArray(card.event) ? card.event[0] : card.event;
+  const event = card.event;
   const gradientClass = getGradientClass(card.cardType, event.category);
   const elevationClass = getElevationClass(card.cardType, isSelected, isHovered);
   const handleClick = (e: React.MouseEvent) => {
@@ -31,8 +31,8 @@ export function CardRenderer({
     onDoubleClick?.(card);
   };
 
-  // Get the event date for data attribute (handle both single event and multi-event cards)
-  const eventDate = Array.isArray(card.event) ? card.event[0]?.date : card.event.date;
+  // Get the event date for data attribute
+  const eventDate = card.event.date;
 
   return (
     <div
@@ -42,8 +42,6 @@ export function CardRenderer({
       data-card-type={card.cardType}
       data-cluster-id={card.clusterId}
       data-density={card.cardType}
-      data-multi={Array.isArray(card.event)}
-      data-summary={card.cardType === 'infinite'}
       className={`
         absolute cursor-pointer card-hover-scale card-enter
         ${getCardTypeStyles(card.cardType)}
@@ -116,10 +114,6 @@ function getCardTypeStyles(cardType: CardType): string {
       return `${baseStyles} border-primary p-3`;
     case 'title-only':
       return `${baseStyles} border-primary p-2`;
-    case 'multi-event':
-      return `${baseStyles} border-primary-200 p-3`;
-    case 'infinite':
-      return `${baseStyles} border-error-200 p-2`;
     default:
       return baseStyles;
   }
@@ -131,10 +125,6 @@ function getGradientClass(cardType: CardType, category?: string): string {
   }
 
   switch (cardType) {
-    case 'multi-event':
-      return 'card-gradient-multi-event';
-    case 'infinite':
-      return 'card-gradient-infinite';
     default:
       return 'card-gradient-default';
   }
@@ -145,10 +135,6 @@ function getElevationClass(cardType: CardType, isSelected: boolean, isHovered: b
   if (isHovered) return 'card-elevation-2';
 
   switch (cardType) {
-    case 'infinite':
-      return 'card-elevation-2';
-    case 'multi-event':
-      return 'card-elevation-1';
     default:
       return 'card-elevation-1';
   }
@@ -173,7 +159,7 @@ function generateConnectorPath(card: PositionedCard): string {
 }
 
 function renderCardContent(card: PositionedCard): React.ReactNode {
-  const event = Array.isArray(card.event) ? card.event[0] : card.event;
+  const event = card.event;
   
   switch (card.cardType) {
     case 'full':
@@ -182,10 +168,6 @@ function renderCardContent(card: PositionedCard): React.ReactNode {
       return <CompactCardContent event={event} />;
     case 'title-only':
       return <TitleOnlyCardContent event={event} />;
-    case 'multi-event':
-      return <MultiEventCardContent events={Array.isArray(card.event) ? card.event : [card.event]} />;
-    case 'infinite':
-      return <InfiniteCardContent count={card.eventCount || 0} />;
     default:
       return <FullCardContent event={event} />;
   }
@@ -276,64 +258,6 @@ function TitleOnlyCardContent({ event }: { event: Event }) {
       </div>
       <div className="card-date text-tertiary">
         {formatDate(event.date)}
-      </div>
-    </div>
-  );
-}
-
-function MultiEventCardContent({ events }: { events: Event[] }) {
-  const typeIcon = getEventTypeIcon('multi-event');
-
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-2">
-        <span className="card-title text-primary">
-          Multiple Events
-        </span>
-        <span
-          className="card-icon material-symbols-rounded"
-          style={{ color: typeIcon.color }}
-          title={typeIcon.description}
-        >
-          {typeIcon.icon}
-        </span>
-      </div>
-      <div className="flex-1 space-y-1">
-        {events.slice(0, 3).map((event) => (
-          <div key={event.id} className="card-description text-primary truncate">
-            • {event.title}
-          </div>
-        ))}
-        {events.length > 3 && (
-          <div className="card-description text-secondary italic">
-            +{events.length - 3} more
-          </div>
-        )}
-      </div>
-      <div className="card-date text-primary-700">
-        {events.length} events
-      </div>
-    </div>
-  );
-}
-
-function InfiniteCardContent({ count }: { count: number }) {
-  const typeIcon = getEventTypeIcon('infinite');
-
-  return (
-    <div className="h-full flex flex-col justify-center items-center">
-      <span
-        className="card-icon material-symbols-rounded mb-1"
-        style={{ color: typeIcon.color, fontSize: '1.25rem' }}
-        title={typeIcon.description}
-      >
-        {typeIcon.icon}
-      </span>
-      <div className="card-count text-error-700">
-        {count}
-      </div>
-      <div className="card-date text-error-700">
-        events
       </div>
     </div>
   );

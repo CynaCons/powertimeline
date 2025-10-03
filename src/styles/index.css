@@ -263,14 +263,6 @@
   background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-100) 100%);
 }
 
-.card-gradient-multi-event {
-  background: linear-gradient(135deg, var(--color-primary-50) 0%, color-mix(in srgb, var(--color-primary-100) 80%, var(--color-secondary-50)) 100%);
-}
-
-.card-gradient-infinite {
-  background: linear-gradient(135deg, var(--color-error-50) 0%, color-mix(in srgb, var(--color-error-100) 70%, var(--color-warning-50)) 100%);
-}
-
 /* Category-based Gradients */
 .card-gradient-meeting {
   background: linear-gradient(135deg, var(--color-secondary-50) 0%, var(--color-secondary-100) 100%);

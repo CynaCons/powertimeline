@@ -2,44 +2,44 @@
 
 ## Overview
 
-PowerTimeline renders a horizontal timeline with event cards positioned in independent half-column systems above and below the timeline. The system uses alternating placement (Event 1→above, Event 2→below) with spatial-based clustering and 2-slot half-columns to ensure optimal distribution and zero overlaps.
+PowerTimeline renders a horizontal timeline with event cards positioned in independent half-column systems above and below the timeline. The system uses alternating placement (Event 1 above, Event 2 below) with spatial-based clustering and 2-slot half-columns to ensure optimal distribution and zero overlaps.
 
 ## Where to find what
 
 - Architecture and planning
-  - `ARCHITECTURE.md` — Deterministic slot-based layout, degradation math, left-to-right clustering.
-  - `PLAN.md` — Phases, checklists, current work items and docs follow-ups.
-  - `PRD.md` — Product goals, user stories, success metrics.
-  - `COMPLETED.md` — Iteration history, decisions, and regressions fixed.
+ - `ARCHITECTURE.md` Deterministic slot-based layout, degradation math, left-to-right clustering.
+ - `PLAN.md` Phases, checklists, current work items and docs follow-ups.
+ - `PRD.md` Product goals, user stories, success metrics.
+ - `COMPLETED.md` Iteration history, decisions, and regressions fixed.
 
 - Core layout engine (deterministic + mathematical)
-  - `src/layout/clustering.ts` — Left-to-right event clustering algorithm.
-  - `src/layout/SlotGrid.ts` — Deterministic slot allocation and occupancy tracking.
-  - `src/layout/LayoutEngine.ts` — Deterministic layout engine (degradation + orchestration + telemetry).
-  - `src/layout/DeterministicLayoutComponent.tsx` — React renderer consuming the engine output.
-  - `src/layout/DegradationEngine.ts` — (legacy/disabled) prior math prototype.
-  - `src/layout/config.ts` / `src/layout/types.ts` — Card sizes/configs and types.
+ - `src/layout/clustering.ts` Left-to-right event clustering algorithm.
+ - `src/layout/SlotGrid.ts` Deterministic slot allocation and occupancy tracking.
+ - `src/layout/LayoutEngine.ts` Deterministic layout engine (degradation + orchestration + telemetry).
+ - `src/layout/DeterministicLayoutComponent.tsx` React renderer consuming the engine output.
+ - `src/layout/DegradationEngine.ts` (legacy/disabled) prior math prototype.
+ - `src/layout/config.ts` / `src/layout/types.ts` Card sizes/configs and types.
 
 - Timeline UI and visuals
-  - `src/components/Timeline.tsx` — Timeline composition and configs.
-  - `src/timeline/Axis.tsx`, `RangeBar.tsx`, `SvgDefs.tsx` — Axis, range, defs.
-  - `src/styles/tokens.css` — Theme tokens (colors, strokes, etc.).
+ - `src/components/Timeline.tsx` Timeline composition and configs.
+ - `src/timeline/Axis.tsx`, `RangeBar.tsx`, `SvgDefs.tsx` Axis, range, defs.
+ - `src/styles/tokens.css` Theme tokens (colors, strokes, etc.).
 
 - Overlays and panels
-  - `src/app/OverlayShell.tsx` — Overlay container and focus handling.
-  - `src/app/panels/*` — Editor/Outline/Dev panels (MUI-based).
+ - `src/app/OverlayShell.tsx` Overlay container and focus handling.
+ - `src/app/panels/*` Editor/Outline/Dev panels (MUI-based).
 
 - Utilities and libs
-  - `src/lib/time.ts`, `text.ts`, `storage.ts` — Time mapping, measurements, persistence.
-  - `src/lib/devSeed.ts` — Seeding helpers and test datasets.
+ - `src/lib/time.ts`, `text.ts`, `storage.ts` Time mapping, measurements, persistence.
+ - `src/lib/devSeed.ts` Seeding helpers and test datasets.
 
 - Tests
-  - `tests/*.spec.ts` — Playwright suite (layout, axis, a11y, density, performance).
+ - `tests/*.spec.ts` Playwright suite (layout, axis, a11y, density, performance).
 
 ## Core Principles
 
 1. **Independent half-column systems**: Above and below timeline sections operate independently with no cross-communication
-2. **Alternating placement**: Events placed chronologically alternating above/below (Event 1→above, Event 2→below, Event 3→above, ...)
+2. **Alternating placement**: Events placed chronologically alternating above/below (Event 1 above, Event 2 below, Event 3 above, ...)
 3. **Spatial-based clustering**: Half-columns created based on horizontal overlap detection only (no artificial event count limits)
 4. **2-slot half-columns**: Each half-column contains exactly 2 slots for full cards
 5. **Temporal anchor centering**: Timeline anchors positioned at center of half-column events
@@ -51,50 +51,42 @@ PowerTimeline renders a horizontal timeline with event cards positioned in indep
 - **Slots**: 2 above + 2 below = **4 total slots**
 - **Use**: Default for sparse datasets
 
-### 2. Compact Cards  
+### 2. Compact Cards 
 - **Content**: Title + partial description + date
 - **Slots**: 4 above + 4 below = **8 total slots**
 - **Size**: Roughly half the vertical size of full cards
 - **Use**: First degradation level
-- **Conversion**: 1 Full → 2 Compact cards
+- **Conversion**: 1 Full 2 Compact cards
 
 ### 3. Title-Only Cards
 - **Content**: Title + date only
 - **Slots**: 4 above + 4 below = **8 total slots**
 - **Size**: Vertically smaller than compact cards
 - **Use**: Second degradation level
-- **Conversion**: 1 Full → 4 Title-only cards
+- **Conversion**: 1 Full 4 Title-only cards
 
-### 4. Multi-Event Cards
-- **Content**: Multiple event titles + dates with separators (max 5 events per card)
-- **Slots**: 2 above + 2 below = **4 total slots** (same as full cards)
-- **Size**: Same physical size as full cards, but content is multiple events
-- **Use**: Final degradation level
-- **Conversion**: 1 Full → 5 Multi-event entries (in one card)
-- **Layout**: 10 events total = 10 above + 10 below (2 full card slots × 5 events each)
 
-## Left-to-Right Clustering Algorithm
 
 ### Step 1: Chronological Processing
 ```
 Events: [E1: Jan 1] [E2: Jan 5] [E3: Jan 15] [E4: Jan 17] [E5: Feb 1]
-Process order: E1 → E2 → E3 → E4 → E5
+Process order: E1 E2 E3 E4 E5
 ```
 
 ### Step 2: Column Creation & Grouping
 ```
 1. Start with E1 (Jan 1)
-   - Create Column A with 4 slots (2 above, 2 below)
-   - Check horizontal space coverage
+ - Create Column A with 4 slots (2 above, 2 below)
+ - Check horizontal space coverage
 
 2. Process E2 (Jan 5)
-   - Does E2 fall within Column A's horizontal space? 
-   - If YES: Add E2 to Column A's event group
-   - If NO: Create new Column B
+ - Does E2 fall within Column A's horizontal space? 
+ - If YES: Add E2 to Column A's event group
+ - If NO: Create new Column B
 
 3. Continue for all events
-   - Each column groups events within its horizontal footprint
-   - Anchors positioned at center of grouped events
+ - Each column groups events within its horizontal footprint
+ - Anchors positioned at center of grouped events
 ```
 
 ### Step 3: Anchor Positioning
@@ -103,66 +95,57 @@ Column A events: [E1: Jan 1, E2: Jan 5, E3: Jan 15]
 Anchor position: Center of time span = Jan 8 (midpoint)
 
 Timeline:
-    Jan 1    Jan 8    Jan 15    Feb 1
-      ●────────●────────●────────●
-    E1,E2,E3    ↑     E4       E5
-              Anchor A
+ Jan 1 Jan 8 Jan 15 Feb 1
+ 
+ E1,E2,E3 E4 E5
+ Anchor A
 ```
 
 ## Deterministic Degradation Mathematics
 
-### Slot Capacity Formula
+### Slot Capacity Guidelines
+
 ```
-Full cards:       4 slots  →  1 event  per 4 slots
-Compact cards:    4 slots  →  2 events per 4 slots  
-Title-only cards: 8 slots  →  4 events per 8 slots
-Multi-event cards:10 slots →  5 events per 10 slots
+Full cards: 4 slots -> dense narrative, up to two events per half-column
+Compact cards: 4 slots -> trimmed copy, up to four events per half-column
+Title-only cards: 8 slots -> headlines only, up to eight events per half-column
 ```
 
 ### Degradation Decision Tree
-```
-For N events in a column group:
 
-IF N ≤ 1:  Use 1 Full card (4 slots)
-IF N ≤ 2:  Use 2 Compact cards (4 slots total)
-IF N ≤ 4:  Use 4 Title-only cards (8 slots total)  
-IF N ≤ 5:  Use 1 Multi-event card (10 slots total)
-IF N > 5:  Use multiple Multi-event cards as needed
+```
+For N events in a half-column:
+
+IF N <= 2: keep full cards
+IF N <= 4: switch to compact cards
+IF N > 4: degrade to title-only cards
 ```
 
-### Example: 7 Events in One Column
-```
-7 events need accommodation:
-- Option 1: 1 Multi-event card (5 events) + 1 Compact card (2 events) = 15 slots
-- Option 2: 1 Multi-event card (5 events) + 2 Title-only cards (2 events) = 18 slots
-- Choose Option 1 (minimum slots = optimal)
-
-Result: 2 cards total, 15 slots used
-```
+The engine promotes or demotes card types deterministically so every layout pass produces the same result for matching input.
 
 ## Layout Positioning System
 
 ### Half-Column Structure
 ```
-   Above Half-Columns (Independent):
-   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-   │ Slot 1 (E1) │      │ Slot 1 (E3) │      │ Slot 1 (E5) │  
-   ├─────────────┤      ├─────────────┤      ├─────────────┤
-   │ Slot 2      │      │ Slot 2      │      │ Slot 2      │  
-   └─────────────┘      └─────────────┘      └─────────────┘
-───●─────────────●──────●─────────────●──────●─────────────●─── ← Timeline
-   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-   │ Slot 1 (E2) │      │ Slot 1 (E4) │      │ Slot 1      │  
-   ├─────────────┤      ├─────────────┤      ├─────────────┤
-   │ Slot 2      │      │ Slot 2      │      │ Slot 2      │  
-   └─────────────┘      └─────────────┘      └─────────────┘
-   Below Half-Columns (Independent):
+ Above Half-Columns (Independent):
+ 
+ Slot 1 (E1) Slot 1 (E3) Slot 1 (E5) 
+ 
+ Slot 2 Slot 2 Slot 2 
+ 
+ Timeline
+ 
+ Slot 1 (E2) Slot 1 (E4) Slot 1 
+ 
+ Slot 2 Slot 2 Slot 2 
+ 
+ Below Half-Columns (Independent):
 
-   Half-Column A1       Half-Column A2       Half-Column A3
-   (Above)              (Above)              (Above)
-   
-   Half-Column B1       Half-Column B2       Half-Column B3  
-   (Below)              (Below)              (Below)
+ Half-Column A1 Half-Column A2 Half-Column A3
+ (Above) (Above) (Above)
+ 
+ Half-Column B1 Half-Column B2 Half-Column B3 
+ (Below) (Below) (Below)
 ```
 
 **Key Changes from Full Columns:**
@@ -176,20 +159,20 @@ Result: 2 cards total, 15 slots used
 **User-Specified Algorithm:**
 1. **Chronological Processing**: Sort all events by date (oldest to newest)
 2. **Alternating Placement**: Process events in order, alternating placement:
-   - Event 1 → Above timeline (Above Half-Column System)  
-   - Event 2 → Below timeline (Below Half-Column System)
-   - Event 3 → Above timeline (Above Half-Column System)
-   - Event 4 → Below timeline (Below Half-Column System)
-   - Continue pattern...
+ - Event 1 Above timeline (Above Half-Column System) 
+ - Event 2 Below timeline (Below Half-Column System)
+ - Event 3 Above timeline (Above Half-Column System)
+ - Event 4 Below timeline (Below Half-Column System)
+ - Continue pattern...
 
 3. **Independent Half-Column Creation**: Within each system (above/below):
-   - Start with leftmost event in that system
-   - Create first half-column with 2 slots
-   - For next event in same system:
-     - Check if event falls within horizontal space of existing half-columns
-     - If YES: Add to existing half-column (if slots available)
-     - If NO: Create new half-column
-   - Half-columns are created based on **spatial overlap only** (no artificial event count limits)
+ - Start with leftmost event in that system
+ - Create first half-column with 2 slots
+ - For next event in same system:
+ - Check if event falls within horizontal space of existing half-columns
+ - If YES: Add to existing half-column (if slots available)
+ - If NO: Create new half-column
+ - Half-columns are created based on **spatial overlap only** (no artificial event count limits)
 
 4. **Temporal Anchor Positioning**: Each half-column's anchor positioned at center of its events' date range
 
@@ -198,25 +181,25 @@ Result: 2 cards total, 15 slots used
 Input Events (chronological): E1(Jan 1), E2(Jan 3), E3(Jan 10), E4(Jan 12), E5(Jan 20), E6(Jan 25)
 
 Step 1: Alternating Placement
-- E1(Jan 1) → Above System
-- E2(Jan 3) → Below System  
-- E3(Jan 10) → Above System
-- E4(Jan 12) → Below System
-- E5(Jan 20) → Above System
-- E6(Jan 25) → Below System
+- E1(Jan 1) Above System
+- E2(Jan 3) Below System 
+- E3(Jan 10) Above System
+- E4(Jan 12) Below System
+- E5(Jan 20) Above System
+- E6(Jan 25) Below System
 
 Step 2: Above System Half-Column Creation
 - E1(Jan 1): Create Above Half-Column A1
 - E3(Jan 10): Check horizontal overlap with A1
-  - If overlaps: Add to A1 (slots: E1, E3)
-  - If no overlap: Create Above Half-Column A2
+ - If overlaps: Add to A1 (slots: E1, E3)
+ - If no overlap: Create Above Half-Column A2
 - E5(Jan 20): Check overlap with existing above half-columns...
 
 Step 3: Below System Half-Column Creation (Independent)
 - E2(Jan 3): Create Below Half-Column B1
 - E4(Jan 12): Check horizontal overlap with B1
-  - If overlaps: Add to B1 (slots: E2, E4)  
-  - If no overlap: Create Below Half-Column B2
+ - If overlaps: Add to B1 (slots: E2, E4) 
+ - If no overlap: Create Below Half-Column B2
 - E6(Jan 25): Check overlap with existing below half-columns...
 ```
 
@@ -248,90 +231,78 @@ Anchor X = (E1.date + E3.date) / 2 (temporal center)
 - **Organic Growth**: Half-columns grow based on timeline space, not event counts
 - **Independent Per Side**: Above and below clustering operates completely separately
 
-### 4. Optimal Space Usage  
+### 4. Optimal Space Usage 
 - **2-slot half-columns**: Each half-column accommodates exactly 2 full cards
 - **Temporal distribution**: Events spread across full timeline width (>50% coverage expected)
 - **Balanced utilization**: Independent above/below systems optimize space separately
 
-## Phase 0: Core Implementation ✅ (COMPLETED - 2025-08-19)
+## Phase 0: Core Implementation (COMPLETED - 2025-08-19)
 
-### 0.1 Terminology & Capacity Model ✅
+### 0.1 Terminology & Capacity Model 
 - **Cell**: Base grid unit for capacity accounting (smallest unit of space)
 - **Footprint**: Number of cells consumed by a placed card
 - **Placements**: Available candidate positions per column group 
 - **Utilization**: Percentage of total cells that are occupied
-- **Capacity Formula**: totalCells = placementsPerSide × 2 (above + below)
+- **Capacity Formula**: totalCells = placementsPerSide 2 (above + below)
 
-### 0.2 Distribution & Column Grouping (Dispatch) ✅
-- Density-adaptive dispatch with target 4–6 events per cluster
+### 0.2 Distribution & Column Grouping (Dispatch) 
+- Density-adaptive dispatch with target 4 6 events per cluster
 - Proximity merge rule: merge groups when inter-group gap < 80px
 - Temporal positioning using actual event dates for horizontal spread
 - Telemetry: groupCount, groupPitchPx, avgEventsPerCluster, largestCluster
 
-### 0.3 Fit Algorithm Contract ✅
+### 0.3 Fit Algorithm Contract 
 - Deterministic assignment using ordered placements
 - Zero-overlap guarantee via capacity allocation tracking
 - Stable sorting with deterministic tie-breakers (ID, title)
 - Priority scoring for consistent placement decisions
 
-### 0.4 Degradation AND Promotion ✅
-- **Corrected Cascade**: Full(4)→Compact(2)→Title-only(1)→Multi-event(4) cells
-- **1→2→4→5 Mathematics**: 1 Full = 2 Compact = 4 Title-only = 5 Multi-event entries  
+### 0.4 Degradation AND Promotion
+- **Card Cascade**: Full(4) → Compact(2) → Title-only(1) cells
+- **Conversion Mathematics**: 1 Full = 2 Compact = 4 Title-only cards
 - Promotion pass when utilization < 40% (configurable threshold)
 - Telemetry: degradedCountByType, promotedCountByType
+- **Overflow handling**: When events exceed capacity, "+N" overflow badges are displayed
 
-### 0.5 Multi-Event Aggregation Policy ✅
-- Triggers when cluster size > threshold AND promotion budget exhausted
-- Never aggregates singleton events (maintains 1:1 visibility)
-- Multi-event cards contain up to 5 events with "+N" overflow indicators
-- Telemetry: {totalAggregations, eventsAggregated, clustersAffected}
-
-### 0.5.1 Infinite Event Card (Overflow Container) ✅
-- **Purpose**: Deterministic overflow when residual events exceed multi-event budget
-- **Footprint**: Fixed 4 cells, one per side per cluster (above/below independently)
-- **Content**: Preview top 5 events chronologically with "+N more" indicator
-- **Determinism**: Stable chronological ordering, predictable triggers
-- **Telemetry**: {enabled, containers, eventsContained, previewCount, byCluster}
-
-### 0.6 Stability & Churn Minimization ✅
-- Stable sorting with deterministic tie-breakers (date → ID → title)
+### 0.5 Stability & Churn Minimization 
+- Stable sorting with deterministic tie-breakers (date ID title)
 - Priority scoring based on event characteristics (duration, recency)
 - Minimal boundary shifts (50px threshold for group repositioning)
 - Local re-fit strategy to prevent cross-group migrations
 
-### 0.7 Telemetry & Tests ✅
-- Complete JSON telemetry: dispatch, capacity, aggregation, infinite metrics
-- Full v5 test suite (01–09) with telemetry assertions
+### 0.6 Telemetry & Tests
+- Complete JSON telemetry: dispatch, capacity, degradation metrics
+- Full v5 test suite (01-09) with telemetry assertions
 - Stable selectors: data-testid="event-card" with data-event-id, data-card-type
 - Screenshot-based visual regression testing
 
-### 0.8 Overlay/UX Updates ✅
+### 0.7 Overlay/UX Updates
 - Split capacity panels: Footprint (cells) vs Placements (candidates)
-- Real-time counters for promotions and aggregations applied
+- Real-time counters for promotions and degradations applied
 - Group pitch metrics (target vs actual events/cluster)
 - Utilization percentage display with thresholds
 
 ## Implementation Phases (Previous Architecture)
 
-### Phase 1: Left-to-Right Clustering ✓
+### Phase 1: Left-to-Right Clustering 
 - [x] Chronological event processing
-- [x] Horizontal overlap detection  
+- [x] Horizontal overlap detection 
 - [x] Column group formation
 - [x] Anchor centering mathematics
 
-### Phase 2: Deterministic Slot Allocation ✓  
+### Phase 2: Deterministic Slot Allocation 
 - [x] Fixed slot counts per card type (4/2/1/4 cells)
 - [x] Slot occupancy tracking
 - [x] Zero-overlap guarantees
 
-### Phase 3: Mathematical Degradation ✓
-- [x] 1→2→4→5 conversion mathematics
+### Phase 3: Mathematical Degradation 
+- [x] 1 2 4 5 conversion mathematics
 - [x] Optimal slot usage algorithm
-- [x] Multi-event and infinite card implementation
+- [x] Full, compact, and title-only card implementation
 
-### Phase 4: Testing & Validation ✓
+### Phase 4: Testing & Validation 
 - [x] Slot occupancy verification
-- [x] Overlap detection tests  
+- [x] Overlap detection tests 
 - [x] Mathematical correctness tests
 - [x] Visual regression screenshots
 
@@ -340,7 +311,7 @@ Anchor X = (E1.date + E3.date) / 2 (temporal center)
 ### Core Concept Quote
 **"Full cards should have 2 slots above and below. Compact cards should have 4 slots. Only-Title should have 8 event slots above and below. Multi-Event should have 10 slots above and below."**
 
-**"Basically a full card can be split in 2 compact or 4 only title or 5 multi-events (5 events in one single card, with separators)."**
+**"A full card can be split into compact or title-only presentations to absorb more density."**
 
 ### Left-to-Right Clustering Strategy (User's Description)
 
@@ -363,19 +334,19 @@ Process Flow:
 
 ```
 Detailed Algorithm:
-1. Take first event E1 → Create Column A
-   - Column A occupies horizontal space [X1, X1 + column_width]
-   - Column A has slots above and below timeline
+1. Take first event E1 Create Column A
+ - Column A occupies horizontal space [X1, X1 + column_width]
+ - Column A has slots above and below timeline
 
 2. Take next event E2
-   - Check: Does E2.x fall within [X1, X1 + column_width]?
-   - If YES: Add E2 to Column A's event group
-   - If NO: Create Column B starting at E2.x
+ - Check: Does E2.x fall within [X1, X1 + column_width]?
+ - If YES: Add E2 to Column A's event group
+ - If NO: Create Column B starting at E2.x
 
 3. Continue for remaining events
-   - For each event, check ALL existing columns
-   - Add to first column where event falls within horizontal space
-   - If no match, create new column
+ - For each event, check ALL existing columns
+ - Add to first column where event falls within horizontal space
+ - If no match, create new column
 ```
 
 #### Anchor Centering Requirement (User's Specification)
@@ -391,26 +362,24 @@ Anchor Positioning Logic:
 
 ### Deterministic Slot System (User's Design)
 
-#### Slot Allocation Rules (Corrected User's Numbers)
+#### Slot Allocation Rules
 ```
-Full Cards:      2 above + 2 below = 4 total slots
-Compact Cards:   4 above + 4 below = 8 total slots (half height of full cards)
-Title-Only:     4 above + 4 below = 8 total slots (smaller than compact)
-Multi-Event:     2 above + 2 below = 4 total slots (full card size, multi content)
-                 → Effective capacity: 10 above + 10 below = 20 events total
+Full Cards: 2 above + 2 below = 4 total slots
+Compact Cards: 4 above + 4 below = 8 total slots (half height of full cards)
+Title-Only: 4 above + 4 below = 8 total slots (smaller than compact)
 ```
 
-#### Mathematical Degradation (User's Formula)
-**"Basically a full card can be split in 2 compact or 4 only title or 5 multi-events"**
+#### Mathematical Degradation
+**Title-only cards are the densest representation; overflow badges display remaining events.**
 
 ```
-Splitting Relationship:
-1 Full Card = 2 Compact Cards = 4 Title-Only Cards = 5 Multi-Event entries
+Degradation Cascade:
+1 Full Card = 2 Compact Cards = 4 Title-Only Cards
 
 This means:
 - When 1 Full card can't fit → create 2 Compact cards
-- When 2 Compact cards can't fit → create 4 Title-only cards  
-- When 4 Title-only cards can't fit → create 1 Multi-event card (5 events)
+- When 2 Compact cards can't fit → create 4 Title-only cards
+- When events exceed title-only capacity → display "+N" overflow badges
 ```
 
 ### Zero Overlaps Guarantee (User's Logic)
@@ -444,31 +413,31 @@ Simplification Benefits:
 #### Single Column Layout
 ```
 Column A (4 events example):
-   ┌─────────────┐
-   │ Event 1     │  ← Slot 1 above
-   ├─────────────┤
-   │ Event 2     │  ← Slot 2 above  
-   ├─────────────┤
-───●─────────────●─── ← Timeline + Centered Anchor
-   │ Event 3     │  ← Slot 1 below
-   ├─────────────┤
-   │ Event 4     │  ← Slot 2 below
-   └─────────────┘
+ 
+ Event 1 Slot 1 above
+ 
+ Event 2 Slot 2 above 
+ 
+ Timeline + Centered Anchor
+ Event 3 Slot 1 below
+ 
+ Event 4 Slot 2 below
+ 
 
 Anchor positioned at temporal center of [Event1, Event2, Event3, Event4]
 ```
 
 #### Multi-Column Layout
 ```
-Column A          Column B          Column C
-┌─────────┐      ┌─────────┐      ┌─────────┐
-│ E1      │      │ E4      │      │ E7      │
-├─────────┤      ├─────────┤      ├─────────┤
-│ E2      │      │ E5      │      │ E8      │
-├─────────┤      ├─────────┤      ├─────────┤
-●─────────●──────●─────────●──────●─────────●
-│ E3      │      │ E6      │      │         │
-└─────────┘      └─────────┘      └─────────┘
+Column A Column B Column C
+ 
+ E1 E4 E7 
+ 
+ E2 E5 E8 
+ 
+ 
+ E3 E6 
+ 
 
 Each anchor centered below its column's temporal span
 ```
@@ -538,10 +507,10 @@ Process Order (Critical):
 ### Unit Tests
 - **Clustering**: Verify left-to-right grouping logic matches user specification
 - **Slot allocation**: Confirm exact 2/4/8/10 slot assignments
-- **Degradation math**: Test precise 1→2→4→5 conversions  
+- **Degradation math**: Test precise 1 2 4 5 conversions 
 - **Anchor positioning**: Validate temporal centering calculations
 
-### Integration Tests  
+### Integration Tests 
 - **Zero overlaps**: Comprehensive overlap detection per user requirement
 - **Space utilization**: Optimal slot usage verification
 - **Edge cases**: Single events, dense clusters, empty timeline
@@ -556,10 +525,10 @@ Process Order (Critical):
 ### View Window Management
 The zoom system uses a normalized coordinate system where:
 - **0.0** = Timeline start (earliest event date)
-- **1.0** = Timeline end (latest event date)  
+- **1.0** = Timeline end (latest event date) 
 - **viewStart/viewEnd** = Current visible window within [0, 1] range
 
-### Mouse Wheel Zoom  
+### Mouse Wheel Zoom 
 - **No Ctrl key required** - Direct wheel events trigger zoom
 - **Cursor-anchored** - Events under cursor stay stable during zoom
 - **Boundary-aware** - Prevents zoom beyond timeline limits
@@ -570,13 +539,13 @@ A horizontal timeline overview positioned above the main timeline to provide zoo
 
 #### Minimap Design
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ [1769] ████▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ [1821] │ ← Timeline overview
-│        ├──────────┤                                       │ ← Current view window  
-│        │          │                                       │   (highlighted section)
-│        │          │                                       │
-│        └─ Event density markers                           │
-└─────────────────────────────────────────────────────────────┘
+ 
+ [1769] [1821] Timeline overview
+ Current view window 
+ (highlighted section)
+ 
+ Event density markers 
+ 
 ```
 
 #### Minimap Features
@@ -584,22 +553,22 @@ A horizontal timeline overview positioned above the main timeline to provide zoo
 - **View window indicator** - Highlighted section showing current zoom area
 - **Event density visualization** - Dots/bars indicating where events exist
 - **Click-to-navigate** - Click anywhere to instantly jump to that timeline area
-- **Zoom level indicator** - Visual proportion of current view vs full timeline  
+- **Zoom level indicator** - Visual proportion of current view vs full timeline 
 - **Responsive design** - Adapts to viewport width and timeline range
 
 #### Implementation Structure
 ```
 TimelineMinimap Component:
-├── MinimapContainer (horizontal bar)
-├── MinimapBackground (full timeline range)
-├── MinimapViewWindow (current zoom area)  
-├── MinimapEventMarkers (density indicators)
-├── MinimapClickHandler (navigation)
-└── MinimapLabels (start/end dates)
+ MinimapContainer (horizontal bar)
+ MinimapBackground (full timeline range)
+ MinimapViewWindow (current zoom area) 
+ MinimapEventMarkers (density indicators)
+ MinimapClickHandler (navigation)
+ MinimapLabels (start/end dates)
 ```
 
 #### Navigation Behavior
-- **Click positioning** - Click at X% on minimap → zoom to that temporal position
+- **Click positioning** - Click at X% on minimap zoom to that temporal position
 - **Drag view window** - Drag highlighted area to pan timeline
 - **Proportional zoom** - Visual feedback of zoom level (window size vs full bar)
 - **Smooth transitions** - Animated navigation between timeline sections

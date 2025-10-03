@@ -13,8 +13,6 @@ All card types share a universal width for visual consistency:
 | **Full** | 260px | 169px | Title (multi-line) + Full description + Date |
 | **Compact** | 260px | 92px | Title (2 lines) + Partial description (1 line) + Date |
 | **Title-only** | 260px | 32px | Title + Date only |
-| **Multi-event** | 180px | 80px | Multiple event summaries (max 5 events) |
-| **Infinite** | 160px | 40px | Overflow container preview |
 
 **Source**: `src/layout/config.ts` - `DEFAULT_CARD_CONFIGS`
 
@@ -165,10 +163,10 @@ The slot system provides deterministic capacity guarantees:
 | **Full** | 2 | Base capacity |
 | **Compact** | 4 | 2× full card slots |
 | **Title-only** | 9 | High-density capacity |
-| **Multi-event** | 2 | Same as full (holds 5 events) |
-| **Infinite** | 2 | Same as full (overflow container) |
 
-**Implementation**: `src/layout/engine/DegradationEngine.ts` - `getMaxCardsPerHalfColumn()`
+**Implementation**: `src/layout/engine/DegradationEngine.ts` - `determineCardType()`
+
+**Note**: When events exceed title-only capacity, overflow badges ("+N") are displayed instead of creating additional card types.
 
 ### 3.2 Slot Occupancy Tracking
 

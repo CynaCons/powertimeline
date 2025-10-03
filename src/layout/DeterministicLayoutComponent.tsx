@@ -18,7 +18,7 @@ interface WindowWithTelemetry extends Window {
   __ccTelemetry?: TelemetryData;
 }
 import { createLayoutConfig } from './config';
-import { DeterministicLayoutV5, type DispatchMetrics, type AggregationMetrics } from './LayoutEngine';
+import { DeterministicLayoutV5, type DispatchMetrics } from './LayoutEngine';
 import { useAxisTicks, type Tick } from '../timeline/hooks/useAxisTicks';
 import { EnhancedTimelineAxis } from '../components/EnhancedTimelineAxis';
 import { getEventTimestamp, formatEventDateTime } from '../lib/time';
@@ -55,7 +55,6 @@ export function DeterministicLayoutComponent({
   // Container ref for proper sizing
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
-  const [showColumnBorders, setShowColumnBorders] = useState(false);
 
   // State for anchor-card pair highlighting
   const [hoveredPairEventId, setHoveredPairEventId] = useState<string | null>(null);
@@ -374,11 +373,10 @@ export function DeterministicLayoutComponent({
 
     // Use telemetry from layout engine if available, fallback to manual calculation
     const engineMetrics = layoutResult.telemetryMetrics;
-    let dispatchMetrics: DispatchMetrics | undefined, aggregationMetrics: AggregationMetrics | undefined;
-    
+    let dispatchMetrics: DispatchMetrics | undefined;
+
     if (engineMetrics) {
       dispatchMetrics = engineMetrics.dispatch;
-      aggregationMetrics = engineMetrics.aggregation;
     } else {
       // Fallback: calculate manually if engine metrics not available
       const groupsCount = clusters.length;
@@ -398,7 +396,6 @@ export function DeterministicLayoutComponent({
         },
         horizontalSpaceUsage: 0 // Placeholder
       };
-      aggregationMetrics = { totalAggregations: 0, eventsAggregated: 0, clustersAffected: 0 };
     }
 
     // Capacity model from layoutResult.utilization
@@ -408,7 +405,7 @@ export function DeterministicLayoutComponent({
 
     // Placements for stability
     const placements = positionedCards.map((p: PositionedCard) => ({
-      id: String(Array.isArray(p.event) ? p.event[0]?.id ?? p.id : p.event?.id ?? p.id),
+      id: String(p.event?.id ?? p.id),
       x: Math.round(p.x),
       y: Math.round(p.y),
       clusterId: String(p.clusterId ?? ''),
@@ -429,19 +426,16 @@ export function DeterministicLayoutComponent({
       }
     }
 
-    // Card type counts and aggregation/degradation metrics
+    // Card type counts and degradation metrics
     const byTypeCounts: Record<string, number> = positionedCards.reduce((acc: Record<string, number>, c: PositionedCard) => {
       const t = String(c.cardType);
       acc[t] = (acc[t] || 0) + 1;
       return acc;
     }, {});
-    const multiEventCards = positionedCards.filter((c: PositionedCard) => c.cardType === 'multi-event');
-    const totalAggregations = multiEventCards.length;
-    const eventsAggregated = multiEventCards.reduce((sum: number, c: PositionedCard) => sum + (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)), 0);
-    const singleEventsShown = positionedCards
-      .filter((c: PositionedCard) => (c.eventCount || (Array.isArray(c.event) ? c.event.length : 1)) === 1)
-      .length;
-    const summaryContained = 0; // Placeholder until 'infinite' summary cards are surfaced in UI
+    const totalAggregations = 0;
+    const eventsAggregated = 0;
+    const singleEventsShown = positionedCards.length;
+    const summaryContained = 0;
     const degradationsCount = (byTypeCounts['compact'] || 0) + (byTypeCounts['title-only'] || 0);
     const promotionsCount = 0; // Placeholder: promotion logic not implemented yet
 
@@ -485,7 +479,7 @@ export function DeterministicLayoutComponent({
     const sortedEvents = events.slice().sort((a, b) => getEventTimestamp(a) - getEventTimestamp(b));
     const sortedPlacements = sortedEvents.map(event => 
       positionedCards.find(card => 
-        (Array.isArray(card.event) ? card.event[0]?.id : card.event?.id) === event.id
+        card.event?.id === event.id
       )
     ).filter(Boolean);
     
@@ -528,10 +522,9 @@ export function DeterministicLayoutComponent({
         }
       },
       aggregation: {
-        ...(aggregationMetrics || {}),
-        // Keep backward compatibility with existing field names
-        totalAggregations: aggregationMetrics?.totalAggregations || totalAggregations,
-        eventsAggregated: aggregationMetrics?.eventsAggregated || eventsAggregated
+        totalAggregations: totalAggregations,
+        eventsAggregated: eventsAggregated,
+        clustersAffected: 0
       },
       cards: {
         single: singleEventsShown,
@@ -584,19 +577,7 @@ export function DeterministicLayoutComponent({
       ref={containerRef}
       className="absolute inset-0 bg-gray-100 overflow-hidden"
     >
-      {/* Column Borders (Development Visualization) */}
-      {showColumnBorders && layoutResult.columnBounds?.map((bounds, index) => (
-        <div
-          key={`column-border-${index}`}
-          className="absolute border border-dashed border-blue-400 opacity-30 pointer-events-none"
-          style={{
-            left: bounds.x,
-            top: bounds.minY,
-            width: bounds.width,
-            height: bounds.maxY - bounds.minY
-          }}
-        />
-      ))}
+      {/* Column Borders removed - was a development visualization feature */}
       
       {/* Enhanced Timeline Axis with multi-level labels and visual improvements */}
       {events.length > 0 && timelineRange && finalTicks && finalTicks.length > 0 && (
@@ -660,9 +641,7 @@ export function DeterministicLayoutComponent({
         // Determine if anchor's events are above or below timeline
         // const timelineY = config?.timelineY ?? viewportSize.height / 2;
         const anchorCards = layoutResult.positionedCards.filter(card => {
-          const cardEventIds = Array.isArray(card.event) 
-            ? card.event.map(e => e.id) 
-            : [card.event.id];
+          const cardEventIds = [card.event.id];
           return cardEventIds.some(id => anchor.eventIds?.includes(id));
         });
         // If no matching cards, suppress this anchor entirely (belt-and-suspenders)
@@ -771,30 +750,26 @@ export function DeterministicLayoutComponent({
       ))}
       
       {/* Cards */}
-      {layoutResult.positionedCards.map((card) => {
-        const cardEventIds = Array.isArray(card.event)
-          ? card.event.map((event) => event.id)
-          : [card.event.id];
-        const primaryCardEventId = cardEventIds[0];
-        const isCardSelected = selectedEventId ? cardEventIds.includes(selectedEventId) : false;
-        const isCardHovered = hoveredEventId ? cardEventIds.includes(hoveredEventId) : false;
-        const isCardPairHovered = hoveredPairEventId ? cardEventIds.includes(hoveredPairEventId) : false;
+      {layoutResult.positionedCards.map(card => {
+        const primaryCardEventId = card.event?.id ?? card.id;
+        const isCardSelected = selectedEventId ? primaryCardEventId === selectedEventId : false;
+        const isCardHovered = hoveredEventId ? primaryCardEventId === hoveredEventId : false;
+        const isCardPairHovered = hoveredPairEventId ? primaryCardEventId === hoveredPairEventId : false;
 
         const cardTypeClass =
-          card.cardType === 'full' ? 'border-l-4 border-l-blue-500 border-gray-200 p-3' :
-          card.cardType === 'compact' ? 'border-l-4 border-l-green-500 border-gray-200 p-2' :
-          card.cardType === 'title-only' ? 'border-l-4 border-l-yellow-500 border-gray-200 p-1' :
-          card.cardType === 'multi-event' ? 'border-l-4 border-l-purple-500 border-gray-200 p-2' :
-          card.cardType === 'infinite' ? 'border-l-4 border-l-red-500 border-gray-200 p-1' :
-          'border-l-4 border-l-gray-500 border-gray-200 p-2';
+          card.cardType === 'full'
+            ? 'border-l-4 border-l-blue-500 border-gray-200 p-3'
+            : card.cardType === 'compact'
+            ? 'border-l-4 border-l-green-500 border-gray-200 p-2'
+            : 'border-l-4 border-l-yellow-500 border-gray-200 p-1';
 
         const cardHighlightClasses = isCardSelected
           ? 'ring-2 ring-amber-400 ring-opacity-80 outline outline-2 outline-offset-2 outline-amber-300 shadow-xl'
           : isCardHovered
-            ? 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg'
-            : isCardPairHovered
-              ? 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg'
-              : '';
+          ? 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg'
+          : isCardPairHovered
+          ? 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg'
+          : '';
 
         const cardStyle: CSSProperties = {
           left: card.x,
@@ -805,6 +780,13 @@ export function DeterministicLayoutComponent({
           backgroundColor: isCardSelected ? 'rgba(254, 243, 199, 0.45)' : undefined,
           boxShadow: isCardSelected ? '0 12px 24px rgba(251, 191, 36, 0.25)' : undefined
         };
+
+        const content =
+          card.cardType === 'compact'
+            ? <CompactCardContent event={card.event} />
+            : card.cardType === 'title-only'
+            ? <TitleOnlyCardContent event={card.event} />
+            : <FullCardContent event={card.event} />;
 
         return (
           <div
@@ -817,242 +799,91 @@ export function DeterministicLayoutComponent({
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}
-            onClick={(event) => {
+            onClick={event => {
               event.stopPropagation();
               if (primaryCardEventId && onEventSelect) {
                 onEventSelect(primaryCardEventId);
               }
             }}
             onDoubleClick={() => {
-              try {
-                if (primaryCardEventId && onCardDoubleClick) onCardDoubleClick(primaryCardEventId);
-              } catch {
-                // Ignore card interaction errors
+              if (primaryCardEventId && onCardDoubleClick) {
+                onCardDoubleClick(primaryCardEventId);
               }
             }}
             onMouseEnter={() => {
-              try {
-                if (primaryCardEventId) {
-                  setHoveredPairEventId(primaryCardEventId);
-                }
-                if (primaryCardEventId && onCardMouseEnter) onCardMouseEnter(primaryCardEventId);
-              } catch {
-                // Ignore card interaction errors
+              if (primaryCardEventId) {
+                setHoveredPairEventId(primaryCardEventId);
+              }
+              if (primaryCardEventId && onCardMouseEnter) {
+                onCardMouseEnter(primaryCardEventId);
               }
             }}
             onMouseLeave={() => {
               setHoveredPairEventId(null);
-              if (onCardMouseLeave) onCardMouseLeave();
+              if (onCardMouseLeave) {
+                onCardMouseLeave();
+              }
             }}
           >
-          {/* Card content based on type */}
-          {card.cardType === 'full' && (
-            <div className="h-full flex flex-col overflow-hidden">
-              <div className="font-semibold text-gray-900">{Array.isArray(card.event) ? card.event[0].title : card.event.title}</div>
-              {(() => {
-                const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
-                return desc ? (
-                  <div className="text-xs text-gray-600 mt-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 8 }}>
-                    {desc}
-                  </div>
-                ) : null;
-              })()}
-              <div className="text-xs text-gray-500 mt-auto">{formatEventDateTime(Array.isArray(card.event) ? card.event[0] : card.event)}</div>
-            </div>
-          )}
-          
-          {card.cardType === 'compact' && (
-            <div className="h-full flex flex-col overflow-hidden">
-              <div className="font-semibold text-gray-900 text-sm">{Array.isArray(card.event) ? card.event[0].title : card.event.title}</div>
-              {(() => {
-                const desc = Array.isArray(card.event) ? card.event[0].description : card.event.description;
-                return desc ? (
-                  <div className="text-xs text-gray-600 mt-0.5 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical' as CSSProperties['WebkitBoxOrient'], WebkitLineClamp: 2 }}>
-                    {desc}
-                  </div>
-                ) : null;
-              })()}
-              <div className="text-xs text-gray-500 mt-auto">{formatEventDateTime(Array.isArray(card.event) ? card.event[0] : card.event)}</div>
-            </div>
-          )}
-          
-          {card.cardType === 'title-only' && (
-            <div className="h-full flex flex-col justify-center">
-              <div className="font-medium text-gray-900 truncate">{Array.isArray(card.event) ? card.event[0].title : card.event.title}</div>
-              {card.eventCount && card.eventCount > 1 && (
-                <div className="text-xs text-blue-600 mt-1">+{card.eventCount - 1} more</div>
-              )}
-            </div>
-          )}
-          
-          {card.cardType === 'multi-event' && (
-            <div className="h-full flex flex-col">
-              <div className="font-semibold text-gray-900 border-b pb-1 mb-1">{card.eventCount || 1} Events</div>
-              <div className="text-xs space-y-0.5 overflow-y-auto flex-1">
-                {Array.isArray(card.event) ? card.event.slice(0, 5).map((event, i) => (
-                  <div key={i} className="text-gray-700 truncate">• {event.title}</div>
-                )) : (
-                  <div className="text-gray-700 truncate">• {card.event.title}</div>
-                )}
-                {card.eventCount && card.eventCount > 5 && (
-                  <div className="text-blue-600">+{card.eventCount - 5} more...</div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+            {content}
+          </div>
         );
       })}
-      
+
       {/* Info Panels - Only show when enabled */}
       {showInfoPanels && (
-        <>
-          {/* Debug Info - Enhanced Deterministic Layout */}
-          <div 
-            className="absolute top-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md max-w-sm transition-all duration-200 z-[5] pointer-events-auto"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-          >
-        <h2 className="font-bold">Enhanced Deterministic Layout v5</h2>
-        <div className="text-sm text-gray-600 space-y-1">
-          <p>{layoutResult.positionedCards.reduce((sum, card) => sum + (card.eventCount || 1), 0)} events</p>
-          <p>{layoutResult.clusters.length} column groups</p>
-          <p>{layoutResult.positionedCards.length} positioned cards</p>
-          <p>Slot utilization: {layoutResult.utilization.percentage.toFixed(1)}%</p>
-          {/* Target vs actual cluster band and pitch stats */}
-          {(() => {
-            const clusterSizes = layoutResult.clusters.map(c => c.events.length);
-            const groupsCount = layoutResult.clusters.length;
-            const avg = groupsCount > 0 ? (clusterSizes.reduce((a, b) => a + b, 0) / groupsCount) : 0;
-            const xs = layoutResult.anchors.map(a => a.x).sort((a, b) => a - b);
-            const pitches = xs.length > 1 ? xs.slice(1).map((x, i) => Math.abs(x - xs[i])) : [];
-            const pitchMin = pitches.length ? Math.min(...pitches) : 0;
-            const pitchAvg = pitches.length ? (pitches.reduce((a, b) => a + b, 0) / pitches.length) : 0;
-            const pitchMax = pitches.length ? Math.max(...pitches) : 0;
-            const withinBand = avg >= 4 && avg <= 6;
-            return (
-              <>
-                <p className={withinBand ? 'text-green-700' : 'text-amber-700'}>
-                  Avg events/cluster: {avg.toFixed(1)} (target 4–6)
-                </p>
-                <p className="text-xs text-gray-500">Group pitch px — min {pitchMin.toFixed(0)} · avg {pitchAvg.toFixed(0)} · max {pitchMax.toFixed(0)}</p>
-              </>
-            );
-          })()}
-          <p className="text-green-600 font-semibold">✓ Zero overlaps guaranteed</p>
-          <p className="text-blue-600 font-semibold">✓ Enhanced algorithm ready</p>
-        </div>
-        <div className="text-xs text-gray-500 mt-2">
-          Architecture: bounds → dispatch → cluster → fit → degrade
-          <br />Corrected slots: Full(4), Compact(8), Title-only(8), Multi-event(4)
-        </div>
-      </div>
-
-      {/* Card Type Statistics */}
-      <div 
-        className="absolute top-4 right-4 backdrop-blur-sm p-3 rounded-lg shadow-md transition-all duration-200 z-[5] pointer-events-auto"
-        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-      >
-        <h3 className="font-bold text-sm mb-2">Card Distribution</h3>
-        <div className="text-xs space-y-1">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span>Full Cards</span>
-            </div>
-            <span className="font-mono">{layoutResult.positionedCards.filter(c => c.cardType === 'full').length}</span>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span>Compact Cards</span>
-            </div>
-            <span className="font-mono">{layoutResult.positionedCards.filter(c => c.cardType === 'compact').length}</span>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-              <span>Title-Only Cards</span>
-            </div>
-            <span className="font-mono">{layoutResult.positionedCards.filter(c => c.cardType === 'title-only').length}</span>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-orange-500 rounded"></div>
-              <span>Multi-Event Cards</span>
-            </div>
-            <span className="font-mono">{layoutResult.positionedCards.filter(c => c.cardType === 'multi-event').length}</span>
-          </div>
-          {/* Promotions and Aggregations counters */}
-          {(() => {
-            const byType: Record<string, number> = layoutResult.positionedCards.reduce((acc: Record<string, number>, c: PositionedCard) => {
-              const t = String(c.cardType);
-              acc[t] = (acc[t] || 0) + 1;
-              return acc;
-            }, {});
-            const totalAggregations = byType['multi-event'] || 0;
-            const promotionsCount = 0; // placeholder until promotion pass exists
-            return (
-              <div className="mt-2 pt-2 border-t">
-                <div className="flex items-center justify-between"><span>Promotions applied</span><span className="font-mono">{promotionsCount}</span></div>
-                <div className="flex items-center justify-between"><span>Aggregations applied</span><span className="font-mono">{totalAggregations}</span></div>
-              </div>
-            );
-          })()}
-        </div>
-        <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
-          <div>Avg events/cluster: {layoutResult.clusters.length > 0 ? (layoutResult.clusters.reduce((sum, c) => sum + c.events.length, 0) / layoutResult.clusters.length).toFixed(1) : 0}</div>
-          <div>Largest cluster: {Math.max(0, ...layoutResult.clusters.map(c => c.events.length))} events</div>
-        </div>
-      </div>
-
-      {/* Footprints (cells) */}
-      <div 
-        className="absolute bottom-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md transition-all duration-200 z-[5] pointer-events-auto"
-        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-      >
-        <h3 className="font-bold text-sm mb-2">Footprints (cells)</h3>
-        <div className="text-xs space-y-1">
-          <div>Full: 4 cells</div>
-          <div>Compact: 4 cells</div>
-          <div>Title-only: 4 cells</div>
-          <div>Multi-event: 4 cells</div>
-        </div>
-        <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
-          Utilization — Total: {layoutResult.utilization.totalSlots} · Used: {layoutResult.utilization.usedSlots}
-        </div>
-        <button
-          className="mt-2 text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          onClick={() => setShowColumnBorders(!showColumnBorders)}
+        <div
+          className="absolute top-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md max-w-sm transition-all duration-200 z-[5] pointer-events-auto"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
         >
-          {showColumnBorders ? 'Hide' : 'Show'} Column Borders
-        </button>
-      </div>
-
-      {/* Placements (candidates per group) */}
-      <div 
-        className="absolute bottom-4 left-72 backdrop-blur-sm p-3 rounded-lg shadow-md transition-all duration-200 z-[5] pointer-events-auto"
-        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-      >
-        <h3 className="font-bold text-sm mb-2">Placements (candidates per group)</h3>
-        <div className="text-xs space-y-1">
-          <div>Top: 4 placements</div>
-          <div>Bottom: 4 placements</div>
-          <div>Total: 8 candidates</div>
+          <h2 className="font-bold text-sm mb-1">Layout Summary</h2>
+          <p className="text-xs text-gray-600">{layoutResult.positionedCards.length} events</p>
+          <p className="text-xs text-gray-600">{layoutResult.clusters.length} column groups</p>
+          <p className="text-xs text-gray-600">Slot utilisation {layoutResult.utilization.percentage.toFixed(1)}%</p>
         </div>
-        <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
-          Applies uniformly to all card types; actual fit is governed by capacity.
-        </div>
-      </div>
-        </>
       )}
     </div>
   );
+}
+
+function FullCardContent({ event }: { event: Event }) {
+  return (
+    <div className="h-full flex flex-col">
+      <h3 className="card-title text-primary line-clamp-2 mb-1">{event.title}</h3>
+      {event.description ? (
+        <p className="card-description text-secondary flex-1 line-clamp-3">{event.description}</p>
+      ) : (
+        <div className="flex-1" />
+      )}
+      <div className="card-date text-tertiary">{formatEventDateTime(event)}</div>
+    </div>
+  );
+}
+
+function CompactCardContent({ event }: { event: Event }) {
+  return (
+    <div className="h-full flex flex-col">
+      <h3 className="card-title text-primary line-clamp-2 mb-1">{event.title}</h3>
+      {event.description ? (
+        <p className="card-description text-secondary line-clamp-1">{event.description}</p>
+      ) : (
+        <div className="flex-1" />
+      )}
+      <div className="card-date text-tertiary">{formatEventDateTime(event)}</div>
+    </div>
+  );
+}
+
+function TitleOnlyCardContent({ event }: { event: Event }) {
+  return (
+    <div className="h-full flex flex-col justify-center">
+      <h3 className="card-title text-primary line-clamp-1">{event.title}</h3>
+      <div className="card-date text-tertiary mt-1">{formatDate(event.date)}</div>
+    </div>
+  );
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }

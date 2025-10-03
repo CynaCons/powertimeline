@@ -1,8 +1,6 @@
 import type { Event } from '../types';
 import type {
   DispatchMetrics,
-  AggregationMetrics,
-  InfiniteMetrics,
   DegradationMetrics,
   AdaptiveMetrics
 } from './LayoutEngine';
@@ -39,27 +37,23 @@ export interface EventCluster {
   slots?: Slot[];
 }
 
-export type CardType = 'full' | 'compact' | 'title-only' | 'multi-event' | 'infinite';
+export type CardType = 'full' | 'compact' | 'title-only';
 
 export interface CardConfig {
   type: CardType;
   width: number;
   height: number;
-  maxEvents?: number; // For multi-event cards
 }
 
 export interface PositionedCard {
   id: string;
-  event: Event | Event[]; // Single event or array for multi-event cards
+  event: Event;
   x: number;           // Card center x
   y: number;           // Card center y
   width: number;       // Card width (updated from cardWidth)
   height: number;      // Card height (updated from cardHeight)
   cardType: CardType;
   clusterId: string;
-  eventCount?: number; // For multi-event and infinite cards
-  // Infinite card specific properties
-  previewCount?: number;  // Number of events to preview in infinite card
   overflowCount?: number; // Number of overflow events (for "+N more" display)
 }
 
@@ -93,8 +87,6 @@ export interface LayoutResult {
   };
   telemetryMetrics?: {
     dispatch?: DispatchMetrics;
-    aggregation?: AggregationMetrics;
-    infinite?: InfiniteMetrics;
     adaptive?: AdaptiveMetrics;
     degradation?: DegradationMetrics;
   };

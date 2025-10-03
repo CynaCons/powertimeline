@@ -4,13 +4,11 @@
  * Handles all telemetry and performance metrics calculation:
  * - Dispatch metrics (group distribution, space usage)
  * - Degradation metrics (card type transitions)
- * - Aggregation metrics (event grouping statistics)
- * - Infinite metrics (overflow container usage)
  * - Adaptive metrics (temporal density calculations)
  */
 
 import type { LayoutConfig, LayoutResult } from '../types';
-import type { DispatchMetrics, AggregationMetrics, InfiniteMetrics, DegradationMetrics, AdaptiveMetrics } from '../LayoutEngine';
+import type { DispatchMetrics, DegradationMetrics, AdaptiveMetrics } from '../LayoutEngine';
 
 export class MetricsCalculator {
   private readonly TEMPORAL_GROUPING_FACTOR = 0.07; // 7% of timeline range for grouping window
@@ -21,15 +19,11 @@ export class MetricsCalculator {
   calculateMetrics(
     result: LayoutResult,
     config: LayoutConfig,
-    aggregationMetrics: AggregationMetrics,
-    infiniteMetrics: InfiniteMetrics,
     degradationMetrics: DegradationMetrics,
     adaptiveHalfColumnWidth?: number,
     timeRange?: { startTime: number; endTime: number; duration: number } | null
   ): {
     dispatch?: DispatchMetrics;
-    aggregation?: AggregationMetrics;
-    infinite?: InfiniteMetrics;
     degradation?: DegradationMetrics;
     adaptive?: AdaptiveMetrics;
   } {
@@ -50,22 +44,6 @@ export class MetricsCalculator {
         avg: pitches.length > 0 ? pitches.reduce((a, b) => a + b, 0) / pitches.length : 0
       },
       horizontalSpaceUsage: this.calculateHorizontalSpaceUsage(result, config)
-    };
-
-    // Include aggregation metrics from Phase 0.5 implementation
-    const aggregation: AggregationMetrics = {
-      totalAggregations: aggregationMetrics.totalAggregations,
-      eventsAggregated: aggregationMetrics.eventsAggregated,
-      clustersAffected: aggregationMetrics.clustersAffected
-    };
-
-    // Include infinite metrics from Phase 0.5.1 implementation
-    const infinite: InfiniteMetrics = {
-      enabled: infiniteMetrics.enabled,
-      containers: infiniteMetrics.containers,
-      eventsContained: infiniteMetrics.eventsContained,
-      previewCount: infiniteMetrics.previewCount,
-      byCluster: infiniteMetrics.byCluster
     };
 
     // Stage 3i4: Add adaptive width telemetry
@@ -95,7 +73,7 @@ export class MetricsCalculator {
       degradationTriggers: degradationMetrics.degradationTriggers
     };
 
-    return { dispatch, aggregation, infinite, degradation, adaptive };
+    return { dispatch, degradation, adaptive };
   }
 
   /**

@@ -563,18 +563,18 @@ export function seedCompactDegradationTest(): Event[] {
   return events;
 }
 
-export function seedMultiEventTest(): Event[] {
-  // Create enough events to force multi-event cards (30+ events)
+export function seedHighDensityTitleTest(): Event[] {
+  // Create enough events to force title-only degradation (30+ events)
   const base = Date.now() - 20 * dayMs;
   const events: Event[] = [];
   
   for (let i = 0; i < 30; i++) {
     const d = new Date(base + i * dayMs).toISOString().slice(0, 10);
     events.push({
-      id: `multi-${i}`,
+      id: `dense-${i}`,
       date: d,
-      title: `Multi Event ${i + 1}`,
-      description: `Event ${i + 1} that will be grouped into multi-event cards.`
+      title: `Dense Event ${i + 1}`,
+      description: `Event ${i + 1} used to stress-test title-only degradation.`
     });
   }
   
