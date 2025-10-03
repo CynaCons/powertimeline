@@ -243,22 +243,17 @@ function TitleOnlyCardContent({ event }: { event: Event }) {
   const eventIcon = getEventIcon(event);
 
   return (
-    <div className="h-full flex flex-col justify-center">
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="card-title text-primary line-clamp-1 flex-1 pr-2">
-          {event.title}
-        </h3>
-        <span
-          className="card-icon material-symbols-rounded flex-shrink-0"
-          style={{ color: eventIcon.color, fontSize: '0.75rem' }}
-          title={eventIcon.description}
-        >
-          {eventIcon.icon}
-        </span>
-      </div>
-      <div className="card-date text-tertiary">
-        {formatDate(event.date)}
-      </div>
+    <div className="h-full flex items-center justify-between">
+      <h3 className="card-title text-primary line-clamp-1 flex-1 pr-2">
+        {event.title}
+      </h3>
+      <span
+        className="card-icon material-symbols-rounded flex-shrink-0"
+        style={{ color: eventIcon.color, fontSize: '0.75rem' }}
+        title={eventIcon.description}
+      >
+        {eventIcon.icon}
+      </span>
     </div>
   );
 }

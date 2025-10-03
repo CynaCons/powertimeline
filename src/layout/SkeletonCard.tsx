@@ -56,9 +56,8 @@ function renderSkeletonContent(cardType: CardType): React.ReactNode {
     case 'title-only':
       return (
         <>
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="skeleton-text skeleton-title w-2/3"></div>
-            <div className="skeleton-text skeleton-date mt-1"></div>
+          <div className="flex-1 flex items-center">
+            <div className="skeleton-text skeleton-title w-3/4"></div>
           </div>
         </>
       );

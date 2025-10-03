@@ -633,6 +633,76 @@
 - Documented all coordinate systems, state machines, and algorithms
 - Identified 11 missing tests (65% of UI requirements lack test coverage)
 
+## Iteration v0.3.6.1 - Title-Only Card Display Fix ✅ COMPLETED
+**Goal:** Fix title-only cards to display event titles instead of dates
+
+**Validation:** Title-only cards show event titles when degraded from compact cards
+
+- [x] Investigate current title-only card rendering logic
+ - [x] Located title-only cards rendered in CardRenderer.tsx:242-264 and SkeletonCard.tsx:56-63
+ - [x] Identified that dates were being displayed alongside titles (CardRenderer.tsx:259-261)
+ - [x] Card type detection working correctly
+- [x] Fix title-only card content display
+ - [x] Updated TitleOnlyCardContent to show only title and icon (CardRenderer.tsx:242-259)
+ - [x] Removed date display from title-only mode (removed lines 259-261)
+ - [x] Updated layout to horizontal flex alignment for title and icon
+ - [x] Updated SkeletonCard to match new title-only layout (SkeletonCard.tsx:56-63)
+- [x] Verify tests for title-only card display
+ - [x] Title-only cards now display titles only, no dates
+ - [x] Test degradation cascade working: full → compact → title-only
+ - [x] Title truncation works correctly with line-clamp-1
+
+**Validation Tests:**
+- [x] Title-only cards display event titles in all test scenarios
+- [x] Degradation from compact to title-only preserves title visibility
+- [x] No dates visible in title-only card mode
+- [x] Test v5/48-title-only-degradation.spec.ts passes (1/1 passing)
+
+**Files Modified:**
+- src/layout/CardRenderer.tsx (removed date display, updated layout)
+- src/layout/SkeletonCard.tsx (removed date skeleton, updated layout)
+
+## Iteration v0.3.6.2 - Mixed Card Type Optimization in Semi-Columns
+**Goal:** Implement intelligent mixed card type strategy to optimize space usage in semi-columns
+
+**Validation:** Semi-columns can mix card types (full, compact, title-only) to maximize visible events
+
+**Strategy Design:**
+- [ ] Design mixed card type allocation rules
+ - [ ] 1 event → 1 full card
+ - [ ] 2 events → 2 full cards (if space allows)
+ - [ ] 3 events → 1 full + 2 compact cards
+ - [ ] 4 events → 2 full + 2 compact or 4 compact cards
+ - [ ] 5+ events → mix of full, compact, and title-only to maximize utilization
+ - [ ] Define priority: preserve full cards for important events, degrade others
+
+**Implementation:**
+- [ ] Update capacity model to support mixed card types per semi-column
+ - [ ] Calculate height budget for each semi-column
+ - [ ] Track available cells in terms of height units (1 full = 4 units, 1 compact = 2 units, 1 title-only = 1 unit)
+ - [ ] Implement greedy packing algorithm or heuristic
+- [ ] Update DegradationEngine to support mixed degradation
+ - [ ] Allow per-event degradation level within same semi-column
+ - [ ] Prioritize full cards for events with longer descriptions
+ - [ ] Degrade to compact/title-only only when necessary
+- [ ] Update layout rendering to handle mixed card types
+ - [ ] Calculate vertical positions for mixed card heights
+ - [ ] Ensure proper spacing and alignment
+ - [ ] Update semi-column visual boundaries if needed
+
+**Validation Tests:**
+- [ ] Semi-column with 3 events shows 1 full + 2 compact cards
+- [ ] Dense timeline optimizes space with mixed card types
+- [ ] No unnecessary degradation (use full cards when space available)
+- [ ] Telemetry reports accurate mix of card types per semi-column
+- [ ] Visual alignment is correct with mixed card heights
+
+**Technical Notes:**
+- Current system: all cards in a semi-column have same type (all full, all compact, or all title-only)
+- New system: each semi-column can mix card types based on available vertical space
+- Height units: full card (~169px / 4 cells), compact (~92px / 2 cells), title-only (~32px / 1 cell)
+- Need to update CapacityModel and DegradationEngine to support per-event type decisions
+
 ## Iteration v0.3.8 - Product Vision Evolution & PRD Update
 **Goal:** Update product requirements to reflect collaborative platform transformation
 
