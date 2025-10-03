@@ -652,7 +652,8 @@ export function DeterministicLayoutComponent({
           ...(anchor.eventId ? [anchor.eventId] : [])
         ];
         const primaryAnchorEventId = anchor.eventId ?? anchor.eventIds?.[0] ?? null;
-        const isAnchorHovered = hoveredPairEventId ? anchorEventIds.includes(hoveredPairEventId) : false;
+        const isAnchorHovered = (hoveredEventId && anchorEventIds.includes(hoveredEventId)) ||
+                                (hoveredPairEventId && anchorEventIds.includes(hoveredPairEventId));
         const isAnchorSelected = selectedEventId ? anchorEventIds.includes(selectedEventId) : false;
 
         const anchorVisualStyle: CSSProperties = isAnchorSelected
