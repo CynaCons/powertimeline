@@ -877,14 +877,8 @@ function CompactCardContent({ event }: { event: Event }) {
 
 function TitleOnlyCardContent({ event }: { event: Event }) {
   return (
-    <div className="h-full flex flex-col justify-center">
+    <div className="h-full flex items-center">
       <h3 className="card-title text-primary line-clamp-1">{event.title}</h3>
-      <div className="card-date text-tertiary mt-1">{formatDate(event.date)}</div>
     </div>
   );
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }

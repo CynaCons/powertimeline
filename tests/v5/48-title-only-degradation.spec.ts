@@ -38,7 +38,32 @@ test.describe('v5/48 Title-only degradation', () => {
     console.log('telemetry.degradation', telemetry?.degradation);
     // Ensure at least one title-only card is rendered
     const titleOnly = page.locator('[data-testid="event-card"][data-card-type="title-only"]');
-    expect(await titleOnly.count()).toBeGreaterThan(0);
+    const titleOnlyCount = await titleOnly.count();
+    expect(titleOnlyCount).toBeGreaterThan(0);
+
+    // VERIFY: Title-only cards display ONLY titles (no dates)
+    console.log(`\n🔍 Verifying ${titleOnlyCount} title-only cards...`);
+    for (let i = 0; i < Math.min(titleOnlyCount, 5); i++) {
+      const card = titleOnly.nth(i);
+      const cardText = await card.textContent();
+      const cardHTML = await card.innerHTML();
+
+      console.log(`  Card ${i}: "${cardText}"`);
+
+      // Check for date patterns
+      const hasDatePattern = /\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\w{3}\s+\d{1,2},\s+\d{4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}/.test(cardText || '');
+      const hasDateElement = /<[^>]*class="[^"]*card-date[^"]*"/.test(cardHTML);
+
+      if (hasDatePattern || hasDateElement) {
+        console.log(`  ❌ Contains date (pattern: ${hasDatePattern}, element: ${hasDateElement})`);
+      } else {
+        console.log(`  ✅ No date found`);
+      }
+
+      // Title-only cards should NOT contain dates
+      expect(hasDatePattern).toBe(false);
+      expect(hasDateElement).toBe(false);
+    }
 
     // No overlaps across all cards
     const overlaps = await page.evaluate(() => {

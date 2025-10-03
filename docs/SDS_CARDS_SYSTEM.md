@@ -12,7 +12,7 @@ All card types share a universal width for visual consistency:
 |---|---|---|---|
 | **Full** | 260px | 169px | Title (multi-line) + Full description + Date |
 | **Compact** | 260px | 92px | Title (2 lines) + Partial description (1 line) + Date |
-| **Title-only** | 260px | 32px | Title + Date only |
+| **Title-only** | 260px | 32px | Title + Icon only (no date, no description) |
 
 **Source**: `src/layout/config.ts` - `DEFAULT_CARD_CONFIGS`
 
@@ -33,8 +33,9 @@ All card types share a universal width for visual consistency:
 
 **Title-only Cards (32px height):**
 - **Title**: Single line, ellipsis truncation
-- **Date**: Inline or stacked, minimal spacing
-- **Spacing**: 8px padding
+- **Icon**: Category icon displayed on the right
+- **No date or description displayed**
+- **Spacing**: 8px padding, horizontal layout
 - **Use case**: High-density timelines with >4 events per half-column
 
 ### 1.3 Typography Specifications
@@ -52,7 +53,7 @@ All card types share a universal width for visual consistency:
 
 /* Title-only Cards */
 .card-title-only .title { font-size: 13px; font-weight: 500; }
-.card-title-only .date { font-size: 10px; opacity: 0.6; }
+/* No date displayed in title-only cards */
 ```
 
 ### 1.4 Visual Hierarchy
