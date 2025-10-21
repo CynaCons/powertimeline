@@ -272,7 +272,7 @@ export class DegradationEngine {
    * Updated with correct math (v0.3.6.3):
    * - Full cards: 2 per half-column (2 × 169px + 12px = 350px)
    * - Compact cards: 4 per half-column (4 × 75px + 3 × 12px = 336px)
-   * - Title-only: 9 per half-column (high density)
+   * - Title-only: 8 per half-column (8 × 32px + 7 × 12px = 340px, fits in available space)
    */
   getMaxCardsPerHalfColumn(cardType: CardType): number {
     switch (cardType) {
@@ -281,7 +281,7 @@ export class DegradationEngine {
       case 'compact':
         return 4; // Compact cards: 4 slots per half-column (4 × 75px + 3 × 12px = 336px)
       case 'title-only':
-        return 9; // Title-only cards: allow up to 9 per half-column in high density
+        return 8; // Title-only cards: 8 per half-column (9 would overflow out of screen)
       default:
         return 2; // Default to full card capacity
     }
@@ -309,10 +309,18 @@ export class DegradationEngine {
 
       if (below) processedBelow.add(below.id);
 
-      // Check cluster-wide overflow
+      // Check cluster-wide overflow (both horizontal from DispatchEngine and predicted vertical)
       const aboveOverflow = (above.overflowEvents?.length ?? 0) > 0;
       const belowOverflow = (below?.overflowEvents?.length ?? 0) > 0;
-      const hasOverflow = aboveOverflow || belowOverflow;
+
+      // PREDICT vertical overflow: check if total events exceed maximum capacity
+      // Maximum capacity is 8 title-only cards per half-column
+      const aboveTotalEvents = above.events.length + (above.overflowEvents?.length ?? 0);
+      const belowTotalEvents = (below?.events.length ?? 0) + (below?.overflowEvents?.length ?? 0);
+      const abovePredictedOverflow = aboveTotalEvents > 8; // Exceeds max title-only capacity
+      const belowPredictedOverflow = belowTotalEvents > 8; // Exceeds max title-only capacity
+
+      const hasOverflow = aboveOverflow || belowOverflow || abovePredictedOverflow || belowPredictedOverflow;
 
       // Calculate total events
       const totalEvents = above.events.length + (below?.events.length ?? 0);
@@ -387,7 +395,7 @@ export class DegradationEngine {
    * - 5 events: [compact, compact, title-only, ...] - mixed
    * - 6 events: [compact, compact, title-only, ...] - mixed
    * - 7 events: [compact, title-only, ...] - mixed
-   * - 8+ events: ['title-only'] - uniform, uses getMaxCardsPerHalfColumn (9 cards)
+   * - 8+ events: ['title-only'] - uniform, uses getMaxCardsPerHalfColumn (8 cards)
    */
   private determineMixedCardTypes(events: Event[]): CardType[] {
     const count = events.length;
@@ -496,7 +504,7 @@ export class DegradationEngine {
     // Use conservative calculation matching PositioningEngine
     // Available height per half-column: timelineY - margins
     const topMargin = 20;
-    const timelineMargin = 24;
+    const timelineMargin = 40; // Restored from 24px to prevent axis label overlap
     const upperAnchorSpacing = 25;
     const availableHeight = (this.config.viewportHeight / 2) - topMargin - timelineMargin - upperAnchorSpacing;
 

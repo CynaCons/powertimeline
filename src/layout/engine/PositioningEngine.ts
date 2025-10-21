@@ -55,7 +55,7 @@ export class PositioningEngine {
 
     // Calculate vertical space reserved for margins and anchors
     // NOTE: We don't calculate available space here anymore - DegradationEngine handles capacity
-    const timelineMargin = 24; // tighter spacing to timeline
+    const timelineMargin = 40; // spacing between cards and timeline axis (restored from 24px to prevent label overlap)
     // Note: Anchor spacing constants are defined in createEventAnchors() where they're used
 
     for (const group of groups) {
@@ -179,9 +179,11 @@ export class PositioningEngine {
     const resolveOverlaps = (items: PositionedCard[], preferRight = true) => {
       const within = (x: number, y: number, w: number, h: number) =>
         x >= 0 && (x + w) <= this.config.viewportWidth && y >= 0 && (y + h) <= this.config.viewportHeight;
+      // FIXED: Collision detection using TOP coordinates (card.y is top, not center)
+      // Cards collide if their bounding boxes overlap
       const collide = (a: PositionedCard, b: PositionedCard) => (
         a.x - a.width / 2 < b.x + b.width / 2 && a.x + a.width / 2 > b.x - b.width / 2 &&
-        a.y - a.height / 2 < b.y + b.height / 2 && a.y + a.height / 2 > b.y - b.height / 2
+        a.y < b.y + b.height && a.y + a.height > b.y
       );
       const spacing = 8; // minimal gap
       const maxPasses = 6;
@@ -209,7 +211,8 @@ export class PositioningEngine {
               const required = other.x + Math.sign(target.x - other.x || 1) * (other.width / 2 + target.width / 2 + spacing);
               nx = required;
               const ny = target.y;
-              if (within(nx - target.width / 2, ny - target.height / 2, target.width, target.height)) {
+              // FIXED: Use TOP coordinates - target.y is already the top, nx is the center
+              if (within(nx - target.width / 2, ny, target.width, target.height)) {
                 target.x = Math.max(target.width / 2, Math.min(this.config.viewportWidth - target.width / 2, nx));
                 changed = true;
                 continue;
@@ -217,11 +220,13 @@ export class PositioningEngine {
             }
 
             // If horizontal nudge skipped (same half-column) or failed, try vertical step within the same band
-            const step = target.height + 12;
+            // Use consistent 12px spacing to maintain proper gaps between cards
+            const step = 12; // Maintain consistent card spacing instead of target.height + 12
             let newY = target.y;
-            if (aAbove) newY = Math.max(0 + target.height / 2, target.y - step);
-            else newY = Math.min(this.config.viewportHeight - target.height / 2, target.y + step);
-            if (within(target.x - target.width / 2, newY - target.height / 2, target.width, target.height)) {
+            if (aAbove) newY = Math.max(0, target.y - step); // Move up (decrease Y)
+            else newY = Math.min(this.config.viewportHeight - target.height, target.y + step); // Move down (increase Y)
+            // FIXED: Use TOP coordinates - newY and target.y are already top positions
+            if (within(target.x - target.width / 2, newY, target.width, target.height)) {
               target.y = newY;
               changed = true;
             }

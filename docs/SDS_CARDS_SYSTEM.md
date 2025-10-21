@@ -86,7 +86,7 @@ if (eventCount <= 2) {
 **Rationale:**
 - **2 events**: Matches full card slot capacity (2 slots per half-column)
 - **4 events**: Matches compact card slot capacity (4 slots per half-column)
-- **5+ events**: Requires title-only cards (9 slots per half-column)
+- **5+ events**: Requires title-only cards (8 slots per half-column)
 
 ### 2.2 Degradation Decision Tree
 
@@ -107,7 +107,7 @@ Event Count → Card Type Selection
 │
 └─ eventCount ≥ 5
    └─ Use TITLE-ONLY cards
-      - 9 slots per half-column
+      - 8 slots per half-column
       - No description shown
       - Maximum density, scan-optimized
 ```
@@ -381,7 +381,7 @@ The slot system provides deterministic capacity guarantees:
 |---|---|---|
 | **Full** | 2 | Base capacity |
 | **Compact** | 4 | 2× full card slots |
-| **Title-only** | 9 | High-density capacity |
+| **Title-only** | 8 | High-density capacity (8 × 32px + 7 × 12px = 340px) |
 
 **Implementation**: `src/layout/engine/DegradationEngine.ts` - `determineCardType()`
 

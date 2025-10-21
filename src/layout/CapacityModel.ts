@@ -56,12 +56,14 @@ export class CapacityModel {
 
   constructor(viewportHeight: number) {
     // Calculate available cells based on viewport
-    // Assuming each side (above/below) gets half the viewport minus timeline space
-    const availableHeight = (viewportHeight / 2) - 60; // Leave 60px margin for timeline
-    // Assuming each cell is roughly 20px in height
-    this.cellsPerSide = Math.floor(availableHeight / 20);
-    // Ensure minimum of 4 cells per side
-    this.cellsPerSide = Math.max(4, this.cellsPerSide);
+    // Each cell represents 1 title-only card height (32px) + spacing (12px) = 44px
+    // Leave enough margin for timeline labels and spacing
+    const timelineMargin = 100; // Increased margin to prevent overlap with timeline labels
+    const availableHeight = (viewportHeight / 2) - timelineMargin;
+    const cellUnit = 32 + 12; // title-only height + spacing = 44px per cell
+    this.cellsPerSide = Math.floor(availableHeight / cellUnit);
+    // Cap at 8 cells per side for optimal display (production standard)
+    this.cellsPerSide = Math.min(8, Math.max(4, this.cellsPerSide));
   }
 
   /**
