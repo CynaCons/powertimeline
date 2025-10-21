@@ -176,8 +176,14 @@ export function getViewportSpecificConfig(width: number, height: number): Partia
  *   - Compact card height reduced to 75px so 4 compact cards fit (4 × 75px + 3 × 12px = 336px)
  *   - Allows mixing full + compact + title-only with chronological priority
  *   - Only enabled when spatial cluster has NO overflow
+ *
+ * Can be disabled via environment variables:
+ *   - VITE_ENABLE_CLUSTER_COORDINATION=false
+ *   - VITE_ENABLE_MIXED_CARD_TYPES=false
  */
 export const FEATURE_FLAGS = {
-  ENABLE_CLUSTER_COORDINATION: true,   // Enable cluster coordination
-  ENABLE_MIXED_CARD_TYPES: true,       // ENABLED - re-introduced with correct math (v0.3.6.3)
+  ENABLE_CLUSTER_COORDINATION:
+    import.meta.env.VITE_ENABLE_CLUSTER_COORDINATION !== 'false',
+  ENABLE_MIXED_CARD_TYPES:
+    import.meta.env.VITE_ENABLE_MIXED_CARD_TYPES !== 'false',
 } as const;

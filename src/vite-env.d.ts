@@ -13,6 +13,9 @@ interface ImportMetaEnv {
 	readonly VITE_FIREBASE_APP_ID?: string;
 	readonly VITE_FIREBASE_MEASUREMENT_ID?: string;
 	readonly VITE_LOG_LEVEL?: string;
+	// Feature flags for layout engine
+	readonly VITE_ENABLE_CLUSTER_COORDINATION?: string;
+	readonly VITE_ENABLE_MIXED_CARD_TYPES?: string;
 }
 
 interface ImportMeta {
