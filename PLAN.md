@@ -618,152 +618,196 @@
 ---
 
 ## Iteration v0.3.8 - Product Vision Evolution & PRD Update
-**Goal:** Update product requirements to reflect collaborative platform transformation
+**Goal:** Document complete collaborative platform vision in PRD.md
 
-- [ ] Update PRD.md with collaborative platform vision
-- [ ] Transform from "timeline visualization tool" to "collaborative documentation platform"
-- [ ] Add "GitHub for Timelines" concept with fork/merge workflow
-- [ ] Update goals to include user accounts, version control, and social features
-- [ ] Revise non-goals to reflect platform ambitions
-- [ ] Add new user stories for collaborative features
-- [ ] Timeline forking and attribution
-- [ ] Version history and merge requests
-- [ ] User profiles and discovery
-- [ ] Social engagement and following
-- [ ] Update technical requirements for backend integration
-- [ ] Firebase Firestore for metadata and user management
-- [ ] Cloud Storage for timeline content files
-- [ ] Authentication and authorization systems
-- [ ] API design for collaborative features
-- [ ] Define new success metrics for platform adoption
-- [ ] User registration and retention rates
-- [ ] Timeline creation and sharing metrics
-- [ ] Fork and merge activity
-- [ ] Community engagement indicators
+**Completed:**
+- [x] Expand PRD.md with comprehensive collaborative platform vision
+- [x] Add detailed technical architecture (Frontend, Backend, API, Git workflow, Security)
+- [x] Add comprehensive collaboration user stories (forking, merge requests, version history, conflict resolution)
+- [x] Define success metrics with specific KPIs (user acquisition, engagement, performance)
+- [x] Document complete "GitHub for Timelines" feature set
+- [x] Add API endpoint specifications
+- [x] Add Git-based version control workflow documentation
+- [x] Add scalability targets and infrastructure requirements
+
+**Key Additions:**
+- RESTful API endpoints for all timeline operations
+- Git-based version control with branch strategy
+- Firebase Architecture (Firestore + Cloud Functions + Auth)
+- Security & privacy controls (GDPR compliance, access permissions)
+- Performance targets (60fps rendering, <2s page loads, 10K+ concurrent users)
+- Growth metrics (10K users year 1, 20% fork rate, 60% merge acceptance)
+
+**Note:** PRD.md now represents the COMPLETE product vision. Implementation priorities and deferrals are tracked in PLAN.md iterations below.
 
 ---
 
 # Major Platform Evolution (v0.4.x+)
 
-## Phase 1: Backend Foundation (v0.4.x)
+**Note:** The complete product vision is documented in PRD.md. The iterations below represent the implementation roadmap with priorities and deferrals.
 
-### v0.4.0 - Internal Git-Based Timeline Storage Infrastructure & Rebranding
-- [ ] Rebrand to PowerTimeline
-- [ ] Update package.json name
-- [ ] Update HTML title and meta tags
-- [ ] Update app header and branding
-- [ ] Update README.md
-- [ ] Update Firebase project configuration
+## Phase 1: Foundation (v0.4.x) - LOCAL FIRST APPROACH
+
+### v0.4.0 - Landing Page & Timeline Discovery (NEXT PRIORITY)
+**Goal:** Build GitHub-style home page for browsing timelines by user (works with localStorage, no backend)
+
+**User Experience:**
+- [ ] Design landing page layout (similar to GitHub homepage)
+- [ ] Create user list/directory view (using mock/demo users: Alice, Bob, Charlie)
+- [ ] Display timeline cards per user (title, description, event count, preview)
+- [ ] Click user → view user's timeline list
+- [ ] Click timeline → navigate to timeline editor/viewer
+- [ ] Add basic search/filter by timeline title
+- [ ] Add timeline preview on hover (minimap thumbnail)
+
+**Routing & Navigation:**
+- [ ] Implement URL routing structure: `/user/:userId` and `/user/:userId/timeline/:timelineId`
+- [ ] Add browser navigation (back/forward) support
+- [ ] Add breadcrumb navigation (Home > User > Timeline)
+
+**Data Management:**
+- [ ] Use localStorage for timeline data (no backend yet)
+- [ ] Create mock user profiles (Alice, Bob, Charlie with avatars, bios)
+- [ ] Assign existing timeline to demo users for demonstration
+- [ ] Implement timeline ownership metadata (ownerId field)
+
+**Visual Design:**
+- [ ] Responsive layout (mobile, tablet, desktop)
+- [ ] Timeline card design (similar to GitHub repo cards)
+- [ ] User avatar and profile display
+- [ ] Empty states (no timelines, no users)
+
+**Out of Scope for v0.4.0:**
+- ❌ Authentication (use mock users only)
+- ❌ Backend/database (localStorage only)
+- ❌ Forking/merging (deferred to v0.5.x+)
+- ❌ Real user accounts (demo users only)
+
+### v0.4.1 - Timeline Metadata & Organization
+**Goal:** Add metadata to timelines for better organization and discovery
+
+- [ ] Add timeline metadata fields (tags, category, description, visibility)
+- [ ] Implement visibility toggle (public/private for each timeline)
+- [ ] Add creation/modification timestamps
+- [ ] Add event count statistics
+- [ ] Create timeline settings panel
+- [ ] Implement timeline deletion with confirmation
+- [ ] Add "favorite" functionality to mark important timelines
+
+**Out of Scope:**
+- ❌ Cloud sync (still localStorage)
+- ❌ User authentication
+
+### v0.4.2 - Demo User Switcher
+**Goal:** Allow switching between demo users to simulate multi-user experience
+
+- [ ] Add user switcher dropdown in navigation rail
+- [ ] Implement demo user context (current logged-in user)
+- [ ] Filter "My Timelines" based on current demo user
+- [ ] Show "All Users" vs "My Timelines" tabs
+- [ ] Implement read-only mode for other users' timelines
+- [ ] Add "owner badge" on timeline cards
+
+**Out of Scope:**
+- ❌ Real authentication
+- ❌ Backend storage
+
+## Phase 2: Backend & Authentication (v0.5.x) - DEFERRED
+
+**Note:** Backend features are deferred until local-first experience is solid. Focus on v0.4.x first.
+
+### v0.5.0 - Firebase Backend Setup (FUTURE)
+- [ ] Set up Firebase Firestore database
+- [ ] Design timeline document schema (JSON format)
+- [ ] Migrate localStorage data to Firestore
+- [ ] Implement cloud sync for timeline data
+- [ ] Add offline-first sync strategy
+- [ ] Create data migration utilities
+
+### v0.5.1 - User Authentication (FUTURE)
+- [ ] Implement Firebase Authentication (Email/Password + Google OAuth)
+- [ ] Create login/signup UI
+- [ ] Replace demo users with real user accounts
+- [ ] User profile management page
+- [ ] Account settings and preferences
+- [ ] Session management and security
+
+### v0.5.2 - Public Sharing & URLs (FUTURE)
+- [ ] Implement public/private timeline visibility
+- [ ] Create shareable URLs for public timelines
+- [ ] Add social sharing buttons (Twitter, Facebook, LinkedIn)
+- [ ] Implement Firestore Security Rules for access control
+- [ ] Create read-only public viewer
+- [ ] Add timeline embed functionality
+
+## Phase 3: Collaboration Features (v0.6.x) - DEFERRED
+
+**Note:** Collaboration features require Git-based storage and backend. Deferred until v0.5.x is complete.
+
+### v0.6.0 - Git-Based Timeline Storage (FUTURE)
 - [ ] Set up internal Git repository management system
-- [ ] Create timeline repository structure
-- [ ] Convert timeline data format from YAML to JSON
-- [ ] Implement internal git repository creation
-- [ ] Add JSON serialization/deserialization utilities
-- [ ] Create timeline-to-git commit workflow
-- [ ] Implement timeline loading from git repositories
-- [ ] Add version history tracking
-- [ ] Test git integration with sample timeline
+- [ ] Convert timeline format to JSON (optimized for Git diffs)
+- [ ] Implement Git commit workflow for saves
+- [ ] Create version history browser
+- [ ] Add diff viewer for comparing versions
+- [ ] Implement revert functionality
 
-### v0.4.1 - Demo Users System
-- [ ] Create demo user profiles (Alice, Bob, Charlie)
-- [ ] Implement user switching interface
-- [ ] Add user profile display
-- [ ] Implement user ownership validation
-- [ ] Create user context and state management
-- [ ] Restrict timeline editing to owners
-- [ ] Add user switching functionality
-- [ ] Pre-populate demo users with sample timelines
-
-### v0.4.2 - Landing Page & Timeline Discovery
-- [ ] Design and implement landing page layout
-- [ ] Create "My Timelines" section
-- [ ] Add "My Pull Requests" section
-- [ ] Implement "Most Popular Timelines" feed
-- [ ] Add "Most Active Timelines" feed
-- [ ] Create timeline card components
-- [ ] Add navigation from landing page to viewer/editor
-- [ ] Implement public timeline browsing
-- [ ] Add timeline search functionality
-
-### v0.4.3 - Public Timeline Sharing & URLs
-- [ ] Implement GitHub-style URL routing
-- [ ] Create public timeline viewer (read-only)
-- [ ] Add timeline metadata display
-- [ ] Implement public timeline sharing
-- [ ] Add social sharing buttons and meta tags
-- [ ] Create timeline embed functionality
-- [ ] Add timeline statistics display
-
-## Phase 2: Version Control (v0.5.x)
-
-### v0.5.0 - Version History
-- [ ] Every save creates new version with changelog
-- [ ] Version browser UI with diff viewer
-- [ ] Revert to previous versions
-- [ ] Version statistics and analytics
-
-### v0.5.1 - Forking System
+### v0.6.1 - Forking System (FUTURE)
 - [ ] Fork button and confirmation flow
+- [ ] Git clone operation for forking
 - [ ] Fork relationship tracking and display
 - [ ] Attribution system for original authors
-- [ ] Fork statistics
+- [ ] Fork network graph visualization
+- [ ] Fork statistics and analytics
 
-### v0.5.2 - Merge System
-- [ ] Timeline merge request workflow
-- [ ] Side-by-side timeline comparison tool
-- [ ] Cherry-pick events between timelines
-- [ ] Merge conflict resolution interface
-- [ ] Merge editor with Git-like operations
+### v0.6.2 - Merge Request System (FUTURE)
+- [ ] Create merge request workflow
+- [ ] Side-by-side diff viewer for changes
+- [ ] Comment system for review
+- [ ] Approve/reject/request changes workflow
+- [ ] Merge conflict detection and resolution UI
+- [ ] Notification system for merge requests
 
-## Phase 3: Discovery & Social (v0.6.x)
+## Phase 4: Discovery & Social (v0.7.x) - DEFERRED
 
-### v0.6.0 - Home Page & Discovery
-- [ ] Timeline gallery with grid/list views
-- [ ] Category system and tagging
-- [ ] Search functionality across all public timelines
+### v0.7.0 - Enhanced Discovery (FUTURE)
+- [ ] Advanced search with filters (date range, tags, category)
+- [ ] Timeline trending algorithm
 - [ ] Featured timeline curation
+- [ ] Category-based browsing
+- [ ] Timeline recommendations
 
-### v0.6.1 - Social Features
-- [ ] Follow users and timelines for updates
-- [ ] Activity feed showing timeline updates
+### v0.7.1 - Social Features (FUTURE)
+- [ ] Follow users and timelines
+- [ ] Activity feed showing updates
 - [ ] View counts and engagement metrics
-- [ ] Timeline collections and playlists
+- [ ] Timeline collections/playlists
+- [ ] User notifications
 
-### v0.6.2 - Trending & Recommendations
-- [ ] Trending timelines algorithm
-- [ ] Popular timelines by views/forks
-- [ ] Personalized timeline recommendations
-- [ ] "Related timelines" suggestions
+## Phase 5: Rich Media (v0.8.x) - DEFERRED
 
-## Phase 4: Rich Media (v0.7.x)
-
-### v0.7.0 - Media Attachments
+### v0.8.0 - Media Attachments (FUTURE)
 - [ ] Image and video uploads for events
+- [ ] Firebase Storage integration
 - [ ] Link previews with automatic metadata
 - [ ] Media gallery view for timelines
 - [ ] Media organization and tagging
 
-### v0.7.1 - Content Archival
+### v0.8.1 - Content Archival (FUTURE)
 - [ ] Automatic web page snapshots
-- [ ] Social media post archival and screenshots
+- [ ] Social media post archival
 - [ ] PDF and document storage
 - [ ] Link rot prevention and backup
 
-### v0.7.2 - Timeline Merging
-- [ ] Cross-timeline event correlation
-- [ ] Merge timelines to create comprehensive views
-- [ ] Event deduplication and conflict resolution
-- [ ] Multi-source event verification
+## Phase 6: AI Integration (v0.9.x) - FAR FUTURE
 
-## Phase 5: AI Integration (v0.8.x)
-
-### v0.8.0 - AI Chat Interface
+### v0.9.0 - AI Chat Interface (FUTURE)
 - [ ] Sidebar chatbot for timeline Q&A
 - [ ] Natural language event creation
 - [ ] Timeline summarization and insights
 - [ ] Event date/time assistance
 
-### v0.8.1 - AI-Powered Automation
+### v0.9.1 - AI-Powered Automation (FUTURE)
 - [ ] Auto-suggest related events from news feeds
 - [ ] Timeline gap detection and suggestions
 - [ ] Fact-checking assistance and source verification
