@@ -291,69 +291,32 @@ type(scope): description
 ## Success Criteria
 
 ### User Experience
-- Users can create and save timelines without errors (>99.9% success rate)
-- Timeline navigation feels intuitive and responsive (<100ms interaction latency)
+- Timeline creation and editing works without errors
+- Timeline navigation feels intuitive and responsive
 - Visual UI provides both high-level overview and detailed zoom experience
-- Collaboration workflow is clear and predictable (>80% task completion rate)
-- First-time users can create a timeline within 5 minutes
-- Users understand the fork/merge workflow without documentation (>70%)
+- Collaboration workflow is clear and understandable
+- Users can create their first timeline quickly
+- Fork/merge workflow is self-explanatory
 
 ### Platform Functionality
-- Timeline fork/merge workflow operates reliably (>99% success rate)
-- Version history tracking works accurately (100% commit capture)
-- Discovery features help users find relevant content (>60% search success rate)
-- Search returns relevant timeline results within 500ms
-- Merge conflict resolution succeeds on first attempt (>80%)
-- Timeline exports complete within 10 seconds for timelines up to 1000 events
+- Timeline fork/merge workflow operates reliably
+- Version history tracking captures all changes accurately
+- Discovery features help users find relevant content
+- Search returns relevant results quickly
+- Merge conflict resolution provides clear guidance
+- Timeline exports complete in reasonable time for large timelines
 
 ### Technical Performance
-- Page load time <2 seconds (p95) on 4G connection
-- Timeline rendering maintains 60fps with 1000+ events
-- Database queries complete in <200ms (p95)
-- API endpoints respond in <500ms (p95)
-- Internal Git operations complete within 5 seconds
-- URL routing and navigation work seamlessly (<50ms transitions)
-- Platform supports 10,000+ concurrent users
-- Uptime >99.9% (excluding planned maintenance)
-
-### Growth & Engagement Metrics
-**User Acquisition:**
-- 10,000+ registered users within first year
-- 30% monthly active user rate
-- 15% weekly active user rate
-- <20% bounce rate on landing page
-
-**Timeline Creation:**
-- Average 5+ timelines created per active user
-- 50% of new users create first timeline within 24 hours
-- 70% of timelines have >10 events
-- 30% of timelines are marked public (vs private)
-
-**Collaboration Activity:**
-- 20% of public timelines get forked at least once
-- 10% of users submit at least one merge request
-- Average 3 merge requests per popular timeline per month
-- 60% merge request acceptance rate
-- Average 2 days from merge request to review
-
-**Discovery & Social:**
-- 40% of timeline views come from discovery features (search, trending)
-- 25% of users follow at least one other user
-- Average 100+ timeline views per public timeline
-- 20% of users return to platform monthly to browse
-
-**Content Quality:**
-- Average 50+ events per timeline
-- 80% of events include descriptions (not just titles)
-- 30% of events include source citations
-- 15% of timelines include media attachments
-
-### Platform Health
-- <5% data loss incidents per year (with full backups)
-- <0.1% version control conflicts requiring manual intervention
-- Average time to resolve security issues: <24 hours (critical), <7 days (moderate)
-- Customer satisfaction score >4.0/5.0
-- Net Promoter Score (NPS) >40
+- **Page load time:** <2 seconds (p95) on 4G connection
+- **Timeline rendering:** Maintains 60fps with 1000+ events
+- **Database queries:** Complete in <200ms (p95)
+- **API endpoints:** Respond in <500ms (p95)
+- **Git operations:** Complete within 5 seconds
+- **Navigation:** URL routing transitions in <50ms
+- **Concurrency:** Platform supports 10,000+ concurrent users
+- **Reliability:** Uptime >99.9% (excluding planned maintenance)
+- **Data safety:** Zero data loss with automated backups
+- **Security response:** Critical issues resolved within 24 hours
 
 ## Non-Goals
 
