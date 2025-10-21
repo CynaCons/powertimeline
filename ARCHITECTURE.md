@@ -38,11 +38,145 @@ PowerTimeline renders a horizontal timeline with event cards positioned in indep
 
 ## Core Principles
 
-1. **Independent half-column systems**: Above and below timeline sections operate independently with no cross-communication
+1. **Independent half-column systems**: Above and below timeline sections operate independently with no cross-communication *
 2. **Alternating placement**: Events placed chronologically alternating above/below (Event 1 above, Event 2 below, Event 3 above, ...)
 3. **Spatial-based clustering**: Half-columns created based on horizontal overlap detection only (no artificial event count limits)
 4. **2-slot half-columns**: Each half-column contains exactly 2 slots for full cards
 5. **Temporal anchor centering**: Timeline anchors positioned at center of half-column events
+
+*_Note: Half-columns are independent EXCEPT when they form a spatial cluster requiring coordination for overflow management. See "Terminology & Key Concepts" below._
+
+## Terminology & Key Concepts
+
+**CRITICAL**: This section defines three distinct concepts that are often confused. Clear understanding is essential for implementing mixed card types and cluster-level coordination.
+
+### 1. Spatial Cluster (User-Visible Grouping)
+
+**Definition**: A visually perceivable region on the timeline containing related events from both above AND below the timeline.
+
+**Boundary Determination**:
+- Defined by horizontal overlap of event date ranges across above+below
+- If events in above half-column and below half-column occupy the same X-region, they form ONE spatial cluster
+- Multiple spatial clusters can exist along the timeline
+
+**Purpose**:
+- Represents what users see as "one area" or "one event group" on the timeline
+- Critical for visual consistency - users expect cards in the same X-region to behave similarly
+- Coordination unit for overflow management (if top overflows, bottom should match)
+
+**Example**:
+```
+Timeline View:
+   [Card A1] [Card A2]    [Card B1]
+         |      |             |
+    ════════════════════════════════  (Timeline Axis)
+         |      |             |
+   [Card C1] [Card C2]    [Card D1]
+
+Spatial Clusters:
+- Cluster 1: X-region containing A1, A2 (above) + C1, C2 (below)
+- Cluster 2: X-region containing B1 (above) + D1 (below)
+```
+
+**Key Insight**: A spatial cluster spans BOTH sides of the timeline. It's not just an above group or below group - it's the combination.
+
+---
+
+### 2. Half-Column (Implementation Structure)
+
+**Definition**: A storage and layout structure for events on ONE side of the timeline (either above OR below, never both).
+
+**Boundary Determination**:
+- Starts at leftmost event assigned to that side (above/below)
+- Extends to rightmost event in that side
+- Determined by spatial overlap detection within events of the same side
+
+**Purpose**:
+- Independent slot allocation for vertical space management
+- Card positioning and rendering unit
+- Capacity tracking (slots used/available)
+
+**Properties**:
+- **Side**: 'above' OR 'below' (never both)
+- **Capacity**: 2 slots for full cards (independently tracked)
+- **Cards**: Array of positioned cards for this half-column
+- **Overflow**: Events that don't fit in available slots
+
+**Example**:
+```
+Above Half-Columns (independent):
+   HC-A1         HC-A2       HC-A3
+  [E1, E3]      [E5]       [E7, E9]
+
+════════════════════════════════════════ (Timeline)
+
+Below Half-Columns (independent):
+   HC-B1         HC-B2       HC-B3
+  [E2, E4]      [E6]       [E8, E10]
+```
+
+**Key Insight**: Half-columns are the IMPLEMENTATION structure. Users don't see "half-columns" - they see spatial clusters.
+
+---
+
+### 3. Column Group (Code Data Structure)
+
+**Definition**: TypeScript interface in LayoutEngine representing a half-column in code.
+
+**Interface**:
+```typescript
+interface ColumnGroup {
+  id: string;
+  events: Event[];              // Visible events (within capacity)
+  overflowEvents?: Event[];     // Events exceeding capacity
+  startX: number;
+  endX: number;
+  centerX: number;
+  side: 'above' | 'below';      // Which half-column system
+  anchor: Anchor;
+  cards: PositionedCard[];
+  capacity: {
+    above: { used: number; total: number };
+    below: { used: number; total: number };
+  };
+}
+```
+
+**Purpose**:
+- Data structure passed between layout engine modules
+- Maps 1:1 with half-columns
+- Contains all information needed for rendering one half-column
+
+**Key Insight**: ColumnGroup is just the code representation of a half-column. In the codebase, "group" = "half-column".
+
+---
+
+### Terminology Mapping
+
+| User Sees | Implementation | Code Structure |
+|---|---|---|
+| **Spatial Cluster** (X-region with events above+below) | 1 Above Half-Column + 1 Below Half-Column | 2 ColumnGroup objects (side='above', side='below') |
+| Events "grouped together" | Events assigned to spatially overlapping half-columns | events[] arrays in matching ColumnGroups |
+| Overflow badge in a region | Overflow from either/both half-columns | overflowEvents[] in one or both ColumnGroups |
+
+---
+
+### When Terminology Matters
+
+**For Uniform Degradation (Current System)**:
+- Each **half-column** (ColumnGroup) independently determines card type
+- No coordination between above/below
+- Result: Bottom can show full cards while top shows compact (different half-columns)
+
+**For Mixed Card Types (Future Enhancement)**:
+- Each **spatial cluster** must coordinate degradation across above+below half-columns
+- If ANY half-column in a spatial cluster has overflow → ALL degrade uniformly
+- If NO overflow in spatial cluster → Each half-column can optimize independently
+
+**Critical Rule**:
+> **Overflow coordination happens at the SPATIAL CLUSTER level, not the half-column level.**
+
+---
 
 ## Card Types & Slot Allocation
 

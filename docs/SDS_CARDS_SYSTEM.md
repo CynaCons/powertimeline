@@ -153,6 +153,224 @@ interface DegradationMetrics {
 
 **Source**: `src/layout/LayoutEngine.ts` - Exported interface
 
+### 2.5 Two-Phase Degradation Strategy with Cluster Coordination
+
+**Current Implementation**: Uniform degradation (single card type per half-column)
+
+**Future Enhancement**: Two-phase strategy that coordinates degradation at spatial cluster level
+
+#### Phase 1: Cluster Identification and Overflow Analysis
+
+Before making degradation decisions, the system must identify spatial clusters and check for overflow:
+
+```typescript
+// Pseudocode - Future implementation
+interface SpatialCluster {
+  id: string;
+  xRegion: { start: number; end: number };  // X-position range
+  aboveGroup?: ColumnGroup;                 // Half-column above timeline
+  belowGroup?: ColumnGroup;                 // Half-column below timeline
+  hasOverflow: boolean;                     // ANY overflow in cluster
+  totalEvents: number;                      // Combined event count
+}
+
+function identifySpatialClusters(groups: ColumnGroup[]): SpatialCluster[] {
+  // Step 1: Group half-columns by X-region proximity
+  // Step 2: Match above/below pairs that share same X-region
+  // Step 3: Check cluster-wide overflow
+
+  const clusters: SpatialCluster[] = [];
+  const xThreshold = 50; // Pixels - consider groups within 50px as same cluster
+
+  for (const aboveGroup of aboveGroups) {
+    // Find matching below group in same X-region
+    const belowGroup = belowGroups.find(g =>
+      Math.abs(g.centerX - aboveGroup.centerX) < xThreshold
+    );
+
+    // Check if EITHER half-column has overflow
+    const aboveHasOverflow = (aboveGroup.overflowEvents?.length ?? 0) > 0;
+    const belowHasOverflow = (belowGroup?.overflowEvents?.length ?? 0) > 0;
+    const clusterHasOverflow = aboveHasOverflow || belowHasOverflow;
+
+    clusters.push({
+      id: `cluster-${aboveGroup.centerX}`,
+      xRegion: { start: aboveGroup.startX, end: aboveGroup.endX },
+      aboveGroup,
+      belowGroup,
+      hasOverflow: clusterHasOverflow,
+      totalEvents: aboveGroup.events.length + (belowGroup?.events.length ?? 0)
+    });
+  }
+
+  return clusters;
+}
+```
+
+**Key Insight**: Overflow checking happens at the **spatial cluster** level, not the individual half-column level.
+
+#### Phase 2: Degradation Decision with Coordination
+
+Once spatial clusters are identified, degradation decisions coordinate across above/below pairs:
+
+```typescript
+// Pseudocode - Future implementation
+function determineCardTypeForCluster(cluster: SpatialCluster): {
+  aboveCardTypes: CardType[];
+  belowCardTypes: CardType[];
+} {
+  // CRITICAL: Check cluster-wide overflow FIRST
+  if (cluster.hasOverflow) {
+    // Phase 2a: Uniform degradation when overflow exists
+    // Both above and below must use same degradation level
+    const totalEvents = cluster.totalEvents;
+    const uniformCardType = determineUniformCardType(totalEvents);
+
+    return {
+      aboveCardTypes: [uniformCardType], // All cards same type
+      belowCardTypes: [uniformCardType]  // All cards same type
+    };
+  } else {
+    // Phase 2b: Mixed card types allowed (no overflow in cluster)
+    // Can optimize information density with chronological priority
+
+    const aboveEvents = cluster.aboveGroup?.events ?? [];
+    const belowEvents = cluster.belowGroup?.events ?? [];
+
+    return {
+      aboveCardTypes: determineMixedCardTypes(aboveEvents),
+      belowCardTypes: determineMixedCardTypes(belowEvents)
+    };
+  }
+}
+
+function determineUniformCardType(eventCount: number): CardType {
+  // Same logic as current implementation
+  if (eventCount <= 2) return 'full';
+  if (eventCount <= 4) return 'compact';
+  return 'title-only';
+}
+
+function determineMixedCardTypes(events: Event[]): CardType[] {
+  // Mixed types with chronological priority
+  // Earlier events get full cards, later events degrade
+  const cardTypes: CardType[] = [];
+
+  for (let i = 0; i < events.length; i++) {
+    if (i < 1) {
+      cardTypes.push('full');      // First event: full card
+    } else if (i < 3) {
+      cardTypes.push('compact');   // Events 2-3: compact cards
+    } else {
+      cardTypes.push('title-only'); // Events 4+: title-only
+    }
+  }
+
+  return cardTypes;
+}
+```
+
+#### Algorithm Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Phase 1: Cluster Identification & Overflow Analysis     │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+    ┌───────────────────────────────────────┐
+    │ Identify spatial clusters by X-region │
+    │ Match above/below half-column pairs   │
+    └───────────────────────────────────────┘
+                        ↓
+    ┌───────────────────────────────────────┐
+    │ Check: Does cluster have overflow?    │
+    │ (ANY overflow in above OR below)      │
+    └───────────────────────────────────────┘
+                        ↓
+            ┌───────────┴───────────┐
+            ↓                       ↓
+    ┌──────────────┐        ┌──────────────┐
+    │ YES: Overflow│        │ NO: No       │
+    │ exists       │        │ overflow     │
+    └──────────────┘        └──────────────┘
+            ↓                       ↓
+┌──────────────────────────┐ ┌─────────────────────────┐
+│ Phase 2a: Uniform        │ │ Phase 2b: Mixed Card    │
+│ Degradation Required     │ │ Types Allowed           │
+└──────────────────────────┘ └─────────────────────────┘
+            ↓                       ↓
+    ┌──────────────┐        ┌──────────────────────┐
+    │ Both above   │        │ Chronological        │
+    │ AND below    │        │ Priority:            │
+    │ use SAME     │        │ - Earliest → Full    │
+    │ card type    │        │ - Middle → Compact   │
+    │              │        │ - Latest → Title     │
+    └──────────────┘        └──────────────────────┘
+```
+
+#### Critical Design Rules
+
+**Rule 1: Cluster-Wide Overflow Coordination**
+> If ANY half-column in a spatial cluster has overflow, BOTH half-columns must degrade uniformly.
+
+**Rule 2: Overflow Precedence**
+> Overflow checking takes priority over all other degradation optimizations.
+
+**Rule 3: Mixed Types Only When Safe**
+> Mixed card types can only be used when the spatial cluster has ZERO overflow.
+
+**Rule 4: Chronological Priority in Mixed Mode**
+> When using mixed card types, earlier events receive higher priority (full > compact > title-only).
+
+#### Example Scenarios
+
+**Scenario A: Overflow Above, No Overflow Below**
+```
+Spatial Cluster at X=500px:
+  Above: 6 events → HAS OVERFLOW
+  Below: 2 events → NO OVERFLOW
+
+Decision:
+  ✅ Above: Use title-only (fits 6 events)
+  ✅ Below: Use title-only (MUST MATCH above due to cluster overflow)
+  ❌ Below: Use full cards (WRONG - violates cluster coordination)
+```
+
+**Scenario B: No Overflow in Cluster**
+```
+Spatial Cluster at X=800px:
+  Above: 3 events → NO OVERFLOW
+  Below: 0 events → NO OVERFLOW
+
+Decision:
+  ✅ Above: Use 1 full + 2 compact (mixed types allowed)
+  ✅ Below: N/A (no events)
+```
+
+**Scenario C: Both Have Overflow**
+```
+Spatial Cluster at X=1200px:
+  Above: 10 events → HAS OVERFLOW
+  Below: 8 events → HAS OVERFLOW
+
+Decision:
+  ✅ Above: Use title-only (uniform degradation)
+  ✅ Below: Use title-only (uniform degradation)
+```
+
+#### Implementation Notes
+
+**Current Status**: The system currently uses uniform degradation (all cards in a half-column are the same type) without cluster coordination. This means overflow in the above section doesn't affect degradation decisions in the below section.
+
+**Migration Path**:
+1. Implement `identifySpatialClusters()` function in DegradationEngine
+2. Update `determineCardType()` to check cluster-wide overflow
+3. Add `determineMixedCardTypes()` for Phase 2b optimization
+4. Update tests to validate cluster coordination
+5. Enable feature flag for gradual rollout
+
+**Performance Impact**: Cluster identification adds O(n log n) complexity for sorting and matching, but n is typically small (<50 groups per layout), so impact is negligible.
+
 ## 3. Slot Allocation System
 
 ### 3.1 Slots Per Half-Column
@@ -426,6 +644,339 @@ Layout Engine Flow:
       - Merge nearby badges
       - Render merged badges at centroids
 ```
+
+### 6.4 Cluster Coordination Implementation Guidance
+
+This section provides practical guidance for implementing spatial cluster coordination in the degradation engine.
+
+#### Step 1: Add Spatial Cluster Interface
+
+Add new types to `src/layout/LayoutEngine.ts`:
+
+```typescript
+/**
+ * Spatial Cluster - Represents a visual grouping of events spanning above/below timeline
+ */
+export interface SpatialCluster {
+  id: string;
+  xRegion: {
+    start: number;
+    end: number;
+    center: number;
+  };
+  aboveGroup: ColumnGroup | null;
+  belowGroup: ColumnGroup | null;
+  hasOverflow: boolean;        // True if ANY half-column has overflow
+  totalEvents: number;          // Combined event count
+  recommendedCardType: CardType; // Uniform card type for cluster
+}
+```
+
+#### Step 2: Implement Cluster Identification
+
+Add new method to `DegradationEngine.ts`:
+
+```typescript
+/**
+ * Identify spatial clusters by matching above/below half-columns
+ * Groups share the same X-region if their centerX positions are within threshold
+ */
+private identifySpatialClusters(groups: ColumnGroup[]): SpatialCluster[] {
+  const X_THRESHOLD = 50; // pixels - groups within 50px are same cluster
+
+  const aboveGroups = groups.filter(g => g.side === 'above');
+  const belowGroups = groups.filter(g => g.side === 'below');
+  const clusters: SpatialCluster[] = [];
+  const processedBelow = new Set<string>();
+
+  // Iterate through above groups and find matching below groups
+  for (const above of aboveGroups) {
+    // Find below group in same X-region
+    const below = belowGroups.find(g =>
+      !processedBelow.has(g.id) &&
+      Math.abs(g.centerX - above.centerX) < X_THRESHOLD
+    );
+
+    if (below) processedBelow.add(below.id);
+
+    // Check cluster-wide overflow
+    const aboveOverflow = (above.overflowEvents?.length ?? 0) > 0;
+    const belowOverflow = (below?.overflowEvents?.length ?? 0) > 0;
+    const hasOverflow = aboveOverflow || belowOverflow;
+
+    // Calculate total events
+    const totalEvents = above.events.length + (below?.events.length ?? 0);
+
+    // Determine recommended uniform card type for cluster
+    const recommendedCardType = this.determineUniformCardType(totalEvents);
+
+    clusters.push({
+      id: `cluster-${above.centerX}`,
+      xRegion: {
+        start: above.startX,
+        end: above.endX,
+        center: above.centerX
+      },
+      aboveGroup: above,
+      belowGroup: below ?? null,
+      hasOverflow,
+      totalEvents,
+      recommendedCardType
+    });
+  }
+
+  // Handle orphan below groups (no matching above group)
+  const orphanBelowGroups = belowGroups.filter(g => !processedBelow.has(g.id));
+  for (const below of orphanBelowGroups) {
+    const hasOverflow = (below.overflowEvents?.length ?? 0) > 0;
+    const totalEvents = below.events.length;
+    const recommendedCardType = this.determineUniformCardType(totalEvents);
+
+    clusters.push({
+      id: `cluster-${below.centerX}`,
+      xRegion: {
+        start: below.startX,
+        end: below.endX,
+        center: below.centerX
+      },
+      aboveGroup: null,
+      belowGroup: below,
+      hasOverflow,
+      totalEvents,
+      recommendedCardType
+    });
+  }
+
+  return clusters;
+}
+
+/**
+ * Determine uniform card type based on total event count
+ * Same thresholds as current production algorithm
+ */
+private determineUniformCardType(eventCount: number): CardType {
+  if (eventCount <= 2) return 'full';
+  if (eventCount <= 4) return 'compact';
+  return 'title-only';
+}
+```
+
+#### Step 3: Update Degradation Logic to Use Clusters
+
+Modify `applyDegradationAndPromotion()` in `DegradationEngine.ts`:
+
+```typescript
+/**
+ * Apply degradation with cluster coordination
+ */
+applyDegradationAndPromotion(groups: ColumnGroup[]): ColumnGroup[] {
+  this.resetMetrics();
+
+  // Phase 1: Identify spatial clusters
+  const clusters = this.identifySpatialClusters(groups);
+
+  // Phase 2: Apply coordinated degradation
+  for (const cluster of clusters) {
+    if (cluster.hasOverflow) {
+      // Phase 2a: Uniform degradation (overflow exists)
+      const cardType = cluster.recommendedCardType;
+
+      if (cluster.aboveGroup) {
+        cluster.aboveGroup.cards = this.createIndividualCards(
+          cluster.aboveGroup,
+          [cardType] // Uniform card type
+        );
+      }
+
+      if (cluster.belowGroup) {
+        cluster.belowGroup.cards = this.createIndividualCards(
+          cluster.belowGroup,
+          [cardType] // Same uniform card type
+        );
+      }
+
+      // Update metrics
+      this.trackDegradation(cluster, cardType, 'uniform');
+
+    } else {
+      // Phase 2b: Mixed card types allowed (no overflow)
+
+      if (cluster.aboveGroup) {
+        const mixedTypes = this.determineMixedCardTypes(cluster.aboveGroup.events);
+        cluster.aboveGroup.cards = this.createIndividualCards(
+          cluster.aboveGroup,
+          mixedTypes // Can use mixed card types
+        );
+      }
+
+      if (cluster.belowGroup) {
+        const mixedTypes = this.determineMixedCardTypes(cluster.belowGroup.events);
+        cluster.belowGroup.cards = this.createIndividualCards(
+          cluster.belowGroup,
+          mixedTypes // Can use mixed card types
+        );
+      }
+
+      // Update metrics
+      this.trackDegradation(cluster, null, 'mixed');
+    }
+  }
+
+  return groups;
+}
+
+/**
+ * Determine mixed card types with chronological priority
+ * Earlier events get full cards, later events degrade
+ */
+private determineMixedCardTypes(events: Event[]): CardType[] {
+  const cardTypes: CardType[] = [];
+
+  for (let i = 0; i < events.length; i++) {
+    if (i === 0) {
+      cardTypes.push('full');      // First event: full card
+    } else if (i <= 2) {
+      cardTypes.push('compact');   // Events 2-3: compact cards
+    } else {
+      cardTypes.push('title-only'); // Events 4+: title-only
+    }
+  }
+
+  return cardTypes;
+}
+```
+
+#### Step 4: Add Telemetry for Cluster Coordination
+
+Extend `DegradationMetrics` interface:
+
+```typescript
+interface DegradationMetrics {
+  // Existing metrics...
+  totalGroups: number;
+  fullCardGroups: number;
+  compactCardGroups: number;
+  titleOnlyCardGroups: number;
+
+  // New cluster coordination metrics
+  totalClusters: number;           // Total spatial clusters identified
+  clustersWithOverflow: number;    // Clusters requiring uniform degradation
+  clustersWithMixedTypes: number;  // Clusters using mixed card types
+  clusterCoordinationEvents: Array<{
+    clusterId: string;
+    hasOverflow: boolean;
+    aboveCardType: CardType | 'mixed';
+    belowCardType: CardType | 'mixed';
+    coordinationApplied: boolean;  // True if below was forced to match above
+  }>;
+}
+```
+
+#### Step 5: Testing Strategy
+
+**Unit Tests** (`DegradationEngine.spec.ts`):
+```typescript
+describe('Cluster Coordination', () => {
+  test('overflow above forces degradation below', () => {
+    // Setup: above has 6 events (overflow), below has 2 events (no overflow)
+    // Expected: both use title-only due to cluster coordination
+  });
+
+  test('no overflow allows mixed types', () => {
+    // Setup: above has 3 events (no overflow), below has 0 events
+    // Expected: above uses 1 full + 2 compact (mixed types)
+  });
+
+  test('orphan below group degrades independently', () => {
+    // Setup: below group with no matching above group
+    // Expected: below makes independent degradation decision
+  });
+});
+```
+
+**E2E Tests** (`tests/v5/67-mixed-card-types.spec.ts`):
+```typescript
+test('French Revolution timeline shows cluster coordination', async ({ page }) => {
+  // Load dense timeline with multiple spatial clusters
+  // Verify that X-regions with overflow show uniform degradation
+  // Verify that X-regions without overflow can use mixed types
+});
+```
+
+#### Step 6: Feature Flag Implementation
+
+Add feature flag to `src/layout/config.ts`:
+
+```typescript
+export const FEATURE_FLAGS = {
+  ENABLE_CLUSTER_COORDINATION: false, // Default: disabled
+  ENABLE_MIXED_CARD_TYPES: false,     // Default: disabled
+} as const;
+```
+
+Use feature flag in `DegradationEngine.ts`:
+
+```typescript
+import { FEATURE_FLAGS } from '../config';
+
+applyDegradationAndPromotion(groups: ColumnGroup[]): ColumnGroup[] {
+  if (FEATURE_FLAGS.ENABLE_CLUSTER_COORDINATION) {
+    // New cluster-coordinated algorithm
+    return this.applyClusterCoordinatedDegradation(groups);
+  } else {
+    // Original production algorithm (fallback)
+    return this.applyLegacyDegradation(groups);
+  }
+}
+```
+
+#### Step 7: Gradual Rollout Plan
+
+**Phase A: Implementation & Testing**
+1. Implement cluster identification (Step 2)
+2. Add unit tests for cluster coordination
+3. Add E2E tests for visual validation
+4. Ensure 100% test pass rate
+
+**Phase B: Feature Flag Rollout**
+1. Deploy with `ENABLE_CLUSTER_COORDINATION: false`
+2. Enable flag in development environment
+3. Run full test suite + manual QA
+4. Monitor telemetry for unexpected behavior
+
+**Phase C: Mixed Card Types**
+1. Enable `ENABLE_CLUSTER_COORDINATION: true` in production
+2. Monitor for 1 week, validate no regressions
+3. Enable `ENABLE_MIXED_CARD_TYPES: true` in development
+4. Repeat testing cycle
+5. Enable in production after validation
+
+**Phase D: Cleanup**
+1. Remove feature flags after stable rollout
+2. Remove legacy degradation code
+3. Update documentation to reflect production algorithm
+
+#### Common Pitfalls & Solutions
+
+**Pitfall 1: X-Threshold Too Large**
+- **Problem**: Unrelated half-columns incorrectly grouped as same cluster
+- **Solution**: Tune `X_THRESHOLD` based on card width (start with 50px, adjust if needed)
+
+**Pitfall 2: Orphan Groups Not Handled**
+- **Problem**: Below groups without matching above groups cause crashes
+- **Solution**: Always handle orphan groups as independent clusters (see Step 2)
+
+**Pitfall 3: Overflow Calculation Timing**
+- **Problem**: Checking overflow before `createIndividualCards()` misses promoted overflow events
+- **Solution**: Run cluster identification AFTER initial overflow assignment in DispatchEngine
+
+**Pitfall 4: Mixed Types Without Space Validation**
+- **Problem**: Mixed card types overflow vertical space despite no event overflow
+- **Solution**: Always validate available vertical space before allowing mixed types
+
+**Pitfall 5: Telemetry Doesn't Track Coordination**
+- **Problem**: Can't debug or monitor cluster coordination behavior
+- **Solution**: Add comprehensive metrics (Step 4) and log coordination decisions
 
 ## 7. Performance Considerations
 

@@ -41,6 +41,23 @@ export interface ColumnGroup {
   };
 }
 
+/**
+ * Spatial Cluster - Represents a visual grouping of events spanning above/below timeline
+ */
+export interface SpatialCluster {
+  id: string;
+  xRegion: {
+    start: number;
+    end: number;
+    center: number;
+  };
+  aboveGroup: ColumnGroup | null;
+  belowGroup: ColumnGroup | null;
+  hasOverflow: boolean;        // True if ANY half-column has overflow
+  totalEvents: number;          // Combined event count
+  recommendedCardType: import('./types').CardType; // Uniform card type for cluster
+}
+
 export interface DispatchMetrics {
   groupCount: number;
   avgEventsPerCluster: number;
@@ -66,6 +83,17 @@ export interface DegradationMetrics {
     from: string;
     to: string;
     spaceSaved: number;
+  }>;
+  // Cluster coordination metrics
+  totalClusters: number;           // Total spatial clusters identified
+  clustersWithOverflow: number;    // Clusters requiring uniform degradation
+  clustersWithMixedTypes: number;  // Clusters using mixed card types
+  clusterCoordinationEvents: Array<{
+    clusterId: string;
+    hasOverflow: boolean;
+    aboveCardType: string;  // 'full' | 'compact' | 'title-only' | 'mixed'
+    belowCardType: string;  // 'full' | 'compact' | 'title-only' | 'mixed'
+    coordinationApplied: boolean;  // True if below was forced to match above
   }>;
 }
 

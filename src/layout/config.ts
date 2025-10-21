@@ -10,7 +10,7 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   compact: {
     type: 'compact',
     width: 260,
-    height: 92  // Increased from 78px to provide adequate space for title (2 lines) + description (1 line) + date
+    height: 75  // Reduced from 92px to 75px so that 4 compact cards fit in half-column (4 × 75px + 3 × 12px = 336px)
   },
   'title-only': {
     type: 'title-only',
@@ -18,6 +18,17 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
     height: 32
   },
 };
+
+// Card height in cells for capacity tracking (mixed card type support)
+// Used by DegradationEngine for greedy packing algorithm
+export const CARD_HEIGHT_CELLS: Record<CardType, number> = {
+  'full': 4,
+  'compact': 2,
+  'title-only': 1
+} as const;
+
+// Timeline margin constant (used in capacity calculations)
+const TIMELINE_MARGIN = 80; // pixels reserved for timeline axis and spacing
 
 export function createLayoutConfig(
   viewportWidth: number,
@@ -74,11 +85,35 @@ export function calculateMaxSlotsPerCluster(config: LayoutConfig): {
 } {
   const availableHeightPerSide = (config.viewportHeight / 2) - 50; // Leave margin for timeline
   const slotsPerSide = Math.floor(availableHeightPerSide / (config.cardConfigs.full.height + config.rowSpacing));
-  
+
   return {
     singleColumn: slotsPerSide * 2, // Above + below
     dualColumn: slotsPerSide * 4    // (Above + below) * 2 columns
   };
+}
+
+/**
+ * Calculate maximum cells available in a semi-column for mixed card types
+ * Uses title-only card height as the base cell unit
+ *
+ * @param viewportHeight - Current viewport height in pixels
+ * @param rowSpacing - Spacing between cards in pixels
+ * @returns Maximum number of cells (title-only card height units) per semi-column
+ */
+export function calculateMaxCellsPerSemiColumn(
+  viewportHeight: number,
+  rowSpacing: number
+): number {
+  const availableHeight = (viewportHeight / 2) - TIMELINE_MARGIN;
+  const cellHeight = DEFAULT_CARD_CONFIGS['title-only'].height;
+
+  // Calculate how many cells fit, accounting for spacing between cards
+  // We can fit roughly: availableHeight / (cellHeight + rowSpacing)
+  const maxCards = Math.floor(availableHeight / (cellHeight + rowSpacing));
+
+  // Each title-only card = 1 cell, so max cells ≈ max title-only cards
+  // Add some buffer for spacing variations
+  return Math.max(8, maxCards); // Minimum 8 cells, typically 10-12 for standard viewport
 }
 
 // Viewport breakpoints for different behaviors
@@ -98,7 +133,7 @@ export function getViewportCategory(width: number): keyof typeof VIEWPORT_BREAKP
 
 export function getViewportSpecificConfig(width: number, height: number): Partial<LayoutConfig> {
   const category = getViewportCategory(width);
-  
+
   switch (category) {
     case 'mobile':
       return {
@@ -132,3 +167,17 @@ export function getViewportSpecificConfig(width: number, height: number): Partia
       return {};
   }
 }
+
+/**
+ * Feature Flags for gradual rollout of new features
+ *
+ * ENABLE_CLUSTER_COORDINATION: Enables spatial cluster coordination for degradation
+ * ENABLE_MIXED_CARD_TYPES: Enables mixed card types within clusters (re-enabled with correct math)
+ *   - Compact card height reduced to 75px so 4 compact cards fit (4 × 75px + 3 × 12px = 336px)
+ *   - Allows mixing full + compact + title-only with chronological priority
+ *   - Only enabled when spatial cluster has NO overflow
+ */
+export const FEATURE_FLAGS = {
+  ENABLE_CLUSTER_COORDINATION: true,   // Enable cluster coordination
+  ENABLE_MIXED_CARD_TYPES: true,       // ENABLED - re-introduced with correct math (v0.3.6.3)
+} as const;

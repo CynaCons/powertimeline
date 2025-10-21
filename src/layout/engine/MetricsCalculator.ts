@@ -70,7 +70,11 @@ export class MetricsCalculator {
         ? degradationMetrics.compactCardGroups / degradationMetrics.totalGroups
         : 0,
       spaceReclaimed: degradationMetrics.spaceReclaimed,
-      degradationTriggers: degradationMetrics.degradationTriggers
+      degradationTriggers: degradationMetrics.degradationTriggers,
+      totalClusters: degradationMetrics.totalClusters,
+      clustersWithOverflow: degradationMetrics.clustersWithOverflow,
+      clustersWithMixedTypes: degradationMetrics.clustersWithMixedTypes,
+      clusterCoordinationEvents: degradationMetrics.clusterCoordinationEvents
     };
 
     return { dispatch, degradation, adaptive };

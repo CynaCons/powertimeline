@@ -53,40 +53,25 @@ export class PositioningEngine {
     const anchors: Anchor[] = [];
     const clusters: EventCluster[] = [];
 
-    // Calculate vertical space available for cards
-    const topMargin = 20; // smaller top margin to use more space
-    const bottomMargin = 20; // smaller bottom margin to use more space
+    // Calculate vertical space reserved for margins and anchors
+    // NOTE: We don't calculate available space here anymore - DegradationEngine handles capacity
     const timelineMargin = 24; // tighter spacing to timeline
-    const availableAbove = this.timelineY - topMargin - timelineMargin;
-    const availableBelow = this.config.viewportHeight - this.timelineY - bottomMargin - timelineMargin;
+    // Note: Anchor spacing constants are defined in createEventAnchors() where they're used
 
     for (const group of groups) {
       // Calculate optimal card size to better use available space
       const cardSpacing = 12; // reduced inter-card spacing
 
-      // Use card type that was already determined in degradation phase
-      // The group.cards should already have the correct cardType from applyDegradationAndPromotion
-      const firstCard = group.cards?.[0];
-      const cardType = firstCard?.cardType || 'full'; // fallback to full if no cards
-      const cardConfig = this.config.cardConfigs[cardType];
-      const cardHeight = cardConfig.height;
+      // Mixed card type support: cards may have different heights within the same group
+      // The group.cards already have correct heights set by DegradationEngine
+      // IMPORTANT: DegradationEngine already calculated capacity - DO NOT recalculate here!
+      // Recalculating creates mismatches that cause gaps in mixed card columns
 
       const isAboveHalfColumn = group.side === 'above';
       const isBelowHalfColumn = group.side === 'below';
 
-      // Half-column capacity: respect pre-determined above/below assignment using actual card height
-      const maxCardsAbove = Math.floor(availableAbove / (cardHeight + cardSpacing));
-      const maxCardsBelow = Math.floor(availableBelow / (cardHeight + cardSpacing));
-
-      const cardsAboveLimit = isAboveHalfColumn ? Math.min(maxCardsAbove, group.cards.length) : 0;
-      const cardsBelowLimit = isBelowHalfColumn ? Math.min(maxCardsBelow, group.cards.length) : 0;
-      const totalCapacity = cardsAboveLimit + cardsBelowLimit;
-
-      // Use configured card height for positioning (no dynamic calculation)
-      // This ensures consistent sizing based on card type degradation
-
-      // Limit cards to what actually fits
-      const actualCards = group.cards.slice(0, totalCapacity);
+      // Trust DegradationEngine's capacity calculation - use all cards it created
+      const actualCards = group.cards;
 
       // Update anchor with proper visible count and overflow count
       // Filter overflow events by current view window to prevent leftover indicators
@@ -119,15 +104,16 @@ export class PositioningEngine {
         anchors.push(...eventAnchors);
 
         // Respect half-column pre-determined position (above vs below)
-        const aboveCards = isAboveHalfColumn ? actualCards.slice(0, cardsAboveLimit) : [];
-        const belowCards = isBelowHalfColumn ? actualCards.slice(0, cardsBelowLimit) : [];
+        // Each group is EITHER above OR below (never both)
+        const aboveCards = isAboveHalfColumn ? actualCards : [];
+        const belowCards = isBelowHalfColumn ? actualCards : [];
 
-        // Position above cards with dynamic sizing and proper spacing
-        // Add extra spacing to create room for upper anchor line
-        const upperAnchorSpacing = 25; // Additional space for upper anchor line
-        let aboveY = this.timelineY - timelineMargin - upperAnchorSpacing;
+        // Position above cards with mixed heights and proper spacing
+        // Start from timeline and stack upward (decreasing Y)
+        let aboveY = this.timelineY - timelineMargin;
         aboveCards.forEach((card) => {
-          card.height = cardHeight;
+          // Use the card's pre-set height from DegradationEngine (don't overwrite!)
+          // card.height is already set correctly for mixed card types
           card.y = aboveY - card.height;
           card.x = group.centerX - (card.width / 2);
 
@@ -137,12 +123,12 @@ export class PositioningEngine {
           this.capacityModel.allocate(group.id, 'above', card.cardType);
         });
 
-        // Position below cards with dynamic sizing and proper spacing
-        // Add extra spacing to create room for lower anchor line
-        const lowerAnchorSpacing = 25; // Additional space for lower anchor line
-        let belowY = this.timelineY + timelineMargin + lowerAnchorSpacing;
+        // Position below cards with mixed heights and proper spacing
+        // Start from timeline and stack downward (increasing Y)
+        let belowY = this.timelineY + timelineMargin;
         belowCards.forEach((card) => {
-          card.height = cardHeight;
+          // Use the card's pre-set height from DegradationEngine (don't overwrite!)
+          // card.height is already set correctly for mixed card types
           card.y = belowY;
           card.x = group.centerX - (card.width / 2);
 
@@ -187,6 +173,7 @@ export class PositioningEngine {
 
   /**
    * Resolve collisions between positioned cards
+   * CC-REQ-LAYOUT-XALIGN-001: Cards within same half-column must maintain X-alignment
    */
   private resolveCollisions(positionedCards: PositionedCard[]): void {
     const resolveOverlaps = (items: PositionedCard[], preferRight = true) => {
@@ -211,21 +198,29 @@ export class PositioningEngine {
             if (!collide(A, B)) continue;
             const target = preferRight ? B : A;
             const other = preferRight ? A : B;
-            // Try horizontal nudge away from overlap
-            let nx = target.x;
-            const required = other.x + Math.sign(target.x - other.x || 1) * (other.width / 2 + target.width / 2 + spacing);
-            nx = required;
-            const ny = target.y;
-            if (within(nx - target.width / 2, ny - target.height / 2, target.width, target.height)) {
-              target.x = Math.max(target.width / 2, Math.min(this.config.viewportWidth - target.width / 2, nx));
-              changed = true;
-              continue;
+
+            // CC-REQ-LAYOUT-XALIGN-001: Check if cards are in same half-column (same clusterId)
+            // Cards in same half-column must NEVER be nudged horizontally to maintain X-alignment
+            const sameHalfColumn = target.clusterId === other.clusterId;
+
+            // Try horizontal nudge ONLY if cards are from DIFFERENT half-columns
+            if (!sameHalfColumn) {
+              let nx = target.x;
+              const required = other.x + Math.sign(target.x - other.x || 1) * (other.width / 2 + target.width / 2 + spacing);
+              nx = required;
+              const ny = target.y;
+              if (within(nx - target.width / 2, ny - target.height / 2, target.width, target.height)) {
+                target.x = Math.max(target.width / 2, Math.min(this.config.viewportWidth - target.width / 2, nx));
+                changed = true;
+                continue;
+              }
             }
-            // If horizontal fails, try vertical step within the same band
+
+            // If horizontal nudge skipped (same half-column) or failed, try vertical step within the same band
             const step = target.height + 12;
-            let newY = ny;
-            if (aAbove) newY = Math.max(0 + target.height / 2, ny - step);
-            else newY = Math.min(this.config.viewportHeight - target.height / 2, ny + step);
+            let newY = target.y;
+            if (aAbove) newY = Math.max(0 + target.height / 2, target.y - step);
+            else newY = Math.min(this.config.viewportHeight - target.height / 2, target.y + step);
             if (within(target.x - target.width / 2, newY - target.height / 2, target.width, target.height)) {
               target.y = newY;
               changed = true;
