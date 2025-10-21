@@ -3,20 +3,7 @@ import type { CSSProperties } from 'react';
 import type { Event } from '../types';
 import type { LayoutConfig, PositionedCard, Anchor, EventCluster } from './types';
 
-interface TelemetryData {
-  placements?: {
-    items?: Array<{
-      id: string;
-      x: number;
-      y: number;
-      clusterId: string;
-    }>;
-  };
-}
-
-interface WindowWithTelemetry extends Window {
-  __ccTelemetry?: TelemetryData;
-}
+// Telemetry types now defined in vite-env.d.ts Window interface
 import { createLayoutConfig } from './config';
 import { DeterministicLayoutV5, type DispatchMetrics } from './LayoutEngine';
 import { useAxisTicks, type Tick } from '../timeline/hooks/useAxisTicks';
@@ -187,10 +174,10 @@ export function DeterministicLayoutComponent({
 
 
   // Debug function for browser console
-  const DEBUG_LAYOUT = typeof window !== 'undefined' && ((window as Window & { __CC_DEBUG_LAYOUT?: boolean }).__CC_DEBUG_LAYOUT || (import.meta as ImportMeta & { env?: { DEV?: boolean } })?.env?.DEV);
+  const DEBUG_LAYOUT = typeof window !== 'undefined' && (window.__CC_DEBUG_LAYOUT || import.meta.env?.DEV);
 
   useEffect(() => {
-    (window as Window & { debugTimelineScales?: () => unknown }).debugTimelineScales = () => {
+    window.debugTimelineScales = () => {
       const container = document.querySelector('[data-testid="timeline-scales-container"]') as HTMLElement;
       const svg = document.querySelector('[data-testid="timeline-scales-svg"]') as SVGElement;
       const texts = document.querySelectorAll('[data-testid="timeline-scales-svg"] text');
@@ -413,7 +400,7 @@ export function DeterministicLayoutComponent({
     }));
 
     // Compare with previous snapshot to compute migrations
-    const prev = (window as WindowWithTelemetry).__ccTelemetry;
+    const prev = window.__ccTelemetry;
     let migrations = 0;
     if (prev && Array.isArray(prev.placements?.items)) {
       const prevMap = new Map(prev.placements!.items!.map(it => [String(it.id), it]));
@@ -567,7 +554,7 @@ export function DeterministicLayoutComponent({
       degradation: layoutResult.telemetryMetrics?.degradation
     };
 
-    (window as WindowWithTelemetry).__ccTelemetry = telemetry;
+    window.__ccTelemetry = telemetry;
   }, [layoutResult, events, viewportSize.width, viewportSize.height, config]);
 
 

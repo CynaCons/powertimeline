@@ -18,3 +18,31 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
 }
+
+// Window interface augmentation for debug and telemetry features
+interface Window {
+	/** Debug flag for layout visualization */
+	__CC_DEBUG_LAYOUT?: boolean;
+
+	/** Timeline telemetry data for testing and debugging */
+	__ccTelemetry?: {
+		placements?: {
+			items?: Array<{
+				id: string;
+				x: number;
+				y: number;
+				clusterId: string;
+			}>;
+		};
+		groups?: {
+			count?: number;
+		};
+		capacity?: {
+			totalCells?: number;
+		};
+		[key: string]: unknown;
+	};
+
+	/** Debug function for inspecting timeline scales */
+	debugTimelineScales?: () => unknown;
+}

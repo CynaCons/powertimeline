@@ -586,6 +586,29 @@
 
 ---
 
+## Iteration v0.3.7.1 - Code Quality & Refactoring Sprint
+**Goal:** Clean up technical debt and improve code maintainability without breaking functionality
+
+**Baseline Test Status:** 154 passed, 12 failed, 15 skipped (pre-existing failures documented)
+
+- [x] Fix ResizeObserver memory leak in useElementSize hook
+- [x] Add proper window type augmentation in vite-env.d.ts (remove unsafe 'as' casts)
+- [x] Centralize configuration values in CapacityModel (added LAYOUT_CONSTANTS)
+- [ ] Fix feature flags to use environment variables
+- [ ] Remove debug code and create proper logger utility
+- [ ] Standardize error handling with structured error types
+- [ ] Extract keyboard shortcuts from App.tsx into custom hook
+- [x] Verify TypeScript compilation and production build succeeds
+- [ ] Update documentation with refactoring notes
+
+**Success Criteria:**
+- No new test failures introduced ✅
+- Test count remains 154 passed minimum (to verify)
+- Application runs without console errors (to verify)
+- All refactored code maintains existing behavior ✅
+
+---
+
 ## Iteration v0.3.8 - Product Vision Evolution & PRD Update
 **Goal:** Update product requirements to reflect collaborative platform transformation
 

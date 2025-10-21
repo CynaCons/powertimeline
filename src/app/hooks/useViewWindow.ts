@@ -192,7 +192,7 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     }
     
     try {
-      const w = window as Window & { __CC_DEBUG_LAYOUT?: boolean };
+      const w = window;
       if (w.__CC_DEBUG_LAYOUT) {
         console.log(`ZOOM RESULT: cursor=${cursorTimePosition.toFixed(3)}, window=[${newStart.toFixed(3)}, ${newEnd.toFixed(3)}]`);
       }

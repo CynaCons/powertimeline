@@ -1,6 +1,6 @@
 /**
  * Capacity Model for Deterministic Layout v5
- * 
+ *
  * Terminology:
  * - Cell: Base grid unit for capacity accounting (smallest unit of space)
  * - Footprint: Number of cells consumed by a placed card
@@ -20,6 +20,27 @@ export const CARD_FOOTPRINTS: Record<CardType, number> = {
 
 // Available placements per column side (above or below timeline)
 export const PLACEMENTS_PER_SIDE = 4; // 4 placement slots above, 4 below
+
+/**
+ * Layout spacing and sizing constants
+ * These values are calibrated for optimal visual density and prevent timeline overlap
+ */
+export const LAYOUT_CONSTANTS = {
+  /** Margin reserved for timeline axis and scale labels (prevents card/label overlap) */
+  TIMELINE_MARGIN: 100, // pixels
+
+  /** Height of title-only card (matches config.ts DEFAULT_CARD_CONFIGS) */
+  TITLE_ONLY_CARD_HEIGHT: 32, // pixels
+
+  /** Vertical spacing between cards */
+  CARD_VERTICAL_SPACING: 12, // pixels
+
+  /** Minimum cells per half-column (ensures minimum capacity even on small screens) */
+  MIN_CELLS_PER_SIDE: 4,
+
+  /** Maximum cells per half-column (optimal for readability, validated in production) */
+  MAX_CELLS_PER_SIDE: 8,
+} as const;
 
 // Degradation cascade with capacity requirements (1->2->4 mathematics)
 export const DEGRADATION_CASCADE = [
@@ -56,14 +77,16 @@ export class CapacityModel {
 
   constructor(viewportHeight: number) {
     // Calculate available cells based on viewport
-    // Each cell represents 1 title-only card height (32px) + spacing (12px) = 44px
-    // Leave enough margin for timeline labels and spacing
-    const timelineMargin = 100; // Increased margin to prevent overlap with timeline labels
-    const availableHeight = (viewportHeight / 2) - timelineMargin;
-    const cellUnit = 32 + 12; // title-only height + spacing = 44px per cell
+    // Each cell represents 1 title-only card + spacing
+    const availableHeight = (viewportHeight / 2) - LAYOUT_CONSTANTS.TIMELINE_MARGIN;
+    const cellUnit = LAYOUT_CONSTANTS.TITLE_ONLY_CARD_HEIGHT + LAYOUT_CONSTANTS.CARD_VERTICAL_SPACING;
     this.cellsPerSide = Math.floor(availableHeight / cellUnit);
-    // Cap at 8 cells per side for optimal display (production standard)
-    this.cellsPerSide = Math.min(8, Math.max(4, this.cellsPerSide));
+
+    // Cap cells to optimal range for readability and performance
+    this.cellsPerSide = Math.min(
+      LAYOUT_CONSTANTS.MAX_CELLS_PER_SIDE,
+      Math.max(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE, this.cellsPerSide)
+    );
   }
 
   /**
