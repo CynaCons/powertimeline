@@ -126,6 +126,10 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | CC-REQ-CARDS-DISPLAY-002 | Cards have three display types: full (169px), compact (92px), and title-only (32px) | `src/layout/config.ts`, `src/layout/LayoutEngine.ts` | v5/03, v5/47, v5/48 |
 | CC-REQ-CARDS-DISPLAY-003 | Cards are color-coded by card type (full, compact, title-only) for visual distinction | `src/layout/cardIcons.ts`, `src/styles/colors.ts` | v5/40, v5/41 |
 
+### 18. Home Page & Timeline Discovery
+
+➡️ See [`SRS_HOME_PAGE.md`](SRS_HOME_PAGE.md) for detailed requirements covering the landing page, user directory, timeline browsing, routing structure, and search/filter functionality.
+
 ### 14. Navigation & Panels
 
 | ID | Requirement | Code | Tests |

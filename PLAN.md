@@ -651,6 +651,12 @@
 ### v0.4.0 - Landing Page & Timeline Discovery (NEXT PRIORITY)
 **Goal:** Build GitHub-style home page for browsing timelines by user (works with localStorage, no backend)
 
+**Requirements Documentation:**
+- [x] Create comprehensive SRS document (docs/SRS_HOME_PAGE.md)
+- [x] Define 25+ requirements across 6 feature areas
+- [x] Document data structures and routing patterns
+- [x] Plan 16 Playwright test scenarios
+
 **User Experience:**
 - [ ] Design landing page layout (similar to GitHub homepage)
 - [ ] Create user list/directory view (using mock/demo users: Alice, Bob, Charlie)
