@@ -653,18 +653,31 @@
 
 **Requirements Documentation:**
 - [x] Create comprehensive SRS document (docs/SRS_HOME_PAGE.md)
-- [x] Define 25+ requirements across 6 feature areas
-- [x] Document data structures and routing patterns
+- [x] Revise with search-first, user-section-first design
+- [x] Define 40+ requirements across 9 feature areas
+- [x] Document unified search (timelines + users)
+- [x] Plan activity feeds (Recently Edited, Popular, Featured)
 - [x] Plan 16 Playwright test scenarios
 
-**User Experience:**
-- [ ] Design landing page layout (similar to GitHub homepage)
-- [ ] Create user list/directory view (using mock/demo users: Alice, Bob, Charlie)
-- [ ] Display timeline cards per user (title, description, event count, preview)
-- [ ] Click user → view user's timeline list
-- [ ] Click timeline → navigate to timeline editor/viewer
-- [ ] Add basic search/filter by timeline title
-- [ ] Add timeline preview on hover (minimap thumbnail)
+**Page Layout (Top to Bottom):**
+1. Header (logo, user profile link)
+2. **Search Bar** (unified search for timelines and users)
+3. **My Timelines** (user's personal workspace with create button) ⬅️ TOP PRIORITY
+4. Statistics Dashboard (platform metrics)
+5. Recently Edited feed
+6. Popular Timelines feed
+7. Featured Timelines feed
+
+**Key Features:**
+- [ ] Implement unified search bar (searches timelines AND users)
+- [ ] Build "My Timelines" section with create button nested inside
+- [ ] Display platform statistics (timelines, users, events, views count)
+- [ ] Show "Recently Edited" timelines feed (sorted by updatedAt)
+- [ ] Show "Popular" timelines feed (sorted by viewCount)
+- [ ] Show "Featured" timelines feed (featured flag)
+- [ ] Timeline cards with metadata (title, description, event count, owner, dates)
+- [ ] Click timeline card → navigate to editor
+- [ ] User profiles accessible by clicking owner name/avatar
 
 **Routing & Navigation:**
 - [ ] Implement URL routing structure: `/user/:userId` and `/user/:userId/timeline/:timelineId`
