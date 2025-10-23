@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import { EnhancedTooltip } from './EnhancedTooltip';
 import { useTheme } from '../contexts/ThemeContext';
 
-interface NavigationItem {
+export interface NavigationItem {
   id: string;
   label: string;
   icon: string | React.ReactNode;
@@ -13,18 +13,28 @@ interface NavigationItem {
   color?: string;
 }
 
-interface NavigationRailProps {
+export interface NavigationSection {
+  type: 'global' | 'context' | 'utilities';
   items: NavigationItem[];
+}
+
+interface NavigationRailProps {
+  items?: NavigationItem[];  // Legacy support
+  sections?: NavigationSection[];  // New sectioned format
   activeItemId?: string;
   onKeyboardNavigation?: (direction: 'up' | 'down') => void;
 }
 
 export const NavigationRail: React.FC<NavigationRailProps> = ({
   items,
+  sections,
   activeItemId,
   onKeyboardNavigation
 }) => {
   const railRef = useRef<HTMLDivElement>(null);
+
+  // Support legacy items array or new sections array
+  const displaySections: NavigationSection[] = sections || (items ? [{ type: 'global', items }] : []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,7 +58,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   }, [onKeyboardNavigation]);
 
   const getButtonStyles = (item: NavigationItem) => {
-    const isActive = item.id === activeItemId;
+    const isActive = item.id === activeItemId || item.isActive;
     return {
       bgcolor: isActive ? 'grey.900' : undefined,
       color: isActive ? 'common.white' : item.color || 'text.primary',
@@ -92,31 +102,46 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       role="navigation"
       aria-label="Main navigation"
     >
-      {items.map((item, index) => (
-        <EnhancedTooltip
-          key={item.id}
-          title={item.label}
-          shortcut={item.shortcut}
-          placement="right"
-        >
-          <IconButton
-            aria-label={item.label}
-            size="small"
-            onClick={item.onClick}
-            sx={getButtonStyles(item)}
-            className="nav-button"
-            data-nav-index={index}
-            tabIndex={0}
-          >
-            {typeof item.icon === 'string' ? (
-              <span className="material-symbols-rounded nav-icon">
-                {item.icon}
-              </span>
-            ) : (
-              item.icon
-            )}
-          </IconButton>
-        </EnhancedTooltip>
+      {displaySections.map((section, sectionIndex) => (
+        <React.Fragment key={`section-${section.type}-${sectionIndex}`}>
+          {/* Section items */}
+          {section.items.map((item, itemIndex) => (
+            <EnhancedTooltip
+              key={item.id}
+              title={item.label}
+              shortcut={item.shortcut}
+              placement="right"
+            >
+              <IconButton
+                aria-label={item.label}
+                size="small"
+                onClick={item.onClick}
+                sx={getButtonStyles(item)}
+                className="nav-button"
+                data-nav-index={itemIndex}
+                data-section={section.type}
+                tabIndex={0}
+              >
+                {typeof item.icon === 'string' ? (
+                  <span className="material-symbols-rounded nav-icon">
+                    {item.icon}
+                  </span>
+                ) : (
+                  item.icon
+                )}
+              </IconButton>
+            </EnhancedTooltip>
+          ))}
+
+          {/* Separator between sections (not after last section) */}
+          {sectionIndex < displaySections.length - 1 && (
+            <div
+              className="w-8 h-px bg-gray-300 my-2"
+              role="separator"
+              aria-hidden="true"
+            />
+          )}
+        </React.Fragment>
       ))}
     </div>
   );
