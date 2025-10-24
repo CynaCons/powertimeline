@@ -13,9 +13,13 @@ import {
   getPopularTimelines,
   getFeaturedTimelines,
   getPlatformStatistics,
+  searchTimelinesAndUsers,
 } from '../lib/homePageStorage';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
+import { UserProfileMenu } from '../components/UserProfileMenu';
+import { UserSwitcherModal } from '../components/UserSwitcherModal';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -30,6 +34,13 @@ export function HomePage() {
     eventCount: 0,
     viewCount: 0,
   });
+  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{
+    timelines: Timeline[];
+    users: User[];
+    hasMore: boolean;
+  } | null>(null);
 
   // Get navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id);
@@ -58,6 +69,27 @@ export function HomePage() {
     navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
   };
 
+  const handleUserClick = (user: User) => {
+    navigate(`/user/${user.id}`);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    if (query.trim().length >= 2) {
+      const results = searchTimelinesAndUsers(query);
+      setSearchResults(results);
+    } else {
+      setSearchResults(null);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Navigation Rail */}
@@ -84,35 +116,124 @@ export function HomePage() {
       <div className="flex-1 ml-14">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="max-w-6xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between mb-2">
               <h1 className="text-2xl font-bold text-gray-900">PowerTimeline</h1>
+              <div className="flex items-center gap-4">
+                {currentUser && (
+                  <UserProfileMenu
+                    onSwitchAccount={() => setUserSwitcherOpen(true)}
+                    onLogout={() => {
+                      // Clear current user and redirect to home
+                      localStorage.removeItem('powertimeline_current_user');
+                      window.location.href = '/';
+                    }}
+                  />
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              {currentUser && (
-                <button
-                  onClick={() => navigate(`/user/${currentUser.id}`)}
-                  className="flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
-                >
-                  <span className="text-2xl">{currentUser.avatar}</span>
-                  <span className="text-sm font-medium text-gray-700">{currentUser.name}</span>
-                </button>
-              )}
-            </div>
+            <Breadcrumb items={[{ label: 'Home' }]} />
           </div>
         </header>
 
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Search Bar - Placeholder */}
-        <div className="mb-8">
+        {/* Search Bar */}
+        <div className="mb-8 relative">
           <div className="relative">
+            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 material-symbols-rounded">
+              search
+            </span>
             <input
               type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
               placeholder="Search timelines and users..."
-              className="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+              className="w-full pl-14 pr-12 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 material-symbols-rounded"
+                aria-label="Clear search"
+              >
+                close
+              </button>
+            )}
           </div>
+
+          {/* Search Results Dropdown */}
+          {searchResults && (
+            <div className="absolute top-full mt-2 w-full bg-white border-2 border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
+              {searchResults.timelines.length === 0 && searchResults.users.length === 0 ? (
+                <div className="p-6 text-center text-gray-500">
+                  No results found for "{searchQuery}"
+                </div>
+              ) : (
+                <>
+                  {/* Timeline Results */}
+                  {searchResults.timelines.length > 0 && (
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                        Timelines ({searchResults.timelines.length})
+                      </h3>
+                      <div className="space-y-2">
+                        {searchResults.timelines.map(timeline => (
+                          <button
+                            key={timeline.id}
+                            onClick={() => {
+                              handleTimelineClick(timeline);
+                              clearSearch();
+                            }}
+                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="font-medium text-gray-900">{timeline.title}</div>
+                            <div className="text-sm text-gray-500 mt-1">
+                              {timeline.events.length} events • by {timeline.ownerId}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* User Results */}
+                  {searchResults.users.length > 0 && (
+                    <div className="p-4 border-t border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                        Users ({searchResults.users.length})
+                      </h3>
+                      <div className="space-y-2">
+                        {searchResults.users.map(user => (
+                          <button
+                            key={user.id}
+                            onClick={() => {
+                              handleUserClick(user);
+                              clearSearch();
+                            }}
+                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3"
+                          >
+                            <div className="text-2xl">{user.avatar}</div>
+                            <div>
+                              <div className="font-medium text-gray-900">{user.name}</div>
+                              <div className="text-sm text-gray-500 mt-1">{user.bio}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Has More Indicator */}
+                  {searchResults.hasMore && (
+                    <div className="p-4 border-t border-gray-200 text-center text-sm text-gray-500">
+                      More results available. Continue typing to refine search.
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* My Timelines Section */}
@@ -259,6 +380,12 @@ export function HomePage() {
         )}
         </main>
       </div>
+
+      {/* User Switcher Modal */}
+      <UserSwitcherModal
+        open={userSwitcherOpen}
+        onClose={() => setUserSwitcherOpen(false)}
+      />
     </div>
   );
 }

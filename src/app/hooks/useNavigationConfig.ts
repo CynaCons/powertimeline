@@ -26,6 +26,9 @@ export interface NavigationItem {
 
 export interface NavigationSection {
   type: 'global' | 'context' | 'utilities';
+  title?: string;  // Optional section title
+  collapsible?: boolean;  // Whether section can be collapsed
+  defaultCollapsed?: boolean;  // Default collapse state
   items: NavigationItem[];
 }
 

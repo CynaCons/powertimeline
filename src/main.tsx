@@ -13,34 +13,54 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { createAppTheme } from './styles/theme'
 import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
-import { initializeUsers, getTimelines, saveTimelines, migrateEventsToTimeline } from './lib/homePageStorage'
+import { initializeUsers, getTimelines, saveTimelines, migrateEventsToTimeline, createSampleTimelines, getCurrentUser, checkAndMigrateData } from './lib/homePageStorage'
 import { EventStorage } from './lib/storage'
 // Firebase disabled for now - will be enabled in v0.4.x when needed
 // import './lib/firebase'
 
-// Initialize users and migrate existing timeline data on first load
+// Initialize users and timeline data on first load
 function initializeHomePageData() {
+  // Check for data version and migrate if needed
+  checkAndMigrateData();
+
   // Initialize demo users
   initializeUsers();
 
-  // Check if we need to migrate existing timeline data
+  // Ensure CynaCons is the default current user
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    logger.warn('No current user found during initialization');
+  } else {
+    logger.info('Current user initialized', { userId: currentUser.id, name: currentUser.name });
+  }
+
+  // Check if we need to initialize timeline data
   const timelines = getTimelines();
   if (timelines.length === 0) {
-    // Check if there's existing Event[] data in localStorage
+    // Check if there's existing Event[] data in localStorage (legacy migration)
     const storage = new EventStorage();
     const events = storage.load();
 
     if (events.length > 0) {
-      // Migrate existing events to Timeline format
+      // Migrate existing events to Timeline format and add to current user
       const migratedTimeline = migrateEventsToTimeline(
         events,
-        'RFK Timeline',
-        'cynacons'
+        'RFK Timeline (Migrated)',
+        currentUser?.id || 'cynacons'
       );
-      saveTimelines([migratedTimeline]);
-      logger.info('Migrated existing events to Timeline format', {
-        eventCount: events.length,
-        timelineId: migratedTimeline.id
+      // Also create sample timelines for other users
+      const sampleTimelines = createSampleTimelines();
+      saveTimelines([migratedTimeline, ...sampleTimelines]);
+      logger.info('Migrated existing events and created sample timelines', {
+        migratedEventCount: events.length,
+        totalTimelines: sampleTimelines.length + 1
+      });
+    } else {
+      // No existing data, create sample timelines for all users
+      const sampleTimelines = createSampleTimelines();
+      saveTimelines(sampleTimelines);
+      logger.info('Created sample timelines for all users', {
+        timelineCount: sampleTimelines.length
       });
     }
   }

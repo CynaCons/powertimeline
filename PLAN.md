@@ -698,19 +698,35 @@
 - [x] Build succeeds with no TypeScript errors
 - [x] Dev server running successfully on http://localhost:5174/
 
-*Remaining Tasks (TO BE IMPLEMENTED):*
-- [ ] Add collapsible section support to NavigationRail component
-- [ ] Update App.tsx (editor) to use context-aware navigation with editor tools
-- [ ] Create UserProfileMenu dropdown component (Google/Microsoft style account switcher)
-- [ ] Create UserSwitcherModal component for switching between CynaCons and Alice
-- [ ] Update headers on all pages to use UserProfileMenu instead of plain text
-- [ ] Add Alice back to demo users list (removed during primary user change)
-- [ ] Update Dev Panel seed functions to assign timelines to current user instead of hardcoded owner
-- [ ] Implement functional search (currently placeholder)
-- [ ] Add breadcrumb navigation (Home > User > Timeline)
+*Completed During Session (2025-10-24):*
+- [x] Create UserProfileMenu dropdown component (Google/Microsoft style account switcher)
+- [x] Create UserSwitcherModal component for switching between demo users
+- [x] Update headers on all pages to use UserProfileMenu instead of plain text
+- [x] Add Alice back to demo users list
+- [x] Update Dev Panel seed functions to assign timelines to current user instead of hardcoded owner
+- [x] Implement slug-based timeline IDs (timeline-french-revolution format)
+- [x] Add French Revolution timeline to CynaCons user
+- [x] Fix timeline navigation bug (wrong content displayed)
+- [x] Implement automatic data migration system with versioning
+- [x] Create comprehensive timeline content verification tests (v5/73)
+- [x] Enhance timeline navigation tests with event count verification (v5/72)
 
-**Key Features (Basic Implementation Complete):**
-- [x] Basic search bar placeholder (functional search TODO)
+*Final Completed Tasks (2025-10-24 Session 2):*
+- [x] Add collapsible section support to NavigationRail component (infrastructure already in place)
+- [x] Update App.tsx (editor) to use context-aware navigation with editor tools (already implemented)
+- [x] Implement functional search with real-time results and dropdown UI
+- [x] Add breadcrumb navigation (Home > User > Timeline) to all three pages
+- [x] Create reusable Breadcrumb component with Material Icons chevrons
+- [x] Add breadcrumb to HomePage showing "Home"
+- [x] Add breadcrumb to UserProfilePage showing "Home > User Name"
+- [x] Add breadcrumb to EditorPage showing "Home > User Name > Timeline Title"
+
+*Status:* ✅ **All v0.4.0 remaining tasks completed!**
+
+**Key Features (ALL Features Complete):**
+- [x] Functional search with real-time results dropdown
+- [x] Search supports timelines and users
+- [x] Search results with click-to-navigate
 - [x] "My Timelines" section with create button
 - [x] Platform statistics dashboard (4 metrics: timelines, users, events, views)
 - [x] "Recently Edited" feed with sorting by updatedAt
@@ -720,10 +736,12 @@
 - [x] Click timeline card → navigate to editor
 - [x] User profiles accessible by clicking owner name/avatar
 
-**Routing & Navigation (Complete):**
+**Routing & Navigation (ALL Complete):**
 - [x] URL routing structure: `/`, `/user/:userId`, `/user/:userId/timeline/:timelineId`
 - [x] Browser navigation (back/forward) via React Router
-- [ ] Breadcrumb navigation (Home > User > Timeline) - TODO
+- [x] Breadcrumb navigation on all pages (Home, User Profile, Editor)
+- [x] Breadcrumbs show current location with clickable links
+- [x] Material Icons chevron separators between breadcrumb items
 
 **Data Management (Complete):**
 - [x] localStorage for timeline data

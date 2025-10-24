@@ -9,6 +9,9 @@ import type { Timeline, User } from '../types';
 import { getUserById, getTimelinesByOwner, getCurrentUser } from '../lib/homePageStorage';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
+import { UserProfileMenu } from '../components/UserProfileMenu';
+import { UserSwitcherModal } from '../components/UserSwitcherModal';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
@@ -16,6 +19,7 @@ export function UserProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [timelines, setTimelines] = useState<Timeline[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const currentUser = getCurrentUser();
 
   // Get navigation configuration
@@ -78,7 +82,23 @@ export function UserProfilePage() {
         {/* Header */}
         <header className="bg-white border-b border-gray-200">
           <div className="max-w-6xl mx-auto px-6 py-4">
-            <h1 className="text-lg font-semibold text-gray-900">User Profile</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-lg font-semibold text-gray-900">User Profile</h1>
+              {currentUser && (
+                <UserProfileMenu
+                  onSwitchAccount={() => setUserSwitcherOpen(true)}
+                  onLogout={() => {
+                    // Clear current user and redirect to home
+                    localStorage.removeItem('powertimeline_current_user');
+                    window.location.href = '/';
+                  }}
+                />
+              )}
+            </div>
+            <Breadcrumb items={[
+              { label: 'Home', href: '/' },
+              { label: user.name }
+            ]} />
           </div>
         </header>
 
@@ -135,6 +155,12 @@ export function UserProfilePage() {
         )}
         </main>
       </div>
+
+      {/* User Switcher Modal */}
+      <UserSwitcherModal
+        open={userSwitcherOpen}
+        onClose={() => setUserSwitcherOpen(false)}
+      />
     </div>
   );
 }

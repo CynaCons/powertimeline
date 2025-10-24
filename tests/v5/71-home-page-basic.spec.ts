@@ -18,8 +18,8 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
       }
     });
 
-    // Basic page elements should be visible
-    await expect(page.locator('text=PowerTimeline')).toBeVisible({ timeout: 5000 });
+    // Basic page elements should be visible - check for the main heading specifically
+    await expect(page.locator('h1:has-text("PowerTimeline")')).toBeVisible({ timeout: 5000 });
   });
 
   test('navigation rail is present with global navigation', async ({ page }) => {
@@ -93,10 +93,15 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Click on user name/avatar to navigate to profile
-    const userButton = page.locator('button:has-text("CynaCons")');
-    await expect(userButton).toBeVisible({ timeout: 5000 });
-    await userButton.click();
+    // Click on UserProfileMenu button (aria-label="Account menu")
+    const userMenuButton = page.locator('button[aria-label="Account menu"]');
+    await expect(userMenuButton).toBeVisible({ timeout: 5000 });
+    await userMenuButton.click();
+
+    // Wait for menu to open and click "My Timelines" option
+    await page.waitForSelector('[role="menu"]', { state: 'visible' });
+    const myTimelinesOption = page.locator('[role="menuitem"]:has-text("My Timelines")');
+    await myTimelinesOption.click();
 
     // Should navigate to user profile page
     await expect(page).toHaveURL(/\/user\/cynacons/, { timeout: 5000 });

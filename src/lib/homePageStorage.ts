@@ -4,6 +4,7 @@
  */
 
 import type { Timeline, User, Event, SearchResults } from '../types';
+import { seedRFKTimeline, seedJFKTimeline, seedFrenchRevolutionTimeline, seedNapoleonTimeline, seedDeGaulleTimeline } from './devSeed';
 
 /**
  * localStorage keys for home page data
@@ -15,7 +16,73 @@ export const STORAGE_KEYS = {
   VIEW_PREFERENCES: 'powertimeline_view_prefs',
   STATS_CACHE: 'powertimeline_stats',
   VIEW_COUNTS: 'powertimeline_view_counts',
+  DATA_VERSION: 'powertimeline_data_version',
 } as const;
+
+/**
+ * Current data version for migration tracking
+ * Increment this when data structure changes require migration
+ */
+const CURRENT_DATA_VERSION = 2; // v2: slug-based timeline IDs
+
+/**
+ * Get current data version from localStorage
+ */
+function getDataVersion(): number {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.DATA_VERSION);
+    return stored ? parseInt(stored, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Set data version in localStorage
+ */
+function setDataVersion(version: number): void {
+  localStorage.setItem(STORAGE_KEYS.DATA_VERSION, version.toString());
+}
+
+/**
+ * Check if timeline IDs are in old timestamp format
+ * Old format: timeline-1761254688359-1
+ * New format: timeline-french-revolution
+ */
+function hasOldTimelineIdFormat(timelines: Timeline[]): boolean {
+  return timelines.some(t => /timeline-\d{13}-\d+/.test(t.id));
+}
+
+/**
+ * Check if data migration is needed and perform it
+ * Returns true if migration was performed
+ */
+export function checkAndMigrateData(): boolean {
+  const currentVersion = getDataVersion();
+
+  if (currentVersion >= CURRENT_DATA_VERSION) {
+    // Check if data is actually valid (no old-format IDs)
+    const timelines = getTimelines();
+    if (timelines.length > 0 && hasOldTimelineIdFormat(timelines)) {
+      console.log('Detected old timeline ID format, resetting data...');
+      // Clear old data including legacy EventStorage
+      localStorage.removeItem(STORAGE_KEYS.TIMELINES);
+      localStorage.removeItem('powertimeline-events'); // Legacy EventStorage key
+      setDataVersion(CURRENT_DATA_VERSION);
+      return true;
+    }
+    return false; // No migration needed
+  }
+
+  console.log(`Migrating data from version ${currentVersion} to ${CURRENT_DATA_VERSION}...`);
+
+  // Clear old data including legacy EventStorage and let initialization create fresh data
+  localStorage.removeItem(STORAGE_KEYS.TIMELINES);
+  localStorage.removeItem('powertimeline-events'); // Legacy EventStorage key
+  setDataVersion(CURRENT_DATA_VERSION);
+
+  return true;
+}
 
 /**
  * Demo users for v0.4.0
@@ -28,6 +95,13 @@ export const DEMO_USERS: User[] = [
     name: 'CynaCons',
     avatar: '⚡',
     bio: 'Building collaborative timeline experiences with PowerTimeline. Exploring the intersection of history, technology, and knowledge sharing.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'alice',
+    name: 'Alice',
+    avatar: '👩‍💼',
+    bio: 'Product manager specializing in historical data visualization and collaborative tools.',
     createdAt: new Date().toISOString(),
   },
   {
@@ -104,9 +178,9 @@ export function getCurrentUser(): User | null {
     console.error('Failed to load current user:', error);
   }
 
-  // Default to Alice if no user set
+  // Default to CynaCons (first user in DEMO_USERS array)
   const users = getUsers();
-  const defaultUser = users[0];
+  const defaultUser = users[0]; // CynaCons
   if (defaultUser) {
     setCurrentUser(defaultUser);
     return defaultUser;
@@ -123,26 +197,188 @@ export function setCurrentUser(user: User): void {
 }
 
 /**
+ * Generate a URL-safe slug from a title
+ * Example: "French Revolution" -> "french-revolution"
+ */
+export function generateSlugFromTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+    .replace(/^-+|-+$/g, '')      // Remove leading/trailing hyphens
+    .slice(0, 50);                // Limit length
+}
+
+/**
+ * Generate a unique timeline ID
+ * Format: timeline-{slug} or timeline-{slug}-{number} if slug exists
+ */
+export function generateTimelineId(title: string, ownerId: string): string {
+  const baseSlug = generateSlugFromTitle(title);
+  const timelines = getTimelines();
+
+  // Check if this slug already exists for this owner
+  const existingSlugs = timelines
+    .filter(t => t.ownerId === ownerId)
+    .map(t => t.id)
+    .filter(id => id.startsWith(`timeline-${baseSlug}`));
+
+  if (existingSlugs.length === 0) {
+    return `timeline-${baseSlug}`;
+  }
+
+  // Find next available number suffix
+  let counter = 2;
+  while (existingSlugs.includes(`timeline-${baseSlug}-${counter}`)) {
+    counter++;
+  }
+  return `timeline-${baseSlug}-${counter}`;
+}
+
+/**
  * Convert legacy Event[] to Timeline format
  * Used for migrating existing timeline data
+ *
+ * @param events - Array of events to convert
+ * @param title - Timeline title
+ * @param ownerId - Owner user ID (defaults to current user, or 'cynacons' if no current user)
+ * @param customId - Optional custom ID (will be slugified if provided)
  */
 export function migrateEventsToTimeline(
   events: Event[],
   title: string = 'My Timeline',
-  ownerId: string = 'cynacons'
+  ownerId?: string,
+  customId?: string
 ): Timeline {
   const now = new Date().toISOString();
+
+  // Use provided ownerId, or current user, or fallback to 'cynacons'
+  const finalOwnerId = ownerId || getCurrentUser()?.id || 'cynacons';
+
+  // Generate ID from custom ID or title
+  const timelineId = customId
+    ? `timeline-${generateSlugFromTitle(customId)}`
+    : generateTimelineId(title, finalOwnerId);
+
   return {
-    id: `timeline-${Date.now()}`,
+    id: timelineId,
     title,
     description: `Migrated timeline with ${events.length} events`,
     events,
-    ownerId,
+    ownerId: finalOwnerId,
     createdAt: now,
     updatedAt: now,
     viewCount: 0,
     featured: false,
   };
+}
+
+/**
+ * Create sample timelines for all demo users
+ * Called on first initialization when no timelines exist
+ */
+export function createSampleTimelines(): Timeline[] {
+  const now = new Date().toISOString();
+
+  const sampleTimelines: Timeline[] = [
+    // CynaCons - RFK Timeline (with actual events)
+    {
+      id: 'timeline-rfk-1968-campaign',
+      title: 'RFK 1968 Campaign',
+      description: 'Robert F. Kennedy\'s presidential campaign timeline from announcement to tragic end',
+      events: seedRFKTimeline(),
+      ownerId: 'cynacons',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: true,
+    },
+    // CynaCons - JFK Timeline (with actual events)
+    {
+      id: 'timeline-jfk-presidency-1961-1963',
+      title: 'JFK Presidency 1961-1963',
+      description: 'Key events during John F. Kennedy\'s presidency',
+      events: seedJFKTimeline(),
+      ownerId: 'cynacons',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+    // CynaCons - French Revolution Timeline (with actual events)
+    {
+      id: 'timeline-french-revolution',
+      title: 'French Revolution',
+      description: 'Timeline of the French Revolution from 1789-1799, documenting the fall of the monarchy and rise of the Republic',
+      events: seedFrenchRevolutionTimeline(),
+      ownerId: 'cynacons',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+    // CynaCons - Napoleon Timeline (with actual events)
+    {
+      id: 'timeline-napoleon-bonaparte',
+      title: 'Napoleon Bonaparte',
+      description: 'Rise and fall of Napoleon Bonaparte from the French Revolution to his exile',
+      events: seedNapoleonTimeline(),
+      ownerId: 'cynacons',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+    // CynaCons - Charles de Gaulle Timeline (with actual events)
+    {
+      id: 'timeline-charles-de-gaulle',
+      title: 'Charles de Gaulle',
+      description: 'Life and political career of Charles de Gaulle, from Free France to the Fifth Republic',
+      events: seedDeGaulleTimeline(),
+      ownerId: 'cynacons',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+    // Alice - Product Timeline
+    {
+      id: 'timeline-powertimeline-product-roadmap',
+      title: 'PowerTimeline Product Roadmap',
+      description: 'Development milestones and feature releases for PowerTimeline',
+      events: [],
+      ownerId: 'alice',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+    // Bob - Scientific Discoveries
+    {
+      id: 'timeline-major-scientific-discoveries',
+      title: 'Major Scientific Discoveries',
+      description: 'Timeline of groundbreaking scientific achievements throughout history',
+      events: [],
+      ownerId: 'bob',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+    // Charlie - Art Movements
+    {
+      id: 'timeline-modern-art-movements',
+      title: 'Modern Art Movements',
+      description: 'Evolution of art styles from Impressionism to Contemporary',
+      events: [],
+      ownerId: 'charlie',
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      featured: false,
+    },
+  ];
+
+  return sampleTimelines;
 }
 
 /**

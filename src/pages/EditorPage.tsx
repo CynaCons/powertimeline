@@ -5,13 +5,17 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getTimelineById, incrementViewCount } from '../lib/homePageStorage';
+import { getTimelineById, incrementViewCount, getUserById } from '../lib/homePageStorage';
+import { Breadcrumb } from '../components/Breadcrumb';
+import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
 
 export function EditorPage() {
-  const { timelineId } = useParams<{ timelineId: string }>();
+  const { timelineId, userId } = useParams<{ timelineId: string; userId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [timeline, setTimeline] = useState<Timeline | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     if (!timelineId) {
@@ -27,10 +31,15 @@ export function EditorPage() {
       return;
     }
 
+    const usr = userId ? (getUserById(userId) || null) : null;
+
+    setTimeline(tl);
+    setUser(usr);
+
     // Increment view count for the timeline
     incrementViewCount(timelineId);
     setLoading(false);
-  }, [timelineId, navigate]);
+  }, [timelineId, userId, navigate]);
 
   if (loading) {
     return (
@@ -42,7 +51,21 @@ export function EditorPage() {
     );
   }
 
-  // For now, render the existing App component (timeline editor)
-  // In the future, we'll pass timeline data as props
-  return <App />;
+  // Render the editor with the timeline ID and breadcrumb
+  return (
+    <div className="relative">
+      {timeline && user && (
+        <div className="absolute top-11 left-20 z-[100] pointer-events-none">
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded px-3 py-0.5 pointer-events-auto inline-block">
+            <Breadcrumb items={[
+              { label: 'Home', href: '/' },
+              { label: user.name, href: `/user/${user.id}` },
+              { label: timeline.title }
+            ]} />
+          </div>
+        </div>
+      )}
+      <App timelineId={timelineId} />
+    </div>
+  );
 }

@@ -2,6 +2,8 @@
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
+import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
+import { getCurrentUser, getTimelineById } from './lib/homePageStorage';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from './contexts/ThemeContext';
@@ -39,12 +41,24 @@ import { usePerformanceMonitoring } from './app/hooks/usePerformanceMonitoring';
 
 const DEV_FLAG_KEY = 'powertimeline-dev';
 
+interface AppProps {
+  timelineId?: string;  // Optional timeline ID to load from home page storage
+}
 
-function App() {
+function App({ timelineId }: AppProps = {}) {
   usePerformanceMonitoring();
   // Storage
   const storageRef = useRef(new EventStorage());
   const [events, setEvents] = useState<Event[]>(() => {
+    // If timelineId is provided, load from that timeline
+    if (timelineId) {
+      const timeline = getTimelineById(timelineId);
+      if (timeline && timeline.events.length > 0) {
+        return timeline.events;
+      }
+    }
+
+    // Otherwise, load from legacy EventStorage
     const stored = storageRef.current.load();
     if (stored.length > 0) {
       return stored;
@@ -57,6 +71,24 @@ function App() {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  // Reload events when timelineId changes
+  useEffect(() => {
+    if (timelineId) {
+      const timeline = getTimelineById(timelineId);
+      if (timeline) {
+        console.log('Loading timeline:', timeline.title, 'with', timeline.events.length, 'events');
+        setEvents(timeline.events);
+        return;
+      }
+    }
+
+    // If no timelineId or timeline not found, load from EventStorage
+    const stored = storageRef.current.load();
+    if (stored.length > 0) {
+      setEvents(stored);
+    }
+  }, [timelineId]);
 
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
   const selected = useMemo(
@@ -357,8 +389,8 @@ function App() {
     setActiveNavItem(null);
   }, []);
 
-  // Navigation rail items
-  const navigationItems = useMemo(() => [
+  // Editor-specific navigation items (context section)
+  const editorItems: NavigationItem[] = useMemo(() => [
     {
       id: 'events',
       label: 'Events',
@@ -375,9 +407,6 @@ function App() {
       onClick: openCreate,
       color: 'primary.main',
     },
-  ], [overlay, openEvents, openCreate]);
-
-  const utilityItems = useMemo(() => [
     {
       id: 'dev',
       label: 'Developer Panel',
@@ -386,7 +415,13 @@ function App() {
       onClick: openDev,
       isActive: overlay === 'dev',
     },
-  ], [overlay, openDev]);
+  ], [overlay, openEvents, openCreate, openDev]);
+
+  // Get current user for navigation context
+  const currentUser = useMemo(() => getCurrentUser(), []);
+
+  // Get context-aware navigation configuration
+  const { sections } = useNavigationConfig(currentUser?.id, editorItems);
 
   // Command palette commands
   const commands: Command[] = useMemo(() => [
@@ -485,18 +520,9 @@ function App() {
             />
           </div>
 
-          {/* Main Navigation */}
+          {/* Context-Aware Navigation */}
           <NavigationRail
-            items={navigationItems}
-            activeItemId={activeNavItem || undefined}
-          />
-
-          {/* Visual separator */}
-          <div className="nav-group-separator my-4"></div>
-
-          {/* Utility Navigation */}
-          <NavigationRail
-            items={utilityItems}
+            sections={sections}
             activeItemId={activeNavItem || undefined}
           />
 
