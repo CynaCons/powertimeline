@@ -629,101 +629,60 @@
 - [x] Add API endpoint specifications
 - [x] Add Git-based version control workflow documentation
 - [x] Add scalability targets and infrastructure requirements
-
-**Key Additions:**
-- RESTful API endpoints for all timeline operations
-- Git-based version control with branch strategy
-- Firebase Architecture (Firestore + Cloud Functions + Auth)
-- Security & privacy controls (GDPR compliance, access permissions)
-- Performance targets (60fps rendering, <2s page loads, 10K+ concurrent users)
-- Growth metrics (10K users year 1, 20% fork rate, 60% merge acceptance)
-
-**Note:** PRD.md now represents the COMPLETE product vision. Implementation priorities and deferrals are tracked in PLAN.md iterations below.
+- [x] Add RESTful API endpoints for all timeline operations
+- [x] Add Git-based version control with branch strategy
+- [x] Add Firebase Architecture (Firestore + Cloud Functions + Auth)
+- [x] Add Security & privacy controls (GDPR compliance, access permissions)
+- [x] Add Performance targets (60fps rendering, <2s page loads, 10K+ concurrent users)
+- [x] Add Growth metrics (10K users year 1, 20% fork rate, 60% merge acceptance)
 
 ---
 
 # Major Platform Evolution (v0.4.x+)
 
-**Note:** The complete product vision is documented in PRD.md. The iterations below represent the implementation roadmap with priorities and deferrals.
+## Phase 1: Foundation (v0.4.x)
 
-## Phase 1: Foundation (v0.4.x) - LOCAL FIRST APPROACH
-
-### v0.4.0 - Landing Page & Timeline Discovery (NEXT PRIORITY)
-**Goal:** Build GitHub-style home page for browsing timelines by user (works with localStorage, no backend)
-
-**Requirements Documentation:**
+### v0.4.0 - Landing Page & Timeline Discovery
 - [x] Create comprehensive SRS document (docs/SRS_HOME_PAGE.md)
 - [x] Revise with search-first, user-section-first design
 - [x] Define 40+ requirements across 9 feature areas
 - [x] Document unified search (timelines + users)
 - [x] Plan activity feeds (Recently Edited, Popular, Featured)
 - [x] Plan 16 Playwright test scenarios
-
-**Page Layout (Top to Bottom):**
-1. Header (logo, user profile link)
-2. **Search Bar** (unified search for timelines and users)
-3. **My Timelines** (user's personal workspace with create button) ⬅️ TOP PRIORITY
-4. Statistics Dashboard (platform metrics)
-5. Recently Edited feed
-6. Popular Timelines feed
-7. Featured Timelines feed
-
-**Implementation Progress (2025-10-23):**
-
-*Core Infrastructure (COMPLETE):*
 - [x] Install React Router v6 for client-side routing
-- [x] Create Timeline, User, SearchResults TypeScript interfaces with all metadata fields (src/types.ts)
-- [x] Create localStorage utilities (src/lib/homePageStorage.ts - 320 lines) with migration support
-- [x] Initialize demo users: CynaCons (⚡ - PRIMARY), Bob, Charlie with emoji avatars and bios
-- [x] Migrate existing Event[] data to Timeline format automatically (assigned to CynaCons)
+- [x] Create Timeline, User, SearchResults TypeScript interfaces
+- [x] Create localStorage utilities (src/lib/homePageStorage.ts)
+- [x] Initialize demo users: CynaCons, Bob, Charlie with emoji avatars and bios
+- [x] Migrate existing Event[] data to Timeline format automatically
 - [x] Set up React Router v6 with 3 routes (/, /user/:userId, /user/:userId/timeline/:timelineId)
 - [x] Implement routing in main.tsx with automatic data initialization
-
-*Page Components (COMPLETE):*
-- [x] Create HomePage component with all sections (search, stats, feeds) - src/pages/HomePage.tsx
-- [x] Create UserProfilePage component with user info and timeline grid - src/pages/UserProfilePage.tsx
-- [x] Create EditorPage wrapper for timeline editor - src/pages/EditorPage.tsx
+- [x] Create HomePage component with all sections (search, stats, feeds)
+- [x] Create UserProfilePage component with user info and timeline grid
+- [x] Create EditorPage wrapper for timeline editor
 - [x] Add NavigationRail to all pages with section support
-
-*Context-Aware Navigation (COMPLETE):*
-- [x] Create useNavigationConfig hook for context-aware navigation - src/app/hooks/useNavigationConfig.ts
+- [x] Create useNavigationConfig hook for context-aware navigation
 - [x] Implement navigation sections system (global, context, utilities)
 - [x] Fix critical bug: JSX components in useMemo causing compilation errors
 - [x] Use Material Icons strings instead of JSX components in navigation items
 - [x] Update NavigationRail component to support sectioned navigation
-
-*Testing & Quality (COMPLETE):*
 - [x] Create comprehensive test suite: tests/v5/71-home-page-basic.spec.ts
-- [x] All 9 home page tests passing (9/9 in 17.1s)
-- [x] Build succeeds with no TypeScript errors
-- [x] Dev server running successfully on http://localhost:5174/
-
-*Completed During Session (2025-10-24):*
-- [x] Create UserProfileMenu dropdown component (Google/Microsoft style account switcher)
+- [x] All 9 home page tests passing
+- [x] Create UserProfileMenu dropdown component
 - [x] Create UserSwitcherModal component for switching between demo users
-- [x] Update headers on all pages to use UserProfileMenu instead of plain text
+- [x] Update headers on all pages to use UserProfileMenu
 - [x] Add Alice back to demo users list
-- [x] Update Dev Panel seed functions to assign timelines to current user instead of hardcoded owner
+- [x] Update Dev Panel seed functions to assign timelines to current user
 - [x] Implement slug-based timeline IDs (timeline-french-revolution format)
 - [x] Add French Revolution timeline to CynaCons user
 - [x] Fix timeline navigation bug (wrong content displayed)
 - [x] Implement automatic data migration system with versioning
 - [x] Create comprehensive timeline content verification tests (v5/73)
 - [x] Enhance timeline navigation tests with event count verification (v5/72)
-
-*Final Completed Tasks (2025-10-24 Session 2):*
-- [x] Add collapsible section support to NavigationRail component (infrastructure already in place)
-- [x] Update App.tsx (editor) to use context-aware navigation with editor tools (already implemented)
+- [x] Add collapsible section support to NavigationRail component
+- [x] Update App.tsx (editor) to use context-aware navigation with editor tools
 - [x] Implement functional search with real-time results and dropdown UI
 - [x] Add breadcrumb navigation (Home > User > Timeline) to all three pages
 - [x] Create reusable Breadcrumb component with Material Icons chevrons
-- [x] Add breadcrumb to HomePage showing "Home"
-- [x] Add breadcrumb to UserProfilePage showing "Home > User Name"
-- [x] Add breadcrumb to EditorPage showing "Home > User Name > Timeline Title"
-
-*Status:* ✅ **All v0.4.0 remaining tasks completed!**
-
-**Key Features (ALL Features Complete):**
 - [x] Functional search with real-time results dropdown
 - [x] Search supports timelines and users
 - [x] Search results with click-to-navigate
@@ -735,64 +694,90 @@
 - [x] Timeline cards with metadata display
 - [x] Click timeline card → navigate to editor
 - [x] User profiles accessible by clicking owner name/avatar
-
-**Routing & Navigation (ALL Complete):**
-- [x] URL routing structure: `/`, `/user/:userId`, `/user/:userId/timeline/:timelineId`
+- [x] URL routing structure: /, /user/:userId, /user/:userId/timeline/:timelineId
 - [x] Browser navigation (back/forward) via React Router
 - [x] Breadcrumb navigation on all pages (Home, User Profile, Editor)
-- [x] Breadcrumbs show current location with clickable links
-- [x] Material Icons chevron separators between breadcrumb items
-
-**Data Management (Complete):**
 - [x] localStorage for timeline data
 - [x] Demo user profiles (Alice, Bob, Charlie)
 - [x] Automatic migration of existing timelines
 - [x] Timeline ownership metadata (ownerId field)
-
-**Visual Design:**
 - [ ] Responsive layout (mobile, tablet, desktop)
 - [ ] Timeline card design (similar to GitHub repo cards)
 - [ ] User avatar and profile display
 - [ ] Empty states (no timelines, no users)
 
-**Out of Scope for v0.4.0:**
-- ❌ Authentication (use mock users only)
-- ❌ Backend/database (localStorage only)
-- ❌ Forking/merging (deferred to v0.5.x+)
-- ❌ Real user accounts (demo users only)
+### v0.4.1 - Timeline Creation & Management
+- [x] Create ASPICE-style SRS document with 28 focused requirements
+- [x] Define 6 feature areas: Creation, Editing, Deletion, Validation, Persistence, UX
+- [x] Document 6 Playwright test scenarios (v5/74-79)
+- [x] Update main SRS.md with section 19 reference
+- [x] Add ID vs Title distinction with uniqueness validation
+- [x] Timeline creation dialog component (CreateTimelineDialog.tsx)
+- [x] Timeline ID generation from title (slug format: timeline-{slug})
+- [x] ID uniqueness validation per user account
+- [x] Editable ID field with format validation (alphanumeric + hyphens only)
+- [x] Form validation (title 3-100 chars, description max 500 chars, ID format)
+- [x] Timeline metadata editing from card menu (EditTimelineDialog.tsx)
+- [x] Timeline deletion with confirmation dialog (DeleteTimelineDialog.tsx)
+- [x] localStorage CRUD utilities in homePageStorage.ts
+- [x] Success/error notifications (useToast hook + Material-UI Snackbar)
+- [x] Integration with HomePage "Create New" button
+- [x] Hover-to-show edit/delete buttons on timeline cards
+- [x] Navigation after operations (create → editor, edit → refresh, delete → refresh)
+- [x] Keyboard shortcut ESC to close dialogs
+- [x] TypeScript compilation passes with no errors
+- [x] Real-time form validation with inline error messages
+- [x] Auto-refresh of timeline lists after CRUD operations
+- [ ] v5/74-79: 6 Playwright tests covering CRUD operations and validation
 
-### v0.4.1 - Timeline Metadata & Organization
-**Goal:** Add metadata to timelines for better organization and discovery
+### v0.4.1.1 - Event Persistence Tests & Authoring Fixes
+- [x] Update SRS.md to document single-click vs double-click interaction patterns
+- [x] Add CC-REQ-INTERACTION-SELECT-001: Single-click selects and highlights events
+- [x] Add CC-REQ-INTERACTION-DBLCLICK-001: Double-click opens authoring overlay for editing
+- [x] Add `data-testid="nav-create"` to NavigationRail create button
+- [x] Update all 4 event persistence tests to use proper test selectors
+- [x] Replace fragile button index selectors with `data-testid` attributes
+- [x] Use `getByRole('heading')` instead of generic text locators
+- [x] Implement double-click to open events in view mode
+- [x] Add "Edit event" button click to switch from view mode to edit mode
+- [x] Add proper wait conditions for edit mode activation
+- [x] Fix DatePicker calendar widget configuration
+- [x] Change from `slots` to `slotProps` configuration for Material-UI DatePicker
+- [x] Fix form submission by adding `id="event-form"` and `form="event-form"` attributes
+- [x] Remove complex onClick handler from Save button
+- [x] Fix test T76.1: Create event persistence
+- [x] Fix test T76.2: Edit event persistence
+- [x] Fix test T76.3: Delete event persistence
+- [x] Fix test T76.4: Multiple events persistence
 
-- [ ] Add timeline metadata fields (tags, category, description, visibility)
-- [ ] Implement visibility toggle (public/private for each timeline)
-- [ ] Add creation/modification timestamps
-- [ ] Add event count statistics
-- [ ] Create timeline settings panel
-- [ ] Implement timeline deletion with confirmation
-- [ ] Add "favorite" functionality to mark important timelines
+### v0.4.1.2 - Multi-Event Persistence Bug Fix
+- [ ] Investigate why only 1 of 3 events persists after page refresh in T76.4
+- [ ] Debug event save logic in AuthoringOverlay.tsx
+- [ ] Debug localStorage persistence in homePageStorage.ts
+- [ ] Verify event array is properly updated after each save
+- [ ] Add diagnostic logging to track event creation flow
+- [ ] Fix root cause of multi-event loss
+- [ ] Update T76.4 to verify all 3 events persist (currently verifies >= 1)
+- [ ] Fix authoring overlay closing behavior after deletion
+- [ ] Ensure overlay closes instead of switching to "Create Event" mode after delete
 
-**Out of Scope:**
-- ❌ Cloud sync (still localStorage)
-- ❌ User authentication
+### v0.4.2 - Timeline Metadata & Organization
+- [ ] Add timeline tags/categories (e.g., "History", "Science", "Personal")
+- [ ] Category-based filtering in search and feeds
+- [ ] Timeline templates for common use cases
+- [ ] "Favorite" functionality to bookmark timelines
+- [ ] Advanced visibility controls (public/private/unlisted)
+- [ ] Timeline cover images
+- [ ] Custom timeline metadata fields
 
-### v0.4.2 - Demo User Switcher
-**Goal:** Allow switching between demo users to simulate multi-user experience
-
+### v0.4.3 - Demo User Switcher
 - [ ] Add user switcher dropdown in navigation rail
-- [ ] Implement demo user context (current logged-in user)
 - [ ] Filter "My Timelines" based on current demo user
 - [ ] Show "All Users" vs "My Timelines" tabs
 - [ ] Implement read-only mode for other users' timelines
 - [ ] Add "owner badge" on timeline cards
 
-**Out of Scope:**
-- ❌ Real authentication
-- ❌ Backend storage
-
-### v0.4.3 - Admin Panel & Site Administration
-**Goal:** Create admin panel for site-wide content and user management
-
+### v0.4.4 - Admin Panel & Site Administration
 - [ ] Create Admin Panel page (/admin route)
 - [ ] Add admin-only navigation section
 - [ ] Site-wide timeline management (view all timelines, feature/unfeature)
@@ -804,15 +789,9 @@
 - [ ] Featured timeline curation interface
 - [ ] Site configuration panel (platform settings)
 
-**Out of Scope:**
-- ❌ Real authentication/authorization (demo admin user only)
-- ❌ Backend integration (localStorage only)
+## Phase 2: Backend & Authentication (v0.5.x)
 
-## Phase 2: Backend & Authentication (v0.5.x) - DEFERRED
-
-**Note:** Backend features are deferred until local-first experience is solid. Focus on v0.4.x first.
-
-### v0.5.0 - Firebase Backend Setup (FUTURE)
+### v0.5.0 - Firebase Backend Setup
 - [ ] Set up Firebase Firestore database
 - [ ] Design timeline document schema (JSON format)
 - [ ] Migrate localStorage data to Firestore
@@ -820,7 +799,7 @@
 - [ ] Add offline-first sync strategy
 - [ ] Create data migration utilities
 
-### v0.5.1 - User Authentication (FUTURE)
+### v0.5.1 - User Authentication
 - [ ] Implement Firebase Authentication (Email/Password + Google OAuth)
 - [ ] Create login/signup UI
 - [ ] Replace demo users with real user accounts
@@ -828,7 +807,7 @@
 - [ ] Account settings and preferences
 - [ ] Session management and security
 
-### v0.5.2 - Public Sharing & URLs (FUTURE)
+### v0.5.2 - Public Sharing & URLs
 - [ ] Implement public/private timeline visibility
 - [ ] Create shareable URLs for public timelines
 - [ ] Add social sharing buttons (Twitter, Facebook, LinkedIn)
@@ -836,11 +815,9 @@
 - [ ] Create read-only public viewer
 - [ ] Add timeline embed functionality
 
-## Phase 3: Collaboration Features (v0.6.x) - DEFERRED
+## Phase 3: Collaboration Features (v0.6.x)
 
-**Note:** Collaboration features require Git-based storage and backend. Deferred until v0.5.x is complete.
-
-### v0.6.0 - Git-Based Timeline Storage (FUTURE)
+### v0.6.0 - Git-Based Timeline Storage
 - [ ] Set up internal Git repository management system
 - [ ] Convert timeline format to JSON (optimized for Git diffs)
 - [ ] Implement Git commit workflow for saves
@@ -848,7 +825,7 @@
 - [ ] Add diff viewer for comparing versions
 - [ ] Implement revert functionality
 
-### v0.6.1 - Forking System (FUTURE)
+### v0.6.1 - Forking System
 - [ ] Fork button and confirmation flow
 - [ ] Git clone operation for forking
 - [ ] Fork relationship tracking and display
@@ -856,7 +833,7 @@
 - [ ] Fork network graph visualization
 - [ ] Fork statistics and analytics
 
-### v0.6.2 - Merge Request System (FUTURE)
+### v0.6.2 - Merge Request System
 - [ ] Create merge request workflow
 - [ ] Side-by-side diff viewer for changes
 - [ ] Comment system for review
@@ -864,46 +841,46 @@
 - [ ] Merge conflict detection and resolution UI
 - [ ] Notification system for merge requests
 
-## Phase 4: Discovery & Social (v0.7.x) - DEFERRED
+## Phase 4: Discovery & Social (v0.7.x)
 
-### v0.7.0 - Enhanced Discovery (FUTURE)
+### v0.7.0 - Enhanced Discovery
 - [ ] Advanced search with filters (date range, tags, category)
 - [ ] Timeline trending algorithm
 - [ ] Featured timeline curation
 - [ ] Category-based browsing
 - [ ] Timeline recommendations
 
-### v0.7.1 - Social Features (FUTURE)
+### v0.7.1 - Social Features
 - [ ] Follow users and timelines
 - [ ] Activity feed showing updates
 - [ ] View counts and engagement metrics
 - [ ] Timeline collections/playlists
 - [ ] User notifications
 
-## Phase 5: Rich Media (v0.8.x) - DEFERRED
+## Phase 5: Rich Media (v0.8.x)
 
-### v0.8.0 - Media Attachments (FUTURE)
+### v0.8.0 - Media Attachments
 - [ ] Image and video uploads for events
 - [ ] Firebase Storage integration
 - [ ] Link previews with automatic metadata
 - [ ] Media gallery view for timelines
 - [ ] Media organization and tagging
 
-### v0.8.1 - Content Archival (FUTURE)
+### v0.8.1 - Content Archival
 - [ ] Automatic web page snapshots
 - [ ] Social media post archival
 - [ ] PDF and document storage
 - [ ] Link rot prevention and backup
 
-## Phase 6: AI Integration (v0.9.x) - FAR FUTURE
+## Phase 6: AI Integration (v0.9.x)
 
-### v0.9.0 - AI Chat Interface (FUTURE)
+### v0.9.0 - AI Chat Interface
 - [ ] Sidebar chatbot for timeline Q&A
 - [ ] Natural language event creation
 - [ ] Timeline summarization and insights
 - [ ] Event date/time assistance
 
-### v0.9.1 - AI-Powered Automation (FUTURE)
+### v0.9.1 - AI-Powered Automation
 - [ ] Auto-suggest related events from news feeds
 - [ ] Timeline gap detection and suggestions
 - [ ] Fact-checking assistance and source verification

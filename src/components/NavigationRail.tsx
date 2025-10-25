@@ -180,6 +180,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   onClick={item.onClick}
                   sx={getButtonStyles(item)}
                   className="nav-button"
+                  data-testid={`nav-${item.id}`}
                   data-nav-index={itemIndex}
                   data-section={section.type}
                   tabIndex={0}

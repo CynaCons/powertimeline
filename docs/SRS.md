@@ -130,6 +130,17 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ➡️ See [`SRS_HOME_PAGE.md`](SRS_HOME_PAGE.md) for detailed requirements covering the landing page, user directory, timeline browsing, routing structure, and search/filter functionality.
 
+### 19. Timeline Creation & Management
+
+➡️ See [`SRS_TIMELINE_CREATION.md`](SRS_TIMELINE_CREATION.md) for ASPICE-style requirements covering timeline CRUD operations (Create, Edit, Delete) with ID/title distinction, form validation, and localStorage persistence (v0.4.1).
+
+| ID | Requirement (summary) | Code | Tests |
+|---|---|---|---|
+| CC-REQ-CREATE-001 | The software shall provide a dialog to create new timelines | TBD | v5/74 |
+| CC-REQ-CREATE-ID-001 | The software shall generate unique timeline IDs from titles with per-user uniqueness validation | TBD | v5/75 |
+| CC-REQ-EDIT-001 | The software shall allow editing timeline metadata (title, description, ID) from card menu | TBD | v5/76 |
+| CC-REQ-DELETE-001 | The software shall require confirmation before deleting timelines | TBD | v5/77 |
+
 ### 14. Navigation & Panels
 
 | ID | Requirement | Code | Tests |
@@ -144,8 +155,8 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | ID | Requirement | Code | Tests |
 |---|---|---|---|
 | CC-REQ-INTERACTION-HOVER-001 | Events can be hovered over on cards, anchors, or panel items with visual feedback | `src/App.tsx` (hoveredEventId state), `src/layout/DeterministicLayoutComponent.tsx` | - |
-| CC-REQ-INTERACTION-SELECT-001 | Selected events are highlighted in timeline and minimap | `src/App.tsx` (selectedEventId state), `src/layout/DeterministicLayoutComponent.tsx`, `src/components/TimelineMinimap.tsx` | - |
-| CC-REQ-INTERACTION-CLICK-001 | Clicking an event card opens it in the authoring overlay for editing | `src/layout/CardRenderer.tsx`, `src/App.tsx` | v5/51 |
+| CC-REQ-INTERACTION-SELECT-001 | Single-clicking an event card selects it and highlights it in timeline and minimap | `src/App.tsx` (selectedEventId state), `src/layout/DeterministicLayoutComponent.tsx`, `src/components/TimelineMinimap.tsx` | - |
+| CC-REQ-INTERACTION-DBLCLICK-001 | Double-clicking an event card opens it in the authoring overlay for editing | `src/layout/CardRenderer.tsx`, `src/App.tsx` | v5/51, v5/76 |
 
 ### 16. Authoring Mode
 
@@ -154,6 +165,8 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | CC-REQ-AUTHORING-OVERLAY-001 | Authoring overlay allows creating and editing events with form interface | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
 | CC-REQ-AUTHORING-FORM-001 | Authoring form includes title, date, time, description, and category fields | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
 | CC-REQ-AUTHORING-VALID-001 | Authoring overlay validates required fields before saving events | `src/app/overlays/AuthoringOverlay.tsx` | v5/51 |
+| CC-REQ-AUTHORING-PERSIST-001 | Event CRUD operations (create, update, delete) must persist to timeline storage in localStorage | `src/App.tsx:54-70` | v5/76 |
+| CC-REQ-AUTHORING-PERSIST-002 | Events must survive page refresh and load correctly when timeline is reopened | `src/App.tsx:72-99` | v5/76 |
 
 ### 17. Enhanced Minimap System
 

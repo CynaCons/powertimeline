@@ -377,7 +377,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                 }`}
               >
                 {isEditMode && (
-                  <form onSubmit={onSave} className="grid grid-cols-1 gap-6 h-full max-w-2xl">
+                  <form id="event-form" onSubmit={onSave} className="grid grid-cols-1 gap-6 h-full max-w-2xl">
                     {/* Date and Time Fields */}
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -389,26 +389,24 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                             onChange={(newValue: Dayjs | null) => {
                               const dateString = newValue ? newValue.format('YYYY-MM-DD') : '';
                               setEditDate(dateString);
-                              if (touched.date) {
-                                setErrors(prev => ({ ...prev, date: validateDate(dateString) }));
-                              }
+                              // Mark as touched and validate the NEW value immediately
+                              setTouched(prev => ({ ...prev, date: true }));
+                              setErrors(prev => ({ ...prev, date: validateDate(dateString) }));
                             }}
                             onClose={() => {
-                              setTouched(prev => ({ ...prev, date: true }));
-                              setErrors(prev => ({ ...prev, date: validateDate(editDate) }));
+                              // Don't re-validate here - already done in onChange with correct value
                             }}
-                            enableAccessibleFieldDOMStructure={false}
-                            slots={{
-                              textField: (props) => (
-                                <TextField
-                                  {...props}
-                                  variant="outlined"
-                                  fullWidth
-                                  autoFocus
-                                  error={touched.date && !!errors.date}
-                                  helperText={touched.date && errors.date ? errors.date : "Click calendar icon to select"}
-                                />
-                              )
+                            slotProps={{
+                               
+                              openPickerButton: {
+                                'data-testid': 'date-picker-button'
+                              } as any, // data-testid is a valid HTML attribute for testing but not in MUI types
+                              textField: {
+                                variant: "outlined" as const,
+                                fullWidth: true,
+                                error: touched.date && !!errors.date,
+                                helperText: touched.date && errors.date ? errors.date : "Click calendar icon to select"
+                              }
                             }}
                           />
                         </div>
@@ -541,8 +539,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                     variant="contained"
                     color="primary"
                     type="submit"
+                    form="event-form"
                     disabled={!!hasErrors || !editDate.trim() || !editTitle.trim()}
-                    onClick={(e) => (e.target as HTMLElement).closest('form')?.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))}
                     startIcon={<span className="material-symbols-rounded">save</span>}
                     sx={{ textTransform: 'none', minWidth: '100px' }}
                   >
