@@ -3,7 +3,7 @@ import { DeterministicLayoutComponent } from './layout/DeterministicLayoutCompon
 import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
-import { getCurrentUser, getTimelineById } from './lib/homePageStorage';
+import { getCurrentUser, getTimelineById, updateTimeline } from './lib/homePageStorage';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from './contexts/ThemeContext';
@@ -49,21 +49,50 @@ function App({ timelineId }: AppProps = {}) {
   usePerformanceMonitoring();
   // Storage
   const storageRef = useRef(new EventStorage());
+
+  // Helper function to save events to the correct location
+  const saveEvents = useCallback((events: Event[]) => {
+    console.log('[saveEvents] Called with', events.length, 'events, timelineId:', timelineId);
+    if (timelineId) {
+      // Save to timeline in homePageStorage
+      console.log('[saveEvents] Saving to timeline storage, timelineId:', timelineId);
+      updateTimeline(timelineId, { events });
+      console.log('[saveEvents] Timeline updated successfully');
+
+      // Verify it was saved
+      const timeline = getTimelineById(timelineId);
+      console.log('[saveEvents] Verification - timeline now has', timeline?.events.length, 'events');
+    } else {
+      // Save to legacy EventStorage
+      console.log('[saveEvents] Saving to legacy EventStorage');
+      storageRef.current.writeThrough(events);
+    }
+  }, [timelineId]);
+
   const [events, setEvents] = useState<Event[]>(() => {
+    console.log('[App] Initializing with timelineId:', timelineId);
     // If timelineId is provided, load from that timeline
     if (timelineId) {
       const timeline = getTimelineById(timelineId);
+      console.log('[App] Loaded timeline:', timeline?.id, 'with', timeline?.events.length, 'events');
       if (timeline && timeline.events.length > 0) {
         return timeline.events;
+      }
+      // Timeline exists but has no events - return empty array
+      if (timeline) {
+        console.log('[App] Timeline exists but has no events, returning empty array');
+        return [];
       }
     }
 
     // Otherwise, load from legacy EventStorage
+    console.log('[App] No timelineId, loading from legacy EventStorage');
     const stored = storageRef.current.load();
     if (stored.length > 0) {
       return stored;
     }
 
+    console.log('[App] No stored events, loading default RFK seed');
     const defaultSeed = seedRFKTimeline();
     storageRef.current.writeThrough(defaultSeed);
     return defaultSeed;
@@ -192,6 +221,9 @@ function App({ timelineId }: AppProps = {}) {
   }, [events]);
 
   // Sync edit fields when selection changes
+  // IMPORTANT: Only depend on selectedId, NOT on 'selected' object
+  // If 'selected' is in deps, form fields reset whenever events array changes
+  // (because selected reference changes), causing user to lose their edits
   useEffect(() => {
     if (selected) {
       setEditDate(selected.date);
@@ -201,7 +233,7 @@ function App({ timelineId }: AppProps = {}) {
     } else {
       setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription('');
     }
-  }, [selectedId, selected]);
+  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyboard shortcuts (ignore when typing in inputs)
   useEffect(() => {
@@ -224,18 +256,27 @@ function App({ timelineId }: AppProps = {}) {
   // CRUD handlers
   const saveAuthoring = useCallback((e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[saveAuthoring] Called');
+    console.log('[saveAuthoring] editDate:', editDate, 'editTitle:', editTitle);
     const isEdit = !!selectedId;
+    console.log('[saveAuthoring] isEdit:', isEdit, 'selectedId:', selectedId);
     if (isEdit) {
-      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, time: editTime || undefined, title: editTitle || ev.title, description: editDescription || undefined } : ev); storageRef.current.writeThrough(next); return next; });
+      console.log('[saveAuthoring] Editing existing event');
+      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, time: editTime || undefined, title: editTitle || ev.title, description: editDescription || undefined } : ev); saveEvents(next); return next; });
       try {
         announce(`Saved changes to ${editTitle || 'event'}`);
       } catch (error) {
         console.warn('Failed to announce save:', error);
       }
     } else {
-      if (!editDate || !editTitle) return;
+      if (!editDate || !editTitle) {
+        console.log('[saveAuthoring] Missing required fields - date or title');
+        return;
+      }
+      console.log('[saveAuthoring] Creating new event');
       const newEvent: Event = { id: Date.now().toString(), date: editDate, time: editTime || undefined, title: editTitle, description: editDescription || undefined };
-      setEvents(prev => { const next = [...prev, newEvent]; storageRef.current.writeThrough(next); return next; });
+      console.log('[saveAuthoring] New event:', newEvent);
+      setEvents(prev => { const next = [...prev, newEvent]; saveEvents(next); return next; });
       setSelectedId(newEvent.id);
       try {
         announce(`Added event ${editTitle}`);
@@ -244,80 +285,80 @@ function App({ timelineId }: AppProps = {}) {
       }
     }
     setOverlay(null);
-  }, [selectedId, editDate, editTime, editTitle, editDescription, announce]);
+  }, [selectedId, editDate, editTime, editTitle, editDescription, announce, saveEvents]);
 
   // saveAuthoring handles both edit and create flows
 
   const deleteSelected = useCallback(() => {
     if (!selectedId) return;
     const toDelete = events.find(e => e.id === selectedId);
-    setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); storageRef.current.writeThrough(next); return next; });
+    setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); saveEvents(next); return next; });
     setSelectedId(undefined);
     try {
       announce(`Deleted ${toDelete?.title || 'event'}`);
     } catch (error) {
       console.warn('Failed to announce delete:', error);
     }
-  }, [selectedId, events, announce]);
+  }, [selectedId, events, announce, saveEvents]);
 
 
   // Dev helpers using utilities
   const seedRandom = useCallback((count: number) => {
-    setEvents(prev => { const next = seedRandomUtil(prev, count); storageRef.current.writeThrough(next); return next; });
-  }, []);
+    setEvents(prev => { const next = seedRandomUtil(prev, count); saveEvents(next); return next; });
+  }, [saveEvents]);
   const seedClustered = useCallback(() => {
-    setEvents(prev => { const next = seedClusteredUtil(prev); storageRef.current.writeThrough(next); return next; });
-  }, []);
+    setEvents(prev => { const next = seedClusteredUtil(prev); saveEvents(next); return next; });
+  }, [saveEvents]);
   const seedLongRange = useCallback(() => {
-    setEvents(prev => { const next = seedLongRangeUtil(prev); storageRef.current.writeThrough(next); return next; });
-  }, []);
+    setEvents(prev => { const next = seedLongRangeUtil(prev); saveEvents(next); return next; });
+  }, [saveEvents]);
   const seedRFK = useCallback(() => {
     const data = seedRFKTimeline();
     setEvents(data);
-    storageRef.current.writeThrough(data);
+    saveEvents(data);
     setSelectedId(undefined);
-  }, []);
+  }, [saveEvents]);
   const seedJFK = useCallback(() => {
     const data = seedJFKTimeline();
     setEvents(data);
-    storageRef.current.writeThrough(data);
+    saveEvents(data);
     setSelectedId(undefined);
-  }, []);
+  }, [saveEvents]);
   const seedNapoleon = useCallback(() => {
     const data = seedNapoleonTimeline();
     setEvents(data);
-    storageRef.current.writeThrough(data);
+    saveEvents(data);
     setSelectedId(undefined);
-  }, []);
+  }, [saveEvents]);
 
   const seedDeGaulle = useCallback(() => {
     const data = seedDeGaulleTimeline();
     setEvents(data);
-    storageRef.current.writeThrough(data);
+    saveEvents(data);
     setSelectedId(undefined);
-  }, []);
+  }, [saveEvents]);
 
   const seedFrenchRevolution = useCallback(() => {
     const data = seedFrenchRevolutionTimeline();
     setEvents(data);
-    storageRef.current.writeThrough(data);
+    saveEvents(data);
     setSelectedId(undefined);
-  }, []);
+  }, [saveEvents]);
 
   const seedMinuteTest = useCallback(() => {
     const data = seedMinuteTestUtil();
     setEvents(data);
-    storageRef.current.writeThrough(data);
+    saveEvents(data);
     setSelectedId(undefined);
-  }, []);
+  }, [saveEvents]);
 
   const seedIncremental = useCallback((targetCount: number) => {
     setEvents(prev => {
       const next = seedIncrementalUtil(prev, targetCount);
-      storageRef.current.writeThrough(next);
+      saveEvents(next);
       return next;
     });
-  }, []);
+  }, [saveEvents]);
   
   const clearAll = useCallback(() => { setEvents([]); }, []);
 
@@ -609,7 +650,7 @@ function App({ timelineId }: AppProps = {}) {
                     events={events}
                     onImportEvents={(importedEvents) => {
                       setEvents(importedEvents);
-                      storageRef.current.writeThrough(importedEvents);
+                      saveEvents(importedEvents);
                     }}
                   />
                 </Suspense>

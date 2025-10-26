@@ -1,5 +1,12 @@
 # PowerTimeline Implementation Plan
 
+**Format:**
+- Iterations: Version number + brief title
+- Goal: One-line objective statement
+- Status: Complete/In Progress (when applicable)
+- Tasks: Simple checkbox items (minimize sub-bullets and implementation details)
+- Known Issues: Brief summary only (move detailed explanations to GitHub issues)
+
 ---
 
 ## Iteration v0.2.0 - Foundation
@@ -707,59 +714,63 @@
 - [ ] Empty states (no timelines, no users)
 
 ### v0.4.1 - Timeline Creation & Management
-- [x] Create ASPICE-style SRS document with 28 focused requirements
-- [x] Define 6 feature areas: Creation, Editing, Deletion, Validation, Persistence, UX
+**Goal:** Implement full CRUD operations for timeline management
+
+- [x] Create ASPICE-style SRS document (28 requirements, 6 feature areas)
 - [x] Document 6 Playwright test scenarios (v5/74-79)
-- [x] Update main SRS.md with section 19 reference
-- [x] Add ID vs Title distinction with uniqueness validation
-- [x] Timeline creation dialog component (CreateTimelineDialog.tsx)
-- [x] Timeline ID generation from title (slug format: timeline-{slug})
-- [x] ID uniqueness validation per user account
-- [x] Editable ID field with format validation (alphanumeric + hyphens only)
-- [x] Form validation (title 3-100 chars, description max 500 chars, ID format)
-- [x] Timeline metadata editing from card menu (EditTimelineDialog.tsx)
-- [x] Timeline deletion with confirmation dialog (DeleteTimelineDialog.tsx)
-- [x] localStorage CRUD utilities in homePageStorage.ts
-- [x] Success/error notifications (useToast hook + Material-UI Snackbar)
-- [x] Integration with HomePage "Create New" button
-- [x] Hover-to-show edit/delete buttons on timeline cards
-- [x] Navigation after operations (create → editor, edit → refresh, delete → refresh)
+- [x] Timeline creation dialog (CreateTimelineDialog.tsx)
+- [x] Timeline ID generation from title (slug format)
+- [x] ID uniqueness validation per user
+- [x] Form validation (title, description, ID format)
+- [x] Timeline metadata editing (EditTimelineDialog.tsx)
+- [x] Timeline deletion with confirmation (DeleteTimelineDialog.tsx)
+- [x] localStorage CRUD utilities
+- [x] Success/error notifications (useToast + Snackbar)
+- [x] Integration with HomePage Create button
+- [x] Hover-to-show edit/delete buttons on cards
+- [x] Navigation after operations
 - [x] Keyboard shortcut ESC to close dialogs
-- [x] TypeScript compilation passes with no errors
-- [x] Real-time form validation with inline error messages
-- [x] Auto-refresh of timeline lists after CRUD operations
-- [ ] v5/74-79: 6 Playwright tests covering CRUD operations and validation
+- [x] Real-time form validation
+- [x] Auto-refresh of timeline lists
+- [ ] v5/74-79: 6 Playwright tests covering CRUD operations
 
 ### v0.4.1.1 - Event Persistence Tests & Authoring Fixes
-- [x] Update SRS.md to document single-click vs double-click interaction patterns
-- [x] Add CC-REQ-INTERACTION-SELECT-001: Single-click selects and highlights events
-- [x] Add CC-REQ-INTERACTION-DBLCLICK-001: Double-click opens authoring overlay for editing
-- [x] Add `data-testid="nav-create"` to NavigationRail create button
-- [x] Update all 4 event persistence tests to use proper test selectors
-- [x] Replace fragile button index selectors with `data-testid` attributes
-- [x] Use `getByRole('heading')` instead of generic text locators
+**Goal:** Fix event persistence tests and improve authoring overlay interactions
+
+- [x] Update SRS.md with interaction patterns (single-click select, double-click edit)
+- [x] Add test selectors to NavigationRail
+- [x] Update event persistence tests to use proper selectors
 - [x] Implement double-click to open events in view mode
-- [x] Add "Edit event" button click to switch from view mode to edit mode
-- [x] Add proper wait conditions for edit mode activation
+- [x] Add Edit button to switch from view to edit mode
 - [x] Fix DatePicker calendar widget configuration
-- [x] Change from `slots` to `slotProps` configuration for Material-UI DatePicker
-- [x] Fix form submission by adding `id="event-form"` and `form="event-form"` attributes
-- [x] Remove complex onClick handler from Save button
+- [x] Fix form submission attributes
 - [x] Fix test T76.1: Create event persistence
 - [x] Fix test T76.2: Edit event persistence
 - [x] Fix test T76.3: Delete event persistence
 - [x] Fix test T76.4: Multiple events persistence
 
-### v0.4.1.2 - Multi-Event Persistence Bug Fix
-- [ ] Investigate why only 1 of 3 events persists after page refresh in T76.4
-- [ ] Debug event save logic in AuthoringOverlay.tsx
-- [ ] Debug localStorage persistence in homePageStorage.ts
-- [ ] Verify event array is properly updated after each save
-- [ ] Add diagnostic logging to track event creation flow
-- [ ] Fix root cause of multi-event loss
-- [ ] Update T76.4 to verify all 3 events persist (currently verifies >= 1)
-- [ ] Fix authoring overlay closing behavior after deletion
-- [ ] Ensure overlay closes instead of switching to "Create Event" mode after delete
+### v0.4.1.2 - Single Event Positioning & Performance
+**Goal:** Fix single-event positioning bugs and optimize form performance
+*Status: Complete*
+
+- [x] TimelineCardMenu component with kebab menu
+- [x] Add kebab menus to all timeline card sections
+- [x] Keyboard accessibility for menus
+- [x] Update SRS requirements for kebab menu
+- [x] Fix text input validation timing in forms
+- [x] Optimize AuthoringOverlay array operations
+- [x] Optimize CreateTimelineDialog validation
+- [x] Optimize EditTimelineDialog validation
+- [x] Fix Timeline ID auto-generation bug
+- [x] Add Ctrl+Enter keyboard shortcut for saving events
+- [x] Fix single-event timeline display (centering and scales)
+- [x] Remove TODAY marker from timeline axis
+- [x] Create single event positioning E2E test (v5/77)
+- [x] Fix single-event zoom positioning bug
+
+**Known Issues:**
+- Multi-event persistence in T76.4 (layout issue, moved to v0.4.3)
+- Authoring overlay closing behavior after deletion (moved to v0.4.3)
 
 ### v0.4.2 - Timeline Metadata & Organization
 - [ ] Add timeline tags/categories (e.g., "History", "Science", "Personal")
@@ -770,7 +781,11 @@
 - [ ] Timeline cover images
 - [ ] Custom timeline metadata fields
 
-### v0.4.3 - Demo User Switcher
+### v0.4.3 - Demo User Switcher & Bug Fixes
+**Goal:** Implement user switcher and fix remaining layout/UX issues
+
+- [ ] Fix multi-event persistence layout issue (T76.4: only 1 of 3 events visible after refresh)
+- [ ] Improve authoring overlay closing behavior after deletion
 - [ ] Add user switcher dropdown in navigation rail
 - [ ] Filter "My Timelines" based on current demo user
 - [ ] Show "All Users" vs "My Timelines" tabs

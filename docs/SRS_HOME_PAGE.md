@@ -52,7 +52,7 @@ The home page sections appear in this order (top to bottom):
 | CC-REQ-MYTIMELINES-002 | Create Timeline button placed within My Timelines section | • "+ Create New" or "+ New Timeline" button in section header (top-right)<br>• Button styled as primary CTA<br>• Clicking opens timeline creation flow<br>• Button always visible in My Timelines section | TBD | TBD |
 | CC-REQ-MYTIMELINES-003 | User's timelines displayed as cards in horizontal scrollable row | • Timeline cards show title, event count, last modified date<br>• Horizontal scroll if more than 3-4 timelines<br>• Responsive: 1 column mobile, 2-3 visible desktop<br>• Click card navigates to /user/:userId/timeline/:timelineId | TBD | TBD |
 | CC-REQ-MYTIMELINES-004 | Empty state when user has no timelines | • "You haven't created any timelines yet" message<br>• Prominent "+ Create Your First Timeline" button<br>• Helpful description: "Start documenting history"<br>• Optional: Show example/template timelines | TBD | TBD |
-| CC-REQ-MYTIMELINES-005 | Quick actions on timeline cards | • Hover shows edit, delete, share icons<br>• Edit opens timeline in editor<br>• Delete shows confirmation dialog<br>• Share copies link to clipboard (future: share dialog) | TBD | TBD |
+| CC-REQ-MYTIMELINES-005 | Quick actions on timeline cards via kebab menu | • Always-visible kebab menu (⋮) button in top-right of each card<br>• Menu shows: View, Edit (owner only), Delete (owner only)<br>• View navigates to timeline<br>• Edit opens timeline metadata editor<br>• Delete shows confirmation dialog<br>• Works on desktop and touch devices<br>• Keyboard accessible (Tab, Enter, Escape) | `src/components/TimelineCardMenu.tsx`,`src/pages/HomePage.tsx` | TBD |
 
 ### Platform Statistics Dashboard
 

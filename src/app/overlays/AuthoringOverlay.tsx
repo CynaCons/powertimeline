@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -123,14 +123,28 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   const [touched, setTouched] = useState({ date: false, time: false, title: false, description: false });
   useFocusTrap(true, rootRef.current);
 
-  // Compute previous and next events
-  const sortedEvents = [...allEvents].sort((a, b) =>
-    new Date(a.date + (a.time || '00:00')).getTime() - new Date(b.date + (b.time || '00:00')).getTime()
+  // Compute previous and next events (memoized to avoid re-sorting on every keystroke)
+  const sortedEvents = useMemo(() =>
+    [...allEvents].sort((a, b) =>
+      new Date(a.date + (a.time || '00:00')).getTime() - new Date(b.date + (b.time || '00:00')).getTime()
+    ),
+    [allEvents]
   );
 
-  const currentIndex = selected ? sortedEvents.findIndex(e => e.id === selected.id) : -1;
-  const prevEvents = currentIndex > 0 ? sortedEvents.slice(0, currentIndex).reverse() : [];
-  const nextEvents = currentIndex >= 0 ? sortedEvents.slice(currentIndex + 1) : [];
+  const currentIndex = useMemo(() =>
+    selected ? sortedEvents.findIndex(e => e.id === selected.id) : -1,
+    [selected, sortedEvents]
+  );
+
+  const prevEvents = useMemo(() =>
+    currentIndex > 0 ? sortedEvents.slice(0, currentIndex).reverse() : [],
+    [currentIndex, sortedEvents]
+  );
+
+  const nextEvents = useMemo(() =>
+    currentIndex >= 0 ? sortedEvents.slice(currentIndex + 1) : [],
+    [currentIndex, sortedEvents]
+  );
 
   const canNavigatePrev = currentIndex > 0;
   const canNavigateNext = currentIndex >= 0 && currentIndex < sortedEvents.length - 1;
@@ -149,8 +163,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   // Keyboard shortcuts for edit mode and navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Save shortcut (Ctrl+S) - only in edit mode
-      if (isEditMode && (e.ctrlKey || e.metaKey) && e.key === 's') {
+      // Save shortcuts (Ctrl+S or Ctrl+Enter) - only in edit mode
+      if (isEditMode && (e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'Enter')) {
         e.preventDefault();
         const form = rootRef.current?.querySelector('form');
         if (form) {

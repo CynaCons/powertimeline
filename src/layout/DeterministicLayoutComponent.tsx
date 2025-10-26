@@ -79,13 +79,20 @@ export function DeterministicLayoutComponent({
     const dates = events.map(event => getEventTimestamp(event));
     const rawMinDate = Math.min(...dates);
     const rawMaxDate = Math.max(...dates);
-    const rawDateRange = rawMaxDate - rawMinDate;
+    let rawDateRange = rawMaxDate - rawMinDate;
 
-    // Add 2% padding to match LayoutEngine's time range calculation (lines 898-904)
+    // For single-event timelines, apply a minimum duration to ensure
+    // proper scale generation and event positioning
+    const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    if (rawDateRange < MIN_DURATION_MS) {
+      rawDateRange = MIN_DURATION_MS;
+    }
+
+    // Add 2% padding to match LayoutEngine's time range calculation
     // This ensures hover dates align with anchor positions
     const padding = rawDateRange * 0.02;
-    const fullMinDate = rawMinDate - padding;
-    const fullMaxDate = rawMaxDate + padding;
+    const fullMinDate = rawMinDate - (rawDateRange / 2) - padding;
+    const fullMaxDate = rawMinDate + (rawDateRange / 2) + padding;
     const fullDateRange = rawDateRange + (padding * 2);
 
     // If zoomed (viewStart and viewEnd are not 0,1), calculate the visible time window
@@ -248,12 +255,18 @@ export function DeterministicLayoutComponent({
     const dates = events.map(e => getEventTimestamp(e));
     const rawMinDate = Math.min(...dates);
     const rawMaxDate = Math.max(...dates);
-    const rawDateRange = rawMaxDate - rawMinDate;
+    let rawDateRange = rawMaxDate - rawMinDate;
+
+    // For single-event timelines, apply a minimum duration to ensure
+    // proper positioning during zoom operations
+    const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    if (rawDateRange < MIN_DURATION_MS) {
+      rawDateRange = MIN_DURATION_MS;
+    }
 
     // Add 2% padding to match other time range calculations
     const padding = rawDateRange * 0.02;
-    const paddedMinDate = rawMinDate - padding;
-    // const paddedMaxDate = rawMaxDate + padding;
+    const paddedMinDate = rawMinDate - (rawDateRange / 2) - padding;
     const paddedDateRange = rawDateRange + (padding * 2);
 
     // Calculate visible time window using padded dates

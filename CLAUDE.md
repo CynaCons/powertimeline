@@ -7,3 +7,4 @@ You are developping PowerTimeline, a web application designed to visualize and e
   - Before doing ANYTHING, you SHALL make a PLAN of what you are going to do and update it in the Tasks list and in PLAN.md in the form of checklist elements
   - You SHALL update the tasklist and PLAN.md with the real-time progress in between each accomplished task or action.
 - Do now modify the PLAN.md unless explicitely asked to do so.
+- Memory this ASPICE-style of requirements for the SRS, with requirements table and link to code and tests.

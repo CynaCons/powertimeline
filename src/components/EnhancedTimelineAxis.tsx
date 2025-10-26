@@ -264,16 +264,6 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     return backgrounds;
   }, [timelineRange, viewportSize.width]);
 
-  // Today marker
-  const todayMarker = useMemo(() => {
-    const now = Date.now();
-    if (now >= timelineRange.minDate && now <= timelineRange.maxDate) {
-      const x = ((now - timelineRange.minDate) / timelineRange.dateRange) * viewportSize.width;
-      return { x, date: new Date(now) };
-    }
-    return null;
-  }, [timelineRange, viewportSize.width]);
-
   // Handle mouse interactions
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -448,34 +438,6 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
             </g>
           );
         })}
-
-        {/* Today marker */}
-        {todayMarker && (
-          <g>
-            {/* Today line */}
-            <line
-              x1={todayMarker.x}
-              x2={todayMarker.x}
-              y1={20}
-              y2={60}
-              stroke="#ef4444"
-              strokeWidth={2}
-              opacity={0.8}
-            />
-            {/* Today label */}
-            <text
-              x={todayMarker.x}
-              y={15}
-              fontSize={10}
-              fill="#ef4444"
-              textAnchor="middle"
-              fontFamily="system-ui, -apple-system, sans-serif"
-              fontWeight="bold"
-            >
-              TODAY
-            </text>
-          </g>
-        )}
 
         {/* Hover indicator */}
         {hoverX !== null && (

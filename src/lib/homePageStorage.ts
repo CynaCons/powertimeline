@@ -197,15 +197,20 @@ export function setCurrentUser(user: User): void {
 }
 
 /**
- * Generate a URL-safe slug from a title
- * Example: "French Revolution" -> "french-revolution"
+ * Generate a URL-safe slug from a title with accent/diacritic removal
+ * Examples:
+ *   "French Revolution" -> "french-revolution"
+ *   "Révolution Française" -> "revolution-francaise"
+ *   "Napoléon Bonaparte" -> "napoleon-bonaparte"
  */
 export function generateSlugFromTitle(title: string): string {
   return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
-    .replace(/^-+|-+$/g, '')      // Remove leading/trailing hyphens
-    .slice(0, 50);                // Limit length
+    .normalize('NFD')                 // Decompose accented characters (é → e + ́)
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .toLowerCase()                    // Convert to lowercase
+    .replace(/[^a-z0-9]+/g, '-')     // Replace non-alphanumeric with hyphens
+    .replace(/^-+|-+$/g, '')         // Remove leading/trailing hyphens
+    .slice(0, 50);                   // Limit length
 }
 
 /**
@@ -232,6 +237,15 @@ export function generateTimelineId(title: string, ownerId: string): string {
     counter++;
   }
   return `timeline-${baseSlug}-${counter}`;
+}
+
+/**
+ * Check if a timeline ID is unique for a given owner
+ * Returns true if the ID doesn't exist, false if it already exists
+ */
+export function isTimelineIdUnique(timelineId: string, ownerId: string): boolean {
+  const timelines = getTimelines();
+  return !timelines.some(t => t.id === timelineId && t.ownerId === ownerId);
 }
 
 /**
@@ -429,13 +443,21 @@ export function getTimelinesByOwner(ownerId: string): Timeline[] {
 export function createTimeline(
   title: string,
   ownerId: string,
+  description: string = '',
+  customId?: string,
   events: Event[] = []
 ): Timeline {
   const now = new Date().toISOString();
+
+  // Use custom ID if provided, otherwise auto-generate
+  const timelineId = customId
+    ? `timeline-${customId}`
+    : `timeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
   const timeline: Timeline = {
-    id: `timeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: timelineId,
     title,
-    description: '',
+    description,
     events,
     ownerId,
     createdAt: now,

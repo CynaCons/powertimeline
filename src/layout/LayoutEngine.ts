@@ -165,9 +165,17 @@ export class DeterministicLayoutV5 {
       if (dates.length > 0) {
         const rawMinDate = Math.min(...dates);
         const rawMaxDate = Math.max(...dates);
-        const rawDateRange = rawMaxDate - rawMinDate;
+        let rawDateRange = rawMaxDate - rawMinDate;
+
+        // For single-event timelines, apply a minimum duration to ensure
+        // proper positioning during zoom operations
+        const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+        if (rawDateRange < MIN_DURATION_MS) {
+          rawDateRange = MIN_DURATION_MS;
+        }
+
         const padding = rawDateRange * 0.02;
-        const paddedMinDate = rawMinDate - padding;
+        const paddedMinDate = rawMinDate - (rawDateRange / 2) - padding;
         const paddedRange = rawDateRange + (padding * 2);
 
         const visibleStartTime = paddedMinDate + (paddedRange * viewWindow.viewStart);
@@ -275,14 +283,21 @@ export class DeterministicLayoutV5 {
     const dates = events.map(e => getEventTimestamp(e));
     const startTime = Math.min(...dates);
     const endTime = Math.max(...dates);
-    const duration = endTime - startTime;
+    let duration = endTime - startTime;
+
+    // For single-event timelines, apply a minimum duration to ensure
+    // proper scale generation and event positioning
+    const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    if (duration < MIN_DURATION_MS) {
+      duration = MIN_DURATION_MS;
+    }
 
     // Reduce padding to 2% to keep events closer to timeline milestones
     const padding = duration * 0.02;
 
     this.timeRange = {
-      startTime: startTime - padding,
-      endTime: endTime + padding,
+      startTime: startTime - (duration / 2) - padding,
+      endTime: startTime + (duration / 2) + padding,
       duration: duration + (padding * 2)
     };
   }

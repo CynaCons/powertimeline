@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Snackbar, Alert } from '@mui/material';
 import type { Timeline, User } from '../types';
 import {
   getCurrentUser,
@@ -14,12 +15,18 @@ import {
   getFeaturedTimelines,
   getPlatformStatistics,
   searchTimelinesAndUsers,
+  getTimelineById,
 } from '../lib/homePageStorage';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
+import { EditTimelineDialog } from '../components/EditTimelineDialog';
+import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
+import { TimelineCardMenu } from '../components/TimelineCardMenu';
+import { useToast } from '../hooks/useToast';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -42,6 +49,16 @@ export function HomePage() {
     hasMore: boolean;
   } | null>(null);
 
+  // Dialog states
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editTimelineId, setEditTimelineId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
+
+  // Toast notifications
+  const { toast, showToast, hideToast } = useToast();
+
   // Get navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id);
 
@@ -61,8 +78,54 @@ export function HomePage() {
   }, []);
 
   const handleCreateTimeline = () => {
-    // TODO: Open timeline creation dialog
-    console.log('Create timeline clicked');
+    setCreateDialogOpen(true);
+  };
+
+  const handleCreateSuccess = (timelineId: string) => {
+    showToast('Timeline created successfully!', 'success');
+
+    // Refresh timeline lists
+    if (currentUser) {
+      setMyTimelines(getTimelinesByOwner(currentUser.id));
+    }
+    setRecentlyEdited(getRecentlyEditedTimelines(6));
+
+    // Navigate to the new timeline (use getTimelineById to get fresh data)
+    const timeline = getTimelineById(timelineId);
+    if (timeline) {
+      navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    }
+  };
+
+  const handleEditTimeline = (timelineId: string) => {
+    setEditTimelineId(timelineId);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    showToast('Timeline updated successfully!', 'success');
+
+    // Refresh timeline lists
+    if (currentUser) {
+      setMyTimelines(getTimelinesByOwner(currentUser.id));
+    }
+    setRecentlyEdited(getRecentlyEditedTimelines(6));
+  };
+
+  const handleDeleteTimeline = (timelineId: string) => {
+    setDeleteTimelineId(timelineId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    showToast('Timeline deleted successfully!', 'success');
+
+    // Refresh timeline lists
+    if (currentUser) {
+      setMyTimelines(getTimelinesByOwner(currentUser.id));
+    }
+    setRecentlyEdited(getRecentlyEditedTimelines(6));
+    setPopular(getPopularTimelines(6));
   };
 
   const handleTimelineClick = (timeline: Timeline) => {
@@ -265,16 +328,29 @@ export function HomePage() {
               {myTimelines.map(timeline => (
                 <div
                   key={timeline.id}
-                  onClick={() => handleTimelineClick(timeline)}
-                  className="flex-none w-80 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 cursor-pointer transition-all"
+                  className="flex-none w-80 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
                 >
-                  <h3 className="font-semibold text-gray-900 mb-2">{timeline.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {timeline.description || 'No description'}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{timeline.events.length} events</span>
-                    <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
+                  {/* Kebab menu - always visible */}
+                  <div className="absolute top-2 right-2">
+                    <TimelineCardMenu
+                      timelineId={timeline.id}
+                      ownerId={timeline.ownerId}
+                      currentUserId={currentUser?.id}
+                      onEdit={handleEditTimeline}
+                      onDelete={handleDeleteTimeline}
+                    />
+                  </div>
+
+                  {/* Card content - clickable to navigate */}
+                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                    <h3 className="font-semibold text-gray-900 mb-2 pr-10">{timeline.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {timeline.description || 'No description'}
+                    </p>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>{timeline.events.length} events</span>
+                      <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -312,16 +388,29 @@ export function HomePage() {
             {recentlyEdited.map(timeline => (
               <div
                 key={timeline.id}
-                onClick={() => handleTimelineClick(timeline)}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 cursor-pointer transition-all"
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
-                <h3 className="font-semibold text-gray-900 mb-2">{timeline.title}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {timeline.description || 'No description'}
-                </p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>{timeline.events.length} events</span>
-                  <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
+                {/* Kebab menu */}
+                <div className="absolute top-2 right-2">
+                  <TimelineCardMenu
+                    timelineId={timeline.id}
+                    ownerId={timeline.ownerId}
+                    currentUserId={currentUser?.id}
+                    onEdit={handleEditTimeline}
+                    onDelete={handleDeleteTimeline}
+                  />
+                </div>
+
+                {/* Card content - clickable to navigate */}
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                  <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {timeline.description || 'No description'}
+                  </p>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>{timeline.events.length} events</span>
+                    <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -335,16 +424,29 @@ export function HomePage() {
             {popular.map(timeline => (
               <div
                 key={timeline.id}
-                onClick={() => handleTimelineClick(timeline)}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 cursor-pointer transition-all"
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
-                <h3 className="font-semibold text-gray-900 mb-2">{timeline.title}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {timeline.description || 'No description'}
-                </p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>{timeline.viewCount} views</span>
-                  <span>{timeline.events.length} events</span>
+                {/* Kebab menu */}
+                <div className="absolute top-2 right-2">
+                  <TimelineCardMenu
+                    timelineId={timeline.id}
+                    ownerId={timeline.ownerId}
+                    currentUserId={currentUser?.id}
+                    onEdit={handleEditTimeline}
+                    onDelete={handleDeleteTimeline}
+                  />
+                </div>
+
+                {/* Card content - clickable to navigate */}
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                  <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {timeline.description || 'No description'}
+                  </p>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>{timeline.viewCount} views</span>
+                    <span>{timeline.events.length} events</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -359,19 +461,32 @@ export function HomePage() {
               {featured.map(timeline => (
                 <div
                   key={timeline.id}
-                  onClick={() => handleTimelineClick(timeline)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 cursor-pointer transition-all"
+                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-yellow-500">⭐</span>
-                    <h3 className="font-semibold text-gray-900">{timeline.title}</h3>
+                  {/* Kebab menu */}
+                  <div className="absolute top-2 right-2">
+                    <TimelineCardMenu
+                      timelineId={timeline.id}
+                      ownerId={timeline.ownerId}
+                      currentUserId={currentUser?.id}
+                      onEdit={handleEditTimeline}
+                      onDelete={handleDeleteTimeline}
+                    />
                   </div>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {timeline.description || 'No description'}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{timeline.events.length} events</span>
-                    <span>{timeline.viewCount} views</span>
+
+                  {/* Card content - clickable to navigate */}
+                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                    <div className="flex items-center gap-2 mb-2 pr-8">
+                      <span className="text-yellow-500">⭐</span>
+                      <h3 className="font-semibold text-gray-900">{timeline.title}</h3>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {timeline.description || 'No description'}
+                    </p>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>{timeline.events.length} events</span>
+                      <span>{timeline.viewCount} views</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -386,6 +501,45 @@ export function HomePage() {
         open={userSwitcherOpen}
         onClose={() => setUserSwitcherOpen(false)}
       />
+
+      {/* Timeline CRUD Dialogs */}
+      <CreateTimelineDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
+
+      <EditTimelineDialog
+        open={editDialogOpen}
+        timelineId={editTimelineId}
+        onClose={() => {
+          setEditDialogOpen(false);
+          setEditTimelineId(null);
+        }}
+        onSuccess={handleEditSuccess}
+      />
+
+      <DeleteTimelineDialog
+        open={deleteDialogOpen}
+        timelineId={deleteTimelineId}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setDeleteTimelineId(null);
+        }}
+        onSuccess={handleDeleteSuccess}
+      />
+
+      {/* Toast Notifications */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={hideToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={hideToast} severity={toast.severity} sx={{ width: '100%' }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
