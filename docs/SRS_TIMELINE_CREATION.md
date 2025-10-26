@@ -14,7 +14,7 @@ This document specifies requirements for timeline CRUD operations enabling users
 **Out of Scope:**
 - Timeline duplication (deferred)
 - First event creation during timeline creation (deferred)
-- Advanced metadata (tags, categories) (v0.4.2)
+- Advanced metadata (tags, categories) (v0.4.3)
 - Cloud storage/sync (v0.5.0)
 - Version history (v0.6.0)
 
@@ -53,6 +53,18 @@ This document specifies requirements for timeline CRUD operations enabling users
 | CC-REQ-DELETE-002 | The software shall require confirmation before deletion | Confirmation dialog shows timeline title and event count | TBD | v5/77 |
 | CC-REQ-DELETE-003 | The software shall remove timeline from localStorage on confirmation | Timeline and all events deleted permanently | TBD | v5/77 |
 | CC-REQ-DELETE-004 | The software shall redirect to home page after deletion | User navigated to / after successful deletion | TBD | v5/77 |
+
+### Timeline Visibility Controls (v0.4.2)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-VISIBILITY-001 | The software shall support three visibility levels | Timeline visibility set to: 'public', 'unlisted', or 'private' | `src/types.ts`, `src/lib/homePageStorage.ts` | TBD |
+| CC-REQ-VISIBILITY-002 | The software shall provide visibility selector in timeline creation dialog | Dropdown with: Public (visible to everyone), Unlisted (accessible via URL), Private (only owner) | `src/components/CreateTimelineDialog.tsx` | TBD |
+| CC-REQ-VISIBILITY-003 | The software shall provide visibility selector in timeline edit dialog | Dropdown pre-populated with current visibility, allows changing | `src/components/EditTimelineDialog.tsx` | TBD |
+| CC-REQ-VISIBILITY-004 | The software shall default new timelines to 'public' visibility | Create dialog initializes with 'public' selected | `src/components/CreateTimelineDialog.tsx` | TBD |
+| CC-REQ-VISIBILITY-005 | The software shall filter private timelines from discovery feeds | Recently Edited, Popular, Featured feeds exclude private timelines not owned by current user | `src/lib/homePageStorage.ts` | TBD |
+| CC-REQ-VISIBILITY-006 | The software shall display visibility indicators on timeline cards | All timeline cards show badge: 🌍 Public (green), 🔗 Unlisted (yellow), or 🔒 Private (red) | `src/pages/HomePage.tsx`, `src/pages/UserProfilePage.tsx` | TBD |
+| CC-REQ-VISIBILITY-007 | The software shall position visibility badges consistently | Badges appear at bottom right of timeline cards across all pages | `src/pages/HomePage.tsx`, `src/pages/UserProfilePage.tsx` | TBD |
 
 ### Form Validation
 
@@ -94,7 +106,7 @@ interface Timeline {
   updatedAt: string;    // ISO 8601
   viewCount: number;
   featured: boolean;
-  visibility: 'public' | 'private';
+  visibility: 'public' | 'unlisted' | 'private';  // v0.4.2
 }
 ```
 
@@ -108,8 +120,14 @@ interface Timeline {
 | v5/77 | Timeline deletion with confirmation | DELETE-001 to 004, UX-003 |
 | v5/78 | Form validation (title, description, ID) | VALID-001 to 004, UX-004 |
 | v5/79 | Data persistence and localStorage | PERSIST-001 to 004 |
+| v5/80 | Timeline visibility controls (v0.4.2) | VISIBILITY-001 to 007 |
 
 ## Change History
+
+- **2025-10-26** — Added Timeline Visibility Controls (v0.4.2)
+- Added 7 visibility requirements (VISIBILITY-001 to 007)
+- Updated Timeline data model with three visibility levels
+- Added test coverage entry for visibility controls (v5/80)
 
 - **2025-10-24** — Initial SRS creation (simplified ASPICE-style)
 - Focused on core CRUD operations (Create, Edit, Delete)

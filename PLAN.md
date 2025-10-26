@@ -772,14 +772,27 @@
 - Multi-event persistence in T76.4 (layout issue, moved to v0.4.3)
 - Authoring overlay closing behavior after deletion (moved to v0.4.3)
 
-### v0.4.2 - Timeline Metadata & Organization
-- [ ] Add timeline tags/categories (e.g., "History", "Science", "Personal")
-- [ ] Category-based filtering in search and feeds
-- [ ] Timeline templates for common use cases
-- [ ] "Favorite" functionality to bookmark timelines
-- [ ] Advanced visibility controls (public/private/unlisted)
-- [ ] Timeline cover images
-- [ ] Custom timeline metadata fields
+### v0.4.2 - Timeline Visibility Controls
+**Goal:** Implement privacy controls for timeline sharing
+**Status:** Completed
+
+- [x] Add TimelineVisibility type (public/unlisted/private)
+- [x] Update Timeline interface with visibility field
+- [x] Update homePageStorage with visibility filtering
+- [x] Add visibility selector to CreateTimelineDialog
+- [x] Add visibility selector to EditTimelineDialog
+- [x] Implement visibility filtering in HomePage feeds
+- [x] Add visibility indicators with icons to timeline cards (HomePage & UserProfilePage)
+- [x] Add kebab menu to UserProfilePage timeline cards
+- [x] Test and fix visibility indicator positioning on cards
+- [x] Update SRS documentation with visibility requirements
+- [x] Create E2E tests for visibility controls (v5/80)
+
+**Deliverables:**
+- Updated SRS_TIMELINE_CREATION.md with 7 visibility requirements (VISIBILITY-001 to 007)
+- Updated SRS_HOME_PAGE.md with Timeline data model changes
+- Created test suite v5/80-timeline-visibility-controls.spec.ts (5 passing tests)
+- Fixed visibility badge positioning consistency across HomePage and UserProfilePage
 
 ### v0.4.3 - Demo User Switcher & Bug Fixes
 **Goal:** Implement user switcher and fix remaining layout/UX issues
@@ -787,21 +800,18 @@
 - [ ] Fix multi-event persistence layout issue (T76.4: only 1 of 3 events visible after refresh)
 - [ ] Improve authoring overlay closing behavior after deletion
 - [ ] Add user switcher dropdown in navigation rail
-- [ ] Filter "My Timelines" based on current demo user
-- [ ] Show "All Users" vs "My Timelines" tabs
 - [ ] Implement read-only mode for other users' timelines
 - [ ] Add "owner badge" on timeline cards
 
 ### v0.4.4 - Admin Panel & Site Administration
+**Goal:** Create admin interface for platform management
+
 - [ ] Create Admin Panel page (/admin route)
 - [ ] Add admin-only navigation section
-- [ ] Site-wide timeline management (view all timelines, feature/unfeature)
 - [ ] User management interface (view all users, assign roles)
 - [ ] Platform statistics dashboard (detailed analytics)
-- [ ] Content moderation tools (flag/unflag timelines)
-- [ ] Bulk operations (delete, transfer ownership, bulk feature)
+- [ ] Bulk operations (delete, bulk feature)
 - [ ] Admin activity log and audit trail
-- [ ] Featured timeline curation interface
 - [ ] Site configuration panel (platform settings)
 
 ## Phase 2: Backend & Authentication (v0.5.x)

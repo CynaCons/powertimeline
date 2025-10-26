@@ -12,9 +12,13 @@ import {
   Button,
   TextField,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { updateTimeline, isTimelineIdUnique, getTimelineById } from '../lib/homePageStorage';
-import type { Timeline } from '../types';
+import type { Timeline, TimelineVisibility } from '../types';
 
 interface EditTimelineDialogProps {
   open: boolean;
@@ -28,6 +32,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
   const [description, setDescription] = useState('');
   const [customId, setCustomId] = useState('');
   const [originalId, setOriginalId] = useState('');
+  const [visibility, setVisibility] = useState<TimelineVisibility>('public');
   const [titleError, setTitleError] = useState('');
   const [descriptionError, setDescriptionError] = useState('');
   const [idError, setIdError] = useState('');
@@ -42,6 +47,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
         setTimeline(tl);
         setTitle(tl.title);
         setDescription(tl.description || '');
+        setVisibility(tl.visibility);
 
         // Extract ID without "timeline-" prefix
         const idWithoutPrefix = tl.id.replace(/^timeline-/, '');
@@ -123,6 +129,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
       const updates: Partial<Timeline> = {
         title,
         description,
+        visibility,
       };
 
       // If ID changed, we need to create a new timeline and delete the old one
@@ -149,6 +156,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     setDescription('');
     setCustomId('');
     setOriginalId('');
+    setVisibility('public');
     setTitleError('');
     setDescriptionError('');
     setIdError('');
@@ -223,8 +231,21 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
               : `Used in URL: /timeline/${customId}`)
           }
           disabled={true}  // Disable ID editing for now
-          sx={{ mb: 1 }}
+          sx={{ mb: 2 }}
         />
+
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Visibility</InputLabel>
+          <Select
+            value={visibility}
+            label="Visibility"
+            onChange={(e) => setVisibility(e.target.value as TimelineVisibility)}
+          >
+            <MenuItem value="public">Public - Visible to everyone</MenuItem>
+            <MenuItem value="unlisted">Unlisted - Accessible via URL only</MenuItem>
+            <MenuItem value="private">Private - Only you can see this</MenuItem>
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>

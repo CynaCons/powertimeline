@@ -23,7 +23,7 @@ export const STORAGE_KEYS = {
  * Current data version for migration tracking
  * Increment this when data structure changes require migration
  */
-const CURRENT_DATA_VERSION = 2; // v2: slug-based timeline IDs
+const CURRENT_DATA_VERSION = 3; // v3: Added required visibility field to Timeline
 
 /**
  * Get current data version from localStorage
@@ -283,6 +283,7 @@ export function migrateEventsToTimeline(
     updatedAt: now,
     viewCount: 0,
     featured: false,
+    visibility: 'public', // Default to public for migrated timelines
   };
 }
 
@@ -305,6 +306,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: true,
+      visibility: 'public',
     },
     // CynaCons - JFK Timeline (with actual events)
     {
@@ -317,6 +319,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
     // CynaCons - French Revolution Timeline (with actual events)
     {
@@ -329,6 +332,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
     // CynaCons - Napoleon Timeline (with actual events)
     {
@@ -341,6 +345,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
     // CynaCons - Charles de Gaulle Timeline (with actual events)
     {
@@ -353,6 +358,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
     // Alice - Product Timeline
     {
@@ -365,6 +371,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
     // Bob - Scientific Discoveries
     {
@@ -377,6 +384,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
     // Charlie - Art Movements
     {
@@ -389,6 +397,7 @@ export function createSampleTimelines(): Timeline[] {
       updatedAt: now,
       viewCount: 0,
       featured: false,
+      visibility: 'public',
     },
   ];
 
@@ -445,7 +454,8 @@ export function createTimeline(
   ownerId: string,
   description: string = '',
   customId?: string,
-  events: Event[] = []
+  events: Event[] = [],
+  visibility: import('../types').TimelineVisibility = 'public'
 ): Timeline {
   const now = new Date().toISOString();
 
@@ -464,6 +474,7 @@ export function createTimeline(
     updatedAt: now,
     viewCount: 0,
     featured: false,
+    visibility,
   };
 
   const timelines = getTimelines();
@@ -500,6 +511,19 @@ export function deleteTimeline(timelineId: string): void {
 }
 
 /**
+ * Check if a timeline should be visible to the current user
+ * - Public timelines: Always visible
+ * - Unlisted/Private timelines: Only visible to owner
+ */
+function isTimelineVisibleToUser(timeline: Timeline, currentUserId?: string): boolean {
+  if (timeline.visibility === 'public') {
+    return true;
+  }
+  // Unlisted and private timelines only visible to owner
+  return currentUserId !== undefined && timeline.ownerId === currentUserId;
+}
+
+/**
  * Increment view count for a timeline
  * Debounced per session - tracks which timelines have been viewed
  */
@@ -525,10 +549,12 @@ export function incrementViewCount(timelineId: string): void {
 
 /**
  * Get recently edited timelines (sorted by updatedAt descending)
+ * Only returns public timelines, or unlisted/private timelines owned by currentUserId
  */
-export function getRecentlyEditedTimelines(limit: number = 6): Timeline[] {
+export function getRecentlyEditedTimelines(limit: number = 6, currentUserId?: string): Timeline[] {
   const timelines = getTimelines();
   return timelines
+    .filter(t => isTimelineVisibleToUser(t, currentUserId))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, limit);
 }
@@ -536,40 +562,44 @@ export function getRecentlyEditedTimelines(limit: number = 6): Timeline[] {
 /**
  * Get popular timelines (sorted by viewCount descending)
  * Falls back to event count if all have 0 views
+ * Only returns public timelines, or unlisted/private timelines owned by currentUserId
  */
-export function getPopularTimelines(limit: number = 6): Timeline[] {
+export function getPopularTimelines(limit: number = 6, currentUserId?: string): Timeline[] {
   const timelines = getTimelines();
+  const visibleTimelines = timelines.filter(t => isTimelineVisibleToUser(t, currentUserId));
 
   // Check if any timeline has views
-  const hasViews = timelines.some(t => t.viewCount > 0);
+  const hasViews = visibleTimelines.some(t => t.viewCount > 0);
 
   if (hasViews) {
-    return timelines
+    return visibleTimelines
       .sort((a, b) => b.viewCount - a.viewCount)
       .slice(0, limit);
   }
 
   // Fallback: sort by event count
-  return timelines
+  return visibleTimelines
     .sort((a, b) => b.events.length - a.events.length)
     .slice(0, limit);
 }
 
 /**
  * Get featured timelines
+ * Only returns public featured timelines, or unlisted/private featured timelines owned by currentUserId
  */
-export function getFeaturedTimelines(limit: number = 6): Timeline[] {
+export function getFeaturedTimelines(limit: number = 6, currentUserId?: string): Timeline[] {
   const timelines = getTimelines();
   return timelines
-    .filter(t => t.featured)
+    .filter(t => t.featured && isTimelineVisibleToUser(t, currentUserId))
     .slice(0, limit);
 }
 
 /**
  * Search timelines and users
  * Unified search across both data types
+ * Only returns public timelines, or unlisted/private timelines owned by currentUserId
  */
-export function searchTimelinesAndUsers(query: string): SearchResults {
+export function searchTimelinesAndUsers(query: string, currentUserId?: string): SearchResults {
   if (!query || query.trim().length < 2) {
     return { timelines: [], users: [], hasMore: false };
   }
@@ -578,10 +608,11 @@ export function searchTimelinesAndUsers(query: string): SearchResults {
   const timelines = getTimelines();
   const users = getUsers();
 
-  // Search timelines
+  // Search timelines (filtered by visibility)
   const matchingTimelines = timelines.filter(t =>
-    t.title.toLowerCase().includes(lowerQuery) ||
-    t.description?.toLowerCase().includes(lowerQuery)
+    isTimelineVisibleToUser(t, currentUserId) &&
+    (t.title.toLowerCase().includes(lowerQuery) ||
+    t.description?.toLowerCase().includes(lowerQuery))
   );
 
   // Search users

@@ -94,7 +94,6 @@ PowerTimeline transforms how people create and share historical knowledge by pro
 - As a timeline owner, I can set different permission levels (read, comment, edit)
 - As a collaborator, I can make direct edits without creating forks
 - As an owner, I can remove collaborators and revoke access
-- As a user, I can transfer timeline ownership to another user
 
 ### Discovery
 - As a user, I can browse a gallery of public timelines by category
@@ -317,6 +316,22 @@ type(scope): description
 - **Reliability:** Uptime >99.9% (excluding planned maintenance)
 - **Data safety:** Zero data loss with automated backups
 - **Security response:** Critical issues resolved within 24 hours
+
+## Future Features (Under Consideration)
+
+These features may be added in future iterations but are not confirmed for the current roadmap:
+
+### Watched Timelines
+- Allow users to "watch" or bookmark timelines they're interested in
+- Receive notifications when watched timelines are updated
+- Quick access to watched timelines from user profile
+- Similar to GitHub's "watch" functionality for repositories
+
+### Transfer Timeline Ownership
+- Allow timeline owners to transfer ownership to another user
+- Preserve timeline history and attribution during transfer
+- Notify both parties of ownership transfer
+- Useful for team transitions and project handoffs
 
 ## Non-Goals
 

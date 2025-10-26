@@ -71,9 +71,9 @@ export function HomePage() {
       setMyTimelines(getTimelinesByOwner(user.id));
     }
 
-    setRecentlyEdited(getRecentlyEditedTimelines(6));
-    setPopular(getPopularTimelines(6));
-    setFeatured(getFeaturedTimelines(6));
+    setRecentlyEdited(getRecentlyEditedTimelines(6, user?.id));
+    setPopular(getPopularTimelines(6, user?.id));
+    setFeatured(getFeaturedTimelines(6, user?.id));
     setStats(getPlatformStatistics());
   }, []);
 
@@ -88,7 +88,7 @@ export function HomePage() {
     if (currentUser) {
       setMyTimelines(getTimelinesByOwner(currentUser.id));
     }
-    setRecentlyEdited(getRecentlyEditedTimelines(6));
+    setRecentlyEdited(getRecentlyEditedTimelines(6, currentUser?.id));
 
     // Navigate to the new timeline (use getTimelineById to get fresh data)
     const timeline = getTimelineById(timelineId);
@@ -109,7 +109,7 @@ export function HomePage() {
     if (currentUser) {
       setMyTimelines(getTimelinesByOwner(currentUser.id));
     }
-    setRecentlyEdited(getRecentlyEditedTimelines(6));
+    setRecentlyEdited(getRecentlyEditedTimelines(6, currentUser?.id));
   };
 
   const handleDeleteTimeline = (timelineId: string) => {
@@ -124,8 +124,8 @@ export function HomePage() {
     if (currentUser) {
       setMyTimelines(getTimelinesByOwner(currentUser.id));
     }
-    setRecentlyEdited(getRecentlyEditedTimelines(6));
-    setPopular(getPopularTimelines(6));
+    setRecentlyEdited(getRecentlyEditedTimelines(6, currentUser?.id));
+    setPopular(getPopularTimelines(6, currentUser?.id));
   };
 
   const handleTimelineClick = (timeline: Timeline) => {
@@ -141,7 +141,7 @@ export function HomePage() {
     setSearchQuery(query);
 
     if (query.trim().length >= 2) {
-      const results = searchTimelinesAndUsers(query);
+      const results = searchTimelinesAndUsers(query, currentUser?.id);
       setSearchResults(results);
     } else {
       setSearchResults(null);
@@ -342,14 +342,27 @@ export function HomePage() {
                   </div>
 
                   {/* Card content - clickable to navigate */}
-                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
                     <h3 className="font-semibold text-gray-900 mb-2 pr-10">{timeline.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
                       {timeline.description || 'No description'}
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <span>{timeline.events.length} events</span>
                       <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
+                    </div>
+                    {/* Visibility badge - absolutely positioned at bottom-right */}
+                    <div className="absolute bottom-2 right-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        timeline.visibility === 'public'
+                          ? 'bg-green-100 text-green-800'
+                          : timeline.visibility === 'private'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {timeline.visibility === 'public' ? '🌍 Public' :
+                         timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -402,14 +415,27 @@ export function HomePage() {
                 </div>
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
                   <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
                     {timeline.description || 'No description'}
                   </p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span>{timeline.events.length} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
+                  </div>
+                  {/* Visibility badge - absolutely positioned at bottom-right */}
+                  <div className="absolute bottom-2 right-2">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                      timeline.visibility === 'public'
+                        ? 'bg-green-100 text-green-800'
+                        : timeline.visibility === 'private'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {timeline.visibility === 'public' ? '🌍 Public' :
+                       timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -447,6 +473,18 @@ export function HomePage() {
                     <span>{timeline.viewCount} views</span>
                     <span>{timeline.events.length} events</span>
                   </div>
+                  <div className="flex items-center justify-end mt-2">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                      timeline.visibility === 'public'
+                        ? 'bg-green-100 text-green-800'
+                        : timeline.visibility === 'private'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {timeline.visibility === 'public' ? '🌍 Public' :
+                       timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -475,17 +513,30 @@ export function HomePage() {
                   </div>
 
                   {/* Card content - clickable to navigate */}
-                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
                     <div className="flex items-center gap-2 mb-2 pr-8">
                       <span className="text-yellow-500">⭐</span>
-                      <h3 className="font-semibold text-gray-900">{timeline.title}</h3>
+                      <h3 className="font-semibold text-gray-900 flex-1">{timeline.title}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
                       {timeline.description || 'No description'}
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <span>{timeline.events.length} events</span>
                       <span>{timeline.viewCount} views</span>
+                    </div>
+                    {/* Visibility badge - absolutely positioned at bottom-right */}
+                    <div className="absolute bottom-2 right-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        timeline.visibility === 'public'
+                          ? 'bg-green-100 text-green-800'
+                          : timeline.visibility === 'private'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {timeline.visibility === 'public' ? '🌍 Public' :
+                         timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                      </span>
                     </div>
                   </div>
                 </div>

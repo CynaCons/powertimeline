@@ -149,7 +149,7 @@ interface Timeline {
   updatedAt: string;         // ISO date
   viewCount: number;         // NEW: Number of views
   featured: boolean;         // NEW: Featured flag (manual curation)
-  visibility?: 'public' | 'private';  // Future: v0.5.x
+  visibility: 'public' | 'unlisted' | 'private';  // v0.4.2
 }
 ```
 
@@ -260,6 +260,11 @@ App
 - [ ] v0.4.0/16-responsive-layout.spec.ts - Mobile/tablet layouts work
 
 ## Change History
+
+- **2025-10-26** — Updated Timeline data model with visibility controls (v0.4.2)
+- Added 'unlisted' visibility level to Timeline interface
+- Updated visibility from optional to required field
+- See SRS_TIMELINE_CREATION.md for detailed visibility requirements
 
 - **2025-01-XX** — Revised SRS with search-first, user-section-first design
 - Unified search for timelines and users

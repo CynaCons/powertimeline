@@ -16,6 +16,14 @@ export interface Event {
 }
 
 /**
+ * Timeline visibility levels
+ * - public: Visible to everyone, appears in discovery feeds
+ * - unlisted: Accessible via URL but not shown in discovery feeds
+ * - private: Only visible to the owner
+ */
+export type TimelineVisibility = 'public' | 'unlisted' | 'private';
+
+/**
  * Timeline represents a collection of events with ownership and engagement metadata
  * Added for v0.4.0 - Home Page & Timeline Discovery
  */
@@ -29,7 +37,7 @@ export interface Timeline {
   updatedAt: string;         // ISO date
   viewCount: number;         // Number of views
   featured: boolean;         // Featured flag (manual curation)
-  visibility?: 'public' | 'private';  // Future: v0.5.x
+  visibility: TimelineVisibility;  // v0.4.2: Privacy controls
 }
 
 /**
