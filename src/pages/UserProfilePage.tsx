@@ -198,6 +198,17 @@ export function UserProfilePage() {
                     <span>{timeline.events.length} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
+                  {/* Owner badge - absolutely positioned at bottom-left */}
+                  {(() => {
+                    const owner = getUserById(timeline.ownerId);
+                    return owner ? (
+                      <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          {owner.avatar} {owner.name}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
                   {/* Visibility badge - absolutely positioned at bottom-right */}
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${

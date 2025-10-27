@@ -16,6 +16,7 @@ import {
   getPlatformStatistics,
   searchTimelinesAndUsers,
   getTimelineById,
+  getUserById,
 } from '../lib/homePageStorage';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
@@ -424,6 +425,17 @@ export function HomePage() {
                     <span>{timeline.events.length} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
+                  {/* Owner badge - absolutely positioned at bottom-left */}
+                  {(() => {
+                    const owner = getUserById(timeline.ownerId);
+                    return owner ? (
+                      <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          {owner.avatar} {owner.name}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
                   {/* Visibility badge - absolutely positioned at bottom-right */}
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
@@ -464,16 +476,28 @@ export function HomePage() {
                 </div>
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer">
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
                   <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
                     {timeline.description || 'No description'}
                   </p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span>{timeline.viewCount} views</span>
                     <span>{timeline.events.length} events</span>
                   </div>
-                  <div className="flex items-center justify-end mt-2">
+                  {/* Owner badge - absolutely positioned at bottom-left */}
+                  {(() => {
+                    const owner = getUserById(timeline.ownerId);
+                    return owner ? (
+                      <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          {owner.avatar} {owner.name}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
+                  {/* Visibility badge - absolutely positioned at bottom-right */}
+                  <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       timeline.visibility === 'public'
                         ? 'bg-green-100 text-green-800'
@@ -525,6 +549,17 @@ export function HomePage() {
                       <span>{timeline.events.length} events</span>
                       <span>{timeline.viewCount} views</span>
                     </div>
+                    {/* Owner badge - absolutely positioned at bottom-left */}
+                    {(() => {
+                      const owner = getUserById(timeline.ownerId);
+                      return owner ? (
+                        <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                            {owner.avatar} {owner.name}
+                          </span>
+                        </div>
+                      ) : null;
+                    })()}
                     {/* Visibility badge - absolutely positioned at bottom-right */}
                     <div className="absolute bottom-2 right-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${

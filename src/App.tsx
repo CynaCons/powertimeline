@@ -19,6 +19,7 @@ const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').th
 const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
+const UserSwitcherModal = lazy(() => import('./components/UserSwitcherModal').then(m => ({ default: m.UserSwitcherModal })));
 import { EventStorage } from './lib/storage';
 import {
   seedRandom as seedRandomUtil,
@@ -100,6 +101,17 @@ function App({ timelineId }: AppProps = {}) {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
+
+  // Determine if timeline is read-only (user is not the owner)
+  const isReadOnly = useMemo(() => {
+    if (!timelineId) return false; // No timeline loaded = not read-only (legacy mode)
+    const timeline = getTimelineById(timelineId);
+    if (!timeline) return false; // Timeline not found = not read-only
+    const currentUser = getCurrentUser();
+    if (!currentUser) return true; // No current user = read-only
+    return timeline.ownerId !== currentUser.id; // Read-only if not owner
+  }, [timelineId]);
 
   // Reload events when timelineId changes
   useEffect(() => {
@@ -277,7 +289,6 @@ function App({ timelineId }: AppProps = {}) {
       const newEvent: Event = { id: Date.now().toString(), date: editDate, time: editTime || undefined, title: editTitle, description: editDescription || undefined };
       console.log('[saveAuthoring] New event:', newEvent);
       setEvents(prev => { const next = [...prev, newEvent]; saveEvents(next); return next; });
-      setSelectedId(newEvent.id);
       try {
         announce(`Added event ${editTitle}`);
       } catch (error) {
@@ -294,6 +305,7 @@ function App({ timelineId }: AppProps = {}) {
     const toDelete = events.find(e => e.id === selectedId);
     setEvents(prev => { const next = prev.filter(ev => ev.id !== selectedId); saveEvents(next); return next; });
     setSelectedId(undefined);
+    setOverlay(null); // Close the authoring overlay after deletion
     try {
       announce(`Deleted ${toDelete?.title || 'event'}`);
     } catch (error) {
@@ -431,32 +443,41 @@ function App({ timelineId }: AppProps = {}) {
   }, []);
 
   // Editor-specific navigation items (context section)
-  const editorItems: NavigationItem[] = useMemo(() => [
-    {
-      id: 'events',
-      label: 'Events',
-      icon: 'list',
-      shortcut: 'Alt+E',
-      onClick: openEvents,
-      isActive: overlay === 'events',
-    },
-    {
-      id: 'create',
-      label: 'Create',
-      icon: <AddIcon fontSize="small" />,
-      shortcut: 'Alt+C',
-      onClick: openCreate,
-      color: 'primary.main',
-    },
-    {
+  const editorItems: NavigationItem[] = useMemo(() => {
+    const items: NavigationItem[] = [
+      {
+        id: 'events',
+        label: 'Events',
+        icon: 'list',
+        shortcut: 'Alt+E',
+        onClick: openEvents,
+        isActive: overlay === 'events',
+      },
+    ];
+
+    // Only show Create button if not in read-only mode
+    if (!isReadOnly) {
+      items.push({
+        id: 'create',
+        label: 'Create',
+        icon: <AddIcon fontSize="small" />,
+        shortcut: 'Alt+C',
+        onClick: openCreate,
+        color: 'primary.main',
+      });
+    }
+
+    items.push({
       id: 'dev',
       label: 'Developer Panel',
       icon: 'settings',
       shortcut: 'Alt+D',
       onClick: openDev,
       isActive: overlay === 'dev',
-    },
-  ], [overlay, openEvents, openCreate, openDev]);
+    });
+
+    return items;
+  }, [overlay, openEvents, openCreate, openDev, isReadOnly]);
 
   // Get current user for navigation context
   const currentUser = useMemo(() => getCurrentUser(), []);
@@ -579,6 +600,15 @@ function App({ timelineId }: AppProps = {}) {
             >
               info
             </button>
+            <button
+              type="button"
+              title="Switch User"
+              onClick={() => setUserSwitcherOpen(true)}
+              className="material-symbols-rounded rounded-md p-2 text-secondary hover:bg-surface-elevated transition-theme"
+              aria-label="Switch User"
+            >
+              account_circle
+            </button>
             <ThemeToggleButton />
           </div>
         </aside>
@@ -675,6 +705,16 @@ function App({ timelineId }: AppProps = {}) {
           </div>
         )}
 
+        {/* Read-only indicator banner */}
+        {isReadOnly && (
+          <div className="fixed top-12 left-20 right-4 z-[85] pointer-events-none">
+            <div className="bg-amber-100 border border-amber-300 text-amber-900 px-4 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 pointer-events-auto">
+              <span className="material-symbols-rounded text-amber-700">lock</span>
+              <span>Read-only mode: You are viewing this timeline but cannot make changes</span>
+            </div>
+          </div>
+        )}
+
         {/* Main timeline area shifts right to avoid sidebar overlap */}
         <div className="absolute inset-0 ml-14">
           {/* Timeline takes full available space */}
@@ -690,7 +730,7 @@ function App({ timelineId }: AppProps = {}) {
                 viewStart={viewStart}
                 viewEnd={viewEnd}
                 hoveredEventId={hoveredEventId}
-                onCardDoubleClick={(id) => { setSelectedId(id); setOverlay('editor'); }}
+                onCardDoubleClick={isReadOnly ? undefined : (id) => { setSelectedId(id); setOverlay('editor'); }}
                 onCardMouseEnter={(id) => setHoveredEventId(id)}
                 onCardMouseLeave={() => setHoveredEventId(undefined)}
                 selectedEventId={selectedId}
@@ -753,6 +793,14 @@ function App({ timelineId }: AppProps = {}) {
             onClose={() => setCommandPaletteOpen(false)}
             commands={commands}
             placeholder="Search commands... (Ctrl+K)"
+          />
+        </Suspense>
+
+        {/* User Switcher Modal */}
+        <Suspense fallback={null}>
+          <UserSwitcherModal
+            open={userSwitcherOpen}
+            onClose={() => setUserSwitcherOpen(false)}
           />
         </Suspense>
 

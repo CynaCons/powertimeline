@@ -170,12 +170,16 @@ export class DeterministicLayoutV5 {
         // For single-event timelines, apply a minimum duration to ensure
         // proper positioning during zoom operations
         const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+        const isSingleEvent = events.length === 1;
         if (rawDateRange < MIN_DURATION_MS) {
           rawDateRange = MIN_DURATION_MS;
         }
 
         const padding = rawDateRange * 0.02;
-        const paddedMinDate = rawMinDate - (rawDateRange / 2) - padding;
+        // Only center for single-event timelines; multi-event timelines use natural range
+        const paddedMinDate = isSingleEvent
+          ? rawMinDate - (rawDateRange / 2) - padding
+          : rawMinDate - padding;
         const paddedRange = rawDateRange + (padding * 2);
 
         const visibleStartTime = paddedMinDate + (paddedRange * viewWindow.viewStart);
@@ -288,6 +292,7 @@ export class DeterministicLayoutV5 {
     // For single-event timelines, apply a minimum duration to ensure
     // proper scale generation and event positioning
     const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    const isSingleEvent = events.length === 1;
     if (duration < MIN_DURATION_MS) {
       duration = MIN_DURATION_MS;
     }
@@ -295,9 +300,10 @@ export class DeterministicLayoutV5 {
     // Reduce padding to 2% to keep events closer to timeline milestones
     const padding = duration * 0.02;
 
+    // Only center for single-event timelines; multi-event timelines use natural range
     this.timeRange = {
-      startTime: startTime - (duration / 2) - padding,
-      endTime: startTime + (duration / 2) + padding,
+      startTime: isSingleEvent ? startTime - (duration / 2) - padding : startTime - padding,
+      endTime: isSingleEvent ? startTime + (duration / 2) + padding : endTime + padding,
       duration: duration + (padding * 2)
     };
   }
