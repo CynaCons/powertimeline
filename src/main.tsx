@@ -6,6 +6,7 @@ import './styles/index.css'
 import { HomePage } from './pages/HomePage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { EditorPage } from './pages/EditorPage'
+import { AdminPage } from './pages/AdminPage'
 import { environment } from './config/environment'
 import { logger } from './utils/logger'
 import { performanceMonitor } from './utils/performanceMonitor'
@@ -84,6 +85,7 @@ function AppWithTheme() {
           <Route path="/" element={<HomePage />} />
           <Route path="/user/:userId" element={<UserProfilePage />} />
           <Route path="/user/:userId/timeline/:timelineId" element={<EditorPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           {/* Fallback for legacy direct editor access */}
           <Route path="/editor" element={<EditorPage />} />
         </Routes>

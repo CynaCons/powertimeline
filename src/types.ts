@@ -50,6 +50,7 @@ export interface User {
   avatar: string;       // Emoji or image URL
   bio?: string;         // Optional biography (max 280 chars)
   createdAt: string;    // ISO date
+  role?: 'user' | 'admin';  // User role (defaults to 'user' if undefined) - v0.4.4
 }
 
 /**

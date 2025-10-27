@@ -23,7 +23,7 @@ export const STORAGE_KEYS = {
  * Current data version for migration tracking
  * Increment this when data structure changes require migration
  */
-const CURRENT_DATA_VERSION = 3; // v3: Added required visibility field to Timeline
+const CURRENT_DATA_VERSION = 4; // v4: Added role field to User, cynacons is admin (v0.4.4)
 
 /**
  * Get current data version from localStorage
@@ -96,6 +96,7 @@ export const DEMO_USERS: User[] = [
     avatar: '⚡',
     bio: 'Building collaborative timeline experiences with PowerTimeline. Exploring the intersection of history, technology, and knowledge sharing.',
     createdAt: new Date().toISOString(),
+    role: 'admin', // Admin user for v0.4.4 admin panel
   },
   {
     id: 'alice',
