@@ -873,7 +873,6 @@
   - [ ] Bulk role assignment
   - [ ] Clear selection button
 - [ ] Add timeline bulk operations
-  - [ ] Bulk feature/unfeature timelines
   - [ ] Bulk visibility changes
   - [ ] Bulk delete timelines
 - [ ] Create confirmation dialogs for destructive operations
@@ -894,28 +893,7 @@
   - [ ] Export to JSON capability
   - [ ] Pagination (20 entries per page)
 
-**Phase 7: Site Configuration Panel**
-- [ ] Add SiteConfiguration type to types.ts
-  - [ ] siteName, siteDescription
-  - [ ] defaultTimelineVisibility
-  - [ ] featuredTimelineIds[]
-  - [ ] maxEventsPerTimeline
-  - [ ] enableUserRegistration (future)
-- [ ] Create siteConfig.ts utility
-  - [ ] getSiteConfig(), updateSiteConfig(), resetToDefaults()
-  - [ ] Store in localStorage
-  - [ ] Default configuration object
-- [ ] Create ConfigurationPanel component
-  - [ ] Form fields for each config option
-  - [ ] Save button with validation
-  - [ ] Reset to defaults button
-  - [ ] Log config changes to activity log
-- [ ] Apply configuration throughout app
-  - [ ] Use site name in header/branding
-  - [ ] Apply default visibility to new timelines
-  - [ ] Enforce max events limit in authoring overlay
-
-**Phase 8: Testing - E2E Test Suite**
+**Phase 7: Testing - E2E Test Suite**
 - [ ] Create admin access test (tests/v5/82-admin-panel-access.spec.ts)
   - [ ] T82.1: Admin user can access /admin route
   - [ ] T82.2: Non-admin user redirected from /admin
@@ -934,18 +912,26 @@
   - [ ] T85.1: Select multiple users
   - [ ] T85.2: Bulk delete users
   - [ ] T85.3: Bulk role assignment
-  - [ ] T85.4: Bulk feature timelines
+  - [ ] T85.4: Bulk timeline visibility changes
 - [ ] Create activity log test (tests/v5/86-admin-activity-log.spec.ts)
   - [ ] T86.1: View activity log entries
   - [ ] T86.2: Log appears after role change
   - [ ] T86.3: Filter log by action type
   - [ ] T86.4: Log shows admin username and timestamp
 
-**Phase 9: Documentation & Completion**
+**Phase 8: Documentation & Completion**
 - [ ] Update PLAN.md with completion notes
 - [ ] Run npm run build and verify bundle size
 - [ ] Run all admin tests
 - [ ] Git commit and push
+
+**Known Issues & Future Cleanup:**
+- Read-only notification banner overlaps with UI elements (needs z-index/positioning fix)
+- Timeline `featured` field exists but feature functionality not desired (schedule for removal)
+  - Remove `featured: boolean` from Timeline type
+  - Remove Featured Timelines section from HomePage
+  - Clean up demo data initialization
+  - Update SRS_HOME_PAGE.md to remove featured timeline requirements
 
 ## Phase 2: Backend & Authentication (v0.5.x)
 

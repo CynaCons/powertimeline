@@ -1,6 +1,6 @@
 # Admin Panel & Site Administration Requirements
 
-This document specifies requirements for the admin interface and platform management features (v0.4.4). The admin panel provides authorized users with tools for user management, platform analytics, bulk operations, activity auditing, and site configuration.
+This document specifies requirements for the admin interface and platform management features (v0.4.4). The admin panel provides authorized users with tools for user management, platform analytics, bulk operations, and activity auditing.
 
 ## Scope
 
@@ -11,7 +11,6 @@ This document specifies requirements for the admin interface and platform manage
 - Platform statistics dashboard with visualizations
 - Bulk operations on users and timelines
 - Admin activity audit log
-- Site configuration panel
 - E2E test coverage for all admin features
 
 **Out of Scope (Deferred):**
@@ -28,7 +27,6 @@ The admin panel (/admin) contains these sections:
 1. **Users** - User management table with role assignment and deletion
 2. **Statistics** - Platform metrics and analytics dashboard
 3. **Activity Log** - Audit trail of admin actions
-4. **Configuration** - Site settings and platform configuration
 
 ## Requirement Tables
 
@@ -85,15 +83,6 @@ The admin panel (/admin) contains these sections:
 | CC-REQ-ADMIN-LOG-003 | Activity log display | • Table shows: Timestamp, Admin User, Action, Target, Details<br>• Sorted by timestamp descending (newest first)<br>• Pagination: 20 entries per page<br>• Expandable rows for full details JSON | `src/components/admin/ActivityLogPanel.tsx` | T86.1 |
 | CC-REQ-ADMIN-LOG-004 | Activity log filtering | • Filter by action type dropdown<br>• Filter by admin user dropdown<br>• Date range picker (last 24h, 7 days, 30 days, all time)<br>• Clear filters button<br>• Export to JSON button | `src/components/admin/ActivityLogPanel.tsx` | T86.3, T86.4 |
 
-### Site Configuration
-
-| ID | Requirement | Acceptance Criteria | Code | Tests |
-|---|---|---|---|---|
-| CC-REQ-ADMIN-CFG-001 | Site configuration type | • SiteConfiguration interface: siteName, siteDescription, defaultTimelineVisibility, featuredTimelineIds[], maxEventsPerTimeline, enableUserRegistration<br>• Stored in localStorage<br>• Default configuration object provided | `src/types.ts` | TBD |
-| CC-REQ-ADMIN-CFG-002 | Configuration management utilities | • getSiteConfig() retrieves current config<br>• updateSiteConfig(config) updates and persists<br>• resetToDefaults() restores default values<br>• Validates config before saving | `src/lib/siteConfig.ts` | TBD |
-| CC-REQ-ADMIN-CFG-003 | Configuration panel UI | • Form with labeled fields for each config option<br>• Input validation (e.g., siteName required, max 100 chars)<br>• Save button (disabled when invalid)<br>• Reset to Defaults button with confirmation<br>• Success notification on save<br>• All changes logged to activity log | `src/components/admin/ConfigurationPanel.tsx` | TBD |
-| CC-REQ-ADMIN-CFG-004 | Apply configuration throughout app | • Use siteName in page header/branding<br>• Apply defaultTimelineVisibility when creating timelines<br>• Enforce maxEventsPerTimeline in authoring overlay<br>• Config changes reflected immediately or on page reload | Various components | TBD |
-
 ## E2E Test Coverage
 
 ### Test Files
@@ -137,24 +126,11 @@ export interface AdminActivityLog {
 }
 ```
 
-### SiteConfiguration Type (src/types.ts)
-```typescript
-export interface SiteConfiguration {
-  siteName: string;                    // Default: "PowerTimeline"
-  siteDescription: string;             // Default: "Visualize and share timelines"
-  defaultTimelineVisibility: TimelineVisibility;  // Default: 'public'
-  featuredTimelineIds: string[];       // Manual curation list
-  maxEventsPerTimeline: number;        // Default: 1000
-  enableUserRegistration: boolean;     // Default: false (v0.5.1+)
-}
-```
-
 ## localStorage Keys
 
 | Key | Purpose | Data Type |
 |---|---|---|
 | `powertimeline_admin_logs` | Admin activity audit trail | `AdminActivityLog[]` |
-| `powertimeline_site_config` | Site configuration | `SiteConfiguration` |
 
 Existing keys remain unchanged (users, timelines, current_user, etc.).
 
