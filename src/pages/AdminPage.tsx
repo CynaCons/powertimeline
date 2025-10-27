@@ -14,6 +14,7 @@ import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { UserManagementPanel } from '../components/admin/UserManagementPanel';
 
 type AdminTab = 'users' | 'statistics' | 'activity';
 
@@ -104,14 +105,9 @@ export function AdminPage() {
         {/* Tab Content */}
         <main className="max-w-7xl mx-auto px-6 py-8">
           {activeTab === 'users' && (
-            <div className="bg-white rounded-lg border border-gray-200 p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">User Management</h2>
-              <p className="text-gray-600">
-                User management table will be implemented here (Phase 2).
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Features: View all users, assign roles, delete users, search and filter
-              </p>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
+              <UserManagementPanel />
             </div>
           )}
 

@@ -198,6 +198,80 @@ export function setCurrentUser(user: User): void {
 }
 
 /**
+ * Save users array to localStorage
+ * Admin utility for v0.4.4
+ */
+export function saveUsers(users: User[]): void {
+  localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+}
+
+/**
+ * Update an existing user
+ * Returns true if successful, false if user not found
+ * Admin utility for v0.4.4
+ */
+export function updateUser(userId: string, updates: Partial<User>): boolean {
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.id === userId);
+
+  if (userIndex === -1) {
+    return false;
+  }
+
+  // Update user with partial updates
+  users[userIndex] = {
+    ...users[userIndex],
+    ...updates,
+  };
+
+  saveUsers(users);
+
+  // If updating current user, update that too
+  const currentUser = getCurrentUser();
+  if (currentUser && currentUser.id === userId) {
+    setCurrentUser(users[userIndex]);
+  }
+
+  return true;
+}
+
+/**
+ * Delete a user and optionally cascade delete their timelines
+ * Returns number of timelines deleted
+ * Admin utility for v0.4.4
+ */
+export function deleteUser(userId: string, cascadeDelete: boolean = true): number {
+  const users = getUsers();
+  const filteredUsers = users.filter(u => u.id !== userId);
+
+  if (filteredUsers.length === users.length) {
+    // User not found
+    return 0;
+  }
+
+  saveUsers(filteredUsers);
+
+  // Handle cascade delete of timelines
+  let timelinesDeleted = 0;
+  if (cascadeDelete) {
+    const timelines = getTimelines();
+    const userTimelines = timelines.filter(t => t.ownerId === userId);
+    timelinesDeleted = userTimelines.length;
+
+    const remainingTimelines = timelines.filter(t => t.ownerId !== userId);
+    saveTimelines(remainingTimelines);
+  }
+
+  // Clear current user if deleting current user
+  const currentUser = getCurrentUser();
+  if (currentUser && currentUser.id === userId) {
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+  }
+
+  return timelinesDeleted;
+}
+
+/**
  * Generate a URL-safe slug from a title with accent/diacritic removal
  * Examples:
  *   "French Revolution" -> "french-revolution"
