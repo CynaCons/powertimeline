@@ -15,6 +15,7 @@ import { UserProfileMenu } from '../components/UserProfileMenu';
 import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { UserManagementPanel } from '../components/admin/UserManagementPanel';
+import { StatisticsDashboard } from '../components/admin/StatisticsDashboard';
 
 type AdminTab = 'users' | 'statistics' | 'activity';
 
@@ -112,14 +113,9 @@ export function AdminPage() {
           )}
 
           {activeTab === 'statistics' && (
-            <div className="bg-white rounded-lg border border-gray-200 p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Platform Statistics</h2>
-              <p className="text-gray-600">
-                Statistics dashboard will be implemented here (Phase 3).
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Features: User counts, timeline counts, visibility breakdown, top creators
-              </p>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">Platform Statistics</h2>
+              <StatisticsDashboard />
             </div>
           )}
 
