@@ -809,14 +809,143 @@
 
 ### v0.4.4 - Admin Panel & Site Administration
 **Goal:** Create admin interface for platform management
+**Status:** In Progress
 
-- [ ] Create Admin Panel page (/admin route)
-- [ ] Add admin-only navigation section
-- [ ] User management interface (view all users, assign roles)
-- [ ] Platform statistics dashboard (detailed analytics)
-- [ ] Bulk operations (delete, bulk feature)
-- [ ] Admin activity log and audit trail
-- [ ] Site configuration panel (platform settings)
+**Phase 1: Foundation - User Roles & Type System**
+- [ ] Update User type with role field (user | admin)
+- [ ] Update demo users (set cynacons as admin)
+- [ ] Increment DATA_VERSION for migration
+- [ ] Create access control utilities (src/lib/adminUtils.ts)
+  - [ ] isAdmin(user) helper function
+  - [ ] canAccessAdmin(user) check
+  - [ ] requireAdmin(user) enforcement
+
+**Phase 2: Admin Route & Navigation**
+- [ ] Create AdminPage component (src/pages/AdminPage.tsx)
+  - [ ] Admin access control check
+  - [ ] Tab navigation (Users, Statistics, Logs, Configuration)
+  - [ ] Protected route pattern
+- [ ] Update routing in main.tsx (/admin route)
+- [ ] Add admin navigation item to navigation rail
+  - [ ] Show only to admin users
+  - [ ] admin_panel_settings icon
+  - [ ] Highlight when on /admin route
+
+**Phase 3: User Management Interface**
+- [ ] Create UserManagementPanel component
+  - [ ] User table/list display (id, name, avatar, role, created, timeline count)
+  - [ ] Role assignment dropdown (user <-> admin)
+  - [ ] Role change confirmation dialog
+  - [ ] Update user in localStorage
+  - [ ] Log role changes to activity log
+- [ ] Add user search & filter functionality
+  - [ ] Search by name or ID
+  - [ ] Filter by role (all/admin/user)
+  - [ ] Sort by creation date, name, timeline count
+- [ ] Implement user deletion
+  - [ ] Delete button with confirmation
+  - [ ] Cascade delete timelines (with warning)
+  - [ ] Log deletion to activity log
+
+**Phase 4: Platform Statistics Dashboard**
+- [ ] Create StatisticsDashboard component
+  - [ ] Total users, timelines, events metrics
+  - [ ] Timeline visibility breakdown (pie/bar chart)
+  - [ ] Top timeline creators
+  - [ ] Recent timeline activity
+  - [ ] Average events per timeline
+  - [ ] View count statistics
+- [ ] Create adminStats.ts utility
+  - [ ] calculatePlatformStats() function
+  - [ ] Efficient localStorage data aggregation
+- [ ] Add charts/visualizations
+  - [ ] Timeline visibility pie chart
+  - [ ] Timeline creation trend (last 30 days)
+  - [ ] Top creators bar chart
+
+**Phase 5: Bulk Operations**
+- [ ] Add selection system to user table
+  - [ ] Row checkboxes
+  - [ ] Select All / Select None controls
+  - [ ] Show selected count
+- [ ] Create bulk actions toolbar
+  - [ ] Bulk delete users (with multi-confirmation)
+  - [ ] Bulk role assignment
+  - [ ] Clear selection button
+- [ ] Add timeline bulk operations
+  - [ ] Bulk feature/unfeature timelines
+  - [ ] Bulk visibility changes
+  - [ ] Bulk delete timelines
+- [ ] Create confirmation dialogs for destructive operations
+  - [ ] Show affected item counts
+  - [ ] Log all bulk operations
+
+**Phase 6: Admin Activity Log**
+- [ ] Add AdminActivityLog type to types.ts
+  - [ ] id, timestamp, adminUserId, action, targetType, targetId, details
+  - [ ] Action types: USER_ROLE_CHANGE, USER_DELETE, TIMELINE_DELETE, BULK_OPERATION, CONFIG_CHANGE
+- [ ] Create activityLog.ts utility
+  - [ ] logAdminAction(...) function
+  - [ ] Store in localStorage array
+  - [ ] Auto-prune to max 1000 entries
+- [ ] Create ActivityLogPanel component
+  - [ ] Table showing recent admin actions
+  - [ ] Filter by action type, date range, admin user
+  - [ ] Export to JSON capability
+  - [ ] Pagination (20 entries per page)
+
+**Phase 7: Site Configuration Panel**
+- [ ] Add SiteConfiguration type to types.ts
+  - [ ] siteName, siteDescription
+  - [ ] defaultTimelineVisibility
+  - [ ] featuredTimelineIds[]
+  - [ ] maxEventsPerTimeline
+  - [ ] enableUserRegistration (future)
+- [ ] Create siteConfig.ts utility
+  - [ ] getSiteConfig(), updateSiteConfig(), resetToDefaults()
+  - [ ] Store in localStorage
+  - [ ] Default configuration object
+- [ ] Create ConfigurationPanel component
+  - [ ] Form fields for each config option
+  - [ ] Save button with validation
+  - [ ] Reset to defaults button
+  - [ ] Log config changes to activity log
+- [ ] Apply configuration throughout app
+  - [ ] Use site name in header/branding
+  - [ ] Apply default visibility to new timelines
+  - [ ] Enforce max events limit in authoring overlay
+
+**Phase 8: Testing - E2E Test Suite**
+- [ ] Create admin access test (tests/v5/82-admin-panel-access.spec.ts)
+  - [ ] T82.1: Admin user can access /admin route
+  - [ ] T82.2: Non-admin user redirected from /admin
+  - [ ] T82.3: Admin navigation item visible only to admin
+- [ ] Create user management test (tests/v5/83-user-management.spec.ts)
+  - [ ] T83.1: View all users in table
+  - [ ] T83.2: Change user role (user -> admin)
+  - [ ] T83.3: Delete user with confirmation
+  - [ ] T83.4: Search users by name
+- [ ] Create statistics dashboard test (tests/v5/84-admin-statistics.spec.ts)
+  - [ ] T84.1: Display total users and timelines
+  - [ ] T84.2: Show visibility breakdown
+  - [ ] T84.3: Display top creators
+  - [ ] T84.4: Statistics update after timeline creation
+- [ ] Create bulk operations test (tests/v5/85-admin-bulk-operations.spec.ts)
+  - [ ] T85.1: Select multiple users
+  - [ ] T85.2: Bulk delete users
+  - [ ] T85.3: Bulk role assignment
+  - [ ] T85.4: Bulk feature timelines
+- [ ] Create activity log test (tests/v5/86-admin-activity-log.spec.ts)
+  - [ ] T86.1: View activity log entries
+  - [ ] T86.2: Log appears after role change
+  - [ ] T86.3: Filter log by action type
+  - [ ] T86.4: Log shows admin username and timestamp
+
+**Phase 9: Documentation & Completion**
+- [ ] Update PLAN.md with completion notes
+- [ ] Run npm run build and verify bundle size
+- [ ] Run all admin tests
+- [ ] Git commit and push
 
 ## Phase 2: Backend & Authentication (v0.5.x)
 
