@@ -61,3 +61,38 @@ export interface SearchResults {
   users: User[];
   hasMore: boolean;
 }
+
+/**
+ * Admin action types for activity logging
+ * v0.4.4 - Admin Panel & Site Administration
+ */
+export type AdminActionType =
+  | 'USER_ROLE_CHANGE'
+  | 'USER_DELETE'
+  | 'TIMELINE_DELETE'
+  | 'BULK_OPERATION'
+  | 'CONFIG_CHANGE';
+
+/**
+ * Target types for admin actions
+ * v0.4.4 - Admin Panel & Site Administration
+ */
+export type AdminActionTargetType = 'user' | 'timeline' | 'system';
+
+/**
+ * Admin activity log entry
+ * Tracks all administrative actions for audit purposes
+ * v0.4.4 - Admin Panel & Site Administration
+ */
+export interface AdminActivityLog {
+  id: string;                           // Unique identifier for the log entry
+  timestamp: string;                    // ISO date when action occurred
+  adminUserId: string;                  // ID of admin who performed the action
+  adminUserName: string;                // Name of admin (denormalized for display)
+  action: AdminActionType;              // Type of action performed
+  targetType: AdminActionTargetType;    // Type of entity affected
+  targetId: string;                     // ID of the affected entity
+  targetName?: string;                  // Name of affected entity (denormalized)
+  details: string;                      // Human-readable description of the action
+  metadata?: Record<string, any>;       // Additional action-specific data
+}

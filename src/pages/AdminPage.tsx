@@ -16,6 +16,7 @@ import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { UserManagementPanel } from '../components/admin/UserManagementPanel';
 import { StatisticsDashboard } from '../components/admin/StatisticsDashboard';
+import { ActivityLogPanel } from '../components/admin/ActivityLogPanel';
 
 type AdminTab = 'users' | 'statistics' | 'activity';
 
@@ -120,14 +121,9 @@ export function AdminPage() {
           )}
 
           {activeTab === 'activity' && (
-            <div className="bg-white rounded-lg border border-gray-200 p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Admin Activity Log</h2>
-              <p className="text-gray-600">
-                Activity log will be implemented here (Phase 6).
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Features: Audit trail of all admin actions, filtering, export
-              </p>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">Admin Activity Log</h2>
+              <ActivityLogPanel />
             </div>
           )}
         </main>

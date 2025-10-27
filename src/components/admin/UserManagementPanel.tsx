@@ -35,6 +35,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import type { User } from '../../types';
 import { getUsers, getTimelinesByOwner, updateUser, deleteUser, getCurrentUser } from '../../lib/homePageStorage';
+import { logAdminAction } from '../../lib/activityLog';
 
 type SortField = 'name' | 'createdAt' | 'timelineCount';
 type SortDirection = 'asc' | 'desc';
@@ -153,7 +154,14 @@ export function UserManagementPanel() {
     const success = updateUser(roleChangeDialog.userId, { role: roleChangeDialog.newRole });
     if (success) {
       setUsers(getUsers());
-      // TODO: Log to activity log when Phase 6 is implemented
+      logAdminAction(
+        'USER_ROLE_CHANGE',
+        'user',
+        roleChangeDialog.userId,
+        `Changed user "${roleChangeDialog.userName}" role to ${roleChangeDialog.newRole}`,
+        roleChangeDialog.userName,
+        { oldRole: users.find(u => u.id === roleChangeDialog.userId)?.role || 'user', newRole: roleChangeDialog.newRole }
+      );
     }
 
     setRoleChangeDialog(null);
@@ -179,7 +187,14 @@ export function UserManagementPanel() {
     const timelinesDeleted = deleteUser(deleteDialog.userId, true);
     console.log(`Deleted user ${deleteDialog.userId}, cascade deleted ${timelinesDeleted} timelines`);
     setUsers(getUsers());
-    // TODO: Log to activity log when Phase 6 is implemented
+    logAdminAction(
+      'USER_DELETE',
+      'user',
+      deleteDialog.userId,
+      `Deleted user "${deleteDialog.userName}" and ${timelinesDeleted} associated timeline${timelinesDeleted !== 1 ? 's' : ''}`,
+      deleteDialog.userName,
+      { timelinesDeleted }
+    );
 
     setDeleteDialog(null);
   };
@@ -240,7 +255,8 @@ export function UserManagementPanel() {
     if (!bulkDeleteDialog) return;
 
     let totalDeleted = 0;
-    Array.from(selectedUserIds).forEach(userId => {
+    const userIds = Array.from(selectedUserIds);
+    userIds.forEach(userId => {
       const timelinesDeleted = deleteUser(userId, true);
       totalDeleted += timelinesDeleted;
     });
@@ -249,7 +265,14 @@ export function UserManagementPanel() {
     setUsers(getUsers());
     clearSelection();
     setBulkDeleteDialog(null);
-    // TODO: Log to activity log when Phase 6 is implemented
+    logAdminAction(
+      'BULK_OPERATION',
+      'user',
+      'bulk',
+      `Bulk deleted ${userIds.length} user${userIds.length !== 1 ? 's' : ''} and ${totalDeleted} associated timeline${totalDeleted !== 1 ? 's' : ''}`,
+      undefined,
+      { operation: 'delete', userCount: userIds.length, timelinesDeleted: totalDeleted, userIds }
+    );
   };
 
   const handleBulkRoleAssignment = (newRole: 'user' | 'admin') => {
@@ -263,7 +286,8 @@ export function UserManagementPanel() {
   const confirmBulkRoleAssignment = () => {
     if (!bulkRoleDialog) return;
 
-    Array.from(selectedUserIds).forEach(userId => {
+    const userIds = Array.from(selectedUserIds);
+    userIds.forEach(userId => {
       updateUser(userId, { role: bulkRoleDialog.newRole });
     });
 
@@ -271,7 +295,14 @@ export function UserManagementPanel() {
     setUsers(getUsers());
     clearSelection();
     setBulkRoleDialog(null);
-    // TODO: Log to activity log when Phase 6 is implemented
+    logAdminAction(
+      'BULK_OPERATION',
+      'user',
+      'bulk',
+      `Bulk assigned ${userIds.length} user${userIds.length !== 1 ? 's' : ''} to role: ${bulkRoleDialog.newRole}`,
+      undefined,
+      { operation: 'role_assignment', userCount: userIds.length, newRole: bulkRoleDialog.newRole, userIds }
+    );
   };
 
   return (
