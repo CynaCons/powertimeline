@@ -1,6 +1,7 @@
 /**
  * UserManagementPanel - Admin user management interface
  * Implements CC-REQ-ADMIN-USR-001 to CC-REQ-ADMIN-USR-004
+ * Phase 5: Added bulk operations (selection, bulk delete, bulk role assignment)
  * v0.4.4 - Admin Panel & Site Administration
  */
 
@@ -26,6 +27,9 @@ import {
   Paper,
   IconButton,
   Tooltip,
+  Checkbox,
+  Toolbar,
+  Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
@@ -47,6 +51,9 @@ export function UserManagementPanel() {
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
+  // Selection state for bulk operations
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+
   // Role change confirmation dialog
   const [roleChangeDialog, setRoleChangeDialog] = useState<{
     open: boolean;
@@ -61,6 +68,20 @@ export function UserManagementPanel() {
     userId: string;
     userName: string;
     timelineCount: number;
+  } | null>(null);
+
+  // Bulk delete confirmation dialog
+  const [bulkDeleteDialog, setBulkDeleteDialog] = useState<{
+    open: boolean;
+    userCount: number;
+    totalTimelines: number;
+  } | null>(null);
+
+  // Bulk role assignment dialog
+  const [bulkRoleDialog, setBulkRoleDialog] = useState<{
+    open: boolean;
+    userCount: number;
+    newRole: 'user' | 'admin';
   } | null>(null);
 
   const currentUser = getCurrentUser();
@@ -172,6 +193,87 @@ export function UserManagementPanel() {
     }
   };
 
+  // Selection handlers
+  const toggleSelectUser = (userId: string) => {
+    const newSelection = new Set(selectedUserIds);
+    if (newSelection.has(userId)) {
+      newSelection.delete(userId);
+    } else {
+      newSelection.add(userId);
+    }
+    setSelectedUserIds(newSelection);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUserIds.size === filteredAndSortedUsers.length) {
+      // Deselect all
+      setSelectedUserIds(new Set());
+    } else {
+      // Select all (except current user)
+      const allIds = new Set(
+        filteredAndSortedUsers
+          .filter(u => u.id !== currentUser?.id)
+          .map(u => u.id)
+      );
+      setSelectedUserIds(allIds);
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedUserIds(new Set());
+  };
+
+  // Bulk operations
+  const handleBulkDelete = () => {
+    const totalTimelines = Array.from(selectedUserIds).reduce((sum, userId) => {
+      return sum + getTimelinesByOwner(userId).length;
+    }, 0);
+
+    setBulkDeleteDialog({
+      open: true,
+      userCount: selectedUserIds.size,
+      totalTimelines,
+    });
+  };
+
+  const confirmBulkDelete = () => {
+    if (!bulkDeleteDialog) return;
+
+    let totalDeleted = 0;
+    Array.from(selectedUserIds).forEach(userId => {
+      const timelinesDeleted = deleteUser(userId, true);
+      totalDeleted += timelinesDeleted;
+    });
+
+    console.log(`Bulk deleted ${selectedUserIds.size} users, cascade deleted ${totalDeleted} timelines`);
+    setUsers(getUsers());
+    clearSelection();
+    setBulkDeleteDialog(null);
+    // TODO: Log to activity log when Phase 6 is implemented
+  };
+
+  const handleBulkRoleAssignment = (newRole: 'user' | 'admin') => {
+    setBulkRoleDialog({
+      open: true,
+      userCount: selectedUserIds.size,
+      newRole,
+    });
+  };
+
+  const confirmBulkRoleAssignment = () => {
+    if (!bulkRoleDialog) return;
+
+    Array.from(selectedUserIds).forEach(userId => {
+      updateUser(userId, { role: bulkRoleDialog.newRole });
+    });
+
+    console.log(`Bulk assigned ${selectedUserIds.size} users to role: ${bulkRoleDialog.newRole}`);
+    setUsers(getUsers());
+    clearSelection();
+    setBulkRoleDialog(null);
+    // TODO: Log to activity log when Phase 6 is implemented
+  };
+
   return (
     <div className="space-y-4">
       {/* Search and Filter Controls */}
@@ -211,11 +313,53 @@ export function UserManagementPanel() {
         )}
       </div>
 
+      {/* Bulk Actions Toolbar */}
+      {selectedUserIds.size > 0 && (
+        <Toolbar sx={{ bgcolor: 'primary.light', borderRadius: 1, px: 2 }}>
+          <Typography variant="subtitle1" component="div" sx={{ flex: '1 1 100%' }}>
+            {selectedUserIds.size} user{selectedUserIds.size !== 1 ? 's' : ''} selected
+          </Typography>
+          <FormControl size="small" sx={{ minWidth: 150, mr: 2 }}>
+            <InputLabel>Assign Role</InputLabel>
+            <Select
+              value=""
+              label="Assign Role"
+              onChange={(e) => handleBulkRoleAssignment(e.target.value as 'user' | 'admin')}
+            >
+              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={handleBulkDelete}
+            sx={{ mr: 2 }}
+          >
+            Delete Selected
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={clearSelection}
+          >
+            Clear Selection
+          </Button>
+        </Toolbar>
+      )}
+
       {/* User Table */}
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={selectedUserIds.size > 0 && selectedUserIds.size < filteredAndSortedUsers.filter(u => u.id !== currentUser?.id).length}
+                  checked={filteredAndSortedUsers.filter(u => u.id !== currentUser?.id).length > 0 && selectedUserIds.size === filteredAndSortedUsers.filter(u => u.id !== currentUser?.id).length}
+                  onChange={toggleSelectAll}
+                />
+              </TableCell>
               <TableCell>Avatar</TableCell>
               <TableCell>
                 <Button
@@ -249,13 +393,20 @@ export function UserManagementPanel() {
           <TableBody>
             {filteredAndSortedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                   <p className="text-gray-500">No users found</p>
                 </TableCell>
               </TableRow>
             ) : (
               filteredAndSortedUsers.map((user) => (
                 <TableRow key={user.id} hover>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedUserIds.has(user.id)}
+                      onChange={() => toggleSelectUser(user.id)}
+                      disabled={currentUser?.id === user.id}
+                    />
+                  </TableCell>
                   <TableCell>
                     <span className="text-2xl">{user.avatar}</span>
                   </TableCell>
@@ -349,6 +500,51 @@ export function UserManagementPanel() {
           <Button onClick={() => setDeleteDialog(null)}>Cancel</Button>
           <Button onClick={confirmDelete} variant="contained" color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog open={bulkDeleteDialog?.open || false} onClose={() => setBulkDeleteDialog(null)}>
+        <DialogTitle>Confirm Bulk User Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete <strong>{bulkDeleteDialog?.userCount} user{bulkDeleteDialog?.userCount !== 1 ? 's' : ''}</strong>?
+            {bulkDeleteDialog && bulkDeleteDialog.totalTimelines > 0 && (
+              <>
+                <br />
+                <br />
+                <span className="text-red-600 font-semibold">
+                  This will also delete {bulkDeleteDialog.totalTimelines} timeline{bulkDeleteDialog.totalTimelines !== 1 ? 's' : ''}.
+                </span>
+              </>
+            )}
+            <br />
+            <br />
+            <strong>This action cannot be undone.</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBulkDeleteDialog(null)}>Cancel</Button>
+          <Button onClick={confirmBulkDelete} variant="contained" color="error">
+            Delete All
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Role Assignment Dialog */}
+      <Dialog open={bulkRoleDialog?.open || false} onClose={() => setBulkRoleDialog(null)}>
+        <DialogTitle>Confirm Bulk Role Assignment</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to assign the <strong>{bulkRoleDialog?.newRole}</strong> role to{' '}
+            <strong>{bulkRoleDialog?.userCount} user{bulkRoleDialog?.userCount !== 1 ? 's' : ''}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBulkRoleDialog(null)}>Cancel</Button>
+          <Button onClick={confirmBulkRoleAssignment} variant="contained" color="primary">
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>
