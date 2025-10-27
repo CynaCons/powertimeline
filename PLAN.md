@@ -868,21 +868,23 @@
 - [x] Tailwind CSS grid layout for responsive design
 - [x] Build passing successfully
 
-**Phase 5: Bulk Operations**
-- [ ] Add selection system to user table
-  - [ ] Row checkboxes
-  - [ ] Select All / Select None controls
-  - [ ] Show selected count
-- [ ] Create bulk actions toolbar
-  - [ ] Bulk delete users (with multi-confirmation)
-  - [ ] Bulk role assignment
-  - [ ] Clear selection button
-- [ ] Add timeline bulk operations
-  - [ ] Bulk visibility changes
-  - [ ] Bulk delete timelines
-- [ ] Create confirmation dialogs for destructive operations
-  - [ ] Show affected item counts
-  - [ ] Log all bulk operations
+**Phase 5: Bulk Operations** ✅
+- [x] Add selection system to user table
+  - [x] Row checkboxes
+  - [x] Select All / Select None controls
+  - [x] Show selected count
+- [x] Create bulk actions toolbar
+  - [x] Bulk delete users (with multi-confirmation)
+  - [x] Bulk role assignment
+  - [x] Clear selection button
+- [x] Create confirmation dialogs for destructive operations
+  - [x] Show affected item counts
+  - [x] Console logging for bulk operations (activity log in Phase 6)
+- [x] Added checkbox column with "Select All" functionality
+- [x] Bulk actions toolbar appears when users are selected
+- [x] Disabled selection for current user (self-protection)
+- [x] Build passing successfully
+- [ ] Add timeline bulk operations (deferred - not in user management scope)
 
 **Phase 6: Admin Activity Log**
 - [ ] Add AdminActivityLog type to types.ts
