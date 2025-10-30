@@ -954,13 +954,31 @@ All 8 phases completed successfully. Admin panel fully functional with:
 
 ## Phase 2: Backend & Authentication (v0.5.x)
 
-### v0.5.0 - Firebase Backend Setup
-- [ ] Set up Firebase Firestore database
-- [ ] Design timeline document schema (JSON format)
-- [ ] Migrate localStorage data to Firestore
-- [ ] Implement cloud sync for timeline data
+### v0.5.0 - Firebase Backend Setup (IN PROGRESS)
+- [x] Set up Firebase Firestore database (Project: powertimeline-860f1)
+- [x] Install Firebase SDK (v10.x)
+- [x] Create Firebase configuration (src/lib/firebase.ts)
+- [x] Design Firestore collections schema (timelines, users, activityLogs)
+- [x] Create Firestore service layer (src/services/firestore.ts)
+  - CRUD operations for timelines, users, activity logs
+  - Real-time subscriptions with onSnapshot
+  - Platform statistics aggregation
+- [x] Create data migration utilities (src/services/migration.ts)
+  - localStorage to Firestore migration
+  - Export/backup functionality
+  - Progress tracking and error handling
+- [ ] Implement cloud sync for timeline data (remaining work)
 - [ ] Add offline-first sync strategy
-- [ ] Create data migration utilities
+- [ ] Update components to use Firestore instead of localStorage
+- [ ] Create UI for migration prompt
+- [ ] Test Firebase integration E2E
+
+**Files Created:**
+- src/lib/firebase.ts - Firebase initialization and configuration
+- src/services/firestore.ts - Firestore service layer (450+ lines)
+- src/services/migration.ts - Migration utilities (300+ lines)
+
+**Next Steps:** Wire up components to use Firestore, add migration UI, implement real-time sync
 
 ### v0.5.1 - User Authentication
 - [ ] Implement Firebase Authentication (Email/Password + Google OAuth)
