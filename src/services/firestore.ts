@@ -12,15 +12,25 @@ import {
   limit,
   onSnapshot,
   increment,
+  collectionGroup,
   type QueryConstraint,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import type { Timeline, User, AdminActivityLog, TimelineVisibility } from '../types';
+import type {
+  Timeline,
+  TimelineMetadata,
+  Event,
+  EventDocument,
+  User,
+  AdminActivityLog,
+  TimelineVisibility
+} from '../types';
 
 // Collection names
 const COLLECTIONS = {
-  TIMELINES: 'timelines',
+  TIMELINES: 'timelines', // Now a subcollection under users
+  EVENTS: 'events', // Subcollection under timelines
   USERS: 'users',
   ACTIVITY_LOGS: 'activityLogs',
 } as const;
@@ -30,18 +40,49 @@ const COLLECTIONS = {
 // ============================================================================
 
 /**
- * Get a timeline by ID
+ * Get timeline metadata only (without events)
+ * v0.5.0.1 - Event Persistence Optimization
  */
-export async function getTimeline(timelineId: string): Promise<Timeline | null> {
+export async function getTimelineMetadata(timelineId: string): Promise<TimelineMetadata | null> {
   try {
-    const timelineRef = doc(db, COLLECTIONS.TIMELINES, timelineId);
-    const timelineSnap = await getDoc(timelineRef);
+    // Use collection group query to search across all users' timelines
+    const q = query(
+      collectionGroup(db, COLLECTIONS.TIMELINES),
+      where('id', '==', timelineId),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
 
-    if (!timelineSnap.exists()) {
+    if (querySnapshot.empty) {
       return null;
     }
 
-    return { id: timelineSnap.id, ...timelineSnap.data() } as Timeline;
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as TimelineMetadata;
+  } catch (error) {
+    console.error('Error fetching timeline metadata:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get a timeline by ID with all events (searches across all users' timelines)
+ */
+export async function getTimeline(timelineId: string): Promise<Timeline | null> {
+  try {
+    // First get the metadata
+    const metadata = await getTimelineMetadata(timelineId);
+    if (!metadata) {
+      return null;
+    }
+
+    // Then get all events
+    const events = await getTimelineEvents(timelineId, metadata.ownerId);
+
+    return {
+      ...metadata,
+      events,
+    };
   } catch (error) {
     console.error('Error fetching timeline:', error);
     throw error;
@@ -49,7 +90,10 @@ export async function getTimeline(timelineId: string): Promise<Timeline | null> 
 }
 
 /**
- * Get all timelines (with optional filters)
+ * Get all timelines metadata (without events)
+ * If ownerId is provided, queries that specific user's timelines subcollection
+ * Otherwise, uses collectionGroup to query across all users
+ * v0.5.0.1 - Event Persistence Optimization - Now returns metadata only
  */
 export async function getTimelines(options?: {
   ownerId?: string;
@@ -58,10 +102,11 @@ export async function getTimelines(options?: {
   limitCount?: number;
   orderByField?: 'createdAt' | 'updatedAt' | 'viewCount';
   orderDirection?: 'asc' | 'desc';
-}): Promise<Timeline[]> {
+}): Promise<TimelineMetadata[]> {
   try {
     const constraints: QueryConstraint[] = [];
 
+    // Note: when using collection group, ownerId filter is applied via where clause
     if (options?.ownerId) {
       constraints.push(where('ownerId', '==', options.ownerId));
     }
@@ -84,38 +129,226 @@ export async function getTimelines(options?: {
       constraints.push(limit(options.limitCount));
     }
 
-    const q = query(collection(db, COLLECTIONS.TIMELINES), ...constraints);
+    // Use collection group to query across all users' timeline subcollections
+    const q = query(collectionGroup(db, COLLECTIONS.TIMELINES), ...constraints);
     const querySnapshot = await getDocs(q);
 
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    })) as Timeline[];
+    })) as TimelineMetadata[];
   } catch (error) {
     console.error('Error fetching timelines:', error);
     throw error;
   }
 }
 
+// ============================================================================
+// Event Operations
+// ============================================================================
+
 /**
- * Create a new timeline
+ * Get all events for a timeline
+ * v0.5.0.1 - Event Persistence Optimization
  */
-export async function createTimeline(timeline: Omit<Timeline, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+export async function getTimelineEvents(timelineId: string, ownerId: string): Promise<Event[]> {
   try {
-    const timelineRef = doc(collection(db, COLLECTIONS.TIMELINES));
+    const eventsCollectionRef = collection(
+      db,
+      COLLECTIONS.USERS,
+      ownerId,
+      COLLECTIONS.TIMELINES,
+      timelineId,
+      COLLECTIONS.EVENTS
+    );
+
+    const q = query(eventsCollectionRef, orderBy('order', 'asc'));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map(doc => {
+      const eventDoc = doc.data() as EventDocument;
+      // Convert EventDocument back to Event by removing Firestore-specific fields
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { timelineId, createdAt, updatedAt, order, ...event } = eventDoc;
+      return event as Event;
+    });
+  } catch (error) {
+    console.error('Error fetching timeline events:', error);
+    throw error;
+  }
+}
+
+/**
+ * Add a new event to a timeline
+ * v0.5.0.1 - Event Persistence Optimization
+ */
+export async function addEvent(
+  timelineId: string,
+  ownerId: string,
+  event: Event
+): Promise<void> {
+  try {
+    const eventsCollectionRef = collection(
+      db,
+      COLLECTIONS.USERS,
+      ownerId,
+      COLLECTIONS.TIMELINES,
+      timelineId,
+      COLLECTIONS.EVENTS
+    );
+
+    // Get current event count to determine order
+    const existingEvents = await getTimelineEvents(timelineId, ownerId);
+    const order = existingEvents.length;
+
+    const eventRef = doc(eventsCollectionRef, event.id);
     const now = new Date().toISOString();
 
-    const newTimeline: Timeline = {
-      ...timeline,
-      id: timelineRef.id,
+    const eventDoc: EventDocument = {
+      ...event,
+      timelineId,
+      createdAt: now,
+      updatedAt: now,
+      order,
+    };
+
+    await setDoc(eventRef, eventDoc);
+
+    // Update timeline's eventCount and updatedAt
+    const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
+    await updateDoc(timelineRef, {
+      eventCount: existingEvents.length + 1,
+      updatedAt: now,
+    });
+  } catch (error) {
+    console.error('Error adding event:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update an existing event
+ * v0.5.0.1 - Event Persistence Optimization
+ */
+export async function updateEvent(
+  timelineId: string,
+  ownerId: string,
+  eventId: string,
+  updates: Partial<Event>
+): Promise<void> {
+  try {
+    const eventRef = doc(
+      db,
+      COLLECTIONS.USERS,
+      ownerId,
+      COLLECTIONS.TIMELINES,
+      timelineId,
+      COLLECTIONS.EVENTS,
+      eventId
+    );
+
+    const now = new Date().toISOString();
+
+    await updateDoc(eventRef, {
+      ...updates,
+      updatedAt: now,
+    });
+
+    // Update timeline's updatedAt
+    const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
+    await updateDoc(timelineRef, {
+      updatedAt: now,
+    });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete an event from a timeline
+ * v0.5.0.1 - Event Persistence Optimization
+ */
+export async function deleteEvent(
+  timelineId: string,
+  ownerId: string,
+  eventId: string
+): Promise<void> {
+  try {
+    const eventRef = doc(
+      db,
+      COLLECTIONS.USERS,
+      ownerId,
+      COLLECTIONS.TIMELINES,
+      timelineId,
+      COLLECTIONS.EVENTS,
+      eventId
+    );
+
+    await deleteDoc(eventRef);
+
+    // Update timeline's eventCount and updatedAt
+    const events = await getTimelineEvents(timelineId, ownerId);
+    const now = new Date().toISOString();
+
+    const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
+    await updateDoc(timelineRef, {
+      eventCount: events.length,
+      updatedAt: now,
+    });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new timeline in the user's timelines subcollection
+ * @param timeline - Timeline data (must include ownerId, can include events for backward compatibility)
+ * @param customId - Optional custom ID (e.g., "timeline-french-revolution"). If not provided, auto-generates ID.
+ * v0.5.0.1 - Event Persistence Optimization - Now stores events in subcollection
+ */
+export async function createTimeline(
+  timeline: Omit<Timeline, 'id' | 'createdAt' | 'updatedAt'> | Omit<TimelineMetadata, 'id' | 'createdAt' | 'updatedAt'>,
+  customId?: string
+): Promise<string> {
+  try {
+    // Timeline must have an ownerId
+    if (!timeline.ownerId) {
+      throw new Error('Timeline must have an ownerId');
+    }
+
+    // Get reference to user's timelines subcollection
+    const timelinesCollectionRef = collection(db, COLLECTIONS.USERS, timeline.ownerId, COLLECTIONS.TIMELINES);
+    const timelineId = customId || doc(timelinesCollectionRef).id;
+    const timelineRef = doc(db, COLLECTIONS.USERS, timeline.ownerId, COLLECTIONS.TIMELINES, timelineId);
+    const now = new Date().toISOString();
+
+    // Extract events if present (backward compatibility)
+    const events = 'events' in timeline ? timeline.events : [];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { events: _events, ...timelineData } = timeline as TimelineCreate & { events?: Event[] };
+
+    const newTimeline: TimelineMetadata = {
+      ...timelineData,
+      id: timelineId,
       createdAt: now,
       updatedAt: now,
       viewCount: timeline.viewCount || 0,
       featured: timeline.featured || false,
+      eventCount: events.length,
     };
 
     await setDoc(timelineRef, newTimeline);
-    return timelineRef.id;
+
+    // If events were provided, add them to the subcollection
+    if (events.length > 0) {
+      for (let i = 0; i < events.length; i++) {
+        await addEvent(timelineId, timeline.ownerId, events[i]);
+      }
+    }
+
+    return timelineId;
   } catch (error) {
     console.error('Error creating timeline:', error);
     throw error;
@@ -123,11 +356,36 @@ export async function createTimeline(timeline: Omit<Timeline, 'id' | 'createdAt'
 }
 
 /**
+ * Check if a timeline ID is unique for a given owner
+ * Checks within that specific user's timelines subcollection
+ */
+export async function isTimelineIdUnique(timelineId: string, ownerId: string): Promise<boolean> {
+  try {
+    const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
+    const timelineDoc = await getDoc(timelineRef);
+
+    // ID is unique if document doesn't exist in this user's subcollection
+    return !timelineDoc.exists();
+  } catch (error) {
+    console.error('Error checking timeline ID uniqueness:', error);
+    return false; // Assume not unique on error to be safe
+  }
+}
+
+/**
  * Update an existing timeline
+ * First fetches the timeline to get the ownerId, then updates it
  */
 export async function updateTimeline(timelineId: string, updates: Partial<Timeline>): Promise<void> {
   try {
-    const timelineRef = doc(db, COLLECTIONS.TIMELINES, timelineId);
+    // First, get the timeline to find its owner
+    const timeline = await getTimeline(timelineId);
+    if (!timeline) {
+      throw new Error(`Timeline ${timelineId} not found`);
+    }
+
+    // Update in the user's timelines subcollection
+    const timelineRef = doc(db, COLLECTIONS.USERS, timeline.ownerId, COLLECTIONS.TIMELINES, timelineId);
     await updateDoc(timelineRef, {
       ...updates,
       updatedAt: new Date().toISOString(),
@@ -140,10 +398,18 @@ export async function updateTimeline(timelineId: string, updates: Partial<Timeli
 
 /**
  * Delete a timeline
+ * First fetches the timeline to get the ownerId, then deletes it
  */
 export async function deleteTimeline(timelineId: string): Promise<void> {
   try {
-    const timelineRef = doc(db, COLLECTIONS.TIMELINES, timelineId);
+    // First, get the timeline to find its owner
+    const timeline = await getTimeline(timelineId);
+    if (!timeline) {
+      throw new Error(`Timeline ${timelineId} not found`);
+    }
+
+    // Delete from the user's timelines subcollection
+    const timelineRef = doc(db, COLLECTIONS.USERS, timeline.ownerId, COLLECTIONS.TIMELINES, timelineId);
     await deleteDoc(timelineRef);
   } catch (error) {
     console.error('Error deleting timeline:', error);
@@ -153,10 +419,25 @@ export async function deleteTimeline(timelineId: string): Promise<void> {
 
 /**
  * Increment timeline view count
+ * First fetches the timeline metadata to get the ownerId, then increments the count
+ * v0.5.0.1 - Event Persistence Optimization - Now uses getTimelineMetadata
+ * v0.5.0.2 - Only increment if viewer is not the owner
  */
-export async function incrementTimelineViewCount(timelineId: string): Promise<void> {
+export async function incrementTimelineViewCount(timelineId: string, viewerId?: string): Promise<void> {
   try {
-    const timelineRef = doc(db, COLLECTIONS.TIMELINES, timelineId);
+    // First, get the timeline metadata to find its owner (no need for events)
+    const timeline = await getTimelineMetadata(timelineId);
+    if (!timeline) {
+      throw new Error(`Timeline ${timelineId} not found`);
+    }
+
+    // Don't increment view count if the viewer is the owner
+    if (viewerId && viewerId === timeline.ownerId) {
+      return;
+    }
+
+    // Increment in the user's timelines subcollection
+    const timelineRef = doc(db, COLLECTIONS.USERS, timeline.ownerId, COLLECTIONS.TIMELINES, timelineId);
     await updateDoc(timelineRef, {
       viewCount: increment(1),
     });
@@ -167,17 +448,34 @@ export async function incrementTimelineViewCount(timelineId: string): Promise<vo
 }
 
 /**
- * Subscribe to timeline changes (real-time updates)
+ * Subscribe to timeline changes (real-time updates) with all events
+ * Uses collection group to find the timeline across all users
+ * v0.5.0.1 - Event Persistence Optimization - Now fetches events separately
  */
 export function subscribeToTimeline(
   timelineId: string,
   callback: (timeline: Timeline | null) => void
 ): Unsubscribe {
-  const timelineRef = doc(db, COLLECTIONS.TIMELINES, timelineId);
+  // Use collection group query to find the timeline across all users
+  const q = query(
+    collectionGroup(db, COLLECTIONS.TIMELINES),
+    where('id', '==', timelineId),
+    limit(1)
+  );
 
-  return onSnapshot(timelineRef, (snapshot) => {
-    if (snapshot.exists()) {
-      callback({ id: snapshot.id, ...snapshot.data() } as Timeline);
+  return onSnapshot(q, async (querySnapshot) => {
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const metadata = { id: doc.id, ...doc.data() } as TimelineMetadata;
+
+      // Fetch events separately
+      try {
+        const events = await getTimelineEvents(timelineId, metadata.ownerId);
+        callback({ ...metadata, events });
+      } catch (error) {
+        console.error('Error fetching events in timeline subscription:', error);
+        callback(null);
+      }
     } else {
       callback(null);
     }
@@ -188,10 +486,12 @@ export function subscribeToTimeline(
 }
 
 /**
- * Subscribe to timelines with filters (real-time updates)
+ * Subscribe to timelines metadata with filters (real-time updates)
+ * Uses collection group to query across all users' timeline subcollections
+ * v0.5.0.1 - Event Persistence Optimization - Now returns metadata only
  */
 export function subscribeToTimelines(
-  callback: (timelines: Timeline[]) => void,
+  callback: (timelines: TimelineMetadata[]) => void,
   options?: Parameters<typeof getTimelines>[0]
 ): Unsubscribe {
   const constraints: QueryConstraint[] = [];
@@ -218,13 +518,14 @@ export function subscribeToTimelines(
     constraints.push(limit(options.limitCount));
   }
 
-  const q = query(collection(db, COLLECTIONS.TIMELINES), ...constraints);
+  // Use collection group to query across all users' timeline subcollections
+  const q = query(collectionGroup(db, COLLECTIONS.TIMELINES), ...constraints);
 
   return onSnapshot(q, (querySnapshot) => {
     const timelines = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    })) as Timeline[];
+    })) as TimelineMetadata[];
     callback(timelines);
   }, (error) => {
     console.error('Error in timelines subscription:', error);
@@ -450,7 +751,8 @@ export async function getPlatformStats(): Promise<{
       getTimelines(),
     ]);
 
-    const totalEvents = timelines.reduce((sum, t) => sum + t.events.length, 0);
+    // v0.5.0.1 - Use eventCount from TimelineMetadata instead of events.length
+    const totalEvents = timelines.reduce((sum, t) => sum + (t.eventCount || 0), 0);
     const totalViews = timelines.reduce((sum, t) => sum + t.viewCount, 0);
 
     const publicTimelines = timelines.filter(t => t.visibility === 'public').length;
@@ -468,6 +770,33 @@ export async function getPlatformStats(): Promise<{
     };
   } catch (error) {
     console.error('Error fetching platform stats:', error);
+    throw error;
+  }
+}
+
+/**
+ * Reset all statistics (view counts) across all timelines
+ * v0.5.0.2 - Admin functionality to clear statistics
+ */
+export async function resetAllStatistics(): Promise<void> {
+  try {
+    // Get all users
+    const users = await getUsers();
+
+    // For each user, get their timelines and reset view counts
+    for (const user of users) {
+      const timelinesRef = collection(db, COLLECTIONS.USERS, user.id, COLLECTIONS.TIMELINES);
+      const snapshot = await getDocs(timelinesRef);
+
+      // Batch update all timelines for this user
+      const batch = writeBatch(db);
+      snapshot.docs.forEach(doc => {
+        batch.update(doc.ref, { viewCount: 0 });
+      });
+      await batch.commit();
+    }
+  } catch (error) {
+    console.error('Error resetting statistics:', error);
     throw error;
   }
 }

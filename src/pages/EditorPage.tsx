@@ -5,7 +5,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getTimelineById, incrementViewCount, getUserById } from '../lib/homePageStorage';
+import { getTimeline, getUser, incrementTimelineViewCount } from '../services/firestore';
+import { getCurrentUser } from '../lib/homePageStorage';
 import { Breadcrumb } from '../components/Breadcrumb';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
@@ -18,27 +19,32 @@ export function EditorPage() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    if (!timelineId) {
-      // No timeline ID - load default editor
+    async function loadTimeline() {
+      if (!timelineId) {
+        // No timeline ID - load default editor
+        setLoading(false);
+        return;
+      }
+
+      const tl = await getTimeline(timelineId);
+      if (!tl) {
+        // Timeline not found - redirect to home
+        navigate('/');
+        return;
+      }
+
+      const usr = userId ? (await getUser(userId) || null) : null;
+
+      setTimeline(tl);
+      setUser(usr);
+
+      // Increment view count for the timeline (only if viewer is not the owner)
+      const currentUser = getCurrentUser();
+      await incrementTimelineViewCount(timelineId, currentUser?.id);
       setLoading(false);
-      return;
     }
 
-    const tl = getTimelineById(timelineId);
-    if (!tl) {
-      // Timeline not found - redirect to home
-      navigate('/');
-      return;
-    }
-
-    const usr = userId ? (getUserById(userId) || null) : null;
-
-    setTimeline(tl);
-    setUser(usr);
-
-    // Increment view count for the timeline
-    incrementViewCount(timelineId);
-    setLoading(false);
+    loadTimeline();
   }, [timelineId, userId, navigate]);
 
   if (loading) {

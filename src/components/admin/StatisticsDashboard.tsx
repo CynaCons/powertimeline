@@ -4,14 +4,16 @@
  * v0.4.4 - Admin Panel & Site Administration
  */
 
-import { useMemo } from 'react';
-import { Paper, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { useMemo, useState } from 'react';
+import { Paper, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { calculatePlatformStats } from '../../lib/adminStats';
+import { resetAllStatistics } from '../../services/firestore';
 import PeopleIcon from '@mui/icons-material/People';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import EventIcon from '@mui/icons-material/Event';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 const COLORS = {
   public: '#4CAF50',
@@ -21,6 +23,26 @@ const COLORS = {
 
 export function StatisticsDashboard() {
   const stats = useMemo(() => calculatePlatformStats(), []);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+
+  const handleResetStatistics = async () => {
+    setResetting(true);
+    try {
+      await resetAllStatistics();
+      setResetSuccess(true);
+      setTimeout(() => {
+        window.location.reload(); // Reload to show updated stats
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to reset statistics:', error);
+      alert('Failed to reset statistics. Please try again.');
+    } finally {
+      setResetting(false);
+      setConfirmDialogOpen(false);
+    }
+  };
 
   // Prepare data for visibility pie chart
   const visibilityData = [
@@ -37,6 +59,34 @@ export function StatisticsDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Reset Statistics Section */}
+      <Paper sx={{ p: 3, bgcolor: 'error.50', border: '1px solid', borderColor: 'error.200' }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <Typography variant="h6" gutterBottom color="error.main">
+              Reset All Statistics
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              This will reset view counts to zero for all timelines. This action cannot be undone.
+            </Typography>
+          </div>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<RestartAltIcon />}
+            onClick={() => setConfirmDialogOpen(true)}
+            disabled={resetting}
+          >
+            Reset Statistics
+          </Button>
+        </div>
+        {resetSuccess && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Statistics reset successfully! Reloading page...
+          </Alert>
+        )}
+      </Paper>
+
       {/* Overview Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Users */}
@@ -124,6 +174,7 @@ export function StatisticsDashboard() {
           {visibilityData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <Pie
                   data={visibilityData}
                   cx="50%"
@@ -251,6 +302,23 @@ export function StatisticsDashboard() {
           </Table>
         </TableContainer>
       </Paper>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)}>
+        <DialogTitle>Reset All Statistics?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to reset all view counts to zero? This will affect all timelines
+            across the entire platform and cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleResetStatistics} color="error" variant="contained" disabled={resetting}>
+            {resetting ? 'Resetting...' : 'Reset All Statistics'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

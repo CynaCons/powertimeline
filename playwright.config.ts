@@ -5,7 +5,7 @@ const reuse = true;
 
 export default defineConfig({
   testDir: 'tests',
-  testMatch: /v5\/.+\.spec\.ts$/,
+  testMatch: /(v5|home|user|admin)\/.+\.spec\.ts$/,
   // Increased timeouts for stability - complex layout calculations need more time
   timeout: 45_000,
   expect: {

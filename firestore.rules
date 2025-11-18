@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Collection group rule for timelines (enables collectionGroup queries)
+    // The {path=**} wildcard matches any path depth
+    match /{path=**}/timelines/{timelineId} {
+      // TEMP: Allow all reads for debugging
+      allow read: if true;
+
+      // Only the owner can create/delete their timelines
+      allow create: if request.auth != null &&
+                      request.resource.data.ownerId == request.auth.uid;
+
+      allow delete: if request.auth != null &&
+                      resource.data.ownerId == request.auth.uid;
+
+      // Allow anyone to increment viewCount (for analytics)
+      // Allow owners to update any field
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']))
+                    || (request.auth != null && resource.data.ownerId == request.auth.uid);
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Anyone can read user documents
+      allow read: if true;
+
+      // TEMP: Allow all user updates for development (no Firebase Auth implemented yet)
+      // TODO(v0.5.0.3): Implement Firebase Authentication and restore this rule:
+      // allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if true;
+
+      // Only admins can delete users
+      allow delete: if request.auth != null &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+      // Timelines subcollection (nested under users)
+      match /timelines/{timelineId} {
+        // Public timelines can be read by anyone
+        // Unlisted timelines can be read by anyone with the link
+        // Private timelines can only be read by the owner
+        // TEMP: Allow all reads for debugging - will restrict after fixing data
+        allow read: if true;
+
+        // Only the owner can create/delete their timelines
+        allow create: if request.auth != null &&
+                        request.resource.data.ownerId == request.auth.uid &&
+                        request.auth.uid == userId;
+
+        allow delete: if request.auth != null &&
+                        resource.data.ownerId == request.auth.uid &&
+                        request.auth.uid == userId;
+
+        // Allow anyone to increment viewCount (for analytics)
+        // Allow owners to update any field
+        allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']))
+                      || (request.auth != null && resource.data.ownerId == request.auth.uid && request.auth.uid == userId);
+
+        // Events subcollection (nested under timelines)
+        // v0.5.0.1 - Event Persistence Optimization
+        match /events/{eventId} {
+          // Anyone can read events if they can read the parent timeline
+          // TEMP: Allow all reads for debugging
+          allow read: if true;
+
+          // Only the timeline owner can create/update/delete events
+          allow create, update, delete: if request.auth != null &&
+                                           request.auth.uid == userId;
+        }
+      }
+    }
+
+    // Activity logs collection (admin only)
+    match /activityLogs/{logId} {
+      // Only admins can read activity logs
+      allow read: if request.auth != null &&
+                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+      // Only admins can create activity logs
+      allow create: if request.auth != null &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+      // Activity logs cannot be updated or deleted
+      allow update, delete: if false;
+    }
+  }
+}

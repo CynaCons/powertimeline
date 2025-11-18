@@ -8,15 +8,14 @@ import { useNavigate } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
 import type { Timeline, User } from '../types';
 import {
+  getTimeline,
+  getTimelines,
+  getUsers,
+  getPlatformStats,
+} from '../services/firestore';
+import {
   getCurrentUser,
-  getTimelinesByOwner,
-  getRecentlyEditedTimelines,
-  getPopularTimelines,
-  getFeaturedTimelines,
-  getPlatformStatistics,
   searchTimelinesAndUsers,
-  getTimelineById,
-  getUserById,
 } from '../lib/homePageStorage';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
@@ -27,11 +26,14 @@ import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
+import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../hooks/useToast';
+import { migrateLocalStorageToFirestore } from '../utils/migrateLocalStorage';
 
 export function HomePage() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [allUsers, setAllUsers] = useState<User[]>([]); // Cache all users for lookups
   const [myTimelines, setMyTimelines] = useState<Timeline[]>([]);
   const [recentlyEdited, setRecentlyEdited] = useState<Timeline[]>([]);
   const [popular, setPopular] = useState<Timeline[]>([]);
@@ -63,36 +65,100 @@ export function HomePage() {
   // Get navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id);
 
+  // Helper function to get user by ID from cache
+  const getUserById = (userId: string): User | null => {
+    return allUsers.find(u => u.id === userId) || null;
+  };
+
   // Load data on mount
   useEffect(() => {
-    const user = getCurrentUser();
-    setCurrentUser(user);
+    async function loadData() {
+      // First, migrate any localStorage data to Firestore
+      const migrationResult = await migrateLocalStorageToFirestore();
+      if (migrationResult.migratedTimelines > 0 || migrationResult.migratedUsers > 0) {
+        showToast(migrationResult.message, 'success');
+      }
 
-    if (user) {
-      setMyTimelines(getTimelinesByOwner(user.id));
+      const user = getCurrentUser();
+      setCurrentUser(user);
+
+      try {
+        // Load all users for caching
+        const users = await getUsers();
+        setAllUsers(users);
+
+        // Load platform statistics
+        const platformStats = await getPlatformStats();
+        setStats({
+          timelineCount: platformStats.totalTimelines,
+          userCount: platformStats.totalUsers,
+          eventCount: platformStats.totalEvents,
+          viewCount: platformStats.totalViews,
+        });
+
+        // Load user's timelines
+        if (user) {
+          const userTimelines = await getTimelines({
+            ownerId: user.id,
+            orderByField: 'updatedAt',
+            orderDirection: 'desc',
+          });
+          setMyTimelines(userTimelines);
+        }
+
+        // Load recently edited timelines (include all timelines)
+        const recentTimelines = await getTimelines({
+          orderByField: 'updatedAt',
+          orderDirection: 'desc',
+          limitCount: 6,
+        });
+        setRecentlyEdited(recentTimelines);
+
+        // Load popular timelines (include all timelines)
+        const popularTimelines = await getTimelines({
+          orderByField: 'viewCount',
+          orderDirection: 'desc',
+          limitCount: 6,
+        });
+        setPopular(popularTimelines);
+
+        // Note: Featured timelines functionality to be removed per PLAN.md known issues
+        setFeatured([]);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        showToast('Error loading timelines', 'error');
+      }
     }
 
-    setRecentlyEdited(getRecentlyEditedTimelines(6, user?.id));
-    setPopular(getPopularTimelines(6, user?.id));
-    setFeatured(getFeaturedTimelines(6, user?.id));
-    setStats(getPlatformStatistics());
-  }, []);
+    loadData();
+  }, [showToast]);
 
   const handleCreateTimeline = () => {
     setCreateDialogOpen(true);
   };
 
-  const handleCreateSuccess = (timelineId: string) => {
+  const handleCreateSuccess = async (timelineId: string) => {
     showToast('Timeline created successfully!', 'success');
 
     // Refresh timeline lists
     if (currentUser) {
-      setMyTimelines(getTimelinesByOwner(currentUser.id));
+      const userTimelines = await getTimelines({
+        ownerId: currentUser.id,
+        orderByField: 'updatedAt',
+        orderDirection: 'desc',
+      });
+      setMyTimelines(userTimelines);
     }
-    setRecentlyEdited(getRecentlyEditedTimelines(6, currentUser?.id));
 
-    // Navigate to the new timeline (use getTimelineById to get fresh data)
-    const timeline = getTimelineById(timelineId);
+    const recentTimelines = await getTimelines({
+      orderByField: 'updatedAt',
+      orderDirection: 'desc',
+      limitCount: 6,
+    });
+    setRecentlyEdited(recentTimelines);
+
+    // Navigate to the new timeline
+    const timeline = await getTimeline(timelineId);
     if (timeline) {
       navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
     }
@@ -103,14 +169,25 @@ export function HomePage() {
     setEditDialogOpen(true);
   };
 
-  const handleEditSuccess = () => {
+  const handleEditSuccess = async () => {
     showToast('Timeline updated successfully!', 'success');
 
     // Refresh timeline lists
     if (currentUser) {
-      setMyTimelines(getTimelinesByOwner(currentUser.id));
+      const userTimelines = await getTimelines({
+        ownerId: currentUser.id,
+        orderByField: 'updatedAt',
+        orderDirection: 'desc',
+      });
+      setMyTimelines(userTimelines);
     }
-    setRecentlyEdited(getRecentlyEditedTimelines(6, currentUser?.id));
+
+    const recentTimelines = await getTimelines({
+      orderByField: 'updatedAt',
+      orderDirection: 'desc',
+      limitCount: 6,
+    });
+    setRecentlyEdited(recentTimelines);
   };
 
   const handleDeleteTimeline = (timelineId: string) => {
@@ -118,15 +195,32 @@ export function HomePage() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteSuccess = () => {
+  const handleDeleteSuccess = async () => {
     showToast('Timeline deleted successfully!', 'success');
 
     // Refresh timeline lists
     if (currentUser) {
-      setMyTimelines(getTimelinesByOwner(currentUser.id));
+      const userTimelines = await getTimelines({
+        ownerId: currentUser.id,
+        orderByField: 'updatedAt',
+        orderDirection: 'desc',
+      });
+      setMyTimelines(userTimelines);
     }
-    setRecentlyEdited(getRecentlyEditedTimelines(6, currentUser?.id));
-    setPopular(getPopularTimelines(6, currentUser?.id));
+
+    const recentTimelines = await getTimelines({
+      orderByField: 'updatedAt',
+      orderDirection: 'desc',
+      limitCount: 6,
+    });
+    setRecentlyEdited(recentTimelines);
+
+    const popularTimelines = await getTimelines({
+      orderByField: 'viewCount',
+      orderDirection: 'desc',
+      limitCount: 6,
+    });
+    setPopular(popularTimelines);
   };
 
   const handleTimelineClick = (timeline: Timeline) => {
@@ -253,7 +347,7 @@ export function HomePage() {
                           >
                             <div className="font-medium text-gray-900">{timeline.title}</div>
                             <div className="text-sm text-gray-500 mt-1">
-                              {timeline.events.length} events • by {timeline.ownerId}
+                              {timeline.eventCount} events • by {timeline.ownerId}
                             </div>
                           </button>
                         ))}
@@ -277,7 +371,7 @@ export function HomePage() {
                             }}
                             className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3"
                           >
-                            <div className="text-2xl">{user.avatar}</div>
+                            <UserAvatar user={user} size="medium" />
                             <div>
                               <div className="font-medium text-gray-900">{user.name}</div>
                               <div className="text-sm text-gray-500 mt-1">{user.bio}</div>
@@ -349,7 +443,7 @@ export function HomePage() {
                       {timeline.description || 'No description'}
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{timeline.events.length} events</span>
+                      <span>{timeline.eventCount} events</span>
                       <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                     </div>
                     {/* Visibility badge - absolutely positioned at bottom-right */}
@@ -422,7 +516,7 @@ export function HomePage() {
                     {timeline.description || 'No description'}
                   </p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{timeline.events.length} events</span>
+                    <span>{timeline.eventCount} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
                   {/* Owner badge - absolutely positioned at bottom-left */}
@@ -431,7 +525,7 @@ export function HomePage() {
                     return owner ? (
                       <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          {owner.avatar} {owner.name}
+                          {owner.name}
                         </span>
                       </div>
                     ) : null;
@@ -483,7 +577,7 @@ export function HomePage() {
                   </p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span>{timeline.viewCount} views</span>
-                    <span>{timeline.events.length} events</span>
+                    <span>{timeline.eventCount} events</span>
                   </div>
                   {/* Owner badge - absolutely positioned at bottom-left */}
                   {(() => {
@@ -491,7 +585,7 @@ export function HomePage() {
                     return owner ? (
                       <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          {owner.avatar} {owner.name}
+                          {owner.name}
                         </span>
                       </div>
                     ) : null;
@@ -546,7 +640,7 @@ export function HomePage() {
                       {timeline.description || 'No description'}
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{timeline.events.length} events</span>
+                      <span>{timeline.eventCount} events</span>
                       <span>{timeline.viewCount} views</span>
                     </div>
                     {/* Owner badge - absolutely positioned at bottom-left */}
