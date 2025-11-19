@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
-import type { Timeline, User } from '../types';
+import type { TimelineMetadata, User } from '../types';
 import {
   getTimeline,
   getTimelines,
@@ -34,10 +34,10 @@ export function HomePage() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]); // Cache all users for lookups
-  const [myTimelines, setMyTimelines] = useState<Timeline[]>([]);
-  const [recentlyEdited, setRecentlyEdited] = useState<Timeline[]>([]);
-  const [popular, setPopular] = useState<Timeline[]>([]);
-  const [featured, setFeatured] = useState<Timeline[]>([]);
+  const [myTimelines, setMyTimelines] = useState<TimelineMetadata[]>([]);
+  const [recentlyEdited, setRecentlyEdited] = useState<TimelineMetadata[]>([]);
+  const [popular, setPopular] = useState<TimelineMetadata[]>([]);
+  const [featured, setFeatured] = useState<TimelineMetadata[]>([]);
   const [stats, setStats] = useState({
     timelineCount: 0,
     userCount: 0,
@@ -47,7 +47,7 @@ export function HomePage() {
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
-    timelines: Timeline[];
+    timelines: TimelineMetadata[];
     users: User[];
     hasMore: boolean;
   } | null>(null);
@@ -223,7 +223,7 @@ export function HomePage() {
     setPopular(popularTimelines);
   };
 
-  const handleTimelineClick = (timeline: Timeline) => {
+  const handleTimelineClick = (timeline: TimelineMetadata) => {
     navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
   };
 

@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
-import type { Timeline, User } from '../types';
+import type { TimelineMetadata, User } from '../types';
 import { getCurrentUser } from '../lib/homePageStorage';
 import { getUser, getTimelines } from '../services/firestore';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
@@ -26,7 +26,7 @@ export function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [timelines, setTimelines] = useState<Timeline[]>([]);
+  const [timelines, setTimelines] = useState<TimelineMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -85,7 +85,7 @@ export function UserProfilePage() {
     loadUserProfile();
   }, [userId, navigate]);
 
-  const handleTimelineClick = (timeline: Timeline) => {
+  const handleTimelineClick = (timeline: TimelineMetadata) => {
     navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
   };
 

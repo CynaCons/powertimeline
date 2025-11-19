@@ -136,6 +136,7 @@ export function CreateTimelineDialog({ open, onClose, onSuccess }: CreateTimelin
           ownerId: currentUser.id,
           visibility,
           events: [],
+          eventCount: 0,
           viewCount: 0,
           featured: false,
         },

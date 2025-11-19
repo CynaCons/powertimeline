@@ -18,7 +18,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import { getUsers, getCurrentUser, setCurrentUser } from '../lib/homePageStorage';
 import { UserAvatar } from './UserAvatar';

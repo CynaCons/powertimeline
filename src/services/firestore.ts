@@ -13,6 +13,7 @@ import {
   onSnapshot,
   increment,
   collectionGroup,
+  writeBatch,
   type QueryConstraint,
   type Unsubscribe,
 } from 'firebase/firestore';
@@ -327,7 +328,7 @@ export async function createTimeline(
     // Extract events if present (backward compatibility)
     const events = 'events' in timeline ? timeline.events : [];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { events: _events, ...timelineData } = timeline as TimelineCreate & { events?: Event[] };
+    const { events: _events, ...timelineData } = timeline as any;
 
     const newTimeline: TimelineMetadata = {
       ...timelineData,
