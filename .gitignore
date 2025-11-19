@@ -13,9 +13,9 @@ dist-ssr
 *.local
 
 # Environment variables (keep secrets private)
+# Note: .env.production is committed as it contains public Firebase client config
 .env
 .env.local
-.env.production
 
 # Vite cache
 .vite/
