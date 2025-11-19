@@ -8,7 +8,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     await page.goto('/');
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for any console errors
     const errors: string[] = [];
@@ -26,7 +26,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-HOME-002' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigation rail should be visible
     const navRail = page.locator('aside').first();
@@ -41,7 +41,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-HOME-003' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // CynaCons user should be displayed
     await expect(page.locator('text=CynaCons')).toBeVisible({ timeout: 5000 });
@@ -54,7 +54,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-SEARCH-001' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Search input should be visible
     const searchInput = page.locator('input[placeholder*="Search"]');
@@ -65,7 +65,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-MYTIMELINES-001' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // My Timelines heading should be visible
     await expect(page.locator('text=/My Timelines/')).toBeVisible({ timeout: 5000 });
@@ -78,7 +78,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-STATS-001' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Statistics section should be visible
     await expect(page.locator('text=Platform Statistics')).toBeVisible({ timeout: 5000 });
@@ -91,7 +91,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ROUTE-001' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Click on UserProfileMenu button (aria-label="Account menu")
     const userMenuButton = page.locator('button[aria-label="Account menu"]');
@@ -115,7 +115,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
 
     // Start on a different page
     await page.goto('/user/cynacons');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for Home icon button in navigation rail
     await page.waitForTimeout(1000); // Give nav rail time to render
@@ -136,7 +136,7 @@ test.describe('v5/71 Home Page - Basic Functionality', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARD-001' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for timeline cards in any of the sections
     const timelineCards = page.locator('[class*="cursor-pointer"]:has-text("events")');

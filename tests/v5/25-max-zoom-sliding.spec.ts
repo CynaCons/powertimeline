@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Maximum Zoom Sliding Tests', () => {
   test('View window should not slide when at maximum zoom level', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -60,6 +62,7 @@ test.describe('Maximum Zoom Sliding Tests', () => {
   });
 
   test('Max zoom maintains cursor position under different cursor locations', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -128,6 +131,7 @@ test.describe('Maximum Zoom Sliding Tests', () => {
   });
 
   test('Minimum zoom window width is enforced and stable', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     

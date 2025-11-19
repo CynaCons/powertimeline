@@ -1,10 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
   test('opens centered and large from Events selection', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     // Open Events and select the first item
     await page.locator('button[aria-label="Events"]').click();
@@ -31,11 +34,11 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
   });
 
   test('opens centered from timeline double-click', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    // Toggle Dev closed so it does not intercept clicks
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     // Double-click a card
     const card = page.locator('[data-testid="event-card"]').first();
@@ -46,9 +49,11 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
   });
 
   test('opens in view mode for existing events and allows toggle to edit mode', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     // Open Events and select the first item
     await page.locator('button[aria-label="Events"]').click();
@@ -86,7 +91,11 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
   });
 
   test('opens in edit mode for new events', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     // Click create button
     await page.getByRole('button', { name: 'Create' }).click();
@@ -107,7 +116,11 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
   });
 
   test('shows improved form fields with validation and enhancements', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     // Click create button to open in edit mode
     await page.getByRole('button', { name: 'Create' }).click();
@@ -144,7 +157,11 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
   });
 
   test('validates required fields and shows error states', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     // Click create button to open in edit mode
     await page.getByRole('button', { name: 'Create' }).click();

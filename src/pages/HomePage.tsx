@@ -338,7 +338,7 @@ export function HomePage() {
                       <div className="space-y-2">
                         {searchResults.timelines.map(timeline => (
                           <button
-                            key={timeline.id}
+                            key={`search-${timeline.id}`}
                             onClick={() => {
                               handleTimelineClick(timeline);
                               clearSearch();
@@ -422,7 +422,7 @@ export function HomePage() {
             <div className="flex gap-4 overflow-x-auto pb-4">
               {myTimelines.map(timeline => (
                 <div
-                  key={timeline.id}
+                  key={`my-${timeline.id}`}
                   className="flex-none w-80 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
                 >
                   {/* Kebab menu - always visible */}
@@ -495,7 +495,7 @@ export function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentlyEdited.map(timeline => (
               <div
-                key={timeline.id}
+                key={`recent-${timeline.id}`}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
                 {/* Kebab menu */}
@@ -555,7 +555,7 @@ export function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {popular.map(timeline => (
               <div
-                key={timeline.id}
+                key={`popular-${timeline.id}`}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
                 {/* Kebab menu */}
@@ -616,7 +616,7 @@ export function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {featured.map(timeline => (
                 <div
-                  key={timeline.id}
+                  key={`featured-${timeline.id}`}
                   className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
                 >
                   {/* Kebab menu */}

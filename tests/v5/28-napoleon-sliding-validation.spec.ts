@@ -1,15 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Napoleon Timeline Sliding Validation Tests', () => {
   test('Step-by-step sliding from beginning to end detects layout issues', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -164,14 +160,9 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
   });
 
   test('Detect anchor point positioning issues during sliding', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -270,14 +261,9 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
   });
 
   test('Overflow indicators update correctly when sliding to different timeline regions', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -369,14 +355,9 @@ test.describe('Napoleon Timeline Sliding Validation Tests', () => {
   });
 
   test('Fully zoomed-in sliding detects overflow indicator inconsistencies', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();

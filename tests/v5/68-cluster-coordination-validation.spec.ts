@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test Suite: Cluster Coordination Validation (v0.3.6.2)

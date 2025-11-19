@@ -5,7 +5,7 @@
  * v0.4.4 - Admin Panel & Site Administration
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -34,7 +34,9 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import type { User } from '../../types';
-import { getUsers, getTimelinesByOwner, updateUser, deleteUser, getCurrentUser } from '../../lib/homePageStorage';
+import { getCurrentUser } from '../../lib/homePageStorage';
+import { getUsers, getTimelines, updateUser as updateUserFirestore, deleteUser as deleteUserFirestore, deleteTimeline } from '../../services/firestore';
+import { UserAvatar } from '../UserAvatar';
 import { logAdminAction } from '../../lib/activityLog';
 
 type SortField = 'name' | 'createdAt' | 'timelineCount';
@@ -46,7 +48,8 @@ interface UserWithTimelines extends User {
 }
 
 export function UserManagementPanel() {
-  const [users, setUsers] = useState<User[]>(getUsers());
+  const [users, setUsers] = useState<User[]>([]);
+  const [timelineCounts, setTimelineCounts] = useState<Map<string, number>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [sortField, setSortField] = useState<SortField>('name');
@@ -87,13 +90,32 @@ export function UserManagementPanel() {
 
   const currentUser = getCurrentUser();
 
+  // Helper function to refresh data from Firestore
+  const refreshData = useCallback(async () => {
+    const loadedUsers = await getUsers();
+    setUsers(loadedUsers);
+
+    // Load all timelines to count per user
+    const allTimelines = await getTimelines();
+    const counts = new Map<string, number>();
+    allTimelines.forEach(timeline => {
+      counts.set(timeline.ownerId, (counts.get(timeline.ownerId) || 0) + 1);
+    });
+    setTimelineCounts(counts);
+  }, []);
+
+  // Load users and timeline counts from Firestore
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
   // Enrich users with timeline count
   const usersWithTimelines: UserWithTimelines[] = useMemo(() => {
     return users.map(user => ({
       ...user,
-      timelineCount: getTimelinesByOwner(user.id).length,
+      timelineCount: timelineCounts.get(user.id) || 0,
     }));
-  }, [users]);
+  }, [users, timelineCounts]);
 
   // Filter and sort users
   const filteredAndSortedUsers = useMemo(() => {
@@ -148,12 +170,12 @@ export function UserManagementPanel() {
     });
   };
 
-  const confirmRoleChange = () => {
+  const confirmRoleChange = async () => {
     if (!roleChangeDialog) return;
 
-    const success = updateUser(roleChangeDialog.userId, { role: roleChangeDialog.newRole });
-    if (success) {
-      setUsers(getUsers());
+    try {
+      await updateUserFirestore(roleChangeDialog.userId, { role: roleChangeDialog.newRole });
+      await refreshData();
       logAdminAction(
         'USER_ROLE_CHANGE',
         'user',
@@ -162,6 +184,8 @@ export function UserManagementPanel() {
         roleChangeDialog.userName,
         { oldRole: users.find(u => u.id === roleChangeDialog.userId)?.role || 'user', newRole: roleChangeDialog.newRole }
       );
+    } catch (error) {
+      console.error('Failed to update user role:', error);
     }
 
     setRoleChangeDialog(null);
@@ -171,7 +195,7 @@ export function UserManagementPanel() {
     const user = users.find(u => u.id === userId);
     if (!user) return;
 
-    const timelineCount = getTimelinesByOwner(userId).length;
+    const timelineCount = timelineCounts.get(userId) || 0;
 
     setDeleteDialog({
       open: true,
@@ -181,20 +205,35 @@ export function UserManagementPanel() {
     });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteDialog) return;
 
-    const timelinesDeleted = deleteUser(deleteDialog.userId, true);
-    console.log(`Deleted user ${deleteDialog.userId}, cascade deleted ${timelinesDeleted} timelines`);
-    setUsers(getUsers());
-    logAdminAction(
-      'USER_DELETE',
-      'user',
-      deleteDialog.userId,
-      `Deleted user "${deleteDialog.userName}" and ${timelinesDeleted} associated timeline${timelinesDeleted !== 1 ? 's' : ''}`,
-      deleteDialog.userName,
-      { timelinesDeleted }
-    );
+    try {
+      // Get user's timelines to delete them first (cascade)
+      const userTimelines = await getTimelines({ ownerId: deleteDialog.userId });
+
+      // Delete all user's timelines
+      for (const timeline of userTimelines) {
+        await deleteTimeline(timeline.id);
+      }
+
+      // Delete the user
+      await deleteUserFirestore(deleteDialog.userId);
+
+      console.log(`Deleted user ${deleteDialog.userId}, cascade deleted ${userTimelines.length} timelines`);
+      await refreshData();
+
+      logAdminAction(
+        'USER_DELETE',
+        'user',
+        deleteDialog.userId,
+        `Deleted user "${deleteDialog.userName}" and ${userTimelines.length} associated timeline${userTimelines.length !== 1 ? 's' : ''}`,
+        deleteDialog.userName,
+        { timelinesDeleted: userTimelines.length }
+      );
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    }
 
     setDeleteDialog(null);
   };
@@ -241,7 +280,7 @@ export function UserManagementPanel() {
   // Bulk operations
   const handleBulkDelete = () => {
     const totalTimelines = Array.from(selectedUserIds).reduce((sum, userId) => {
-      return sum + getTimelinesByOwner(userId).length;
+      return sum + (timelineCounts.get(userId) || 0);
     }, 0);
 
     setBulkDeleteDialog({
@@ -251,28 +290,44 @@ export function UserManagementPanel() {
     });
   };
 
-  const confirmBulkDelete = () => {
+  const confirmBulkDelete = async () => {
     if (!bulkDeleteDialog) return;
 
-    let totalDeleted = 0;
-    const userIds = Array.from(selectedUserIds);
-    userIds.forEach(userId => {
-      const timelinesDeleted = deleteUser(userId, true);
-      totalDeleted += timelinesDeleted;
-    });
+    try {
+      let totalDeleted = 0;
+      const userIds = Array.from(selectedUserIds);
 
-    console.log(`Bulk deleted ${selectedUserIds.size} users, cascade deleted ${totalDeleted} timelines`);
-    setUsers(getUsers());
-    clearSelection();
-    setBulkDeleteDialog(null);
-    logAdminAction(
-      'BULK_OPERATION',
-      'user',
-      'bulk',
-      `Bulk deleted ${userIds.length} user${userIds.length !== 1 ? 's' : ''} and ${totalDeleted} associated timeline${totalDeleted !== 1 ? 's' : ''}`,
-      undefined,
-      { operation: 'delete', userCount: userIds.length, timelinesDeleted: totalDeleted, userIds }
-    );
+      for (const userId of userIds) {
+        // Get user's timelines to delete them first (cascade)
+        const userTimelines = await getTimelines({ ownerId: userId });
+
+        // Delete all user's timelines
+        for (const timeline of userTimelines) {
+          await deleteTimeline(timeline.id);
+        }
+        totalDeleted += userTimelines.length;
+
+        // Delete the user
+        await deleteUserFirestore(userId);
+      }
+
+      console.log(`Bulk deleted ${selectedUserIds.size} users, cascade deleted ${totalDeleted} timelines`);
+      await refreshData();
+      clearSelection();
+      setBulkDeleteDialog(null);
+      logAdminAction(
+        'BULK_OPERATION',
+        'user',
+        'bulk',
+        `Bulk deleted ${userIds.length} user${userIds.length !== 1 ? 's' : ''} and ${totalDeleted} associated timeline${totalDeleted !== 1 ? 's' : ''}`,
+        undefined,
+        { operation: 'delete', userCount: userIds.length, timelinesDeleted: totalDeleted, userIds }
+      );
+    } catch (error) {
+      console.error('Failed to bulk delete users:', error);
+      clearSelection();
+      setBulkDeleteDialog(null);
+    }
   };
 
   const handleBulkRoleAssignment = (newRole: 'user' | 'admin') => {
@@ -283,26 +338,33 @@ export function UserManagementPanel() {
     });
   };
 
-  const confirmBulkRoleAssignment = () => {
+  const confirmBulkRoleAssignment = async () => {
     if (!bulkRoleDialog) return;
 
-    const userIds = Array.from(selectedUserIds);
-    userIds.forEach(userId => {
-      updateUser(userId, { role: bulkRoleDialog.newRole });
-    });
+    try {
+      const userIds = Array.from(selectedUserIds);
 
-    console.log(`Bulk assigned ${selectedUserIds.size} users to role: ${bulkRoleDialog.newRole}`);
-    setUsers(getUsers());
-    clearSelection();
-    setBulkRoleDialog(null);
-    logAdminAction(
-      'BULK_OPERATION',
-      'user',
-      'bulk',
-      `Bulk assigned ${userIds.length} user${userIds.length !== 1 ? 's' : ''} to role: ${bulkRoleDialog.newRole}`,
-      undefined,
-      { operation: 'role_assignment', userCount: userIds.length, newRole: bulkRoleDialog.newRole, userIds }
-    );
+      for (const userId of userIds) {
+        await updateUserFirestore(userId, { role: bulkRoleDialog.newRole });
+      }
+
+      console.log(`Bulk assigned ${selectedUserIds.size} users to role: ${bulkRoleDialog.newRole}`);
+      await refreshData();
+      clearSelection();
+      setBulkRoleDialog(null);
+      logAdminAction(
+        'BULK_OPERATION',
+        'user',
+        'bulk',
+        `Bulk assigned ${userIds.length} user${userIds.length !== 1 ? 's' : ''} to role: ${bulkRoleDialog.newRole}`,
+        undefined,
+        { operation: 'role_assignment', userCount: userIds.length, newRole: bulkRoleDialog.newRole, userIds }
+      );
+    } catch (error) {
+      console.error('Failed to bulk assign roles:', error);
+      clearSelection();
+      setBulkRoleDialog(null);
+    }
   };
 
   return (
@@ -439,7 +501,7 @@ export function UserManagementPanel() {
                     />
                   </TableCell>
                   <TableCell>
-                    <span className="text-2xl">{user.avatar}</span>
+                    <UserAvatar user={user} size="medium" />
                   </TableCell>
                   <TableCell>
                     <strong>{user.name}</strong>

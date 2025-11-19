@@ -24,20 +24,41 @@ export interface Event {
 export type TimelineVisibility = 'public' | 'unlisted' | 'private';
 
 /**
- * Timeline represents a collection of events with ownership and engagement metadata
- * Added for v0.4.0 - Home Page & Timeline Discovery
+ * Timeline metadata (without events array)
+ * Used for listing timelines without loading all events
+ * v0.5.0.1 - Event Persistence Optimization
  */
-export interface Timeline {
+export interface TimelineMetadata {
   id: string;
   title: string;
   description?: string;
-  events: Event[];
   ownerId: string;           // References User.id
   createdAt: string;         // ISO date
   updatedAt: string;         // ISO date
   viewCount: number;         // Number of views
   featured: boolean;         // Featured flag (manual curation)
   visibility: TimelineVisibility;  // v0.4.2: Privacy controls
+  eventCount: number;        // Total number of events (for display)
+}
+
+/**
+ * Timeline with events (full data)
+ * Used when displaying/editing a specific timeline
+ * v0.5.0.1 - Event Persistence Optimization
+ */
+export interface Timeline extends TimelineMetadata {
+  events: Event[];
+}
+
+/**
+ * Event document as stored in Firestore subcollection
+ * v0.5.0.1 - Event Persistence Optimization
+ */
+export interface EventDocument extends Event {
+  timelineId: string;        // Reference to parent timeline
+  createdAt: string;         // ISO date
+  updatedAt: string;         // ISO date
+  order: number;             // Order within timeline (for sorting)
 }
 
 /**

@@ -4,7 +4,7 @@ test.describe('v5/86 Admin Panel - Activity Log', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to admin panel Activity Log tab
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     const activityTab = page.locator('[role="tab"]:has-text("Activity Log")');
     await activityTab.click();

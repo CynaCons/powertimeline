@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/50 Panels visibility and sizing', () => {
   test('Events panel is visible and full-height', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     await page.getByRole('button', { name: 'Events' }).click();
@@ -17,6 +19,7 @@ test.describe('v5/50 Panels visibility and sizing', () => {
   });
 
   test('Create opens centered authoring overlay (replacing side Create panel)', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.getByRole('button', { name: 'Events' }).click();
     await page.getByRole('button', { name: '+ Add Event' }).click();
@@ -33,6 +36,7 @@ test.describe('v5/50 Panels visibility and sizing', () => {
   });
 
   test('Dev panel is visible and full-height', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.waitForTimeout(500);

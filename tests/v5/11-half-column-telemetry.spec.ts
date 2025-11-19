@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 async function openDevPanel(page: any) {
-  
+
   await page.getByRole('button', { name: 'Developer Panel' }).click();
 }
 
@@ -12,12 +13,11 @@ async function closeDevPanel(page: any) {
 
 test.describe('Half-Column Telemetry', () => {
   test('RFK timeline — enhanced telemetry structure', async ({ page }) => {
-    await page.goto('/');
-    
-    // Seed RFK timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     // Wait for layout to stabilize
     await page.waitForTimeout(1000);
@@ -72,12 +72,11 @@ test.describe('Half-Column Telemetry', () => {
   });
   
   test('Half-column slot calculation — 2 slots per half-column', async ({ page }) => {
-    await page.goto('/');
-    
-    // Seed RFK timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
     
     const telemetry = await page.evaluate(() => (window as any).__ccTelemetry);
@@ -99,12 +98,11 @@ test.describe('Half-Column Telemetry', () => {
   });
   
   test('Temporal distribution measurement', async ({ page }) => {
-    await page.goto('/');
-    
-    // Seed RFK timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
     
     const telemetry = await page.evaluate(() => (window as any).__ccTelemetry);

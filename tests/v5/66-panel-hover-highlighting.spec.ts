@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test 66: Event Panel Interactive Highlighting

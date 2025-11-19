@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 import {
   loginAsUser,
+  loginAsTestUser,
   loadTimeline,
+  loadTestTimeline,
   getUserTimelines,
   getTimelineById,
   navigateToUserProfile,
@@ -13,7 +15,7 @@ test.describe('v5/72 Timeline Navigation', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-001' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Get CynaCons' timelines
     const timelines = await getUserTimelines(page, 'cynacons');
@@ -59,7 +61,7 @@ test.describe('v5/72 Timeline Navigation', () => {
 
     // Click the card
     await timelineCard.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify URL contains the correct timeline ID
     const currentUrl = page.url();
@@ -94,7 +96,7 @@ test.describe('v5/72 Timeline Navigation', () => {
       const timelineCard = page.locator('.cursor-pointer').filter({ hasText: timeline.title }).first();
       await expect(timelineCard).toBeVisible({ timeout: 5000 });
       await timelineCard.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Verify correct timeline loaded
       const urlTimelineId = await getCurrentUrlTimelineId(page);
@@ -106,7 +108,7 @@ test.describe('v5/72 Timeline Navigation', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-004' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const timelines = await getUserTimelines(page, 'cynacons');
     expect(timelines.length).toBeGreaterThan(0);
@@ -127,7 +129,7 @@ test.describe('v5/72 Timeline Navigation', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-005' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const timeline = await getTimelineById(page, 'timeline-french-revolution');
     expect(timeline).not.toBeNull();
@@ -141,7 +143,7 @@ test.describe('v5/72 Timeline Navigation', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-007' });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const timelines = await getUserTimelines(page, 'cynacons');
 
@@ -152,12 +154,12 @@ test.describe('v5/72 Timeline Navigation', () => {
     }
 
     // Verify RFK timeline specifically
-    const rfkTimeline = await getTimelineById(page, 'timeline-rfk-1968-campaign');
+    const rfkTimeline = await getTimelineById(page, 'timeline-rfk');
     expect(rfkTimeline).not.toBeNull();
     expect(rfkTimeline.events.length).toBeGreaterThan(0);
 
     // Verify JFK timeline specifically
-    const jfkTimeline = await getTimelineById(page, 'timeline-jfk-presidency-1961-1963');
+    const jfkTimeline = await getTimelineById(page, 'timeline-jfk');
     expect(jfkTimeline).not.toBeNull();
     expect(jfkTimeline.events.length).toBeGreaterThan(0);
 
@@ -185,7 +187,7 @@ test.describe('v5/72 Timeline Navigation', () => {
 
     await loginAsUser(page, 'cynacons');
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Find a timeline card on home page (in any section)
     const timelineCards = page.locator('[class*="cursor-pointer"]:has-text("events")');
@@ -202,7 +204,7 @@ test.describe('v5/72 Timeline Navigation', () => {
 
       // Click the card
       await firstCard.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Verify navigation happened
       const currentUrl = page.url();

@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Minimap Visibility During Authoring Overlay', () => {
   let page: Page;

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 const RGB_BLACK_MATCHER = /rgba?\(0, 0, 0(?:, 1)?\)/;
 

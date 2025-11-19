@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -8,6 +9,7 @@ async function openDevPanel(page: any) {
 
 test.describe('Navigation Rail Overlap Tests', () => {
   test('Cards should not be behind navigation rail', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load a timeline with events
@@ -99,6 +101,7 @@ test.describe('Navigation Rail Overlap Tests', () => {
   });
   
   test('Cards should have adequate left margin from viewport edge', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load RFK timeline (simpler case)

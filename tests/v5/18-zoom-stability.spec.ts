@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -11,6 +12,7 @@ async function closeDevPanel(page: any) {
 
 test.describe('Zoom Stability Tests', () => {
   test('Cursor anchoring - Event should stay under cursor during zoom', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load JFK timeline with multiple events
@@ -85,6 +87,7 @@ test.describe('Zoom Stability Tests', () => {
   });
   
   test('Visual integrity during zoom operations', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load clustered timeline for visual complexity
@@ -159,6 +162,7 @@ test.describe('Zoom Stability Tests', () => {
   });
   
   test('Zoom range limits and boundary behavior', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load RFK timeline
@@ -207,6 +211,7 @@ test.describe('Zoom Stability Tests', () => {
   });
   
   test('Multi-timeline zoom consistency', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await openDevPanel(page);
 
@@ -276,6 +281,7 @@ test.describe('Zoom Stability Tests', () => {
   });
   
   test('Zoom with overflow badges - No overlap regressions', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Create scenario with overflow badges

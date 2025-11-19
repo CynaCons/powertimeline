@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test Suite: French Revolution Timeline Zoom Test

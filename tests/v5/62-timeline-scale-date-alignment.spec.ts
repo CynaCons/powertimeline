@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Timeline Scale-Date Alignment', () => {
   test('Timeline scale labels match actual hover dates (CC-REQ-AXIS-002)', async ({ page }) => {

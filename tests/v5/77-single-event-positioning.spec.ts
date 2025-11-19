@@ -1,4 +1,5 @@
 /**
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
  * Single Event Positioning Test (v5/77)
  *
  * Requirements Coverage:
@@ -90,6 +91,7 @@ test.describe('Single Event Positioning (CC-REQ-LAYOUT-SINGLE-001, CC-REQ-ANCHOR
 
   test.beforeEach(async ({ page }) => {
     // Start from HomePage
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Clear localStorage for clean test environment

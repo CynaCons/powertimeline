@@ -4,7 +4,7 @@ test.describe('v5/84 Admin Panel - Statistics Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to admin panel
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Click Statistics tab
     const statisticsTab = page.locator('[role="tab"]:has-text("Statistics")');

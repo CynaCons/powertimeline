@@ -5,16 +5,22 @@ import type { Firestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import type { Analytics } from 'firebase/analytics';
 
-// Firebase configuration
+// Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBdN2dbVi1wHnBJyaWrW-KEI18kQlsD3_c",
-  authDomain: "powertimeline-860f1.firebaseapp.com",
-  projectId: "powertimeline-860f1",
-  storageBucket: "powertimeline-860f1.firebasestorage.app",
-  messagingSenderId: "480635471085",
-  appId: "1:480635471085:web:b959dea1cc33945ca638e4",
-  measurementId: "G-G2C76ZT1PG"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+// Debug: Check if config is loaded
+if (!firebaseConfig.projectId) {
+  console.error('❌ Firebase config not loaded! Check .env.local file');
+  console.log('Available env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
+}
 
 // Initialize Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);

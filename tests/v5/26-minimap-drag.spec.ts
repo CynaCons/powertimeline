@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Timeline Minimap Drag Tests', () => {
   test('View window can be dragged to slide timeline position', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -59,6 +61,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
   });
 
   test('View window drag respects timeline boundaries', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -128,6 +131,7 @@ test.describe('Timeline Minimap Drag Tests', () => {
   });
 
   test('Drag provides visual feedback with cursor changes', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     

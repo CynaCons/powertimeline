@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Timeline Minimap Basic Tests', () => {
   test('Page loads correctly with minimap visible', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Minimap should be visible
@@ -15,15 +20,13 @@ test.describe('Timeline Minimap Basic Tests', () => {
 
     await page.screenshot({ path: 'test-results/minimap-basic-no-events.png' });
   });
-  
-  test('Minimap shows event density markers', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
 
-    // Enable dev mode and add some test events first
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
+  test('Minimap shows event density markers', async ({ page }) => {
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(500);
 
     // Check that minimap shows event count
@@ -39,13 +42,11 @@ test.describe('Timeline Minimap Basic Tests', () => {
   });
   
   test('Minimap view window indicator is visible', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
 
-    // Enable dev mode and add some test events first
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(500);
 
     // Check for view window indicator - it's cursor-grab or cursor-grabbing

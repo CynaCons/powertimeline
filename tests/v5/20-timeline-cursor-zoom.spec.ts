@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -17,6 +18,7 @@ async function closeDevPanel(page: any) {
 
 test.describe('Timeline Cursor Zoom Tests', () => {
   test('Cursor anchoring issue - Position vs Zoom behavior', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load Napoleon timeline and establish baseline
@@ -121,6 +123,7 @@ test.describe('Timeline Cursor Zoom Tests', () => {
   });
   
   test('Timeline axis cursor positioning - Napoleon 1800 area', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load Napoleon timeline
@@ -179,6 +182,7 @@ test.describe('Timeline Cursor Zoom Tests', () => {
   });
   
   test('Timeline overflow area targeting', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load clustered data with known overflow

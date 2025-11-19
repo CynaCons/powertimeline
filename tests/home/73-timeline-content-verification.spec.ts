@@ -5,7 +5,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage and set up test timelines with distinct events
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     await page.evaluate(() => {
       // Clear everything
@@ -111,7 +111,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     });
 
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('timeline cards show correct event counts', async ({ page }) => {
@@ -138,7 +138,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     // Click RFK timeline card
     const rfkCard = page.locator('.cursor-pointer').filter({ hasText: 'RFK Timeline' }).first();
     await rfkCard.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait a bit for the timeline to load
     await page.waitForTimeout(1000);
@@ -154,7 +154,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
 
     // Reload to trigger the console.log
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     // Verify loading message appeared
@@ -170,7 +170,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     // Click JFK timeline card
     const jfkCard = page.locator('.cursor-pointer').filter({ hasText: 'JFK Timeline' }).first();
     await jfkCard.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait a bit for the timeline to load
     await page.waitForTimeout(1000);
@@ -185,7 +185,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     });
 
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     const loadingMessage = logs.find(log => log.includes('Loading timeline') && log.includes('JFK Timeline'));
@@ -200,7 +200,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     // Click French Revolution timeline card
     const frCard = page.locator('.cursor-pointer').filter({ hasText: 'French Revolution' }).first();
     await frCard.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait a bit for the timeline to load
     await page.waitForTimeout(1000);
@@ -215,7 +215,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     });
 
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     const loadingMessage = logs.find(log => log.includes('Loading timeline') && log.includes('French Revolution'));
@@ -229,7 +229,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
 
     // Click RFK timeline
     await page.locator('.cursor-pointer').filter({ hasText: 'RFK Timeline' }).first().click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     const url1 = page.url();
@@ -241,7 +241,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
 
     // Click JFK timeline
     await page.locator('.cursor-pointer').filter({ hasText: 'JFK Timeline' }).first().click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     const url2 = page.url();
@@ -254,7 +254,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
 
     // Click French Revolution timeline
     await page.locator('.cursor-pointer').filter({ hasText: 'French Revolution' }).first().click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     const url3 = page.url();
@@ -268,7 +268,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
 
     // Navigate directly to JFK timeline
     await page.goto('/user/cynacons/timeline/timeline-jfk');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     // Verify URL
@@ -281,7 +281,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
     });
 
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
     const loadingMessage = logs.find(log => log.includes('Loading timeline') && log.includes('JFK Timeline'));

@@ -17,7 +17,7 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { updateTimeline, isTimelineIdUnique, getTimelineById } from '../lib/homePageStorage';
+import { updateTimeline, isTimelineIdUnique, getTimeline } from '../services/firestore';
 import type { Timeline, TimelineVisibility } from '../types';
 
 interface EditTimelineDialogProps {
@@ -41,20 +41,23 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
 
   // Load timeline data when dialog opens
   useEffect(() => {
-    if (open && timelineId) {
-      const tl = getTimelineById(timelineId);
-      if (tl) {
-        setTimeline(tl);
-        setTitle(tl.title);
-        setDescription(tl.description || '');
-        setVisibility(tl.visibility);
+    async function loadTimeline() {
+      if (open && timelineId) {
+        const tl = await getTimeline(timelineId);
+        if (tl) {
+          setTimeline(tl);
+          setTitle(tl.title);
+          setDescription(tl.description || '');
+          setVisibility(tl.visibility);
 
-        // Extract ID without "timeline-" prefix
-        const idWithoutPrefix = tl.id.replace(/^timeline-/, '');
-        setCustomId(idWithoutPrefix);
-        setOriginalId(tl.id);
+          // Extract ID without "timeline-" prefix
+          const idWithoutPrefix = tl.id.replace(/^timeline-/, '');
+          setCustomId(idWithoutPrefix);
+          setOriginalId(tl.id);
+        }
       }
     }
+    loadTimeline();
   }, [open, timelineId]);
 
   // Validation functions (moved to functions instead of useEffect for better performance)
@@ -74,7 +77,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     return '';
   }, []);
 
-  const validateCustomId = useCallback((value: string): string => {
+  const validateCustomId = useCallback(async (value: string): Promise<string> => {
     if (!value || !timeline) return '';
 
     // Validate format
@@ -85,8 +88,11 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
 
     // Check uniqueness (if ID changed)
     const fullId = `timeline-${value}`;
-    if (fullId !== originalId && !isTimelineIdUnique(fullId, timeline.ownerId)) {
-      return 'This ID already exists for your account';
+    if (fullId !== originalId) {
+      const isUnique = await isTimelineIdUnique(fullId, timeline.ownerId);
+      if (!isUnique) {
+        return 'This ID already exists for your account';
+      }
     }
 
     return '';
@@ -101,8 +107,9 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     setDescriptionError(validateDescription(description));
   };
 
-  const handleIdBlur = () => {
-    setIdError(validateCustomId(customId));
+  const handleIdBlur = async () => {
+    const error = await validateCustomId(customId);
+    setIdError(error);
   };
 
   const isFormValid =
@@ -114,7 +121,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     !descriptionError &&
     !idError;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!timeline) {
       setGeneralError('Timeline not found');
       return;
@@ -140,7 +147,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
         return;
       }
 
-      updateTimeline(timeline.id, updates);
+      await updateTimeline(timeline.id, updates);
 
       // Close dialog and notify parent
       handleClose();

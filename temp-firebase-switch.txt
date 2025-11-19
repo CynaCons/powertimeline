@@ -1,0 +1,12 @@
+To switch to hardcoded Firebase config:
+
+1. In src/utils/migrateLocalStorage.ts, change line 7:
+   FROM: import { db } from '../lib/firebase';
+   TO:   import { db } from '../lib/firebase-temp';
+
+2. Restart dev server:
+   npm run dev
+
+3. Try migration again
+
+This bypasses the env variable loading issue.

@@ -1,9 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/02 Cards placement', () => {
   test('cards render above and below the axis', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARDS-001' });
-    await page.goto('/');
+
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
 
     const cards = page.locator('[data-testid="event-card"]');
     await expect(cards.first()).toBeVisible();

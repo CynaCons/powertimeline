@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test 36: Card Degradation System
@@ -13,13 +14,9 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Card degradation system - full to compact cards', async ({ page }) => {
-  await page.goto('/');
-
-  // Load Napoleon dataset to have events
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-  await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(1000);
+  await loginAsTestUser(page);
+  await loadTestTimeline(page, 'timeline-napoleon');
+  await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
   console.log('🔍 TESTING CARD DEGRADATION SYSTEM');
 

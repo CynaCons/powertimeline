@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 async function openDevPanel(page: any) {
   
@@ -61,9 +62,8 @@ async function logTickSpread(page: any, label: string) {
 
 test.describe('v5/09 Seeding scenarios and screenshots', () => {
   test('RFK 1968 — screenshot', async ({ page }) => {
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
     await closeDevPanel(page);
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
@@ -73,10 +73,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('RFK 1968 — timeline date range coverage', async ({ page }) => {
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
     await fitAll(page);
     
     // Verify all 10 RFK events are loaded (visible + overflow)
@@ -141,10 +139,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('JFK 1961-63 — screenshot', async ({ page }) => {
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-jfk-1961-63.png');
@@ -153,10 +149,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('Napoleon 1769-1821 — screenshot', async ({ page }) => {
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await fitAll(page);
     await saveViewportScreenshot(page, 'v5-napoleon-1769-1821.png');
@@ -165,6 +159,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('Long-range — screenshot', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Long-range' }).click();
@@ -177,6 +172,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('Clustered x1 — screenshot', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clustered' }).click();
@@ -189,6 +185,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('Clustered x2 — screenshot', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clustered' }).click();
@@ -202,6 +199,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('Clustered x3 — screenshot', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clustered' }).click();
@@ -216,6 +214,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   });
 
   test('Clustered x5 — screenshot', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await openDevPanel(page);
     await page.getByRole('button', { name: 'Clustered' }).click();

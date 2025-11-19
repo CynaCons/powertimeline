@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/52 Side panel scroll behavior', () => {
   test('scroll wheel over Events panel scrolls the panel (not the canvas)', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Seed many events so the Events list overflows

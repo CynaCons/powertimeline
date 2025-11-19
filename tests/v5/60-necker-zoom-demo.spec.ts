@@ -1,27 +1,14 @@
 import { test, expect, Page, Locator } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Necker Event Timeline-Anchor Alignment with Zoom Demo', () => {
   test('Demonstrate Necker event alignment at multiple zoom levels', async ({ page }) => {
-    // Navigate to the application
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-french-revolution');
 
-    // Wait for app to load and show events
-    await expect(page.locator('[data-testid="timeline-axis"]')).toBeVisible({ timeout: 10000 });
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
-
-    // Open dev panel using keyboard shortcut
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(500);
-
-    // Load French Revolution timeline which contains Necker event
-    const frenchRevButton = page.getByRole('button', { name: 'French Revolution' });
-    await frenchRevButton.click();
-    await page.waitForTimeout(2000);
-
-    // Close dev panel
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(500);
 
     // Find the Necker event card and anchor
     const neckerCard = page.locator('[data-event-id="fr-necker-compte"]');

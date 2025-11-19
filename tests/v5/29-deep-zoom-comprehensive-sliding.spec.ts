@@ -1,17 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Deep Zoom Comprehensive Sliding Tests', () => {
   test.setTimeout(60000); // Increase timeout for deep zoom tests
 
   test('Maximum zoom level sliding with no overlaps and consistent overflow indicators', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();

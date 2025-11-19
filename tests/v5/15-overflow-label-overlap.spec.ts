@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -8,6 +9,7 @@ async function openDevPanel(page: any) {
 
 test.describe('Overflow Label Overlap Tests', () => {
   test('Overflow indicators should not overlap on timeline', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Create dense overflow scenario with clustered seeder
@@ -102,6 +104,7 @@ test.describe('Overflow Label Overlap Tests', () => {
   });
   
   test('Overflow badges should have minimum spacing', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Create moderate overflow scenario

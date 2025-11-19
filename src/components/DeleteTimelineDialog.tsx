@@ -14,7 +14,7 @@ import {
   Alert,
   Typography,
 } from '@mui/material';
-import { deleteTimeline, getTimelineById } from '../lib/homePageStorage';
+import { deleteTimeline, getTimeline } from '../services/firestore';
 import type { Timeline } from '../types';
 
 interface DeleteTimelineDialogProps {
@@ -30,24 +30,27 @@ export function DeleteTimelineDialog({ open, timelineId, onClose, onSuccess }: D
 
   // Load timeline data when dialog opens
   useEffect(() => {
-    if (open && timelineId) {
-      const tl = getTimelineById(timelineId);
-      if (tl) {
-        setTimeline(tl);
-      } else {
-        setGeneralError('Timeline not found');
+    async function loadTimeline() {
+      if (open && timelineId) {
+        const tl = await getTimeline(timelineId);
+        if (tl) {
+          setTimeline(tl);
+        } else {
+          setGeneralError('Timeline not found');
+        }
       }
     }
+    loadTimeline();
   }, [open, timelineId]);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!timeline) {
       setGeneralError('Timeline not found');
       return;
     }
 
     try {
-      deleteTimeline(timeline.id);
+      await deleteTimeline(timeline.id);
 
       // Close dialog and notify parent
       handleClose();

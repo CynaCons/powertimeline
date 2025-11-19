@@ -8,9 +8,12 @@ service cloud.firestore {
       // TEMP: Allow all reads for debugging
       allow read: if true;
 
+      // TEMP: Allow all timeline creation for migration (no Firebase Auth implemented yet)
+      // TODO(v0.5.1): Restore authentication requirement
       // Only the owner can create/delete their timelines
-      allow create: if request.auth != null &&
-                      request.resource.data.ownerId == request.auth.uid;
+      // allow create: if request.auth != null &&
+      //                 request.resource.data.ownerId == request.auth.uid;
+      allow create: if true;
 
       allow delete: if request.auth != null &&
                       resource.data.ownerId == request.auth.uid;
@@ -43,10 +46,13 @@ service cloud.firestore {
         // TEMP: Allow all reads for debugging - will restrict after fixing data
         allow read: if true;
 
+        // TEMP: Allow all timeline creation for migration (no Firebase Auth implemented yet)
+        // TODO(v0.5.1): Restore authentication requirement
         // Only the owner can create/delete their timelines
-        allow create: if request.auth != null &&
-                        request.resource.data.ownerId == request.auth.uid &&
-                        request.auth.uid == userId;
+        // allow create: if request.auth != null &&
+        //                 request.resource.data.ownerId == request.auth.uid &&
+        //                 request.auth.uid == userId;
+        allow create: if true;
 
         allow delete: if request.auth != null &&
                         resource.data.ownerId == request.auth.uid &&
@@ -64,9 +70,12 @@ service cloud.firestore {
           // TEMP: Allow all reads for debugging
           allow read: if true;
 
+          // TEMP: Allow all event operations for migration (no Firebase Auth implemented yet)
+          // TODO(v0.5.1): Restore authentication requirement
           // Only the timeline owner can create/update/delete events
-          allow create, update, delete: if request.auth != null &&
-                                           request.auth.uid == userId;
+          // allow create, update, delete: if request.auth != null &&
+          //                                  request.auth.uid == userId;
+          allow create, update, delete: if true;
         }
       }
     }

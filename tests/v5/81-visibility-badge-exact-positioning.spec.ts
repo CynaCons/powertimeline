@@ -1,4 +1,5 @@
 /**
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
  * Visibility Badge Exact Positioning Test (v5/81)
  * Ensures visibility indicators are at the exact same position across all cards
  *
@@ -16,6 +17,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Visibility Badge Exact Positioning', () => {
   test.beforeEach(async ({ page }) => {
     // Start from HomePage
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Clear localStorage to start fresh

@@ -17,7 +17,8 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { createTimeline, isTimelineIdUnique, generateSlugFromTitle, getCurrentUser } from '../lib/homePageStorage';
+import { createTimeline, isTimelineIdUnique } from '../services/firestore';
+import { generateSlugFromTitle, getCurrentUser } from '../lib/homePageStorage';
 import type { TimelineVisibility } from '../types';
 
 interface CreateTimelineDialogProps {
@@ -71,7 +72,7 @@ export function CreateTimelineDialog({ open, onClose, onSuccess }: CreateTimelin
     return '';
   };
 
-  const validateCustomId = (value: string): string => {
+  const validateCustomId = async (value: string): Promise<string> => {
     if (!value) return '';
 
     // Validate format (alphanumeric and hyphens only)
@@ -80,10 +81,11 @@ export function CreateTimelineDialog({ open, onClose, onSuccess }: CreateTimelin
       return 'ID must contain only lowercase letters, numbers, and hyphens';
     }
 
-    // Check uniqueness
+    // Check uniqueness (async Firestore query)
     if (currentUser) {
       const fullId = `timeline-${value}`;
-      if (!isTimelineIdUnique(fullId, currentUser.id)) {
+      const isUnique = await isTimelineIdUnique(fullId, currentUser.id);
+      if (!isUnique) {
         return 'This ID already exists for your account';
       }
     }
@@ -100,8 +102,9 @@ export function CreateTimelineDialog({ open, onClose, onSuccess }: CreateTimelin
     setDescriptionError(validateDescription(description));
   };
 
-  const handleIdBlur = () => {
-    setIdError(validateCustomId(customId));
+  const handleIdBlur = async () => {
+    const error = await validateCustomId(customId);
+    setIdError(error);
   };
 
   const isFormValid =
@@ -113,7 +116,7 @@ export function CreateTimelineDialog({ open, onClose, onSuccess }: CreateTimelin
     !descriptionError &&
     !idError;
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!currentUser) {
       setGeneralError('You must be logged in to create a timeline');
       return;
@@ -124,18 +127,24 @@ export function CreateTimelineDialog({ open, onClose, onSuccess }: CreateTimelin
     }
 
     try {
-      const timeline = createTimeline(
-        title,
-        currentUser.id,
-        description,
-        customId,
-        [],
-        visibility
+      const fullId = `timeline-${customId}`;
+
+      const timelineId = await createTimeline(
+        {
+          title,
+          description,
+          ownerId: currentUser.id,
+          visibility,
+          events: [],
+          viewCount: 0,
+          featured: false,
+        },
+        fullId // Pass custom ID
       );
 
       // Close dialog and notify parent
       handleClose();
-      onSuccess(timeline.id);
+      onSuccess(timelineId);
     } catch (error) {
       setGeneralError(error instanceof Error ? error.message : 'Failed to create timeline');
     }

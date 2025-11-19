@@ -1,19 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/34 Adaptive Timeline Scales', () => {
   test.setTimeout(60000);
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-
-    // Load Napoleon timeline via developer hotkey to avoid selector drift
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(400);
-    await page.click('button:has-text("Napoleon 1769-1821")');
-    await page.waitForTimeout(600);
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(200);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('timeline scales adapt from years to days across zoom levels', async ({ page }) => {

@@ -4,7 +4,7 @@ test.describe('v5/83 Admin Panel - User Management', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to admin panel as cynacons (admin user)
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Ensure we're on the Users tab
     const usersTab = page.locator('[role="tab"]:has-text("Users")');
@@ -64,7 +64,7 @@ test.describe('v5/83 Admin Panel - User Management', () => {
 
     // Role should be updated (reload to verify persistence)
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const aliceRowAfter = page.locator('tr:has(td:has-text("Alice"))');
     await expect(aliceRowAfter.locator('text=admin')).toBeVisible();

@@ -1,17 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/35 Adaptive Scale Visibility Tests', () => {
   test.setTimeout(60000);
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/?dev=1'); // Enable dev mode via URL parameter
-    await page.waitForTimeout(2000); // Give more time for app to load
-    
-    // Load Napoleon timeline for testing
-    await page.click('button[aria-label="Developer Panel"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("Napoleon 1769-1821")');
-    await page.waitForTimeout(2000); // Give more time for events to load
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('timeline scales are visible and adapt across zoom levels', async ({ page }) => {

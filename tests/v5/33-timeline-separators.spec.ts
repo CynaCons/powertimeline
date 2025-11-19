@@ -1,17 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/33 Timeline Scale Comprehensive Testing', () => {
   test.setTimeout(60000);
 
   test.skip('Timeline scales - complete functionality verification', async ({ page }) => {
     // Feature not yet implemented - timeline-scales-container testid not found in DOM
-    await page.goto('http://localhost:5174');
-    
-    // Load Napoleon timeline for consistent testing
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(2000);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     // Take initial screenshot to see current state
     await page.screenshot({ path: 'test-results/33-initial-state.png', fullPage: true });

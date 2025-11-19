@@ -1,27 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Necker Event Timeline-Anchor Alignment Demo', () => {
   test('Demonstrate Necker event alignment issue and fix', async ({ page }) => {
-    // Navigate to the application
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-french-revolution');
 
-    // Wait for app to load and show events
-    await expect(page.locator('[data-testid="timeline-axis"]')).toBeVisible({ timeout: 10000 });
-    await page.waitForTimeout(1000); // Allow for stabilization
-
-    // Open dev panel using keyboard shortcut
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(500);
-
-    // Load French Revolution timeline which contains Necker event
-    const frenchRevButton = page.getByRole('button', { name: 'French Revolution' });
-    await frenchRevButton.click();
-    await page.waitForTimeout(2000); // Wait for events to load
-
-    // Close dev panel
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(500);
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     console.log('🔍 Looking for Necker event card...');
 

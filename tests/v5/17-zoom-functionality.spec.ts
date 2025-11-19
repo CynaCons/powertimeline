@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 async function openDevPanel(page: any) {
   await page.getByRole('button', { name: 'Developer Panel' }).click();
@@ -12,13 +13,11 @@ async function closeDevPanel(page: any) {
 test.describe('Zoom Functionality Tests', () => {
   test('Zoom controls should filter visible events', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-001' });
-    await page.goto('/');
-    
-    // Load JFK timeline (16 events)
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
     
     // Count cards at full zoom (Fit All)
@@ -76,13 +75,11 @@ test.describe('Zoom Functionality Tests', () => {
   
   test('Mouse wheel zoom should work with Ctrl key', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-002' });
-    await page.goto('/');
-    
-    // Load JFK timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-jfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
     
     // Get initial card count
@@ -125,13 +122,11 @@ test.describe('Zoom Functionality Tests', () => {
 
   test('Keyboard zoom shortcuts should work', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-003' });
-    await page.goto('/');
-    
-    // Load RFK timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await closeDevPanel(page);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
     
     // Get initial card count

@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Timeline Zoom Stability Tests', () => {
   test('Cursor position remains stable during repeated zoom cycles', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -55,6 +57,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
   });
 
   test('Zoom behavior at timeline boundaries', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -113,6 +116,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
   });
 
   test('Zoom reversibility test', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -174,6 +178,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
   });
 
   test('Rapid zoom changes do not cause view window corruption', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -217,6 +222,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
   });
 
   test('Zoom with cursor at different screen positions', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     

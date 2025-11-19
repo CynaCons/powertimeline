@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -17,6 +18,7 @@ async function closeDevPanel(page: any) {
 
 test.describe('Zoom Edge Cases Tests', () => {
   test('Extreme zoom limits should not break system', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Load Napoleon timeline (long range)
@@ -154,6 +156,7 @@ test.describe('Zoom Edge Cases Tests', () => {
   });
   
   test('Zoom performance with dense datasets', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Create dense dataset using multiple clustered operations

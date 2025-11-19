@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/55 YAML Export/Import', () => {
   test('export and import timeline via YAML', async ({ page }) => {

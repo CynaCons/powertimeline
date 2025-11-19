@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test 40: Card Color System Validation
@@ -6,7 +7,8 @@ import { test, expect } from '@playwright/test';
  */
 
 test('card color system reflects card types', async ({ page }) => {
-  await page.goto('/');
+    await loginAsTestUser(page);
+    await page.goto('/');
   await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10_000 });
 
   const cards = await page.locator('[data-testid="event-card"]').all();

@@ -1,4 +1,5 @@
 import { test, expect, type Page as PlaywrightPage } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { zoomAndSwipe, type ZoomSwipePosition } from '../helpers/zoom-and-swipe';
 
 /**

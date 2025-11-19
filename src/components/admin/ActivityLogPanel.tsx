@@ -4,7 +4,7 @@
  * v0.4.4 - Admin Panel & Site Administration
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -30,7 +30,7 @@ import {
   exportActivityLogs,
   type ActivityLogFilters,
 } from '../../lib/activityLog';
-import { getUsers } from '../../lib/homePageStorage';
+import { getUsers } from '../../services/firestore';
 
 type ActionFilter = AdminActionType | 'all';
 type TargetTypeFilter = AdminActionTargetType | 'all';
@@ -42,8 +42,17 @@ export function ActivityLogPanel() {
   const [targetTypeFilter, setTargetTypeFilter] = useState<TargetTypeFilter>('all');
   const [adminUserFilter, setAdminUserFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [allUsers, setAllUsers] = useState<any[]>([]);
 
-  const allUsers = getUsers();
+  // Load users from Firestore
+  useEffect(() => {
+    async function loadUsers() {
+      const users = await getUsers();
+      setAllUsers(users);
+    }
+    loadUsers();
+  }, []);
+
   const adminUsers = allUsers.filter(u => u.role === 'admin');
 
   // Apply filters

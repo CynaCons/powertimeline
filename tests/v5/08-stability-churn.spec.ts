@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/08 Stability & churn (telemetry)', () => {
   test('small viewport change preserves placements (limited migrations)', async ({ page }) => {
-    await page.goto('/');
-    
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
 
     // Ensure initial telemetry is present
     await page.waitForFunction(() => Boolean((window as any).__ccTelemetry?.placements?.items?.length >= 1));

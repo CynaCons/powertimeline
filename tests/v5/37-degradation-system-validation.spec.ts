@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test 37: Degradation System Validation Across All Datasets
@@ -22,6 +23,7 @@ test.describe('Degradation System Validation', () => {
   
   for (const dataset of DATASETS) {
     test(`Card degradation system - ${dataset.name}`, async ({ page }) => {
+      await loginAsTestUser(page);
       await page.goto('/');
 
       // Wait for timeline to load

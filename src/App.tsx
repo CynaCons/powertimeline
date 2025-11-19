@@ -3,7 +3,8 @@ import { DeterministicLayoutComponent } from './layout/DeterministicLayoutCompon
 import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
-import { getCurrentUser, getTimelineById, updateTimeline } from './lib/homePageStorage';
+import { getCurrentUser } from './lib/homePageStorage';
+import { getTimeline, updateTimeline } from './services/firestore';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from './contexts/ThemeContext';
@@ -52,16 +53,16 @@ function App({ timelineId }: AppProps = {}) {
   const storageRef = useRef(new EventStorage());
 
   // Helper function to save events to the correct location
-  const saveEvents = useCallback((events: Event[]) => {
+  const saveEvents = useCallback(async (events: Event[]) => {
     console.log('[saveEvents] Called with', events.length, 'events, timelineId:', timelineId);
     if (timelineId) {
-      // Save to timeline in homePageStorage
-      console.log('[saveEvents] Saving to timeline storage, timelineId:', timelineId);
-      updateTimeline(timelineId, { events });
-      console.log('[saveEvents] Timeline updated successfully');
+      // Save to timeline in Firestore
+      console.log('[saveEvents] Saving to Firestore, timelineId:', timelineId);
+      await updateTimeline(timelineId, { events });
+      console.log('[saveEvents] Timeline updated successfully in Firestore');
 
       // Verify it was saved
-      const timeline = getTimelineById(timelineId);
+      const timeline = await getTimeline(timelineId);
       console.log('[saveEvents] Verification - timeline now has', timeline?.events.length, 'events');
     } else {
       // Save to legacy EventStorage
@@ -72,18 +73,10 @@ function App({ timelineId }: AppProps = {}) {
 
   const [events, setEvents] = useState<Event[]>(() => {
     console.log('[App] Initializing with timelineId:', timelineId);
-    // If timelineId is provided, load from that timeline
+    // If timelineId is provided, we'll load from Firestore in useEffect (can't be async here)
     if (timelineId) {
-      const timeline = getTimelineById(timelineId);
-      console.log('[App] Loaded timeline:', timeline?.id, 'with', timeline?.events.length, 'events');
-      if (timeline && timeline.events.length > 0) {
-        return timeline.events;
-      }
-      // Timeline exists but has no events - return empty array
-      if (timeline) {
-        console.log('[App] Timeline exists but has no events, returning empty array');
-        return [];
-      }
+      console.log('[App] Timeline ID provided, will load from Firestore in useEffect');
+      return [];
     }
 
     // Otherwise, load from legacy EventStorage
@@ -103,32 +96,40 @@ function App({ timelineId }: AppProps = {}) {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
 
+  // Store timeline for ownership check
+  const [loadedTimeline, setLoadedTimeline] = useState<any>(null);
+
   // Determine if timeline is read-only (user is not the owner)
   const isReadOnly = useMemo(() => {
     if (!timelineId) return false; // No timeline loaded = not read-only (legacy mode)
-    const timeline = getTimelineById(timelineId);
-    if (!timeline) return false; // Timeline not found = not read-only
+    if (!loadedTimeline) return false; // Timeline not loaded yet = not read-only
     const currentUser = getCurrentUser();
     if (!currentUser) return true; // No current user = read-only
-    return timeline.ownerId !== currentUser.id; // Read-only if not owner
-  }, [timelineId]);
+    return loadedTimeline.ownerId !== currentUser.id; // Read-only if not owner
+  }, [timelineId, loadedTimeline]);
 
   // Reload events when timelineId changes
   useEffect(() => {
-    if (timelineId) {
-      const timeline = getTimelineById(timelineId);
-      if (timeline) {
-        console.log('Loading timeline:', timeline.title, 'with', timeline.events.length, 'events');
-        setEvents(timeline.events);
-        return;
+    async function loadTimelineEvents() {
+      if (timelineId) {
+        const timeline = await getTimeline(timelineId);
+        if (timeline) {
+          console.log('Loading timeline:', timeline.title, 'with', timeline.events.length, 'events');
+          setEvents(timeline.events);
+          setLoadedTimeline(timeline);
+          return;
+        }
       }
+
+      // If no timelineId or timeline not found, load from EventStorage
+      const stored = storageRef.current.load();
+      if (stored.length > 0) {
+        setEvents(stored);
+      }
+      setLoadedTimeline(null);
     }
 
-    // If no timelineId or timeline not found, load from EventStorage
-    const stored = storageRef.current.load();
-    if (stored.length > 0) {
-      setEvents(stored);
-    }
+    loadTimelineEvents();
   }, [timelineId]);
 
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);

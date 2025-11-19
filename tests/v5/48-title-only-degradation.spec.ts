@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/48 Title-only degradation', () => {
   test('dense clusters trigger title-only cards without overlaps', async ({ page }) => {

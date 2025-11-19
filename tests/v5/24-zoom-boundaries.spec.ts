@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Timeline Zoom Boundary Tests', () => {
   test('Zoom does not stick to timeline start boundary', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -45,6 +47,7 @@ test.describe('Timeline Zoom Boundary Tests', () => {
   });
 
   test('Zoom does not stick to timeline end boundary', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -88,6 +91,7 @@ test.describe('Timeline Zoom Boundary Tests', () => {
   });
 
   test('Extreme zoom levels maintain valid view window', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     

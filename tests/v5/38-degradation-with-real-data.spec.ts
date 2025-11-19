@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 /**
  * Test 38: Degradation System with Real Data
@@ -12,36 +13,22 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Degradation system with Napoleon dataset - Real data validation', async ({ page }) => {
-  await page.goto('/');
-
-  // Wait for timeline to load
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  await loginAsTestUser(page);
+  await loadTestTimeline(page, 'timeline-napoleon');
+  await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
   console.log('\n🔍 DEGRADATION SYSTEM TEST WITH REAL NAPOLEON DATA');
-  
-  // Open developer panel to access dataset controls
-  const devToggle = page.getByRole('button', { name: 'Developer Panel' });
-  if (await devToggle.count() > 0) {
-    await devToggle.click();
-    await page.waitForTimeout(500);
 
-    // Load Napoleon dataset
-    const napoleonButton = page.getByRole('button', { name: 'Napoleon 1769-1821' });
-    if (await napoleonButton.count() > 0) {
-      console.log('📚 Loading Napoleon dataset...');
-      await napoleonButton.click();
-      await page.waitForTimeout(3000); // Wait for data to load and layout to calculate
-      
-      // Wait for telemetry with real data
-      await page.waitForFunction(() => {
-        const telemetry = (window as unknown as { __ccTelemetry?: { events?: { total?: number } } }).__ccTelemetry;
-        return telemetry && telemetry.events && telemetry.events.total && telemetry.events.total > 0;
-      }, { timeout: 10000 });
+  // Wait for telemetry with real data
+  await page.waitForFunction(() => {
+    const telemetry = (window as unknown as { __ccTelemetry?: { events?: { total?: number } } }).__ccTelemetry;
+    return telemetry && telemetry.events && telemetry.events.total && telemetry.events.total > 0;
+  }, { timeout: 10000 });
 
-      // Get telemetry with loaded data
-      const telemetryData = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
-      expect(telemetryData).toBeTruthy();
-      expect(telemetryData.events.total).toBeGreaterThan(0);
+  // Get telemetry with loaded data
+  const telemetryData = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
+  expect(telemetryData).toBeTruthy();
+  expect(telemetryData.events.total).toBeGreaterThan(0);
       
       console.log('📊 Napoleon dataset loaded:', {
         totalEvents: telemetryData.events.total,
@@ -165,15 +152,6 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
       await page.waitForTimeout(1000);
       
       console.log('✅ Napoleon dataset degradation test completed successfully');
-      
-    } else {
-      console.log('❌ Napoleon dataset button not found in DevPanel');
-      expect(false).toBe(true); // Fail the test if we can't load the dataset
-    }
-  } else {
-    console.log('❌ Developer Panel toggle not found');
-    expect(false).toBe(true); // Fail the test if we can't open the dev panel
-  }
 });
 
 test('Degradation system efficiency validation', async ({ page }) => {

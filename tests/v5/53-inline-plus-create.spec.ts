@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/53 Inline "+" affordances open Create overlay', () => {
   test('top and bottom add buttons open Create', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Seed a few events so list exists

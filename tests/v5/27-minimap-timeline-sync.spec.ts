@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Minimap Timeline Synchronization Tests', () => {
   test('Timeline events update when minimap view window is dragged', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -70,6 +72,7 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
   });
 
   test('Overflow indicators update when zooming via minimap click', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     
@@ -114,6 +117,7 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
   });
 
   test('Blue event indicators respond to minimap navigation', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     await page.waitForTimeout(1000);
     

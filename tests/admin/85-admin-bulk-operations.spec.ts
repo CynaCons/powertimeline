@@ -4,7 +4,7 @@ test.describe('v5/85 Admin Panel - Bulk Operations', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to admin panel Users tab
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     const usersTab = page.locator('[role="tab"]:has-text("Users")');
     await usersTab.click();

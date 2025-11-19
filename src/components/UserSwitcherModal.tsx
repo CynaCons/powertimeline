@@ -21,6 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import { getUsers, getCurrentUser, setCurrentUser } from '../lib/homePageStorage';
+import { UserAvatar } from './UserAvatar';
 import type { User } from '../types';
 
 interface UserSwitcherModalProps {
@@ -110,14 +111,7 @@ export const UserSwitcherModal: React.FC<UserSwitcherModalProps> = ({ open, onCl
                     }}
                   >
                     <ListItemAvatar>
-                      <Avatar
-                        sx={{
-                          bgcolor: isCurrentUser ? 'primary.main' : 'grey.400',
-                          fontSize: '1.5rem',
-                        }}
-                      >
-                        {user.avatar}
-                      </Avatar>
+                      <UserAvatar user={user} size="medium" />
                     </ListItemAvatar>
                     <ListItemText
                       primary={

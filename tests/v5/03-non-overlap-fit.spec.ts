@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 function overlapRatio(a: {x:number;y:number;w:number;h:number}, b:{x:number;y:number;w:number;h:number}) {
   const left = Math.max(a.x, b.x);
@@ -16,10 +17,12 @@ function overlapRatio(a: {x:number;y:number;w:number;h:number}, b:{x:number;y:nu
 test.describe('v5/03 Non-overlap fit', () => {
   test('cards do not significantly overlap', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-CARDS-002' });
-    await page.goto('/');
-    
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
+
+    // Wait for timeline to load and cards to render
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
     const cards = await page.locator('[data-testid="event-card"]').elementHandles();
     expect(cards.length).toBeGreaterThan(0); // At least 1 card should be rendered
@@ -40,15 +43,10 @@ test.describe('v5/03 Non-overlap fit', () => {
 
   test('Napoleon at Fit-All has no card overlaps', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-LAYOUT-001' });
-    await page.goto('/');
 
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
     await page.waitForTimeout(500);
-
-    // Close the dev panel before clicking Fit All to avoid overlay blocking the button
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
 
     await page.getByRole('button', { name: 'Fit All' }).click();
     await page.waitForTimeout(500);

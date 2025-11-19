@@ -6,11 +6,11 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Navigate to home page (cynacons is default admin user)
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to /admin route
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify URL is /admin (not redirected)
     await expect(page).toHaveURL('/admin', { timeout: 5000 });
@@ -32,7 +32,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Start on home page
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Switch to alice (non-admin user) via localStorage
     await page.evaluate(() => {
@@ -41,14 +41,14 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Reload to apply new current user
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify we're logged in as alice (use first() since name may appear in timeline cards too)
     await expect(page.locator('text=Alice').first()).toBeVisible({ timeout: 5000 });
 
     // Try to navigate to /admin route
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Should be redirected to home page
     await expect(page).toHaveURL('/', { timeout: 5000 });
@@ -65,7 +65,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Part 1: Admin user (cynacons) should see Admin nav item
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for navigation rail to render
     await page.waitForTimeout(1000);
@@ -84,7 +84,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Reload to apply new current user
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify we're logged in as alice (use first() since name may appear in timeline cards too)
     await expect(page.locator('text=Alice').first()).toBeVisible({ timeout: 5000 });
@@ -104,7 +104,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Navigate to home page as admin
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for navigation rail to render
     await page.waitForTimeout(1000);
@@ -126,7 +126,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Navigate to admin panel
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Default tab should be Users
     await expect(page.locator('[role="tab"][aria-selected="true"]:has-text("Users")')).toBeVisible();
@@ -162,7 +162,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Navigate to admin panel
     await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Breadcrumb should show: Home > Admin
     const breadcrumbs = page.locator('[class*="breadcrumb"], nav[aria-label="Breadcrumb"]');

@@ -1,18 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Leftover Overflow Indicator Detection Tests', () => {
   test.setTimeout(60000);
 
   test('Detect leftover overflow indicators that persist in empty timeline regions', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-001' });
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -134,14 +130,9 @@ test.describe('Leftover Overflow Indicator Detection Tests', () => {
 
   test('Overflow indicators should disappear when zooming out from dense regions', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-002' });
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -217,14 +208,9 @@ test.describe('Leftover Overflow Indicator Detection Tests', () => {
   });
 
   test('Navigate to completely different timeline positions to force overflow recalculation', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();

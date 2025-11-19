@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Anchor Persistence - French Revolution', () => {
   test('Anchors remain visible at all zoom levels (CC-REQ-ANCHOR-004)', async ({ page }) => {

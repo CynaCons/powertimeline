@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/07 Aggregation policy (telemetry)', () => {
   test('aggregation metrics present and event count reconciles', async ({ page }) => {
-    await page.goto('/');
-    
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
 
     await page.waitForFunction(() => Boolean((window as any).__ccTelemetry?.aggregation?.totalAggregations >= 0));
     const t = await page.evaluate(() => (window as any).__ccTelemetry || null);

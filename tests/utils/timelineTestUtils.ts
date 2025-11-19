@@ -8,6 +8,35 @@ import { expect } from '@playwright/test';
 import type { Timeline, User } from '../../src/types';
 
 /**
+ * Default test user configuration
+ * Change this single value to update the test user for all tests
+ */
+const DEFAULT_TEST_USER = 'cynacons';
+
+/**
+ * Login as the default test user
+ * User-agnostic function that can be updated in one place for all tests
+ * @param page - Playwright page object
+ *
+ * TODO(v0.5.1): When Firebase Auth is implemented, update this to use real authentication
+ */
+export async function loginAsTestUser(page: Page): Promise<void> {
+  await loginAsUser(page, DEFAULT_TEST_USER);
+}
+
+/**
+ * Load a timeline for the default test user
+ * User-agnostic function for loading test timelines
+ * @param page - Playwright page object
+ * @param timelineId - Timeline ID to load
+ *
+ * TODO(v0.5.1): When Firebase Auth is implemented, this will automatically use authenticated user
+ */
+export async function loadTestTimeline(page: Page, timelineId: string): Promise<void> {
+  await loadTimeline(page, DEFAULT_TEST_USER, timelineId, false);
+}
+
+/**
  * Login as a specific user by setting localStorage
  * @param page - Playwright page object
  * @param userId - User ID to log in as (e.g., 'cynacons', 'alice')
@@ -26,7 +55,7 @@ export async function loginAsUser(page: Page, userId: string): Promise<void> {
 
   // Reload to apply the user change
   await page.reload();
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 /**
@@ -61,7 +90,7 @@ export async function loadTimeline(
 
   // Navigate to timeline URL
   await page.goto(`/user/${userId}/timeline/${timelineId}`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 /**
@@ -121,7 +150,7 @@ export async function verifyTimelineLoaded(page: Page, expectedTitle: string): P
  */
 export async function navigateToUserProfile(page: Page, userId: string): Promise<void> {
   await page.goto(`/user/${userId}`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 /**
@@ -133,7 +162,7 @@ export async function clickTimelineCard(page: Page, timelineTitle: string): Prom
   const card = page.locator(`[class*="cursor-pointer"]:has-text("${timelineTitle}")`).first();
   await expect(card).toBeVisible({ timeout: 5000 });
   await card.click();
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 /**

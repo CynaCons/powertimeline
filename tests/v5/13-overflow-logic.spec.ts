@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function openDevPanel(page: any) {
@@ -8,6 +9,7 @@ async function openDevPanel(page: any) {
 
 test.describe('Overflow Logic Tests', () => {
   test('Half-column overflow - Simple incremental test', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
     
     // Clear any existing events and add multiple events close together

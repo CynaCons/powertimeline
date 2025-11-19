@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
   test('validates horizontal space usage telemetry exists', async ({ page }) => {
-    await page.goto('/');
-    
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
 
     // Wait for telemetry to be populated (same pattern as 04-dispatch-band)
     await page.waitForFunction(() => Boolean((window as any).__ccTelemetry && (window as any).__ccTelemetry.groups?.count >= 0));
@@ -24,10 +23,8 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
   });
 
   test('validates spatial distribution metrics for dense scenarios', async ({ page }) => {
-    await page.goto('/');
-    
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
 
     // Wait for telemetry (same pattern as capacity-model test)
     await page.waitForFunction(() => Boolean((window as any).__ccTelemetry && (window as any).__ccTelemetry.capacity?.totalCells >= 0));
@@ -52,8 +49,9 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
   });
 
   test('validates screen real estate usage with actual card positions', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
-    
+
     await page.getByRole('button', { name: 'Developer Panel' }).click();
     await page.getByRole('button', { name: 'Long-range' }).click();
 
@@ -112,10 +110,8 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
   });
 
   test('validates anti-clustering behavior for sparse data', async ({ page }) => {
-    await page.goto('/');
-    
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-rfk');
 
     await page.waitForFunction(() => Boolean((window as any).__ccTelemetry && (window as any).__ccTelemetry.groups?.count >= 0));
     const t = await page.evaluate(() => (window as any).__ccTelemetry || null);

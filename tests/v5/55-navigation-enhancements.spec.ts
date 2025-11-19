@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/55 Enhanced Navigation & Interaction', () => {
   test('keyboard shortcuts work for navigation', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Test Alt+E for Events panel
@@ -46,6 +48,7 @@ test.describe('v5/55 Enhanced Navigation & Interaction', () => {
   });
 
   test('enhanced tooltips show keyboard shortcuts', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Hover over Events button
@@ -72,6 +75,7 @@ test.describe('v5/55 Enhanced Navigation & Interaction', () => {
   });
 
   test('navigation rail shows active states', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Events button should not be active initially
@@ -90,6 +94,7 @@ test.describe('v5/55 Enhanced Navigation & Interaction', () => {
   });
 
   test('theme toggle works with Alt+T shortcut', async ({ page }) => {
+    await loginAsTestUser(page);
     await page.goto('/');
 
     // Get initial theme

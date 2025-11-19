@@ -333,7 +333,7 @@ export function UserProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {sortedTimelines.map(timeline => (
               <div
-                key={timeline.id}
+                key={`user-profile-${timeline.id}`}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
                 {/* Kebab menu - only show if current user is the owner */}
