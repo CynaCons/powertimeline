@@ -16,6 +16,7 @@ type FeatureFlags = {
   enableDevPanel: boolean;
   enableDiagnosticsOverlay: boolean;
   enableTelemetry: boolean;
+  enforceAuth: boolean;  // v0.5.1 - Firebase Auth enforcement
 };
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -82,7 +83,8 @@ const firebaseConfig: FirebaseConfig = {
 const flags: FeatureFlags = {
   enableDevPanel: normalizeBooleanFlag(readEnv('VITE_ENABLE_DEV_PANEL'), mode !== 'production'),
   enableDiagnosticsOverlay: normalizeBooleanFlag(readEnv('VITE_ENABLE_DIAGNOSTICS_OVERLAY'), mode !== 'production'),
-  enableTelemetry: normalizeBooleanFlag(readEnv('VITE_ENABLE_TELEMETRY'), mode === 'production')
+  enableTelemetry: normalizeBooleanFlag(readEnv('VITE_ENABLE_TELEMETRY'), mode === 'production'),
+  enforceAuth: normalizeBooleanFlag(readEnv('VITE_ENFORCE_AUTH'), mode === 'production')  // Default: false in dev, true in prod
 };
 
 const logging: LoggingConfig = {

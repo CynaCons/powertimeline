@@ -62,11 +62,14 @@ export interface EventDocument extends Event {
 }
 
 /**
- * User represents a demo user profile
+ * User represents a user profile
  * Added for v0.4.0 - Home Page & Timeline Discovery
+ * v0.5.1 - Added email and username fields for authentication
  */
 export interface User {
-  id: string;           // e.g., "alice", "bob", "charlie"
+  id: string;           // Firebase Auth UID
+  email: string;        // User's email address (v0.5.1)
+  username: string;     // Unique username for URLs (v0.5.1)
   name: string;         // Display name
   avatar: string;       // Emoji or image URL
   bio?: string;         // Optional biography (max 280 chars)

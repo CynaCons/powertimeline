@@ -92,6 +92,8 @@ export function checkAndMigrateData(): boolean {
 export const DEMO_USERS: User[] = [
   {
     id: 'cynacons',
+    email: 'cynacons@powertimeline.com',
+    username: 'cynacons',
     name: 'CynaCons',
     avatar: '⚡',
     bio: 'Building collaborative timeline experiences with PowerTimeline. Exploring the intersection of history, technology, and knowledge sharing.',
@@ -100,6 +102,8 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'alice',
+    email: 'alice@example.com',
+    username: 'alice',
     name: 'Alice',
     avatar: '👩‍💼',
     bio: 'Product manager specializing in historical data visualization and collaborative tools.',
@@ -107,6 +111,8 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'bob',
+    email: 'bob@example.com',
+    username: 'bob',
     name: 'Bob',
     avatar: '👨‍🔬',
     bio: 'Researcher focused on scientific discoveries throughout history.',
@@ -114,6 +120,8 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'charlie',
+    email: 'charlie@example.com',
+    username: 'charlie',
     name: 'Charlie',
     avatar: '👨‍🎨',
     bio: 'Exploring art history and cultural movements.',

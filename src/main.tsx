@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { EditorPage } from './pages/EditorPage'
 import { AdminPage } from './pages/AdminPage'
+import LoginPage from './pages/LoginPage'
 import { environment } from './config/environment'
 import { logger } from './utils/logger'
 import { performanceMonitor } from './utils/performanceMonitor'
@@ -14,6 +15,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { createAppTheme } from './styles/theme'
 import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
+import { AuthProvider } from './contexts/AuthContext'
 import { initializeUsers, getTimelines, saveTimelines, migrateEventsToTimeline, createSampleTimelines, getCurrentUser, checkAndMigrateData } from './lib/homePageStorage'
 import { EventStorage } from './lib/storage'
 // Firebase disabled for now - will be enabled in v0.4.x when needed
@@ -86,6 +88,7 @@ function AppWithTheme() {
           <Route path="/user/:userId" element={<UserProfilePage />} />
           <Route path="/user/:userId/timeline/:timelineId" element={<EditorPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/login" element={<LoginPage />} />
           {/* Fallback for legacy direct editor access */}
           <Route path="/editor" element={<EditorPage />} />
         </Routes>
@@ -112,7 +115,9 @@ if (monitoringEnabled && typeof window !== 'undefined') {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ChronoThemeProvider>
-      <AppWithTheme />
+      <AuthProvider>
+        <AppWithTheme />
+      </AuthProvider>
     </ChronoThemeProvider>
   </StrictMode>,
 )

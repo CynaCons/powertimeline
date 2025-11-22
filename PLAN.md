@@ -1212,13 +1212,215 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - Production deployment verified with automated smoke tests
 - Clear separation of concerns between dev and prod environments
 
-### v0.5.1 - User Authentication
-- [ ] Implement Firebase Authentication (Email/Password + Google OAuth)
-- [ ] Create login/signup UI
-- [ ] Replace demo users with real user accounts
-- [ ] User profile management page
-- [ ] Account settings and preferences
-- [ ] Session management and security
+### v0.5.1 - User Authentication & Registration Enhancement
+**Goal:** Implement robust Firebase Authentication with comprehensive validation and user profile creation
+**Status:** In Progress
+**Started:** 2025-01-22
+
+**Phase 1: Authentication Foundation (IN PROGRESS)**
+- [x] Install and configure Firebase Authentication SDK
+- [x] Create authentication service layer (src/services/auth.ts)
+  - [x] Email/password signup and signin
+  - [x] Google OAuth provider
+  - [x] Sign out functionality
+  - [x] Auth state change listener
+- [x] Create clean, GitHub-inspired login page (src/pages/LoginPage.tsx)
+- [x] Add /login route to application router
+- [x] Create basic authentication test suite (tests/auth/01-auth-smoke.spec.ts)
+
+**Phase 2: Registration Validation & User Experience (IN PROGRESS)**
+- [x] Password strength validation system
+  - [x] Create passwordValidation.ts utility
+  - [x] 15 character minimum requirement
+  - [x] Require at least one number
+  - [x] Require at least one special character
+  - [x] 5-level strength indicator (Very Weak to Strong)
+  - [x] Real-time feedback with color coding
+- [x] Email validation system
+  - [x] Create emailValidation.ts utility
+  - [x] RFC 5322 compliant email regex
+  - [x] Real-time format validation
+  - [ ] Check for existing email in Firebase Auth
+  - [ ] Visual checkmark indicator when valid
+- [x] Username system for profile URLs
+  - [x] Create usernameValidation.ts utility
+  - [x] 3-20 character length requirement
+  - [x] Alphanumeric and hyphens only
+  - [x] Cannot start/end with hyphen
+  - [x] Reserved username list (admin, api, login, etc.)
+  - [ ] Check username availability in Firestore
+  - [ ] Auto-suggest username from email
+  - [ ] Real-time availability indicator
+- [ ] Update LoginPage with validation indicators
+  - [ ] Email field with green checkmark when valid
+  - [ ] Password strength meter with visual feedback
+  - [ ] Username field with availability check
+  - [ ] Clear error messages and hints
+  - [ ] Disabled submit button until all validations pass
+
+**Phase 3: User Profile Creation**
+- [ ] Add username field to User type in Firestore
+- [ ] Create user profile on registration
+  - [ ] Store email, username, displayName
+  - [ ] Generate default avatar
+  - [ ] Set role (default: 'user')
+  - [ ] Record creation timestamp
+- [ ] Update createUser() in firestore.ts
+- [ ] Link Firebase Auth UID to Firestore user document
+- [ ] Create getUserByEmail() function
+- [ ] Create getUserByUsername() function
+- [ ] Create isUsernameAvailable() function
+
+**Phase 4: Authentication Integration**
+- [ ] Replace demo user system with real Firebase Auth
+- [ ] Update getCurrentUser() to use Firebase Auth
+- [ ] Implement protected routes (require authentication)
+- [ ] Add authentication state management (React Context)
+- [ ] Update navigation rail with auth state
+- [ ] Add user profile dropdown menu
+- [ ] Implement "Remember me" functionality
+- [ ] Add email verification flow
+
+**Phase 5: Comprehensive Testing**
+- [ ] Update authentication test suite
+  - [ ] Password strength validation tests
+  - [ ] Email validation tests
+  - [ ] Username validation and availability tests
+  - [ ] Registration flow with all validations
+  - [ ] Duplicate email/username error handling
+  - [ ] Google OAuth flow
+  - [ ] Session persistence
+- [ ] Create validation utility tests
+- [ ] Integration tests for user profile creation
+- [ ] E2E tests for complete registration workflow
+
+**Phase 6: Requirements Documentation**
+- [ ] Create AUTH_REQUIREMENTS.md
+  - [ ] Password policy requirements
+  - [ ] Email validation requirements
+  - [ ] Username requirements and reserved words
+  - [ ] User profile structure
+  - [ ] Security requirements
+- [ ] Update SRS with authentication flows
+- [ ] Document validation rules and error messages
+- [ ] Create user registration flow diagrams
+
+**Phase 7: Security & Best Practices**
+- [ ] Implement rate limiting for auth attempts
+- [ ] Add CAPTCHA for suspicious activity
+- [ ] Implement password reset flow
+- [ ] Add two-factor authentication option
+- [ ] Session timeout and security settings
+- [ ] Update Firestore security rules for user documents
+
+**Files Created (Phase 1 & 2):**
+1. src/services/auth.ts - Firebase Auth service layer
+2. src/pages/LoginPage.tsx - Clean authentication UI
+3. src/utils/passwordValidation.ts - Password strength validation
+4. src/utils/emailValidation.ts - Email format validation
+5. src/utils/usernameValidation.ts - Username rules and validation
+6. tests/auth/01-auth-smoke.spec.ts - Authentication test suite
+7. playwright.config.ts - Updated to include auth tests
+
+**Next Steps:**
+- Complete LoginPage UI with all validation indicators
+- Implement Firestore functions for email/username availability checks
+- Integrate user profile creation with registration flow
+- Update tests to cover all validation scenarios
+- Document requirements and validation rules
+
+**Phase 8: Code Quality & Security Audit Recommendations (2025-11-22)**
+**Codebase Analysis Findings:**
+
+**Progress Tracker:**
+- Phase 1 (Auth Foundation): ✅ COMPLETE (2025-11-22)
+- Phase 2 (Protected Routes): ⏳ Pending
+- Phase 3 (Data Migration): ⏳ Pending
+- Phase 4 (Component Migration): ⏳ Pending
+- Phase 5 (Test Suite Update): ⏳ Pending
+- Phase 6 (Firestore Security Rules): ⏳ Pending
+
+**PRIORITY 1 - CRITICAL (Build Blocker):** ✅ COMPLETE
+- [x] Fix TypeScript compilation errors in src/lib/homePageStorage.ts
+  - [x] Add `email` and `username` fields to all DEMO_USERS entries (lines 92-122)
+  - [x] Run `npm run build` to verify fix
+  - **Impact:** Build currently failing with 4 TypeScript errors, deployment blocked
+  - **Resolution:** Added email and username fields to all 4 demo users. Build now passes successfully.
+
+**PRIORITY 2 - CRITICAL (Security Vulnerability):**
+- [ ] Secure production Firestore database
+  - [ ] Complete Firebase Authentication integration with routing (IN PROGRESS - Phase 1 DONE)
+    - [x] Create AuthContext for global auth state management (src/contexts/AuthContext.tsx)
+    - [x] Add AuthProvider to main.tsx wrapping the app
+    - [x] Create ProtectedRoute component for auth-required pages
+    - [x] Add VITE_ENFORCE_AUTH feature flag (defaults: false in dev, true in prod)
+    - [x] Update LoginPage with redirect logic (useNavigate + useLocation)
+    - [x] getUserByUsername() already exists in firestore.ts
+    - [ ] Update routes to use ProtectedRoute for /admin, /user/:userId/timeline/:timelineId
+    - [ ] Replace getCurrentUser() in homePageStorage.ts with Firebase Auth version
+    - [ ] Add auth state persistence (onAuthStateChanged listener in AuthContext)
+    - [ ] Update UserProfileMenu to show Firebase Auth user
+    - [ ] Add sign out functionality to navigation
+    - [ ] Redirect to /login for unauthenticated users on protected routes
+    - [ ] Redirect to / after successful login
+  - [ ] Update firestore.rules to require authentication (4 critical locations)
+    - [ ] Line 16: Collection group timelines - Restore commented auth rule
+      ```
+      allow create: if request.auth != null &&
+                      request.resource.data.ownerId == request.auth.uid;
+      ```
+    - [ ] Line 35: Users collection - Restore commented auth rule
+      ```
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      ```
+    - [ ] Line 55: Nested timelines - Restore commented auth rule
+      ```
+      allow create: if request.auth != null &&
+                      request.resource.data.ownerId == request.auth.uid &&
+                      request.auth.uid == userId;
+      ```
+    - [ ] Line 78: Events subcollection - Restore commented auth rule
+      ```
+      allow create, update, delete: if request.auth != null &&
+                                       request.auth.uid == userId;
+      ```
+  - [ ] Deploy updated security rules to production (`firebase deploy --only firestore:rules`)
+  - [ ] Test authentication flow end-to-end with secured database
+  - **Impact:** Production database (powertimeline-860f1) currently allows unauthenticated write access
+  - **Files to Modify:**
+    - src/contexts/AuthContext.tsx (NEW)
+    - src/components/ProtectedRoute.tsx (NEW)
+    - src/main.tsx (add AuthProvider)
+    - src/lib/homePageStorage.ts (integrate Firebase Auth)
+    - src/components/UserProfileMenu.tsx (show Firebase user)
+    - firestore.rules (add auth checks)
+  - **Breaking Changes:** Will replace demo user system with real authentication
+
+**PRIORITY 3 - HIGH (Code Quality):**
+- [ ] Clean up console.log statements (110 instances)
+  - [ ] Replace with src/utils/logger.ts utility calls
+  - [ ] Reduce production console noise
+- [ ] Replace remaining `any` types (19 instances across App.tsx, AuthoringOverlay, firestore.ts, StatisticsDashboard)
+- [ ] Remove unused variables in migration scripts (diagnose-timelines.ts, migrate-events-to-subcollection.ts)
+- [ ] Fix ESLint warnings (16 errors in scripts, 19 warnings total)
+
+**MEDIUM PRIORITY:**
+- [ ] Investigate multi-event layout visibility bug (v0.4.3 known issue - only 1/3 events visible after refresh)
+- [ ] Add unit tests (currently only E2E Playwright tests exist)
+- [ ] Document feature flags (ENABLE_CLUSTER_COORDINATION, ENABLE_MIXED_CARD_TYPES)
+- [ ] Create .env.example with all required variables
+
+**STRENGTHS TO PRESERVE:**
+- Layout engine determinism and elegance (4-engine architecture)
+- Test coverage: 166/166 passing (100% pass rate)
+- Comprehensive documentation (ARCHITECTURE.md, modular SRS)
+- Type safety with strict TypeScript configuration
+- Modern tech stack (React 19, TypeScript 5.8, Firebase 12, Playwright 1.54)
+
+**SECURITY NOTES:**
+- Current Firestore rules allow unauthenticated CREATE/UPDATE operations (lines 16, 35, 55, 78)
+- Rules contain TODOs acknowledging this is temporary for development
+- Production deployment MUST NOT occur until authentication is fully integrated
 
 ### v0.5.2 - Public Sharing & URLs
 - [ ] Implement public/private timeline visibility
@@ -1227,6 +1429,23 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Implement Firestore Security Rules for access control
 - [ ] Create read-only public viewer
 - [ ] Add timeline embed functionality
+
+### v0.5.3 - Landing Page Redesign
+**Goal:** Create a proper landing page for unauthenticated users
+**Status:** Planned
+
+- [ ] Design hero section with value proposition
+- [ ] Add "Sign in with Google" prominent CTA
+- [ ] Create featured timelines showcase section
+- [ ] Add "How it works" section with screenshots
+- [ ] Implement "Get Started" onboarding flow
+- [ ] Update navigation for unauthenticated users
+- [ ] Add footer with links (About, Privacy, Terms, Contact)
+- [ ] Responsive design for mobile/tablet/desktop
+- [ ] SEO optimization (meta tags, Open Graph)
+- [ ] Create separate "Browse Timelines" page (current HomePage content)
+
+**Inspiration:** GitHub landing page, Notion marketing site, Linear homepage
 
 ## Phase 3: Collaboration Features (v0.6.x)
 

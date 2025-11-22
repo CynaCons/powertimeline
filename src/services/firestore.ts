@@ -618,6 +618,84 @@ export async function deleteUser(userId: string): Promise<void> {
   }
 }
 
+/**
+ * Get user by email address
+ * v0.5.1 - Registration validation
+ */
+export async function getUserByEmail(email: string): Promise<User | null> {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.USERS),
+      where('email', '==', email),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as User;
+  } catch (error) {
+    console.error('Error fetching user by email:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get user by username
+ * v0.5.1 - Registration validation
+ */
+export async function getUserByUsername(username: string): Promise<User | null> {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.USERS),
+      where('username', '==', username.toLowerCase()),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as User;
+  } catch (error) {
+    console.error('Error fetching user by username:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if username is available
+ * v0.5.1 - Registration validation
+ */
+export async function isUsernameAvailable(username: string): Promise<boolean> {
+  try {
+    const user = await getUserByUsername(username);
+    return user === null;
+  } catch (error) {
+    console.error('Error checking username availability:', error);
+    return false; // Assume not available on error to be safe
+  }
+}
+
+/**
+ * Check if email is available (not already registered)
+ * v0.5.1 - Registration validation
+ */
+export async function isEmailAvailable(email: string): Promise<boolean> {
+  try {
+    const user = await getUserByEmail(email);
+    return user === null;
+  } catch (error) {
+    console.error('Error checking email availability:', error);
+    return false; // Assume not available on error to be safe
+  }
+}
+
 // ============================================================================
 // Admin Activity Log Operations
 // ============================================================================
