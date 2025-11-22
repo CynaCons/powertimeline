@@ -17,6 +17,11 @@ dist-ssr
 .env
 .env.local
 
+# Firebase service account keys (NEVER commit these!)
+service-account-*.json
+*-service-account.json
+*-firebase-adminsdk-*.json
+
 # Vite cache
 .vite/
 

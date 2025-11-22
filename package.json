@@ -28,6 +28,7 @@
     "@types/js-yaml": "^4.0.9",
     "dayjs": "^1.11.18",
     "firebase": "^12.4.0",
+    "firebase-admin": "^13.6.0",
     "js-yaml": "^4.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

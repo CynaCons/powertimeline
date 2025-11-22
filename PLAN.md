@@ -1173,6 +1173,45 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - Database cleaned of duplicate data
 - All tests future-proofed for Firebase Authentication migration
 
+### v0.5.0.4 - Development Environment & Production Infrastructure ✅ COMPLETE
+**Goal:** Establish separate development and production Firebase environments with proper security and testing isolation
+
+**Key Accomplishments:**
+- [x] Created separate Firebase project for development (powertimeline-dev)
+- [x] Configured environment-specific Firebase credentials (.env.local for dev, .env.production for prod)
+- [x] Secured service account keys in .gitignore (firebase-adminsdk patterns)
+- [x] Installed Firebase Admin SDK for administrative operations
+- [x] Created production database cleanup script using Admin SDK
+- [x] Cleaned production Firestore database (removed 14 test timelines)
+- [x] Verified production smoke tests pass (4/5 tests passing)
+- [x] Documented test environment configuration and workflow
+
+**Environment Setup:**
+- Development (.env.local): powertimeline-dev project with empty database for safe testing
+- Production (.env.production): powertimeline-860f1 project with live data at powertimeline.com
+- Test isolation: Regular tests use dev database, production smoke tests verify live site
+
+**Files Created/Modified:**
+1. .env.local - Updated to point to dev Firebase project
+2. .gitignore - Added patterns to prevent service account key commits
+3. scripts/cleanup-production-admin.ts (NEW) - Admin SDK cleanup script
+4. scripts/check-cynacons.ts (NEW) - Diagnostic script for user data
+5. scripts/check-user-data.ts (NEW) - User data verification script
+6. tests/production/01-smoke.spec.ts (NEW) - Production deployment verification
+7. playwright.config.ts - Added "production" to testMatch pattern
+
+**Production Database State:**
+- Before: 19 timelines (5 real + 14 test pollution)
+- After: 5 real timelines only (Charles de Gaulle, French Revolution, JFK, Napoleon, RFK)
+- User profile restored: name="CynaCons", bio="PowerTimeline creator and admin"
+
+**Impact:**
+- Development and testing now completely isolated from production
+- No risk of test data polluting live database
+- Service account keys properly secured
+- Production deployment verified with automated smoke tests
+- Clear separation of concerns between dev and prod environments
+
 ### v0.5.1 - User Authentication
 - [ ] Implement Firebase Authentication (Email/Password + Google OAuth)
 - [ ] Create login/signup UI
