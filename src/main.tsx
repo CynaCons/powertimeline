@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import './styles/index.css'
+import { LandingPage } from './pages/LandingPage'
 import { HomePage } from './pages/HomePage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { EditorPage } from './pages/EditorPage'
@@ -85,7 +86,9 @@ function AppWithTheme() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* Public routes - accessible to everyone */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/browse" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected routes - require auth when VITE_ENFORCE_AUTH=true */}
