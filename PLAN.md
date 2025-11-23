@@ -1454,6 +1454,10 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] Fix color contrast to meet WCAG AA standards
 - [x] Test responsive behavior on mobile/tablet/desktop
 - [x] Verify build and commit changes
+- [x] Add top-right Sign In button with login icon
+- [x] Move search bar from below hero to within hero (below headline)
+- [x] Make featured timeline cards clickable (navigate to actual timelines)
+- [x] Create COLOR_THEME.md documentation for design system
 
 **Key Improvements Implemented:**
 - Dark theme (#0d1117) with elevated surfaces (#161b22)
@@ -1461,11 +1465,26 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - Orange CTAs (#f97316) with prominent shadows and hover effects
 - Better messaging: "Version control for history"
 - Feature cards with specific value propositions and hover animations
-- Examples gallery with 4 timeline cards and descriptions
+- Examples gallery with 4 clickable timeline cards linking to real timelines:
+  - French Revolution (timeline-french-revolution)
+  - Napoleon Bonaparte (timeline-napoleon)
+  - Charles de Gaulle (timeline-charles-de-gaulle)
+  - RFK Timeline (timeline-rfk)
 - Hero demo placeholder area (16:9 aspect ratio)
 - Reduced footer prominence with lighter colors (#8d96a0)
 - Typography hierarchy: h1 at 4.5rem, improved line-heights
 - Responsive Stack layouts replacing Grid2
+- Top-right Sign In button (absolute positioned, z-index 10)
+- Search bar integrated within hero section for better UX flow
+
+**Documentation Created:**
+- COLOR_THEME.md: Comprehensive color palette documentation
+  - Core palette: backgrounds, text hierarchy, accents
+  - Gradient effects and implementation patterns
+  - Interactive states and hover effects
+  - WCAG AA accessibility compliance verification
+  - Migration guide from old theme to new dark theme
+  - Future light theme considerations
 
 **Deferred to Future Phases:**
 - [ ] Add "Sign in with Google" prominent CTA (needs Firebase Auth fully integrated)

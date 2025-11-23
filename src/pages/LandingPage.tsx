@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GroupIcon from '@mui/icons-material/Group';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
 
 export function LandingPage() {
@@ -32,13 +33,68 @@ export function LandingPage() {
     }
   };
 
+  // Navigate to specific timeline
+  const handleTimelineClick = (timelineId: string) => {
+    // Navigate to the timeline - using cynacons as the owner for now
+    navigate(`/user/cynacons/timeline/${timelineId}`);
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#0d1117', color: '#e6edf3' }}>
+      {/* Top-right Login/Sign-in Button */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          zIndex: 10,
+        }}
+      >
+        {user ? (
+          <Button
+            variant="outlined"
+            onClick={() => navigate(`/user/${user.uid}`)}
+            sx={{
+              borderColor: '#30363d',
+              color: '#e6edf3',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              '&:hover': {
+                borderColor: '#8b5cf6',
+                bgcolor: 'rgba(139, 92, 246, 0.1)',
+              },
+            }}
+          >
+            My Timelines
+          </Button>
+        ) : (
+          <Button
+            variant="outlined"
+            startIcon={<LoginIcon />}
+            onClick={handleSignIn}
+            sx={{
+              borderColor: '#30363d',
+              color: '#e6edf3',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              '&:hover': {
+                borderColor: '#8b5cf6',
+                bgcolor: 'rgba(139, 92, 246, 0.1)',
+              },
+            }}
+          >
+            Sign In
+          </Button>
+        )}
+      </Box>
+
       {/* Hero Section - Dark with Gradient Headline */}
       <Box
         sx={{
           background: 'linear-gradient(135deg, #161b22 0%, #0d1117 100%)',
-          pt: { xs: 8, md: 12 },
+          pt: { xs: 10, md: 14 },
           pb: { xs: 8, md: 10 },
           textAlign: 'center',
           position: 'relative',
@@ -80,7 +136,7 @@ export function LandingPage() {
             variant="h5"
             component="h2"
             sx={{
-              mb: 4,
+              mb: 5,
               color: '#8d96a0',
               fontSize: { xs: '1.1rem', md: '1.3rem' },
               maxWidth: 700,
@@ -91,6 +147,52 @@ export function LandingPage() {
             Version control for history. Collaborate on timelines with forking, merge requests,
             and a powerful visual editor.
           </Typography>
+
+          {/* Search Bar - Moved here below headline */}
+          <Container maxWidth="md" sx={{ mb: 5 }}>
+            <Card
+              elevation={0}
+              sx={{
+                bgcolor: '#161b22',
+                border: '1px solid #30363d',
+                borderRadius: 2,
+              }}
+            >
+              <CardContent sx={{ p: 2.5 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Search timelines, users, or topics..."
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: '#8d96a0' }} />
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      bgcolor: '#0d1117',
+                      color: '#e6edf3',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#30363d',
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#8b5cf6',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#8b5cf6',
+                      },
+                    },
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const query = (e.target as HTMLInputElement).value;
+                      navigate(`/browse?search=${encodeURIComponent(query)}`);
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </Container>
 
           {/* CTA Buttons */}
           <Stack
@@ -172,52 +274,6 @@ export function LandingPage() {
           </Box>
         </Container>
       </Box>
-
-      {/* Search Section */}
-      <Container maxWidth="md" sx={{ mt: -4, mb: 10, position: 'relative', zIndex: 2 }}>
-        <Card
-          elevation={0}
-          sx={{
-            bgcolor: '#161b22',
-            border: '1px solid #30363d',
-            borderRadius: 2,
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <TextField
-              fullWidth
-              placeholder="Search timelines, users, or topics..."
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#8d96a0' }} />
-                  </InputAdornment>
-                ),
-                sx: {
-                  bgcolor: '#0d1117',
-                  color: '#e6edf3',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#30363d',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#8b5cf6',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#8b5cf6',
-                  },
-                },
-              }}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  const query = (e.target as HTMLInputElement).value;
-                  navigate(`/browse?search=${encodeURIComponent(query)}`);
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
-      </Container>
 
       {/* Features Section */}
       <Container maxWidth="lg" sx={{ py: 10 }}>
@@ -368,25 +424,29 @@ export function LandingPage() {
                 title: 'French Revolution',
                 author: 'CynaCons',
                 events: 150,
-                description: 'Complete chronicle of revolutionary France 1789-1799'
+                description: 'Complete chronicle of revolutionary France 1789-1799',
+                timelineId: 'timeline-french-revolution',
               },
               {
-                title: 'Space Exploration',
-                author: 'NASA Archive',
+                title: 'Napoleon Bonaparte',
+                author: 'CynaCons',
                 events: 85,
-                description: 'Humanity\'s journey to the stars from Sputnik to Artemis'
+                description: 'Rise and fall of Napoleon from Corsica to Saint Helena',
+                timelineId: 'timeline-napoleon',
               },
               {
-                title: 'Evolution of Computing',
-                author: 'TechHistory',
-                events: 120,
-                description: 'From ENIAC to quantum computing'
+                title: 'Charles de Gaulle',
+                author: 'CynaCons',
+                events: 90,
+                description: 'From Free France to Fifth Republic',
+                timelineId: 'timeline-charles-de-gaulle',
               },
               {
-                title: 'World War II',
-                author: 'HistoryDocs',
-                events: 200,
-                description: 'Global conflict timeline with major battles and events'
+                title: 'RFK Timeline',
+                author: 'CynaCons',
+                events: 65,
+                description: 'Robert F. Kennedy\'s political career and legacy',
+                timelineId: 'timeline-rfk',
               },
             ].map((timeline) => (
               <Card
@@ -403,7 +463,7 @@ export function LandingPage() {
                   },
                 }}
               >
-                <CardActionArea onClick={handleBrowseTimelines}>
+                <CardActionArea onClick={() => handleTimelineClick(timeline.timelineId)}>
                   {/* Placeholder for timeline thumbnail */}
                   <Box
                     sx={{
