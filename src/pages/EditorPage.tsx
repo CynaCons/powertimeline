@@ -84,6 +84,7 @@ export function EditorPage() {
             <Alert
               icon={<InfoIcon fontSize="inherit" />}
               severity="info"
+              data-testid="read-only-banner"
               sx={{
                 bgcolor: 'rgba(6, 182, 212, 0.1)',
                 border: '1px solid rgba(6, 182, 212, 0.3)',
@@ -97,6 +98,7 @@ export function EditorPage() {
                   <Button
                     size="small"
                     onClick={() => navigate('/login')}
+                    data-testid="sign-in-to-edit-button"
                     sx={{
                       color: '#06b6d4',
                       textTransform: 'none',

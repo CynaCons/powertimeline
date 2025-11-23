@@ -34,6 +34,7 @@ export function TopNavBar() {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
+          data-testid="top-nav-bar"
         >
           {/* Logo/Brand */}
           <Box
@@ -44,6 +45,7 @@ export function TopNavBar() {
               cursor: 'pointer',
             }}
             onClick={() => navigate('/')}
+            data-testid="logo-button"
           >
             <TimelineIcon sx={{ color: '#8b5cf6', fontSize: 28 }} />
             <Typography
@@ -62,6 +64,7 @@ export function TopNavBar() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Button
               onClick={() => navigate('/browse')}
+              data-testid="browse-button"
               sx={{
                 color: '#8d96a0',
                 textTransform: 'none',
@@ -80,6 +83,7 @@ export function TopNavBar() {
               <Button
                 variant="outlined"
                 onClick={() => navigate(`/user/${user.uid}`)}
+                data-testid="my-timelines-button"
                 sx={{
                   borderColor: '#30363d',
                   color: '#e6edf3',
@@ -99,6 +103,7 @@ export function TopNavBar() {
                 variant="outlined"
                 startIcon={<LoginIcon />}
                 onClick={() => navigate('/login')}
+                data-testid="sign-in-button"
                 sx={{
                   borderColor: '#30363d',
                   color: '#e6edf3',

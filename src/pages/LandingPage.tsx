@@ -117,6 +117,7 @@ export function LandingPage() {
                   fullWidth
                   placeholder="Search timelines, users, or topics..."
                   variant="outlined"
+                  data-testid="search-input"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -159,6 +160,7 @@ export function LandingPage() {
               variant="contained"
               size="large"
               onClick={handleGetStarted}
+              data-testid="cta-get-started"
               sx={{
                 bgcolor: '#f97316',
                 color: '#fff',
@@ -181,6 +183,7 @@ export function LandingPage() {
               variant="outlined"
               size="large"
               onClick={handleBrowseTimelines}
+              data-testid="cta-explore-examples"
               sx={{
                 borderColor: '#30363d',
                 color: '#e6edf3',
@@ -405,6 +408,7 @@ export function LandingPage() {
             ].map((timeline) => (
               <Card
                 key={timeline.title}
+                data-testid={`timeline-card-${timeline.timelineId}`}
                 sx={{
                   bgcolor: '#0d1117',
                   border: '1px solid #30363d',
@@ -417,7 +421,10 @@ export function LandingPage() {
                   },
                 }}
               >
-                <CardActionArea onClick={() => handleTimelineClick(timeline.timelineId)}>
+                <CardActionArea
+                  onClick={() => handleTimelineClick(timeline.timelineId)}
+                  data-testid={`timeline-link-${timeline.timelineId}`}
+                >
                   {/* Placeholder for timeline thumbnail */}
                   <Box
                     sx={{

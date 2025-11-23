@@ -211,9 +211,9 @@ test.describe('Full User Journey: Unauthenticated to Authenticated', () => {
   test('PHASE 1: Unauthenticated user explores landing page', async ({ page }) => {
     // 1.1. Verify landing page components
     await test.step('Verify TopNavBar components', async () => {
-      await expect(page.locator('text=PowerTimeline').first()).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Browse', exact: true })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+      await expect(page.getByTestId('logo-button')).toBeVisible();
+      await expect(page.getByTestId('browse-button')).toBeVisible();
+      await expect(page.getByTestId('sign-in-button')).toBeVisible();
     });
 
     await test.step('Verify hero section', async () => {
@@ -222,12 +222,12 @@ test.describe('Full User Journey: Unauthenticated to Authenticated', () => {
     });
 
     await test.step('Verify search bar is present', async () => {
-      await expect(page.locator('input[placeholder*="Search timelines"]')).toBeVisible();
+      await expect(page.getByTestId('search-input')).toBeVisible();
     });
 
     await test.step('Verify CTA buttons', async () => {
-      await expect(page.locator('button:has-text("Get Started Free"), button:has-text("Go to My Timelines")').first()).toBeVisible();
-      await expect(page.locator('button:has-text("Explore Examples")')).toBeVisible();
+      await expect(page.getByTestId('cta-get-started')).toBeVisible();
+      await expect(page.getByTestId('cta-explore-examples')).toBeVisible();
     });
 
     await test.step('Verify feature cards', async () => {
@@ -253,24 +253,24 @@ test.describe('Full User Journey: Unauthenticated to Authenticated', () => {
   test('PHASE 2: User views timeline in read-only mode', async ({ page }) => {
     // 2.1. Click on French Revolution timeline card
     await test.step('Navigate to French Revolution timeline', async () => {
-      await page.locator('text=French Revolution').first().click();
+      await page.getByTestId('timeline-link-timeline-french-revolution').click();
       await page.waitForURL('**/user/cynacons/timeline/timeline-french-revolution');
     });
 
     await test.step('Verify TopNavBar is visible (read-only mode)', async () => {
-      await expect(page.locator('text=PowerTimeline').first()).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Browse', exact: true })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+      await expect(page.getByTestId('top-nav-bar')).toBeVisible();
+      await expect(page.getByTestId('browse-button')).toBeVisible();
+      await expect(page.getByTestId('sign-in-button')).toBeVisible();
     });
 
     await test.step('Verify read-only mode banner', async () => {
       // Banner should be visible with specific text
-      const banner = page.locator('role=alert').filter({ hasText: 'Viewing' });
+      const banner = page.getByTestId('read-only-banner');
       await expect(banner).toBeVisible();
       await expect(banner).toContainText('read-only mode');
 
       // Sign In to Edit button should be present
-      await expect(page.locator('button:has-text("Sign In to Edit")')).toBeVisible();
+      await expect(page.getByTestId('sign-in-to-edit-button')).toBeVisible();
     });
 
     await test.step('Verify NO NavigationRail in read-only mode', async () => {
@@ -310,29 +310,29 @@ test.describe('Full User Journey: Unauthenticated to Authenticated', () => {
 
   test('PHASE 3: User returns to landing page', async ({ page }) => {
     // First navigate to a timeline
-    await page.locator('text=French Revolution').first().click();
+    await page.getByTestId('timeline-link-timeline-french-revolution').click();
     await page.waitForURL('**/timeline/**');
 
     await test.step('Click logo to return to landing page', async () => {
-      await page.locator('text=PowerTimeline').first().click();
+      await page.getByTestId('logo-button').click();
       await page.waitForURL('/');
     });
 
     await test.step('Verify back on landing page', async () => {
       await expect(page.locator('text=Build timelines like you build code')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+      await expect(page.getByTestId('sign-in-button')).toBeVisible();
     });
   });
 
   test('PHASE 4: User uses Browse and Search functionality', async ({ page }) => {
     await test.step('Click Browse button', async () => {
-      await page.getByRole('button', { name: 'Browse', exact: true }).click();
+      await page.getByTestId('browse-button').click();
       await page.waitForURL('/browse');
     });
 
     await test.step('Verify browse page components', async () => {
       // TopNavBar should still be visible (unauthenticated)
-      await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+      await expect(page.getByTestId('sign-in-button')).toBeVisible();
 
       // NO NavigationRail (unauthenticated)
       const navRail = page.locator('aside.w-14');
