@@ -65,19 +65,19 @@ export function useNavigationConfig(
     const user = getCurrentUser();
     const items: NavigationItem[] = [
       {
-        id: 'home',
-        label: 'Home',
-        icon: 'home',
-        shortcut: 'Alt+H',
-        onClick: () => navigate('/'),
+        id: 'browse',
+        label: 'Browse',
+        icon: 'explore',
+        shortcut: 'Alt+B',
+        onClick: () => navigate('/browse'),
         isActive: context === 'home',
       },
       {
-        id: 'my-profile',
+        id: 'my-timelines',
         label: 'My Timelines',
         icon: 'person',
-        shortcut: 'Alt+P',
-        onClick: () => navigate(currentUserId ? `/user/${currentUserId}` : '/'),
+        shortcut: 'Alt+M',
+        onClick: () => navigate(currentUserId ? `/user/${currentUserId}` : '/browse'),
         isActive: context === 'profile',
       },
     ];

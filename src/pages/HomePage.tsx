@@ -21,6 +21,8 @@ import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail'
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { UserSwitcherModal } from '../components/UserSwitcherModal';
+import { TopNavBar } from '../components/TopNavBar';
+import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
@@ -32,6 +34,7 @@ import { migrateLocalStorageToFirestore } from '../utils/migrateLocalStorage';
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { user: firebaseUser } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]); // Cache all users for lookups
   const [myTimelines, setMyTimelines] = useState<TimelineMetadata[]>([]);
@@ -249,8 +252,13 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Navigation Rail */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navigation for unauthenticated users */}
+      {!firebaseUser && <TopNavBar />}
+
+      <div className="flex">
+      {/* Navigation Rail for authenticated users */}
+      {firebaseUser && (
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
         {/* PowerTimeline logo at top */}
         <div className="mb-4 p-1 text-center">
@@ -269,9 +277,10 @@ export function HomePage() {
           <ThemeToggleButton />
         </div>
       </aside>
+      )}
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-14">
+      <div className={`flex-1 ${firebaseUser ? 'ml-14' : ''}`}>
         {/* Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
           <div className="max-w-6xl mx-auto px-6 py-4">
@@ -720,6 +729,7 @@ export function HomePage() {
           {toast.message}
         </Alert>
       </Snackbar>
+      </div>
     </div>
   );
 }

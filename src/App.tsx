@@ -45,9 +45,10 @@ const DEV_FLAG_KEY = 'powertimeline-dev';
 
 interface AppProps {
   timelineId?: string;  // Optional timeline ID to load from home page storage
+  readOnly?: boolean;   // Read-only mode: hide authoring overlay and navigation rail
 }
 
-function App({ timelineId }: AppProps = {}) {
+function App({ timelineId, readOnly = false }: AppProps = {}) {
   usePerformanceMonitoring();
   // Storage
   const storageRef = useRef(new EventStorage());
@@ -572,7 +573,8 @@ function App({ timelineId }: AppProps = {}) {
     <div className="min-h-screen bg-background text-primary transition-theme">
       {/* Full-bleed canvas area - no header, maximum space */}
       <div className="relative h-screen">
-        {/* Enhanced Navigation Rail */}
+        {/* Enhanced Navigation Rail - Hidden in read-only mode */}
+        {!readOnly && (
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
           {/* PowerTimeline logo at top */}
           <div className="mb-4 p-1 text-center">
@@ -613,6 +615,7 @@ function App({ timelineId }: AppProps = {}) {
             <ThemeToggleButton />
           </div>
         </aside>
+        )}
 
         {/* Overlays next to the sidebar, never covering it */}
         {overlay && (
@@ -636,7 +639,7 @@ function App({ timelineId }: AppProps = {}) {
                 </Suspense>
               </ErrorBoundary>
             )}
-            {overlay === 'editor' && (
+            {overlay === 'editor' && !readOnly && (
               <ErrorBoundary>
                 <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-200 flex items-center justify-center">Loading...</div>}>
                   <AuthoringOverlay

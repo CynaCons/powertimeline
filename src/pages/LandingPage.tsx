@@ -10,7 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GroupIcon from '@mui/icons-material/Group';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import LoginIcon from '@mui/icons-material/Login';
+import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
 
 export function LandingPage() {
@@ -41,54 +41,8 @@ export function LandingPage() {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#0d1117', color: '#e6edf3' }}>
-      {/* Top-right Login/Sign-in Button */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 20,
-          right: 20,
-          zIndex: 10,
-        }}
-      >
-        {user ? (
-          <Button
-            variant="outlined"
-            onClick={() => navigate(`/user/${user.uid}`)}
-            sx={{
-              borderColor: '#30363d',
-              color: '#e6edf3',
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              '&:hover': {
-                borderColor: '#8b5cf6',
-                bgcolor: 'rgba(139, 92, 246, 0.1)',
-              },
-            }}
-          >
-            My Timelines
-          </Button>
-        ) : (
-          <Button
-            variant="outlined"
-            startIcon={<LoginIcon />}
-            onClick={handleSignIn}
-            sx={{
-              borderColor: '#30363d',
-              color: '#e6edf3',
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              '&:hover': {
-                borderColor: '#8b5cf6',
-                bgcolor: 'rgba(139, 92, 246, 0.1)',
-              },
-            }}
-          >
-            Sign In
-          </Button>
-        )}
-      </Box>
+      {/* Top Navigation */}
+      <TopNavBar />
 
       {/* Hero Section - Dark with Gradient Headline */}
       <Box

@@ -97,11 +97,7 @@ function AppWithTheme() {
               <UserProfilePage />
             </ProtectedRoute>
           } />
-          <Route path="/user/:userId/timeline/:timelineId" element={
-            <ProtectedRoute>
-              <EditorPage />
-            </ProtectedRoute>
-          } />
+          <Route path="/user/:userId/timeline/:timelineId" element={<EditorPage />} />
           <Route path="/admin" element={
             <ProtectedRoute>
               <AdminPage />
