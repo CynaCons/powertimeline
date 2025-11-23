@@ -5,7 +5,7 @@ const reuse = true;
 
 export default defineConfig({
   testDir: 'tests',
-  testMatch: /(v5|home|user|admin|production|auth)\/.+\.spec\.ts$/,
+  testMatch: /(v5|home|user|admin|production|auth|e2e)\/.+\.spec\.ts$/,
   // Increased timeouts for stability - complex layout calculations need more time
   timeout: 45_000,
   expect: {
@@ -17,15 +17,15 @@ export default defineConfig({
   retries: 0,
   webServer: {
     // Use a fixed non-default port to avoid clashing with a manually running Vite dev server
-    command: 'npm run dev -- --port=5174 --strictPort',
-    url: 'http://localhost:5174',
+    command: 'npm run dev -- --port=5175 --strictPort',
+    url: 'http://localhost:5175',
     reuseExistingServer: reuse,
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 30_000,
   },
   use: {
-    baseURL: 'http://localhost:5174',
+    baseURL: 'http://localhost:5175',
     headless: true,
     // Enable visual comparisons
     screenshot: 'only-on-failure',
