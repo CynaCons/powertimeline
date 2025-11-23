@@ -1217,21 +1217,18 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] Verify WCAG AA contrast compliance
 
 ### v0.5.3 - Public Timeline Access & Navigation Redesign
-**Goal:** Enable public timeline viewing and implement dual navigation pattern
-**Status:** In Progress
+**Status:** Complete
 
-- [ ] Create TopNavBar component for unauthenticated users
-- [ ] Apply top nav to LandingPage, HomePage, timeline viewer
-- [ ] Redesign NavigationRail for authenticated users (rename "Home" to "My Timelines")
-- [ ] Apply dark theme styling to navigation
-- [ ] Remove ProtectedRoute from timeline viewer route
-- [ ] Add read-only mode to EditorPage (detect auth and ownership)
-- [ ] Hide edit UI for non-owners (authoring overlay, delete buttons)
-- [ ] Show "View-only mode" banner for unauthenticated users
-- [ ] Keep ProtectedRoute for /admin and user profile routes
-- [ ] Test: unauthenticated users can view timelines
-- [ ] Test: authenticated non-owners see read-only mode
-- [ ] Test: owners see full edit functionality
+- [x] Create TopNavBar component for unauthenticated users
+- [x] Apply top nav to LandingPage, HomePage, timeline viewer
+- [x] Redesign NavigationRail (rename "Home" to "Browse", update "My Timelines")
+- [x] Apply dark theme styling to navigation
+- [x] Remove ProtectedRoute from timeline viewer route
+- [x] Add read-only mode to EditorPage (detect auth and ownership)
+- [x] Hide edit UI for non-owners (authoring overlay, navigation rail)
+- [x] Show "View-only mode" banner with "Sign In to Edit" button
+- [x] Keep ProtectedRoute for /admin and user profile routes
+- [x] Build and commit changes
 
 ### v0.5.4 - Authentication & Sharing Completion (Planned)
 **Goal:** Complete authentication system and enable timeline sharing
