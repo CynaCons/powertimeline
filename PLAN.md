@@ -1334,7 +1334,7 @@ Create reusable test utilities that abstract authentication and navigation, maki
 
 **Progress Tracker:**
 - Phase 1 (Auth Foundation): ✅ COMPLETE (2025-11-22)
-- Phase 2 (Protected Routes): ⏳ Pending
+- Phase 2 (Protected Routes): ✅ COMPLETE (2025-11-22)
 - Phase 3 (Data Migration): ⏳ Pending
 - Phase 4 (Component Migration): ⏳ Pending
 - Phase 5 (Test Suite Update): ⏳ Pending
@@ -1356,7 +1356,10 @@ Create reusable test utilities that abstract authentication and navigation, maki
     - [x] Add VITE_ENFORCE_AUTH feature flag (defaults: false in dev, true in prod)
     - [x] Update LoginPage with redirect logic (useNavigate + useLocation)
     - [x] getUserByUsername() already exists in firestore.ts
-    - [ ] Update routes to use ProtectedRoute for /admin, /user/:userId/timeline/:timelineId
+    - [x] Update routes to use ProtectedRoute for /admin, /user/:userId/timeline/:timelineId (Phase 2)
+    - [x] Update UserProfileMenu with Firebase Auth integration (Phase 2)
+    - [x] Add "Sign Out" functionality connected to Firebase Auth (Phase 2)
+    - [x] Show auth status indicator ("Demo" chip for demo users) (Phase 2)
     - [ ] Replace getCurrentUser() in homePageStorage.ts with Firebase Auth version
     - [ ] Add auth state persistence (onAuthStateChanged listener in AuthContext)
     - [ ] Update UserProfileMenu to show Firebase Auth user

@@ -6,6 +6,7 @@
  * - Dropdown menu with account actions
  * - Switch Account, User Space, Settings, Logout options
  * - Keyboard navigation support
+ * - v0.5.1 Phase 2: Firebase Auth integration
  */
 
 import React, { useState, useEffect } from 'react';
@@ -17,7 +18,10 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
+import Chip from '@mui/material/Chip';
 import { getCurrentUser } from '../lib/homePageStorage';
+import { useAuth } from '../contexts/AuthContext';
+import { environment } from '../config/environment';
 import type { User } from '../types';
 
 interface UserProfileMenuProps {
@@ -30,11 +34,15 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
   onLogout,
 }) => {
   const navigate = useNavigate();
+  const { user: firebaseUser, signOut } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const open = Boolean(anchorEl);
 
-  // Load current user
+  // Determine if using Firebase Auth or demo users
+  const isUsingFirebaseAuth = firebaseUser !== null;
+
+  // Load current user (demo user system)
   useEffect(() => {
     const user = getCurrentUser();
     setCurrentUser(user);
@@ -66,9 +74,16 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
     console.log('Settings clicked - to be implemented');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleClose();
-    onLogout?.();
+
+    if (isUsingFirebaseAuth) {
+      // Firebase Auth sign out
+      await signOut();
+    } else {
+      // Demo user logout (legacy)
+      onLogout?.();
+    }
   };
 
   if (!currentUser) {
@@ -140,22 +155,31 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           <Avatar sx={{ bgcolor: 'primary.main', fontSize: '1.2rem' }}>
             {currentUser.avatar}
           </Avatar>
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-500 mb-0.5">Logged in as</span>
+          <div className="flex flex-col w-full">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-xs text-gray-500">Logged in as</span>
+              {!isUsingFirebaseAuth && !environment.flags.enforceAuth && (
+                <Chip label="Demo" size="small" color="warning" sx={{ height: 16, fontSize: '0.65rem' }} />
+              )}
+            </div>
             <span className="font-semibold text-sm">{currentUser.name}</span>
-            <span className="text-xs text-gray-500">@{currentUser.id}</span>
+            <span className="text-xs text-gray-500">
+              {isUsingFirebaseAuth ? firebaseUser.email : `@${currentUser.id}`}
+            </span>
           </div>
         </MenuItem>
 
         <Divider />
 
-        {/* Switch Account */}
-        <MenuItem onClick={handleSwitchAccount}>
-          <ListItemIcon>
-            <span className="material-symbols-rounded">swap_horiz</span>
-          </ListItemIcon>
-          <ListItemText>Switch Account</ListItemText>
-        </MenuItem>
+        {/* Switch Account - only show for demo users */}
+        {!isUsingFirebaseAuth && (
+          <MenuItem onClick={handleSwitchAccount}>
+            <ListItemIcon>
+              <span className="material-symbols-rounded">swap_horiz</span>
+            </ListItemIcon>
+            <ListItemText>Switch Account (Demo)</ListItemText>
+          </MenuItem>
+        )}
 
         {/* User Space */}
         <MenuItem onClick={handleUserSpace}>
@@ -175,12 +199,12 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
         <Divider />
 
-        {/* Logout */}
+        {/* Logout / Sign Out */}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <span className="material-symbols-rounded">logout</span>
           </ListItemIcon>
-          <ListItemText>Logout</ListItemText>
+          <ListItemText>{isUsingFirebaseAuth ? 'Sign Out' : 'Logout'}</ListItemText>
         </MenuItem>
       </Menu>
     </>

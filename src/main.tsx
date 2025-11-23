@@ -16,6 +16,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { createAppTheme } from './styles/theme'
 import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import { initializeUsers, getTimelines, saveTimelines, migrateEventsToTimeline, createSampleTimelines, getCurrentUser, checkAndMigrateData } from './lib/homePageStorage'
 import { EventStorage } from './lib/storage'
 // Firebase disabled for now - will be enabled in v0.4.x when needed
@@ -85,12 +86,31 @@ function AppWithTheme() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/user/:userId" element={<UserProfilePage />} />
-          <Route path="/user/:userId/timeline/:timelineId" element={<EditorPage />} />
-          <Route path="/admin" element={<AdminPage />} />
           <Route path="/login" element={<LoginPage />} />
+
+          {/* Protected routes - require auth when VITE_ENFORCE_AUTH=true */}
+          <Route path="/user/:userId" element={
+            <ProtectedRoute>
+              <UserProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/user/:userId/timeline/:timelineId" element={
+            <ProtectedRoute>
+              <EditorPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          } />
+
           {/* Fallback for legacy direct editor access */}
-          <Route path="/editor" element={<EditorPage />} />
+          <Route path="/editor" element={
+            <ProtectedRoute>
+              <EditorPage />
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
