@@ -1,11 +1,16 @@
 # PowerTimeline Implementation Plan
 
-**Format:**
+**Format Rules:**
 - Iterations: Version number + brief title
-- Goal: One-line objective statement
-- Status: Complete/In Progress (when applicable)
-- Tasks: Simple checkbox items (minimize sub-bullets and implementation details)
-- Known Issues: Brief summary only (move detailed explanations to GitHub issues)
+- Goal: One-line objective statement (optional)
+- Status: Complete/In Progress (only if in progress)
+- Tasks: Simple checkbox items only (no sub-bullets, no implementation details)
+- NO "Files Modified" sections (use git for that)
+- NO "Impact" sections (tasks describe the work)
+- NO "Key Accomplishments" or verbose summaries
+- Known Issues: Brief bullet points only
+- Close iterations chronologically - don't skip ahead
+- Move incomplete tasks to future iterations, don't leave them in closed ones
 
 ---
 
@@ -1173,325 +1178,74 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - Database cleaned of duplicate data
 - All tests future-proofed for Firebase Authentication migration
 
-### v0.5.0.4 - Development Environment & Production Infrastructure ✅ COMPLETE
-**Goal:** Establish separate development and production Firebase environments with proper security and testing isolation
+### v0.5.0.4 - Development Environment & Production Infrastructure
+**Status:** Complete
 
-**Key Accomplishments:**
-- [x] Created separate Firebase project for development (powertimeline-dev)
-- [x] Configured environment-specific Firebase credentials (.env.local for dev, .env.production for prod)
-- [x] Secured service account keys in .gitignore (firebase-adminsdk patterns)
-- [x] Installed Firebase Admin SDK for administrative operations
-- [x] Created production database cleanup script using Admin SDK
-- [x] Cleaned production Firestore database (removed 14 test timelines)
-- [x] Verified production smoke tests pass (4/5 tests passing)
-- [x] Documented test environment configuration and workflow
+- [x] Create separate Firebase project for development (powertimeline-dev)
+- [x] Configure environment-specific Firebase credentials
+- [x] Secure service account keys in .gitignore
+- [x] Install Firebase Admin SDK
+- [x] Create production database cleanup script
+- [x] Clean production Firestore database (removed 14 test timelines)
+- [x] Create production smoke tests
+- [x] Document test environment configuration
 
-**Environment Setup:**
-- Development (.env.local): powertimeline-dev project with empty database for safe testing
-- Production (.env.production): powertimeline-860f1 project with live data at powertimeline.com
-- Test isolation: Regular tests use dev database, production smoke tests verify live site
+### v0.5.1 - Firebase Authentication Foundation
+**Status:** Complete
 
-**Files Created/Modified:**
-1. .env.local - Updated to point to dev Firebase project
-2. .gitignore - Added patterns to prevent service account key commits
-3. scripts/cleanup-production-admin.ts (NEW) - Admin SDK cleanup script
-4. scripts/check-cynacons.ts (NEW) - Diagnostic script for user data
-5. scripts/check-user-data.ts (NEW) - User data verification script
-6. tests/production/01-smoke.spec.ts (NEW) - Production deployment verification
-7. playwright.config.ts - Added "production" to testMatch pattern
+- [x] Install Firebase Authentication SDK
+- [x] Create auth service layer (src/services/auth.ts)
+- [x] Create LoginPage with GitHub-inspired design
+- [x] Create validation utilities (password, email, username)
+- [x] Create AuthContext for global auth state
+- [x] Create ProtectedRoute component
+- [x] Add VITE_ENFORCE_AUTH feature flag
+- [x] Integrate Firebase Auth with UserProfileMenu
+- [x] TypeScript build fixes (DEMO_USERS fields)
 
-**Production Database State:**
-- Before: 19 timelines (5 real + 14 test pollution)
-- After: 5 real timelines only (Charles de Gaulle, French Revolution, JFK, Napoleon, RFK)
-- User profile restored: name="CynaCons", bio="PowerTimeline creator and admin"
+### v0.5.2 - Landing Page Redesign
+**Status:** Complete
 
-**Impact:**
-- Development and testing now completely isolated from production
-- No risk of test data polluting live database
-- Service account keys properly secured
-- Production deployment verified with automated smoke tests
-- Clear separation of concerns between dev and prod environments
+- [x] Research competitors (Tiki-Toki, TimelineJS, Linear, GitHub)
+- [x] Apply dark theme color palette (#0d1117, #161b22, #8b5cf6, #06b6d4, #f97316)
+- [x] Redesign hero with gradient headline effect
+- [x] Add top-right Sign In button
+- [x] Move search bar to hero section
+- [x] Create clickable timeline examples gallery
+- [x] Improve typography and spacing
+- [x] Create COLOR_THEME.md documentation
+- [x] Verify WCAG AA contrast compliance
 
-### v0.5.1 - User Authentication & Registration Enhancement
-**Goal:** Implement robust Firebase Authentication with comprehensive validation and user profile creation
+### v0.5.3 - Public Timeline Access & Navigation Redesign
+**Goal:** Enable public timeline viewing and implement dual navigation pattern
 **Status:** In Progress
-**Started:** 2025-01-22
 
-**Phase 1: Authentication Foundation (IN PROGRESS)**
-- [x] Install and configure Firebase Authentication SDK
-- [x] Create authentication service layer (src/services/auth.ts)
-  - [x] Email/password signup and signin
-  - [x] Google OAuth provider
-  - [x] Sign out functionality
-  - [x] Auth state change listener
-- [x] Create clean, GitHub-inspired login page (src/pages/LoginPage.tsx)
-- [x] Add /login route to application router
-- [x] Create basic authentication test suite (tests/auth/01-auth-smoke.spec.ts)
+- [ ] Create TopNavBar component for unauthenticated users
+- [ ] Apply top nav to LandingPage, HomePage, timeline viewer
+- [ ] Redesign NavigationRail for authenticated users (rename "Home" to "My Timelines")
+- [ ] Apply dark theme styling to navigation
+- [ ] Remove ProtectedRoute from timeline viewer route
+- [ ] Add read-only mode to EditorPage (detect auth and ownership)
+- [ ] Hide edit UI for non-owners (authoring overlay, delete buttons)
+- [ ] Show "View-only mode" banner for unauthenticated users
+- [ ] Keep ProtectedRoute for /admin and user profile routes
+- [ ] Test: unauthenticated users can view timelines
+- [ ] Test: authenticated non-owners see read-only mode
+- [ ] Test: owners see full edit functionality
 
-**Phase 2: Registration Validation & User Experience (IN PROGRESS)**
-- [x] Password strength validation system
-  - [x] Create passwordValidation.ts utility
-  - [x] 15 character minimum requirement
-  - [x] Require at least one number
-  - [x] Require at least one special character
-  - [x] 5-level strength indicator (Very Weak to Strong)
-  - [x] Real-time feedback with color coding
-- [x] Email validation system
-  - [x] Create emailValidation.ts utility
-  - [x] RFC 5322 compliant email regex
-  - [x] Real-time format validation
-  - [ ] Check for existing email in Firebase Auth
-  - [ ] Visual checkmark indicator when valid
-- [x] Username system for profile URLs
-  - [x] Create usernameValidation.ts utility
-  - [x] 3-20 character length requirement
-  - [x] Alphanumeric and hyphens only
-  - [x] Cannot start/end with hyphen
-  - [x] Reserved username list (admin, api, login, etc.)
-  - [ ] Check username availability in Firestore
-  - [ ] Auto-suggest username from email
-  - [ ] Real-time availability indicator
-- [ ] Update LoginPage with validation indicators
-  - [ ] Email field with green checkmark when valid
-  - [ ] Password strength meter with visual feedback
-  - [ ] Username field with availability check
-  - [ ] Clear error messages and hints
-  - [ ] Disabled submit button until all validations pass
+### v0.5.4 - Authentication & Sharing Completion (Planned)
+**Goal:** Complete authentication system and enable timeline sharing
 
-**Phase 3: User Profile Creation**
-- [ ] Add username field to User type in Firestore
-- [ ] Create user profile on registration
-  - [ ] Store email, username, displayName
-  - [ ] Generate default avatar
-  - [ ] Set role (default: 'user')
-  - [ ] Record creation timestamp
-- [ ] Update createUser() in firestore.ts
-- [ ] Link Firebase Auth UID to Firestore user document
-- [ ] Create getUserByEmail() function
-- [ ] Create getUserByUsername() function
-- [ ] Create isUsernameAvailable() function
-
-**Phase 4: Authentication Integration**
-- [ ] Replace demo user system with real Firebase Auth
-- [ ] Update getCurrentUser() to use Firebase Auth
-- [ ] Implement protected routes (require authentication)
-- [ ] Add authentication state management (React Context)
-- [ ] Update navigation rail with auth state
-- [ ] Add user profile dropdown menu
-- [ ] Implement "Remember me" functionality
-- [ ] Add email verification flow
-
-**Phase 5: Comprehensive Testing**
-- [ ] Update authentication test suite
-  - [ ] Password strength validation tests
-  - [ ] Email validation tests
-  - [ ] Username validation and availability tests
-  - [ ] Registration flow with all validations
-  - [ ] Duplicate email/username error handling
-  - [ ] Google OAuth flow
-  - [ ] Session persistence
-- [ ] Create validation utility tests
-- [ ] Integration tests for user profile creation
-- [ ] E2E tests for complete registration workflow
-
-**Phase 6: Requirements Documentation**
-- [ ] Create AUTH_REQUIREMENTS.md
-  - [ ] Password policy requirements
-  - [ ] Email validation requirements
-  - [ ] Username requirements and reserved words
-  - [ ] User profile structure
-  - [ ] Security requirements
-- [ ] Update SRS with authentication flows
-- [ ] Document validation rules and error messages
-- [ ] Create user registration flow diagrams
-
-**Phase 7: Security & Best Practices**
-- [ ] Implement rate limiting for auth attempts
-- [ ] Add CAPTCHA for suspicious activity
-- [ ] Implement password reset flow
-- [ ] Add two-factor authentication option
-- [ ] Session timeout and security settings
-- [ ] Update Firestore security rules for user documents
-
-**Files Created (Phase 1 & 2):**
-1. src/services/auth.ts - Firebase Auth service layer
-2. src/pages/LoginPage.tsx - Clean authentication UI
-3. src/utils/passwordValidation.ts - Password strength validation
-4. src/utils/emailValidation.ts - Email format validation
-5. src/utils/usernameValidation.ts - Username rules and validation
-6. tests/auth/01-auth-smoke.spec.ts - Authentication test suite
-7. playwright.config.ts - Updated to include auth tests
-
-**Next Steps:**
-- Complete LoginPage UI with all validation indicators
-- Implement Firestore functions for email/username availability checks
-- Integrate user profile creation with registration flow
-- Update tests to cover all validation scenarios
-- Document requirements and validation rules
-
-**Phase 8: Code Quality & Security Audit Recommendations (2025-11-22)**
-**Codebase Analysis Findings:**
-
-**Progress Tracker:**
-- Phase 1 (Auth Foundation): ✅ COMPLETE (2025-11-22)
-- Phase 2 (Protected Routes): ✅ COMPLETE (2025-11-22)
-- Phase 3 (Data Migration): ⏳ Pending
-- Phase 4 (Component Migration): ⏳ Pending
-- Phase 5 (Test Suite Update): ⏳ Pending
-- Phase 6 (Firestore Security Rules): ⏳ Pending
-
-**PRIORITY 1 - CRITICAL (Build Blocker):** ✅ COMPLETE
-- [x] Fix TypeScript compilation errors in src/lib/homePageStorage.ts
-  - [x] Add `email` and `username` fields to all DEMO_USERS entries (lines 92-122)
-  - [x] Run `npm run build` to verify fix
-  - **Impact:** Build currently failing with 4 TypeScript errors, deployment blocked
-  - **Resolution:** Added email and username fields to all 4 demo users. Build now passes successfully.
-
-**PRIORITY 2 - CRITICAL (Security Vulnerability):**
-- [ ] Secure production Firestore database
-  - [ ] Complete Firebase Authentication integration with routing (IN PROGRESS - Phase 1 DONE)
-    - [x] Create AuthContext for global auth state management (src/contexts/AuthContext.tsx)
-    - [x] Add AuthProvider to main.tsx wrapping the app
-    - [x] Create ProtectedRoute component for auth-required pages
-    - [x] Add VITE_ENFORCE_AUTH feature flag (defaults: false in dev, true in prod)
-    - [x] Update LoginPage with redirect logic (useNavigate + useLocation)
-    - [x] getUserByUsername() already exists in firestore.ts
-    - [x] Update routes to use ProtectedRoute for /admin, /user/:userId/timeline/:timelineId (Phase 2)
-    - [x] Update UserProfileMenu with Firebase Auth integration (Phase 2)
-    - [x] Add "Sign Out" functionality connected to Firebase Auth (Phase 2)
-    - [x] Show auth status indicator ("Demo" chip for demo users) (Phase 2)
-    - [ ] Replace getCurrentUser() in homePageStorage.ts with Firebase Auth version
-    - [ ] Add auth state persistence (onAuthStateChanged listener in AuthContext)
-    - [ ] Update UserProfileMenu to show Firebase Auth user
-    - [ ] Add sign out functionality to navigation
-    - [ ] Redirect to /login for unauthenticated users on protected routes
-    - [ ] Redirect to / after successful login
-  - [ ] Update firestore.rules to require authentication (4 critical locations)
-    - [ ] Line 16: Collection group timelines - Restore commented auth rule
-      ```
-      allow create: if request.auth != null &&
-                      request.resource.data.ownerId == request.auth.uid;
-      ```
-    - [ ] Line 35: Users collection - Restore commented auth rule
-      ```
-      allow create, update: if request.auth != null && request.auth.uid == userId;
-      ```
-    - [ ] Line 55: Nested timelines - Restore commented auth rule
-      ```
-      allow create: if request.auth != null &&
-                      request.resource.data.ownerId == request.auth.uid &&
-                      request.auth.uid == userId;
-      ```
-    - [ ] Line 78: Events subcollection - Restore commented auth rule
-      ```
-      allow create, update, delete: if request.auth != null &&
-                                       request.auth.uid == userId;
-      ```
-  - [ ] Deploy updated security rules to production (`firebase deploy --only firestore:rules`)
-  - [ ] Test authentication flow end-to-end with secured database
-  - **Impact:** Production database (powertimeline-860f1) currently allows unauthenticated write access
-  - **Files to Modify:**
-    - src/contexts/AuthContext.tsx (NEW)
-    - src/components/ProtectedRoute.tsx (NEW)
-    - src/main.tsx (add AuthProvider)
-    - src/lib/homePageStorage.ts (integrate Firebase Auth)
-    - src/components/UserProfileMenu.tsx (show Firebase user)
-    - firestore.rules (add auth checks)
-  - **Breaking Changes:** Will replace demo user system with real authentication
-
-**PRIORITY 3 - HIGH (Code Quality):**
-- [ ] Clean up console.log statements (110 instances)
-  - [ ] Replace with src/utils/logger.ts utility calls
-  - [ ] Reduce production console noise
-- [ ] Replace remaining `any` types (19 instances across App.tsx, AuthoringOverlay, firestore.ts, StatisticsDashboard)
-- [ ] Remove unused variables in migration scripts (diagnose-timelines.ts, migrate-events-to-subcollection.ts)
-- [ ] Fix ESLint warnings (16 errors in scripts, 19 warnings total)
-
-**MEDIUM PRIORITY:**
-- [ ] Investigate multi-event layout visibility bug (v0.4.3 known issue - only 1/3 events visible after refresh)
-- [ ] Add unit tests (currently only E2E Playwright tests exist)
-- [ ] Document feature flags (ENABLE_CLUSTER_COORDINATION, ENABLE_MIXED_CARD_TYPES)
-- [ ] Create .env.example with all required variables
-
-**STRENGTHS TO PRESERVE:**
-- Layout engine determinism and elegance (4-engine architecture)
-- Test coverage: 166/166 passing (100% pass rate)
-- Comprehensive documentation (ARCHITECTURE.md, modular SRS)
-- Type safety with strict TypeScript configuration
-- Modern tech stack (React 19, TypeScript 5.8, Firebase 12, Playwright 1.54)
-
-**SECURITY NOTES:**
-- Current Firestore rules allow unauthenticated CREATE/UPDATE operations (lines 16, 35, 55, 78)
-- Rules contain TODOs acknowledging this is temporary for development
-- Production deployment MUST NOT occur until authentication is fully integrated
-
-### v0.5.2 - Public Sharing & URLs
-- [ ] Implement public/private timeline visibility
+- [ ] Complete registration form with validation UI indicators
+- [ ] Implement user profile creation on signup
+- [ ] Update Firestore security rules for production
+- [ ] Deploy secured Firestore rules
+- [ ] Implement public/private timeline visibility toggles
 - [ ] Create shareable URLs for public timelines
 - [ ] Add social sharing buttons (Twitter, Facebook, LinkedIn)
-- [ ] Implement Firestore Security Rules for access control
-- [ ] Create read-only public viewer
-- [ ] Add timeline embed functionality
-
-### v0.5.3 - Landing Page Redesign
-**Goal:** Transform landing page from generic SaaS template to distinctive timeline-focused design
-**Status:** In Progress (2025-11-23)
-**Started:** 2025-11-23
-
-**Research Completed:**
-- [x] Deep analysis of timeline tool competitors (Tiki-Toki, TimelineJS, Preceden)
-- [x] Analysis of modern SaaS landing pages (Linear, GitHub, GitLab, Notion)
-- [x] Color scheme research and best practices for 2024/2025
-- [x] Typography and layout pattern identification
-
-**Implementation Tasks:**
-- [x] Apply dark theme color palette (Dark & Modern: #0d1117 background, purple-to-cyan gradients)
-- [x] Redesign hero section with gradient headline effect
-- [x] Add real product screenshots/demos to feature cards (replace icon-only cards)
-- [x] Create examples gallery with real timeline thumbnails (French Revolution, Napoleon, etc.)
-- [x] Improve typography hierarchy (larger display font, gradient effects)
-- [x] Reduce footer prominence (lighter background, smaller text)
-- [x] Fix color contrast to meet WCAG AA standards
-- [x] Test responsive behavior on mobile/tablet/desktop
-- [x] Verify build and commit changes
-- [x] Add top-right Sign In button with login icon
-- [x] Move search bar from below hero to within hero (below headline)
-- [x] Make featured timeline cards clickable (navigate to actual timelines)
-- [x] Create COLOR_THEME.md documentation for design system
-
-**Key Improvements Implemented:**
-- Dark theme (#0d1117) with elevated surfaces (#161b22)
-- Gradient headline: "Build timelines like you build code" (purple to cyan)
-- Orange CTAs (#f97316) with prominent shadows and hover effects
-- Better messaging: "Version control for history"
-- Feature cards with specific value propositions and hover animations
-- Examples gallery with 4 clickable timeline cards linking to real timelines:
-  - French Revolution (timeline-french-revolution)
-  - Napoleon Bonaparte (timeline-napoleon)
-  - Charles de Gaulle (timeline-charles-de-gaulle)
-  - RFK Timeline (timeline-rfk)
-- Hero demo placeholder area (16:9 aspect ratio)
-- Reduced footer prominence with lighter colors (#8d96a0)
-- Typography hierarchy: h1 at 4.5rem, improved line-heights
-- Responsive Stack layouts replacing Grid2
-- Top-right Sign In button (absolute positioned, z-index 10)
-- Search bar integrated within hero section for better UX flow
-
-**Documentation Created:**
-- COLOR_THEME.md: Comprehensive color palette documentation
-  - Core palette: backgrounds, text hierarchy, accents
-  - Gradient effects and implementation patterns
-  - Interactive states and hover effects
-  - WCAG AA accessibility compliance verification
-  - Migration guide from old theme to new dark theme
-  - Future light theme considerations
-
-**Deferred to Future Phases:**
-- [ ] Add "Sign in with Google" prominent CTA (needs Firebase Auth fully integrated)
-- [ ] SEO optimization (meta tags, Open Graph)
-- [ ] Create separate "Browse Timelines" page navigation
-
-**Inspiration:** GitHub dark theme, Linear gradients, Tiki-Toki product demos
+- [ ] Create timeline embed functionality
+- [ ] Replace demo user system with Firebase Auth completely
+- [ ] Test authentication flow end-to-end
 
 ## Phase 3: Collaboration Features (v0.6.x)
 
