@@ -1434,21 +1434,45 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Add timeline embed functionality
 
 ### v0.5.3 - Landing Page Redesign
-**Goal:** Create a proper landing page for unauthenticated users
-**Status:** Planned
+**Goal:** Transform landing page from generic SaaS template to distinctive timeline-focused design
+**Status:** In Progress (2025-11-23)
+**Started:** 2025-11-23
 
-- [ ] Design hero section with value proposition
-- [ ] Add "Sign in with Google" prominent CTA
-- [ ] Create featured timelines showcase section
-- [ ] Add "How it works" section with screenshots
-- [ ] Implement "Get Started" onboarding flow
-- [ ] Update navigation for unauthenticated users
-- [ ] Add footer with links (About, Privacy, Terms, Contact)
-- [ ] Responsive design for mobile/tablet/desktop
+**Research Completed:**
+- [x] Deep analysis of timeline tool competitors (Tiki-Toki, TimelineJS, Preceden)
+- [x] Analysis of modern SaaS landing pages (Linear, GitHub, GitLab, Notion)
+- [x] Color scheme research and best practices for 2024/2025
+- [x] Typography and layout pattern identification
+
+**Implementation Tasks:**
+- [x] Apply dark theme color palette (Dark & Modern: #0d1117 background, purple-to-cyan gradients)
+- [x] Redesign hero section with gradient headline effect
+- [x] Add real product screenshots/demos to feature cards (replace icon-only cards)
+- [x] Create examples gallery with real timeline thumbnails (French Revolution, Napoleon, etc.)
+- [x] Improve typography hierarchy (larger display font, gradient effects)
+- [x] Reduce footer prominence (lighter background, smaller text)
+- [x] Fix color contrast to meet WCAG AA standards
+- [x] Test responsive behavior on mobile/tablet/desktop
+- [x] Verify build and commit changes
+
+**Key Improvements Implemented:**
+- Dark theme (#0d1117) with elevated surfaces (#161b22)
+- Gradient headline: "Build timelines like you build code" (purple to cyan)
+- Orange CTAs (#f97316) with prominent shadows and hover effects
+- Better messaging: "Version control for history"
+- Feature cards with specific value propositions and hover animations
+- Examples gallery with 4 timeline cards and descriptions
+- Hero demo placeholder area (16:9 aspect ratio)
+- Reduced footer prominence with lighter colors (#8d96a0)
+- Typography hierarchy: h1 at 4.5rem, improved line-heights
+- Responsive Stack layouts replacing Grid2
+
+**Deferred to Future Phases:**
+- [ ] Add "Sign in with Google" prominent CTA (needs Firebase Auth fully integrated)
 - [ ] SEO optimization (meta tags, Open Graph)
-- [ ] Create separate "Browse Timelines" page (current HomePage content)
+- [ ] Create separate "Browse Timelines" page navigation
 
-**Inspiration:** GitHub landing page, Notion marketing site, Linear homepage
+**Inspiration:** GitHub dark theme, Linear gradients, Tiki-Toki product demos
 
 ## Phase 3: Collaboration Features (v0.6.x)
 
