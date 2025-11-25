@@ -1,7 +1,8 @@
 {
   "projects": {
     "default": "powertimeline-860f1",
-    "powertimeline": "powertimeline-860f1"
+    "powertimeline": "powertimeline-860f1",
+    "dev": "powertimeline-dev"
   },
   "targets": {},
   "etags": {}

@@ -134,7 +134,8 @@ export function HomePage() {
     }
 
     loadData();
-  }, [showToast]);
+  }, []); // Run only once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   const handleCreateTimeline = () => {
     setCreateDialogOpen(true);
@@ -252,14 +253,14 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#0d1117' }}>
       {/* Top Navigation for unauthenticated users */}
       {!firebaseUser && <TopNavBar />}
 
       <div className="flex">
       {/* Navigation Rail for authenticated users */}
       {firebaseUser && (
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ borderColor: '#30363d', backgroundColor: '#161b22' }}>
         {/* PowerTimeline logo at top */}
         <div className="mb-4 p-1 text-center">
           <img
@@ -282,12 +283,12 @@ export function HomePage() {
       {/* Main Content Area */}
       <div className={`flex-1 ${firebaseUser ? 'ml-14' : ''}`}>
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
           <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-2xl font-bold text-gray-900">PowerTimeline</h1>
+              <h1 className="text-2xl font-bold" style={{ color: '#e6edf3' }}>PowerTimeline</h1>
               <div className="flex items-center gap-4">
-                {currentUser && (
+                {firebaseUser ? (
                   <UserProfileMenu
                     onSwitchAccount={() => setUserSwitcherOpen(true)}
                     onLogout={() => {
@@ -296,6 +297,16 @@ export function HomePage() {
                       window.location.href = '/';
                     }}
                   />
+                ) : (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-6 py-2 text-white rounded-lg transition-colors font-medium"
+                    style={{ backgroundColor: '#8b5cf6' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+                  >
+                    Sign In
+                  </button>
                 )}
               </div>
             </div>
@@ -308,7 +319,7 @@ export function HomePage() {
         {/* Search Bar */}
         <div className="mb-8 relative">
           <div className="relative">
-            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 material-symbols-rounded">
+            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 material-symbols-rounded" style={{ color: '#8d96a0' }}>
               search
             </span>
             <input
@@ -316,12 +327,28 @@ export function HomePage() {
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search timelines and users..."
-              className="w-full pl-14 pr-12 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+              className="w-full pl-14 pr-12 py-4 text-lg border-2 rounded-xl outline-none transition-all"
+              style={{
+                backgroundColor: '#161b22',
+                borderColor: '#30363d',
+                color: '#e6edf3'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#8b5cf6';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#30363d';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             />
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 material-symbols-rounded"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 material-symbols-rounded"
+                style={{ color: '#8d96a0' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#e6edf3'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#8d96a0'}
                 aria-label="Clear search"
               >
                 close
@@ -331,9 +358,9 @@ export function HomePage() {
 
           {/* Search Results Dropdown */}
           {searchResults && (
-            <div className="absolute top-full mt-2 w-full bg-white border-2 border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
+            <div className="absolute top-full mt-2 w-full rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style={{ backgroundColor: '#161b22', border: '2px solid #30363d' }}>
               {searchResults.timelines.length === 0 && searchResults.users.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
+                <div className="p-6 text-center" style={{ color: '#8d96a0' }}>
                   No results found for "{searchQuery}"
                 </div>
               ) : (
@@ -341,7 +368,7 @@ export function HomePage() {
                   {/* Timeline Results */}
                   {searchResults.timelines.length > 0 && (
                     <div className="p-4">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: '#8d96a0' }}>
                         Timelines ({searchResults.timelines.length})
                       </h3>
                       <div className="space-y-2">
@@ -352,10 +379,13 @@ export function HomePage() {
                               handleTimelineClick(timeline);
                               clearSearch();
                             }}
-                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="w-full text-left px-4 py-3 rounded-lg transition-colors"
+                            style={{ backgroundColor: 'transparent' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d1117'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
-                            <div className="font-medium text-gray-900">{timeline.title}</div>
-                            <div className="text-sm text-gray-500 mt-1">
+                            <div className="font-medium" style={{ color: '#e6edf3' }}>{timeline.title}</div>
+                            <div className="text-sm mt-1" style={{ color: '#8d96a0' }}>
                               {timeline.eventCount} events • by {timeline.ownerId}
                             </div>
                           </button>
@@ -366,8 +396,8 @@ export function HomePage() {
 
                   {/* User Results */}
                   {searchResults.users.length > 0 && (
-                    <div className="p-4 border-t border-gray-200">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    <div className="p-4" style={{ borderTop: '1px solid #30363d' }}>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: '#8d96a0' }}>
                         Users ({searchResults.users.length})
                       </h3>
                       <div className="space-y-2">
@@ -378,12 +408,15 @@ export function HomePage() {
                               handleUserClick(user);
                               clearSearch();
                             }}
-                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3"
+                            className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3"
+                            style={{ backgroundColor: 'transparent' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d1117'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
                             <UserAvatar user={user} size="medium" />
                             <div>
-                              <div className="font-medium text-gray-900">{user.name}</div>
-                              <div className="text-sm text-gray-500 mt-1">{user.bio}</div>
+                              <div className="font-medium" style={{ color: '#e6edf3' }}>{user.name}</div>
+                              <div className="text-sm mt-1" style={{ color: '#8d96a0' }}>{user.bio}</div>
                             </div>
                           </button>
                         ))}
@@ -393,7 +426,7 @@ export function HomePage() {
 
                   {/* Has More Indicator */}
                   {searchResults.hasMore && (
-                    <div className="p-4 border-t border-gray-200 text-center text-sm text-gray-500">
+                    <div className="p-4 text-center text-sm" style={{ borderTop: '1px solid #30363d', color: '#8d96a0' }}>
                       More results available. Continue typing to refine search.
                     </div>
                   )}
@@ -403,26 +436,33 @@ export function HomePage() {
           )}
         </div>
 
-        {/* My Timelines Section */}
+        {/* My Timelines Section - Only show when authenticated */}
+        {firebaseUser && (
         <section className="mb-12">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold" style={{ color: '#e6edf3' }}>
               My Timelines ({myTimelines.length})
             </h2>
             <button
               onClick={handleCreateTimeline}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="px-4 py-2 text-white rounded-lg transition-colors font-medium"
+              style={{ backgroundColor: '#8b5cf6' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
             >
               + Create New
             </button>
           </div>
 
           {myTimelines.length === 0 ? (
-            <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-              <p className="text-gray-600 mb-4">You haven't created any timelines yet</p>
+            <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+              <p className="mb-4" style={{ color: '#8d96a0' }}>You haven't created any timelines yet</p>
               <button
                 onClick={handleCreateTimeline}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="px-6 py-3 text-white rounded-lg transition-colors font-medium"
+                style={{ backgroundColor: '#8b5cf6' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
               >
                 + Create Your First Timeline
               </button>
@@ -432,7 +472,10 @@ export function HomePage() {
               {myTimelines.map(timeline => (
                 <div
                   key={`my-${timeline.id}`}
-                  className="flex-none w-80 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
+                  className="flex-none w-80 border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                  style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
                 >
                   {/* Kebab menu - always visible */}
                   <div className="absolute top-2 right-2">
@@ -447,11 +490,11 @@ export function HomePage() {
 
                   {/* Card content - clickable to navigate */}
                   <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                    <h3 className="font-semibold text-gray-900 mb-2 pr-10">{timeline.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
+                    <h3 className="font-semibold mb-2 pr-10" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
+                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
                       {timeline.description || 'No description'}
                     </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
                       <span>{timeline.eventCount} events</span>
                       <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                     </div>
@@ -474,38 +517,42 @@ export function HomePage() {
             </div>
           )}
         </section>
+        )}
 
         {/* Statistics Section */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Platform Statistics</h2>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>Platform Statistics</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="text-3xl font-bold text-blue-600 mb-1">{stats.timelineCount}</div>
-              <div className="text-sm text-gray-600">Timelines</div>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+              <div className="text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
+              <div className="text-sm" style={{ color: '#8d96a0' }}>Timelines</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="text-3xl font-bold text-green-600 mb-1">{stats.userCount}</div>
-              <div className="text-sm text-gray-600">Users</div>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+              <div className="text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{stats.userCount}</div>
+              <div className="text-sm" style={{ color: '#8d96a0' }}>Users</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="text-3xl font-bold text-purple-600 mb-1">{stats.eventCount}</div>
-              <div className="text-sm text-gray-600">Events</div>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+              <div className="text-3xl font-bold mb-1" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
+              <div className="text-sm" style={{ color: '#8d96a0' }}>Events</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="text-3xl font-bold text-orange-600 mb-1">{stats.viewCount}</div>
-              <div className="text-sm text-gray-600">Total Views</div>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+              <div className="text-3xl font-bold mb-1" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
+              <div className="text-sm" style={{ color: '#8d96a0' }}>Total Views</div>
             </div>
           </div>
         </section>
 
         {/* Recently Edited Section */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔥 Recently Edited</h2>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>🔥 Recently Edited</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentlyEdited.map(timeline => (
               <div
                 key={`recent-${timeline.id}`}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
+                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
               >
                 {/* Kebab menu */}
                 <div className="absolute top-2 right-2">
@@ -520,11 +567,11 @@ export function HomePage() {
 
                 {/* Card content - clickable to navigate */}
                 <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                  <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
+                  <h3 className="font-semibold mb-2 pr-8" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
+                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
                     <span>{timeline.eventCount} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
@@ -560,12 +607,15 @@ export function HomePage() {
 
         {/* Popular Timelines Section */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">⭐ Popular Timelines</h2>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {popular.map(timeline => (
               <div
                 key={`popular-${timeline.id}`}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
+                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
               >
                 {/* Kebab menu */}
                 <div className="absolute top-2 right-2">
@@ -580,11 +630,11 @@ export function HomePage() {
 
                 {/* Card content - clickable to navigate */}
                 <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                  <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
+                  <h3 className="font-semibold mb-2 pr-8" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
+                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
                     <span>{timeline.viewCount} views</span>
                     <span>{timeline.eventCount} events</span>
                   </div>
@@ -621,12 +671,15 @@ export function HomePage() {
         {/* Featured Timelines Section */}
         {featured.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">✨ Featured</h2>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>✨ Featured</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {featured.map(timeline => (
                 <div
                   key={`featured-${timeline.id}`}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
+                  className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                  style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
                 >
                   {/* Kebab menu */}
                   <div className="absolute top-2 right-2">
@@ -643,12 +696,12 @@ export function HomePage() {
                   <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
                     <div className="flex items-center gap-2 mb-2 pr-8">
                       <span className="text-yellow-500">⭐</span>
-                      <h3 className="font-semibold text-gray-900 flex-1">{timeline.title}</h3>
+                      <h3 className="font-semibold flex-1" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
+                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
                       {timeline.description || 'No description'}
                     </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
                       <span>{timeline.eventCount} events</span>
                       <span>{timeline.viewCount} views</span>
                     </div>

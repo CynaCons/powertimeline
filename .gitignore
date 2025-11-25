@@ -16,6 +16,7 @@ dist-ssr
 # Note: .env.production is committed as it contains public Firebase client config
 .env
 .env.local
+.env.test
 
 # Firebase service account keys (NEVER commit these!)
 service-account-*.json

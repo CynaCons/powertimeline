@@ -1,16 +1,47 @@
 # PowerTimeline
 
-PowerTimeline is a React + TypeScript application for creating, exploring, and editing richly detailed historical timelines. It ships with a deterministic layout engine, adaptive zoom controls, and authoring tools designed for dense datasets.
+**GitHub for Timelines** - Collaborative historical event visualization and timeline management platform.
 
-## Quick links
+PowerTimeline is a React + TypeScript web application that makes it easy to create, explore, and collaborate on richly detailed historical timelines. Think of it as "GitHub for history" - fork timelines, submit improvements, and build collective knowledge together.
 
-- [Product Requirements (`PRD.md`)](./PRD.md)
-- [Architecture overview (`ARCHITECTURE.md`)](./ARCHITECTURE.md)
-- [Software requirements & traceability (`docs/SRS.md`)](./docs/SRS.md)
-- [Project plan & iteration history (`PLAN.md`)](./PLAN.md)
-- [Playwright test suite (`tests/`)](./tests)
+> 🚧 **Screenshot Coming Soon** - Timeline editor with French Revolution dataset (150+ events, adaptive zoom, minimap navigation)
 
-## Features at a glance
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Visit http://localhost:5173
+```
+
+Once running, use the Developer Panel (navigation rail) to load sample datasets like the French Revolution timeline.
+
+## ✨ What Can PowerTimeline Do?
+
+- **📊 Visualize Complex Timelines** - Deterministic layout engine handles dense datasets with 1000+ events
+- **🔍 Adaptive Zoom** - Navigate from decades to minutes with cursor-anchored zooming
+- **🎨 Smart Degradation** - Cards automatically adjust (full → compact → title-only) to prevent overlaps
+- **🗺️ Minimap Navigation** - Bird's-eye view with density heatmap and click-to-navigate
+- **✏️ Rich Authoring** - Calendar pickers, time input, live validation, and event navigation
+- **📤 Import/Export** - YAML-based sharing and seeding pipeline
+- **🔐 Authentication** - Firebase Auth with public timeline viewing
+- **👥 User Profiles** - Personal workspace, timeline gallery, and discovery feeds
+- **⚙️ Admin Panel** - Platform management, user administration, and analytics
+
+## 📚 Documentation
+
+- **[Product Requirements (PRD.md)](./PRD.md)** - Product vision and user stories
+- **[Requirements Index (docs/SRS_INDEX.md)](./docs/SRS_INDEX.md)** - Complete requirements dashboard (~155 requirements)
+- **[Software Requirements (docs/SRS.md)](./docs/SRS.md)** - Detailed SRS with traceability
+- **[Architecture (ARCHITECTURE.md)](./ARCHITECTURE.md)** - Technical design decisions
+- **[Implementation Plan (PLAN.md)](./PLAN.md)** - Iteration history (160+ completed)
+- **[Test Suite (tests/)](./tests)** - 287 Playwright E2E tests
+
+## 📦 Features at a glance
 
 - Deterministic half-column layout that prevents card overlap across zoom levels.
 - Multi-level card degradation (full -> compact -> title-only) with telemetry.

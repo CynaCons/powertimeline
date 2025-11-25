@@ -46,6 +46,7 @@ const COLLECTIONS = {
  */
 export async function getTimelineMetadata(timelineId: string): Promise<TimelineMetadata | null> {
   try {
+    console.log('[getTimelineMetadata] Fetching timeline:', timelineId);
     // Use collection group query to search across all users' timelines
     const q = query(
       collectionGroup(db, COLLECTIONS.TIMELINES),
@@ -55,13 +56,16 @@ export async function getTimelineMetadata(timelineId: string): Promise<TimelineM
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
+      console.log('[getTimelineMetadata] Timeline not found:', timelineId);
       return null;
     }
 
     const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as TimelineMetadata;
+    const metadata = { id: doc.id, ...doc.data() } as TimelineMetadata;
+    console.log('[getTimelineMetadata] Found timeline:', metadata.title, 'Owner:', metadata.ownerId);
+    return metadata;
   } catch (error) {
-    console.error('Error fetching timeline metadata:', error);
+    console.error('[getTimelineMetadata] Error:', error);
     throw error;
   }
 }
@@ -154,6 +158,7 @@ export async function getTimelines(options?: {
  */
 export async function getTimelineEvents(timelineId: string, ownerId: string): Promise<Event[]> {
   try {
+    console.log('[getTimelineEvents] Fetching events for timeline:', timelineId, 'owner:', ownerId);
     const eventsCollectionRef = collection(
       db,
       COLLECTIONS.USERS,
@@ -166,6 +171,7 @@ export async function getTimelineEvents(timelineId: string, ownerId: string): Pr
     const q = query(eventsCollectionRef, orderBy('order', 'asc'));
     const querySnapshot = await getDocs(q);
 
+    console.log('[getTimelineEvents] Found', querySnapshot.size, 'events');
     return querySnapshot.docs.map(doc => {
       const eventDoc = doc.data() as EventDocument;
       // Convert EventDocument back to Event by removing Firestore-specific fields
@@ -174,7 +180,7 @@ export async function getTimelineEvents(timelineId: string, ownerId: string): Pr
       return event as Event;
     });
   } catch (error) {
-    console.error('Error fetching timeline events:', error);
+    console.error('[getTimelineEvents] Error:', error);
     throw error;
   }
 }

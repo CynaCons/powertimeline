@@ -45,7 +45,7 @@ const DEV_FLAG_KEY = 'powertimeline-dev';
 
 interface AppProps {
   timelineId?: string;  // Optional timeline ID to load from home page storage
-  readOnly?: boolean;   // Read-only mode: hide authoring overlay and navigation rail
+  readOnly?: boolean;   // Read-only mode: hide authoring overlay, show lock icon on nav rail
 }
 
 function App({ timelineId, readOnly = false }: AppProps = {}) {
@@ -573,8 +573,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
     <div className="min-h-screen bg-background text-primary transition-theme">
       {/* Full-bleed canvas area - no header, maximum space */}
       <div className="relative h-screen">
-        {/* Enhanced Navigation Rail - Hidden in read-only mode */}
-        {!readOnly && (
+        {/* Enhanced Navigation Rail - Always visible */}
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
           {/* PowerTimeline logo at top */}
           <div className="mb-4 p-1 text-center">
@@ -584,6 +583,15 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
               className="w-10 h-10 object-contain"
             />
           </div>
+
+          {/* Read-only lock icon - shown in read-only mode */}
+          {readOnly && (
+            <Tooltip title="You are viewing in read-only mode. Sign in to edit your own timelines, or fork this timeline to make your own copy." placement="right">
+              <div className="mb-4 p-2 text-gray-400">
+                <span className="material-symbols-rounded text-xl">lock</span>
+              </div>
+            </Tooltip>
+          )}
 
           {/* Context-Aware Navigation */}
           <NavigationRail
@@ -615,7 +623,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             <ThemeToggleButton />
           </div>
         </aside>
-        )}
 
         {/* Overlays next to the sidebar, never covering it */}
         {overlay && (
@@ -706,16 +713,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
                 hoveredEventId={hoveredEventId}
               />
             </Suspense>
-          </div>
-        )}
-
-        {/* Read-only indicator banner */}
-        {isReadOnly && (
-          <div className="fixed top-12 left-20 right-4 z-[85] pointer-events-none">
-            <div className="bg-amber-100 border border-amber-300 text-amber-900 px-4 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 pointer-events-auto">
-              <span className="material-symbols-rounded text-amber-700">lock</span>
-              <span>Read-only mode: You are viewing this timeline but cannot make changes</span>
-            </div>
           </div>
         )}
 

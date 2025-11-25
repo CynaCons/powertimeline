@@ -1,9 +1,9 @@
 /**
  * TopNavBar - Public navigation for unauthenticated users
  *
- * Appears on: LandingPage, HomePage (browse), timeline viewer (read-only)
+ * Appears on: LandingPage, HomePage (browse)
  * Dark theme styling matching COLOR_THEME.md
- * Simple horizontal layout: Logo | Browse | Sign In
+ * Simple horizontal layout: Logo | Browse | Sign In/User Menu
  */
 
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { Box, Button, Container, Typography } from '@mui/material';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
+import { UserProfileMenu } from './UserProfileMenu';
 
 export function TopNavBar() {
   const navigate = useNavigate();
@@ -80,24 +81,26 @@ export function TopNavBar() {
             </Button>
 
             {user ? (
-              <Button
-                variant="outlined"
-                onClick={() => navigate(`/user/${user.uid}`)}
-                data-testid="my-timelines-button"
-                sx={{
-                  borderColor: '#30363d',
-                  color: '#e6edf3',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  px: 2,
+              <Box sx={{
+                '& .MuiIconButton-root': {
                   '&:hover': {
-                    borderColor: '#8b5cf6',
                     bgcolor: 'rgba(139, 92, 246, 0.1)',
                   },
-                }}
-              >
-                My Timelines
-              </Button>
+                },
+                '& .MuiAvatar-root': {
+                  bgcolor: '#8b5cf6',
+                },
+                '& span': {
+                  color: '#e6edf3',
+                },
+              }}>
+                <UserProfileMenu
+                  onLogout={() => {
+                    localStorage.removeItem('powertimeline_current_user');
+                    window.location.href = '/';
+                  }}
+                />
+              </Box>
             ) : (
               <Button
                 variant="outlined"

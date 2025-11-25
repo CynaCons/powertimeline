@@ -5,16 +5,18 @@ service cloud.firestore {
     // Collection group rule for timelines (enables collectionGroup queries)
     // The {path=**} wildcard matches any path depth
     match /{path=**}/timelines/{timelineId} {
-      // TEMP: Allow all reads for debugging
-      allow read: if true;
+      // Public timelines can be read by anyone
+      // Private timelines require authentication and ownership
+      allow read: if resource.data.visibility == 'public'
+                    || resource.data.visibility == 'unlisted'
+                    || (request.auth != null && resource.data.ownerId == request.auth.uid);
 
-      // TEMP: Allow all timeline creation for migration (no Firebase Auth implemented yet)
-      // TODO(v0.5.1): Restore authentication requirement
-      // Only the owner can create/delete their timelines
-      // allow create: if request.auth != null &&
-      //                 request.resource.data.ownerId == request.auth.uid;
-      allow create: if true;
+      // Only authenticated users can create timelines
+      // Timeline must be owned by the authenticated user
+      allow create: if request.auth != null &&
+                      request.resource.data.ownerId == request.auth.uid;
 
+      // Only the owner can delete their timelines
       allow delete: if request.auth != null &&
                       resource.data.ownerId == request.auth.uid;
 
@@ -26,13 +28,12 @@ service cloud.firestore {
 
     // Users collection
     match /users/{userId} {
-      // Anyone can read user documents
+      // Anyone can read user documents (public profiles)
       allow read: if true;
 
-      // TEMP: Allow all user updates for development (no Firebase Auth implemented yet)
-      // TODO(v0.5.0.3): Implement Firebase Authentication and restore this rule:
-      // allow create, update: if request.auth != null && request.auth.uid == userId;
-      allow create, update: if true;
+      // Only authenticated users can create/update their own profile
+      // User document ID must match authenticated user ID
+      allow create, update: if request.auth != null && request.auth.uid == userId;
 
       // Only admins can delete users
       allow delete: if request.auth != null &&
@@ -43,17 +44,18 @@ service cloud.firestore {
         // Public timelines can be read by anyone
         // Unlisted timelines can be read by anyone with the link
         // Private timelines can only be read by the owner
-        // TEMP: Allow all reads for debugging - will restrict after fixing data
-        allow read: if true;
+        allow read: if resource.data.visibility == 'public'
+                      || resource.data.visibility == 'unlisted'
+                      || (request.auth != null && resource.data.ownerId == request.auth.uid);
 
-        // TEMP: Allow all timeline creation for migration (no Firebase Auth implemented yet)
-        // TODO(v0.5.1): Restore authentication requirement
-        // Only the owner can create/delete their timelines
-        // allow create: if request.auth != null &&
-        //                 request.resource.data.ownerId == request.auth.uid &&
-        //                 request.auth.uid == userId;
-        allow create: if true;
+        // Only authenticated users can create timelines
+        // Timeline must be owned by the authenticated user
+        // Timeline must be in the owner's collection
+        allow create: if request.auth != null &&
+                        request.resource.data.ownerId == request.auth.uid &&
+                        request.auth.uid == userId;
 
+        // Only the owner can delete their timelines
         allow delete: if request.auth != null &&
                         resource.data.ownerId == request.auth.uid &&
                         request.auth.uid == userId;
@@ -65,17 +67,22 @@ service cloud.firestore {
 
         // Events subcollection (nested under timelines)
         // v0.5.0.1 - Event Persistence Optimization
+        // v0.5.6 - Security Fix: Properly restrict event access
         match /events/{eventId} {
-          // Anyone can read events if they can read the parent timeline
-          // TEMP: Allow all reads for debugging
-          allow read: if true;
+          // SECURITY FIX: Events visibility must be explicitly checked
+          // Firestore subcollection rules do NOT inherit parent permissions
+          // We must explicitly check timeline visibility here
 
-          // TEMP: Allow all event operations for migration (no Firebase Auth implemented yet)
-          // TODO(v0.5.1): Restore authentication requirement
-          // Only the timeline owner can create/update/delete events
-          // allow create, update, delete: if request.auth != null &&
-          //                                  request.auth.uid == userId;
-          allow create, update, delete: if true;
+          // Strategy: Check parent timeline visibility via get()
+          // Public/Unlisted timelines: Anyone can read events
+          // Private timelines: Only owner can read events
+          allow read: if get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'public'
+                      || get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'unlisted'
+                      || (request.auth != null && request.auth.uid == userId);
+
+          // Only the timeline owner (authenticated user) can create/update/delete events
+          allow create, update, delete: if request.auth != null &&
+                                          request.auth.uid == userId;
         }
       }
     }

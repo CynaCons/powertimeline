@@ -85,55 +85,35 @@ export function checkAndMigrateData(): boolean {
 }
 
 /**
- * Demo users for v0.4.0
- * Pre-populated on first load
- * Primary user: CynaCons (the application owner)
+ * DEPRECATED (v0.5.6): Demo users removed in favor of Firebase Authentication
+ * Users are now managed via Firebase Auth + Firestore
+ *
+ * This code is kept temporarily for backwards compatibility and will be removed in v0.6.0
+ *
+ * @deprecated Use Firebase Auth getCurrentUser() and Firestore getUser() instead
  */
-export const DEMO_USERS: User[] = [
-  {
-    id: 'cynacons',
-    email: 'cynacons@powertimeline.com',
-    username: 'cynacons',
-    name: 'CynaCons',
-    avatar: '⚡',
-    bio: 'Building collaborative timeline experiences with PowerTimeline. Exploring the intersection of history, technology, and knowledge sharing.',
-    createdAt: new Date().toISOString(),
-    role: 'admin', // Admin user for v0.4.4 admin panel
-  },
-  {
-    id: 'alice',
-    email: 'alice@example.com',
-    username: 'alice',
-    name: 'Alice',
-    avatar: '👩‍💼',
-    bio: 'Product manager specializing in historical data visualization and collaborative tools.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'bob',
-    email: 'bob@example.com',
-    username: 'bob',
-    name: 'Bob',
-    avatar: '👨‍🔬',
-    bio: 'Researcher focused on scientific discoveries throughout history.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'charlie',
-    email: 'charlie@example.com',
-    username: 'charlie',
-    name: 'Charlie',
-    avatar: '👨‍🎨',
-    bio: 'Exploring art history and cultural movements.',
-    createdAt: new Date().toISOString(),
-  },
+export const DEMO_USERS: User[] = [];
+
+// Legacy demo user data (commented out - no longer used)
+/*
+const LEGACY_DEMO_USERS = [
+  { id: 'cynacons', username: 'cynacons', name: 'CynaCons', ... },
+  { id: 'alice', username: 'alice', name: 'Alice', ... },
+  { id: 'bob', username: 'bob', name: 'Bob', ... },
+  { id: 'charlie', username: 'charlie', name: 'Charlie', ... },
 ];
+*/
 
 /**
- * Initialize users if they don't exist in localStorage
- * Idempotent - safe to run multiple times
+ * DEPRECATED (v0.5.6): Initialize users from localStorage
+ *
+ * @deprecated Users are now managed via Firebase Auth + Firestore
+ * This function returns empty array and does NOT auto-create demo users
+ * Use Firestore getAllUsers() to fetch authenticated users instead
  */
 export function initializeUsers(): User[] {
+  console.warn('initializeUsers() is deprecated. Use Firebase Auth + Firestore instead.');
+
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.USERS);
     if (stored) {
@@ -146,9 +126,9 @@ export function initializeUsers(): User[] {
     console.error('Failed to load users from localStorage:', error);
   }
 
-  // Initialize with demo users
-  localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(DEMO_USERS));
-  return DEMO_USERS;
+  // NO LONGER auto-initializing with demo users (v0.5.6)
+  // Users must authenticate via Firebase Auth
+  return [];
 }
 
 /**
@@ -175,26 +155,15 @@ export function getUserById(userId: string): User | undefined {
 }
 
 /**
- * Get current logged-in user (demo user for v0.4.0)
+ * DEPRECATED (v0.5.6): Get current logged-in user
+ * @deprecated Use Firebase Auth useAuth() hook instead
+ * Returns null - demo users removed
  */
 export function getCurrentUser(): User | null {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-    if (stored) {
-      return JSON.parse(stored) as User;
-    }
-  } catch (error) {
-    console.error('Failed to load current user:', error);
-  }
+  console.warn('getCurrentUser() is deprecated. Use Firebase Auth useAuth() hook instead.');
 
-  // Default to CynaCons (first user in DEMO_USERS array)
-  const users = getUsers();
-  const defaultUser = users[0]; // CynaCons
-  if (defaultUser) {
-    setCurrentUser(defaultUser);
-    return defaultUser;
-  }
-
+  // NO LONGER auto-creating demo users (v0.5.6)
+  // Users must authenticate via Firebase Auth
   return null;
 }
 
@@ -449,48 +418,8 @@ export function createSampleTimelines(): Timeline[] {
       featured: false,
       visibility: 'public',
     },
-    // Alice - Product Timeline
-    {
-      id: 'timeline-powertimeline-product-roadmap',
-      title: 'PowerTimeline Product Roadmap',
-      description: 'Development milestones and feature releases for PowerTimeline',
-      events: [],
-      eventCount: 0,
-      ownerId: 'alice',
-      createdAt: now,
-      updatedAt: now,
-      viewCount: 0,
-      featured: false,
-      visibility: 'public',
-    },
-    // Bob - Scientific Discoveries
-    {
-      id: 'timeline-major-scientific-discoveries',
-      title: 'Major Scientific Discoveries',
-      description: 'Timeline of groundbreaking scientific achievements throughout history',
-      events: [],
-      eventCount: 0,
-      ownerId: 'bob',
-      createdAt: now,
-      updatedAt: now,
-      viewCount: 0,
-      featured: false,
-      visibility: 'public',
-    },
-    // Charlie - Art Movements
-    {
-      id: 'timeline-modern-art-movements',
-      title: 'Modern Art Movements',
-      description: 'Evolution of art styles from Impressionism to Contemporary',
-      events: [],
-      eventCount: 0,
-      ownerId: 'charlie',
-      createdAt: now,
-      updatedAt: now,
-      viewCount: 0,
-      featured: false,
-      visibility: 'public',
-    },
+    // Demo user timelines removed in v0.5.6
+    // All timelines now owned by 'cynacons' or Firebase Auth users
   ];
 
   return sampleTimelines;

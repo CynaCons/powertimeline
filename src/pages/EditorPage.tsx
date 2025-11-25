@@ -10,13 +10,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Alert, Button } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { Box, Snackbar, Alert } from '@mui/material';
 import { getTimeline, getUser, incrementTimelineViewCount } from '../services/firestore';
 import { getCurrentUser } from '../lib/homePageStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { TopNavBar } from '../components/TopNavBar';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
 
@@ -27,31 +25,47 @@ export function EditorPage() {
   const [loading, setLoading] = useState(true);
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [showReadOnlyToast, setShowReadOnlyToast] = useState(false);
 
   useEffect(() => {
     async function loadTimeline() {
-      if (!timelineId) {
-        // No timeline ID - load default editor
+      try {
+        if (!timelineId) {
+          // No timeline ID - load default editor
+          setLoading(false);
+          return;
+        }
+
+        const tl = await getTimeline(timelineId);
+        if (!tl) {
+          // Timeline not found - redirect to home
+          navigate('/');
+          return;
+        }
+
+        const usr = userId ? (await getUser(userId) || null) : null;
+
+        setTimeline(tl);
+        setUser(usr);
+
+        // Increment view count for the timeline (only if viewer is not the owner)
+        const currentUser = getCurrentUser();
+        await incrementTimelineViewCount(timelineId, currentUser?.id);
         setLoading(false);
-        return;
-      }
 
-      const tl = await getTimeline(timelineId);
-      if (!tl) {
-        // Timeline not found - redirect to home
+        // Show read-only toast if user is not the owner
+        const isOwner = firebaseUser && firebaseUser.uid === tl.ownerId;
+        if (!isOwner) {
+          setShowReadOnlyToast(true);
+        }
+      } catch (error) {
+        console.error('Error loading timeline:', error);
+        console.error('Timeline ID:', timelineId);
+        console.error('User ID:', userId);
+        console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        // On error, redirect to home page
         navigate('/');
-        return;
       }
-
-      const usr = userId ? (await getUser(userId) || null) : null;
-
-      setTimeline(tl);
-      setUser(usr);
-
-      // Increment view count for the timeline (only if viewer is not the owner)
-      const currentUser = getCurrentUser();
-      await incrementTimelineViewCount(timelineId, currentUser?.id);
-      setLoading(false);
     }
 
     loadTimeline();
@@ -71,54 +85,9 @@ export function EditorPage() {
     );
   }
 
-  // Render the editor/viewer with optional top nav and read-only banner
+  // Render the editor/viewer with breadcrumbs
   return (
     <Box sx={{ minHeight: '100vh' }}>
-      {/* Top navigation for read-only mode (unauthenticated or non-owner) */}
-      {isReadOnly && <TopNavBar />}
-
-      {/* Read-only mode banner */}
-      {isReadOnly && timeline && (
-        <Box sx={{ bgcolor: '#0d1117', borderBottom: '1px solid #21262d' }}>
-          <Box sx={{ maxWidth: 'lg', mx: 'auto', px: 2, py: 1.5 }}>
-            <Alert
-              icon={<InfoIcon fontSize="inherit" />}
-              severity="info"
-              data-testid="read-only-banner"
-              sx={{
-                bgcolor: 'rgba(6, 182, 212, 0.1)',
-                border: '1px solid rgba(6, 182, 212, 0.3)',
-                color: '#e6edf3',
-                '& .MuiAlert-icon': {
-                  color: '#06b6d4',
-                },
-              }}
-              action={
-                !firebaseUser && (
-                  <Button
-                    size="small"
-                    onClick={() => navigate('/login')}
-                    data-testid="sign-in-to-edit-button"
-                    sx={{
-                      color: '#06b6d4',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      '&:hover': {
-                        bgcolor: 'rgba(6, 182, 212, 0.2)',
-                      },
-                    }}
-                  >
-                    Sign In to Edit
-                  </Button>
-                )
-              }
-            >
-              Viewing <strong>{timeline.title}</strong> in read-only mode
-              {firebaseUser && ' (You are not the owner)'}
-            </Alert>
-          </Box>
-        </Box>
-      )}
 
       <div className="relative">
         {/* Breadcrumb for authenticated owner mode */}
@@ -135,6 +104,22 @@ export function EditorPage() {
         )}
         <App timelineId={timelineId} readOnly={isReadOnly} />
       </div>
+
+      {/* Read-only mode toast notification */}
+      <Snackbar
+        open={showReadOnlyToast}
+        autoHideDuration={5000}
+        onClose={() => setShowReadOnlyToast(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setShowReadOnlyToast(false)}
+          severity="info"
+          sx={{ width: '100%' }}
+        >
+          Viewing in read-only mode. {!firebaseUser ? 'Sign in to edit your own timelines.' : 'You can fork this timeline to make your own copy.'}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

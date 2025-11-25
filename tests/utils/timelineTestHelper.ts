@@ -22,97 +22,111 @@ export const TEST_TIMELINES = {
 } as const;
 
 /**
- * Common test users available in the system
+ * Firebase Auth test user for E2E testing
+ * Created via scripts/create-test-user.ts with Firebase Admin SDK
+ *
+ * SECURITY: Credentials are loaded from environment variables
+ * Create a .env.test file (never commit it!) with:
+ *   TEST_USER_EMAIL=test@powertimeline.com
+ *   TEST_USER_PASSWORD=your_password
+ *   TEST_USER_UID=your_uid
+ *   TEST_USER_TIMELINE_ID=your_timeline_id
+ *
+ * @see tests/e2e/01-full-user-journey.spec.ts for usage example
+ * @see .env.test.example for template
  */
 export const TEST_USERS = {
+  E2E_TEST_USER: {
+    uid: process.env.TEST_USER_UID || 'iTMZ9n0IuzUSbhWfCaR86WsB2AC3',
+    email: process.env.TEST_USER_EMAIL || 'test@powertimeline.com',
+    password: process.env.TEST_USER_PASSWORD || '', // MUST be set in .env.test
+    timelineId: process.env.TEST_USER_TIMELINE_ID || 'zEAJkBfgpYt3YdCLW2tz',
+  },
+  // Legacy demo users (DEPRECATED - v0.5.6)
+  // Use Firebase Auth E2E_TEST_USER for new tests
   CYNACONS: {
     id: 'cynacons',
     name: 'Cynacons',
     email: 'cynacons@example.com',
   },
-  ALICE: {
-    id: 'alice',
-    name: 'Alice',
-    email: 'alice@example.com',
-  },
-  BOB: {
-    id: 'bob',
-    name: 'Bob',
-    email: 'bob@example.com',
-  },
 } as const;
 
 /**
- * Sets up a mock user in localStorage for testing
+ * Authenticates a test user using Firebase Auth
  *
  * @param page - Playwright page object
- * @param userId - User ID to set as current user (defaults to 'cynacons')
+ * @param email - Email address (defaults to E2E test user)
+ * @param password - Password (defaults to E2E test user password)
  *
  * @example
- * await setupMockUser(page, 'cynacons');
+ * // Use default E2E test user
+ * await loginWithFirebaseAuth(page);
  *
- * TODO(v0.5.1): When Firebase Authentication is implemented, update this function to:
- * 1. Navigate to /login
- * 2. Fill email and password fields
- * 3. Submit login form
- * 4. Wait for authentication redirect
+ * // Use custom credentials
+ * await loginWithFirebaseAuth(page, 'custom@example.com', 'password123');
  *
- * The function signature can stay the same, but the implementation will change from
- * localStorage manipulation to actual Firebase Auth login. All existing tests will
- * continue to work without modification.
+ * v0.5.6: Updated to use Firebase Authentication instead of localStorage
  */
-export async function setupMockUser(page: Page, userId: string = 'cynacons'): Promise<void> {
-  // Find user in TEST_USERS or create a basic user object
-  const userEntry = Object.values(TEST_USERS).find(u => u.id === userId);
+export async function loginWithFirebaseAuth(
+  page: Page,
+  email: string = TEST_USERS.E2E_TEST_USER.email,
+  password: string = TEST_USERS.E2E_TEST_USER.password
+): Promise<void> {
+  // Navigate to login page
+  await page.goto('/login');
 
-  const user = userEntry || {
-    id: userId,
-    name: userId.charAt(0).toUpperCase() + userId.slice(1),
-    email: `${userId}@example.com`,
-  };
+  // Fill in credentials
+  await page.fill('input[type="email"]', email);
+  await page.fill('input[type="password"]', password);
 
-  await page.evaluate((userData) => {
-    localStorage.setItem('powertimeline_current_user', JSON.stringify(userData));
-  }, user);
+  // Submit form using data-testid
+  await page.getByTestId('sign-in-submit-button').click();
+
+  // Wait for auth to complete and redirect
+  await page.waitForURL('/');
+  await page.waitForTimeout(1000); // Allow auth state to settle
 }
 
 /**
- * Navigates to a specific timeline, setting up authentication if needed
+ * REMOVED (v0.5.6): setupMockUser() has been deleted
+ * @deprecated Use loginWithFirebaseAuth() instead
+ * Demo user system completely removed - Firebase Auth only
+ */
+export async function setupMockUser(page: Page, _userId: string = 'cynacons'): Promise<void> {
+  throw new Error('setupMockUser() has been removed. Use loginWithFirebaseAuth() instead. Demo user system (Alice, Bob, Charlie) is no longer supported.');
+}
+
+/**
+ * DEPRECATED (v0.5.6): Navigates to a specific timeline
+ * @deprecated Demo users removed - timelines are publicly viewable without authentication
+ *
+ * For unauthenticated viewing: Just navigate to timeline URL
+ * For authenticated editing: Use loginWithFirebaseAuth() first
  *
  * @param page - Playwright page object
  * @param timelineId - Timeline ID to navigate to
  * @param ownerId - Owner user ID (defaults to 'cynacons')
  *
  * @example
- * // Navigate to Napoleon timeline
- * await openTimeline(page, TEST_TIMELINES.NAPOLEON);
+ * // View timeline without auth (read-only)
+ * await page.goto('/user/cynacons/timeline/timeline-napoleon');
  *
- * // Navigate to a specific user's timeline
- * await openTimeline(page, 'my-timeline-id', 'alice');
- *
- * TODO(v0.5.1): When Firebase Auth is implemented, this function may need to:
- * 1. Check if user is already authenticated
- * 2. If not, call setupMockUser() to authenticate
- * 3. Then navigate to timeline
+ * // Edit timeline (requires auth)
+ * await loginWithFirebaseAuth(page);
+ * await page.goto(`/user/${userId}/timeline/${timelineId}`);
  */
 export async function openTimeline(
   page: Page,
   timelineId: string,
   ownerId: string = 'cynacons'
 ): Promise<void> {
+  console.warn('openTimeline() is deprecated. Just use page.goto() directly.');
+
   const url = `/user/${ownerId}/timeline/${timelineId}`;
 
-  // Navigate to timeline first to establish origin for localStorage
+  // Simply navigate - no authentication needed for public viewing
   await page.goto(url);
-
-  // Set up mock user after navigation (when localStorage is accessible)
-  await setupMockUser(page, ownerId);
-
-  // Reload page to apply localStorage changes and wait for full load
-  await page.reload({ waitUntil: 'domcontentloaded' });
-
-  // Give React time to render the editor
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 /**
@@ -179,15 +193,23 @@ export function getDefaultTestTimelines() {
 }
 
 /**
- * Helper to navigate to home page with authenticated user
+ * DEPRECATED (v0.5.6): Navigate to home page
+ * @deprecated Use page.goto('/') or page.goto('/browse') directly
+ *
+ * For authenticated navigation: Use loginWithFirebaseAuth() first
  *
  * @param page - Playwright page object
- * @param userId - User ID to authenticate as (defaults to 'cynacons')
+ * @param userId - IGNORED - demo users removed
  *
  * @example
- * await navigateToHome(page, 'alice');
+ * // Unauthenticated
+ * await page.goto('/');
+ *
+ * // Authenticated
+ * await loginWithFirebaseAuth(page);
+ * await page.goto('/browse');
  */
-export async function navigateToHome(page: Page, userId: string = 'cynacons'): Promise<void> {
-  await setupMockUser(page, userId);
+export async function navigateToHome(page: Page, _userId: string = 'cynacons'): Promise<void> {
+  console.warn('navigateToHome() is deprecated. Use page.goto() directly.');
   await page.goto('/');
 }

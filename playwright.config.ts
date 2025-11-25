@@ -1,4 +1,15 @@
 import { defineConfig } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load test environment variables from .env.test
+// This file should contain TEST_USER_EMAIL, TEST_USER_PASSWORD, etc.
+dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
 // Allow reusing existing dev server during development
 const reuse = true;

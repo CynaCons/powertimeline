@@ -484,6 +484,7 @@ export default function LoginPage() {
               fullWidth
               variant="contained"
               disabled={isSignUp && !canSubmit()}
+              data-testid={isSignUp ? 'create-account-submit-button' : 'sign-in-submit-button'}
               sx={{
                 bgcolor: '#2da44e',
                 color: 'white',
@@ -515,6 +516,7 @@ export default function LoginPage() {
             fullWidth
             variant="outlined"
             onClick={handleGoogleSignIn}
+            data-testid="sign-in-google-button"
             sx={{
               borderColor: '#d0d7de',
               color: '#24292f',
