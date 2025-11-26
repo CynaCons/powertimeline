@@ -11,12 +11,10 @@ import {
   getTimeline,
   getTimelines,
   getUsers,
+  getUser,
   getPlatformStats,
 } from '../services/firestore';
-import {
-  getCurrentUser,
-  searchTimelinesAndUsers,
-} from '../lib/homePageStorage';
+import { signOutUser } from '../services/auth';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
@@ -30,7 +28,6 @@ import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
 import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../hooks/useToast';
-import { migrateLocalStorageToFirestore } from '../utils/migrateLocalStorage';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -73,19 +70,18 @@ export function HomePage() {
     return allUsers.find(u => u.id === userId) || null;
   };
 
-  // Load data on mount
+  // Load data on mount and when firebaseUser changes
   useEffect(() => {
     async function loadData() {
-      // First, migrate any localStorage data to Firestore
-      const migrationResult = await migrateLocalStorageToFirestore();
-      if (migrationResult.migratedTimelines > 0 || migrationResult.migratedUsers > 0) {
-        showToast(migrationResult.message, 'success');
-      }
-
-      const user = getCurrentUser();
-      setCurrentUser(user);
-
       try {
+        // Load current user profile from Firestore if authenticated
+        if (firebaseUser) {
+          const userProfile = await getUser(firebaseUser.uid);
+          setCurrentUser(userProfile);
+        } else {
+          setCurrentUser(null);
+        }
+
         // Load all users for caching
         const users = await getUsers();
         setAllUsers(users);
@@ -99,14 +95,16 @@ export function HomePage() {
           viewCount: platformStats.totalViews,
         });
 
-        // Load user's timelines
-        if (user) {
+        // Load user's timelines (only if authenticated)
+        if (firebaseUser) {
           const userTimelines = await getTimelines({
-            ownerId: user.id,
+            ownerId: firebaseUser.uid,
             orderByField: 'updatedAt',
             orderDirection: 'desc',
           });
           setMyTimelines(userTimelines);
+        } else {
+          setMyTimelines([]);
         }
 
         // Load recently edited timelines (include all timelines)
@@ -134,8 +132,8 @@ export function HomePage() {
     }
 
     loadData();
-  }, []); // Run only once on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firebaseUser]); // Re-run when auth state changes
 
   const handleCreateTimeline = () => {
     setCreateDialogOpen(true);
@@ -145,9 +143,9 @@ export function HomePage() {
     showToast('Timeline created successfully!', 'success');
 
     // Refresh timeline lists
-    if (currentUser) {
+    if (firebaseUser) {
       const userTimelines = await getTimelines({
-        ownerId: currentUser.id,
+        ownerId: firebaseUser.uid,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -177,9 +175,9 @@ export function HomePage() {
     showToast('Timeline updated successfully!', 'success');
 
     // Refresh timeline lists
-    if (currentUser) {
+    if (firebaseUser) {
       const userTimelines = await getTimelines({
-        ownerId: currentUser.id,
+        ownerId: firebaseUser.uid,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -203,9 +201,9 @@ export function HomePage() {
     showToast('Timeline deleted successfully!', 'success');
 
     // Refresh timeline lists
-    if (currentUser) {
+    if (firebaseUser) {
       const userTimelines = await getTimelines({
-        ownerId: currentUser.id,
+        ownerId: firebaseUser.uid,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -240,8 +238,30 @@ export function HomePage() {
     setSearchQuery(query);
 
     if (query.trim().length >= 2) {
-      const results = searchTimelinesAndUsers(query, currentUser?.id);
-      setSearchResults(results);
+      const lowerQuery = query.toLowerCase();
+
+      // Search in already loaded timelines (recently edited + popular)
+      const allLoadedTimelines = [...recentlyEdited, ...popular, ...myTimelines];
+      const uniqueTimelines = allLoadedTimelines.filter((t, i, arr) =>
+        arr.findIndex(x => x.id === t.id) === i
+      );
+
+      const matchingTimelines = uniqueTimelines.filter(t =>
+        t.title.toLowerCase().includes(lowerQuery) ||
+        (t.description && t.description.toLowerCase().includes(lowerQuery))
+      );
+
+      // Search in cached users
+      const matchingUsers = allUsers.filter(u =>
+        u.name.toLowerCase().includes(lowerQuery) ||
+        (u.bio && u.bio.toLowerCase().includes(lowerQuery))
+      );
+
+      setSearchResults({
+        timelines: matchingTimelines.slice(0, 10),
+        users: matchingUsers.slice(0, 5),
+        hasMore: matchingTimelines.length > 10 || matchingUsers.length > 5,
+      });
     } else {
       setSearchResults(null);
     }
@@ -290,11 +310,9 @@ export function HomePage() {
               <div className="flex items-center gap-4">
                 {firebaseUser ? (
                   <UserProfileMenu
-                    onSwitchAccount={() => setUserSwitcherOpen(true)}
-                    onLogout={() => {
-                      // Clear current user and redirect to home
-                      localStorage.removeItem('powertimeline_current_user');
-                      window.location.href = '/';
+                    onLogout={async () => {
+                      await signOutUser();
+                      navigate('/');
                     }}
                   />
                 ) : (
@@ -482,7 +500,7 @@ export function HomePage() {
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
-                      currentUserId={currentUser?.id}
+                      currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
                     />
@@ -559,7 +577,7 @@ export function HomePage() {
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
-                    currentUserId={currentUser?.id}
+                    currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
                   />
@@ -622,7 +640,7 @@ export function HomePage() {
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
-                    currentUserId={currentUser?.id}
+                    currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
                   />
@@ -686,7 +704,7 @@ export function HomePage() {
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
-                      currentUserId={currentUser?.id}
+                      currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
                     />
