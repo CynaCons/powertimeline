@@ -1311,6 +1311,30 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] Utilities section: Theme toggle at bottom
 - [x] Profile actions: UserProfileMenu in header handles logout, profile actions
 
+**Light/Dark Theme Support:**
+- [x] Add page-level CSS variables for theming (--page-bg, --page-text-primary, etc.)
+- [x] Add light theme overrides in tokens.css for [data-theme="light"]
+- [x] Update HomePage to use CSS variables instead of hardcoded colors
+- [x] Update Breadcrumb component with theme-aware styling
+- [x] Update ThemeToggleButton with CSS variable styling
+- [x] MUI theme responds dynamically via createAppTheme(isDarkMode)
+
+**Platform Statistics Aggregation (CR from CHANGE_REQUEST.md):**
+- [ ] Create `stats/platform` document schema in Firestore
+  - Fields: totalTimelines, totalUsers, totalEvents, totalViews, lastUpdated
+- [ ] Add Firestore security rules for stats collection (public read)
+- [ ] Create Cloud Function: onTimelineCreate - increment totalTimelines
+- [ ] Create Cloud Function: onTimelineDelete - decrement totalTimelines
+- [ ] Create Cloud Function: onEventWrite - update totalEvents count
+- [ ] Create Cloud Function: onUserCreate - increment totalUsers
+- [ ] Create Cloud Function: onViewIncrement - increment totalViews
+- [ ] Alternative: Scheduled function to recalculate stats periodically
+- [ ] Update getPlatformStats() in firestore.ts to read from stats doc
+- [ ] Add client-side caching with 5-minute TTL for stats
+- [ ] Add graceful degradation: hide stats widget if unavailable
+- [ ] Deploy Cloud Functions to production
+- [ ] Test stats accuracy after CRUD operations
+
 **Navigation & Search Fixes:**
 - [ ] Fix LandingPage timeline card navigation
 - [ ] Make search bar on LandingPage functional (redirect to /browse)
