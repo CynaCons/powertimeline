@@ -102,26 +102,22 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: 1,
-          padding: '4px 12px',
-          borderRadius: '20px',
+          gap: 0.5,
+          padding: '6px 12px',
+          borderRadius: '6px',
+          border: '1px solid',
+          borderColor: 'transparent',
           '&:hover': {
-            bgcolor: 'grey.100',
+            bgcolor: 'rgba(139, 92, 246, 0.1)',
+            borderColor: '#30363d',
           },
         }}
       >
-        <Avatar
-          sx={{
-            width: 32,
-            height: 32,
-            bgcolor: 'primary.main',
-            fontSize: '1.2rem',
-          }}
-        >
-          {currentUser.avatar}
-        </Avatar>
-        <span className="text-sm font-medium hidden md:inline">
-          {currentUser.name}
+        <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>
+          account_circle
+        </span>
+        <span className="text-sm font-medium hidden md:inline" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {currentUser.name || firebaseUser?.email?.split('@')[0]}
         </span>
         <span className="material-symbols-rounded text-sm">
           {open ? 'expand_less' : 'expand_more'}
@@ -152,9 +148,9 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
       >
         {/* User Info Header with "Logged in as" label */}
         <MenuItem disabled sx={{ opacity: '1 !important', cursor: 'default !important', pb: 2 }}>
-          <Avatar sx={{ bgcolor: 'primary.main', fontSize: '1.2rem' }}>
-            {currentUser.avatar}
-          </Avatar>
+          <span className="material-symbols-rounded" style={{ fontSize: '32px', marginRight: '8px', color: '#8b5cf6' }}>
+            account_circle
+          </span>
           <div className="flex flex-col w-full">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-xs text-gray-500">Logged in as</span>
@@ -162,7 +158,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
                 <Chip label="Demo" size="small" color="warning" sx={{ height: 16, fontSize: '0.65rem' }} />
               )}
             </div>
-            <span className="font-semibold text-sm">{currentUser.name}</span>
+            <span className="font-semibold text-sm">{currentUser.name || firebaseUser?.email?.split('@')[0]}</span>
             <span className="text-xs text-gray-500">
               {isUsingFirebaseAuth ? firebaseUser.email : `@${currentUser.id}`}
             </span>
