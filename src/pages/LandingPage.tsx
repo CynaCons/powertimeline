@@ -5,10 +5,12 @@
  */
 
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Typography, TextField, InputAdornment, Card, CardContent, CardActionArea, Stack } from '@mui/material';
+import { Box, Button, Container, Typography, TextField, InputAdornment, Card, CardContent, CardActionArea, Stack, Link } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GroupIcon from '@mui/icons-material/Group';
+import EmailIcon from '@mui/icons-material/Email';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -575,6 +577,45 @@ export function LandingPage() {
                 >
                   Documentation
                 </Button>
+              </Stack>
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ color: '#8d96a0', fontSize: '0.85rem', mb: 1.5 }}>
+                Contact
+              </Typography>
+              <Stack spacing={1}>
+                <Link
+                  href="mailto:cynako@gmail.com"
+                  underline="none"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: '#8d96a0',
+                    fontSize: '0.85rem',
+                    '&:hover': { color: '#e6edf3' },
+                  }}
+                >
+                  <EmailIcon sx={{ fontSize: 18 }} />
+                  cynako@gmail.com
+                </Link>
+                <Link
+                  href="https://github.com/CynaCons/powertimeline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  underline="none"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: '#8d96a0',
+                    fontSize: '0.85rem',
+                    '&:hover': { color: '#e6edf3' },
+                  }}
+                >
+                  <GitHubIcon sx={{ fontSize: 18 }} />
+                  GitHub Repository
+                </Link>
               </Stack>
             </Box>
           </Stack>

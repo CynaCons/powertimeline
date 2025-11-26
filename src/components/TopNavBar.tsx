@@ -59,6 +59,22 @@ export function TopNavBar() {
             >
               PowerTimeline
             </Typography>
+            {/* BETA Indicator */}
+            <Box
+              sx={{
+                bgcolor: '#f97316',
+                color: '#fff',
+                px: 1,
+                py: 0.25,
+                borderRadius: 1,
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                ml: 0.5,
+              }}
+            >
+              BETA
+            </Box>
           </Box>
 
           {/* Navigation Links */}
