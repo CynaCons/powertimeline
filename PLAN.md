@@ -1287,6 +1287,30 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] Replace localStorage logout with Firebase signOutUser() in all pages
 - [x] Clean up unused imports from homePageStorage.ts
 
+**Navigation & Breadcrumb Fixes:**
+- [x] Fix breadcrumb "Home" link to go to /browse instead of / (landing)
+- [x] Make nav rail logo clickable to navigate to /browse
+- [x] Add breadcrumbs to EditorPage (shown in all modes)
+- [x] Update useNavigationConfig to use Firebase Auth for user ID
+
+**BETA & Site Status:**
+- [x] Add BETA indicator badge next to logo in TopNavBar
+
+**Footer & Contact:**
+- [x] Add contact email (cynako@gmail.com) to footer
+- [x] Add GitHub repository link to footer
+
+**Navigation Rail Redesign:**
+- [x] Remove duplicate "Power Timeline" banner from HomePage (TopNavBar handles this)
+- [x] Show nav rail on all pages (including unauthenticated users on /browse)
+- [x] Simplify nav items: Remove Dev Panel from nav rail, Settings placeholder, About placeholder
+- [x] Global nav items (all pages): Logo→Home, Sign In (unauthenticated)
+- [x] Authenticated items: My Timelines (profile link)
+- [x] Admin nav item: Only visible to admin role users
+- [x] Editor-only items: Event List toggle, Create (owner), Lock indicator (read-only)
+- [x] Utilities section: Theme toggle at bottom
+- [x] Profile actions: UserProfileMenu in header handles logout, profile actions
+
 **Navigation & Search Fixes:**
 - [ ] Fix LandingPage timeline card navigation
 - [ ] Make search bar on LandingPage functional (redirect to /browse)
@@ -1294,26 +1318,11 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Verify CTA buttons work correctly
 - [ ] Test public timeline browsing end-to-end
 
-**Navigation & Breadcrumb Fixes:**
-- [ ] Fix breadcrumb "Home" link to go to /browse instead of / (landing)
-- [ ] Show nav rail on HomePage when user is logged in
-- [ ] Make nav rail logo clickable to navigate to /browse
-- [ ] Add breadcrumbs to EditorPage below minimap
-
 **Hero Section Improvements:**
 - [ ] Update headline to: "Where events become understanding"
 - [ ] Add action verbs line: "Explore. Create. Visualize. Fork. Merge."
 - [ ] Add purpose statement: "Make sense of complex events, history, and politics by mapping them across time. Build a collaborative shared memory for what matters."
 - [ ] Swap CTA buttons: Orange "Explore Examples" (primary) + "Sign In" (secondary)
-
-**BETA & Site Status:**
-- [ ] Add prominent BETA banner at top of landing page
-- [ ] Include "under construction" messaging with expected features
-
-**Footer & Contact:**
-- [ ] Add contact email (cynako@gmail.com) to footer
-- [ ] Add GitHub repository link to footer
-- [ ] Add "Report Issue / Request Feature" link to GitHub Issues
 
 **Additional Polish:**
 - [ ] Add keyboard shortcut hint for search (e.g., "/" to focus)

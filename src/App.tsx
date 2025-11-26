@@ -438,6 +438,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
   }, []);
 
   // Editor-specific navigation items (context section)
+  // v0.5.6 - Simplified: Events toggle, Create (owner only), Lock indicator (read-only)
   const editorItems: NavigationItem[] = useMemo(() => {
     const items: NavigationItem[] = [
       {
@@ -462,17 +463,20 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
       });
     }
 
-    items.push({
-      id: 'dev',
-      label: 'Developer Panel',
-      icon: 'settings',
-      shortcut: 'Alt+D',
-      onClick: openDev,
-      isActive: overlay === 'dev',
-    });
+    // Show Lock indicator for read-only mode (non-clickable visual indicator)
+    if (isReadOnly) {
+      items.push({
+        id: 'read-only',
+        label: 'View Only',
+        icon: 'lock',
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onClick: () => {}, // Indicator only - no action
+        color: '#f97316', // Orange to indicate restriction
+      });
+    }
 
     return items;
-  }, [overlay, openEvents, openCreate, openDev, isReadOnly]);
+  }, [overlay, openEvents, openCreate, isReadOnly]);
 
   // Get current user for navigation context
   const { user: firebaseUser } = useAuth();

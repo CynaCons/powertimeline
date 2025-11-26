@@ -2,10 +2,10 @@
  * useNavigationConfig - Context-aware navigation configuration
  * Provides different navigation items based on current page/context
  *
- * Navigation Structure:
- * - Global Navigation: Always visible (Home, My Profile, Settings, About, Admin)
- * - Context Tools: Page-specific tools (Editor: Events, Create, Dev)
- * - Utilities: Always visible (Info Toggle, Theme)
+ * Navigation Structure (v0.5.6 redesign):
+ * - Global Navigation: Browse (all users), My Profile (authenticated), Admin (admin only)
+ * - Context Tools: Page-specific tools (Editor: Events toggle, Lock indicator)
+ * - Utilities: Theme toggle at bottom
  */
 
 import { useMemo } from 'react';
@@ -68,6 +68,7 @@ export function useNavigationConfig(
   const globalNavigation: NavigationSection = useMemo(() => {
     // Use firebaseUser.uid if currentUserId not provided
     const userId = currentUserId || firebaseUser?.uid;
+    const isAuthenticated = !!firebaseUser;
 
     const items: NavigationItem[] = [
       {
@@ -78,17 +79,21 @@ export function useNavigationConfig(
         onClick: () => navigate('/browse'),
         isActive: context === 'home',
       },
-      {
+    ];
+
+    // My Timelines - only for authenticated users
+    if (isAuthenticated) {
+      items.push({
         id: 'my-timelines',
         label: 'My Timelines',
         icon: 'person',
         shortcut: 'Alt+M',
         onClick: () => navigate(userId ? `/user/${userId}` : '/browse'),
         isActive: context === 'profile',
-      },
-    ];
+      });
+    }
 
-    // Add Admin item only for admin users (CC-REQ-ADMIN-NAV-002)
+    // Admin item - only for admin users (CC-REQ-ADMIN-NAV-002)
     if (isAdmin(currentUser)) {
       items.push({
         id: 'admin',
@@ -99,26 +104,16 @@ export function useNavigationConfig(
       });
     }
 
-    items.push(
-      {
-        id: 'settings',
-        label: 'Settings',
-        icon: 'settings',
-        onClick: () => {
-          // Placeholder for now
-          console.log('Settings clicked - to be implemented');
-        },
-      },
-      {
-        id: 'about',
-        label: 'About',
-        icon: 'info',
-        onClick: () => {
-          // Placeholder for now
-          console.log('About clicked - to be implemented');
-        },
-      }
-    );
+    // Sign In - only for unauthenticated users
+    if (!isAuthenticated) {
+      items.push({
+        id: 'sign-in',
+        label: 'Sign In',
+        icon: 'login',
+        onClick: () => navigate('/login'),
+        color: '#8b5cf6', // Purple accent
+      });
+    }
 
     return {
       type: 'global',

@@ -91,6 +91,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
 
   const getButtonStyles = (item: NavigationItem) => {
     const isActive = item.id === activeItemId || item.isActive;
+    const hasCustomColor = item.color && item.color.startsWith('#');
     return {
       bgcolor: isActive ? 'grey.900' : undefined,
       color: isActive ? 'common.white' : item.color || 'text.primary',
@@ -98,7 +99,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
       transform: 'scale(1)',
       '&:hover': {
-        bgcolor: isActive ? 'grey.800' : item.color ? `${item.color}.50` : 'grey.100',
+        bgcolor: isActive ? 'grey.800' : hasCustomColor ? `${item.color}20` : 'grey.100',
         transform: 'scale(1.05)',
       },
       '&:focus-visible': {

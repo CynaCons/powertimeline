@@ -19,7 +19,6 @@ import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail'
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { UserSwitcherModal } from '../components/UserSwitcherModal';
-import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
@@ -274,12 +273,8 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0d1117' }}>
-      {/* Top Navigation for unauthenticated users */}
-      {!firebaseUser && <TopNavBar />}
-
       <div className="flex">
-      {/* Navigation Rail for authenticated users */}
-      {firebaseUser && (
+      {/* Navigation Rail - shown for all users (authenticated and unauthenticated) */}
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ borderColor: '#30363d', backgroundColor: '#161b22' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
@@ -302,37 +297,23 @@ export function HomePage() {
           <ThemeToggleButton />
         </div>
       </aside>
-      )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 ${firebaseUser ? 'ml-14' : ''}`}>
-        {/* Header */}
+      <div className="flex-1 ml-14">
+        {/* Header - simplified, no duplicate title/sign-in (TopNavBar handles unauthenticated) */}
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
           <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-2xl font-bold" style={{ color: '#e6edf3' }}>PowerTimeline</h1>
-              <div className="flex items-center gap-4">
-                {firebaseUser ? (
-                  <UserProfileMenu
-                    onLogout={async () => {
-                      await signOutUser();
-                      navigate('/');
-                    }}
-                  />
-                ) : (
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="px-6 py-2 text-white rounded-lg transition-colors font-medium"
-                    style={{ backgroundColor: '#8b5cf6' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
-                  >
-                    Sign In
-                  </button>
-                )}
-              </div>
+              <Breadcrumb items={[{ label: 'Browse' }]} />
+              {firebaseUser && (
+                <UserProfileMenu
+                  onLogout={async () => {
+                    await signOutUser();
+                    navigate('/');
+                  }}
+                />
+              )}
             </div>
-            <Breadcrumb items={[{ label: 'Home' }]} />
           </div>
         </header>
 
