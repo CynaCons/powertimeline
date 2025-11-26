@@ -5,25 +5,12 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', '*.cjs', 'debug-*.cjs'] },
+  { ignores: ['dist', 'node_modules', '*.cjs', 'debug-*.cjs', 'update_all_tests.js'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  // Node.js scripts configuration
+  // React/TypeScript application code (excludes tests and scripts)
   {
-    files: ['scripts/**/*.{js,mjs}'],
-    languageOptions: {
-      ecmaVersion: 2022,
-      globals: globals.node,
-      sourceType: 'module',
-    },
-    rules: {
-      'no-console': 'off',
-      'no-process-exit': 'off',
-    },
-  },
-  // React/TypeScript application code
-  {
-    files: ['**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -52,6 +39,38 @@ export default tseslint.config(
       // React specific rules
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
+  // Node.js scripts configuration (JS and TS)
+  {
+    files: ['scripts/**/*.{js,mjs,ts}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.node,
+      sourceType: 'module',
+    },
+    rules: {
+      'no-console': 'off',
+      'no-process-exit': 'off',
+      '@typescript-eslint/no-unused-vars': 'off', // Scripts may have temporary unused vars
+      '@typescript-eslint/no-explicit-any': 'off', // Scripts can use any
+    },
+  },
+  // Test files configuration (Playwright tests)
+  {
+    files: ['tests/**/*.{ts,tsx,js}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
+      sourceType: 'module',
+    },
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-unused-vars': 'off', // Tests may have prepared but unused imports
+      '@typescript-eslint/no-explicit-any': 'off', // Tests can use any
     },
   }
 )

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { test, expect } from '@playwright/test';
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 

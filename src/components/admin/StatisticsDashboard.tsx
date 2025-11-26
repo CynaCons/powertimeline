@@ -174,7 +174,7 @@ export function StatisticsDashboard() {
           {visibilityData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                { }
                 <Pie
                   data={visibilityData}
                   cx="50%"
