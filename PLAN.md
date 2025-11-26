@@ -2,12 +2,12 @@
 
 ## 📊 Quick Summary
 
-**Current Version:** v0.5.3
-**Status:** ✅ Public Timeline Access & Navigation Redesign Complete
-**Next Milestone:** v0.5.5-v0.5.6 - Documentation & Technical Debt
+**Current Version:** v0.5.5
+**Status:** Complete - Public Browsing & Dark Theme
+**Next Milestone:** v0.5.6 - Navigation & Search Fixes
 
 ### Key Metrics
-- **Total Iterations:** 160+ completed (v0.2.0 → v0.5.3)
+- **Total Iterations:** 165+ completed (v0.2.0 → v0.5.5)
 - **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~150 requirements (97%)
 - **Test Coverage:** ~113 requirements verified (73%)
@@ -17,14 +17,14 @@
 - ✅ Firebase Authentication foundation (v0.5.1)
 - ✅ Landing page redesign with dark theme (v0.5.2)
 - ✅ Public timeline viewing (v0.5.3)
-- ✅ Dual navigation (TopNavBar + NavigationRail)
-- ✅ Read-only mode for non-owners
+- ✅ Authentication security & demo user removal (v0.5.4)
+- ✅ Public browsing & unified dark theme (v0.5.5)
 
-### Active Work (v0.5.5-v0.5.6)
-- 🔄 Documentation & navigation improvements
-- 🔄 SRS requirements dashboard ([SRS_INDEX.md](docs/SRS_INDEX.md))
-- 🔄 Technical debt cleanup
-- ⚠️ CRITICAL: Re-enable authentication security (v0.5.6 Phase 1)
+### Active Work (v0.5.6)
+- 🔄 Landing page messaging & hero section improvements
+- 🔄 Navigation & search fixes
+- 🔄 BETA banner and footer updates
+- 🔄 Public browsing polish
 
 ### Test Status
 - **Running:** 287 tests
@@ -1201,26 +1201,6 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] tests/user/: 7 passed, 2 failed (improvement from 6/3)
 - [x] Firestore data cleaned (no duplicate timelines)
 
-**Files Modified (12 files):**
-1. src/pages/HomePage.tsx - React key fixes
-2. src/pages/UserProfilePage.tsx - React key fixes
-3. firestore.rules - Security rule updates
-4. scripts/diagnose-timelines.ts (NEW)
-5. tests/home/71-home-page-basic.spec.ts
-6. tests/home/72-timeline-navigation.spec.ts
-7. tests/home/73-timeline-content-verification.spec.ts
-8. tests/admin/82-admin-panel-access.spec.ts
-9. tests/admin/83-user-management.spec.ts
-10. tests/admin/84-admin-statistics.spec.ts
-11. tests/admin/85-admin-bulk-operations.spec.ts
-12. tests/admin/86-admin-activity-log.spec.ts
-
-**Impact:**
-- Test suite fully modernized for Firebase backend
-- Critical React bug eliminated improving app stability
-- Database cleaned of duplicate data
-- All tests future-proofed for Firebase Authentication migration
-
 ### v0.5.0.4 - Development Environment & Production Infrastructure
 **Status:** Complete
 
@@ -1273,243 +1253,112 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] Keep ProtectedRoute for /admin and user profile routes
 - [x] Build and commit changes
 
-### v0.5.4 - Authentication & Sharing Completion (Planned)
-**Goal:** Complete authentication system and enable timeline sharing
+### v0.5.4 - Authentication Security & Demo User Removal
+**Goal:** Secure Firestore rules and remove localStorage demo system
 
-- [ ] Complete registration form with validation UI indicators
-- [ ] Implement user profile creation on signup
-- [ ] Update Firestore security rules for production
-- [ ] Deploy secured Firestore rules
-- [ ] Implement public/private timeline visibility toggles
-- [ ] Create shareable URLs for public timelines
-- [ ] Add social sharing buttons (Twitter, Facebook, LinkedIn)
-- [ ] Create timeline embed functionality
-- [ ] Replace demo user system with Firebase Auth completely
-- [ ] Test authentication flow end-to-end
-
-### v0.5.5 - Documentation & Navigation Improvements
-**Goal:** Address documentation navigation complexity and improve developer experience
-
-**Phase 1: PLAN.md Improvements**
-- [ ] Add quick summary section at top of PLAN.md (current version, last milestone, next goal, test status)
-- [ ] Standardize completion markers (use "Complete" consistently instead of mix of ✅, COMPLETE, etc.)
-- [ ] Ensure all iterations have Goal field for consistency
-- [ ] Move Format Rules to CONTRIBUTING.md
-- [ ] Add table of contents with jump links to major phases
-
-**Phase 2: SRS Navigation & Dashboard**
-- [ ] Create docs/SRS_INDEX.md as requirements dashboard
-- [ ] Add total requirement counts (Total, Implemented, Verified, In Progress, Proposed)
-- [ ] Add requirements breakdown by feature area with file links
-- [ ] Add quick search table (REQ-ID → File → Status)
-- [ ] Update main SRS.md to link to SRS_INDEX.md prominently
-
-**Phase 3: README.md Enhancement**
-- [ ] Add one-sentence elevator pitch at top ("GitHub for Timelines - collaborative historical event visualization")
-- [ ] Add screenshot or GIF of timeline editor in action
-- [ ] Move Quick Start above Features section
-- [ ] Add "What Can It Do?" section with key capabilities
-- [ ] Move documentation links below getting started section
-
-**Phase 4: Test Status Tracking**
-- [ ] Create TESTS.md with latest test run results
-- [ ] Add last test run date and pass/fail counts
-- [ ] Organize test results by feature area (Foundation, Layout, Zoom, etc.)
-- [ ] Document known flaky tests if any
-- [ ] Add npm script to generate TESTS.md automatically (npm run test:report)
-
-**Phase 5: Requirements-Plan Alignment**
-- [ ] Document that SRS.md is single source of truth for requirement status
-- [ ] Add note in PLAN.md that it's historical record of when work was done
-- [ ] Create script to validate PLAN.md references to requirement IDs exist in SRS.md
-- [ ] Add CI check to prevent drift between PLAN.md and SRS.md
-
-### v0.5.6 - Technical Debt & Code Quality
-**Goal:** Address technical debt, security issues, and code inconsistencies
-**Status:** In Progress (Phase 1 Complete, Phase 1.5 In Progress)
-**Completed:** 2025-11-24
-
-**Phase 1: CRITICAL - Authentication Security** ✅ COMPLETE
-- [x] Fix Firestore security rules for events subcollection (critical vulnerability)
-  - Changed `allow read: if true` to proper visibility checks with get()
-  - Events now respect parent timeline visibility (public/unlisted/private)
-  - Only authenticated owners can create/update/delete events
+- [x] Fix Firestore security rules for events subcollection
 - [x] Move test user password to environment variable (.env.test)
-  - Created .env.test.example template
-  - Updated timelineTestHelper.ts to use process.env
-  - Password no longer hardcoded in source
 - [x] Create .env.test.example template for contributors
 - [x] Add .env.test to .gitignore
 - [x] Update playwright.config.ts to load test environment variables
-- [x] Clean up untracked files
-  - Deleted `nul` file (Windows redirect artifact)
-  - Staged utility scripts (check-timeline-*.ts, create-test-user.ts, etc.)
-  - Created scripts/README.md documenting all utility scripts
-- [x] Complete E2E journey test (Phases 7-8)
-  - Implemented Phase 7: Authenticated timeline editing (owner mode)
-  - Implemented Phase 8: Logout flow with state verification
-  - Test now covers full user journey: landing → auth → edit → logout
-- [x] Document admin panel test fixes needed (docs/ADMIN_TEST_FIX_GUIDE.md)
-  - Created comprehensive implementation guide
-  - Estimated 5-7 hours to convert all 23 failing tests
-  - Provided step-by-step migration from localStorage to Firebase Auth
+- [x] Clean up untracked files and create scripts/README.md
+- [x] Complete E2E journey test (full user journey coverage)
+- [x] Document admin panel test fixes needed (ADMIN_TEST_FIX_GUIDE.md)
 - [x] Remove localStorage demo user system (Alice, Bob, Charlie)
-  - Removed Alice/Bob/Charlie timelines from createSampleTimelines()
-  - Updated getCurrentUser() to return null (Firebase Auth only)
-  - Removed demo users from DEMO_USERS array
-  - Updated setupMockUser() to throw error (completely removed)
-  - Updated openTimeline() and navigateToHome() to not use demo users
-  - Created scripts/clear-demo-users.ts to clean localStorage
 - [x] Enable public timeline browsing without authentication
-  - Timelines can be viewed without login (read-only mode)
-  - Only authenticated owners can edit their timelines
-  - TopNavBar + read-only banner for unauthenticated viewers
-- [ ] Enable VITE_ENFORCE_AUTH=true in production environment
+
+### v0.5.5 - Public Browsing & Dark Theme
+**Goal:** Unified dark theme and public browsing experience
+
+- [x] Fix HomePage (/browse) public browsing experience
+- [x] Apply unified dark theme to HomePage and EditorPage
+- [x] Clean up Editor UI and navigation architecture
+- [x] Add toast notification for read-only mode
+- [x] Update TopNavBar with Microsoft-style auth pattern
+
+### v0.5.6 - Landing Page & Public Browsing Polish
+**Goal:** Improve landing page messaging, navigation, and public browsing experience
+**Status:** In Progress
+
+**Legacy Code Cleanup (Critical):**
+- [x] Remove all getCurrentUser() calls from pages (use AuthContext instead)
+- [x] Remove searchTimelinesAndUsers localStorage import from HomePage
+- [x] Remove migrateLocalStorageToFirestore() call from HomePage
+- [x] Replace localStorage logout with Firebase signOutUser() in all pages
+- [x] Clean up unused imports from homePageStorage.ts
+
+**Navigation & Search Fixes:**
+- [ ] Fix LandingPage timeline card navigation
+- [ ] Make search bar on LandingPage functional (redirect to /browse)
+- [ ] Update HomePage (/browse) to use Firestore exclusively
+- [ ] Verify CTA buttons work correctly
+- [ ] Test public timeline browsing end-to-end
+
+**Navigation & Breadcrumb Fixes:**
+- [ ] Fix breadcrumb "Home" link to go to /browse instead of / (landing)
+- [ ] Show nav rail on HomePage when user is logged in
+- [ ] Make nav rail logo clickable to navigate to /browse
+- [ ] Add breadcrumbs to EditorPage below minimap
+
+**Hero Section Improvements:**
+- [ ] Update headline to: "Where events become understanding"
+- [ ] Add action verbs line: "Explore. Create. Visualize. Fork. Merge."
+- [ ] Add purpose statement: "Make sense of complex events, history, and politics by mapping them across time. Build a collaborative shared memory for what matters."
+- [ ] Swap CTA buttons: Orange "Explore Examples" (primary) + "Sign In" (secondary)
+
+**BETA & Site Status:**
+- [ ] Add prominent BETA banner at top of landing page
+- [ ] Include "under construction" messaging with expected features
+
+**Footer & Contact:**
+- [ ] Add contact email (cynako@gmail.com) to footer
+- [ ] Add GitHub repository link to footer
+- [ ] Add "Report Issue / Request Feature" link to GitHub Issues
+
+**Additional Polish:**
+- [ ] Add keyboard shortcut hint for search (e.g., "/" to focus)
+- [ ] Add loading skeleton for timeline cards on /browse
+- [ ] Improve empty state when no search results found
+- [ ] Add hover preview tooltips on example timeline cards
+- [ ] Ensure mobile responsiveness on landing and browse pages
+
+### v0.5.7 - Authentication Production Deployment
+**Goal:** Enable authentication enforcement in production
+
+- [ ] Enable VITE_ENFORCE_AUTH=true in production
 - [ ] Re-enable Firestore security rules requiring authentication
-- [ ] Test that unauthenticated users can only read public timelines
-- [ ] Add auth migration documentation for existing test users
+- [ ] Test unauthenticated users can only read public timelines
+- [ ] Add auth migration documentation for existing users
 - [ ] Deploy auth-enabled Firestore rules to production
 - [ ] Add security audit checklist to CONTRIBUTING.md
 
-**Phase 1.5: Public Timeline Browsing - Fix Navigation & E2E Tests** ⚡ CURRENT
-**Goal:** Make timeline browsing work without authentication, fix E2E tests
-**Status:** In Progress
-**Design Decision:** Keep landing page as-is, fix navigation to actually work
+### v0.5.8 - Documentation Improvements
+**Goal:** Improve documentation navigation and developer experience
 
-**Architecture Requirements:**
-```
-Landing Page (/)
-├─ Hero with search bar
-│  └─ Search shows results inline OR navigates to /browse
-├─ 4 example timeline cards (French Revolution, Napoleon, De Gaulle, RFK)
-│  └─ ✅ MUST be clickable → Navigate to timeline viewer
-├─ "Get Started Free" button → /login
-└─ "Explore Examples" button → /browse
+- [ ] Add quick summary section at top of PLAN.md
+- [ ] Standardize completion markers (use "Complete" consistently)
+- [ ] Create docs/SRS_INDEX.md as requirements dashboard
+- [ ] Add screenshot or GIF to README.md
+- [ ] Create TESTS.md with latest test run results
+- [ ] Document naming conventions in CONTRIBUTING.md
 
-Browse Page (/browse) - Previously HomePage
-├─ Search bar at top
-├─ Timeline cards from Firestore (NOT localStorage)
-├─ ✅ Works WITHOUT authentication (public browsing)
-└─ Cards clickable → Navigate to timeline viewer
+### v0.5.9 - Test Organization
+**Goal:** Clean up test suite organization
 
-Timeline Viewer (/user/:userId/timeline/:timelineId)
-├─ ✅ Works WITHOUT authentication for public timelines
-├─ Shows read-only banner if not owner
-└─ Loads from Firestore ONLY
-```
-
-**Implementation Tasks:**
-- [ ] Fix LandingPage timeline card navigation
-  - Debug why `handleTimelineClick()` doesn't navigate
-  - Verify `navigate()` is called correctly
-  - Test that clicking card actually navigates to timeline
-- [ ] Update TopNavBar for unauthenticated users
-  - Show "Sign In" button (not "My Timelines")
-  - Keep "Browse" button visible
-  - Remove user profile menu when not authenticated
-- [ ] Make search bar on LandingPage functional
-  - Option A: Show results inline below search
-  - Option B: Redirect to /browse with search query
-  - Decision: Redirect to /browse (simpler)
-- [ ] Update HomePage (/browse) to use Firestore
-  - Remove all localStorage queries
-  - Replace `searchTimelinesAndUsers()` with Firestore query
-  - Use `getAllTimelinesMetadata()` from firestore.ts
-  - Search should query Firestore, not localStorage
-- [ ] Verify "Get Started" and "Explore Examples" buttons work
-  - "Get Started" → /login (if not authenticated)
-  - "Explore Examples" → /browse
-- [ ] Test public timeline browsing (unauthenticated)
-  - Can view landing page ✓
-  - Can click timeline cards → navigates to viewer
-  - Can use search → finds timelines
-  - Can view timelines in read-only mode
-  - Read-only banner shows "Sign In to Edit"
-- [ ] Rewrite E2E test to match new architecture
-  - Phase 1: Landing page loads, click timeline card
-  - Phase 2: Timeline viewer opens in read-only mode
-  - Phase 3: Return to landing, use search
-  - Phase 4: Browse page, search works
-  - Phase 5-8: Authentication flow (unchanged)
-- [x] Fix HomePage (/browse) public browsing experience
-  - "My Timelines" section should ONLY show when authenticated
-  - When NOT authenticated: Show Featured, Popular, Recently Edited timelines
-  - Top-right: Show "Sign In / Login" button (not "My Timelines" link)
-  - When authenticated: Show user account menu with profile options
-  - Timeline cards on /browse must navigate correctly (not redirect to landing)
-  - Statistics panel always visible (public analytics)
-- [x] Apply unified dark theme to HomePage and EditorPage
-  - Applied landing page dark theme (#0d1117, #161b22, #30363d, #8b5cf6) to HomePage
-  - Updated search bar, timeline cards, statistics, and all sections
-  - Simplified read-only banner in EditorPage (clean, minimal, no overlaps)
-  - Purple accent buttons (#8b5cf6) matching landing page
-- [x] Clean up Editor UI and navigation architecture
-  - Remove TopNavBar from EditorPage (keep editor "pure")
-  - Remove read-only banner at top (replace with nav rail lock icon)
-  - Keep breadcrumbs for navigation hierarchy
-  - Ensure navigation rail ALWAYS visible in Editor (authenticated or not)
-  - Add lock icon to TOP of nav rail in read-only mode
-  - Add tooltip to lock icon: "You are viewing in read-only mode. Sign in to edit your own timelines, or fork this timeline."
-  - Add toast notification when loading in read-only mode
-  - Account/signin options already at BOTTOM of nav rail in Editor
-  - Update TopNavBar (HomePage/LandingPage) to Microsoft-style auth pattern
-  - Nav rail is global: HomePage ✓, Editor ✓, LandingPage ✗
-
-**Key Constraint:** Use Firestore ONLY - No localStorage for timeline data
-
-**Success Criteria:**
-- ✅ Timeline cards on landing page are clickable and navigate
-- ✅ Search bar redirects to /browse with query
-- ✅ /browse page works without authentication
-- ✅ /browse page loads timelines from Firestore
-- ✅ Timeline viewing works without authentication
-- ✅ E2E test passes (all 5 phases)
-- ✅ TopNavBar shows correct buttons for auth state
-
-**Phase 2: Naming Convention Standardization**
-- [ ] Document naming conventions in CONTRIBUTING.md (file naming, requirement IDs, test files)
-- [ ] Create decision: Keep PLAN.md, PRD.md, README.md in screaming case (standard)
-- [ ] Document docs/*.md should use SCREAMING_SNAKE_CASE
-- [ ] Document test file naming pattern (tests/feature-area/NN-test-name.spec.ts)
-- [ ] Add linter rule or script to validate naming conventions
-
-**Phase 3: Test Organization Cleanup**
 - [ ] Rename tests/v5/ to tests/editor/ for clarity
 - [ ] Update all test imports referencing v5/ path
-- [ ] Create tests/README.md explaining organization structure
-- [ ] Document test naming conventions (NN-descriptive-name.spec.ts)
+- [ ] Create tests/README.md explaining organization
 - [ ] Update playwright.config.ts with new paths
-- [ ] Update TESTS.md with new test organization
+- [ ] Run full E2E test suite and verify pass rate
 
-**Phase 4: PLAN.md Format Enforcement**
-- [ ] Audit all iterations in PLAN.md for format violations
-- [ ] Remove "Files Modified" sections (violations of own rules)
-- [ ] Remove "Impact" sections (violations of own rules)
-- [ ] Remove "Key Accomplishments" verbose summaries
-- [ ] Create PLAN.md linter script to detect format violations
-- [ ] Add pre-commit hook to validate PLAN.md format
+### v0.5.10 - SEO, Branding & Analytics
+**Goal:** Improve discoverability, branding consistency, and usage tracking
 
-**Phase 5: Data Migration Testing Protocol**
-- [ ] Document data migration testing checklist in CONTRIBUTING.md
-- [ ] Create migration rollback procedures
-- [ ] Add migration testing to CI/CD pipeline
-- [ ] Document the "duplicate timeline" incident as case study
-- [ ] Create migration test suite template (before/after validation)
-- [ ] Add migration dry-run scripts for future migrations
-
-**Phase 6: E2E Testing Completion (from previous session)**
-- [ ] Run full E2E test suite with new test IDs
-- [ ] Verify authentication flow tests (PHASE 5-8) pass
-- [ ] Update E2E test documentation with test user credentials location
-- [ ] Add E2E test maintenance guide to docs/
-- [ ] Validate all data-testid attributes are stable
-
-**Phase 7: Featured Timeline Preparation (Future Feature)**
-- [ ] Document featured timeline vision in PRD.md
-- [ ] Create SRS requirements for featured timeline feature
-- [ ] Design featured timeline curation workflow
-- [ ] Plan admin panel integration for featuring timelines
-- [ ] Keep featured field in Timeline type (mark as @future in JSDoc)
+- [ ] Add Open Graph meta tags for social sharing preview
+- [ ] Update favicon to match dark theme/purple accent
+- [ ] Create custom 404 "timeline not found" page
+- [ ] Add analytics events for CTA clicks, search queries, timeline views
+- [ ] Add use cases section: "Perfect for: Historians, Journalists, Researchers, Students"
 
 ## Phase 3: Collaboration Features (v0.6.x)
 

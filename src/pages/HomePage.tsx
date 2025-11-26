@@ -63,7 +63,7 @@ export function HomePage() {
   const { toast, showToast, hideToast } = useToast();
 
   // Get navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id);
+  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
 
   // Helper function to get user by ID from cache
   const getUserById = (userId: string): User | null => {
@@ -281,14 +281,18 @@ export function HomePage() {
       {/* Navigation Rail for authenticated users */}
       {firebaseUser && (
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ borderColor: '#30363d', backgroundColor: '#161b22' }}>
-        {/* PowerTimeline logo at top */}
-        <div className="mb-4 p-1 text-center">
+        {/* PowerTimeline logo at top - clickable to go home */}
+        <button
+          onClick={() => navigate('/browse')}
+          className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
+          title="Go to Home"
+        >
           <img
             src="/assets/images/logo.png"
-            alt="PowerTimeline"
+            alt="PowerTimeline - Go to Home"
             className="w-10 h-10 object-contain"
           />
-        </div>
+        </button>
 
         {/* Navigation sections */}
         <NavigationRail sections={sections} />

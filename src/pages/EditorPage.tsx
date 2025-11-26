@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Snackbar, Alert } from '@mui/material';
 import { getTimeline, getUser, incrementTimelineViewCount } from '../services/firestore';
-import { getCurrentUser } from '../lib/homePageStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import type { Timeline, User } from '../types';
@@ -49,8 +48,7 @@ export function EditorPage() {
         setUser(usr);
 
         // Increment view count for the timeline (only if viewer is not the owner)
-        const currentUser = getCurrentUser();
-        await incrementTimelineViewCount(timelineId, currentUser?.id);
+        await incrementTimelineViewCount(timelineId, firebaseUser?.uid);
         setLoading(false);
 
         // Show read-only toast if user is not the owner
@@ -69,7 +67,7 @@ export function EditorPage() {
     }
 
     loadTimeline();
-  }, [timelineId, userId, navigate]);
+  }, [timelineId, userId, navigate, firebaseUser]);
 
   // Determine if user is the owner (can edit)
   const isOwner = timeline && firebaseUser && firebaseUser.uid === timeline.ownerId;
@@ -90,12 +88,12 @@ export function EditorPage() {
     <Box sx={{ minHeight: '100vh' }}>
 
       <div className="relative">
-        {/* Breadcrumb for authenticated owner mode */}
-        {timeline && user && !isReadOnly && (
+        {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
+        {timeline && user && (
           <div className="absolute top-11 left-20 z-[100] pointer-events-none">
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded px-3 py-0.5 pointer-events-auto inline-block">
               <Breadcrumb items={[
-                { label: 'Home', href: '/' },
+                { label: 'Home', href: '/browse' },
                 { label: user.name, href: `/user/${user.id}` },
                 { label: timeline.title }
               ]} />

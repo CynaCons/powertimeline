@@ -16,21 +16,16 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
-import Chip from '@mui/material/Chip';
-import { getCurrentUser } from '../lib/homePageStorage';
 import { useAuth } from '../contexts/AuthContext';
-import { environment } from '../config/environment';
+import { getUser } from '../services/firestore';
 import type { User } from '../types';
 
 interface UserProfileMenuProps {
-  onSwitchAccount?: () => void;  // Callback to open user switcher modal
   onLogout?: () => void;  // Callback for logout action
 }
 
 export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
-  onSwitchAccount,
   onLogout,
 }) => {
   const navigate = useNavigate();
@@ -39,14 +34,18 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const open = Boolean(anchorEl);
 
-  // Determine if using Firebase Auth or demo users
-  const isUsingFirebaseAuth = firebaseUser !== null;
-
-  // Load current user (demo user system)
+  // Load current user profile from Firestore
   useEffect(() => {
-    const user = getCurrentUser();
-    setCurrentUser(user);
-  }, []);
+    async function loadUser() {
+      if (firebaseUser) {
+        const userProfile = await getUser(firebaseUser.uid);
+        setCurrentUser(userProfile);
+      } else {
+        setCurrentUser(null);
+      }
+    }
+    loadUser();
+  }, [firebaseUser]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -56,15 +55,10 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
     setAnchorEl(null);
   };
 
-  const handleSwitchAccount = () => {
-    handleClose();
-    onSwitchAccount?.();
-  };
-
   const handleUserSpace = () => {
     handleClose();
-    if (currentUser) {
-      navigate(`/user/${currentUser.id}`);
+    if (firebaseUser) {
+      navigate(`/user/${firebaseUser.uid}`);
     }
   };
 
@@ -76,17 +70,12 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
   const handleLogout = async () => {
     handleClose();
-
-    if (isUsingFirebaseAuth) {
-      // Firebase Auth sign out
-      await signOut();
-    } else {
-      // Demo user logout (legacy)
-      onLogout?.();
-    }
+    await signOut();
+    onLogout?.();
   };
 
-  if (!currentUser) {
+  // Don't render if not logged in
+  if (!firebaseUser) {
     return null;
   }
 
@@ -117,7 +106,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           account_circle
         </span>
         <span className="text-sm font-medium hidden md:inline" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {currentUser.name || firebaseUser?.email?.split('@')[0]}
+          {currentUser?.name || firebaseUser?.email?.split('@')[0]}
         </span>
         <span className="material-symbols-rounded text-sm">
           {open ? 'expand_less' : 'expand_more'}
@@ -154,28 +143,15 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           <div className="flex flex-col w-full">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-xs text-gray-500">Logged in as</span>
-              {!isUsingFirebaseAuth && !environment.flags.enforceAuth && (
-                <Chip label="Demo" size="small" color="warning" sx={{ height: 16, fontSize: '0.65rem' }} />
-              )}
             </div>
-            <span className="font-semibold text-sm">{currentUser.name || firebaseUser?.email?.split('@')[0]}</span>
+            <span className="font-semibold text-sm">{currentUser?.name || firebaseUser?.email?.split('@')[0]}</span>
             <span className="text-xs text-gray-500">
-              {isUsingFirebaseAuth ? firebaseUser.email : `@${currentUser.id}`}
+              {firebaseUser?.email}
             </span>
           </div>
         </MenuItem>
 
         <Divider />
-
-        {/* Switch Account - only show for demo users */}
-        {!isUsingFirebaseAuth && (
-          <MenuItem onClick={handleSwitchAccount}>
-            <ListItemIcon>
-              <span className="material-symbols-rounded">swap_horiz</span>
-            </ListItemIcon>
-            <ListItemText>Switch Account (Demo)</ListItemText>
-          </MenuItem>
-        )}
 
         {/* User Space */}
         <MenuItem onClick={handleUserSpace}>
@@ -195,12 +171,12 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
         <Divider />
 
-        {/* Logout / Sign Out */}
+        {/* Sign Out */}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <span className="material-symbols-rounded">logout</span>
           </ListItemIcon>
-          <ListItemText>{isUsingFirebaseAuth ? 'Sign Out' : 'Logout'}</ListItemText>
+          <ListItemText>Sign Out</ListItemText>
         </MenuItem>
       </Menu>
     </>

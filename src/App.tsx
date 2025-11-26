@@ -1,10 +1,12 @@
 ﻿import { useEffect, useMemo, useRef, useState, useCallback, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
-import { getCurrentUser } from './lib/homePageStorage';
-import { getTimeline, updateTimeline } from './services/firestore';
+import { useAuth } from './contexts/AuthContext';
+import { getTimeline, updateTimeline, getUser } from './services/firestore';
+import type { User } from './types';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from './contexts/ThemeContext';
@@ -50,6 +52,8 @@ interface AppProps {
 
 function App({ timelineId, readOnly = false }: AppProps = {}) {
   usePerformanceMonitoring();
+  const navigate = useNavigate();
+
   // Storage
   const storageRef = useRef(new EventStorage());
 
@@ -97,17 +101,8 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
 
-  // Store timeline for ownership check
-  const [loadedTimeline, setLoadedTimeline] = useState<any>(null);
-
-  // Determine if timeline is read-only (user is not the owner)
-  const isReadOnly = useMemo(() => {
-    if (!timelineId) return false; // No timeline loaded = not read-only (legacy mode)
-    if (!loadedTimeline) return false; // Timeline not loaded yet = not read-only
-    const currentUser = getCurrentUser();
-    if (!currentUser) return true; // No current user = read-only
-    return loadedTimeline.ownerId !== currentUser.id; // Read-only if not owner
-  }, [timelineId, loadedTimeline]);
+  // Use readOnly prop from EditorPage (which determines ownership via Firebase Auth)
+  const isReadOnly = readOnly;
 
   // Reload events when timelineId changes
   useEffect(() => {
@@ -117,7 +112,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
         if (timeline) {
           console.log('Loading timeline:', timeline.title, 'with', timeline.events.length, 'events');
           setEvents(timeline.events);
-          setLoadedTimeline(timeline);
           return;
         }
       }
@@ -127,7 +121,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
       if (stored.length > 0) {
         setEvents(stored);
       }
-      setLoadedTimeline(null);
     }
 
     loadTimelineEvents();
@@ -482,10 +475,24 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
   }, [overlay, openEvents, openCreate, openDev, isReadOnly]);
 
   // Get current user for navigation context
-  const currentUser = useMemo(() => getCurrentUser(), []);
+  const { user: firebaseUser } = useAuth();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // Load user profile from Firestore
+  useEffect(() => {
+    async function loadUser() {
+      if (firebaseUser) {
+        const userProfile = await getUser(firebaseUser.uid);
+        setCurrentUser(userProfile);
+      } else {
+        setCurrentUser(null);
+      }
+    }
+    loadUser();
+  }, [firebaseUser]);
 
   // Get context-aware navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, editorItems);
+  const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser);
 
   // Command palette commands
   const commands: Command[] = useMemo(() => [
@@ -575,14 +582,18 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
       <div className="relative h-screen">
         {/* Enhanced Navigation Rail - Always visible */}
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
-          {/* PowerTimeline logo at top */}
-          <div className="mb-4 p-1 text-center">
+          {/* PowerTimeline logo at top - clickable to go home */}
+          <button
+            onClick={() => navigate('/browse')}
+            className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
+            title="Go to Home"
+          >
             <img
               src="/assets/images/logo.png"
-              alt="PowerTimeline"
+              alt="PowerTimeline - Go to Home"
               className="w-10 h-10 object-contain"
             />
-          </div>
+          </button>
 
           {/* Read-only lock icon - shown in read-only mode */}
           {readOnly && (

@@ -168,7 +168,8 @@ export async function getTimelineEvents(timelineId: string, ownerId: string): Pr
       COLLECTIONS.EVENTS
     );
 
-    const q = query(eventsCollectionRef, orderBy('order', 'asc'));
+    // Order by date since 'order' field may not exist on all events
+    const q = query(eventsCollectionRef, orderBy('date', 'asc'));
     const querySnapshot = await getDocs(q);
 
     console.log('[getTimelineEvents] Found', querySnapshot.size, 'events');

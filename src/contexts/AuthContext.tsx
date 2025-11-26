@@ -12,6 +12,7 @@ import {
   signInWithGoogle,
   signOutUser,
   onAuthStateChange,
+  ensureUserProfile,
 } from '../services/auth';
 import { logger } from '../utils/logger';
 
@@ -36,11 +37,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     // Subscribe to Firebase Auth state changes
-    const unsubscribe = onAuthStateChange((firebaseUser) => {
+    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
       setUser(firebaseUser);
-      setLoading(false);
 
       if (firebaseUser) {
+        // Ensure user has a Firestore profile (for session restore and legacy users)
+        try {
+          await ensureUserProfile(firebaseUser);
+        } catch (error) {
+          logger.warn('Failed to ensure user profile', { error, uid: firebaseUser.uid });
+        }
+
         logger.info('User authenticated', {
           uid: firebaseUser.uid,
           email: firebaseUser.email
@@ -48,6 +55,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         logger.info('User signed out');
       }
+
+      setLoading(false);
     });
 
     return () => unsubscribe();

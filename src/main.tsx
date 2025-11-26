@@ -18,56 +18,19 @@ import { createAppTheme } from './styles/theme'
 import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { initializeUsers, getTimelines, saveTimelines, migrateEventsToTimeline, createSampleTimelines, getCurrentUser, checkAndMigrateData } from './lib/homePageStorage'
-import { EventStorage } from './lib/storage'
-// Firebase disabled for now - will be enabled in v0.4.x when needed
-// import './lib/firebase'
 
-// Initialize users and timeline data on first load
+// DEPRECATED (v0.5.6): localStorage initialization disabled
+// App now uses Firebase Auth + Firestore exclusively
+// Demo users (Alice, Bob, Charlie) removed
 function initializeHomePageData() {
-  // Check for data version and migrate if needed
-  checkAndMigrateData();
+  logger.info('localStorage initialization DISABLED - using Firestore only (v0.5.6)');
 
-  // Initialize demo users
-  initializeUsers();
-
-  // Ensure CynaCons is the default current user
-  const currentUser = getCurrentUser();
-  if (!currentUser) {
-    logger.warn('No current user found during initialization');
-  } else {
-    logger.info('Current user initialized', { userId: currentUser.id, name: currentUser.name });
-  }
-
-  // Check if we need to initialize timeline data
-  const timelines = getTimelines();
-  if (timelines.length === 0) {
-    // Check if there's existing Event[] data in localStorage (legacy migration)
-    const storage = new EventStorage();
-    const events = storage.load();
-
-    if (events.length > 0) {
-      // Migrate existing events to Timeline format and add to current user
-      const migratedTimeline = migrateEventsToTimeline(
-        events,
-        'RFK Timeline (Migrated)',
-        currentUser?.id || 'cynacons'
-      );
-      // Also create sample timelines for other users
-      const sampleTimelines = createSampleTimelines();
-      saveTimelines([migratedTimeline, ...sampleTimelines]);
-      logger.info('Migrated existing events and created sample timelines', {
-        migratedEventCount: events.length,
-        totalTimelines: sampleTimelines.length + 1
-      });
-    } else {
-      // No existing data, create sample timelines for all users
-      const sampleTimelines = createSampleTimelines();
-      saveTimelines(sampleTimelines);
-      logger.info('Created sample timelines for all users', {
-        timelineCount: sampleTimelines.length
-      });
-    }
+  // Clear any old localStorage data to prevent conflicts
+  try {
+    localStorage.removeItem('powertimeline_current_user');
+    logger.debug('Cleared old localStorage user data');
+  } catch (error) {
+    logger.warn('Could not clear localStorage', { error });
   }
 }
 

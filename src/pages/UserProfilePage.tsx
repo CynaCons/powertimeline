@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
 import type { TimelineMetadata, User } from '../types';
-import { getCurrentUser } from '../lib/homePageStorage';
+import { useAuth } from '../contexts/AuthContext';
+import { signOutUser } from '../services/auth';
 import { getUser, getTimelines } from '../services/firestore';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
@@ -25,7 +26,9 @@ import { useToast } from '../hooks/useToast';
 export function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { user: firebaseUser } = useAuth();
   const [user, setUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [timelines, setTimelines] = useState<TimelineMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
@@ -37,13 +40,25 @@ export function UserProfilePage() {
   const [createTimelineDialogOpen, setCreateTimelineDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'updated' | 'title' | 'events' | 'views'>('updated');
   const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
-  const currentUser = getCurrentUser();
 
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
 
   // Get navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id);
+  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
+
+  // Load current user profile from Firestore
+  useEffect(() => {
+    async function loadCurrentUser() {
+      if (firebaseUser) {
+        const userProfile = await getUser(firebaseUser.uid);
+        setCurrentUser(userProfile);
+      } else {
+        setCurrentUser(null);
+      }
+    }
+    loadCurrentUser();
+  }, [firebaseUser]);
 
   useEffect(() => {
     async function loadUserProfile() {
@@ -176,14 +191,18 @@ export function UserProfilePage() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Navigation Rail */}
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
-        {/* PowerTimeline logo at top */}
-        <div className="mb-4 p-1 text-center">
+        {/* PowerTimeline logo at top - clickable to go home */}
+        <button
+          onClick={() => navigate('/browse')}
+          className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
+          title="Go to Home"
+        >
           <img
             src="/assets/images/logo.png"
-            alt="PowerTimeline"
+            alt="PowerTimeline - Go to Home"
             className="w-10 h-10 object-contain"
           />
-        </div>
+        </button>
 
         {/* Navigation sections */}
         <NavigationRail sections={sections} />
@@ -201,19 +220,17 @@ export function UserProfilePage() {
           <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-lg font-semibold text-gray-900">User Profile</h1>
-              {currentUser && (
+              {firebaseUser && (
                 <UserProfileMenu
-                  onSwitchAccount={() => setUserSwitcherOpen(true)}
-                  onLogout={() => {
-                    // Clear current user and redirect to home
-                    localStorage.removeItem('powertimeline_current_user');
-                    window.location.href = '/';
+                  onLogout={async () => {
+                    await signOutUser();
+                    navigate('/');
                   }}
                 />
               )}
             </div>
             <Breadcrumb items={[
-              { label: 'Home', href: '/' },
+              { label: 'Home', href: '/browse' },
               { label: user?.name || '...' }
             ]} />
           </div>
@@ -238,7 +255,7 @@ export function UserProfilePage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h1>
-                    {currentUser && currentUser.id === userId && (
+                    {firebaseUser && firebaseUser.uid === userId && (
                       <button
                         onClick={handleEditProfile}
                         className="mb-2 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
@@ -303,7 +320,7 @@ export function UserProfilePage() {
               </div>
             )}
           </div>
-          {currentUser && currentUser.id === userId && (
+          {firebaseUser && firebaseUser.uid === userId && (
             <button
               onClick={handleCreateTimeline}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
@@ -337,12 +354,12 @@ export function UserProfilePage() {
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
                 {/* Kebab menu - only show if current user is the owner */}
-                {currentUser && currentUser.id === timeline.ownerId && (
+                {firebaseUser && firebaseUser.uid === timeline.ownerId && (
                   <div className="absolute top-2 right-2">
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
-                      currentUserId={currentUser.id}
+                      currentUserId={firebaseUser.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
                     />

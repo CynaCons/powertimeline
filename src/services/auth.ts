@@ -15,8 +15,29 @@ import {
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { app } from '../lib/firebase';
-import { createUser } from './firestore';
+import { createUser, getUser } from './firestore';
 import type { User } from '../types';
+
+/**
+ * Ensure a user profile exists in Firestore
+ * Creates one if it doesn't exist (for users who signed up before profile creation was added)
+ * v0.5.6 - Exported for use in AuthContext on session restore
+ */
+export async function ensureUserProfile(firebaseUser: FirebaseUser): Promise<void> {
+  const existingProfile = await getUser(firebaseUser.uid);
+  if (!existingProfile) {
+    // Create a basic profile for the user
+    const userProfile: Omit<User, 'createdAt'> = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      username: firebaseUser.email?.split('@')[0] || firebaseUser.uid.slice(0, 8),
+      name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+      avatar: '👤',
+      role: 'user',
+    };
+    await createUser(userProfile);
+  }
+}
 
 // Initialize Firebase Auth
 export const auth = getAuth(app);
@@ -63,18 +84,30 @@ export async function signUpWithEmailAndCreateProfile(
 
 /**
  * Sign in existing user with email and password
+ * v0.5.6 - Now ensures user profile exists in Firestore
  */
 export async function signInWithEmail(email: string, password: string): Promise<FirebaseUser> {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  return userCredential.user;
+  const firebaseUser = userCredential.user;
+
+  // Ensure user has a Firestore profile (for users who registered before profile creation)
+  await ensureUserProfile(firebaseUser);
+
+  return firebaseUser;
 }
 
 /**
  * Sign in with Google OAuth
+ * v0.5.6 - Now ensures user profile exists in Firestore
  */
 export async function signInWithGoogle(): Promise<FirebaseUser> {
   const userCredential = await signInWithPopup(auth, googleProvider);
-  return userCredential.user;
+  const firebaseUser = userCredential.user;
+
+  // Ensure user has a Firestore profile (first-time Google sign-in creates profile)
+  await ensureUserProfile(firebaseUser);
+
+  return firebaseUser;
 }
 
 /**
