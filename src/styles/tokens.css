@@ -1,4 +1,24 @@
 :root {
+  /* === Page-level Theme Variables === */
+  /* These are used by pages (HomePage, LandingPage, etc.) */
+  --page-bg: #0d1117;
+  --page-bg-elevated: #161b22;
+  --page-border: #30363d;
+  --page-text-primary: #e6edf3;
+  --page-text-secondary: #8d96a0;
+  --page-accent: #8b5cf6;
+  --page-accent-hover: #7c3aed;
+  --nav-bg: #161b22;
+  --nav-border: #30363d;
+  --card-bg: #161b22;
+  --card-border: #30363d;
+  --card-border-hover: #8b5cf6;
+  --input-bg: #161b22;
+  --input-border: #30363d;
+  --input-focus-border: #8b5cf6;
+  --input-focus-shadow: rgba(139, 92, 246, 0.1);
+
+  /* === Editor/Canvas Theme Variables (Dark) === */
   /* Palette */
   --cc-bg-steel-0: #0f1418;
   --cc-bg-steel-1: #131a20;
@@ -86,7 +106,47 @@
   --cc-focus-ring-outline: 2px solid var(--cc-color-focus-ring);
 }
 
-/* Light theme removed: Dark theme only */
+/* === Light Theme Overrides === */
+[data-theme="light"] {
+  /* Page-level variables */
+  --page-bg: #ffffff;
+  --page-bg-elevated: #f6f8fa;
+  --page-border: #d0d7de;
+  --page-text-primary: #1f2328;
+  --page-text-secondary: #656d76;
+  --page-accent: #8b5cf6;
+  --page-accent-hover: #7c3aed;
+  --nav-bg: #f6f8fa;
+  --nav-border: #d0d7de;
+  --card-bg: #ffffff;
+  --card-border: #d0d7de;
+  --card-border-hover: #8b5cf6;
+  --input-bg: #ffffff;
+  --input-border: #d0d7de;
+  --input-focus-border: #8b5cf6;
+  --input-focus-shadow: rgba(139, 92, 246, 0.15);
+
+  /* Editor/Canvas variables for light mode */
+  --cc-bg-steel-0: #f0f2f5;
+  --cc-bg-steel-1: #f6f8fa;
+  --cc-bg-steel-2: #ffffff;
+  --cc-bg-steel-3: #ffffff;
+  --cc-bg-app: #f6f8fa;
+  --cc-color-axis-label: #1f2328;
+  --cc-color-axis-line: #00000040;
+  --cc-color-axis-line-strong: #00000060;
+  --cc-color-grid-minor: #00000015;
+  --cc-color-grid-major: #00000025;
+  --cc-color-border: #d0d7de;
+  --cc-color-panel-bg: #ffffff;
+  --cc-color-panel-fg: #1f2328;
+  --cc-color-card-bg: #ffffff;
+  --cc-color-card-border: #d0d7de;
+  --cc-color-card-divider: #d0d7de;
+  --cc-color-card-title: #1f2328;
+  --cc-color-card-body: #656d76;
+  --cc-bg-gradient: linear-gradient(180deg, #f6f8fa 0%, #ffffff 100%);
+}
 
 /* High contrast mode adjustments (Phase F) */
 @media (forced-colors: active) {

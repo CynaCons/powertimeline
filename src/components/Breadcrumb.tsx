@@ -16,7 +16,11 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-gray-600">
+    <nav
+      aria-label="Breadcrumb"
+      className="flex items-center gap-1.5 text-xs"
+      style={{ color: 'var(--page-text-secondary)' }}
+    >
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
 
@@ -25,16 +29,24 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
             {item.href ? (
               <Link
                 to={item.href}
-                className="hover:text-blue-600 transition-colors hover:underline"
+                className="transition-colors hover:underline"
+                style={{ color: 'var(--page-text-secondary)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--page-accent)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--page-text-secondary)'}
               >
                 {item.label}
               </Link>
             ) : (
-              <span className="text-gray-900 font-medium">{item.label}</span>
+              <span className="font-medium" style={{ color: 'var(--page-text-primary)' }}>
+                {item.label}
+              </span>
             )}
 
             {!isLast && (
-              <span className="material-symbols-rounded text-gray-400 text-sm">
+              <span
+                className="material-symbols-rounded text-sm"
+                style={{ color: 'var(--page-text-secondary)', opacity: 0.6 }}
+              >
                 chevron_right
               </span>
             )}

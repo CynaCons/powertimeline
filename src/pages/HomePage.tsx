@@ -272,10 +272,10 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0d1117' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
       <div className="flex">
       {/* Navigation Rail - shown for all users (authenticated and unauthenticated) */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ borderColor: '#30363d', backgroundColor: '#161b22' }}>
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
           onClick={() => navigate('/browse')}
@@ -301,7 +301,7 @@ export function HomePage() {
       {/* Main Content Area */}
       <div className="flex-1 ml-14">
         {/* Header - simplified, no duplicate title/sign-in (TopNavBar handles unauthenticated) */}
-        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
           <div className="max-w-6xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-2">
               <Breadcrumb items={[{ label: 'Browse' }]} />
@@ -322,7 +322,7 @@ export function HomePage() {
         {/* Search Bar */}
         <div className="mb-8 relative">
           <div className="relative">
-            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 material-symbols-rounded" style={{ color: '#8d96a0' }}>
+            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 material-symbols-rounded" style={{ color: 'var(--page-text-secondary)' }}>
               search
             </span>
             <input
@@ -332,16 +332,16 @@ export function HomePage() {
               placeholder="Search timelines and users..."
               className="w-full pl-14 pr-12 py-4 text-lg border-2 rounded-xl outline-none transition-all"
               style={{
-                backgroundColor: '#161b22',
-                borderColor: '#30363d',
-                color: '#e6edf3'
+                backgroundColor: 'var(--input-bg)',
+                borderColor: 'var(--input-border)',
+                color: 'var(--page-text-primary)'
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#8b5cf6';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
+                e.currentTarget.style.borderColor = 'var(--input-focus-border)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px var(--input-focus-shadow)';
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#30363d';
+                e.currentTarget.style.borderColor = 'var(--input-border)';
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
@@ -349,9 +349,9 @@ export function HomePage() {
               <button
                 onClick={clearSearch}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 material-symbols-rounded"
-                style={{ color: '#8d96a0' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#e6edf3'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#8d96a0'}
+                style={{ color: 'var(--page-text-secondary)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--page-text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--page-text-secondary)'}
                 aria-label="Clear search"
               >
                 close
@@ -361,9 +361,9 @@ export function HomePage() {
 
           {/* Search Results Dropdown */}
           {searchResults && (
-            <div className="absolute top-full mt-2 w-full rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style={{ backgroundColor: '#161b22', border: '2px solid #30363d' }}>
+            <div className="absolute top-full mt-2 w-full rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style={{ backgroundColor: 'var(--card-bg)', border: '2px solid var(--card-border)' }}>
               {searchResults.timelines.length === 0 && searchResults.users.length === 0 ? (
-                <div className="p-6 text-center" style={{ color: '#8d96a0' }}>
+                <div className="p-6 text-center" style={{ color: 'var(--page-text-secondary)' }}>
                   No results found for "{searchQuery}"
                 </div>
               ) : (
@@ -371,7 +371,7 @@ export function HomePage() {
                   {/* Timeline Results */}
                   {searchResults.timelines.length > 0 && (
                     <div className="p-4">
-                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: '#8d96a0' }}>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--page-text-secondary)' }}>
                         Timelines ({searchResults.timelines.length})
                       </h3>
                       <div className="space-y-2">
@@ -384,11 +384,11 @@ export function HomePage() {
                             }}
                             className="w-full text-left px-4 py-3 rounded-lg transition-colors"
                             style={{ backgroundColor: 'transparent' }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d1117'}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--page-bg)'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
-                            <div className="font-medium" style={{ color: '#e6edf3' }}>{timeline.title}</div>
-                            <div className="text-sm mt-1" style={{ color: '#8d96a0' }}>
+                            <div className="font-medium" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</div>
+                            <div className="text-sm mt-1" style={{ color: 'var(--page-text-secondary)' }}>
                               {timeline.eventCount} events • by {timeline.ownerId}
                             </div>
                           </button>
@@ -399,8 +399,8 @@ export function HomePage() {
 
                   {/* User Results */}
                   {searchResults.users.length > 0 && (
-                    <div className="p-4" style={{ borderTop: '1px solid #30363d' }}>
-                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: '#8d96a0' }}>
+                    <div className="p-4" style={{ borderTop: '1px solid var(--card-border)' }}>
+                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--page-text-secondary)' }}>
                         Users ({searchResults.users.length})
                       </h3>
                       <div className="space-y-2">
@@ -413,13 +413,13 @@ export function HomePage() {
                             }}
                             className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3"
                             style={{ backgroundColor: 'transparent' }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d1117'}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--page-bg)'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
                             <UserAvatar user={user} size="medium" />
                             <div>
-                              <div className="font-medium" style={{ color: '#e6edf3' }}>{user.name}</div>
-                              <div className="text-sm mt-1" style={{ color: '#8d96a0' }}>{user.bio}</div>
+                              <div className="font-medium" style={{ color: 'var(--page-text-primary)' }}>{user.name}</div>
+                              <div className="text-sm mt-1" style={{ color: 'var(--page-text-secondary)' }}>{user.bio}</div>
                             </div>
                           </button>
                         ))}
@@ -429,7 +429,7 @@ export function HomePage() {
 
                   {/* Has More Indicator */}
                   {searchResults.hasMore && (
-                    <div className="p-4 text-center text-sm" style={{ borderTop: '1px solid #30363d', color: '#8d96a0' }}>
+                    <div className="p-4 text-center text-sm" style={{ borderTop: '1px solid var(--card-border)', color: 'var(--page-text-secondary)' }}>
                       More results available. Continue typing to refine search.
                     </div>
                   )}
@@ -443,7 +443,7 @@ export function HomePage() {
         {firebaseUser && (
         <section className="mb-12">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold" style={{ color: '#e6edf3' }}>
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
               My Timelines ({myTimelines.length})
             </h2>
             <button
@@ -458,8 +458,8 @@ export function HomePage() {
           </div>
 
           {myTimelines.length === 0 ? (
-            <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
-              <p className="mb-4" style={{ color: '#8d96a0' }}>You haven't created any timelines yet</p>
+            <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+              <p className="mb-4" style={{ color: 'var(--page-text-secondary)' }}>You haven't created any timelines yet</p>
               <button
                 onClick={handleCreateTimeline}
                 className="px-6 py-3 text-white rounded-lg transition-colors font-medium"
@@ -476,9 +476,9 @@ export function HomePage() {
                 <div
                   key={`my-${timeline.id}`}
                   className="flex-none w-80 border rounded-lg p-4 hover:shadow-lg transition-all relative"
-                  style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
                 >
                   {/* Kebab menu - always visible */}
                   <div className="absolute top-2 right-2">
@@ -493,11 +493,11 @@ export function HomePage() {
 
                   {/* Card content - clickable to navigate */}
                   <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                    <h3 className="font-semibold mb-2 pr-10" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
-                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
+                    <h3 className="font-semibold mb-2 pr-10" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
+                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
                       {timeline.description || 'No description'}
                     </p>
-                    <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
+                    <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                       <span>{timeline.eventCount} events</span>
                       <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                     </div>
@@ -524,38 +524,38 @@ export function HomePage() {
 
         {/* Statistics Section */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>Platform Statistics</h2>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
-              <div className="text-sm" style={{ color: '#8d96a0' }}>Timelines</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Timelines</div>
             </div>
-            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{stats.userCount}</div>
-              <div className="text-sm" style={{ color: '#8d96a0' }}>Users</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
             </div>
-            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-3xl font-bold mb-1" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
-              <div className="text-sm" style={{ color: '#8d96a0' }}>Events</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Events</div>
             </div>
-            <div className="border rounded-lg p-6" style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}>
+            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-3xl font-bold mb-1" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
-              <div className="text-sm" style={{ color: '#8d96a0' }}>Total Views</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Total Views</div>
             </div>
           </div>
         </section>
 
         {/* Recently Edited Section */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>🔥 Recently Edited</h2>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentlyEdited.map(timeline => (
               <div
                 key={`recent-${timeline.id}`}
                 className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
-                style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
               >
                 {/* Kebab menu */}
                 <div className="absolute top-2 right-2">
@@ -570,11 +570,11 @@ export function HomePage() {
 
                 {/* Card content - clickable to navigate */}
                 <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                  <h3 className="font-semibold mb-2 pr-8" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
-                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
+                  <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
+                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
+                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.eventCount} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
@@ -610,15 +610,15 @@ export function HomePage() {
 
         {/* Popular Timelines Section */}
         <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>⭐ Popular Timelines</h2>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {popular.map(timeline => (
               <div
                 key={`popular-${timeline.id}`}
                 className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
-                style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
               >
                 {/* Kebab menu */}
                 <div className="absolute top-2 right-2">
@@ -633,11 +633,11 @@ export function HomePage() {
 
                 {/* Card content - clickable to navigate */}
                 <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                  <h3 className="font-semibold mb-2 pr-8" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
-                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
+                  <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
+                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
+                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.viewCount} views</span>
                     <span>{timeline.eventCount} events</span>
                   </div>
@@ -674,15 +674,15 @@ export function HomePage() {
         {/* Featured Timelines Section */}
         {featured.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#e6edf3' }}>✨ Featured</h2>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>✨ Featured</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {featured.map(timeline => (
                 <div
                   key={`featured-${timeline.id}`}
                   className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
-                  style={{ backgroundColor: '#161b22', borderColor: '#30363d' }}
+                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#30363d'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
                 >
                   {/* Kebab menu */}
                   <div className="absolute top-2 right-2">
@@ -699,12 +699,12 @@ export function HomePage() {
                   <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
                     <div className="flex items-center gap-2 mb-2 pr-8">
                       <span className="text-yellow-500">⭐</span>
-                      <h3 className="font-semibold flex-1" style={{ color: '#e6edf3' }}>{timeline.title}</h3>
+                      <h3 className="font-semibold flex-1" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
                     </div>
-                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: '#8d96a0' }}>
+                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
                       {timeline.description || 'No description'}
                     </p>
-                    <div className="flex items-center justify-between text-sm" style={{ color: '#8d96a0' }}>
+                    <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                       <span>{timeline.eventCount} events</span>
                       <span>{timeline.viewCount} views</span>
                     </div>

@@ -236,11 +236,19 @@ export const ThemeToggleButton: React.FC = () => {
         type="button"
         title={getThemeTitle()}
         onClick={toggleTheme}
-        className={`material-symbols-rounded rounded-md p-2 transition-theme ${
-          isDarkMode
-            ? 'bg-primary-50 text-primary-700 hover:bg-primary-100'
-            : 'text-secondary hover:bg-surface-elevated'
-        }`}
+        className="material-symbols-rounded rounded-md p-2 transition-all"
+        style={{
+          color: 'var(--page-text-secondary)',
+          backgroundColor: 'transparent',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--page-accent)';
+          e.currentTarget.style.color = '#ffffff';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.color = 'var(--page-text-secondary)';
+        }}
         aria-label="Toggle theme"
       >
         {getThemeIcon()}
