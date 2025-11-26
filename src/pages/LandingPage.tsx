@@ -9,7 +9,6 @@ import { Box, Button, Container, Typography, TextField, InputAdornment, Card, Ca
 import SearchIcon from '@mui/icons-material/Search';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GroupIcon from '@mui/icons-material/Group';
-import GitHubIcon from '@mui/icons-material/GitHub';
 import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -575,26 +574,6 @@ export function LandingPage() {
                   }}
                 >
                   Documentation
-                </Button>
-              </Stack>
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ color: '#8d96a0', fontSize: '0.85rem', mb: 1.5 }}>
-                Community
-              </Typography>
-              <Stack spacing={0.5}>
-                <Button
-                  size="small"
-                  startIcon={<GitHubIcon sx={{ fontSize: '1rem' }} />}
-                  sx={{
-                    color: '#8d96a0',
-                    justifyContent: 'flex-start',
-                    textTransform: 'none',
-                    fontSize: '0.85rem',
-                    '&:hover': { color: '#e6edf3' },
-                  }}
-                >
-                  GitHub
                 </Button>
               </Stack>
             </Box>
