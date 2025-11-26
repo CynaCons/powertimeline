@@ -1319,22 +1319,6 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] Update ThemeToggleButton with CSS variable styling
 - [x] MUI theme responds dynamically via createAppTheme(isDarkMode)
 
-**Platform Statistics Aggregation (CR from CHANGE_REQUEST.md):**
-- [ ] Create `stats/platform` document schema in Firestore
-  - Fields: totalTimelines, totalUsers, totalEvents, totalViews, lastUpdated
-- [ ] Add Firestore security rules for stats collection (public read)
-- [ ] Create Cloud Function: onTimelineCreate - increment totalTimelines
-- [ ] Create Cloud Function: onTimelineDelete - decrement totalTimelines
-- [ ] Create Cloud Function: onEventWrite - update totalEvents count
-- [ ] Create Cloud Function: onUserCreate - increment totalUsers
-- [ ] Create Cloud Function: onViewIncrement - increment totalViews
-- [ ] Alternative: Scheduled function to recalculate stats periodically
-- [ ] Update getPlatformStats() in firestore.ts to read from stats doc
-- [ ] Add client-side caching with 5-minute TTL for stats
-- [ ] Add graceful degradation: hide stats widget if unavailable
-- [ ] Deploy Cloud Functions to production
-- [ ] Test stats accuracy after CRUD operations
-
 **Navigation & Search Fixes:**
 - [ ] Fix LandingPage timeline card navigation
 - [ ] Make search bar on LandingPage functional (redirect to /browse)
@@ -1392,6 +1376,31 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Create custom 404 "timeline not found" page
 - [ ] Add analytics events for CTA clicks, search queries, timeline views
 - [ ] Add use cases section: "Perfect for: Historians, Journalists, Researchers, Students"
+
+### v0.5.11 - Platform Statistics Aggregation
+**Goal:** Move stats calculation from client-side scans to server-side aggregation (CR from CHANGE_REQUEST.md)
+
+**Firestore Schema:**
+- [ ] Create `stats/platform` document with fields: totalTimelines, totalUsers, totalEvents, totalViews, lastUpdated
+- [ ] Add Firestore security rules for stats collection (public read)
+
+**Cloud Functions (Real-time Updates):**
+- [ ] Create Cloud Function: onTimelineCreate - increment totalTimelines
+- [ ] Create Cloud Function: onTimelineDelete - decrement totalTimelines
+- [ ] Create Cloud Function: onEventWrite - update totalEvents count
+- [ ] Create Cloud Function: onUserCreate - increment totalUsers
+- [ ] Create Cloud Function: onViewIncrement - increment totalViews
+- [ ] Alternative: Scheduled function to recalculate stats periodically (fallback)
+
+**Client-Side Updates:**
+- [ ] Update getPlatformStats() in firestore.ts to read from stats doc
+- [ ] Add client-side caching with 5-minute TTL for stats
+- [ ] Add graceful degradation: hide stats widget or show cached if unavailable
+
+**Deployment & Testing:**
+- [ ] Deploy Cloud Functions to production
+- [ ] Test stats accuracy after CRUD operations
+- [ ] Monitor function execution and costs
 
 ## Phase 3: Collaboration Features (v0.6.x)
 
