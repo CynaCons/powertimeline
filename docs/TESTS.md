@@ -11,7 +11,7 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 
 | Suite | Location | Purpose |
 |-------|----------|---------|
-| Editor Tests | `tests/v5/` | Timeline editor functionality (66 files) |
+| Editor Tests | `tests/editor/` | Timeline editor functionality (66 files) |
 | Home Tests | `tests/home/` | Home page and navigation (8 files) |
 | Admin Tests | `tests/admin/` | Admin panel functionality (5 files) |
 | User Tests | `tests/user/` | User profile and editing (2 files) |

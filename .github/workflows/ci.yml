@@ -155,7 +155,7 @@ jobs:
     - name: Run foundation tests
       run: |
         npx playwright test \
-          tests/v5/01-foundation.smoke.spec.ts \
+          tests/editor/01-foundation.smoke.spec.ts \
           --timeout=30000
 
     - name: Upload test results

@@ -1,0 +1,115 @@
+name: Test Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Which test suite to run'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - editor-foundation
+          - editor-full
+          - all
+
+jobs:
+  production-tests:
+    if: ${{ github.event.inputs.test_suite == 'production' || github.event.inputs.test_suite == 'all' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install chromium
+
+    - name: Run production tests
+      run: npx playwright test tests/production/ --reporter=list
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: production-test-results
+        path: test-results/
+        retention-days: 7
+
+  editor-foundation-tests:
+    if: ${{ github.event.inputs.test_suite == 'editor-foundation' || github.event.inputs.test_suite == 'all' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install chromium
+
+    - name: Run editor foundation tests
+      run: |
+        npx playwright test \
+          tests/editor/01-foundation.smoke.spec.ts \
+          tests/editor/02-cards-placement.spec.ts \
+          tests/editor/03-non-overlap-fit.spec.ts \
+          --reporter=list
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: editor-foundation-results
+        path: test-results/
+        retention-days: 7
+
+  editor-full-tests:
+    if: ${{ github.event.inputs.test_suite == 'editor-full' || github.event.inputs.test_suite == 'all' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install chromium
+
+    - name: Run all editor tests
+      run: npx playwright test tests/editor/ --reporter=list
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: editor-full-results
+        path: test-results/
+        retention-days: 7

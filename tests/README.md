@@ -1,74 +1,137 @@
-# Test Structure
+# Test Suite Organization
 
-## New Iterative Testing Approach
+**Last Updated:** 2025-11-27
+**Version:** v0.5.9
 
-We've cleaned up the complex test suite and restarted with a simple, iterative approach that matches our development plan.
+## Directory Structure
 
-### Current Tests
+```
+tests/
+├── editor/       # Timeline editor functionality (66 files)
+├── home/         # Home page and navigation (8 files)
+├── admin/        # Admin panel functionality (5 files)
+├── user/         # User profile and editing (2 files)
+├── production/   # Production smoke tests (5 files)
+├── auth/         # Authentication tests
+├── e2e/          # End-to-end user journeys
+├── firestore/    # Firestore integration tests
+├── helpers/      # Test helper utilities
+└── utils/        # Shared test utilities
+```
 
-We are migrating to a focused v5 TDD suite centered on cards placement & architecture.
+## Test Categories
 
-Active (v5)
-- `tests/v5/01-foundation.smoke.spec.ts` — app loads, axis visible
-- `tests/v5/02-cards-placement.spec.ts` — cards render above/below axis (RFK seed)
-- `tests/v5/03-non-overlap-fit.spec.ts` — no significant overlaps (RFK seed)
-- `tests/v5/04-dispatch-band.spec.ts` — dispatch band telemetry
-- `tests/v5/05-capacity-model.spec.ts` — capacity telemetry
-- `tests/v5/06-degrade-promote.spec.ts` — degradations/promotions telemetry
-- `tests/v5/07-aggregation-policy.spec.ts` — aggregation telemetry & reconciliation
+| Suite | Purpose | Runs Against |
+|-------|---------|--------------|
+| `editor/` | Timeline rendering, zoom, layout, cards | localhost:5175 |
+| `home/` | HomePage, navigation, search | localhost:5175 |
+| `admin/` | Admin panel, user management | localhost:5175 |
+| `user/` | User profiles, editing | localhost:5175 |
+| `production/` | Smoke tests | powertimeline.com |
+| `e2e/` | Full user journeys | localhost:5175 |
 
-Deferred (to be reintroduced progressively)
-- `degradation-flow.spec.ts`, `clustered-count.spec.ts`, `no-overlap-and-axis-clearance.spec.ts`, `performance.spec.ts`, `basic-timeline.spec.ts`,
-  `analyze-vertical-gaps.spec.ts`, `analyze-layout.spec.ts`, `space-usage-analysis.spec.ts`, `progressive-cluster-analysis.spec.ts`,
-  `resize-behavior.spec.ts`, `zoom-mapping.spec.ts`, `timeline-proximity-test.spec.ts`, `admin-panel.spec.ts`, `info-panel-toggle.spec.ts`.
+## Running Tests
 
-Archived (legacy or screenshot-heavy)
-- Legacy SVG/UI era: `legacy.spec.ts`, `deterministic-layout.spec.ts`, `deterministic-simple.spec.ts`, `grid-lines.spec.ts`, `multi-row-lanes.spec.ts`,
-  `editing-controls.spec.ts`, `node-expansion-edit.spec.ts`, `expanded-card-content.spec.ts`, `debug-expansion.spec.ts`.
-- Visual dumps/screens: `column-system-visual.spec.ts` (+ snapshots), `napoleon-screenshot*.spec.ts`, `seeding-visual*.spec.ts` (+ snapshots),
-  `triple-cluster-screenshot.spec.ts`, `smoke-ui.spec.ts`, `visual-regression.spec.ts`.
-
-Location: All legacy specs and snapshots have been moved to `tests/_archive/`. The active suite lives under `tests/v5/`.
-
-Rationale
-- Keep tests tight, deterministic, and aligned with the new HTML card renderer and v5 layout goals.
-- Reintroduce coverage with telemetry-driven assertions (capacity, dispatch band, degrade/promote, aggregation) as features land.
-
-### Removed Tests
-
-The following tests were removed as they were based on the old SVG+foreignObject architecture:
-- `smoke-ui.spec.ts` - Complex UI tests with SVG selectors
-- `accessibility-audit.spec.ts` - Accessibility tests for old architecture
-- `editing-controls.spec.ts` - Tests for SVG-based editing
-- `expanded-card-content.spec.ts` - Tests for foreignObject card expansion
-- `grid-lines.spec.ts` - Tests for SVG grid lines
-- `multi-row-lanes.spec.ts` - Tests for complex lane system
-- `node-expansion-edit.spec.ts` - Tests for SVG node interactions
-- `visual-regression.spec.ts` - Visual regression tests for old UI
-- All associated snapshots
-
-### Testing Philosophy
-
-1. **One test file per feature area** - Clean separation of concerns
-2. **Simple selectors** - HTML/CSS classes, not complex SVG paths
-3. **Visual verification** - Screenshots for each major feature
-4. **Skip until implemented** - Future tests marked as skipped until features exist
-5. **Keep it simple** - Focus on core functionality, not edge cases
-
-### Running Tests
-
+### All Tests (Local)
 ```bash
-# Run the focused v5 suite (playwright.config is scoped via testMatch)
 npx playwright test
+```
 
-# Debug one v5 spec
-npx playwright test tests/v5/02-cards-placement.spec.ts --headed
+### Specific Suite
+```bash
+# Editor tests only
+npx playwright test tests/editor/
 
-# Run just telemetry tests
-npx playwright test tests/v5/0{4,5,6,7}-*.spec.ts
+# Production smoke tests
+npx playwright test tests/production/
 
-# Capture a JSON summary and update docs/TESTS.md
+# Single file
+npx playwright test tests/editor/01-foundation.smoke.spec.ts
+```
+
+### Debug Mode
+```bash
+# With browser visible
+npx playwright test tests/editor/02-cards-placement.spec.ts --headed
+
+# Interactive UI mode
+npx playwright test --ui
+```
+
+### Update Documentation
+```bash
+# Run tests and update docs/TESTS.md
 npm run test:update-doc
 ```
 
-> The command above surfaces Playwright's exit code; it still refreshes the documentation even when the suite fails.
+## Editor Tests (tests/editor/)
+
+Core timeline functionality tests organized by feature:
+
+| Range | Category | Examples |
+|-------|----------|----------|
+| 01-03 | Foundation | App loads, cards render, no overlaps |
+| 04-08 | Telemetry | Capacity, degradation, stability metrics |
+| 09-16 | Layout | Space optimization, half-columns, viewport |
+| 17-29 | Zoom | Cursor anchor, boundaries, deep zoom |
+| 21-27 | Minimap | Rendering, drag, sync |
+| 30-35 | Overflow | Detection, cleanup, anchors |
+| 36-49 | Degradation | Full→compact→title-only cascade |
+| 50-55 | UI/Panels | Authoring overlay, navigation |
+| 56-70 | Integration | Complex scenarios, validation |
+
+## Production Tests (tests/production/)
+
+Smoke tests against live https://powertimeline.com:
+
+| File | Tests |
+|------|-------|
+| 01-smoke | Hero renders, example cards visible |
+| 02-navigation | CTAs route correctly |
+| 03-browse-and-search | Browse page works |
+| 04-login | Login page accessible |
+| 05-auth-ui | Auth buttons display correctly |
+
+## Writing New Tests
+
+### File Naming
+```
+{number}-{feature-name}.spec.ts
+```
+
+### Test Structure
+```typescript
+import { test, expect } from '@playwright/test';
+import { loadTestTimeline } from '../utils/timelineTestUtils';
+
+test.describe('Feature Name', () => {
+  test('should do something', async ({ page }) => {
+    await loadTestTimeline(page, 'timeline-french-revolution');
+    // assertions
+  });
+});
+```
+
+### Requirement Traceability
+```typescript
+test('feature works', async ({ page }) => {
+  test.info().annotations.push({ type: 'req', description: 'CC-REQ-XXX' });
+  // test implementation
+});
+```
+
+## Configuration
+
+See `playwright.config.ts` for:
+- Test matching pattern: `/(editor|home|user|admin|production|auth|e2e)/.+\.spec\.ts$/`
+- Timeouts: 45s test, 10s expect
+- Viewport: 1920x1080
+- Screenshots: on-failure only
+
+## CI/CD
+
+Tests run on GitHub Actions:
+- **On push/PR**: Quality checks, foundation test
+- **Manual trigger**: Full test suite (workflow_dispatch)
+
+See `.github/workflows/ci.yml` and `.github/workflows/tests.yml`

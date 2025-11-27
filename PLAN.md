@@ -2,12 +2,12 @@
 
 ## 📊 Quick Summary
 
-**Current Version:** v0.5.8
-**Status:** Complete - Documentation Improvements
-**Next Milestone:** v0.5.9 - Test Organization
+**Current Version:** v0.5.9
+**Status:** Complete - Test Organization
+**Next Milestone:** v0.5.10 - SEO, Branding & Analytics
 
 ### Key Metrics
-- **Total Iterations:** 175+ completed (v0.2.0 → v0.5.8)
+- **Total Iterations:** 180+ completed (v0.2.0 → v0.5.9)
 - **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~150 requirements (97%)
 - **Test Coverage:** ~113 requirements verified (73%)
@@ -23,11 +23,12 @@
 - ✅ Landing page polish & mobile responsiveness (v0.5.6)
 - ✅ Authentication production deployment with security rules (v0.5.7)
 - ✅ Documentation improvements & naming conventions (v0.5.8)
+- ✅ Test organization & GitHub Actions workflow (v0.5.9)
 
-### Active Work (v0.5.9)
-- 🔄 Rename tests/v5/ to tests/editor/ for clarity
-- 🔄 Create tests/README.md explaining organization
-- 🔄 Update playwright.config.ts with new paths
+### Active Work (v0.5.10)
+- 🔄 Open Graph meta tags for social sharing
+- 🔄 Custom 404 page
+- 🔄 Analytics events for key interactions
 
 ### Test Status
 - **Running:** 287 tests
@@ -1371,12 +1372,18 @@ Create reusable test utilities that abstract authentication and navigation, maki
 
 ### v0.5.9 - Test Organization
 **Goal:** Clean up test suite organization
+**Status:** Complete ✅
 
-- [ ] Rename tests/v5/ to tests/editor/ for clarity
-- [ ] Update all test imports referencing v5/ path
-- [ ] Create tests/README.md explaining organization
-- [ ] Update playwright.config.ts with new paths
-- [ ] Run full E2E test suite and verify pass rate
+- [x] Rename tests/v5/ to tests/editor/ for clarity
+- [x] Update all test imports referencing v5/ path
+- [x] Rewrite tests/README.md with comprehensive organization guide
+- [x] Update playwright.config.ts with new paths
+- [x] Update CI workflow (ci.yml) with new paths
+- [x] Create manual test workflow (.github/workflows/tests.yml)
+  - Production tests (against powertimeline.com)
+  - Editor foundation tests
+  - Editor full test suite
+- [x] Verify tests pass locally (production + editor foundation)
 
 ### v0.5.10 - SEO, Branding & Analytics
 **Goal:** Improve discoverability, branding consistency, and usage tracking

@@ -148,7 +148,7 @@ For roadmap context, see the v0.3.x tasks in `PLAN.md` along with the future pla
 
 - **Playwright cannot launch** run `npx playwright install` to ensure browsers are downloaded.
 - **Firebase analytics errors** double-check `.env.local` values or temporarily disable analytics initialization.
-- **Layout regressions** load seeded datasets and run the relevant v5 Playwright spec (see `tests/v5/`).
+- **Layout regressions** load seeded datasets and run the relevant Playwright spec (see `tests/editor/`).
 
 Have questions? Open an issue with reproduction steps and mention the affected requirement IDs if available.
 
