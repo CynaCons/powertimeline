@@ -2,16 +2,17 @@
 
 ## 📊 Quick Summary
 
-**Current Version:** v0.5.5
-**Status:** Complete - Public Browsing & Dark Theme
-**Next Milestone:** v0.5.6 - Navigation & Search Fixes
+**Current Version:** v0.5.8
+**Status:** Complete - Documentation Improvements
+**Next Milestone:** v0.5.9 - Test Organization
 
 ### Key Metrics
-- **Total Iterations:** 165+ completed (v0.2.0 → v0.5.5)
+- **Total Iterations:** 175+ completed (v0.2.0 → v0.5.8)
 - **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~150 requirements (97%)
 - **Test Coverage:** ~113 requirements verified (73%)
 - **Test Suite:** 287 Playwright tests ([Test Status](#test-status))
+- **Production Tests:** 11/11 passing (v0.5.7)
 
 ### Recent Achievements (v0.5.x)
 - ✅ Firebase Authentication foundation (v0.5.1)
@@ -19,12 +20,14 @@
 - ✅ Public timeline viewing (v0.5.3)
 - ✅ Authentication security & demo user removal (v0.5.4)
 - ✅ Public browsing & unified dark theme (v0.5.5)
+- ✅ Landing page polish & mobile responsiveness (v0.5.6)
+- ✅ Authentication production deployment with security rules (v0.5.7)
+- ✅ Documentation improvements & naming conventions (v0.5.8)
 
-### Active Work (v0.5.6)
-- 🔄 Landing page messaging & hero section improvements
-- 🔄 Navigation & search fixes
-- 🔄 BETA banner and footer updates
-- 🔄 Public browsing polish
+### Active Work (v0.5.9)
+- 🔄 Rename tests/v5/ to tests/editor/ for clarity
+- 🔄 Create tests/README.md explaining organization
+- 🔄 Update playwright.config.ts with new paths
 
 ### Test Status
 - **Running:** 287 tests
@@ -1357,13 +1360,14 @@ Create reusable test utilities that abstract authentication and navigation, maki
 
 ### v0.5.8 - Documentation Improvements
 **Goal:** Improve documentation navigation and developer experience
+**Status:** Complete ✅
 
-- [ ] Add quick summary section at top of PLAN.md
-- [ ] Standardize completion markers (use "Complete" consistently)
-- [ ] Create docs/SRS_INDEX.md as requirements dashboard
-- [ ] Add screenshot or GIF to README.md
-- [ ] Create TESTS.md with latest test run results
-- [ ] Document naming conventions in CONTRIBUTING.md
+- [x] Update PLAN.md Quick Summary to v0.5.7 with latest achievements
+- [x] Update SRS_INDEX.md version, known issues, and audit dates
+- [x] Update TESTS.md with production test results and version info
+- [x] Document naming conventions in CONTRIBUTING.md (files, code, requirements, versions)
+- [x] Fix TESTS.md path reference in SRS_INDEX.md
+- [ ] Add screenshot or GIF to README.md (deferred - placeholder exists)
 
 ### v0.5.9 - Test Organization
 **Goal:** Clean up test suite organization

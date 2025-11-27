@@ -170,6 +170,62 @@ console.log('Debug info:', data);
 - Update PLAN.md to track progress
 - Link code changes to requirements in SRS.md
 
+## Naming Conventions
+
+### Files & Directories
+
+| Type | Convention | Example |
+|------|------------|---------|
+| React components | PascalCase | `TimelineCard.tsx`, `AuthoringOverlay.tsx` |
+| Hooks | camelCase with `use` prefix | `useViewWindow.ts`, `useTimelineZoom.ts` |
+| Utilities | camelCase | `timelineUtils.ts`, `yamlSerializer.ts` |
+| Types | camelCase | `types.ts` |
+| Test files | kebab-case with `.spec.ts` | `01-foundation.smoke.spec.ts` |
+| SRS documents | SCREAMING_SNAKE_CASE | `SRS_HOME_PAGE.md`, `SRS_CARDS_SYSTEM.md` |
+
+### Code Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| React components | PascalCase | `function TimelineCard()` |
+| Hooks | camelCase with `use` prefix | `useViewWindow()` |
+| Functions | camelCase | `calculatePosition()` |
+| Constants | SCREAMING_SNAKE_CASE | `MAX_ZOOM_LEVEL` |
+| Types/Interfaces | PascalCase | `interface TimelineEvent` |
+| Enums | PascalCase | `enum CardType` |
+| CSS classes | kebab-case or Tailwind | `timeline-card`, `bg-gray-900` |
+| Test IDs | kebab-case | `data-testid="timeline-axis"` |
+
+### Requirement IDs
+
+Follow the pattern: `CC-REQ-{AREA}-{NUMBER}`
+
+| Area | Prefix | Example |
+|------|--------|---------|
+| Foundation | `CC-REQ-FOUND-` | `CC-REQ-FOUND-001` |
+| Layout | `CC-REQ-LAYOUT-` | `CC-REQ-LAYOUT-001` |
+| Cards | `CC-REQ-CARD-` | `CC-REQ-CARD-FULL-001` |
+| Degradation | `CC-REQ-DEGRADATION-` | `CC-REQ-DEGRADATION-001` |
+| Zoom | `CC-REQ-ZOOM-` | `CC-REQ-ZOOM-001` |
+| Minimap | `CC-REQ-MINIMAP-` | `CC-REQ-MINIMAP-001` |
+| Admin | `CC-REQ-ADMIN-` | `CC-REQ-ADMIN-ACCESS-001` |
+
+### Timeline & Firestore IDs
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Timeline IDs | `timeline-{slug}` | `timeline-french-revolution` |
+| User IDs | Firebase Auth UID | `abc123xyz...` |
+| Event IDs | Auto-generated | Firestore document ID |
+
+### Version Numbers
+
+Follow semantic versioning: `v{MAJOR}.{MINOR}.{PATCH}`
+
+- **MAJOR**: Breaking changes (v1.0.0)
+- **MINOR**: New features (v0.5.0)
+- **PATCH**: Bug fixes (v0.5.1)
+
 ## Performance Targets
 
 - Main bundle: < 400KB

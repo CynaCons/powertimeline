@@ -2,7 +2,43 @@
 
 This document tracks Playwright regression coverage for PowerTimeline and is updated after every full suite run.
 
-## Latest Playwright Run
+**Last Updated:** 2025-11-27
+**Version:** v0.5.7
+
+## Test Suites Overview
+
+PowerTimeline uses Playwright for end-to-end testing with the following test categories:
+
+| Suite | Location | Purpose |
+|-------|----------|---------|
+| Editor Tests | `tests/v5/` | Timeline editor functionality (66 files) |
+| Home Tests | `tests/home/` | Home page and navigation (8 files) |
+| Admin Tests | `tests/admin/` | Admin panel functionality (5 files) |
+| User Tests | `tests/user/` | User profile and editing (2 files) |
+| Production Tests | `tests/production/` | Production smoke tests (5 files) |
+| E2E Tests | `tests/e2e/` | End-to-end user journeys |
+
+## Production Tests (Latest)
+
+- **Date:** 2025-11-27
+- **Target:** https://powertimeline.com
+- **Results:** 11 passing / 0 failing
+
+| Test | Description | Status |
+|------|-------------|--------|
+| 01-smoke | Landing hero renders without errors | ✅ Pass |
+| 01-smoke | Landing shows example timeline cards | ✅ Pass |
+| 02-navigation | CTA "Sign In" routes to login | ✅ Pass |
+| 02-navigation | CTA "Explore Examples" routes to /browse | ✅ Pass |
+| 02-navigation | Top nav Browse button routes to /browse | ✅ Pass |
+| 02-navigation | Example card navigates to timeline viewer | ✅ Pass |
+| 03-browse-page | Browse page renders timeline grid | ✅ Pass |
+| 04-timeline-viewer | Timeline viewer renders in read-only mode | ✅ Pass |
+| 05-auth-ui | Top nav shows Sign In button | ✅ Pass |
+| 05-auth-ui | CTA get-started says "Sign In" | ✅ Pass |
+| 05-auth-ui | Sign In button navigates to /login | ✅ Pass |
+
+## Editor Tests (v5 Suite)
 
 <!-- GENERATED:RUN-SUMMARY -->
 - **Date:** 2025-10-02
@@ -146,7 +182,9 @@ This uses the cached results from `tmp/test-docs/test-results.json` and complete
 
 ## Version History
 
-- **v0.3.1** (current): Automated Playwright run on 2025-09-26 (v1.54.2). 8 / 65 spec files passing.
+- **v0.5.7** (current): Production tests passing (11/11). Auth deployment complete.
+- **v0.5.6**: Landing page polish and mobile responsiveness.
+- **v0.3.1**: Automated Playwright run on 2025-09-26 (v1.54.2). 8 / 65 spec files passing.
 - **Historical status:** No earlier recorded runs.
 
 ## Notes

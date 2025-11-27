@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-11-23
-**Version:** v0.5.5
+**Last Updated:** 2025-11-27
+**Version:** v0.5.7
 
 ---
 
@@ -270,7 +270,7 @@ Platform administration interface:
 
 ### Design Documents
 - **[SDS_CARDS_SYSTEM.md](SDS_CARDS_SYSTEM.md)** - Software Design Specification for card system
-- **[TESTS.md](../TESTS.md)** - Test status and organization (to be created in v0.5.5)
+- **[TESTS.md](TESTS.md)** - Test status and organization
 
 ---
 
@@ -279,25 +279,23 @@ Platform administration interface:
 ### High Priority
 1. **Admin Panel Tests Failing** (0/23 passing)
    - All admin tests timing out or failing authentication
-   - Needs investigation in v0.5.6 Phase 1
+   - Needs investigation in future iteration
    - Related: tests/admin/82-86.spec.ts
 
-2. **Authentication System Incomplete** (v0.5.4)
-   - Demo user system still active alongside Firebase Auth
-   - Firestore rules temporarily disabled
-   - Security risk in production
-
-3. **Test Coverage Gaps** (Home Page: 43% verified)
+2. **Test Coverage Gaps** (Home Page: 43% verified)
    - Many home page requirements have "TBD" for tests
    - Need comprehensive E2E tests for search, feeds, routing
-   - Planned in v0.5.5 Phase 4
+
+### Resolved (v0.5.7)
+- ✅ **Authentication System Complete** - Firebase Auth deployed to production
+- ✅ **Firestore Security Rules** - Visibility-based access control enabled
+- ✅ **Backwards Compatibility** - Rules handle timelines without visibility field
 
 ### Medium Priority
-4. **Minimap Hover Highlighting** (CC-REQ-MINIMAP-HIGHLIGHT-002)
+3. **Minimap Hover Highlighting** (CC-REQ-MINIMAP-HIGHLIGHT-002)
    - Implemented but no test coverage
-   - Should be verified in v0.5.5
 
-5. **Touch Gesture Support** (CC-REQ-MINIMAP-INTERACTION-002)
+4. **Touch Gesture Support** (CC-REQ-MINIMAP-INTERACTION-002)
    - Planned but not yet implemented
    - Deferred to v0.6.x
 
@@ -331,8 +329,8 @@ This index should be updated when:
 - Implementation status changes significantly
 - Test coverage improves
 
-**Last audit:** 2025-11-23 (v0.5.5)
-**Next audit:** After v0.5.6 completion
+**Last audit:** 2025-11-27 (v0.5.7)
+**Next audit:** After v0.5.9 completion
 
 ---
 

@@ -20,9 +20,9 @@ test.describe('Production Smoke', () => {
 
     await page.goto(PRODUCTION_URL);
 
-    // Unique hero headline
+    // Unique hero headline (updated in v0.5.6)
     await expect(
-      page.getByRole('heading', { name: 'Build timelines like you build code' })
+      page.getByRole('heading', { name: 'Where events become understanding' })
     ).toBeVisible({ timeout: 10_000 });
 
     await waitForQuiet(page, 1_500);

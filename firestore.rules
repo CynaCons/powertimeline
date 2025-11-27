@@ -5,9 +5,12 @@ service cloud.firestore {
     // Collection group rule for timelines (enables collectionGroup queries)
     // The {path=**} wildcard matches any path depth
     // v0.5.7 - Restrict to public/unlisted timelines only (security fix)
+    // Note: Default to public if visibility not set (backwards compatibility)
     match /{path=**}/timelines/{timelineId} {
       // Only allow reads for public/unlisted timelines, or by the owner
-      allow read: if resource.data.visibility == 'public'
+      // If visibility field doesn't exist, default to allowing read (backwards compat)
+      allow read: if !('visibility' in resource.data)
+                    || resource.data.visibility == 'public'
                     || resource.data.visibility == 'unlisted'
                     || (request.auth != null && resource.data.ownerId == request.auth.uid);
 
@@ -44,7 +47,9 @@ service cloud.firestore {
         // Public timelines can be read by anyone
         // Unlisted timelines can be read by anyone with the link
         // Private timelines can only be read by the owner
-        allow read: if resource.data.visibility == 'public'
+        // Default to public if visibility not set (backwards compatibility)
+        allow read: if !('visibility' in resource.data)
+                      || resource.data.visibility == 'public'
                       || resource.data.visibility == 'unlisted'
                       || (request.auth != null && resource.data.ownerId == request.auth.uid);
 
@@ -71,7 +76,9 @@ service cloud.firestore {
         match /events/{eventId} {
           // Allow reads only if parent timeline is public/unlisted or user is owner
           // Uses get() to check parent timeline visibility
-          allow read: if get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'public'
+          // Default to allowing read if visibility not set (backwards compatibility)
+          allow read: if !('visibility' in get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data)
+                        || get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'public'
                         || get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'unlisted'
                         || (request.auth != null && request.auth.uid == userId);
 
