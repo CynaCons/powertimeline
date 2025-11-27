@@ -176,3 +176,69 @@ console.log('Debug info:', data);
 - First load: < 3 seconds
 - Test suite: < 2 minutes
 - Memory usage: < 100MB for typical datasets
+
+## Security Audit Checklist
+
+Before releasing changes that affect authentication, authorization, or data access:
+
+### Authentication (v0.5.7+)
+
+- [ ] **Protected routes**: Verify `ProtectedRoute` wraps all sensitive pages
+- [ ] **Auth state**: Check `useAuth()` hook is used correctly
+- [ ] **Logout**: Ensure `signOutUser()` clears all session data
+- [ ] **Token handling**: Never expose Firebase tokens in URLs or logs
+
+### Firestore Security Rules
+
+- [ ] **Read rules**: Public data uses `visibility` checks
+- [ ] **Write rules**: All writes require `request.auth != null`
+- [ ] **Owner checks**: Mutations verify `resource.data.ownerId == request.auth.uid`
+- [ ] **Admin checks**: Admin-only operations use role verification
+- [ ] **Collection groups**: Group queries respect visibility rules
+
+### Data Exposure
+
+- [ ] **API responses**: No private data in public API responses
+- [ ] **Console logs**: No sensitive data in console output
+- [ ] **Error messages**: Generic errors for auth failures (prevent enumeration)
+- [ ] **URLs**: No sensitive IDs or tokens in shareable URLs
+
+### Testing Security Changes
+
+```bash
+# Test as unauthenticated user
+1. Open incognito window
+2. Navigate to /browse - should work
+3. Navigate to private timeline - should fail gracefully
+4. Try to create timeline - should redirect to login
+
+# Test as authenticated user
+1. Sign in with test account
+2. Verify "My Timelines" appears
+3. Create a private timeline
+4. Verify other users can't access it
+
+# Test Firestore rules
+firebase emulators:start
+npm run test:firestore-rules
+```
+
+### Deployment Checklist
+
+- [ ] **Rules deployed**: `firebase deploy --only firestore:rules`
+- [ ] **Environment vars**: Verify `.env.production` settings
+- [ ] **Feature flags**: Check `VITE_ENFORCE_AUTH=true` in production
+- [ ] **Rollback plan**: Know how to revert if issues arise
+
+### Common Vulnerabilities to Check
+
+1. **Broken Access Control**: Can users access others' private data?
+2. **Security Misconfiguration**: Are debug endpoints disabled?
+3. **Injection**: Is user input sanitized before Firestore queries?
+4. **IDOR**: Can users manipulate IDs to access unauthorized resources?
+
+### Reporting Security Issues
+
+For security vulnerabilities, please email: cynako@gmail.com
+
+Do NOT create public issues for security vulnerabilities.

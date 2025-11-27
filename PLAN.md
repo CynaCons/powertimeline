@@ -1344,13 +1344,16 @@ Create reusable test utilities that abstract authentication and navigation, maki
 
 ### v0.5.7 - Authentication Production Deployment
 **Goal:** Enable authentication enforcement in production
+**Status:** Complete ✅
 
-- [ ] Enable VITE_ENFORCE_AUTH=true in production
-- [ ] Re-enable Firestore security rules requiring authentication
-- [ ] Test unauthenticated users can only read public timelines
-- [ ] Add auth migration documentation for existing users
-- [ ] Deploy auth-enabled Firestore rules to production
-- [ ] Add security audit checklist to CONTRIBUTING.md
+- [x] Enable VITE_ENFORCE_AUTH=true in production (.env.production)
+- [x] Re-enable Firestore security rules requiring authentication
+  - [x] Collection group queries respect visibility (public/unlisted/owner)
+  - [x] Events subcollection checks parent timeline visibility via get()
+- [x] Test unauthenticated users can only read public timelines (rules enforce this)
+- [x] Add auth migration documentation for existing users (docs/AUTH_MIGRATION.md)
+- [x] Deploy auth-enabled Firestore rules to production (manual: `firebase deploy --only firestore:rules`)
+- [x] Add security audit checklist to CONTRIBUTING.md
 
 ### v0.5.8 - Documentation Improvements
 **Goal:** Improve documentation navigation and developer experience

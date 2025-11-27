@@ -4,10 +4,12 @@ service cloud.firestore {
 
     // Collection group rule for timelines (enables collectionGroup queries)
     // The {path=**} wildcard matches any path depth
-    // NOTE: For collection group queries, we allow all reads and viewCount updates
+    // v0.5.7 - Restrict to public/unlisted timelines only (security fix)
     match /{path=**}/timelines/{timelineId} {
-      // Allow all reads - for public timeline browsing
-      allow read: if true;
+      // Only allow reads for public/unlisted timelines, or by the owner
+      allow read: if resource.data.visibility == 'public'
+                    || resource.data.visibility == 'unlisted'
+                    || (request.auth != null && resource.data.ownerId == request.auth.uid);
 
       // Allow anyone to update viewCount only (for analytics)
       // This uses a simpler check that works with increment()
@@ -65,11 +67,13 @@ service cloud.firestore {
 
         // Events subcollection (nested under timelines)
         // v0.5.0.1 - Event Persistence Optimization
-        // v0.5.6 - Allow public access for now (TODO: restrict based on parent timeline visibility)
+        // v0.5.7 - Restrict based on parent timeline visibility
         match /events/{eventId} {
-          // TEMPORARY: Allow all reads for public timeline browsing
-          //TODO: Implement proper visibility checking via get() or other means
-          allow read: if true;
+          // Allow reads only if parent timeline is public/unlisted or user is owner
+          // Uses get() to check parent timeline visibility
+          allow read: if get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'public'
+                        || get(/databases/$(database)/documents/users/$(userId)/timelines/$(timelineId)).data.visibility == 'unlisted'
+                        || (request.auth != null && request.auth.uid == userId);
 
           // Only the timeline owner (authenticated user) can create/update/delete events
           allow create, update, delete: if request.auth != null &&
