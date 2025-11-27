@@ -3,9 +3,9 @@
  * Implements requirements from docs/SRS_HOME_PAGE.md (v0.4.0)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert, Skeleton } from '@mui/material';
 import type { TimelineMetadata, User } from '../types';
 import {
   getTimeline,
@@ -61,8 +61,29 @@ export function HomePage() {
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
 
+  // Search input ref for keyboard shortcut
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Get navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
+
+  // Loading state for timeline data
+  const [loadingTimelines, setLoadingTimelines] = useState(true);
+
+  // Keyboard shortcut: "/" to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if not already in an input/textarea
+      if (e.key === '/' &&
+          document.activeElement?.tagName !== 'INPUT' &&
+          document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Helper function to get user by ID from cache
   const getUserById = (userId: string): User | null => {
@@ -72,6 +93,7 @@ export function HomePage() {
   // Load data on mount and when firebaseUser changes
   useEffect(() => {
     async function loadData() {
+      setLoadingTimelines(true);
       try {
         // Load current user profile from Firestore if authenticated
         if (firebaseUser) {
@@ -127,6 +149,8 @@ export function HomePage() {
       } catch (error) {
         console.error('Error loading data:', error);
         showToast('Error loading timelines', 'error');
+      } finally {
+        setLoadingTimelines(false);
       }
     }
 
@@ -274,8 +298,8 @@ export function HomePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
       <div className="flex">
-      {/* Navigation Rail - shown for all users (authenticated and unauthenticated) */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
+      {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
           onClick={() => navigate('/browse')}
@@ -298,27 +322,60 @@ export function HomePage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 ml-14">
-        {/* Header - simplified, no duplicate title/sign-in (TopNavBar handles unauthenticated) */}
+      {/* Main Content Area - full width on mobile, offset on md+ */}
+      <div className="flex-1 md:ml-14">
+        {/* Header - with mobile logo and navigation */}
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <Breadcrumb items={[{ label: 'Browse' }]} />
-              {firebaseUser && (
-                <UserProfileMenu
-                  onLogout={async () => {
-                    await signOutUser();
-                    navigate('/');
-                  }}
-                />
-              )}
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div className="flex items-center justify-between">
+              {/* Mobile: Logo + Title, Desktop: Breadcrumb */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/')}
+                  className="md:hidden p-1 hover:opacity-80 transition-opacity"
+                  title="Go to Landing Page"
+                >
+                  <img
+                    src="/assets/images/logo.png"
+                    alt="PowerTimeline"
+                    className="w-8 h-8 object-contain"
+                  />
+                </button>
+                <span className="md:hidden font-semibold" style={{ color: 'var(--page-text-primary)' }}>
+                  Browse
+                </span>
+                <div className="hidden md:block">
+                  <Breadcrumb items={[{ label: 'Browse' }]} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Mobile: Theme toggle (since nav rail is hidden) */}
+                <div className="md:hidden">
+                  <ThemeToggleButton />
+                </div>
+                {firebaseUser ? (
+                  <UserProfileMenu
+                    onLogout={async () => {
+                      await signOutUser();
+                      navigate('/');
+                    }}
+                  />
+                ) : (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
+                    style={{ backgroundColor: '#8b5cf6', color: '#fff' }}
+                  >
+                    Sign In
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-6 py-8">
+        <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Search Bar */}
         <div className="mb-8 relative">
           <div className="relative">
@@ -326,11 +383,12 @@ export function HomePage() {
               search
             </span>
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search timelines and users..."
-              className="w-full pl-14 pr-12 py-4 text-lg border-2 rounded-xl outline-none transition-all"
+              className="w-full pl-14 pr-20 py-4 text-lg border-2 rounded-xl outline-none transition-all"
               style={{
                 backgroundColor: 'var(--input-bg)',
                 borderColor: 'var(--input-border)',
@@ -345,6 +403,19 @@ export function HomePage() {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
+            {/* Keyboard shortcut hint - hidden on mobile */}
+            {!searchQuery && (
+              <span
+                className="absolute right-12 top-1/2 transform -translate-y-1/2 px-2 py-1 rounded text-xs font-mono hidden md:block"
+                style={{
+                  backgroundColor: 'var(--page-bg)',
+                  color: 'var(--page-text-secondary)',
+                  border: '1px solid var(--page-border)',
+                }}
+              >
+                /
+              </span>
+            )}
             {searchQuery && (
               <button
                 onClick={clearSearch}
@@ -549,7 +620,24 @@ export function HomePage() {
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recentlyEdited.map(timeline => (
+            {loadingTimelines ? (
+              // Loading skeletons
+              Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={`skeleton-recent-${index}`}
+                  className="border rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                >
+                  <Skeleton variant="text" width="70%" height={24} sx={{ bgcolor: 'var(--page-bg)' }} />
+                  <Skeleton variant="text" width="100%" sx={{ bgcolor: 'var(--page-bg)', mt: 1 }} />
+                  <Skeleton variant="text" width="80%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                  <div className="flex justify-between mt-3">
+                    <Skeleton variant="text" width="30%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                    <Skeleton variant="text" width="25%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                  </div>
+                </div>
+              ))
+            ) : recentlyEdited.map(timeline => (
               <div
                 key={`recent-${timeline.id}`}
                 className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
@@ -612,7 +700,24 @@ export function HomePage() {
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {popular.map(timeline => (
+            {loadingTimelines ? (
+              // Loading skeletons
+              Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={`skeleton-popular-${index}`}
+                  className="border rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                >
+                  <Skeleton variant="text" width="70%" height={24} sx={{ bgcolor: 'var(--page-bg)' }} />
+                  <Skeleton variant="text" width="100%" sx={{ bgcolor: 'var(--page-bg)', mt: 1 }} />
+                  <Skeleton variant="text" width="80%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                  <div className="flex justify-between mt-3">
+                    <Skeleton variant="text" width="30%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                    <Skeleton variant="text" width="25%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                  </div>
+                </div>
+              ))
+            ) : popular.map(timeline => (
               <div
                 key={`popular-${timeline.id}`}
                 className="border rounded-lg p-4 hover:shadow-lg transition-all relative"

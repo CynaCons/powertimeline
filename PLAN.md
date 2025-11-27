@@ -1278,7 +1278,7 @@ Create reusable test utilities that abstract authentication and navigation, maki
 
 ### v0.5.6 - Landing Page & Public Browsing Polish
 **Goal:** Improve landing page messaging, navigation, and public browsing experience
-**Status:** In Progress
+**Status:** Complete ✅
 
 **Legacy Code Cleanup (Critical):**
 - [x] Remove all getCurrentUser() calls from pages (use AuthContext instead)
@@ -1320,24 +1320,27 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [x] MUI theme responds dynamically via createAppTheme(isDarkMode)
 
 **Navigation & Search Fixes:**
-- [ ] Fix LandingPage timeline card navigation
-- [ ] Make search bar on LandingPage functional (redirect to /browse)
-- [ ] Update HomePage (/browse) to use Firestore exclusively
-- [ ] Verify CTA buttons work correctly
-- [ ] Test public timeline browsing end-to-end
+- [x] Fix LandingPage timeline card navigation (fetch from Firestore for correct ownerId)
+- [x] Make search bar on LandingPage functional (redirect to /browse on Enter)
+- [x] Update HomePage (/browse) to use Firestore exclusively
+- [x] Verify CTA buttons work correctly
+- [x] Test public timeline browsing end-to-end (E2E tests exist in tests/e2e/)
 
 **Hero Section Improvements:**
-- [ ] Update headline to: "Where events become understanding"
-- [ ] Add action verbs line: "Explore. Create. Visualize. Fork. Merge."
-- [ ] Add purpose statement: "Make sense of complex events, history, and politics by mapping them across time. Build a collaborative shared memory for what matters."
-- [ ] Swap CTA buttons: Orange "Explore Examples" (primary) + "Sign In" (secondary)
+- [x] Update headline to: "Where events become understanding"
+- [x] Add action verbs line: "Explore. Create. Visualize. Fork. Merge."
+- [x] Add purpose statement: "Make sense of complex events, history, and politics by mapping them across time. Build a collaborative shared memory for what matters."
+- [x] Swap CTA buttons: Orange "Explore Examples" (primary) + "Sign In" (secondary)
 
 **Additional Polish:**
-- [ ] Add keyboard shortcut hint for search (e.g., "/" to focus)
-- [ ] Add loading skeleton for timeline cards on /browse
-- [ ] Improve empty state when no search results found
-- [ ] Add hover preview tooltips on example timeline cards
-- [ ] Ensure mobile responsiveness on landing and browse pages
+- [x] Add keyboard shortcut hint for search ("/" to focus on both pages, hidden on mobile)
+- [x] Add loading skeleton for timeline cards (LandingPage and HomePage)
+- [x] Improve empty state when no search results found
+- [x] Add hover preview tooltips on example timeline cards (LandingPage)
+- [x] Ensure mobile responsiveness on landing and browse pages
+  - [x] LandingPage: Already uses MUI responsive breakpoints (xs/sm/md)
+  - [x] HomePage: Hide nav rail on mobile, add mobile header with logo/sign-in
+  - [x] EditorPage: Add "Desktop Recommended" modal notice on small screens
 
 ### v0.5.7 - Authentication Production Deployment
 **Goal:** Enable authentication enforcement in production

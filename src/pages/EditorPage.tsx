@@ -10,12 +10,47 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Snackbar, Alert } from '@mui/material';
+import { Box, Snackbar, Alert, useMediaQuery, useTheme } from '@mui/material';
 import { getTimeline, getUser, incrementTimelineViewCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
+
+// Mobile notice component
+function MobileNotice({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+      <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6 max-w-sm text-center">
+        <span className="material-symbols-rounded text-5xl text-[#8b5cf6] mb-4 block">
+          desktop_windows
+        </span>
+        <h2 className="text-xl font-semibold text-[#e6edf3] mb-2">
+          Desktop Recommended
+        </h2>
+        <p className="text-[#8d96a0] mb-4 text-sm leading-relaxed">
+          The timeline editor works best on larger screens.
+          You can still browse and view timelines, but editing features
+          require a desktop or tablet for the best experience.
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={onDismiss}
+            className="w-full px-4 py-2 bg-[#8b5cf6] text-white rounded-lg font-medium hover:bg-[#7c3aed] transition-colors"
+          >
+            Continue Anyway
+          </button>
+          <button
+            onClick={() => window.history.back()}
+            className="w-full px-4 py-2 border border-[#30363d] text-[#8d96a0] rounded-lg font-medium hover:border-[#8b5cf6] hover:text-[#e6edf3] transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function EditorPage() {
   const { timelineId, userId } = useParams<{ timelineId: string; userId: string }>();
@@ -25,6 +60,11 @@ export function EditorPage() {
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [showReadOnlyToast, setShowReadOnlyToast] = useState(false);
+  const [mobileNoticeDismissed, setMobileNoticeDismissed] = useState(false);
+
+  // Detect mobile/small screen
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
 
   useEffect(() => {
     async function loadTimeline() {
@@ -86,6 +126,10 @@ export function EditorPage() {
   // Render the editor/viewer with breadcrumbs
   return (
     <Box sx={{ minHeight: '100vh' }}>
+      {/* Mobile notice - show on small screens */}
+      {isMobile && !mobileNoticeDismissed && (
+        <MobileNotice onDismiss={() => setMobileNoticeDismissed(true)} />
+      )}
 
       <div className="relative">
         {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
