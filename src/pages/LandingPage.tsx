@@ -86,7 +86,7 @@ export function LandingPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#0d1117', color: '#e6edf3' }}>
+    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: '#0d1117', color: '#e6edf3' }}>
       {/* Top Navigation */}
       <TopNavBar />
 
@@ -117,6 +117,7 @@ export function LandingPage() {
           <Typography
             variant="h1"
             component="h1"
+            data-testid="landing-headline"
             gutterBottom
             sx={{
               fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem' },

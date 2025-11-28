@@ -296,7 +296,7 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
+    <div data-testid="browse-page" className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
       <div className="flex">
       {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
@@ -384,6 +384,7 @@ export function HomePage() {
             </span>
             <input
               ref={searchInputRef}
+              data-testid="browse-search-input"
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -512,12 +513,13 @@ export function HomePage() {
 
         {/* My Timelines Section - Only show when authenticated */}
         {firebaseUser && (
-        <section className="mb-12">
+        <section data-testid="my-timelines-section" className="mb-12">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
+            <h2 data-testid="my-timelines-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
               My Timelines ({myTimelines.length})
             </h2>
             <button
+              data-testid="create-timeline-button"
               onClick={handleCreateTimeline}
               className="px-4 py-2 text-white rounded-lg transition-colors font-medium"
               style={{ backgroundColor: '#8b5cf6' }}
@@ -594,8 +596,8 @@ export function HomePage() {
         )}
 
         {/* Statistics Section */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
+        <section data-testid="platform-stats-section" className="mb-12">
+          <h2 data-testid="platform-stats-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
@@ -617,8 +619,8 @@ export function HomePage() {
         </section>
 
         {/* Recently Edited Section */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
+        <section data-testid="recently-edited-section" className="mb-12">
+          <h2 data-testid="recently-edited-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {loadingTimelines ? (
               // Loading skeletons
@@ -697,8 +699,8 @@ export function HomePage() {
         </section>
 
         {/* Popular Timelines Section */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
+        <section data-testid="popular-timelines-section" className="mb-12">
+          <h2 data-testid="popular-timelines-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {loadingTimelines ? (
               // Loading skeletons

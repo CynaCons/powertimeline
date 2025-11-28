@@ -64,7 +64,7 @@ export function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div data-testid="admin-page" className="min-h-screen bg-gray-50 flex">
       {/* Navigation Rail */}
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
         {/* PowerTimeline logo at top - clickable to go home */}
@@ -95,7 +95,7 @@ export function AdminPage() {
         <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-lg font-semibold text-gray-900">Admin Panel</h1>
+              <h1 data-testid="admin-heading" className="text-lg font-semibold text-gray-900">Admin Panel</h1>
               {currentUser && (
                 <UserProfileMenu
                   onLogout={async () => {
@@ -126,22 +126,22 @@ export function AdminPage() {
         {/* Tab Content */}
         <main className="max-w-7xl mx-auto px-6 py-8">
           {activeTab === 'users' && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
+            <div data-testid="admin-users-tab" className="space-y-4">
+              <h2 data-testid="user-management-heading" className="text-xl font-semibold text-gray-900">User Management</h2>
               <UserManagementPanel />
             </div>
           )}
 
           {activeTab === 'statistics' && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Platform Statistics</h2>
+            <div data-testid="admin-statistics-tab" className="space-y-4">
+              <h2 data-testid="platform-statistics-heading" className="text-xl font-semibold text-gray-900">Platform Statistics</h2>
               <StatisticsDashboard />
             </div>
           )}
 
           {activeTab === 'activity' && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Admin Activity Log</h2>
+            <div data-testid="admin-activity-tab" className="space-y-4">
+              <h2 data-testid="activity-log-heading" className="text-xl font-semibold text-gray-900">Admin Activity Log</h2>
               <ActivityLogPanel />
             </div>
           )}

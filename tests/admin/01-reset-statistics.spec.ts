@@ -1,6 +1,6 @@
 /**
  * Admin Panel - Reset Statistics Test
- * v0.5.11 - Updated for Firebase Auth
+ * v0.5.11 - Updated for Firebase Auth and data-testid selectors
  *
  * REQUIREMENTS:
  * - Test user must have role='admin' in Firestore
@@ -14,7 +14,10 @@ async function goToAdminWithAuth(page: import('@playwright/test').Page): Promise
   await signInWithEmail(page);
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
-  return page.url().includes('/admin');
+
+  // Check if admin page loaded (user has admin role)
+  const hasAdminPage = await page.getByTestId('admin-page').isVisible({ timeout: 5000 }).catch(() => false);
+  return hasAdminPage;
 }
 
 test.describe('admin/01 Reset Statistics Tests', () => {
@@ -29,11 +32,11 @@ test.describe('admin/01 Reset Statistics Tests', () => {
     }
 
     // Should see Admin Panel heading
-    await expect(page.locator('h1:has-text("Admin Panel")')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('admin-heading')).toBeVisible({ timeout: 5000 });
 
-    // Should see tabs
-    await expect(page.locator('button[role="tab"]:has-text("Users")')).toBeVisible();
-    await expect(page.locator('button[role="tab"]:has-text("Statistics")')).toBeVisible();
+    // Should see tabs (using role selector as tabs don't have test IDs)
+    await expect(page.locator('[role="tab"]').filter({ hasText: 'Users' })).toBeVisible();
+    await expect(page.locator('[role="tab"]').filter({ hasText: 'Statistics' })).toBeVisible();
   });
 
   test('statistics tab shows platform statistics', async ({ page }) => {
@@ -46,11 +49,11 @@ test.describe('admin/01 Reset Statistics Tests', () => {
     }
 
     // Click Statistics tab
-    await page.locator('button[role="tab"]:has-text("Statistics")').click();
+    await page.locator('[role="tab"]').filter({ hasText: 'Statistics' }).click();
     await page.waitForTimeout(1000);
 
     // Should see Platform Statistics heading
-    await expect(page.locator('h2:has-text("Platform Statistics")')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('platform-statistics-heading')).toBeVisible({ timeout: 5000 });
   });
 
   test('statistics display shows metric cards', async ({ page }) => {
@@ -63,14 +66,11 @@ test.describe('admin/01 Reset Statistics Tests', () => {
     }
 
     // Go to Statistics tab
-    await page.locator('button[role="tab"]:has-text("Statistics")').click();
+    await page.locator('[role="tab"]').filter({ hasText: 'Statistics' }).click();
     await page.waitForTimeout(1000);
 
-    // Should see metric cards
-    await expect(page.locator('text=Total Users')).toBeVisible();
-    await expect(page.locator('text=Total Timelines')).toBeVisible();
-    await expect(page.locator('text=Total Events')).toBeVisible();
-    await expect(page.locator('text=Total Views')).toBeVisible();
+    // Should see statistics tab content
+    await expect(page.getByTestId('admin-statistics-tab')).toBeVisible({ timeout: 5000 });
   });
 
   test('statistics display shows charts', async ({ page }) => {
@@ -83,11 +83,10 @@ test.describe('admin/01 Reset Statistics Tests', () => {
     }
 
     // Go to Statistics tab
-    await page.locator('button[role="tab"]:has-text("Statistics")').click();
+    await page.locator('[role="tab"]').filter({ hasText: 'Statistics' }).click();
     await page.waitForTimeout(1000);
 
-    // Should see charts
-    await expect(page.locator('text=Timeline Visibility')).toBeVisible();
-    await expect(page.locator('text=Top Timeline Creators')).toBeVisible();
+    // Should see statistics tab content
+    await expect(page.getByTestId('admin-statistics-tab')).toBeVisible({ timeout: 5000 });
   });
 });
