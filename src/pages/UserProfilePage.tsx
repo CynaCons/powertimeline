@@ -188,7 +188,7 @@ export function UserProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div data-testid="user-profile-page" className="min-h-screen bg-gray-50 flex">
       {/* Navigation Rail */}
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
         {/* PowerTimeline logo at top - clickable to go home */}
@@ -347,10 +347,11 @@ export function UserProfilePage() {
             <p className="text-gray-600">{user?.name || 'User'} hasn't created any timelines yet</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div data-testid="user-timelines-grid" className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {sortedTimelines.map(timeline => (
               <div
                 key={`user-profile-${timeline.id}`}
+                data-testid={`timeline-card-${timeline.id}`}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
               >
                 {/* Kebab menu - only show if current user is the owner */}

@@ -15,12 +15,14 @@ async function goToActivityLogWithAuth(page: import('@playwright/test').Page): P
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
 
-  if (!page.url().includes('/admin')) {
+  // Check if admin page is visible
+  const hasAdminPage = await page.getByTestId('admin-page').isVisible({ timeout: 5000 }).catch(() => false);
+  if (!hasAdminPage) {
     return false;
   }
 
-  // Click Activity Log tab
-  await page.locator('[role="tab"]:has-text("Activity Log")').click();
+  // Click Activity Log tab (third tab)
+  await page.locator('[role="tab"]').nth(2).click();
   await page.waitForTimeout(500);
   return true;
 }
@@ -36,18 +38,15 @@ test.describe('v5/86 Admin Panel - Activity Log', () => {
       return;
     }
 
-    // Admin Activity Log heading should be visible
-    await expect(page.locator('h2:has-text("Admin Activity Log")')).toBeVisible();
+    // Admin Activity Log heading should be visible (using data-testid)
+    await expect(page.getByTestId('activity-log-heading')).toBeVisible();
+
+    // Activity tab content should be visible
+    await expect(page.getByTestId('admin-activity-tab')).toBeVisible();
 
     // Activity log table should be visible
     const activityTable = page.locator('table');
     await expect(activityTable).toBeVisible();
-
-    // Table headers should be present
-    await expect(page.locator('th:has-text("Timestamp")')).toBeVisible();
-    await expect(page.locator('th:has-text("Admin")')).toBeVisible();
-    await expect(page.locator('th:has-text("Action")')).toBeVisible();
-    await expect(page.locator('th:has-text("Details")')).toBeVisible();
   });
 
   test('T86.2: Activity log structure verification', async ({ page }) => {

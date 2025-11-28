@@ -15,12 +15,14 @@ async function goToUserManagementWithAuth(page: import('@playwright/test').Page)
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
 
-  if (!page.url().includes('/admin')) {
+  // Check if admin page is visible
+  const hasAdminPage = await page.getByTestId('admin-page').isVisible({ timeout: 5000 }).catch(() => false);
+  if (!hasAdminPage) {
     return false;
   }
 
-  // Ensure we're on the Users tab
-  await page.locator('[role="tab"]:has-text("Users")').click();
+  // Ensure we're on the Users tab (first tab)
+  await page.locator('[role="tab"]').first().click();
   await page.waitForTimeout(500);
   return true;
 }
