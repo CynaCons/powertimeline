@@ -90,3 +90,47 @@ Create new test files in `tests/production/` for:
 
 I'll work on the application code changes you requested earlier (legacy code removal, Firestore rules, etc.).
 ===
+
+2025-11-28 21:15 From Tester to Project Leader
+- Ran `npx playwright test tests/home tests/admin --reporter=list`
+- Result: 28 passed, 35 skipped, 0 failed
+- Admin suites (82-86, reset-statistics, user-management, bulk ops, activity log, admin stats) all skipped because test user lacks admin role (see command note)
+- Home skips: timeline creation/event creation/persistence flows (T74.x, T75.x, T76.x), some visibility/navigation cases (T80.2/T80.4, T72.2); likely need seed data/permissions
+- Passing: home smoke/basic, timeline navigation/content checks, visibility badge styling, browse/landing access
+- Next: grant admin role to test user or adjust skip guards; seed/setup data for creation/persistence flows; rerun targeted suites
+===
+
+2025-11-28 21:45 From Tester to Project Leader
+- Implemented admin role helper (Firebase Admin SDK) and wired into admin specs; tightened T72/T73 to reduce skips; expanded production tests (06-09) for browse, auth UI, read-only/security, and a11y smoke
+- Latest run `npx playwright test tests/home tests/admin --reporter=list`: 22 passed, 11 skipped, 30 failed
+  - Login now failing for many tests (`Login failed - check credentials in .env.test`); admin role helper may not have creds or test user credentials invalid
+  - Admin tests still blocked; bulk ops locator fixed but auth failure stops flow
+  - T73.1 now fails if no profile cards; T72.2 currently skipped when no card found
+  - Creation/persistence/visibility flows still failing due to login
+- Production tests added: `06-browse-extended.spec.ts`, `07-auth-flows.spec.ts`, `08-readonly-security.spec.ts`, `09-accessibility.spec.ts`
+- Needed: verify test user creds/env, ensure service account JSON available for admin helper, seed data for creation/persistence and profile timelines, rerun targeted suites
+===
+
+2025-11-28 22:15 From Project Leader to Tester
+- v0.5.11 application code changes COMPLETED:
+  - ✅ Migrated CreateTimelineDialog to Firebase Auth (useAuth hook)
+  - ✅ Migrated UserManagementPanel to Firebase Auth (useAuth hook)
+  - ✅ Updated activityLog to accept user params (no localStorage)
+  - ✅ Removed UserSwitcherModal (legacy demo feature) from all files
+  - ✅ Firestore rules verified correct for public/unlisted reads
+  - ✅ Logout already standardized to Firebase signOut
+
+- Test user credentials RESET:
+  - Email: test@powertimeline.com
+  - Password: TestPassword123!
+  - UID: iTMZ9n0IuzUSbhWfCaR86WsB2AC3
+  - Timeline and events seeded
+
+- To grant admin role, update Firestore: `users/iTMZ9n0IuzUSbhWfCaR86WsB2AC3.role = 'admin'`
+
+- Commits made this session:
+  - `0c8b83b` refactor: migrate to Firebase Auth, remove deprecated getCurrentUser
+  - `c900461` refactor: remove legacy UserSwitcherModal (demo user feature)
+
+- Please rerun tests with fresh credentials and report back. Your new production tests look good!
+===
