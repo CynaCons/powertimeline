@@ -9,6 +9,7 @@ import { UserProfilePage } from './pages/UserProfilePage'
 import { EditorPage } from './pages/EditorPage'
 import { AdminPage } from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 import { environment } from './config/environment'
 import { logger } from './utils/logger'
 import { performanceMonitor } from './utils/performanceMonitor'
@@ -73,6 +74,9 @@ function AppWithTheme() {
               <EditorPage />
             </ProtectedRoute>
           } />
+
+          {/* 404 catch-all route */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
