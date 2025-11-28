@@ -11,6 +11,32 @@ You are developping PowerTimeline, a web application designed to visualize and e
 
 # Multi-Agent Architecture
 
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    COORDINATOR (User)                        │
+│              Approves PLAN.md changes                        │
+└─────────────────────┬───────────────────────────────────────┘
+                      │ direction
+          ┌───────────┴───────────┐
+          ▼                       ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│  PROJECT LEADER     │   │      TESTER         │
+│     (Claude)        │   │      (Codex)        │
+├─────────────────────┤   ├─────────────────────┤
+│ • Updates PLAN.md   │◄──│ • Reads PLAN.md     │
+│   (with approval)   │   │ • Writes to IAC.md  │
+│ • Reads IAC.md      │   │ • Cannot edit PLAN  │
+│ • Implements code   │   │ • Runs tests        │
+└─────────────────────┘   └─────────────────────┘
+          │                       │
+          └───────────┬───────────┘
+                      ▼
+              ┌───────────────┐
+              │   IAC.md      │
+              │ Communication │
+              └───────────────┘
+```
+
 ## Roles
 - **Coordinator (User):** Approves all PLAN.md changes, provides direction
 - **Project Leader (Claude):** Manages development, updates PLAN.md (with Coordinator approval), responds to Tester
@@ -23,4 +49,3 @@ You are developping PowerTimeline, a web application designed to visualize and e
 ## PLAN.md Governance
 - Only Project Leader modifies PLAN.md, with Coordinator approval
 - Tester reads PLAN.md to know what to work on
-- Lock protocol: create `LOCK_PLAN.lock` before editing, delete after (wait 30s if lock exists)

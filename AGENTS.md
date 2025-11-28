@@ -34,6 +34,34 @@
 ## Roles & Coordination
 
 ### Multi-Agent Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    COORDINATOR (User)                        │
+│              Approves PLAN.md changes                        │
+└─────────────────────┬───────────────────────────────────────┘
+                      │ direction
+          ┌───────────┴───────────┐
+          ▼                       ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│  PROJECT LEADER     │   │      TESTER         │
+│     (Claude)        │   │      (Codex)        │
+├─────────────────────┤   ├─────────────────────┤
+│ • Updates PLAN.md   │◄──│ • Reads PLAN.md     │
+│   (with approval)   │   │ • Writes to IAC.md  │
+│ • Reads IAC.md      │   │ • Cannot edit PLAN  │
+│ • Implements code   │   │ • Runs tests        │
+└─────────────────────┘   └─────────────────────┘
+          │                       │
+          └───────────┬───────────┘
+                      ▼
+              ┌───────────────┐
+              │   IAC.md      │
+              │ Communication │
+              └───────────────┘
+```
+
+### Roles
 - **Coordinator (User):** Approves all PLAN.md changes, provides direction to both agents
 - **Project Leader (Claude):** Manages development, updates PLAN.md (with Coordinator approval), responds to Tester findings
 - **Tester (Codex - You):** Reads PLAN.md for tasks, reports status/findings in IAC.md
