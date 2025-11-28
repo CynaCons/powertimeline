@@ -19,7 +19,6 @@ import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail'
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { useAuth } from '../contexts/AuthContext';
-import { Breadcrumb } from '../components/Breadcrumb';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
@@ -326,25 +325,29 @@ export function HomePage() {
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4">
             <div className="flex items-center justify-between">
-              {/* Mobile: Logo + Title, Desktop: Breadcrumb */}
-              <div className="flex items-center gap-3">
+              {/* Brand: Logo + PowerTimeline BETA */}
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigate('/')}
-                  className="md:hidden p-1 hover:opacity-80 transition-opacity"
+                  className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
                   title="Go to Landing Page"
+                  data-testid="logo-button"
                 >
                   <img
                     src="/assets/images/logo.png"
                     alt="PowerTimeline"
                     className="w-8 h-8 object-contain"
                   />
+                  <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
+                    PowerTimeline
+                  </span>
+                  <span
+                    className="px-2 py-0.5 text-xs font-bold rounded"
+                    style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
+                  >
+                    BETA
+                  </span>
                 </button>
-                <span className="md:hidden font-semibold" style={{ color: 'var(--page-text-primary)' }}>
-                  Browse
-                </span>
-                <div className="hidden md:block">
-                  <Breadcrumb items={[{ label: 'Browse' }]} />
-                </div>
               </div>
               <div className="flex items-center gap-2">
                 {/* Mobile: Theme toggle (since nav rail is hidden) */}

@@ -998,6 +998,14 @@
 - [ ] Fix home tests (T71-T73) selector issues
 - [ ] Expand production tests (browse, auth, security, a11y)
 
+### v0.5.11.1 - UI Polish & Theme Defaults
+**Goal:** Consistent branding and dark theme as default
+
+- [x] Add "PowerTimeline BETA" branding to HomePage, UserProfilePage, AdminPage headers
+- [x] Set dark mode as default theme (was 'system')
+- [x] Theme preference persists in localStorage
+- [x] Theme toggle remembers user choice
+
 ### v0.5.12 - Platform Statistics Aggregation
 **Goal:** Move stats calculation from client-side scans to server-side aggregation
 

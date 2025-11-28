@@ -14,7 +14,6 @@ import { canAccessAdmin } from '../lib/adminUtils';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
-import { Breadcrumb } from '../components/Breadcrumb';
 import { UserManagementPanel } from '../components/admin/UserManagementPanel';
 import { StatisticsDashboard } from '../components/admin/StatisticsDashboard';
 import { ActivityLogPanel } from '../components/admin/ActivityLogPanel';
@@ -90,10 +89,31 @@ export function AdminPage() {
       {/* Main Content Area */}
       <div className="flex-1 ml-14">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <h1 data-testid="admin-heading" className="text-lg font-semibold text-gray-900">Admin Panel</h1>
+        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
+          <div className="max-w-7xl mx-auto px-6 py-3">
+            <div className="flex items-center justify-between">
+              {/* Brand: Logo + PowerTimeline BETA */}
+              <button
+                onClick={() => navigate('/')}
+                className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
+                title="Go to Landing Page"
+                data-testid="logo-button"
+              >
+                <img
+                  src="/assets/images/logo.png"
+                  alt="PowerTimeline"
+                  className="w-8 h-8 object-contain"
+                />
+                <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
+                  PowerTimeline
+                </span>
+                <span
+                  className="px-2 py-0.5 text-xs font-bold rounded"
+                  style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
+                >
+                  BETA
+                </span>
+              </button>
               {currentUser && (
                 <UserProfileMenu
                   onLogout={async () => {
@@ -103,10 +123,6 @@ export function AdminPage() {
                 />
               )}
             </div>
-            <Breadcrumb items={[
-              { label: 'Home', href: '/browse' },
-              { label: 'Admin' }
-            ]} />
           </div>
         </header>
 

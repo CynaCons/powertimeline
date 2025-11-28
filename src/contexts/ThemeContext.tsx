@@ -9,10 +9,10 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  isDarkMode: false,
+  isDarkMode: true, // Default to dark mode
   toggleTheme: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
   setTheme: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-  themePreference: 'system'
+  themePreference: 'dark'
 });
 
 interface ThemeProviderProps {
@@ -20,7 +20,7 @@ interface ThemeProviderProps {
 }
 
 export const ChronoThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Get initial theme preference from localStorage or default to system
+  // Get initial theme preference from localStorage or default to dark
   const [themePreference, setThemePreference] = useState<'light' | 'dark' | 'system'>(() => {
     try {
       const saved = localStorage.getItem('theme-preference');
@@ -30,7 +30,7 @@ export const ChronoThemeProvider: React.FC<ThemeProviderProps> = ({ children }) 
     } catch (error) {
       console.warn('Failed to read theme preference from localStorage:', error);
     }
-    return 'system';
+    return 'dark'; // Default to dark mode
   });
 
   // Track system preference
