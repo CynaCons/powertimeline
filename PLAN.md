@@ -27,15 +27,16 @@
 - ✅ Vision & positioning update, OG tags, 404 page (v0.5.10)
 
 ### Active Work (v0.5.11)
-- 🔄 Move stats calculation from client-side to server-side
-- 🔄 Create Cloud Functions for real-time stat updates
-- 🔄 Add Firestore `stats/platform` document
+- 🔄 Fix 69 broken tests (localStorage→Firebase Auth migration)
+- 🔄 Skip/remove admin tests (architecturally incompatible)
+- 🔄 Update home tests for unauthenticated browsing
+- 🔄 Clean up legacy localStorage code
 
 ### Test Status
-- **Running:** 287 tests
-- **Passing:** ~220 tests (77%)
-- **Failing:** ~67 tests (23% - mostly admin panel and auth tests)
-- **Coverage Areas:** Foundation ✅ | Layout ✅ | Cards ✅ | Zoom ✅ | Minimap 🟡 | Home Page 🟡 | Admin Panel ❌
+- **Total:** 296 tests in 92 files
+- **Passing:** ~227 tests (77%)
+- **Failing:** ~69 tests (23% - admin panel + home page auth tests)
+- **Coverage Areas:** Foundation ✅ | Layout ✅ | Cards ✅ | Zoom ✅ | Minimap ✅ | Production ✅ | Home Page 🟡 | Admin Panel ❌
 
 ### Quick Links
 - [Requirements Dashboard](docs/SRS_INDEX.md) - Complete requirements overview
@@ -1408,8 +1409,60 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Update favicon to match dark theme/purple accent (deferred)
 - [ ] Add analytics events (deferred to v0.6.x)
 
-### v0.5.11 - Platform Statistics Aggregation
-**Goal:** Move stats calculation from client-side scans to server-side aggregation (CR from CHANGE_REQUEST.md)
+### v0.5.11 - Test Stabilization
+**Goal:** Fix 69 broken tests caused by localStorage→Firebase Auth migration
+
+**Context:** The v0.5.4-v0.5.6 migration from localStorage demo users to Firebase Auth broke tests that relied on:
+- `localStorage.setItem('powertimeline_current_user', ...)` for user switching
+- Demo users (Alice, Bob, Charlie, cynacons) that no longer exist
+- LocalStorage-based user/timeline data
+
+**Test Status (296 total tests in 92 files):**
+- Admin tests: 29 failing (100%) - architecturally incompatible
+- Home tests: 40 failing (~89%) - rely on demo users
+- Editor tests: ~167 tests - mostly working (layout/zoom/cards)
+- Production tests: 11 passing (100%)
+
+**Phase 1: Admin Tests (29 tests, 6 files)**
+- [ ] Mark admin tests as skipped with clear TODO explaining Firebase Auth incompatibility
+- [ ] Create `tests/admin/README.md` documenting why tests are skipped
+- [ ] Consider: Delete admin tests entirely if admin panel is low priority
+- Files: `01-reset-statistics.spec.ts`, `82-86.spec.ts`
+
+**Phase 2: Home Tests Cleanup (40 tests, 8 files)**
+- [ ] Remove localStorage user switching from tests (no more `powertimeline_current_user`)
+- [ ] Update tests to work with unauthenticated browsing (public timelines)
+- [ ] For tests requiring auth: skip with TODO or mock Firebase Auth
+- [ ] Update `tests/home/01-smoke.spec.ts` - remove demo user assumptions
+- [ ] Update `tests/home/72-timeline-navigation.spec.ts` - use Firestore data
+- [ ] Update `tests/home/73-timeline-content-verification.spec.ts` - use public timelines
+- [ ] Skip or rewrite `tests/home/74-76*.spec.ts` (timeline/event creation needs auth)
+- [ ] Update `tests/home/80-timeline-visibility-controls.spec.ts`
+
+**Phase 3: Test Utilities Cleanup**
+- [ ] Update `tests/utils/timelineTestUtils.ts` - remove localStorage references
+- [ ] Update `tests/utils/timelineTestHelper.ts` - remove demo user logic
+- [ ] Create helper for loading public test timelines from Firestore
+
+**Phase 4: Legacy Code Cleanup (from CHANGE_REQUEST.md)**
+- [ ] Remove/deprecate `getCurrentUser()` in `src/lib/homePageStorage.ts`
+- [ ] Remove `initializeUsers()` references
+- [ ] Clean up `src/components/UserSwitcherModal.tsx` - remove demo user switching
+- [ ] Update `src/services/migration.ts` - remove localStorage user migration
+- [ ] Remove localStorage user clearing in `src/main.tsx` (lines 30-32)
+- [ ] Clean up `src/components/TopNavBar.tsx` localStorage reference (line 115)
+
+**Phase 5: Verification**
+- [ ] Run full test suite: `npx playwright test`
+- [ ] Target: <10 failing tests (down from 69)
+- [ ] Update `docs/TESTS.md` with new test counts
+- [ ] Commit and push
+
+**Deferred to v0.5.12:**
+- Platform Statistics Aggregation (Cloud Functions)
+
+### v0.5.12 - Platform Statistics Aggregation
+**Goal:** Move stats calculation from client-side scans to server-side aggregation
 
 **Firestore Schema:**
 - [ ] Create `stats/platform` document with fields: totalTimelines, totalUsers, totalEvents, totalViews, lastUpdated
@@ -1421,17 +1474,11 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Create Cloud Function: onEventWrite - update totalEvents count
 - [ ] Create Cloud Function: onUserCreate - increment totalUsers
 - [ ] Create Cloud Function: onViewIncrement - increment totalViews
-- [ ] Alternative: Scheduled function to recalculate stats periodically (fallback)
 
 **Client-Side Updates:**
 - [ ] Update getPlatformStats() in firestore.ts to read from stats doc
 - [ ] Add client-side caching with 5-minute TTL for stats
-- [ ] Add graceful degradation: hide stats widget or show cached if unavailable
-
-**Deployment & Testing:**
-- [ ] Deploy Cloud Functions to production
-- [ ] Test stats accuracy after CRUD operations
-- [ ] Monitor function execution and costs
+- [ ] Add graceful degradation: hide stats widget if unavailable
 
 ## Phase 3: Collaboration Features (v0.6.x)
 
