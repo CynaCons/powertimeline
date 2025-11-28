@@ -1469,6 +1469,31 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - UID: iTMZ9n0IuzUSbhWfCaR86WsB2AC3
 - Firestore: Set `users/{UID}.role = 'admin'` for admin panel tests
 
+---
+
+### Tester Agent Tasks (Delegated to Codex)
+
+**Task A: Fix Failing Tests** `[TESTER]`
+- [ ] Fix admin tests (82-86) - skip logic or grant admin role to test user
+- [ ] Fix T71.5 logo visibility test - verify `logo-button` data-testid works
+- [ ] Fix T72 timeline navigation tests - update URLs/selectors as needed
+- [ ] Fix T73 timeline content verification - verify cynacons has public timelines
+
+**Task B: Expand Production Tests** `[TESTER]`
+- [ ] Add browse page tests (search, filters, timeline cards)
+- [ ] Add public timeline viewing tests (no auth required)
+- [ ] Add auth flow tests (sign up, sign in, sign out)
+- [ ] Add read-only mode tests (non-owner viewing timelines)
+- [ ] Add security probe tests (unauthenticated write attempts, permission errors)
+- [ ] Add console/network hygiene tests (no failed API calls, no sensitive data)
+- [ ] Add accessibility smoke tests (keyboard nav, headings, contrast)
+
+**Task C: Report Findings** `[TESTER]`
+- [ ] Report all findings in IAC.md
+- [ ] Include test results, blockers, and suggested fixes
+
+---
+
 **Deferred to v0.5.12:**
 - Platform Statistics Aggregation (Cloud Functions)
 
