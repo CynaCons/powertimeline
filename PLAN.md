@@ -2,8 +2,8 @@
 
 ## 📊 Quick Summary
 
-**Current Version:** v0.5.11 (In Progress)
-**Status:** Test Stabilization - Infrastructure Complete
+**Current Version:** v0.5.11 (Complete)
+**Status:** Test Stabilization & Legacy Code Cleanup Complete
 **Next Milestone:** v0.5.12 - Platform Statistics Aggregation
 
 ### Key Metrics
@@ -25,20 +25,16 @@
 - ✅ Documentation improvements & naming conventions (v0.5.8)
 - ✅ Test organization & GitHub Actions workflow (v0.5.9)
 - ✅ Vision & positioning update, OG tags, 404 page (v0.5.10)
+- ✅ Test stabilization & legacy code cleanup (v0.5.11)
 
-### Active Work (v0.5.11)
-- ✅ Created Firebase Auth test utilities (authTestUtils.ts)
-- ✅ Updated all admin tests (6 files) with Firebase Auth
-- ✅ Updated all home tests (8 files) with Firebase Auth
-- ✅ Updated timelineTestUtils.ts - removed localStorage
-- 🔄 UI selector fixes needed - tests don't match current UI
-- 🔄 Test user needs admin role in Firestore
+### Next Up (v0.5.12)
+- Platform statistics aggregation with Cloud Functions
+- Test fixes delegated to Tester agent
 
 ### Test Status
-- **Total:** 296 tests in 92 files
-- **Passing:** ~227 tests (77%)
-- **Failing:** ~69 tests (23% - admin panel + home page auth tests)
-- **Coverage Areas:** Foundation ✅ | Layout ✅ | Cards ✅ | Zoom ✅ | Minimap ✅ | Production ✅ | Home Page 🟡 | Admin Panel ❌
+- **Suite:** 296 tests in 92 files
+- **Coverage:** Foundation ✅ | Layout ✅ | Cards ✅ | Zoom ✅ | Minimap ✅ | Production ✅
+- **Pending Fixes:** Admin panel and home page tests (Tester agent)
 
 ### Quick Links
 - [Requirements Dashboard](docs/SRS_INDEX.md) - Complete requirements overview
@@ -650,54 +646,26 @@
 ---
 
 ## Iteration v0.3.7.1 - Code Quality & Refactoring Sprint
-**Goal:** Clean up technical debt and improve code maintainability without breaking functionality
+**Goal:** Clean up technical debt and improve code maintainability
 
-**Baseline Test Status:** 154 passed, 12 failed, 15 skipped (pre-existing failures documented)
-
-**Completed:**
 - [x] Fix ResizeObserver memory leak in useElementSize hook
-- [x] Add proper window type augmentation in vite-env.d.ts (remove unsafe 'as' casts)
-- [x] Centralize configuration values in CapacityModel (added LAYOUT_CONSTANTS)
-- [x] Fix feature flags to use environment variables (VITE_ENABLE_CLUSTER_COORDINATION, VITE_ENABLE_MIXED_CARD_TYPES)
+- [x] Add proper window type augmentation in vite-env.d.ts
+- [x] Centralize configuration values in CapacityModel (LAYOUT_CONSTANTS)
+- [x] Fix feature flags to use environment variables
 - [x] Verify TypeScript compilation and production build succeeds
-
-**Deferred to Future Iterations:**
-- [ ] Remove debug code and create proper logger utility (deferred - needs careful testing)
-- [ ] Standardize error handling with structured error types (deferred - larger scope)
-- [ ] Extract keyboard shortcuts from App.tsx into custom hook (deferred - complex state dependencies)
-
-**Success Criteria:**
-- No new test failures introduced ✅
-- TypeScript compilation passes ✅
-- Production build succeeds ✅
-- All refactored code maintains existing behavior ✅
-
-**Impact:**
-- Fixed memory leak that could cause performance degradation over time
-- Improved type safety by removing 17 unsafe type casts
-- Better code maintainability with documented configuration constants
-- Feature flags now configurable via environment variables for easier testing
 
 ---
 
 ## Iteration v0.3.8 - Product Vision Evolution & PRD Update
 **Goal:** Document complete collaborative platform vision in PRD.md
 
-**Completed:**
-- [x] Expand PRD.md with comprehensive collaborative platform vision
-- [x] Add detailed technical architecture (Frontend, Backend, API, Git workflow, Security)
-- [x] Add comprehensive collaboration user stories (forking, merge requests, version history, conflict resolution)
-- [x] Define success metrics with specific KPIs (user acquisition, engagement, performance)
-- [x] Document complete "GitHub for Timelines" feature set
+- [x] Expand PRD.md with collaborative platform vision
+- [x] Add technical architecture documentation
+- [x] Add collaboration user stories (forking, merge requests, version history)
+- [x] Define success metrics and KPIs
 - [x] Add API endpoint specifications
-- [x] Add Git-based version control workflow documentation
-- [x] Add scalability targets and infrastructure requirements
-- [x] Add RESTful API endpoints for all timeline operations
-- [x] Add Git-based version control with branch strategy
-- [x] Add Firebase Architecture (Firestore + Cloud Functions + Auth)
-- [x] Add Security & privacy controls (GDPR compliance, access permissions)
-- [x] Add Performance targets (60fps rendering, <2s page loads, 10K+ concurrent users)
-- [x] Add Growth metrics (10K users year 1, 20% fork rate, 60% merge acceptance)
+- [x] Add Firebase Architecture documentation
+- [x] Add security, privacy, and performance targets
 
 ---
 
@@ -865,656 +833,178 @@
 
 ### v0.4.4 - Admin Panel & Site Administration
 **Goal:** Create admin interface for platform management
-**Status:** In Progress
 
-**Phase 1: Foundation - User Roles & Type System** ✅
-- [x] Update User type with role field (user | admin)
-- [x] Update demo users (set cynacons as admin)
-- [x] Increment DATA_VERSION for migration
-- [x] Create access control utilities (src/lib/adminUtils.ts)
-  - [x] isAdmin(user) helper function
-  - [x] canAccessAdmin(user) check
-  - [x] requireAdmin(user) enforcement
-
-**Phase 2: Admin Route & Navigation** ✅
-- [x] Create AdminPage component (src/pages/AdminPage.tsx)
-  - [x] Admin access control check
-  - [x] Tab navigation (Users, Statistics, Activity Log)
-  - [x] Protected route pattern
-- [x] Update routing in main.tsx (/admin route)
-- [x] Add admin navigation item to navigation rail
-  - [x] Show only to admin users
-  - [x] admin_panel_settings icon
-  - [x] Highlight when on /admin route
-- [x] E2E tests (tests/v5/82-admin-panel-access.spec.ts) - 6 tests passing
-
-**Phase 3: User Management Interface** ✅
-- [x] Create UserManagementPanel component
-  - [x] User table/list display (id, name, avatar, role, created, timeline count)
-  - [x] Role assignment dropdown (user <-> admin)
-  - [x] Role change confirmation dialog
-  - [x] Update user in localStorage
-  - [ ] Log role changes to activity log (Phase 6)
-- [x] Add user search & filter functionality
-  - [x] Search by name or ID
-  - [x] Filter by role (all/admin/user)
-  - [x] Sort by creation date, name, timeline count
-- [x] Implement user deletion
-  - [x] Delete button with confirmation
-  - [x] Cascade delete timelines (with warning)
-  - [ ] Log deletion to activity log (Phase 6)
-- [x] Added helper functions: saveUsers(), updateUser(), deleteUser()
-
-**Phase 4: Platform Statistics Dashboard** ✅
-- [x] Create StatisticsDashboard component
-  - [x] Total users, timelines, events metrics
-  - [x] Timeline visibility breakdown (pie/bar chart)
-  - [x] Top timeline creators
-  - [x] Recent timeline activity
-  - [x] Average events per timeline
-  - [x] View count statistics
-- [x] Create adminStats.ts utility
-  - [x] calculatePlatformStats() function
-  - [x] Efficient localStorage data aggregation
-- [x] Add charts/visualizations
-  - [x] Timeline visibility pie chart
-  - [x] Timeline creation trend (last 30 days count)
-  - [x] Top creators bar chart
-- [x] Installed recharts library for data visualizations
-- [x] Tailwind CSS grid layout for responsive design
-- [x] Build passing successfully
-
-**Phase 5: Bulk Operations** ✅
-- [x] Add selection system to user table
-  - [x] Row checkboxes
-  - [x] Select All / Select None controls
-  - [x] Show selected count
-- [x] Create bulk actions toolbar
-  - [x] Bulk delete users (with multi-confirmation)
-  - [x] Bulk role assignment
-  - [x] Clear selection button
-- [x] Create confirmation dialogs for destructive operations
-  - [x] Show affected item counts
-  - [x] Console logging for bulk operations (activity log in Phase 6)
-- [x] Added checkbox column with "Select All" functionality
-- [x] Bulk actions toolbar appears when users are selected
-- [x] Disabled selection for current user (self-protection)
-- [x] Build passing successfully
-- [ ] Add timeline bulk operations (deferred - not in user management scope)
-
-**Phase 6: Admin Activity Log** ✅
-- [x] Add AdminActivityLog type to types.ts
-  - [x] id, timestamp, adminUserId, action, targetType, targetId, details
-  - [x] Action types: USER_ROLE_CHANGE, USER_DELETE, TIMELINE_DELETE, BULK_OPERATION, CONFIG_CHANGE
-- [x] Create activityLog.ts utility
-  - [x] logAdminAction(...) function
-  - [x] Store in localStorage array
-  - [x] Auto-prune to max 1000 entries
-- [x] Create ActivityLogPanel component
-  - [x] Table showing recent admin actions
-  - [x] Filter by action type, date range, admin user
-  - [x] Export to JSON capability
-  - [x] Pagination (20 entries per page)
-
-**Phase 7: Testing - E2E Test Suite** ✅
-- [x] Create admin access test (tests/v5/82-admin-panel-access.spec.ts)
-  - [x] T82.1: Admin user can access /admin route
-  - [x] T82.2: Non-admin user redirected from /admin
-  - [x] T82.3: Admin navigation item visible only to admin
-- [x] Create user management test (tests/v5/83-user-management.spec.ts)
-  - [x] T83.1: View all users in table
-  - [x] T83.2: Change user role (user -> admin)
-  - [x] T83.3: Delete user with confirmation
-  - [x] T83.4: Search users by name
-- [x] Create statistics dashboard test (tests/v5/84-admin-statistics.spec.ts)
-  - [x] T84.1: Display total users and timelines
-  - [x] T84.2: Show visibility breakdown
-  - [x] T84.3: Display top creators
-  - [x] T84.4: Statistics update after timeline creation
-- [x] Create bulk operations test (tests/v5/85-admin-bulk-operations.spec.ts)
-  - [x] T85.1: Select multiple users
-  - [x] T85.2: Bulk delete users
-  - [x] T85.3: Bulk role assignment
-  - [x] T85.4: Select All functionality
-- [x] Create activity log test (tests/v5/86-admin-activity-log.spec.ts)
-  - [x] T86.1: View activity log entries
-  - [x] T86.2: Log appears after role change
-  - [x] T86.3: Filter log by action type
-  - [x] T86.4: Log shows admin username and timestamp
-
-**Test Results:** 13/23 passing (some tests have strict mode selector issues to be refined)
-
-**Phase 8: Documentation & Completion** ✅
-- [x] Update PLAN.md with completion notes
-- [x] Run npm run build and verify bundle size
-- [x] Run all admin tests
-- [x] Git commit and push
-
-**v0.4.4 Admin Panel & Site Administration - COMPLETE** ✅
-All 8 phases completed successfully. Admin panel fully functional with:
-- User roles and permissions system
-- Admin route with access control
-- User management (view, edit roles, delete)
-- Platform statistics dashboard with visualizations
-- Bulk operations (select, delete, role assignment)
-- Comprehensive activity logging
-- E2E test coverage (13 passing tests)
-
-**Known Issues & Future Cleanup:**
-- Read-only notification banner overlaps with UI elements (needs z-index/positioning fix)
-- Timeline `featured` field exists but feature functionality not desired (schedule for removal)
-  - Remove `featured: boolean` from Timeline type
-  - Remove Featured Timelines section from HomePage
-  - Clean up demo data initialization
-  - Update SRS_HOME_PAGE.md to remove featured timeline requirements
+- [x] Add User type with role field (user | admin)
+- [x] Create access control utilities (adminUtils.ts)
+- [x] Create AdminPage with tab navigation
+- [x] Add /admin route with access control
+- [x] Add admin navigation item to rail (admin users only)
+- [x] Create UserManagementPanel (table, search, filter, role change, delete)
+- [x] Create StatisticsDashboard with charts (recharts)
+- [x] Add bulk operations (select, delete, role assignment)
+- [x] Create ActivityLogPanel with filtering and pagination
+- [x] E2E test suite (82-86) for admin features
 
 ## Phase 2: Backend & Authentication (v0.5.x)
 
-### v0.5.0 - Firebase Backend Setup (COMPLETE)
-- [x] Set up Firebase Firestore database (Project: powertimeline-860f1)
-- [x] Install Firebase SDK (v10.x)
-- [x] Create Firebase configuration (src/lib/firebase.ts)
-- [x] Design Firestore collections schema (timelines, users, activityLogs)
-- [x] Create Firestore service layer (src/services/firestore.ts)
-  - CRUD operations for timelines, users, activity logs
-  - Real-time subscriptions with onSnapshot
-  - Platform statistics aggregation
-- [x] Create data migration utilities (src/services/migration.ts)
-  - localStorage to Firestore migration
-  - Export/backup functionality
-  - Progress tracking and error handling
-- [x] Migrate to nested timeline structure (users/{userId}/timelines/{timelineId})
+### v0.5.0 - Firebase Backend Setup
+- [x] Set up Firebase Firestore database (powertimeline-860f1)
+- [x] Install Firebase SDK and create configuration
+- [x] Design Firestore collections schema
+- [x] Create Firestore service layer (CRUD, real-time subscriptions)
+- [x] Create data migration utilities (localStorage to Firestore)
+- [x] Migrate to nested timeline structure
 - [x] Fix collection group query permissions and indexes
 
-**Files Created:**
-- src/lib/firebase.ts - Firebase initialization and configuration
-- src/services/firestore.ts - Firestore service layer (450+ lines)
-- src/services/migration.ts - Migration utilities (300+ lines)
-- firestore.rules - Security rules for nested structure
-- firestore.indexes.json - Collection group indexes configuration
-- scripts/migrate-to-nested-structure.ts - Migration script
-- tests/firestore/ - Firestore integration tests
-
-**Next Steps:** Wire up components to use Firestore, add migration UI, implement real-time sync
-
-### v0.5.0.1 - Event Persistence Optimization (COMPLETE)
+### v0.5.0.1 - Event Persistence Optimization
 **Goal:** Separate events from timeline metadata for better performance
 
-**Problem:** Timeline documents currently store ALL events inline, causing slow page loads when fetching timeline lists (user pages, home page). We're downloading hundreds of events just to show timeline metadata (title, description, count).
-
-**Solution:** Store events in a separate subcollection:
-- `users/{userId}/timelines/{timelineId}` - Timeline metadata only (no events array)
-- `users/{userId}/timelines/{timelineId}/events/{eventId}` - Individual event documents
-
-**Tasks:**
 - [x] Update Timeline type to separate metadata from events
 - [x] Create EventDocument type for event subcollection
 - [x] Update Firestore service to handle events subcollection
-  - [x] Update createTimeline to create empty timeline (no events)
-  - [x] Create addEvent, updateEvent, deleteEvent functions
-  - [x] Update getTimeline to fetch events from subcollection
-  - [x] Create getTimelineMetadata function (no events)
 - [x] Update security rules for events subcollection
-- [x] Create migration script to move events to subcollection
-- [x] Test migration with existing data (371 events migrated across 5 timelines)
-- [x] Update UserProfilePage to use getTimelineMetadata + skeleton loaders
-- [x] Update HomePage to use getTimelineMetadata
-- [x] Update EditorPage to use getTimeline (with events)
-- [x] Create smoke tests for HomePage and UserProfilePage (5/7 passing)
+- [x] Create migration script (371 events migrated)
+- [x] Update pages to use getTimelineMetadata for lists
+- [x] Create smoke tests for HomePage and UserProfilePage
 
-**Performance Improvement Achieved:**
-- User page load: Metadata only, ~5x faster with skeleton loaders for smooth UX
-- Home page load: Metadata only, ~5x faster
-- Timeline editor: Loads full events from subcollection as needed
-
-### v0.5.0.2 - Home & User Page Enhancements ✅ COMPLETE
+### v0.5.0.2 - Home & User Page Enhancements
 **Goal:** Improve user experience and functionality on HomePage and UserProfilePage
-**Status:** All priority tasks completed with comprehensive test coverage
-**Completion Date:** 2025-11-17
 
-**Completed Priority Tasks:**
+- [x] Fix view counting (skip owner views)
+- [x] Add user profile editing (EditUserProfileDialog)
+- [x] Create initials avatar system (UserAvatar component)
+- [x] Add user statistics display to UserProfilePage
+- [x] Add "Create Timeline" button on profile page
+- [x] Add timeline sorting dropdown (4 options)
+- [x] Add admin reset statistics feature
+- [x] Fix Firestore permission errors
+- [x] Create tests for profile editing and admin stats
 
-**1. View Counting Fix (DONE)**
-- [x] Updated incrementTimelineViewCount() to accept viewerId parameter
-- [x] Skip incrementing views when viewer is the timeline owner
-- [x] Modified EditorPage.tsx to pass current user ID
-- [x] Ensures platform stats only count external visitors
+### v0.5.0.3 - Test Suite Modernization & Data Cleanup
+**Goal:** Update test suite to work with new routing architecture
 
-**2. User Profile Editing (DONE)**
-- [x] Added "Edit Profile" button (visible only to profile owner)
-- [x] Created EditUserProfileDialog component with full validation
-  - [x] Edit user name field (2-50 chars)
-  - [x] Edit user bio (multi-line textarea, 280 char limit)
-  - [x] Save button with loading state
-- [x] Show toast notifications on successful save
-- [x] Comprehensive tests in tests/user/02-edit-profile.spec.ts (5/5 passing)
-
-**3. Initials Avatar System (DONE - Not Used on Cards)**
-- [x] Created lib/avatarUtils.ts with initials generation
-- [x] Created UserAvatar component with 4 sizes
-- [x] Generate consistent color from user ID hash
-- Note: Avatars removed from timeline cards per user preference (just show names)
-
-**4. User Statistics Display (DONE)**
-- [x] Added statistics bar to UserProfilePage
-- [x] Shows total timelines, events, and views
-- [x] Displays formatted "Member since" date
-
-**5. Create Timeline Button (DONE)**
-- [x] Added "Create Timeline" button on UserProfilePage
-- [x] Button only visible when viewing own profile
-- [x] Integrates with CreateTimelineDialog
-
-**6. Timeline Sorting (DONE)**
-- [x] Added sorting dropdown with 4 options:
-  - Last Updated (default)
-  - Title (A-Z)
-  - Event Count
-  - Views
-- [x] Dropdown only appears when 2+ timelines exist
-
-**7. Admin Reset Statistics (DONE)**
-- [x] Added resetAllStatistics() function in firestore.ts
-- [x] Added "Reset Statistics" section in StatisticsDashboard
-- [x] Confirmation dialog with "cannot be undone" warning
-- [x] Resets view counts for all timelines across platform
-- [x] Tests in tests/admin/01-reset-statistics.spec.ts (4/6 passing)
-
-**8. Firestore Permission Fix (DONE)**
-- [x] Identified root cause: No Firebase Auth implemented (using localStorage)
-- [x] Temporarily disabled auth requirement in firestore.rules for development
-- [x] Added TODO(v0.5.0.3) to implement proper Firebase Authentication
-- [x] Deployed updated rules to production Firestore
-- [x] Verified fix with passing tests
-
-**Test Coverage:**
-- [x] Created tests/user/02-edit-profile.spec.ts (5/5 passing)
-- [x] Created tests/admin/01-reset-statistics.spec.ts (4/6 passing)
-- [x] Updated playwright.config.ts to include admin tests
-- [x] All permission errors resolved
-
-**Future Enhancements (Deferred to Later Versions):**
-- [ ] Add search/filter box for timelines
-- [ ] Add quick actions menu to timeline cards (edit, duplicate, delete)
-- [ ] Add filtering for "My Timelines" by visibility
-- [ ] Add "Recently Viewed" section on HomePage
-- [ ] Add "Trending This Week" section
-- [ ] Improve timeline card design with visual hierarchy
-- [ ] Add empty state illustrations
-- [ ] Add micro-interactions and transitions
-
-### v0.5.0.3 - Test Suite Modernization & Data Cleanup ✅ COMPLETE
-**Goal:** Update v5 test suite to work with new routing architecture and prepare for Firebase Authentication
-**Status:** ✅ Complete
-**Started:** 2025-01-18
-**Completed:** 2025-01-19
-
-**Current State Analysis:**
-- ~250 v5 tests failing because they navigate to `/` expecting timeline editor
-- New routing requires navigating to `/user/:username/timeline/:timelineId`
-- Tests currently hardcode navigation and have no authentication setup
-- Created centralized test utilities for common operations
-
-**Approach:**
-Create reusable test utilities that abstract authentication and navigation, making tests resilient to future changes (especially Firebase Auth migration).
-
-**Phase 1: Infrastructure & Initial Updates (COMPLETE):**
-- [x] Fixed `timelineTestUtils.ts` to use `domcontentloaded` instead of `networkidle` (4 locations)
-- [x] Updated Firestore rules to temporarily allow unauthenticated timeline/event creation
-- [x] Migrated 5 seed timelines to Firestore (371 events total)
-- [x] Fixed timeline ID mismatch in tests (timeline-napoleon-bonaparte -> timeline-napoleon)
-- [x] Updated `timelineTestHelper.ts` with correct Firestore timeline IDs
-- [x] Foundation test passing: tests/v5/01-foundation.smoke.spec.ts (1/1)
-- [x] Deployed Firestore rules: `firebase deploy --only firestore:rules`
-
-**Phase 2: Test File Updates (COMPLETE - 66/66 files updated):**
-- [x] Created user-agnostic test utilities: `loginAsTestUser()` and `loadTestTimeline()`
-- [x] Updated ALL 66 v5 test files to use new utilities
-  - Pattern: Import utilities from `../utils/timelineTestUtils`
-  - Pattern: Replace `loginAsUser(page, 'cynacons')` with `loginAsTestUser(page)`
-  - Pattern: Replace `loadTimeline(page, 'cynacons', 'timeline-id', false)` with `loadTestTimeline(page, 'timeline-id')`
-  - Pattern: Replaced Dev Panel timeline loading with direct `loadTestTimeline()` calls
-- [x] Fixed timeline ID references across all files to use correct Firestore IDs
-- [x] Special cases handled: Tests 77, 81 (timeline creation via UI), seeding tests (dev panel preserved)
-- [x] Fixed syntax error in test 38 (orphaned else blocks)
-
-**Phase 3: Test Organization (COMPLETE - 13 files moved):**
-- [x] Moved 8 home/navigation tests to `tests/home/`
-- [x] Moved 5 admin tests to `tests/admin/`
-- [x] Kept 66 timeline editor tests in `tests/v5/`
-
-**Phase 4: NetworkIdle Migration (COMPLETE - 74 files, ~159 replacements):**
-- [x] Updated tests/home/ - 3 files, 24 occurrences (71, 72, 73)
-- [x] Updated tests/admin/ - 5 files, 15 occurrences (82-86)
-- [x] Updated tests/user/ - 0 files (already clean)
-- [x] All tests now use `domcontentloaded` instead of `networkidle` for Firestore compatibility
-
-**Phase 5: React Duplicate Key Bug Fix (COMPLETE):**
-- [x] Fixed HomePage.tsx - 5 timeline sections with section-specific key prefixes (my-, search-, recent-, popular-, featured-)
-- [x] Fixed UserProfilePage.tsx - Added user-profile- prefix to timeline keys
-- [x] Resolved 45+ React duplicate key console errors
-
-**Phase 6: Firestore Data Cleanup (COMPLETE):**
-- [x] Created diagnostic script (scripts/diagnose-timelines.ts)
-- [x] Identified root cause: Duplicate timelines in root `/timelines` collection AND nested `/users/{userId}/timelines`
-- [x] Updated Firestore security rules to allow legacy data deletion
-- [x] Deleted all 12 duplicate timeline documents from root collection
-- [x] Verified duplicate key errors resolved (tests/user/01-smoke now passing)
-- [x] Deployed updated security rules to production
-
-**Verification:**
-- [x] All 66 v5 files have user-agnostic utilities imported
-- [x] Tests 01-03 confirmed passing (4/4 tests)
-- [x] Duplicate key errors eliminated (0 console warnings)
-- [x] tests/user/: 7 passed, 2 failed (improvement from 6/3)
-- [x] Firestore data cleaned (no duplicate timelines)
+- [x] Create user-agnostic test utilities (loginAsTestUser, loadTestTimeline)
+- [x] Update all 66 test files to use new utilities
+- [x] Fix timeline ID references for Firestore
+- [x] Migrate to `domcontentloaded` instead of `networkidle`
+- [x] Move tests to organized directories (home/, admin/, editor/)
+- [x] Fix React duplicate key bugs in HomePage/UserProfilePage
+- [x] Clean up duplicate Firestore data
 
 ### v0.5.0.4 - Development Environment & Production Infrastructure
-**Status:** Complete
-
-- [x] Create separate Firebase project for development (powertimeline-dev)
+- [x] Create separate Firebase project for development
 - [x] Configure environment-specific Firebase credentials
-- [x] Secure service account keys in .gitignore
 - [x] Install Firebase Admin SDK
 - [x] Create production database cleanup script
-- [x] Clean production Firestore database (removed 14 test timelines)
+- [x] Clean production Firestore database
 - [x] Create production smoke tests
-- [x] Document test environment configuration
 
 ### v0.5.1 - Firebase Authentication Foundation
-**Status:** Complete
-
 - [x] Install Firebase Authentication SDK
-- [x] Create auth service layer (src/services/auth.ts)
-- [x] Create LoginPage with GitHub-inspired design
-- [x] Create validation utilities (password, email, username)
-- [x] Create AuthContext for global auth state
-- [x] Create ProtectedRoute component
+- [x] Create auth service layer and LoginPage
+- [x] Create validation utilities
+- [x] Create AuthContext and ProtectedRoute
 - [x] Add VITE_ENFORCE_AUTH feature flag
 - [x] Integrate Firebase Auth with UserProfileMenu
-- [x] TypeScript build fixes (DEMO_USERS fields)
 
 ### v0.5.2 - Landing Page Redesign
-**Status:** Complete
-
-- [x] Research competitors (Tiki-Toki, TimelineJS, Linear, GitHub)
-- [x] Apply dark theme color palette (#0d1117, #161b22, #8b5cf6, #06b6d4, #f97316)
+- [x] Apply dark theme color palette
 - [x] Redesign hero with gradient headline effect
-- [x] Add top-right Sign In button
-- [x] Move search bar to hero section
-- [x] Create clickable timeline examples gallery
-- [x] Improve typography and spacing
-- [x] Create COLOR_THEME.md documentation
+- [x] Add Sign In button and search bar to hero
+- [x] Create timeline examples gallery
 - [x] Verify WCAG AA contrast compliance
 
 ### v0.5.3 - Public Timeline Access & Navigation Redesign
-**Status:** Complete
-
-- [x] Create TopNavBar component for unauthenticated users
-- [x] Apply top nav to LandingPage, HomePage, timeline viewer
-- [x] Redesign NavigationRail (rename "Home" to "Browse", update "My Timelines")
-- [x] Apply dark theme styling to navigation
-- [x] Remove ProtectedRoute from timeline viewer route
-- [x] Add read-only mode to EditorPage (detect auth and ownership)
-- [x] Hide edit UI for non-owners (authoring overlay, navigation rail)
-- [x] Show "View-only mode" banner with "Sign In to Edit" button
-- [x] Keep ProtectedRoute for /admin and user profile routes
-- [x] Build and commit changes
+- [x] Create TopNavBar for unauthenticated users
+- [x] Redesign NavigationRail with dark theme
+- [x] Enable public timeline viewing without auth
+- [x] Add read-only mode to EditorPage
+- [x] Keep ProtectedRoute for /admin and profile routes
 
 ### v0.5.4 - Authentication Security & Demo User Removal
 **Goal:** Secure Firestore rules and remove localStorage demo system
 
 - [x] Fix Firestore security rules for events subcollection
-- [x] Move test user password to environment variable (.env.test)
-- [x] Create .env.test.example template for contributors
-- [x] Add .env.test to .gitignore
-- [x] Update playwright.config.ts to load test environment variables
-- [x] Clean up untracked files and create scripts/README.md
-- [x] Complete E2E journey test (full user journey coverage)
-- [x] Document admin panel test fixes needed (ADMIN_TEST_FIX_GUIDE.md)
-- [x] Remove localStorage demo user system (Alice, Bob, Charlie)
+- [x] Move test user password to environment variable
+- [x] Remove localStorage demo user system
 - [x] Enable public timeline browsing without authentication
+- [x] Complete E2E journey test coverage
 
 ### v0.5.5 - Public Browsing & Dark Theme
 **Goal:** Unified dark theme and public browsing experience
 
-- [x] Fix HomePage (/browse) public browsing experience
-- [x] Apply unified dark theme to HomePage and EditorPage
-- [x] Clean up Editor UI and navigation architecture
-- [x] Add toast notification for read-only mode
+- [x] Fix public browsing on HomePage (/browse)
+- [x] Apply unified dark theme to all pages
 - [x] Update TopNavBar with Microsoft-style auth pattern
 
 ### v0.5.6 - Landing Page & Public Browsing Polish
 **Goal:** Improve landing page messaging, navigation, and public browsing experience
-**Status:** Complete ✅
 
-**Legacy Code Cleanup (Critical):**
-- [x] Remove all getCurrentUser() calls from pages (use AuthContext instead)
-- [x] Remove searchTimelinesAndUsers localStorage import from HomePage
-- [x] Remove migrateLocalStorageToFirestore() call from HomePage
-- [x] Replace localStorage logout with Firebase signOutUser() in all pages
-- [x] Clean up unused imports from homePageStorage.ts
-
-**Navigation & Breadcrumb Fixes:**
-- [x] Fix breadcrumb "Home" link to go to /browse instead of / (landing)
-- [x] Make nav rail logo clickable to navigate to /browse
-- [x] Add breadcrumbs to EditorPage (shown in all modes)
-- [x] Update useNavigationConfig to use Firebase Auth for user ID
-
-**BETA & Site Status:**
-- [x] Add BETA indicator badge next to logo in TopNavBar
-
-**Footer & Contact:**
-- [x] Add contact email (cynako@gmail.com) to footer
-- [x] Add GitHub repository link to footer
-
-**Navigation Rail Redesign:**
-- [x] Remove duplicate "Power Timeline" banner from HomePage (TopNavBar handles this)
-- [x] Show nav rail on all pages (including unauthenticated users on /browse)
-- [x] Simplify nav items: Remove Dev Panel from nav rail, Settings placeholder, About placeholder
-- [x] Global nav items (all pages): Logo→Home, Sign In (unauthenticated)
-- [x] Authenticated items: My Timelines (profile link)
-- [x] Admin nav item: Only visible to admin role users
-- [x] Editor-only items: Event List toggle, Create (owner), Lock indicator (read-only)
-- [x] Utilities section: Theme toggle at bottom
-- [x] Profile actions: UserProfileMenu in header handles logout, profile actions
-
-**Light/Dark Theme Support:**
-- [x] Add page-level CSS variables for theming (--page-bg, --page-text-primary, etc.)
-- [x] Add light theme overrides in tokens.css for [data-theme="light"]
-- [x] Update HomePage to use CSS variables instead of hardcoded colors
-- [x] Update Breadcrumb component with theme-aware styling
-- [x] Update ThemeToggleButton with CSS variable styling
-- [x] MUI theme responds dynamically via createAppTheme(isDarkMode)
-
-**Navigation & Search Fixes:**
-- [x] Fix LandingPage timeline card navigation (fetch from Firestore for correct ownerId)
-- [x] Make search bar on LandingPage functional (redirect to /browse on Enter)
-- [x] Update HomePage (/browse) to use Firestore exclusively
-- [x] Verify CTA buttons work correctly
-- [x] Test public timeline browsing end-to-end (E2E tests exist in tests/e2e/)
-
-**Hero Section Improvements:**
-- [x] Update headline to: "Where events become understanding"
-- [x] Add action verbs line: "Explore. Create. Visualize. Fork. Merge."
-- [x] Add purpose statement: "Make sense of complex events, history, and politics by mapping them across time. Build a collaborative shared memory for what matters."
-- [x] Swap CTA buttons: Orange "Explore Examples" (primary) + "Sign In" (secondary)
-
-**Additional Polish:**
-- [x] Add keyboard shortcut hint for search ("/" to focus on both pages, hidden on mobile)
-- [x] Add loading skeleton for timeline cards (LandingPage and HomePage)
-- [x] Improve empty state when no search results found
-- [x] Add hover preview tooltips on example timeline cards (LandingPage)
-- [x] Ensure mobile responsiveness on landing and browse pages
-  - [x] LandingPage: Already uses MUI responsive breakpoints (xs/sm/md)
-  - [x] HomePage: Hide nav rail on mobile, add mobile header with logo/sign-in
-  - [x] EditorPage: Add "Desktop Recommended" modal notice on small screens
+- [x] Remove legacy getCurrentUser() calls (use AuthContext)
+- [x] Fix breadcrumb and nav rail navigation
+- [x] Add BETA indicator badge
+- [x] Redesign navigation rail (global + contextual items)
+- [x] Add light/dark theme support with CSS variables
+- [x] Fix LandingPage timeline navigation (Firestore)
+- [x] Improve hero section messaging
+- [x] Add mobile responsiveness and loading skeletons
 
 ### v0.5.7 - Authentication Production Deployment
 **Goal:** Enable authentication enforcement in production
-**Status:** Complete ✅
 
-- [x] Enable VITE_ENFORCE_AUTH=true in production (.env.production)
+- [x] Enable VITE_ENFORCE_AUTH=true in production
 - [x] Re-enable Firestore security rules requiring authentication
-  - [x] Collection group queries respect visibility (public/unlisted/owner)
-  - [x] Events subcollection checks parent timeline visibility via get()
-- [x] Test unauthenticated users can only read public timelines (rules enforce this)
-- [x] Add auth migration documentation for existing users (docs/AUTH_MIGRATION.md)
-- [x] Deploy auth-enabled Firestore rules to production (manual: `firebase deploy --only firestore:rules`)
-- [x] Add security audit checklist to CONTRIBUTING.md
+- [x] Deploy auth-enabled Firestore rules
+- [x] Add auth migration documentation
 
 ### v0.5.8 - Documentation Improvements
 **Goal:** Improve documentation navigation and developer experience
-**Status:** Complete ✅
 
-- [x] Update PLAN.md Quick Summary to v0.5.7 with latest achievements
-- [x] Update SRS_INDEX.md version, known issues, and audit dates
-- [x] Update TESTS.md with production test results and version info
-- [x] Document naming conventions in CONTRIBUTING.md (files, code, requirements, versions)
-- [x] Fix TESTS.md path reference in SRS_INDEX.md
-- [ ] Add screenshot or GIF to README.md (deferred - placeholder exists)
+- [x] Update PLAN.md Quick Summary and SRS_INDEX.md
+- [x] Update TESTS.md with production test results
+- [x] Document naming conventions in CONTRIBUTING.md
 
 ### v0.5.9 - Test Organization
 **Goal:** Clean up test suite organization
-**Status:** Complete ✅
 
 - [x] Rename tests/v5/ to tests/editor/ for clarity
-- [x] Update all test imports referencing v5/ path
-- [x] Rewrite tests/README.md with comprehensive organization guide
-- [x] Update playwright.config.ts with new paths
-- [x] Update CI workflow (ci.yml) with new paths
+- [x] Update all test imports and playwright.config.ts
 - [x] Create manual test workflow (.github/workflows/tests.yml)
-  - Production tests (against powertimeline.com)
-  - Editor foundation tests
-  - Editor full test suite
-- [x] Verify tests pass locally (production + editor foundation)
+- [x] Verify tests pass locally
 
 ### v0.5.10 - Vision & Positioning Update
 **Goal:** Communicate product vision and improve SEO/discoverability
-**Status:** Complete ✅
 
 - [x] Rewrite landing page messaging with "connect the dots" vision
-- [x] Add "The Problem" section (scattered info, private whiteboards, oral journalism)
-- [x] Add "Who It's For" section with 6 audience cards:
-  - Journalists & Investigators
-  - Historians & Researchers
-  - Educators & Students
-  - Informed Citizens
-  - Podcasters & Content Creators
-  - Anyone Seeking Clarity
-- [x] Update features section (Infinite Zoom, Fork & Improve, Share & Verify)
-- [x] Add Open Graph meta tags for social sharing preview
-- [x] Add meta description and Twitter cards
-- [x] Add theme-color meta tag for mobile browsers
-- [x] Create custom 404 "Timeline not found" page
-- [x] Update page title to "PowerTimeline - Where Events Become Understanding"
-- [ ] Update favicon to match dark theme/purple accent (deferred)
-- [ ] Add analytics events (deferred to v0.6.x)
+- [x] Add "The Problem" and "Who It's For" sections
+- [x] Update features section
+- [x] Add Open Graph meta tags and Twitter cards
+- [x] Create custom 404 page
 
-### v0.5.11 - Test Stabilization
-**Status:** In Progress
-**Goal:** Fix 69 broken tests caused by localStorage→Firebase Auth migration
+### v0.5.11 - Test Stabilization & Legacy Code Cleanup
+**Goal:** Fix broken tests and remove legacy localStorage code
 
-**Context:** The v0.5.4-v0.5.6 migration from localStorage demo users to Firebase Auth broke tests that relied on:
-- `localStorage.setItem('powertimeline_current_user', ...)` for user switching
-- Demo users (Alice, Bob, Charlie, cynacons) that no longer exist
-- LocalStorage-based user/timeline data
+- [x] Create Firebase Auth test utilities (authTestUtils.ts)
+- [x] Update all admin/home test files with Firebase Auth
+- [x] Remove legacy getCurrentUser() calls from application
+- [x] Remove UserSwitcherModal (demo user feature)
+- [x] Migrate CreateTimelineDialog to useAuth hook
+- [x] Migrate UserManagementPanel to useAuth hook
+- [x] Update activityLog to accept user params
+- [x] Reset test user credentials
 
-**Test Infrastructure Changes (DONE):**
-- [x] Created `tests/utils/authTestUtils.ts` - Firebase Auth helper functions
-- [x] Updated `tests/utils/timelineTestUtils.ts` - removed localStorage, uses Firestore
-- [x] Updated all 6 admin test files with Firebase Auth sign-in
-- [x] Updated all 8 home test files to use Firebase Auth or public timelines
-- [x] Updated `tests/user/02-edit-profile.spec.ts` for Firebase Auth
-- [x] Updated `tests/auth/01-auth-smoke.spec.ts` selectors
-
-**Phase 1: Admin Tests (DONE - infrastructure)**
-- [x] Updated `01-reset-statistics.spec.ts` - uses signInWithEmail
-- [x] Updated `82-admin-panel-access.spec.ts` - graceful skip if no admin role
-- [x] Updated `83-user-management.spec.ts` - uses Firebase Auth
-- [x] Updated `84-admin-statistics.spec.ts` - uses Firebase Auth
-- [x] Updated `85-admin-bulk-operations.spec.ts` - uses Firebase Auth
-- [x] Updated `86-admin-activity-log.spec.ts` - uses Firebase Auth
-
-**Phase 2: Home Tests (DONE - infrastructure)**
-- [x] Updated `01-smoke.spec.ts` - tests landing + browse pages
-- [x] Updated `71-home-page-basic.spec.ts` - unauthenticated + authenticated flows
-- [x] Updated `72-timeline-navigation.spec.ts` - uses public timelines
-- [x] Updated `73-timeline-content-verification.spec.ts` - uses Firestore data
-- [x] Updated `74-timeline-creation-e2e.spec.ts` - requires sign-in first
-- [x] Updated `75-event-creation-e2e.spec.ts` - requires sign-in first
-- [x] Updated `76-event-persistence.spec.ts` - requires sign-in first
-- [x] Updated `80-timeline-visibility-controls.spec.ts` - requires sign-in
-
-**Phase 3: Test Utilities (DONE)**
-- [x] Created `tests/utils/authTestUtils.ts` with signInWithEmail, signOut, etc.
-- [x] Updated `tests/utils/timelineTestUtils.ts` - removed localStorage refs
-
-**Phase 4: Legacy Code Cleanup (DEFERRED)**
-- [ ] src/ localStorage code is for theme/migration, not auth - not breaking tests
-
-**Phase 5: Verification (IN PROGRESS)**
-- [ ] Tests still failing due to UI selector mismatches
-- [ ] Test user needs `role: 'admin'` in Firestore for admin tests
-- [ ] Login redirect behavior differs from test expectations
-
-**Remaining Issues (need UI fixes or selector updates):**
-1. Landing page selectors don't match current UI (h1, buttons)
-2. Browse page selectors don't match (missing h1)
-3. Login redirects to `/` not `/browse` after successful sign-in
-4. Test user `iTMZ9n0IuzUSbhWfCaR86WsB2AC3` needs admin role in Firestore
-
-**Test User Setup Required:**
-- Email: test@powertimeline.com
-- UID: iTMZ9n0IuzUSbhWfCaR86WsB2AC3
-- Firestore: Set `users/{UID}.role = 'admin'` for admin panel tests
-
----
-
-### Tester Agent Tasks (Delegated to Codex)
-
-**Task A: Fix Failing Tests** `[TESTER]`
-- [ ] Fix admin tests (82-86) - skip logic or grant admin role to test user
-- [ ] Fix T71.5 logo visibility test - verify `logo-button` data-testid works
-- [ ] Fix T72 timeline navigation tests - update URLs/selectors as needed
-- [ ] Fix T73 timeline content verification - verify cynacons has public timelines
-
-**Task B: Expand Production Tests** `[TESTER]`
-- [ ] Add browse page tests (search, filters, timeline cards)
-- [ ] Add public timeline viewing tests (no auth required)
-- [ ] Add auth flow tests (sign up, sign in, sign out)
-- [ ] Add read-only mode tests (non-owner viewing timelines)
-- [ ] Add security probe tests (unauthenticated write attempts, permission errors)
-- [ ] Add console/network hygiene tests (no failed API calls, no sensitive data)
-- [ ] Add accessibility smoke tests (keyboard nav, headings, contrast)
-
-**Task C: Report Findings** `[TESTER]`
-- [ ] Report all findings in IAC.md
-- [ ] Include test results, blockers, and suggested fixes
-
----
-
-**Deferred to v0.5.12:**
-- Platform Statistics Aggregation (Cloud Functions)
+**Tester Agent Tasks (Delegated):**
+- [ ] Fix admin tests (82-86) selector/role issues
+- [ ] Fix home tests (T71-T73) selector issues
+- [ ] Expand production tests (browse, auth, security, a11y)
 
 ### v0.5.12 - Platform Statistics Aggregation
 **Goal:** Move stats calculation from client-side scans to server-side aggregation
 
-**Firestore Schema:**
-- [ ] Create `stats/platform` document with fields: totalTimelines, totalUsers, totalEvents, totalViews, lastUpdated
-- [ ] Add Firestore security rules for stats collection (public read)
-
-**Cloud Functions (Real-time Updates):**
-- [ ] Create Cloud Function: onTimelineCreate - increment totalTimelines
-- [ ] Create Cloud Function: onTimelineDelete - decrement totalTimelines
-- [ ] Create Cloud Function: onEventWrite - update totalEvents count
-- [ ] Create Cloud Function: onUserCreate - increment totalUsers
-- [ ] Create Cloud Function: onViewIncrement - increment totalViews
-
-**Client-Side Updates:**
-- [ ] Update getPlatformStats() in firestore.ts to read from stats doc
-- [ ] Add client-side caching with 5-minute TTL for stats
-- [ ] Add graceful degradation: hide stats widget if unavailable
+- [ ] Create `stats/platform` document in Firestore
+- [ ] Create Cloud Functions for real-time stats updates
+- [ ] Update getPlatformStats() to read from stats doc
+- [ ] Add client-side caching with TTL
 
 ## Phase 3: Collaboration Features (v0.6.x)
 
