@@ -1,61 +1,45 @@
 /**
  * Timeline Test Utilities
  * Helper functions for testing timeline loading and navigation
+ * v0.5.11 - Updated for Firebase Auth (removed localStorage)
  */
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import type { Timeline, User } from '../../src/types';
+import { signInWithEmail, getTestUserUid } from './authTestUtils';
 
 /**
  * Default test user configuration
- * Change this single value to update the test user for all tests
+ * This is the Firebase UID of the test user
  */
-const DEFAULT_TEST_USER = 'cynacons';
+const DEFAULT_TEST_USER_UID = getTestUserUid();
+
+// Known public timelines in Firestore (cynacons user)
+const CYNACONS_USER_ID = 'cynacons';
+const PUBLIC_TIMELINES = {
+  'timeline-french-revolution': CYNACONS_USER_ID,
+  'timeline-napoleon': CYNACONS_USER_ID,
+  'timeline-charles-de-gaulle': CYNACONS_USER_ID,
+  'timeline-rfk': CYNACONS_USER_ID,
+};
 
 /**
- * Login as the default test user
- * User-agnostic function that can be updated in one place for all tests
+ * Login as the test user via Firebase Auth
  * @param page - Playwright page object
- *
- * TODO(v0.5.1): When Firebase Auth is implemented, update this to use real authentication
  */
 export async function loginAsTestUser(page: Page): Promise<void> {
-  await loginAsUser(page, DEFAULT_TEST_USER);
+  await signInWithEmail(page);
 }
 
 /**
- * Load a timeline for the default test user
- * User-agnostic function for loading test timelines
+ * Load a public timeline (no auth required)
  * @param page - Playwright page object
  * @param timelineId - Timeline ID to load
- *
- * TODO(v0.5.1): When Firebase Auth is implemented, this will automatically use authenticated user
  */
 export async function loadTestTimeline(page: Page, timelineId: string): Promise<void> {
-  await loadTimeline(page, DEFAULT_TEST_USER, timelineId, false);
-}
-
-/**
- * Login as a specific user by setting localStorage
- * @param page - Playwright page object
- * @param userId - User ID to log in as (e.g., 'cynacons', 'alice')
- */
-export async function loginAsUser(page: Page, userId: string): Promise<void> {
-  await page.goto('/');
-
-  // Set current user in localStorage
-  await page.evaluate((uid) => {
-    const users = JSON.parse(localStorage.getItem('powertimeline_users') || '[]');
-    const user = users.find((u: User) => u.id === uid);
-    if (user) {
-      localStorage.setItem('powertimeline_current_user', JSON.stringify(user));
-    }
-  }, userId);
-
-  // Reload to apply the user change
-  await page.reload();
-  await page.waitForLoadState('domcontentloaded');
+  // Check if this is a known public timeline
+  const ownerId = PUBLIC_TIMELINES[timelineId as keyof typeof PUBLIC_TIMELINES] || CYNACONS_USER_ID;
+  await loadTimeline(page, ownerId, timelineId, false);
 }
 
 /**
@@ -63,29 +47,16 @@ export async function loginAsUser(page: Page, userId: string): Promise<void> {
  * @param page - Playwright page object
  * @param userId - Owner user ID
  * @param timelineId - Timeline ID
- * @param ensureLoggedIn - Whether to ensure user is logged in before navigation
+ * @param requireAuth - Whether to sign in before navigation
  */
 export async function loadTimeline(
   page: Page,
   userId: string,
   timelineId: string,
-  ensureLoggedIn: boolean = true
+  requireAuth: boolean = false
 ): Promise<void> {
-  if (ensureLoggedIn) {
-    // Get current logged-in user
-    const currentUserId = await page.evaluate(() => {
-      const stored = localStorage.getItem('powertimeline_current_user');
-      if (stored) {
-        const user = JSON.parse(stored);
-        return user.id;
-      }
-      return null;
-    });
-
-    // If not logged in, log in as the timeline owner
-    if (!currentUserId) {
-      await loginAsUser(page, userId);
-    }
+  if (requireAuth) {
+    await signInWithEmail(page);
   }
 
   // Navigate to timeline URL
@@ -94,39 +65,25 @@ export async function loadTimeline(
 }
 
 /**
- * Get all timelines for a user from localStorage
- * @param page - Playwright page object
- * @param userId - User ID to get timelines for
- * @returns Array of timeline objects
- */
-export async function getUserTimelines(page: Page, userId: string): Promise<Timeline[]> {
-  return page.evaluate((uid) => {
-    const timelines = JSON.parse(localStorage.getItem('powertimeline_timelines') || '[]');
-    return timelines.filter((t: Timeline) => t.ownerId === uid);
-  }, userId);
-}
-
-/**
- * Get a specific timeline by ID from localStorage
- * @param page - Playwright page object
- * @param timelineId - Timeline ID
- * @returns Timeline object or null if not found
- */
-export async function getTimelineById(page: Page, timelineId: string): Promise<Timeline | null> {
-  return page.evaluate((tid) => {
-    const timelines = JSON.parse(localStorage.getItem('powertimeline_timelines') || '[]');
-    return timelines.find((t: Timeline) => t.id === tid) || null;
-  }, timelineId);
-}
-
-/**
  * Wait for timeline editor to load
  * @param page - Playwright page object
  * @param timeoutMs - Timeout in milliseconds
  */
 export async function waitForEditorLoaded(page: Page, timeoutMs: number = 5000): Promise<void> {
-  // Wait for canvas or main editor element
-  await expect(page.locator('canvas, [data-testid="timeline-editor"]').first()).toBeVisible({
+  // Wait for timeline axis (indicator that editor loaded)
+  await expect(page.locator('[data-testid="timeline-axis"]').first()).toBeVisible({
+    timeout: timeoutMs
+  });
+}
+
+/**
+ * Wait for timeline to render with events
+ * @param page - Playwright page object
+ * @param timeoutMs - Timeout in milliseconds
+ */
+export async function waitForTimelineRendered(page: Page, timeoutMs: number = 10000): Promise<void> {
+  // Wait for at least one event card to appear
+  await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({
     timeout: timeoutMs
   });
 }
@@ -138,7 +95,6 @@ export async function waitForEditorLoaded(page: Page, timeoutMs: number = 5000):
  */
 export async function verifyTimelineLoaded(page: Page, expectedTitle: string): Promise<void> {
   // Check if the timeline title appears somewhere on the page
-  // (This might need adjustment based on your actual editor UI)
   const titleVisible = await page.locator(`text="${expectedTitle}"`).count();
   expect(titleVisible).toBeGreaterThan(0);
 }
@@ -154,12 +110,21 @@ export async function navigateToUserProfile(page: Page, userId: string): Promise
 }
 
 /**
+ * Navigate to browse page
+ * @param page - Playwright page object
+ */
+export async function navigateToBrowse(page: Page): Promise<void> {
+  await page.goto('/browse');
+  await page.waitForLoadState('domcontentloaded');
+}
+
+/**
  * Click on a timeline card by title
  * @param page - Playwright page object
  * @param timelineTitle - Timeline title to click
  */
 export async function clickTimelineCard(page: Page, timelineTitle: string): Promise<void> {
-  const card = page.locator(`[class*="cursor-pointer"]:has-text("${timelineTitle}")`).first();
+  const card = page.locator(`[data-testid^="timeline-card-"]:has-text("${timelineTitle}")`).first();
   await expect(card).toBeVisible({ timeout: 5000 });
   await card.click();
   await page.waitForLoadState('domcontentloaded');
@@ -174,4 +139,25 @@ export async function getCurrentUrlTimelineId(page: Page): Promise<string | null
   const url = page.url();
   const match = url.match(/\/timeline\/([^/]+)/);
   return match ? match[1] : null;
+}
+
+/**
+ * Get current URL user ID from the browser
+ * @param page - Playwright page object
+ * @returns User ID from URL or null
+ */
+export async function getCurrentUrlUserId(page: Page): Promise<string | null> {
+  const url = page.url();
+  const match = url.match(/\/user\/([^/]+)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Wait for page to be fully interactive
+ * @param page - Playwright page object
+ * @param delayMs - Additional delay after load
+ */
+export async function waitForPageReady(page: Page, delayMs: number = 500): Promise<void> {
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(delayMs);
 }

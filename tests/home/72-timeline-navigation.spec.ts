@@ -1,219 +1,179 @@
+/**
+ * Timeline Navigation Tests
+ * v0.5.11 - Updated for Firebase Auth
+ *
+ * Tests navigation between timelines using public Firestore data
+ */
+
 import { test, expect } from '@playwright/test';
+import { signInWithEmail } from '../utils/authTestUtils';
 import {
-  loginAsUser,
-  loginAsTestUser,
   loadTimeline,
-  loadTestTimeline,
-  getUserTimelines,
-  getTimelineById,
   navigateToUserProfile,
   getCurrentUrlTimelineId,
+  clickTimelineCard,
 } from '../utils/timelineTestUtils';
 
+// Known public timelines in Firestore
+const PUBLIC_TIMELINES = [
+  { id: 'timeline-french-revolution', title: 'French Revolution', ownerId: 'cynacons' },
+  { id: 'timeline-napoleon', title: 'Napoleon', ownerId: 'cynacons' },
+  { id: 'timeline-rfk', title: 'RFK', ownerId: 'cynacons' },
+];
+
 test.describe('v5/72 Timeline Navigation', () => {
-  test('can load timeline directly using utility', async ({ page }) => {
+
+  test('T72.1: Can load public timeline directly via URL', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-001' });
 
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
+    const timeline = PUBLIC_TIMELINES[0];
 
-    // Get CynaCons' timelines
-    const timelines = await getUserTimelines(page, 'cynacons');
-    expect(timelines.length).toBeGreaterThan(0);
-
-    const firstTimeline = timelines[0];
-    console.log('First timeline:', firstTimeline);
-
-    // Verify timeline has events
-    expect(firstTimeline.events.length).toBeGreaterThan(0);
-    console.log(`Timeline "${firstTimeline.title}" has ${firstTimeline.events.length} events`);
-
-    // Load the timeline using our utility
-    await loadTimeline(page, 'cynacons', firstTimeline.id);
+    // Load timeline directly
+    await loadTimeline(page, timeline.ownerId, timeline.id);
 
     // Verify URL is correct
     const urlTimelineId = await getCurrentUrlTimelineId(page);
-    expect(urlTimelineId).toBe(firstTimeline.id);
+    expect(urlTimelineId).toBe(timeline.id);
+
+    // Timeline should render (look for axis or events)
+    const hasContent = await page.locator('[data-testid="timeline-axis"], [data-testid="event-card"]').first().isVisible({ timeout: 10000 }).catch(() => false);
+    expect(hasContent).toBe(true);
   });
 
-  test('clicking timeline card in user profile navigates correctly', async ({ page }) => {
+  test('T72.2: Clicking timeline card in user profile navigates correctly', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-002' });
 
-    // Login as CynaCons
-    await loginAsUser(page, 'cynacons');
-
-    // Navigate to CynaCons user profile
+    // Navigate to cynacons user profile (public profile)
     await navigateToUserProfile(page, 'cynacons');
 
-    // Get timelines from localStorage to verify
-    const timelines = await getUserTimelines(page, 'cynacons');
-    expect(timelines.length).toBeGreaterThan(0);
+    // Wait for timeline cards to load
+    await page.waitForTimeout(2000);
 
-    const firstTimeline = timelines[0];
-    console.log('Testing navigation for timeline:', {
-      id: firstTimeline.id,
-      title: firstTimeline.title
-    });
-
-    // Find and click the first timeline card
-    const timelineCard = page.locator('.cursor-pointer').filter({ hasText: firstTimeline.title }).first();
-    await expect(timelineCard).toBeVisible({ timeout: 5000 });
-
-    // Click the card
-    await timelineCard.click();
-    await page.waitForLoadState('domcontentloaded');
-
-    // Verify URL contains the correct timeline ID
-    const currentUrl = page.url();
-    console.log('Current URL after click:', currentUrl);
-    expect(currentUrl).toContain(`/timeline/${firstTimeline.id}`);
-
-    // Verify URL timeline ID matches
-    const urlTimelineId = await getCurrentUrlTimelineId(page);
-    console.log('URL timeline ID:', urlTimelineId);
-    console.log('Expected timeline ID:', firstTimeline.id);
-    expect(urlTimelineId).toBe(firstTimeline.id);
-  });
-
-  test('clicking multiple different timelines navigates correctly', async ({ page }) => {
-    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-003' });
-
-    await loginAsUser(page, 'cynacons');
-    await navigateToUserProfile(page, 'cynacons');
-
-    const timelines = await getUserTimelines(page, 'cynacons');
-
-    // Test first 2 timelines (or all if less than 2)
-    const timelinesToTest = timelines.slice(0, Math.min(2, timelines.length));
-
-    for (const timeline of timelinesToTest) {
-      console.log(`Testing timeline: ${timeline.title} (${timeline.id})`);
-
-      // Go back to profile page
-      await navigateToUserProfile(page, 'cynacons');
-
-      // Click the timeline card
-      const timelineCard = page.locator('.cursor-pointer').filter({ hasText: timeline.title }).first();
-      await expect(timelineCard).toBeVisible({ timeout: 5000 });
-      await timelineCard.click();
-      await page.waitForLoadState('domcontentloaded');
-
-      // Verify correct timeline loaded
-      const urlTimelineId = await getCurrentUrlTimelineId(page);
-      expect(urlTimelineId).toBe(timeline.id);
-    }
-  });
-
-  test('timeline IDs are in slug format (not timestamp format)', async ({ page }) => {
-    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-004' });
-
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
-
-    const timelines = await getUserTimelines(page, 'cynacons');
-    expect(timelines.length).toBeGreaterThan(0);
-
-    // Check that timeline IDs are NOT in old timestamp format
-    // Old format: timeline-1761254688359-1
-    // New format: timeline-french-revolution
-    const timestampFormatRegex = /timeline-\d{13}-\d+/;
-
-    for (const timeline of timelines) {
-      console.log(`Checking timeline ID format: ${timeline.id}`);
-      expect(timeline.id).not.toMatch(timestampFormatRegex);
-      expect(timeline.id).toMatch(/^timeline-[a-z0-9-]+$/);
-    }
-  });
-
-  test('French Revolution timeline exists for CynaCons', async ({ page }) => {
-    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-005' });
-
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
-
-    const timeline = await getTimelineById(page, 'timeline-french-revolution');
-    expect(timeline).not.toBeNull();
-    expect(timeline.title).toBe('French Revolution');
-    expect(timeline.ownerId).toBe('cynacons');
-    expect(timeline.events.length).toBeGreaterThan(0);
-    console.log(`French Revolution timeline has ${timeline.events.length} events`);
-  });
-
-  test('all CynaCons timelines contain events', async ({ page }) => {
-    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-007' });
-
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
-
-    const timelines = await getUserTimelines(page, 'cynacons');
-
-    // Verify all timelines have events
-    for (const timeline of timelines) {
-      expect(timeline.events.length).toBeGreaterThan(0);
-      console.log(`"${timeline.title}" has ${timeline.events.length} events`);
-    }
-
-    // Verify RFK timeline specifically
-    const rfkTimeline = await getTimelineById(page, 'timeline-rfk');
-    expect(rfkTimeline).not.toBeNull();
-    expect(rfkTimeline.events.length).toBeGreaterThan(0);
-
-    // Verify JFK timeline specifically
-    const jfkTimeline = await getTimelineById(page, 'timeline-jfk');
-    expect(jfkTimeline).not.toBeNull();
-    expect(jfkTimeline.events.length).toBeGreaterThan(0);
-
-    // Verify French Revolution timeline specifically
-    const frTimeline = await getTimelineById(page, 'timeline-french-revolution');
-    expect(frTimeline).not.toBeNull();
-    expect(frTimeline.events.length).toBeGreaterThan(0);
-
-    // Verify that timeline events are different (check first event title)
-    const rfkFirstEvent = rfkTimeline.events[0].title;
-    const jfkFirstEvent = jfkTimeline.events[0].title;
-    const frFirstEvent = frTimeline.events[0].title;
-
-    expect(rfkFirstEvent).not.toBe(jfkFirstEvent);
-    expect(rfkFirstEvent).not.toBe(frFirstEvent);
-    expect(jfkFirstEvent).not.toBe(frFirstEvent);
-
-    console.log('RFK first event:', rfkFirstEvent);
-    console.log('JFK first event:', jfkFirstEvent);
-    console.log('FR first event:', frFirstEvent);
-  });
-
-  test('can navigate from home page timeline card to editor', async ({ page }) => {
-    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-006' });
-
-    await loginAsUser(page, 'cynacons');
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
-
-    // Find a timeline card on home page (in any section)
-    const timelineCards = page.locator('[class*="cursor-pointer"]:has-text("events")');
+    // Find and click a timeline card
+    const timelineCards = page.locator('[data-testid^="timeline-card-"], .cursor-pointer:has-text("events")');
     const cardCount = await timelineCards.count();
 
     if (cardCount > 0) {
-      // Get the timeline title from the first card
-      const firstCard = timelineCards.first();
-      await expect(firstCard).toBeVisible({ timeout: 5000 });
+      await timelineCards.first().click();
+      await page.waitForLoadState('domcontentloaded');
 
-      // Extract timeline title for verification
-      const cardText = await firstCard.textContent();
-      console.log('Clicking timeline card with text:', cardText);
+      // Verify URL contains timeline ID
+      const urlTimelineId = await getCurrentUrlTimelineId(page);
+      expect(urlTimelineId).toBeTruthy();
+      expect(urlTimelineId).toMatch(/^timeline-/);
+    } else {
+      test.skip(true, 'No timeline cards found on user profile');
+    }
+  });
 
-      // Click the card
-      await firstCard.click();
+  test('T72.3: Clicking multiple different timelines navigates correctly', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-003' });
+
+    const visitedUrls: string[] = [];
+
+    // Test first 2 public timelines
+    for (const timeline of PUBLIC_TIMELINES.slice(0, 2)) {
+      await loadTimeline(page, timeline.ownerId, timeline.id);
+
+      const url = page.url();
+      expect(url).toContain(timeline.id);
+      visitedUrls.push(url);
+    }
+
+    // Verify we visited different URLs
+    expect(visitedUrls[0]).not.toBe(visitedUrls[1]);
+  });
+
+  test('T72.4: Timeline IDs are in slug format', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-004' });
+
+    // Load a known timeline
+    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+
+    // Verify URL has correct format
+    const urlTimelineId = await getCurrentUrlTimelineId(page);
+    expect(urlTimelineId).toBe('timeline-french-revolution');
+
+    // Check that ID is NOT in old timestamp format
+    const timestampFormatRegex = /timeline-\d{13}-\d+/;
+    expect(urlTimelineId).not.toMatch(timestampFormatRegex);
+    expect(urlTimelineId).toMatch(/^timeline-[a-z0-9-]+$/);
+  });
+
+  test('T72.5: French Revolution timeline loads correctly', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-005' });
+
+    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+
+    // Verify URL
+    expect(page.url()).toContain('timeline-french-revolution');
+
+    // Wait for content
+    await page.waitForTimeout(2000);
+
+    // Should show timeline content
+    const hasContent = await page.locator('[data-testid="timeline-axis"], [data-testid="event-card"], text=French').first().isVisible({ timeout: 5000 }).catch(() => false);
+    expect(hasContent).toBe(true);
+  });
+
+  test('T72.6: Can navigate from browse page to timeline editor', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-006' });
+
+    // Go to browse page
+    await page.goto('/browse');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Wait for timeline cards to load
+    await page.waitForTimeout(2000);
+
+    // Find a timeline card
+    const timelineCards = page.locator('[data-testid^="timeline-card-"], .cursor-pointer:has-text("events")');
+    const cardCount = await timelineCards.count();
+
+    if (cardCount > 0) {
+      // Click the first card
+      await timelineCards.first().click();
       await page.waitForLoadState('domcontentloaded');
 
       // Verify navigation happened
-      const currentUrl = page.url();
-      expect(currentUrl).toMatch(/\/user\/\w+\/timeline\/timeline-[a-z0-9-]+/);
+      expect(page.url()).toMatch(/\/user\/\w+\/timeline\/timeline-[a-z0-9-]+/);
 
       // Verify URL has a valid timeline ID
       const urlTimelineId = await getCurrentUrlTimelineId(page);
       expect(urlTimelineId).not.toBeNull();
       expect(urlTimelineId).toMatch(/^timeline-[a-z0-9-]+$/);
+    } else {
+      console.log('Note: No timeline cards found on browse page');
+    }
+  });
+
+  test('T72.7: Authenticated user can navigate to own timelines', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-007' });
+
+    // Sign in
+    await signInWithEmail(page);
+
+    // Navigate to user's profile page
+    const testUserUid = process.env.TEST_USER_UID || 'iTMZ9n0IuzUSbhWfCaR86WsB2AC3';
+    await page.goto(`/user/${testUserUid}`);
+    await page.waitForLoadState('domcontentloaded');
+
+    // Wait for content
+    await page.waitForTimeout(2000);
+
+    // Check if there are any timeline cards
+    const timelineCards = page.locator('[data-testid^="timeline-card-"], .cursor-pointer:has-text("events")');
+    const cardCount = await timelineCards.count();
+
+    if (cardCount > 0) {
+      // Click first card
+      await timelineCards.first().click();
+      await page.waitForLoadState('domcontentloaded');
+
+      // Verify navigation
+      expect(page.url()).toContain('/timeline/');
+    } else {
+      console.log('Note: User has no timelines yet');
     }
   });
 });

@@ -30,8 +30,8 @@ test.describe('Authentication Smoke Tests', () => {
   test('should display auth forms when not signed in', async ({ page }) => {
     // Check that sign in form is visible
     await expect(page.getByText(/Sign in to PowerTimeline/i)).toBeVisible();
-    await expect(page.getByText(/Email address/i)).toBeVisible();
-    await expect(page.getByText(/Password/i)).toBeVisible();
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
 
     // Check that Google OAuth button is visible
     await expect(page.getByRole('button', { name: /Sign in with Google/i })).toBeVisible();
@@ -48,8 +48,8 @@ test.describe('Authentication Smoke Tests', () => {
     await expect(page.getByText(/Create your account/i)).toBeVisible();
 
     // Fill in signup form
-    await page.getByLabel(/Email address/i).fill(TEST_EMAIL);
-    await page.getByLabel(/Password/i).fill(TEST_PASSWORD);
+    await page.locator('input[type="email"]').fill(TEST_EMAIL);
+    await page.locator('input[type="password"]').fill(TEST_PASSWORD);
 
     // Click Create account button
     await page.getByRole('button', { name: /Create account/i }).click();
@@ -69,8 +69,8 @@ test.describe('Authentication Smoke Tests', () => {
     await page.getByText(/Create an account/i).click();
     await expect(page.getByText(/Create your account/i)).toBeVisible();
 
-    await page.getByLabel(/Email address/i).fill(TEST_EMAIL);
-    await page.getByLabel(/Password/i).fill(TEST_PASSWORD);
+    await page.locator('input[type="email"]').fill(TEST_EMAIL);
+    await page.locator('input[type="password"]').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /Create account/i }).click();
 
     // Wait for account creation
@@ -88,8 +88,8 @@ test.describe('Authentication Smoke Tests', () => {
     await page.getByText(/Create an account/i).click();
     await expect(page.getByText(/Create your account/i)).toBeVisible();
 
-    await page.getByLabel(/Email address/i).fill(TEST_EMAIL);
-    await page.getByLabel(/Password/i).fill(TEST_PASSWORD);
+    await page.locator('input[type="email"]').fill(TEST_EMAIL);
+    await page.locator('input[type="password"]').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /Create account/i }).click();
     await expect(page.getByText(/Signed in as/i)).toBeVisible({ timeout: 10000 });
 
@@ -98,8 +98,8 @@ test.describe('Authentication Smoke Tests', () => {
     await expect(page.getByText(/Sign in to PowerTimeline/i)).toBeVisible({ timeout: 5000 });
 
     // Now sign in again with the same credentials
-    await page.getByLabel(/Email address/i).fill(TEST_EMAIL);
-    await page.getByLabel(/Password/i).fill(TEST_PASSWORD);
+    await page.locator('input[type="email"]').fill(TEST_EMAIL);
+    await page.locator('input[type="password"]').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: /Sign in/i }).click();
 
     // Wait for success
@@ -109,8 +109,8 @@ test.describe('Authentication Smoke Tests', () => {
 
   test('should show error for invalid credentials', async ({ page }) => {
     // Try to sign in with non-existent account
-    await page.getByLabel(/Email address/i).fill('nonexistent@test.com');
-    await page.getByLabel(/Password/i).fill('WrongPassword123');
+    await page.locator('input[type="email"]').fill('nonexistent@test.com');
+    await page.locator('input[type="password"]').fill('WrongPassword123');
     await page.getByRole('button', { name: /Sign in/i }).click();
 
     // Wait for error message
@@ -123,8 +123,8 @@ test.describe('Authentication Smoke Tests', () => {
     await expect(page.getByText(/Create your account/i)).toBeVisible();
 
     // Try to create account with password that's too short
-    await page.getByLabel(/Email address/i).fill(TEST_EMAIL);
-    await page.getByLabel(/Password/i).fill('12345'); // Too short
+    await page.locator('input[type="email"]').fill(TEST_EMAIL);
+    await page.locator('input[type="password"]').fill('12345'); // Too short
     await page.getByRole('button', { name: /Create account/i }).click();
 
     // Wait for error message about weak password

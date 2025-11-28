@@ -2,16 +2,16 @@
 
 ## 📊 Quick Summary
 
-**Current Version:** v0.5.10
-**Status:** Complete - Vision & Positioning Update
-**Next Milestone:** v0.5.11 - Platform Statistics Aggregation
+**Current Version:** v0.5.11 (In Progress)
+**Status:** Test Stabilization - Infrastructure Complete
+**Next Milestone:** v0.5.12 - Platform Statistics Aggregation
 
 ### Key Metrics
 - **Total Iterations:** 185+ completed (v0.2.0 → v0.5.10)
 - **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~150 requirements (97%)
 - **Test Coverage:** ~113 requirements verified (73%)
-- **Test Suite:** 287 Playwright tests ([Test Status](#test-status))
+- **Test Suite:** 296 Playwright tests ([Test Status](#test-status))
 - **Production Tests:** 11/11 passing (v0.5.7)
 
 ### Recent Achievements (v0.5.x)
@@ -27,10 +27,12 @@
 - ✅ Vision & positioning update, OG tags, 404 page (v0.5.10)
 
 ### Active Work (v0.5.11)
-- 🔄 Fix 69 broken tests (localStorage→Firebase Auth migration)
-- 🔄 Skip/remove admin tests (architecturally incompatible)
-- 🔄 Update home tests for unauthenticated browsing
-- 🔄 Clean up legacy localStorage code
+- ✅ Created Firebase Auth test utilities (authTestUtils.ts)
+- ✅ Updated all admin tests (6 files) with Firebase Auth
+- ✅ Updated all home tests (8 files) with Firebase Auth
+- ✅ Updated timelineTestUtils.ts - removed localStorage
+- 🔄 UI selector fixes needed - tests don't match current UI
+- 🔄 Test user needs admin role in Firestore
 
 ### Test Status
 - **Total:** 296 tests in 92 files
@@ -1410,6 +1412,7 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - [ ] Add analytics events (deferred to v0.6.x)
 
 ### v0.5.11 - Test Stabilization
+**Status:** In Progress
 **Goal:** Fix 69 broken tests caused by localStorage→Firebase Auth migration
 
 **Context:** The v0.5.4-v0.5.6 migration from localStorage demo users to Firebase Auth broke tests that relied on:
@@ -1417,46 +1420,54 @@ Create reusable test utilities that abstract authentication and navigation, maki
 - Demo users (Alice, Bob, Charlie, cynacons) that no longer exist
 - LocalStorage-based user/timeline data
 
-**Test Status (296 total tests in 92 files):**
-- Admin tests: 29 failing (100%) - architecturally incompatible
-- Home tests: 40 failing (~89%) - rely on demo users
-- Editor tests: ~167 tests - mostly working (layout/zoom/cards)
-- Production tests: 11 passing (100%)
+**Test Infrastructure Changes (DONE):**
+- [x] Created `tests/utils/authTestUtils.ts` - Firebase Auth helper functions
+- [x] Updated `tests/utils/timelineTestUtils.ts` - removed localStorage, uses Firestore
+- [x] Updated all 6 admin test files with Firebase Auth sign-in
+- [x] Updated all 8 home test files to use Firebase Auth or public timelines
+- [x] Updated `tests/user/02-edit-profile.spec.ts` for Firebase Auth
+- [x] Updated `tests/auth/01-auth-smoke.spec.ts` selectors
 
-**Phase 1: Admin Tests (29 tests, 6 files)**
-- [ ] Mark admin tests as skipped with clear TODO explaining Firebase Auth incompatibility
-- [ ] Create `tests/admin/README.md` documenting why tests are skipped
-- [ ] Consider: Delete admin tests entirely if admin panel is low priority
-- Files: `01-reset-statistics.spec.ts`, `82-86.spec.ts`
+**Phase 1: Admin Tests (DONE - infrastructure)**
+- [x] Updated `01-reset-statistics.spec.ts` - uses signInWithEmail
+- [x] Updated `82-admin-panel-access.spec.ts` - graceful skip if no admin role
+- [x] Updated `83-user-management.spec.ts` - uses Firebase Auth
+- [x] Updated `84-admin-statistics.spec.ts` - uses Firebase Auth
+- [x] Updated `85-admin-bulk-operations.spec.ts` - uses Firebase Auth
+- [x] Updated `86-admin-activity-log.spec.ts` - uses Firebase Auth
 
-**Phase 2: Home Tests Cleanup (40 tests, 8 files)**
-- [ ] Remove localStorage user switching from tests (no more `powertimeline_current_user`)
-- [ ] Update tests to work with unauthenticated browsing (public timelines)
-- [ ] For tests requiring auth: skip with TODO or mock Firebase Auth
-- [ ] Update `tests/home/01-smoke.spec.ts` - remove demo user assumptions
-- [ ] Update `tests/home/72-timeline-navigation.spec.ts` - use Firestore data
-- [ ] Update `tests/home/73-timeline-content-verification.spec.ts` - use public timelines
-- [ ] Skip or rewrite `tests/home/74-76*.spec.ts` (timeline/event creation needs auth)
-- [ ] Update `tests/home/80-timeline-visibility-controls.spec.ts`
+**Phase 2: Home Tests (DONE - infrastructure)**
+- [x] Updated `01-smoke.spec.ts` - tests landing + browse pages
+- [x] Updated `71-home-page-basic.spec.ts` - unauthenticated + authenticated flows
+- [x] Updated `72-timeline-navigation.spec.ts` - uses public timelines
+- [x] Updated `73-timeline-content-verification.spec.ts` - uses Firestore data
+- [x] Updated `74-timeline-creation-e2e.spec.ts` - requires sign-in first
+- [x] Updated `75-event-creation-e2e.spec.ts` - requires sign-in first
+- [x] Updated `76-event-persistence.spec.ts` - requires sign-in first
+- [x] Updated `80-timeline-visibility-controls.spec.ts` - requires sign-in
 
-**Phase 3: Test Utilities Cleanup**
-- [ ] Update `tests/utils/timelineTestUtils.ts` - remove localStorage references
-- [ ] Update `tests/utils/timelineTestHelper.ts` - remove demo user logic
-- [ ] Create helper for loading public test timelines from Firestore
+**Phase 3: Test Utilities (DONE)**
+- [x] Created `tests/utils/authTestUtils.ts` with signInWithEmail, signOut, etc.
+- [x] Updated `tests/utils/timelineTestUtils.ts` - removed localStorage refs
 
-**Phase 4: Legacy Code Cleanup (from CHANGE_REQUEST.md)**
-- [ ] Remove/deprecate `getCurrentUser()` in `src/lib/homePageStorage.ts`
-- [ ] Remove `initializeUsers()` references
-- [ ] Clean up `src/components/UserSwitcherModal.tsx` - remove demo user switching
-- [ ] Update `src/services/migration.ts` - remove localStorage user migration
-- [ ] Remove localStorage user clearing in `src/main.tsx` (lines 30-32)
-- [ ] Clean up `src/components/TopNavBar.tsx` localStorage reference (line 115)
+**Phase 4: Legacy Code Cleanup (DEFERRED)**
+- [ ] src/ localStorage code is for theme/migration, not auth - not breaking tests
 
-**Phase 5: Verification**
-- [ ] Run full test suite: `npx playwright test`
-- [ ] Target: <10 failing tests (down from 69)
-- [ ] Update `docs/TESTS.md` with new test counts
-- [ ] Commit and push
+**Phase 5: Verification (IN PROGRESS)**
+- [ ] Tests still failing due to UI selector mismatches
+- [ ] Test user needs `role: 'admin'` in Firestore for admin tests
+- [ ] Login redirect behavior differs from test expectations
+
+**Remaining Issues (need UI fixes or selector updates):**
+1. Landing page selectors don't match current UI (h1, buttons)
+2. Browse page selectors don't match (missing h1)
+3. Login redirects to `/` not `/browse` after successful sign-in
+4. Test user `iTMZ9n0IuzUSbhWfCaR86WsB2AC3` needs admin role in Firestore
+
+**Test User Setup Required:**
+- Email: test@powertimeline.com
+- UID: iTMZ9n0IuzUSbhWfCaR86WsB2AC3
+- Firestore: Set `users/{UID}.role = 'admin'` for admin panel tests
 
 **Deferred to v0.5.12:**
 - Platform Statistics Aggregation (Cloud Functions)
