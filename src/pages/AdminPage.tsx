@@ -14,7 +14,6 @@ import { canAccessAdmin } from '../lib/adminUtils';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
-import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { UserManagementPanel } from '../components/admin/UserManagementPanel';
 import { StatisticsDashboard } from '../components/admin/StatisticsDashboard';
@@ -27,7 +26,6 @@ export function AdminPage() {
   const navigate = useNavigate();
   const { user: firebaseUser } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
 
   // Get navigation configuration
@@ -147,12 +145,6 @@ export function AdminPage() {
           )}
         </main>
       </div>
-
-      {/* User Switcher Modal */}
-      <UserSwitcherModal
-        open={userSwitcherOpen}
-        onClose={() => setUserSwitcherOpen(false)}
-      />
     </div>
   );
 }

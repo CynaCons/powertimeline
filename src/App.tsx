@@ -22,7 +22,6 @@ const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').th
 const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
-const UserSwitcherModal = lazy(() => import('./components/UserSwitcherModal').then(m => ({ default: m.UserSwitcherModal })));
 import { EventStorage } from './lib/storage';
 import {
   seedRandom as seedRandomUtil,
@@ -99,7 +98,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
 
   // Use readOnly prop from EditorPage (which determines ownership via Firebase Auth)
   const isReadOnly = readOnly;
@@ -626,15 +624,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             >
               info
             </button>
-            <button
-              type="button"
-              title="Switch User"
-              onClick={() => setUserSwitcherOpen(true)}
-              className="material-symbols-rounded rounded-md p-2 text-secondary hover:bg-surface-elevated transition-theme"
-              aria-label="Switch User"
-            >
-              account_circle
-            </button>
             <ThemeToggleButton />
           </div>
         </aside>
@@ -809,14 +798,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             onClose={() => setCommandPaletteOpen(false)}
             commands={commands}
             placeholder="Search commands... (Ctrl+K)"
-          />
-        </Suspense>
-
-        {/* User Switcher Modal */}
-        <Suspense fallback={null}>
-          <UserSwitcherModal
-            open={userSwitcherOpen}
-            onClose={() => setUserSwitcherOpen(false)}
           />
         </Suspense>
 

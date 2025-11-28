@@ -18,7 +18,6 @@ import { signOutUser } from '../services/auth';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
-import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
@@ -43,7 +42,6 @@ export function HomePage() {
     eventCount: 0,
     viewCount: 0,
   });
-  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
     timelines: TimelineMetadata[];
@@ -847,12 +845,6 @@ export function HomePage() {
         )}
         </main>
       </div>
-
-      {/* User Switcher Modal */}
-      <UserSwitcherModal
-        open={userSwitcherOpen}
-        onClose={() => setUserSwitcherOpen(false)}
-      />
 
       {/* Timeline CRUD Dialogs */}
       <CreateTimelineDialog

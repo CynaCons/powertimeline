@@ -13,7 +13,6 @@ import { getUser, getTimelines } from '../services/firestore';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
-import { UserSwitcherModal } from '../components/UserSwitcherModal';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
@@ -31,7 +30,6 @@ export function UserProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [timelines, setTimelines] = useState<TimelineMetadata[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editTimelineId, setEditTimelineId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -408,12 +406,6 @@ export function UserProfilePage() {
         )}
         </main>
       </div>
-
-      {/* User Switcher Modal */}
-      <UserSwitcherModal
-        open={userSwitcherOpen}
-        onClose={() => setUserSwitcherOpen(false)}
-      />
 
       {/* Timeline Edit/Delete Dialogs */}
       <EditTimelineDialog
