@@ -9,7 +9,8 @@ import type {
   AdminActionType,
   AdminActionTargetType,
 } from '../types';
-import { getCurrentUser } from './homePageStorage';
+// Note: getCurrentUser from homePageStorage is deprecated.
+// logAdminAction now requires userId and userName parameters.
 
 const ACTIVITY_LOG_KEY = 'powertimeline_activity_log';
 const MAX_LOG_ENTRIES = 1000;
@@ -47,6 +48,8 @@ function saveActivityLogs(logs: AdminActivityLog[]): void {
 /**
  * Log an admin action to the activity log
  *
+ * @param adminUserId - ID of the admin performing the action (from Firebase Auth)
+ * @param adminUserName - Display name of the admin
  * @param action - Type of admin action performed
  * @param targetType - Type of entity affected (user, timeline, system)
  * @param targetId - ID of the affected entity
@@ -55,24 +58,25 @@ function saveActivityLogs(logs: AdminActivityLog[]): void {
  * @param metadata - Optional additional action-specific data
  */
 export function logAdminAction(
+  adminUserId: string,
+  adminUserName: string,
   action: AdminActionType,
   targetType: AdminActionTargetType,
   targetId: string,
   details: string,
   targetName?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): void {
-  const currentUser = getCurrentUser();
-  if (!currentUser) {
-    console.warn('Cannot log admin action: No current user');
+  if (!adminUserId) {
+    console.warn('Cannot log admin action: No admin user ID provided');
     return;
   }
 
   const logEntry: AdminActivityLog = {
     id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     timestamp: new Date().toISOString(),
-    adminUserId: currentUser.id,
-    adminUserName: currentUser.name,
+    adminUserId,
+    adminUserName,
     action,
     targetType,
     targetId,
@@ -85,7 +89,7 @@ export function logAdminAction(
   logs.push(logEntry);
   saveActivityLogs(logs);
 
-  console.log(`[ADMIN ACTION] ${currentUser.name}: ${details}`, metadata);
+  console.log(`[ADMIN ACTION] ${adminUserName}: ${details}`, metadata);
 }
 
 /**

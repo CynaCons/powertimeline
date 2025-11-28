@@ -34,7 +34,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import type { User } from '../../types';
-import { getCurrentUser } from '../../lib/homePageStorage';
+import { useAuth } from '../../contexts/AuthContext';
 import { getUsers, getTimelines, updateUser as updateUserFirestore, deleteUser as deleteUserFirestore, deleteTimeline } from '../../services/firestore';
 import { UserAvatar } from '../UserAvatar';
 import { logAdminAction } from '../../lib/activityLog';
@@ -88,7 +88,9 @@ export function UserManagementPanel() {
     newRole: 'user' | 'admin';
   } | null>(null);
 
-  const currentUser = getCurrentUser();
+  // Use Firebase Auth instead of deprecated localStorage getCurrentUser()
+  const { user } = useAuth();
+  const currentUserId = user?.uid;
 
   // Helper function to refresh data from Firestore
   const refreshData = useCallback(async () => {
@@ -177,6 +179,8 @@ export function UserManagementPanel() {
       await updateUserFirestore(roleChangeDialog.userId, { role: roleChangeDialog.newRole });
       await refreshData();
       logAdminAction(
+        currentUserId || '',
+        user?.displayName || 'Admin',
         'USER_ROLE_CHANGE',
         'user',
         roleChangeDialog.userId,
@@ -224,6 +228,8 @@ export function UserManagementPanel() {
       await refreshData();
 
       logAdminAction(
+        currentUserId || '',
+        user?.displayName || 'Admin',
         'USER_DELETE',
         'user',
         deleteDialog.userId,
@@ -266,7 +272,7 @@ export function UserManagementPanel() {
       // Select all (except current user)
       const allIds = new Set(
         filteredAndSortedUsers
-          .filter(u => u.id !== currentUser?.id)
+          .filter(u => u.id !== currentUserId)
           .map(u => u.id)
       );
       setSelectedUserIds(allIds);
@@ -316,6 +322,8 @@ export function UserManagementPanel() {
       clearSelection();
       setBulkDeleteDialog(null);
       logAdminAction(
+        currentUserId || '',
+        user?.displayName || 'Admin',
         'BULK_OPERATION',
         'user',
         'bulk',
@@ -353,6 +361,8 @@ export function UserManagementPanel() {
       clearSelection();
       setBulkRoleDialog(null);
       logAdminAction(
+        currentUserId || '',
+        user?.displayName || 'Admin',
         'BULK_OPERATION',
         'user',
         'bulk',
@@ -448,8 +458,8 @@ export function UserManagementPanel() {
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
-                  indeterminate={selectedUserIds.size > 0 && selectedUserIds.size < filteredAndSortedUsers.filter(u => u.id !== currentUser?.id).length}
-                  checked={filteredAndSortedUsers.filter(u => u.id !== currentUser?.id).length > 0 && selectedUserIds.size === filteredAndSortedUsers.filter(u => u.id !== currentUser?.id).length}
+                  indeterminate={selectedUserIds.size > 0 && selectedUserIds.size < filteredAndSortedUsers.filter(u => u.id !== currentUserId).length}
+                  checked={filteredAndSortedUsers.filter(u => u.id !== currentUserId).length > 0 && selectedUserIds.size === filteredAndSortedUsers.filter(u => u.id !== currentUserId).length}
                   onChange={toggleSelectAll}
                 />
               </TableCell>
@@ -497,7 +507,7 @@ export function UserManagementPanel() {
                     <Checkbox
                       checked={selectedUserIds.has(user.id)}
                       onChange={() => toggleSelectUser(user.id)}
-                      disabled={currentUser?.id === user.id}
+                      disabled={currentUserId === user.id}
                     />
                   </TableCell>
                   <TableCell>
@@ -514,7 +524,7 @@ export function UserManagementPanel() {
                       <Select
                         value={user.role || 'user'}
                         onChange={(e) => handleRoleChange(user.id, e.target.value as 'user' | 'admin')}
-                        disabled={currentUser?.id === user.id} // Can't change own role
+                        disabled={currentUserId === user.id} // Can't change own role
                       >
                         <MenuItem value="user">User</MenuItem>
                         <MenuItem value="admin">Admin</MenuItem>
@@ -530,13 +540,13 @@ export function UserManagementPanel() {
                     <span className="text-sm">{user.timelineCount}</span>
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title={currentUser?.id === user.id ? 'Cannot delete yourself' : 'Delete user'}>
+                    <Tooltip title={currentUserId === user.id ? 'Cannot delete yourself' : 'Delete user'}>
                       <span>
                         <IconButton
                           size="small"
                           color="error"
                           onClick={() => handleDeleteClick(user.id)}
-                          disabled={currentUser?.id === user.id} // Can't delete yourself
+                          disabled={currentUserId === user.id} // Can't delete yourself
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
