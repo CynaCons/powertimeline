@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FileAnalysis",
+  "description": "Structured output for file/codebase analysis",
+  "type": "object",
+  "properties": {
+    "files_analyzed": {
+      "type": "integer",
+      "description": "Number of files analyzed",
+      "minimum": 0
+    },
+    "total_lines": {
+      "type": "integer",
+      "description": "Total lines of code",
+      "minimum": 0
+    },
+    "file_types": {
+      "type": "object",
+      "description": "Count of files by extension",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Key findings from analysis",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Finding type (e.g., pattern, concern, observation)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the finding"
+          },
+          "locations": {
+            "type": "array",
+            "description": "Relevant file locations",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["type", "description"]
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "External dependencies found",
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "string",
+      "description": "Overall analysis summary"
+    }
+  },
+  "required": ["files_analyzed", "summary"]
+}

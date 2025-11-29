@@ -1,0 +1,90 @@
+# Multi-Agent System Configuration
+# Used by spawner.py and workflow scripts
+
+version: "1.0"
+
+# Default working directory (relative to repo root)
+workspace: "."
+
+# Agent Definitions
+agents:
+  claude:
+    cli: "claude"
+    default_model: "sonnet"  # opus, sonnet, haiku
+    output_format: "json"
+    default_tools:
+      - "Bash"
+      - "Read"
+      - "Glob"
+      - "Grep"
+      - "Edit"
+      - "Write"
+    timeout_seconds: 300
+
+  codex:
+    cli: "codex"
+    subcommand: "exec"
+    default_model: null  # uses codex default (gpt-5.1-codex-max)
+    output_format: "json"  # --json flag for JSONL
+    default_sandbox: "read-only"  # read-only, workspace-write, danger-full-access
+    timeout_seconds: 300
+
+# Model Selection Guide
+models:
+  claude:
+    opus:
+      description: "Most capable, highest cost"
+      use_for: "Complex reasoning, architecture decisions"
+      cost_tier: "high"
+    sonnet:
+      description: "Balanced capability and cost"
+      use_for: "Code generation, analysis"
+      cost_tier: "medium"
+    haiku:
+      description: "Fast and cheap"
+      use_for: "Simple tasks, file listing, quick checks"
+      cost_tier: "low"
+
+# Sandbox Modes (Codex)
+sandbox_modes:
+  read-only:
+    description: "Can only read files, no modifications"
+    use_for: "Testing, verification, analysis"
+  workspace-write:
+    description: "Can modify files in workspace"
+    use_for: "Code generation, refactoring"
+  danger-full-access:
+    description: "Full system access - use with caution"
+    use_for: "System administration tasks"
+
+# Schema Definitions
+schemas:
+  test_results: "schemas/test_results.json"
+  code_review: "schemas/code_review.json"
+  file_analysis: "schemas/file_analysis.json"
+
+# Workflow Defaults
+workflows:
+  run_tests:
+    agent: "codex"
+    sandbox: "read-only"
+    schema: "test_results"
+
+  code_review:
+    agent: "claude"
+    model: "sonnet"
+    tools: ["Read", "Glob", "Grep"]
+    schema: "code_review"
+
+# Logging
+logging:
+  history_file: "HISTORY.md"
+  context_file: "CONTEXT.md"
+  append_history: true
+  update_context: true
+
+# Error Handling
+error_handling:
+  retry_count: 1
+  retry_delay_seconds: 5
+  log_errors: true
