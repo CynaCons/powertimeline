@@ -1,6 +1,6 @@
-# Multi-Agent Orchestration System
+# MCP Agent Spawner System
 
-This module provides CLI-based spawning and coordination of AI agents (Claude and Codex) for automated development workflows.
+This module provides **MCP-based** spawning and coordination of AI agents (Claude and Codex) for automated development workflows. The MCP (Model Context Protocol) server exposes agent spawning as first-class tools.
 
 ## Overview
 
@@ -22,34 +22,47 @@ This module provides CLI-based spawning and coordination of AI agents (Claude an
 └───────────────────────┘       └───────────────────────────────┘
 ```
 
-## Quick Start
+## Quick Start (Recommended: MCP Tools)
 
-### Spawn a Claude sub-agent
+When using Claude Code, spawn agents via MCP tools:
+
+```
+mcp__agents__spawn_claude   - Spawn Claude sub-agent (recommended)
+mcp__agents__spawn_codex    - Spawn Codex agent
+mcp__agents__list_running   - List running agents
+mcp__agents__get_result     - Get completed result
+mcp__agents__get_context    - Preview injected context
+```
+
+### Example MCP call (within Claude Code)
+```json
+{
+  "tool": "mcp__agents__spawn_claude",
+  "parameters": {
+    "prompt": "Run the production tests and report results",
+    "model": "haiku",
+    "tools": ["Bash", "Read", "Glob"],
+    "timeout": 300
+  }
+}
+```
+
+## Alternative: Direct Python Usage
+
+For scripting outside Claude Code:
+
 ```python
-from agents.spawner import spawn_claude
+from agents import spawn_claude
 
 result = spawn_claude(
     prompt="Run the production tests and report results",
     tools=["Bash", "Read", "Glob"],
-    model="haiku",  # cheaper for simple tasks
-    schema="schemas/test_results.json"
+    model="haiku",
 )
-print(result.structured_output)
+print(result.text)
 ```
 
-### Spawn a Codex sub-agent
-```python
-from agents.spawner import spawn_codex
-
-for event in spawn_codex(
-    prompt="Count TypeScript files in src/",
-    sandbox="read-only"
-):
-    if event.type == "agent_message":
-        print(event.text)
-```
-
-### Run a predefined workflow
+### Run predefined workflows
 ```bash
 python agents/workflows/run_tests.py --suite production
 python agents/workflows/code_review.py --files src/services/*.ts

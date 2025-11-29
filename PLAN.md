@@ -1,10 +1,10 @@
 # PowerTimeline Implementation Plan
 
-## 📊 Quick Summary
+## Quick Summary
 
-**Current Version:** v0.5.12 (Complete)
-**Status:** Firestore Schema Cleanup Complete
-**Next Milestone:** v0.5.13 - Multi-Agent Orchestration Tooling
+**Current Version:** v0.5.13 (Complete)
+**Status:** MCP Agent Spawner Complete
+**Next Milestone:** v0.5.14 - Timeline Navigation & URL Fixes
 
 ### Key Metrics
 - **Total Iterations:** 185+ completed (v0.2.0 → v0.5.10)
@@ -1033,29 +1033,71 @@
 - [x] Create test suite for SRS_DB.md schema validation (tests/db/)
 
 ### v0.5.13 - Multi-Agent Orchestration Tooling
-**Goal:** Enable Claude to spawn, supervise, and coordinate sub-agents (Codex or Claude CLI) programmatically
+**Goal:** Enable Claude to spawn, supervise, and coordinate sub-agents programmatically
+**Status:** Complete
+
+- [x] Investigate Codex CLI and Claude CLI invocation options
+- [x] Design deterministic orchestration architecture (Python handles all bookkeeping)
+- [x] Create agents/ module with spawner.py, logger.py, context_loader.py
+- [x] Implement auto-context injection (PRD, PLAN, CLAUDE.md)
+- [x] Implement auto-logging to IAC.md and CONTEXT.md
+- [x] Create agents/DESIGN.md with architecture rationale
+- [x] Update CLAUDE.md and AGENTS.md with orchestration documentation
+- [x] Test spawning sub-agents for simple tasks
+- [x] Repository cleanup (deleted stale debug/temp files)
+- [x] Verify Firebase service account keys never in git history
+- [x] Design MCP server for deterministic agent spawning (agents/MCP_DESIGN.md)
+- [x] Implement MCP server exposing 5 tools (spawn_claude, spawn_codex, list_running, get_result, get_context)
+- [x] Create .mcp.json configuration for Claude Code integration
+- [x] Update documentation for MCP-first usage pattern
+- [x] Fix broken imports in workflow files (run_tests.py, code_review.py)
+- [x] Consolidate logging config (IAC.md as primary log)
+
+### v0.5.14 - Timeline Navigation & URL Fixes
+**Goal:** Fix critical production issues with timeline navigation, URL structure, and schema compliance
 **Status:** In Progress
 
-**Research & Design:**
-- [ ] Investigate Codex CLI invocation options (npx @anthropic-ai/codex, API, etc.)
-- [ ] Investigate Claude CLI invocation options (claude, npx, API)
-- [ ] Compare pros/cons of each solution for sub-agent spawning
-- [ ] Design sub-agent spawning interface (prompt, context files, task description)
-- [ ] Define supervision model (background processes, output monitoring, termination)
-- [ ] Document orchestration patterns in AGENTS.md
+**Phase 1: Schema Compliance (Claude)**
+- [x] Remove deprecated fields from src/types.ts (User: name, avatar, bio; Event: priority, category, excerpt; EventDocument: order)
+- [x] Update avatarUtils.ts to work with username
+- [x] Update UserAvatar to use username instead of name
+- [ ] Update remaining UI components to use username (HomePage, UserProfilePage, UserProfileMenu, etc.)
+- [ ] Remove EditUserProfileDialog (no editable fields in SRS_DB.md)
+- [ ] Run SRS_DB compliance tests on dev environment
 
-**Implementation:**
-- [ ] Create script/tool for spawning sub-agents with context (PRD, PLAN, AGENTS.md, CLAUDE.md, IAC)
-- [ ] Implement background process management for sub-agents
-- [ ] Create output monitoring and result collection mechanism
-- [ ] Build task dispatch system with structured prompts
+**Phase 2: Username System (Claude)**
+- [ ] Create UsernameSelectionDialog component for first-time users
+- [ ] Implement username uniqueness check in Firestore
+- [ ] Add username format validation (3-20 chars, lowercase alphanumeric + hyphen)
+- [ ] Block reserved usernames (admin, api, browse, etc.)
+- [ ] Integrate username prompt into auth flow (after Google sign-in or email registration)
+- [ ] Update auth service to require username before app access
 
-**Integration:**
-- [ ] Test spawning sub-agents for simple tasks (e.g., run tests, report results)
-- [ ] Test multi-agent coordination via IAC.md
-- [ ] Document usage patterns and best practices
+**Phase 3: URL Structure Refactor (Claude)**
+- [ ] Change URL pattern from `/user/{firebaseUid}/timeline/{id}` to `/user/{username}/timeline/{id}`
+- [ ] Create getUserByUsername() Firestore query
+- [ ] Update React Router routes in main.tsx
+- [ ] Update all navigation links (LandingPage, HomePage, TimelineCard, etc.)
+- [ ] Update breadcrumb navigation to use username
+- [ ] Handle legacy UID-based URLs with redirect
 
-### v0.5.14 - Firestore Data Refinement
+**Phase 4: Timeline Navigation Fixes (Claude)**
+- [ ] Debug timeline card click handlers for authenticated users
+- [ ] Fix Firestore security rules for authenticated read access
+- [ ] Fix race conditions in auth state vs data loading
+
+**Phase 5: Test Environment Setup (Sub-agent)**
+- [ ] Seed test timelines in powertimeline-dev for development testing
+- [ ] Create tester account in production with PRIVATE timelines
+- [ ] Ensure cynako@gmail.com public timelines exist for production tests
+
+**Phase 6: Production Test Suite Enhancement (Sub-agent)**
+- [ ] Test all navigation buttons on production (TopNavBar, NavigationRail, breadcrumbs)
+- [ ] Test authenticated timeline opening for cynako@gmail.com
+- [ ] Test public timeline browsing without authentication
+- [ ] Verify no test data pollution in production feeds
+
+### v0.5.15 - Firestore Data Refinement (Backlog)
 **Goal:** Complete Firestore compliance and fix remaining data issues
 
 **Code Updates (from v0.5.12):**
@@ -1079,7 +1121,7 @@
 - [ ] Update any tests that reference removed fields
 - [ ] Pass SRS_DB.md compliance tests (tests/db/)
 
-### v0.5.15 - Platform Statistics Aggregation
+### v0.5.16 - Platform Statistics Aggregation
 **Goal:** Move stats calculation from client-side scans to server-side aggregation
 
 - [ ] Create `stats/platform` document in Firestore

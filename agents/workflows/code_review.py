@@ -18,7 +18,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from agents.spawner import spawn_claude, append_history
+from agents.spawner import spawn_claude
 
 
 def get_staged_diff() -> str:
@@ -116,14 +116,8 @@ Use git diff HEAD~1 to see recent changes, then provide a review."""
             print(f"\nApproved: {approved}")
             print(f"Issues found: {len(issues)}")
 
-    # Log to history
-    target = ", ".join(files) if files else "git diff"
-    append_history(
-        agent="Claude (sonnet)",
-        task="Code review",
-        result=f"Reviewed {target}",
-        notes=f"Approved: {result.structured_output.get('approved', 'N/A') if result.structured_output else 'N/A'}",
-    )
+    # Note: Logging is handled automatically by spawn_claude
+    # No manual logging needed here
 
     return {
         "success": result.success,

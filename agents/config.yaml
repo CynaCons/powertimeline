@@ -78,9 +78,10 @@ workflows:
 
 # Logging
 logging:
-  history_file: "HISTORY.md"
-  context_file: "CONTEXT.md"
-  append_history: true
+  iac_file: "IAC.md"           # Inter-Agent Communication log (auto-generated)
+  context_file: "CONTEXT.md"   # Live agent state (auto-generated)
+  history_file: "HISTORY.md"   # Manual run history (legacy, read-only reference)
+  append_iac: true
   update_context: true
 
 # Error Handling

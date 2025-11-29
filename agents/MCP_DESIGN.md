@@ -1,9 +1,9 @@
 # MCP Agent Spawner - Design Document
 
-**Version:** 1.0 (Draft)
+**Version:** 1.0
 **Date:** 2025-11-29
 **Authors:** Claude (Orchestrator) + User
-**Status:** Proposal
+**Status:** Implemented
 
 ---
 

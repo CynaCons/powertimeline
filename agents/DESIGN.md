@@ -1,8 +1,9 @@
 # Multi-Agent Orchestration System - Design Document
 
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2025-11-29
 **Authors:** User + Claude (Orchestrator)
+**Status:** Implemented (with MCP integration)
 
 ---
 
@@ -374,3 +375,18 @@ When this system stabilizes, it can be extracted to a separate repository:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2025-11-29 | Initial design document |
+| 1.1 | 2025-11-29 | Added MCP integration (see MCP_DESIGN.md for details) |
+
+---
+
+## 10. MCP Integration
+
+This orchestration system is now exposed via an MCP (Model Context Protocol) server, making agent spawning a first-class tool in Claude Code's tool list.
+
+**Benefits of MCP integration:**
+- Agent spawning appears as `mcp__agents__spawn_claude` in tool list
+- No need to remember Python invocation patterns
+- Automatic schema validation of parameters
+- Context injection and logging handled automatically
+
+**See `MCP_DESIGN.md` for complete MCP architecture documentation.**

@@ -17,7 +17,8 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from agents.spawner import spawn_claude, spawn_codex, append_history, update_context
+from agents.spawner import spawn_claude, spawn_codex
+from agents.logger import log_spawn_start, log_spawn_complete
 
 
 def run_tests(
@@ -76,14 +77,8 @@ Be concise but complete."""
         if result.structured_output:
             print(f"Structured: {result.structured_output}")
 
-    # Log to history
-    suite_str = ", ".join(suites) if suites else ", ".join(files) if files else "all"
-    append_history(
-        agent=agent.capitalize(),
-        task=f"Run {suite_str} tests",
-        command=f"npx playwright test {test_targets}",
-        result=result.text[:100] + "..." if len(result.text) > 100 else result.text,
-    )
+    # Note: Logging is handled automatically by spawn_claude/spawn_codex
+    # No manual logging needed here
 
     return {
         "success": result.success,
