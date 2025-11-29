@@ -7,10 +7,17 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { signInWithEmail } from '../utils/authTestUtils';
+import { signInWithEmail, getTestUserUid, getTestUserEmail } from '../utils/authTestUtils';
+import { ensureAdminRoleForTestUser } from '../utils/adminRoleUtils';
+
+let adminReady = false;
 
 // Helper to navigate to admin activity log tab
 async function goToActivityLogWithAuth(page: import('@playwright/test').Page): Promise<boolean> {
+  if (!adminReady) {
+    return false;
+  }
+
   await signInWithEmail(page);
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
@@ -28,6 +35,9 @@ async function goToActivityLogWithAuth(page: import('@playwright/test').Page): P
 }
 
 test.describe('v5/86 Admin Panel - Activity Log', () => {
+  test.beforeAll(async () => {
+    adminReady = await ensureAdminRoleForTestUser(getTestUserUid(), getTestUserEmail());
+  });
 
   test('T86.1: View activity log entries', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-LOG-001' });

@@ -7,10 +7,17 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { signInWithEmail } from '../utils/authTestUtils';
+import { signInWithEmail, getTestUserUid, getTestUserEmail } from '../utils/authTestUtils';
+import { ensureAdminRoleForTestUser } from '../utils/adminRoleUtils';
+
+let adminReady = false;
 
 // Helper to navigate to admin user management tab
 async function goToUserManagementWithAuth(page: import('@playwright/test').Page): Promise<boolean> {
+  if (!adminReady) {
+    return false;
+  }
+
   await signInWithEmail(page);
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
@@ -28,6 +35,9 @@ async function goToUserManagementWithAuth(page: import('@playwright/test').Page)
 }
 
 test.describe('v5/83 Admin Panel - User Management', () => {
+  test.beforeAll(async () => {
+    adminReady = await ensureAdminRoleForTestUser(getTestUserUid(), getTestUserEmail());
+  });
 
   test('T83.1: View all users in table', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-USR-001' });

@@ -31,21 +31,18 @@
 - Do not store secrets in repo; use `.env.local`/`.env.test` (already gitignored). Validate `VITE_*` vars before running tests.
 - Firestore rules must allow public read of public/unlisted timelines while blocking writes for unauth users; keep admin operations restricted.
 
-## Roles & Coordination
-
-### Multi-Agent Architecture
+## Multi-Agent Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    COORDINATOR (User)                        │
+│                       USER                                   │
 │              Approves PLAN.md changes                        │
 └─────────────────────┬───────────────────────────────────────┘
                       │ direction
           ┌───────────┴───────────┐
           ▼                       ▼
 ┌─────────────────────┐   ┌─────────────────────┐
-│  PROJECT LEADER     │   │      TESTER         │
-│     (Claude)        │   │      (Codex)        │
+│      CLAUDE         │   │       CODEX         │
 ├─────────────────────┤   ├─────────────────────┤
 │ • Updates PLAN.md   │◄──│ • Reads PLAN.md     │
 │   (with approval)   │   │ • Writes to IAC.md  │
@@ -61,21 +58,21 @@
               └───────────────┘
 ```
 
-### Roles
-- **Coordinator (User):** Approves all PLAN.md changes, provides direction to both agents
-- **Project Leader (Claude):** Manages development, updates PLAN.md (with Coordinator approval), responds to Tester findings
-- **Tester (Codex - You):** Reads PLAN.md for tasks, reports status/findings in IAC.md
+### Agents
+- **User:** Approves all PLAN.md changes, provides direction to both agents
+- **Claude:** Manages development, updates PLAN.md (with User approval), implements code, responds to Codex
+- **Codex (You):** Reads PLAN.md for tasks, runs tests, reports status/findings in IAC.md
 
-### Your Role as Tester
-- You are the **Tester agent (Codex)**
+### Your Role as Codex
+- You are **Codex**
 - **Read** `PLAN.md` to understand current tasks and priorities
 - **Write** your findings, status updates, and test results to `IAC.md`
-- **Do NOT modify** `PLAN.md` - only the Project Leader can update it
+- **Do NOT modify** `PLAN.md` - only Claude can update it
 - Always follow the rules in `CLAUDE.md`
 
 ### IAC.md Communication Format
 ```
-YYYY-MM-DD HH:MM From Tester to Project Leader
+YYYY-MM-DD HH:MM From Codex to Claude
 - Finding or status update here
 - Use compact bullet format
 ===
@@ -85,4 +82,4 @@ YYYY-MM-DD HH:MM From Tester to Project Leader
 1. Read `PLAN.md` to know what to test
 2. Execute tests and analysis
 3. Write findings to `IAC.md`
-4. Project Leader reads IAC.md and updates PLAN.md (with Coordinator approval)
+4. Claude reads IAC.md and updates PLAN.md (with User approval)

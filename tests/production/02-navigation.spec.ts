@@ -60,11 +60,12 @@ test.describe('Production Navigation', () => {
     const consoleMonitor = monitorConsole(page);
     const networkMonitor = monitorNetwork(page);
 
-    await page.goto(PRODUCTION_URL);
+    await page.goto(`${PRODUCTION_URL}/browse`);
 
-    const exampleLink = page.getByTestId(/timeline-link-/).first();
-    await expect(exampleLink).toBeVisible({ timeout: 5_000 });
-    await exampleLink.click();
+    // Use first timeline heading as navigation target
+    const timelineHeading = page.getByRole('heading', { level: 3 }).first();
+    await expect(timelineHeading).toBeVisible({ timeout: 5_000 });
+    await timelineHeading.click();
 
     await page.waitForLoadState('domcontentloaded');
     await expect(page).toHaveURL(/\/timeline\//);

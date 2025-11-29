@@ -1,162 +1,164 @@
 /**
- * Create E2E Test User
- * Creates a test user with known credentials for E2E testing
- * Run with: npx tsx scripts/create-test-user.ts
+ * Create a test user based on cynako@gmail.com account
+ * Copies all timelines with "test-" prefix
+ *
+ * Run with: npx tsx scripts/create-test-user.ts [--prod|--dev|--both]
+ *
+ * Default: runs on dev database
+ * --prod: runs on production database
+ * --both: runs on both databases
  */
 
 import admin from 'firebase-admin';
-import { config } from 'dotenv';
+import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { readFileSync } from 'fs';
 
-// Load environment variables
-config({ path: resolve(process.cwd(), '.env.local') });
+// Source user: cynako@gmail.com (different IDs in prod vs dev)
+const SOURCE_USER_ID_PROD = 'R0rT7M1Lo1Ocomg4UeffEJ1EpvG2';
+const SOURCE_USER_ID_DEV = 'HL3gR4MbXKe4gPc4vUwksaoKEn93';
 
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    const serviceAccountPath = resolve(process.cwd(), 'powertimeline-dev-firebase-adminsdk-fbsvc-adcd3de895.json');
-    const serviceAccountJson = readFileSync(serviceAccountPath, 'utf8');
-    const serviceAccount = JSON.parse(serviceAccountJson);
-    const credential = admin.credential.cert(serviceAccount);
+// Test user ID
+const TEST_USER_ID = 'test-user';
 
-    admin.initializeApp({
-      credential,
-    });
-    console.log('✅ Connected to Firebase Admin SDK\n');
-  } catch (error) {
-    console.error('❌ Failed to initialize Firebase Admin:', error);
-    process.exit(1);
-  }
+const runProd = process.argv.includes('--prod') || process.argv.includes('--both');
+const runDev = process.argv.includes('--dev') || process.argv.includes('--both') || (!process.argv.includes('--prod'));
+
+function getSourceUserId(envName: string): string {
+  return envName === 'PRODUCTION' ? SOURCE_USER_ID_PROD : SOURCE_USER_ID_DEV;
 }
 
-const TEST_USER = {
-  email: 'test@powertimeline.com',
-  password: 'TestPassword123!',
-  displayName: 'E2E Test User',
-  emailVerified: true,
-};
+const prodKeyPath = resolve(process.cwd(), 'powertimeline-860f1-firebase-adminsdk-fbsvc-933b603f7d.json');
+const devKeyPath = resolve(process.cwd(), 'powertimeline-dev-firebase-adminsdk-fbsvc-adcd3de895.json');
 
-async function createTestUser() {
+async function createTestUserInDb(keyPath: string, envName: string) {
+  if (!existsSync(keyPath)) {
+    console.error(`Service account key not found: ${keyPath}`);
+    return;
+  }
+
+  const serviceAccount = JSON.parse(readFileSync(keyPath, 'utf8'));
+
+  // Create unique app name for each environment
+  const appName = `app-${envName}-${Date.now()}`;
+  const app = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  }, appName);
+
+  const db = app.firestore();
+  const sourceUserId = getSourceUserId(envName);
+
+  console.log(`\n Creating test user in ${envName} database...\n`);
+  console.log(`   Source user ID: ${sourceUserId}`);
+
   try {
-    console.log('🔧 Creating E2E test user...\n');
+    // 1. Get source user document
+    const sourceUserDoc = await db.doc(`users/${sourceUserId}`).get();
 
-    // Check if user already exists
-    let userRecord;
-    try {
-      userRecord = await admin.auth().getUserByEmail(TEST_USER.email);
-      console.log(`⚠️  User ${TEST_USER.email} already exists!`);
-      console.log(`   UID: ${userRecord.uid}`);
-      console.log(`   Created: ${userRecord.metadata.creationTime}`);
-      console.log('\n   Updating password...');
+    if (!sourceUserDoc.exists) {
+      console.log(`   Source user not found in ${envName}. Skipping...`);
+      return;
+    }
 
-      // Update the password
-      await admin.auth().updateUser(userRecord.uid, {
-        password: TEST_USER.password,
-        displayName: TEST_USER.displayName,
-        emailVerified: TEST_USER.emailVerified,
+    const sourceUserData = sourceUserDoc.data()!;
+    console.log(`   Found source user: ${sourceUserData.name || sourceUserData.email}`);
+
+    // 2. Create test user document
+    const testUserData = {
+      ...sourceUserData,
+      id: TEST_USER_ID,
+      email: 'test@powertimeline.app',
+      name: 'Test User',
+      role: 'user', // Not admin for test user
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    await db.doc(`users/${TEST_USER_ID}`).set(testUserData);
+    console.log(`   Created test user document`);
+
+    // 3. Get all timelines from source user
+    const timelinesSnapshot = await db.collection(`users/${sourceUserId}/timelines`).get();
+
+    if (timelinesSnapshot.empty) {
+      console.log(`   No timelines found for source user`);
+      return;
+    }
+
+    console.log(`   Found ${timelinesSnapshot.size} timelines to copy\n`);
+
+    let totalEvents = 0;
+
+    // 4. Copy each timeline with "test-" prefix
+    for (const timelineDoc of timelinesSnapshot.docs) {
+      const timelineData = timelineDoc.data();
+      const originalId = timelineDoc.id;
+      const newId = `test-${originalId}`;
+      const newTitle = `[Test] ${timelineData.title}`;
+
+      console.log(`   Copying timeline: ${timelineData.title}...`);
+
+      // Create new timeline document
+      const newTimelinePath = `users/${TEST_USER_ID}/timelines/${newId}`;
+      await db.doc(newTimelinePath).set({
+        ...timelineData,
+        title: newTitle,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
 
-      console.log('   ✅ Password and details updated!\n');
-    } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
-        // User doesn't exist, create new one
-        console.log('   Creating new user...');
-        userRecord = await admin.auth().createUser({
-          email: TEST_USER.email,
-          password: TEST_USER.password,
-          displayName: TEST_USER.displayName,
-          emailVerified: TEST_USER.emailVerified,
-        });
+      // Copy all events
+      const eventsSnapshot = await db.collection(`users/${sourceUserId}/timelines/${originalId}/events`).get();
 
-        console.log('   ✅ User created successfully!\n');
-      } else {
-        throw error;
+      if (!eventsSnapshot.empty) {
+        // Batch write events (max 500 per batch)
+        const batchSize = 450;
+        const events = eventsSnapshot.docs;
+
+        for (let i = 0; i < events.length; i += batchSize) {
+          const batch = db.batch();
+          const batchEvents = events.slice(i, i + batchSize);
+
+          for (const eventDoc of batchEvents) {
+            const eventData = eventDoc.data();
+            const newEventRef = db.doc(`${newTimelinePath}/events/${eventDoc.id}`);
+            batch.set(newEventRef, eventData);
+          }
+
+          await batch.commit();
+        }
+
+        totalEvents += events.length;
+        console.log(`      -> Copied ${events.length} events`);
       }
     }
 
-    // Create user profile in Firestore
-    const db = admin.firestore();
-    const userDocRef = db.collection('users').doc(userRecord.uid);
-
-    const userProfile = {
-      email: TEST_USER.email,
-      displayName: TEST_USER.displayName,
-      username: 'testuser',
-      avatar: '🧪',
-      bio: 'E2E Test User - Automated testing account',
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      role: 'user',
-    };
-
-    await userDocRef.set(userProfile, { merge: true });
-    console.log('✅ User profile created in Firestore\n');
-
-    // Create a test timeline for this user
-    const timelineRef = db.collection('timelines').doc();
-    const timelineData = {
-      id: timelineRef.id,
-      title: 'E2E Test Timeline',
-      description: 'Test timeline for automated E2E tests',
-      ownerId: userRecord.uid,
-      ownerEmail: TEST_USER.email,
-      visibility: 'public',
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      tags: ['test', 'e2e'],
-      eventCount: 3,
-    };
-
-    await timelineRef.set(timelineData);
-    console.log(`✅ Test timeline created: ${timelineRef.id}\n`);
-
-    // Create some test events for the timeline
-    const eventsRef = timelineRef.collection('events');
-    const testEvents = [
-      {
-        id: 'event-1',
-        title: 'Test Event 1',
-        date: '2024-01-01',
-        description: 'First test event',
-        category: 'test',
-      },
-      {
-        id: 'event-2',
-        title: 'Test Event 2',
-        date: '2024-06-15',
-        description: 'Second test event',
-        category: 'test',
-      },
-      {
-        id: 'event-3',
-        title: 'Test Event 3',
-        date: '2024-12-31',
-        description: 'Third test event',
-        category: 'test',
-      },
-    ];
-
-    for (const event of testEvents) {
-      await eventsRef.doc(event.id).set(event);
-    }
-    console.log('✅ Test events created (3 events)\n');
-
-    // Output credentials for test
-    console.log('═══════════════════════════════════════════════════');
-    console.log('📋 E2E Test User Credentials');
-    console.log('═══════════════════════════════════════════════════');
-    console.log(`Email:        ${TEST_USER.email}`);
-    console.log(`Password:     ${TEST_USER.password}`);
-    console.log(`UID:          ${userRecord.uid}`);
-    console.log(`Timeline ID:  ${timelineRef.id}`);
-    console.log('═══════════════════════════════════════════════════');
-    console.log('\n✅ Test user setup complete!');
-    console.log('   You can now run the E2E tests with PHASE 5-8 enabled.\n');
+    console.log(`\n   Test user created successfully in ${envName}!`);
+    console.log(`   - User ID: ${TEST_USER_ID}`);
+    console.log(`   - Timelines: ${timelinesSnapshot.size}`);
+    console.log(`   - Total events: ${totalEvents}\n`);
 
   } catch (error) {
-    console.error('❌ Error creating test user:', error);
-    process.exit(1);
+    console.error(`Error in ${envName}:`, error);
+  } finally {
+    await app.delete();
   }
 }
 
-createTestUser();
+async function main() {
+  console.log('\n=== Creating Test User ===\n');
+
+  if (runDev) {
+    await createTestUserInDb(devKeyPath, 'DEVELOPMENT');
+  }
+
+  if (runProd) {
+    await createTestUserInDb(prodKeyPath, 'PRODUCTION');
+  }
+
+  console.log('\n=== Done ===\n');
+}
+
+main().catch(error => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});

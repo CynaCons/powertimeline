@@ -7,10 +7,17 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { signInWithEmail } from '../utils/authTestUtils';
+import { signInWithEmail, getTestUserUid, getTestUserEmail } from '../utils/authTestUtils';
+import { ensureAdminRoleForTestUser } from '../utils/adminRoleUtils';
+
+let adminReady = false;
 
 // Helper to navigate to admin statistics
 async function goToAdminStatsWithAuth(page: import('@playwright/test').Page): Promise<boolean> {
+  if (!adminReady) {
+    return false;
+  }
+
   await signInWithEmail(page);
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
@@ -28,6 +35,9 @@ async function goToAdminStatsWithAuth(page: import('@playwright/test').Page): Pr
 }
 
 test.describe('v5/84 Admin Panel - Statistics Dashboard', () => {
+  test.beforeAll(async () => {
+    adminReady = await ensureAdminRoleForTestUser(getTestUserUid(), getTestUserEmail());
+  });
 
   test('T84.1: Display total users and timelines', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-STATS-001' });

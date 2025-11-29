@@ -54,21 +54,21 @@ test.describe('v5/72 Timeline Navigation', () => {
     // Wait for timeline cards to load
     await page.waitForTimeout(2000);
 
-    // Find and click a timeline card
-    const timelineCards = page.locator('[data-testid^="timeline-card-"], .cursor-pointer:has-text("events")');
-    const cardCount = await timelineCards.count();
+    // Find a known public timeline card
+    const targetCard = page.getByTestId('timeline-card-timeline-french-revolution').first();
+    const cardVisible = await targetCard.isVisible({ timeout: 5000 }).catch(() => false);
 
-    if (cardCount > 0) {
-      await timelineCards.first().click();
-      await page.waitForLoadState('domcontentloaded');
-
-      // Verify URL contains timeline ID
-      const urlTimelineId = await getCurrentUrlTimelineId(page);
-      expect(urlTimelineId).toBeTruthy();
-      expect(urlTimelineId).toMatch(/^timeline-/);
-    } else {
-      test.skip(true, 'No timeline cards found on user profile');
+    if (!cardVisible) {
+      test.skip(true, 'Expected timeline card not found on user profile');
+      return;
     }
+
+    await targetCard.click();
+    await page.waitForLoadState('domcontentloaded');
+
+    // Verify URL contains timeline ID
+    const urlTimelineId = await getCurrentUrlTimelineId(page);
+    expect(urlTimelineId).toBe('timeline-french-revolution');
   });
 
   test('T72.3: Clicking multiple different timelines navigates correctly', async ({ page }) => {

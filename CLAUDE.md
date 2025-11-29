@@ -13,15 +13,14 @@ You are developping PowerTimeline, a web application designed to visualize and e
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    COORDINATOR (User)                        │
+│                       USER                                   │
 │              Approves PLAN.md changes                        │
 └─────────────────────┬───────────────────────────────────────┘
                       │ direction
           ┌───────────┴───────────┐
           ▼                       ▼
 ┌─────────────────────┐   ┌─────────────────────┐
-│  PROJECT LEADER     │   │      TESTER         │
-│     (Claude)        │   │      (Codex)        │
+│      CLAUDE         │   │       CODEX         │
 ├─────────────────────┤   ├─────────────────────┤
 │ • Updates PLAN.md   │◄──│ • Reads PLAN.md     │
 │   (with approval)   │   │ • Writes to IAC.md  │
@@ -37,15 +36,15 @@ You are developping PowerTimeline, a web application designed to visualize and e
               └───────────────┘
 ```
 
-## Roles
-- **Coordinator (User):** Approves all PLAN.md changes, provides direction
-- **Project Leader (Claude):** Manages development, updates PLAN.md (with Coordinator approval), responds to Tester
-- **Tester (Codex):** Reads PLAN.md for tasks, reports status/findings in IAC.md, cannot modify PLAN.md
+## Agents
+- **User:** Approves all PLAN.md changes, provides direction
+- **Claude:** Manages development, updates PLAN.md (with User approval), implements code, responds to Codex
+- **Codex:** Reads PLAN.md for tasks, runs tests, reports status/findings in IAC.md, cannot modify PLAN.md
 
 ## Communication
-- `IAC.md` (Inter Agents Communication): Message format `YYYY-MM-DD HH:MM From <Role> to <Role>` followed by bullet points, ending with `===`
-- Tester writes findings/status to IAC.md → Project Leader reads and updates PLAN.md → Coordinator approves
+- `IAC.md` (Inter Agents Communication): Message format `YYYY-MM-DD HH:MM From <Agent> to <Agent>` followed by bullet points, ending with `===`
+- Codex writes findings/status to IAC.md -> Claude reads and updates PLAN.md -> User approves
 
 ## PLAN.md Governance
-- Only Project Leader modifies PLAN.md, with Coordinator approval
-- Tester reads PLAN.md to know what to work on
+- Only Claude modifies PLAN.md, with User approval
+- Codex reads PLAN.md to know what to work on

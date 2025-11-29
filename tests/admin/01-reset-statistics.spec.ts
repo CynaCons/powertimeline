@@ -7,10 +7,17 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { signInWithEmail } from '../utils/authTestUtils';
+import { signInWithEmail, getTestUserUid, getTestUserEmail } from '../utils/authTestUtils';
+import { ensureAdminRoleForTestUser } from '../utils/adminRoleUtils';
+
+let adminReady = false;
 
 // Helper to navigate to admin and check access
 async function goToAdminWithAuth(page: import('@playwright/test').Page): Promise<boolean> {
+  if (!adminReady) {
+    return false;
+  }
+
   await signInWithEmail(page);
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
@@ -21,6 +28,9 @@ async function goToAdminWithAuth(page: import('@playwright/test').Page): Promise
 }
 
 test.describe('admin/01 Reset Statistics Tests', () => {
+  test.beforeAll(async () => {
+    adminReady = await ensureAdminRoleForTestUser(getTestUserUid(), getTestUserEmail());
+  });
 
   test('admin panel is accessible', async ({ page }) => {
     test.info().annotations.push({ type: 'phase', description: 'v0.5.11' });

@@ -2,9 +2,9 @@
 
 ## 📊 Quick Summary
 
-**Current Version:** v0.5.11 (Complete)
-**Status:** Test Stabilization & Legacy Code Cleanup Complete
-**Next Milestone:** v0.5.12 - Platform Statistics Aggregation
+**Current Version:** v0.5.12 (Complete)
+**Status:** Firestore Schema Cleanup Complete
+**Next Milestone:** v0.5.13 - Multi-Agent Orchestration Tooling
 
 ### Key Metrics
 - **Total Iterations:** 185+ completed (v0.2.0 → v0.5.10)
@@ -983,6 +983,7 @@
 
 ### v0.5.11 - Test Stabilization & Legacy Code Cleanup
 **Goal:** Fix broken tests and remove legacy localStorage code
+**Status:** Complete
 
 - [x] Create Firebase Auth test utilities (authTestUtils.ts)
 - [x] Update all admin/home test files with Firebase Auth
@@ -993,10 +994,10 @@
 - [x] Update activityLog to accept user params
 - [x] Reset test user credentials
 
-**Tester Agent Tasks (Delegated):**
-- [ ] Fix admin tests (82-86) selector/role issues
-- [ ] Fix home tests (T71-T73) selector issues
-- [ ] Expand production tests (browse, auth, security, a11y)
+**Codex Tasks (Delegated) - COMPLETED:**
+- [x] Fix admin tests (82-86) selector/role issues
+- [x] Fix home tests (T71-T73) selector issues
+- [x] Expand production tests (browse, auth, security, a11y) - 22/22 passing
 
 ### v0.5.11.1 - UI Polish & Theme Defaults
 **Goal:** Consistent branding and dark theme as default
@@ -1006,7 +1007,79 @@
 - [x] Theme preference persists in localStorage
 - [x] Theme toggle remembers user choice
 
-### v0.5.12 - Platform Statistics Aggregation
+### v0.5.12 - Firestore Schema Cleanup
+**Goal:** Simplify database schema by removing unused fields and making Firestore compliant with SRS_DB.md
+**Status:** Complete
+
+**Database Requirements (SRS_DB.md) - COMPLETED:**
+- [x] Remove `avatar` field from User type (unused)
+- [x] Remove `bio` field from User type (unused)
+- [x] Remove `name` field from User type (unused, username is sufficient)
+- [x] Remove `order` field from Event type (date/time used for ordering)
+- [x] Remove `priority` field from Event type (unused)
+- [x] Remove `category` field from Event type (unused)
+- [x] Remove `excerpt` field from Event type (unused)
+- [x] Remove Migration Notes section from SRS_DB.md
+
+**Claude Tasks (Firestore Migration Scripts) - COMPLETED:**
+- [x] Create script to clean User documents (remove avatar, bio, name fields)
+- [x] Create script to clean Event documents (remove order, priority, category, excerpt)
+- [x] Run migration on DEVELOPMENT database (6 users updated)
+- [x] Run migration on PRODUCTION database (3 users updated)
+- [x] Verify data integrity after migration (dry-run shows 0 updates needed)
+
+**Codex Tasks - COMPLETED:**
+- [x] Clean up IAC.md (remove verbose/corrupted entries)
+- [x] Create test suite for SRS_DB.md schema validation (tests/db/)
+
+### v0.5.13 - Multi-Agent Orchestration Tooling
+**Goal:** Enable Claude to spawn, supervise, and coordinate sub-agents (Codex or Claude CLI) programmatically
+**Status:** In Progress
+
+**Research & Design:**
+- [ ] Investigate Codex CLI invocation options (npx @anthropic-ai/codex, API, etc.)
+- [ ] Investigate Claude CLI invocation options (claude, npx, API)
+- [ ] Compare pros/cons of each solution for sub-agent spawning
+- [ ] Design sub-agent spawning interface (prompt, context files, task description)
+- [ ] Define supervision model (background processes, output monitoring, termination)
+- [ ] Document orchestration patterns in AGENTS.md
+
+**Implementation:**
+- [ ] Create script/tool for spawning sub-agents with context (PRD, PLAN, AGENTS.md, CLAUDE.md, IAC)
+- [ ] Implement background process management for sub-agents
+- [ ] Create output monitoring and result collection mechanism
+- [ ] Build task dispatch system with structured prompts
+
+**Integration:**
+- [ ] Test spawning sub-agents for simple tasks (e.g., run tests, report results)
+- [ ] Test multi-agent coordination via IAC.md
+- [ ] Document usage patterns and best practices
+
+### v0.5.14 - Firestore Data Refinement
+**Goal:** Complete Firestore compliance and fix remaining data issues
+
+**Code Updates (from v0.5.12):**
+- [ ] Update User interface in src/types.ts
+- [ ] Update Event interface in src/types.ts
+- [ ] Update UserProfilePage to show read-only user info from Firestore
+- [ ] Remove EditUserProfileDialog (no editable fields for now)
+- [ ] Update UserAvatar component (use username initials only)
+- [ ] Remove avatar/bio references from auth service
+- [ ] Update Firestore service functions
+- [ ] Clean up any UI components referencing removed fields
+
+**Data Fixes (from Codex feedback):**
+- [ ] Ensure all Timeline documents have required `id` field
+- [ ] Ensure all Event documents have required `id` and `timelineId` fields
+- [ ] Run data validation script on dev and prod
+- [ ] Seed writable data for creation/persistence test flows
+
+**Testing:**
+- [ ] Verify existing tests still pass after field removal
+- [ ] Update any tests that reference removed fields
+- [ ] Pass SRS_DB.md compliance tests (tests/db/)
+
+### v0.5.15 - Platform Statistics Aggregation
 **Goal:** Move stats calculation from client-side scans to server-side aggregation
 
 - [ ] Create `stats/platform` document in Firestore

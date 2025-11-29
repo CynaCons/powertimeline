@@ -7,10 +7,17 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { signInWithEmail } from '../utils/authTestUtils';
+import { signInWithEmail, getTestUserUid, getTestUserEmail } from '../utils/authTestUtils';
+import { ensureAdminRoleForTestUser } from '../utils/adminRoleUtils';
+
+let adminReady = false;
 
 // Helper to navigate to admin user management tab
 async function goToUserManagementWithAuth(page: import('@playwright/test').Page): Promise<boolean> {
+  if (!adminReady) {
+    return false;
+  }
+
   await signInWithEmail(page);
   await page.goto('/admin');
   await page.waitForLoadState('domcontentloaded');
@@ -28,6 +35,9 @@ async function goToUserManagementWithAuth(page: import('@playwright/test').Page)
 }
 
 test.describe('v5/85 Admin Panel - Bulk Operations', () => {
+  test.beforeAll(async () => {
+    adminReady = await ensureAdminRoleForTestUser(getTestUserUid(), getTestUserEmail());
+  });
 
   test('T85.1: Select multiple users', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-BULK-001' });
@@ -52,7 +62,7 @@ test.describe('v5/85 Admin Panel - Bulk Operations', () => {
     await checkboxes.nth(1).click();
 
     // Bulk actions toolbar should appear
-    await expect(page.locator('text=selected')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText(/users selected/i).first()).toBeVisible({ timeout: 3000 });
     await expect(page.locator('button:has-text("Delete Selected")')).toBeVisible();
   });
 

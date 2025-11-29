@@ -8,12 +8,24 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { signInWithEmail, signOut } from '../utils/authTestUtils';
+import { signInWithEmail, signOut, getTestUserUid, getTestUserEmail } from '../utils/authTestUtils';
+import { ensureAdminRoleForTestUser } from '../utils/adminRoleUtils';
 
 test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
+  let adminReady = false;
+
+  test.beforeAll(async () => {
+    adminReady = await ensureAdminRoleForTestUser(getTestUserUid(), getTestUserEmail());
+  });
+
   test('T82.1: Authenticated admin user can access admin panel', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-NAV-001' });
+
+    if (!adminReady) {
+      test.skip(true, 'Test user lacks admin role - ensureAdminRoleForTestUser failed');
+      return;
+    }
 
     // Sign in with test user (should have admin role)
     await signInWithEmail(page);
@@ -24,18 +36,13 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
 
     // Check if admin page is visible (user has admin role)
     const hasAdminPage = await page.getByTestId('admin-page').isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (hasAdminPage) {
-      // Admin access granted - verify admin panel elements using data-testid
-      await expect(page.getByTestId('admin-heading')).toBeVisible({ timeout: 5000 });
-
-      // Verify tabs are present (MUI Tabs use role="tab")
-      await expect(page.locator('[role="tab"]').first()).toBeVisible();
-    } else {
-      // Not admin - test passes but documents the issue
-      console.log('Note: Test user does not have admin role. Update Firestore to grant admin access.');
-      test.skip(true, 'Test user lacks admin role - set role="admin" in Firestore users collection');
+    if (!hasAdminPage) {
+      test.skip(true, 'Admin page not accessible with test user (role update may be required)');
+      return;
     }
+
+    await expect(page.getByTestId('admin-heading')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[role="tab"]').first()).toBeVisible();
   });
 
   test('T82.2: Unauthenticated user cannot access admin panel', async ({ page }) => {
@@ -60,9 +67,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
     await page.goto('/admin');
     await page.waitForLoadState('domcontentloaded');
 
-    // Skip if not admin
-    const hasAdminPage = await page.getByTestId('admin-page').isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasAdminPage) {
+    if (!adminReady) {
       test.skip(true, 'Test user lacks admin role');
       return;
     }
@@ -97,9 +102,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
     await page.goto('/admin');
     await page.waitForLoadState('domcontentloaded');
 
-    // Skip if not admin
-    const hasAdminPage = await page.getByTestId('admin-page').isVisible({ timeout: 5000 }).catch(() => false);
-    if (!hasAdminPage) {
+    if (!adminReady) {
       test.skip(true, 'Test user lacks admin role');
       return;
     }
