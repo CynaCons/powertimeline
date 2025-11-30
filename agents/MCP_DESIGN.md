@@ -1,6 +1,6 @@
 # MCP Agent Spawner - Design Document
 
-**Version:** 1.1
+**Version:** 1.3
 **Date:** 2025-11-30
 **Status:** Implemented
 
@@ -9,9 +9,9 @@
 ## 1. Purpose
 
 Expose agent spawning as MCP tools so the orchestrator (Claude Code) can delegate tasks to sub-agents with:
-- Automatic context injection (AGENTS.md)
-- Automatic logging (IAC.md)
+- Automatic logging (IAC.md, CONTEXT.md)
 - Deterministic behavior (no memory required)
+- Thread-safe concurrent execution
 
 ## 2. Tools
 
@@ -28,7 +28,7 @@ Parameters:
 All other settings are hardcoded:
 - Tools: Bash, Read, Write, Edit, Glob, Grep
 - Timeout: 300s (600s for test tasks)
-- Context: AGENTS.md injected automatically
+- Context: Claude CLI auto-loads CLAUDE.md from project root
 
 ### spawn_codex
 
@@ -42,7 +42,7 @@ Parameters:
 All settings hardcoded:
 - Sandbox: workspace-write
 - Timeout: 300s
-- Context: AGENTS.md injected automatically
+- Context: Codex CLI auto-loads AGENTS.md from project root
 
 ### list
 
@@ -75,33 +75,37 @@ Parameters:
 ┌──────────────────────────────────────────────────────┐
 │  MCP Server (agents/mcp_server.py)                   │
 │                                                      │
-│  1. Inject AGENTS.md context                         │
-│  2. Log start to IAC.md                              │
-│  3. Spawn subprocess (claude/codex CLI)              │
-│  4. Log completion to IAC.md                         │
-│  5. Return result                                    │
+│  1. Log start to IAC.md                              │
+│  2. Spawn subprocess (claude/codex CLI)              │
+│     - CLI auto-loads context (CLAUDE.md/AGENTS.md)   │
+│  3. Log completion to IAC.md                         │
+│  4. Return result                                    │
 └──────────────────────────────────────────────────────┘
 ```
 
-## 4. Context Injection
+## 4. Context Loading
 
-All sub-agents receive AGENTS.md content, which contains:
+Context is loaded by the respective CLIs, not injected by the MCP server:
+- **Claude CLI:** Auto-loads `CLAUDE.md` from project root
+- **Codex CLI:** Auto-loads `AGENTS.md` from project root
+
+This avoids duplicate context and ensures each agent gets the appropriate instructions.
+
+The context files contain:
 - Project overview (what is PowerTimeline)
 - Codebase structure (where things are)
 - Commands (how to build, test)
 - Role guidelines (what to do and NOT do)
 
-This is model-agnostic - works for Claude and Codex.
-
 ## 5. Logging
 
-IAC.md automatically records:
-- Spawn ID, agent type, timestamp
-- Task summary
-- Duration, cost (for Claude)
-- Success/failure status
+**IAC.md** (Inter-Agent Communication) records:
+- Spawn ID, agent type, timestamp (UTC)
+- Task summary and full input prompt
+- Duration, cost (for Claude, estimated for Codex)
+- Success/failure status with output
 
-CONTEXT.md tracks recent runs for quick reference.
+**CONTEXT.md** shows currently active agents only (resets on server restart).
 
 ## 6. Why Two Agent Types?
 

@@ -154,10 +154,15 @@ class AgentLogger:
             if len(result_text) > 50000:
                 display_result = result_text[:25000] + "\n\n... [truncated] ...\n\n" + result_text[-25000:]
 
+            # Use 4 backticks as fence if result contains triple backticks
+            fence = "````" if "```" in display_result else "```"
+
             result_block = f"""<details>
 <summary>📤 Output ({len(result_text)} chars)</summary>
 
+{fence}
 {display_result}
+{fence}
 
 </details>
 
@@ -202,6 +207,10 @@ class AgentLogger:
         # Write to IAC.md - unified entry format (will be updated on completion)
         tools_str = ', '.join(tools) if tools else 'None'
 
+        # Escape backticks in prompt to prevent breaking markdown code fences
+        # Use 4 backticks as fence if prompt contains triple backticks
+        fence = "````" if "```" in prompt else "```"
+
         iac_entry = f"""
 ### 🤖 {task_summary}
 - [ ] ⏳ **Running** | `#{spawn_id}` | {agent} ({model}) | {now_time()} | Tools: {tools_str}
@@ -209,9 +218,9 @@ class AgentLogger:
 <details>
 <summary>📥 Input ({len(prompt)} chars)</summary>
 
-```
+{fence}
 {prompt}
-```
+{fence}
 
 </details>
 

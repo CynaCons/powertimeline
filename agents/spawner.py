@@ -299,21 +299,35 @@ def spawn_codex(
 
     # Extract final message from events
     final_text = ""
+    command_outputs = []
     usage = {}
     session_id = None
     error = None
+    had_turn_completed = False
 
     for event in events:
         if event.type == "thread.started":
             session_id = event.data.get("thread_id")
         elif event.is_message:
             final_text = event.text or ""
+        elif event.is_command:
+            # Capture command outputs as fallback for success detection
+            output = event.command_output
+            if output:
+                command_outputs.append(output)
         elif event.type == "turn.completed":
             usage = event.data.get("usage", {})
+            had_turn_completed = True
         elif event.type == "error":
             error = event.data.get("message")
 
-    success = error is None and final_text != ""
+    # Success if: no error AND (has message text OR completed a turn with commands)
+    # This handles cases where Codex only runs commands without a final message
+    success = error is None and (final_text != "" or (had_turn_completed and len(command_outputs) > 0))
+
+    # If no message but we have command outputs, use last command output as result
+    if not final_text and command_outputs:
+        final_text = command_outputs[-1][:5000]  # Truncate to reasonable length
 
     # Log completion
     log_spawn_complete(
@@ -396,12 +410,13 @@ def _spawn_codex_stream_internal(
     # Use "-" to read prompt from stdin (more reliable on Windows)
     cmd.append("-")
 
+    proc = None
     try:
         proc = subprocess.Popen(
             cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Merge stderr into stdout to avoid deadlock
             text=True,
             cwd=cwd,
             shell=IS_WINDOWS,
@@ -425,7 +440,11 @@ def _spawn_codex_stream_internal(
         proc.wait(timeout=timeout)
 
     except subprocess.TimeoutExpired:
-        proc.kill()
+        if proc:
+            proc.kill()
         yield CodexEvent(type="error", data={"message": f"Timed out after {timeout}s"})
     except Exception as e:
         yield CodexEvent(type="error", data={"message": str(e)})
+    finally:
+        if proc and proc.poll() is None:
+            proc.kill()

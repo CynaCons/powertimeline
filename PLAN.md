@@ -1152,14 +1152,15 @@
 **MCP Agent Server Improvements (from Codex review):**
 - [x] Add threading.Lock around running_agents/completed_agents dict access (prevent RuntimeError on iteration)
 - [x] Clean up background_threads dict after completion (memory leak)
-- [ ] Fix Codex success detection (empty response treated as failure even when agent succeeded)
-- [ ] Read stderr in _spawn_codex_stream_internal (avoid deadlock on full buffer)
+- [x] Fix Codex success detection (now detects command-only runs as success)
+- [x] Read stderr in _spawn_codex_stream_internal (merged stderr→stdout to avoid deadlock)
 - [x] Fix timestamps to use UTC (now using datetime.utcnow() and timezone.utc)
 - [x] Mark Codex cost as estimate (added comment)
 - [x] Align version numbers (v1.3.0 using SERVER_VERSION constant)
-- [ ] Update MCP_DESIGN.md to reflect context_level="none" (doc says server injects context)
+- [x] Update MCP_DESIGN.md to reflect CLI auto-loading context
 - [x] Sanitize newlines in CONTEXT.md task summaries (added sanitize_for_table helper)
 - [x] Remove .recent_runs.json - CONTEXT.md now shows active agents only (IAC.md is authoritative)
+- [x] Fix IAC.md markdown escaping (use 4 backticks when prompt contains triple backticks)
 
 **Test Infrastructure:**
 - [x] Create strict smoke test requiring event loading (waitForEvents helper)
