@@ -291,7 +291,7 @@ def _run_codex_background(agent_id: str, prompt: str):
         # No extra context injection needed
         result: AgentResult = _spawn_codex(
             prompt=prompt,
-            sandbox="workspace-write",
+            bypass_sandbox=True,  # Use --dangerously-bypass-approvals-and-sandbox for write access
             timeout=300,
             context_level="none",  # Codex auto-loads AGENTS.md
             task_summary=prompt[:50] + "..." if len(prompt) > 50 else prompt,

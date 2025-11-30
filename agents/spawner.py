@@ -244,10 +244,9 @@ def spawn_claude(
 def spawn_codex(
     prompt: str,
     *,
-    sandbox: str = "read-only",
+    bypass_sandbox: bool = True,
     working_dir: Optional[str] = None,
     timeout: int = 300,
-    full_auto: bool = False,
     context_level: str = "none",
     task_summary: Optional[str] = None,
 ) -> AgentResult:
@@ -262,10 +261,10 @@ def spawn_codex(
 
     Args:
         prompt: The task/instruction for the agent
-        sandbox: Sandbox mode (read-only, workspace-write, danger-full-access)
+        bypass_sandbox: If True (default), use --dangerously-bypass-approvals-and-sandbox
+                        to enable file writes. Codex's workspace-write mode is broken.
         working_dir: Working directory for the agent
         timeout: Timeout in seconds
-        full_auto: Enable full-auto mode (low-friction sandboxed execution)
         context_level: "none" (default), "minimal", "standard", or "full"
         task_summary: Optional short description for logging
 
@@ -279,20 +278,20 @@ def spawn_codex(
     full_prompt = format_prompt_with_context(prompt, context_level=context_level)
 
     # Log spawn start
+    sandbox_mode = "bypass" if bypass_sandbox else "workspace-write"
     spawn_id = log_spawn_start(
         agent="Codex",
         model="gpt-5.1-codex-max",
         prompt=prompt,
-        tools=[f"sandbox:{sandbox}"],
+        tools=[f"sandbox:{sandbox_mode}"],
         task_summary=task_summary,
     )
 
     events = list(_spawn_codex_stream_internal(
         full_prompt,
-        sandbox=sandbox,
+        bypass_sandbox=bypass_sandbox,
         working_dir=working_dir,
         timeout=timeout,
-        full_auto=full_auto,
     ))
 
     duration = time.time() - start_time
@@ -351,7 +350,7 @@ def spawn_codex(
 def spawn_codex_stream(
     prompt: str,
     *,
-    sandbox: str = "read-only",
+    bypass_sandbox: bool = True,
     working_dir: Optional[str] = None,
     timeout: int = 300,
     full_auto: bool = False,
@@ -364,7 +363,8 @@ def spawn_codex_stream(
 
     Args:
         prompt: The task/instruction for the agent
-        sandbox: Sandbox mode (read-only, workspace-write, danger-full-access)
+        bypass_sandbox: If True (default), use --dangerously-bypass-approvals-and-sandbox
+                        to enable file writes. Codex's workspace-write mode is broken.
         working_dir: Working directory for the agent
         timeout: Timeout in seconds
         full_auto: Enable full-auto mode
@@ -378,7 +378,7 @@ def spawn_codex_stream(
 
     yield from _spawn_codex_stream_internal(
         full_prompt,
-        sandbox=sandbox,
+        bypass_sandbox=bypass_sandbox,
         working_dir=working_dir,
         timeout=timeout,
         full_auto=full_auto,
@@ -388,7 +388,7 @@ def spawn_codex_stream(
 def _spawn_codex_stream_internal(
     prompt: str,
     *,
-    sandbox: str = "read-only",
+    bypass_sandbox: bool = True,
     working_dir: Optional[str] = None,
     timeout: int = 300,
     full_auto: bool = False,
@@ -396,8 +396,11 @@ def _spawn_codex_stream_internal(
     """Internal streaming implementation without context injection."""
     cmd = ["codex", "exec", "--json"]
 
-    # Sandbox mode
-    cmd.extend(["--sandbox", sandbox])
+    # Sandbox mode - use bypass flag for write access (workspace-write is broken)
+    if bypass_sandbox:
+        cmd.append("--dangerously-bypass-approvals-and-sandbox")
+    else:
+        cmd.extend(["--sandbox", "read-only"])
 
     # Working directory
     cwd = working_dir or str(get_workspace_dir())

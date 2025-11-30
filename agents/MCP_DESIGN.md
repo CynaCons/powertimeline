@@ -40,9 +40,11 @@ Parameters:
 ```
 
 All settings hardcoded:
-- Sandbox: workspace-write
+- Sandbox: `--dangerously-bypass-approvals-and-sandbox` (required for write access)
 - Timeout: 300s
 - Context: Codex CLI auto-loads AGENTS.md from project root
+
+**Note:** Codex's `--sandbox workspace-write` mode is broken ([GitHub issue](https://github.com/openai/codex/issues)). We use the bypass flag to enable file writes.
 
 ### list
 
