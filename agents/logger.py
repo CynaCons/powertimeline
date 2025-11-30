@@ -34,18 +34,29 @@ def generate_spawn_id() -> str:
 
 
 def now_iso() -> str:
-    """Get current timestamp in ISO format."""
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    """Get current timestamp in ISO format (UTC)."""
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def now_time() -> str:
-    """Get current time only."""
-    return datetime.now().strftime("%H:%M:%S")
+    """Get current time only (UTC)."""
+    return datetime.utcnow().strftime("%H:%M:%S")
 
 
 def now_date() -> str:
-    """Get current date only."""
-    return datetime.now().strftime("%Y-%m-%d")
+    """Get current date only (UTC)."""
+    return datetime.utcnow().strftime("%Y-%m-%d")
+
+
+def sanitize_for_table(text: str, max_len: int = 60) -> str:
+    """Sanitize text for markdown table display (remove newlines, truncate)."""
+    if not text:
+        return ""
+    # Replace newlines with spaces, collapse multiple spaces
+    clean = ' '.join(text.split())
+    if len(clean) > max_len:
+        return clean[:max_len-3] + "..."
+    return clean
 
 
 @dataclass
@@ -258,34 +269,17 @@ class AgentLogger:
 
     def _update_context(self, completed_record: Optional[SpawnRecord] = None):
         """Update CONTEXT.md with current state."""
-        # Load existing recent runs
-        recent_runs = self._load_recent_runs()
-
-        # Add completed record to recent runs
-        if completed_record:
-            recent_runs.insert(0, {
-                'time': completed_record.completed_at or now_iso(),
-                'agent': f"{completed_record.agent} ({completed_record.model})",
-                'task': completed_record.task_summary,
-                'duration': f"{completed_record.duration_seconds:.1f}s" if completed_record.duration_seconds else "N/A",
-                'result': "Success" if completed_record.success else f"Failed: {completed_record.error or 'Unknown'}",
-            })
-            recent_runs = recent_runs[:self.max_recent_runs]
+        # Recent runs are stored in-memory only (reset on server restart)
+        # IAC.md is the authoritative log for history
 
         # Build active agents table
         active_table = "| ID | Agent | Task | Started |\n|-----|-------|------|--------|\n"
         if self.active_spawns:
             for sid, rec in self.active_spawns.items():
-                active_table += f"| {sid} | {rec.agent} | {rec.task_summary[:60]} | {rec.started_at} |\n"
+                task_clean = sanitize_for_table(rec.task_summary, 60)
+                active_table += f"| {sid} | {rec.agent} | {task_clean} | {rec.started_at} |\n"
         else:
             active_table += "| - | - | No active agents | - |\n"
-
-        # Build recent runs table
-        recent_table = "| Time | Agent | Task | Duration | Result |\n|------|-------|------|----------|--------|\n"
-        for run in recent_runs:
-            recent_table += f"| {run['time']} | {run['agent']} | {run['task'][:50]} | {run['duration']} | {run['result'][:40]} |\n"
-        if not recent_runs:
-            recent_table += "| - | - | No recent runs | - | - |\n"
 
         # Write CONTEXT.md (thread-safe)
         with _file_lock:
@@ -303,39 +297,13 @@ class AgentLogger:
 
 ---
 
-## Recent Runs (Last {self.max_recent_runs})
-
-{recent_table}
-
----
-
 ## Notes
 
-- This file is overwritten on each agent spawn/completion
-- See IAC.md for full interaction logs
-- See DESIGN.md for architecture documentation
+- This file shows currently running agents only
+- See IAC.md for full interaction history
+- See MCP_DESIGN.md for architecture documentation
 """
             self.context_path.write_text(context_content, encoding='utf-8')
-
-            # Save recent runs for persistence
-            self._save_recent_runs(recent_runs)
-
-    def _load_recent_runs(self) -> list[dict]:
-        """Load recent runs from a simple cache file."""
-        cache_path = self.agents_dir / ".recent_runs.json"
-        if cache_path.exists():
-            import json
-            try:
-                return json.loads(cache_path.read_text(encoding='utf-8'))
-            except:
-                return []
-        return []
-
-    def _save_recent_runs(self, runs: list[dict]):
-        """Save recent runs to a simple cache file."""
-        import json
-        cache_path = self.agents_dir / ".recent_runs.json"
-        cache_path.write_text(json.dumps(runs, indent=2), encoding='utf-8')
 
 
 # Global logger instance

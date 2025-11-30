@@ -1139,26 +1139,36 @@
 - [x] Increase agent history from 10 to 100 runs
 - [x] Add cost tracking for Codex agents
 - [x] Document Codex limitations (not suitable for shell command execution)
-
-**MCP Agent Server Testing:**
 - [x] Test Claude agent spawn and result retrieval (SUCCESS - $0.024, 30s)
-- [x] Test Codex agent spawn and result retrieval (PARTIAL - returned "No task specified")
 - [x] Fix double logging bug (removed duplicate log_spawn_start from MCP server)
 - [x] Fix task summary (set context_level="none", CLIs auto-load their own context)
 - [x] Fix Codex prompt passing (use stdin with "-" argument)
-- [ ] Restart MCP server and retest Codex subagent
+- [x] Retest Codex subagent (SUCCESS - test counting, admin tests, MCP review)
+
+**Admin Tests:**
+- [x] Ensure test user has admin role in dev Firestore (ensureAdminRoleForTestUser works with credentials file)
+- [x] Fix T82.4 test - updated to check NavRail instead of breadcrumb
+
+**MCP Agent Server Improvements (from Codex review):**
+- [x] Add threading.Lock around running_agents/completed_agents dict access (prevent RuntimeError on iteration)
+- [x] Clean up background_threads dict after completion (memory leak)
+- [ ] Fix Codex success detection (empty response treated as failure even when agent succeeded)
+- [ ] Read stderr in _spawn_codex_stream_internal (avoid deadlock on full buffer)
+- [x] Fix timestamps to use UTC (now using datetime.utcnow() and timezone.utc)
+- [x] Mark Codex cost as estimate (added comment)
+- [x] Align version numbers (v1.3.0 using SERVER_VERSION constant)
+- [ ] Update MCP_DESIGN.md to reflect context_level="none" (doc says server injects context)
+- [x] Sanitize newlines in CONTEXT.md task summaries (added sanitize_for_table helper)
+- [x] Remove .recent_runs.json - CONTEXT.md now shows active agents only (IAC.md is authoritative)
 
 **Test Infrastructure:**
-- [ ] Fix admin tests (23/23 failing - dev server not starting)
-- [ ] Create strict smoke test requiring event loading
-- [ ] Fix permissive tests to fail when events don't render
+- [x] Create strict smoke test requiring event loading (waitForEvents helper)
+- [x] Fix permissive tests to fail when events don't render
 
 **Private Timeline Visibility Bug:**
-Private timelines are shown on HomePage/LandingPage feeds but users can't click them. Should only be visible to authenticated owner in "My Timelines".
-
-- [ ] Filter out private timelines from HomePage discovery feeds (Recently Edited, Popular, Featured)
-- [ ] Filter out private timelines from LandingPage example timelines
-- [ ] Ensure "My Timelines" section still shows owner's private timelines
+- [x] Filter out private timelines from HomePage discovery feeds (Recently Edited, Popular)
+- [x] Filter out private timelines from LandingPage example timelines
+- [x] Ensure "My Timelines" section still shows owner's private timelines (unchanged - no filter)
 - [ ] Add E2E test verifying private timelines are hidden from public feeds
 
 ---

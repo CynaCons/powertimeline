@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Agent Spawner Server v1.2
+MCP Agent Spawner Server v1.3
 
 Exposes agent spawning as MCP tools for Claude Code.
 Simplified design with minimal parameters.
@@ -26,7 +26,7 @@ import subprocess
 import sys
 import threading
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -36,6 +36,9 @@ if sys.platform == "win32":
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 IS_WINDOWS = sys.platform == "win32"
+
+# Version (single source of truth)
+SERVER_VERSION = "1.3.0"
 
 # MCP SDK imports
 try:
@@ -58,10 +61,14 @@ from agents.spawner import spawn_claude as _spawn_claude, spawn_codex as _spawn_
 # Initialize MCP server
 server = Server("agents")
 
-# Track agents
+# Track agents (protected by _agents_lock)
+_agents_lock = threading.Lock()
 running_agents: dict[str, dict] = {}
 completed_agents: dict[str, dict] = {}
 background_threads: dict[str, threading.Thread] = {}
+
+# Limit completed_agents to prevent unbounded memory growth
+MAX_COMPLETED_AGENTS = 100
 
 
 def sanitize_for_json(text: str) -> str:
@@ -69,6 +76,21 @@ def sanitize_for_json(text: str) -> str:
     if not text:
         return ""
     return text.encode('utf-8', errors='replace').decode('utf-8')
+
+
+def utc_now_iso() -> str:
+    """Get current UTC timestamp in ISO format."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _cleanup_completed_agents():
+    """Remove oldest entries if over limit (must be called with _agents_lock held)."""
+    if len(completed_agents) > MAX_COMPLETED_AGENTS:
+        # Remove oldest entries (dict maintains insertion order in Python 3.7+)
+        keys_to_remove = list(completed_agents.keys())[:-MAX_COMPLETED_AGENTS]
+        for key in keys_to_remove:
+            del completed_agents[key]
+            background_threads.pop(key, None)  # Also clean up thread reference
 
 
 def get_workspace_dir() -> Path:
@@ -194,30 +216,35 @@ def _run_claude_background(agent_id: str, prompt: str, model: str):
             task_summary=prompt[:50] + "..." if len(prompt) > 50 else prompt,
         )
 
-        completed_agents[agent_id] = {
-            "agent_id": agent_id,
-            "agent_type": "claude",
-            "model": model,
-            "success": result.success,
-            "result": sanitize_for_json(result.text),
-            "cost_usd": round(result.cost_usd, 4),
-            "completed_at": datetime.utcnow().isoformat() + "Z",
-            "error": result.error,
-        }
+        with _agents_lock:
+            completed_agents[agent_id] = {
+                "agent_id": agent_id,
+                "agent_type": "claude",
+                "model": model,
+                "success": result.success,
+                "result": sanitize_for_json(result.text),
+                "cost_usd": round(result.cost_usd, 4),
+                "completed_at": utc_now_iso(),
+                "error": result.error,
+            }
+            _cleanup_completed_agents()
 
     except Exception as e:
-        completed_agents[agent_id] = {
-            "agent_id": agent_id,
-            "agent_type": "claude",
-            "model": model,
-            "success": False,
-            "result": "",
-            "cost_usd": 0,
-            "completed_at": datetime.utcnow().isoformat() + "Z",
-            "error": str(e),
-        }
+        with _agents_lock:
+            completed_agents[agent_id] = {
+                "agent_id": agent_id,
+                "agent_type": "claude",
+                "model": model,
+                "success": False,
+                "result": "",
+                "cost_usd": 0,
+                "completed_at": utc_now_iso(),
+                "error": str(e),
+            }
     finally:
-        running_agents.pop(agent_id, None)
+        with _agents_lock:
+            running_agents.pop(agent_id, None)
+            background_threads.pop(agent_id, None)  # Clean up thread reference
 
 
 async def handle_spawn_claude(args: dict) -> list[TextContent]:
@@ -226,16 +253,17 @@ async def handle_spawn_claude(args: dict) -> list[TextContent]:
     model = args.get("model", "sonnet")
 
     agent_id = uuid.uuid4().hex[:8]
-    started_at = datetime.utcnow().isoformat() + "Z"
+    started_at = utc_now_iso()
 
     # Track as running (logging is done by spawner.py)
-    running_agents[agent_id] = {
-        "agent_id": agent_id,
-        "agent_type": "claude",
-        "model": model,
-        "started_at": started_at,
-        "task": prompt[:100],
-    }
+    with _agents_lock:
+        running_agents[agent_id] = {
+            "agent_id": agent_id,
+            "agent_type": "claude",
+            "model": model,
+            "started_at": started_at,
+            "task": prompt[:100].replace('\n', ' '),  # Sanitize newlines for display
+        }
 
     # Spawn in background (pass original prompt for correct task_summary logging)
     thread = threading.Thread(
@@ -244,7 +272,8 @@ async def handle_spawn_claude(args: dict) -> list[TextContent]:
         daemon=True,
     )
     thread.start()
-    background_threads[agent_id] = thread
+    with _agents_lock:
+        background_threads[agent_id] = thread
 
     return [TextContent(type="text", text=json.dumps({
         "agent_id": agent_id,
@@ -268,28 +297,33 @@ def _run_codex_background(agent_id: str, prompt: str):
             task_summary=prompt[:50] + "..." if len(prompt) > 50 else prompt,
         )
 
-        completed_agents[agent_id] = {
-            "agent_id": agent_id,
-            "agent_type": "codex",
-            "success": result.success,
-            "result": sanitize_for_json(result.text),
-            "cost_usd": 0.005 if result.success else 0,  # Estimate
-            "completed_at": datetime.utcnow().isoformat() + "Z",
-            "error": result.error,
-        }
+        with _agents_lock:
+            completed_agents[agent_id] = {
+                "agent_id": agent_id,
+                "agent_type": "codex",
+                "success": result.success,
+                "result": sanitize_for_json(result.text),
+                "cost_usd": 0.005 if result.success else 0,  # Estimate - Codex doesn't report cost
+                "completed_at": utc_now_iso(),
+                "error": result.error,
+            }
+            _cleanup_completed_agents()
 
     except Exception as e:
-        completed_agents[agent_id] = {
-            "agent_id": agent_id,
-            "agent_type": "codex",
-            "success": False,
-            "result": "",
-            "cost_usd": 0,
-            "completed_at": datetime.utcnow().isoformat() + "Z",
-            "error": str(e),
-        }
+        with _agents_lock:
+            completed_agents[agent_id] = {
+                "agent_id": agent_id,
+                "agent_type": "codex",
+                "success": False,
+                "result": "",
+                "cost_usd": 0,
+                "completed_at": utc_now_iso(),
+                "error": str(e),
+            }
     finally:
-        running_agents.pop(agent_id, None)
+        with _agents_lock:
+            running_agents.pop(agent_id, None)
+            background_threads.pop(agent_id, None)  # Clean up thread reference
 
 
 async def handle_spawn_codex(args: dict) -> list[TextContent]:
@@ -297,15 +331,16 @@ async def handle_spawn_codex(args: dict) -> list[TextContent]:
     prompt = args["prompt"]
 
     agent_id = uuid.uuid4().hex[:8]
-    started_at = datetime.utcnow().isoformat() + "Z"
+    started_at = utc_now_iso()
 
     # Track as running (logging is done by spawner.py)
-    running_agents[agent_id] = {
-        "agent_id": agent_id,
-        "agent_type": "codex",
-        "started_at": started_at,
-        "task": prompt[:100],
-    }
+    with _agents_lock:
+        running_agents[agent_id] = {
+            "agent_id": agent_id,
+            "agent_type": "codex",
+            "started_at": started_at,
+            "task": prompt[:100].replace('\n', ' '),  # Sanitize newlines for display
+        }
 
     # Spawn in background (pass original prompt for correct task_summary logging)
     thread = threading.Thread(
@@ -314,7 +349,8 @@ async def handle_spawn_codex(args: dict) -> list[TextContent]:
         daemon=True,
     )
     thread.start()
-    background_threads[agent_id] = thread
+    with _agents_lock:
+        background_threads[agent_id] = thread
 
     return [TextContent(type="text", text=json.dumps({
         "agent_id": agent_id,
@@ -326,37 +362,38 @@ async def handle_spawn_codex(args: dict) -> list[TextContent]:
 
 async def handle_list() -> list[TextContent]:
     """List running and completed agents."""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
-    running = []
-    for agent_id, info in running_agents.items():
-        elapsed = 0
-        if "started_at" in info:
-            try:
-                started = datetime.fromisoformat(info["started_at"].replace("Z", ""))
-                elapsed = int((now - started).total_seconds())
-            except:
-                pass
+    with _agents_lock:
+        running = []
+        for agent_id, info in list(running_agents.items()):  # list() for safe iteration
+            elapsed = 0
+            if "started_at" in info:
+                try:
+                    started = datetime.fromisoformat(info["started_at"].replace("Z", "+00:00"))
+                    elapsed = int((now - started).total_seconds())
+                except Exception:
+                    pass
 
-        running.append({
-            "agent_id": agent_id,
-            "agent_type": info.get("agent_type", "unknown"),
-            "model": info.get("model"),
-            "elapsed_seconds": elapsed,
-            "task": info.get("task", "")[:50],
-        })
+            running.append({
+                "agent_id": agent_id,
+                "agent_type": info.get("agent_type", "unknown"),
+                "model": info.get("model"),
+                "elapsed_seconds": elapsed,
+                "task": info.get("task", "")[:50].replace('\n', ' '),
+            })
 
-    # Last 20 completed
-    recent = list(completed_agents.items())[-20:]
-    completed = [
-        {
-            "agent_id": aid,
-            "agent_type": info.get("agent_type"),
-            "success": info.get("success"),
-            "cost_usd": info.get("cost_usd", 0),
-        }
-        for aid, info in recent
-    ]
+        # Last 20 completed
+        recent = list(completed_agents.items())[-20:]
+        completed = [
+            {
+                "agent_id": aid,
+                "agent_type": info.get("agent_type"),
+                "success": info.get("success"),
+                "cost_usd": info.get("cost_usd", 0),
+            }
+            for aid, info in recent
+        ]
 
     return [TextContent(type="text", text=json.dumps({
         "running": running,
@@ -369,27 +406,28 @@ async def handle_result(args: dict) -> list[TextContent]:
     """Get result of a completed agent."""
     agent_id = args["agent_id"]
 
-    if agent_id in completed_agents:
-        return [TextContent(type="text", text=json.dumps(
-            completed_agents[agent_id], indent=2, ensure_ascii=False
-        ))]
+    with _agents_lock:
+        if agent_id in completed_agents:
+            return [TextContent(type="text", text=json.dumps(
+                completed_agents[agent_id], indent=2, ensure_ascii=False
+            ))]
 
-    if agent_id in running_agents:
-        info = running_agents[agent_id]
-        elapsed = 0
-        if "started_at" in info:
-            try:
-                started = datetime.fromisoformat(info["started_at"].replace("Z", ""))
-                elapsed = int((datetime.utcnow() - started).total_seconds())
-            except:
-                pass
+        if agent_id in running_agents:
+            info = running_agents[agent_id]
+            elapsed = 0
+            if "started_at" in info:
+                try:
+                    started = datetime.fromisoformat(info["started_at"].replace("Z", "+00:00"))
+                    elapsed = int((datetime.now(timezone.utc) - started).total_seconds())
+                except Exception:
+                    pass
 
-        return [TextContent(type="text", text=json.dumps({
-            "agent_id": agent_id,
-            "status": "running",
-            "elapsed_seconds": elapsed,
-            "message": "Agent still running. Check back later.",
-        }, indent=2, ensure_ascii=False))]
+            return [TextContent(type="text", text=json.dumps({
+                "agent_id": agent_id,
+                "status": "running",
+                "elapsed_seconds": elapsed,
+                "message": "Agent still running. Check back later.",
+            }, indent=2, ensure_ascii=False))]
 
     return [TextContent(type="text", text=json.dumps({
         "agent_id": agent_id,
@@ -407,7 +445,7 @@ async def main():
     async with stdio_server() as (read_stream, write_stream):
         init_options = InitializationOptions(
             server_name="agents",
-            server_version="1.1.0",
+            server_version=SERVER_VERSION,
             capabilities=server.get_capabilities(
                 notification_options=NotificationOptions(),
                 experimental_capabilities={},

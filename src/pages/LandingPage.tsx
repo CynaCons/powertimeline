@@ -41,10 +41,14 @@ export function LandingPage() {
           EXAMPLE_TIMELINE_IDS.map(id => getTimelineMetadata(id))
         );
         const validTimelines = timelines.filter((t): t is TimelineMetadata => t !== null);
-        setExampleTimelines(validTimelines);
+        // Filter to only show public timelines on landing page
+        const publicTimelines = validTimelines.filter(
+          t => (t.visibility ?? 'public') === 'public'
+        );
+        setExampleTimelines(publicTimelines);
 
         // Cache owner usernames for navigation
-        const ownerIds = new Set(validTimelines.map(t => t.ownerId));
+        const ownerIds = new Set(publicTimelines.map(t => t.ownerId));
         const cache = new Map<string, User>();
         for (const ownerId of ownerIds) {
           const owner = await getUser(ownerId);

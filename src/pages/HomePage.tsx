@@ -87,6 +87,10 @@ export function HomePage() {
     return allUsers.find(u => u.id === userId) || null;
   };
 
+  // Filter out private timelines from discovery feeds (only show public)
+  const filterPublicTimelines = (timelines: TimelineMetadata[]) =>
+    timelines.filter(t => (t.visibility ?? 'public') === 'public');
+
   // Load data on mount and when firebaseUser changes
   useEffect(() => {
     async function loadData() {
@@ -125,23 +129,21 @@ export function HomePage() {
           setMyTimelines([]);
         }
 
-        // Load recently edited timelines for discovery
-        // Note: visibility filter removed - old timelines don't have visibility field
-        // Security rules handle access control (only public/unlisted readable by non-owners)
+        // Load recently edited timelines for discovery (public only)
         const recentTimelines = await getTimelines({
           orderByField: 'updatedAt',
           orderDirection: 'desc',
-          limitCount: 6,
+          limitCount: 12, // Fetch extra to account for filtering
         });
-        setRecentlyEdited(recentTimelines);
+        setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
 
-        // Load popular timelines for discovery
+        // Load popular timelines for discovery (public only)
         const popularTimelines = await getTimelines({
           orderByField: 'viewCount',
           orderDirection: 'desc',
-          limitCount: 6,
+          limitCount: 12, // Fetch extra to account for filtering
         });
-        setPopular(popularTimelines);
+        setPopular(filterPublicTimelines(popularTimelines).slice(0, 6));
 
         // Note: Featured timelines functionality to be removed per PLAN.md known issues
         setFeatured([]);
@@ -177,9 +179,9 @@ export function HomePage() {
     const recentTimelines = await getTimelines({
       orderByField: 'updatedAt',
       orderDirection: 'desc',
-      limitCount: 6,
+      limitCount: 12,
     });
-    setRecentlyEdited(recentTimelines);
+    setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
 
     // Navigate to the new timeline using username-based URL
     // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
@@ -210,9 +212,9 @@ export function HomePage() {
     const recentTimelines = await getTimelines({
       orderByField: 'updatedAt',
       orderDirection: 'desc',
-      limitCount: 6,
+      limitCount: 12,
     });
-    setRecentlyEdited(recentTimelines);
+    setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
   };
 
   const handleDeleteTimeline = (timelineId: string) => {
@@ -236,16 +238,16 @@ export function HomePage() {
     const recentTimelines = await getTimelines({
       orderByField: 'updatedAt',
       orderDirection: 'desc',
-      limitCount: 6,
+      limitCount: 12,
     });
-    setRecentlyEdited(recentTimelines);
+    setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
 
     const popularTimelines = await getTimelines({
       orderByField: 'viewCount',
       orderDirection: 'desc',
-      limitCount: 6,
+      limitCount: 12,
     });
-    setPopular(popularTimelines);
+    setPopular(filterPublicTimelines(popularTimelines).slice(0, 6));
   };
 
   const handleTimelineClick = (timeline: TimelineMetadata) => {

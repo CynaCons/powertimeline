@@ -5,8 +5,18 @@
  * Verifies that the landing page and browse page load without errors
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { signInWithEmail } from '../utils/authTestUtils';
+
+/**
+ * Wait for timeline events to render - fails if no events appear within timeout
+ */
+const waitForEvents = async (page: Page) => {
+  const eventCards = page.getByTestId('event-card');
+  await expect(eventCards.first()).toBeVisible({ timeout: 10000 });
+  const eventCount = await eventCards.count();
+  expect(eventCount).toBeGreaterThan(0);
+};
 
 test.describe('home/01 Smoke Tests', () => {
   test('landing page loads without console errors', async ({ page }) => {
@@ -70,28 +80,15 @@ test.describe('home/01 Smoke Tests', () => {
     // Should not redirect to login (this is a public timeline)
     expect(page.url()).not.toContain('/login');
 
-    // Wait for page to fully load
-    await page.waitForTimeout(3000);
-
-    // Timeline content should be visible - check for any timeline-related elements
-    const hasTimelineAxis = await page.locator('[data-testid="timeline-axis"]').isVisible({ timeout: 2000 }).catch(() => false);
-    const hasEventCard = await page.locator('[data-testid="event-card"]').first().isVisible({ timeout: 2000 }).catch(() => false);
-    const hasEditorPage = await page.locator('[data-testid="editor-page"]').isVisible({ timeout: 2000 }).catch(() => false);
-    const hasTimelineContent = await page.locator('.timeline-container, .timeline-axis, svg').first().isVisible({ timeout: 2000 }).catch(() => false);
-
-    // At minimum, we should see some timeline-related content
-    const hasContent = hasTimelineAxis || hasEventCard || hasEditorPage || hasTimelineContent;
-
     // Check for 404 page - this should NOT be visible for a valid timeline
     const has404 = await page.getByRole('heading', { name: '404' }).isVisible().catch(() => false);
-
-    if (!hasContent) {
-      console.log('Note: No timeline-specific elements found, but page loaded successfully');
-    }
-    // Fail if we see 404 page
     expect(has404).toBe(false);
-    // Pass if URL is correct (public timeline access worked)
-    expect(page.url()).toContain('french-revolution');
+
+    // Events should render to prove the timeline loaded correctly
+    await waitForEvents(page);
+
+    // Axis should also render for a valid timeline
+    await expect(page.getByTestId('timeline-axis')).toBeVisible({ timeout: 10000 });
   });
 
   test('authenticated user can access home features', async ({ page }) => {

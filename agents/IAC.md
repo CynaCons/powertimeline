@@ -86,3 +86,361 @@ Report:
 
 ---
 
+
+### 🤖 Investigate why there are 19 skipped admin tests.
+...
+- [x] ✅ **Done** (106.8s, $0.0000) | `#c43b1528` | Codex (gpt-5.1-codex-max) | 16:26:50 | Tools: sandbox:workspace-write
+
+<details>
+<summary>📥 Input (252 chars)</summary>
+
+```
+Investigate why there are 19 skipped admin tests.
+
+1. Look at tests/admin/*.spec.ts files
+2. Find all test.skip() or it.skip() calls
+3. Check for any skip conditions or comments explaining why tests are skipped
+4. Report which tests are skipped and why
+```
+
+</details>
+
+<details>
+<summary>📤 Output (1746 chars)</summary>
+
+Admin specs are gated behind runtime skips that fire when the Playwright test user isn’t an admin (and in bulk tests, when there aren’t enough users). Every admin test except `T82.2` has a `test.skip` guard.
+
+- `tests/admin/01-reset-statistics.spec.ts:40,57,74,91` — All four tests skip if `goToAdminWithAuth` cannot confirm admin access (`adminReady` false or `/admin` not visible): “Test user lacks admin role.”
+- `tests/admin/82-admin-panel-access.spec.ts:26,40,71,106` — `T82.1` skips if `ensureAdminRoleForTestUser` fails (“Test user lacks admin role - ensureAdminRoleForTestUser failed”) or if the admin page isn’t reachable (“Admin page not accessible with test user…”); `T82.3` and `T82.4` skip when the user isn’t an admin. `T82.2` is the only admin test without a skip.
+- `tests/admin/83-user-management.spec.ts:47,67,85` — `T83.1–T83.3` all skip when admin access isn’t confirmed: “Test user lacks admin role.”
+- `tests/admin/84-admin-statistics.spec.ts:47,63,76` — `T84.1–T84.3` skip on missing admin role.
+- `tests/admin/85-admin-bulk-operations.spec.ts:47,74,113,147` — Each bulk test (`T85.1–T85.4`) first skips if the user isn’t an admin. Additional skips when data is insufficient: `T85.1` at :56 (“Not enough users to test bulk selection”) and `T85.2`/`T85.3` at :83,:122 (“Not enough users to test bulk operations”).
+- `tests/admin/86-admin-activity-log.spec.ts:47,67,94,114,145` — `T86.1–T86.5` each skip if admin access isn’t confirmed: “Test user lacks admin role.”
+
+Net: there are skip guards on 22 admin tests; in your run 19 likely tripped because the test user lacked the admin role (and possibly some bulk tests skipped for insufficient user rows). Fixing the admin role for the test account should unskip most of them.
+
+</details>
+
+---
+
+
+### 🤖 Review the MCP agent implementation in the agents/...
+- [x] ✅ **Done** (113.9s, $0.0000) | `#bbe68f4e` | Codex (gpt-5.1-codex-max) | 16:26:51 | Tools: sandbox:workspace-write
+
+<details>
+<summary>📥 Input (518 chars)</summary>
+
+```
+Review the MCP agent implementation in the agents/ directory.
+
+Analyze:
+1. agents/mcp_server.py - the MCP server implementation
+2. agents/MCP_DESIGN.md - the architecture design
+3. agents/spawner.py - how agents are spawned
+4. agents/logger.py - logging to IAC.md and CONTEXT.md
+
+Provide a code review focusing on:
+- Architecture quality and design patterns
+- Error handling and edge cases
+- Potential improvements or bugs
+- Code clarity and maintainability
+
+Be specific with file:line references for any issues found.
+```
+
+</details>
+
+<details>
+<summary>📤 Output (2519 chars)</summary>
+
+**Findings**
+- `mcp_server.py:62-64,180-221,258-293,327-348` share `running_agents`/`completed_agents`/`background_threads` across async handlers and background threads without locking. `handle_list()` iterates `running_agents` while `_run_*` threads pop entries, so a concurrent update can raise `RuntimeError: dictionary changed size during iteration` and return partial data; a small `threading.Lock` around mutations/reads would stabilize state.
+- `mcp_server.py:64,241-248,311-317` retains every background thread in `background_threads` but never deletes/joins them, so long-running use will leak thread objects and keep them alive until process exit. Clean up in the `_run_*` finally blocks or after join when completed.
+- Documentation drift on context injection: MCP_DESIGN says the server injects `AGENTS.md` (`MCP_DESIGN.md:28-32,42-45`), but the code explicitly disables context injection (`mcp_server.py:186-195,263-269`, `context_level="none"`) and instead depends on CLI auto-load behavior. If the CLI defaults change, sub-agents could run without required context; align code and doc or enforce explicit context injection in the server.
+- Success detection for Codex runs hinges on an `agent_message` event (`spawner.py:300-317`). Flows that end with a `turn.completed` usage event or command output only will set `final_text=""` and be logged as failures even when the run succeeded. Consider using an explicit completion status or the last non-error event as the result.
+- `_spawn_codex_stream_internal` pipes stderr but never reads it (`spawner.py:399-430`). A noisy Codex process can block on a full stderr buffer, and errors are silently dropped. Redirect stderr to stdout or read it in a separate thread/`communicate()` to avoid deadlocks and capture failure details.
+- Logged timestamps are local-time but labeled “UTC” (`logger.py:36-48,296`), which produces incorrect audit trails when the host isn’t on UTC. Use `datetime.utcnow()` (or timezone-aware datetimes) for both log strings and the “UTC” label.
+- Cost reporting for Codex results is hardcoded to `$0.005` on success (`mcp_server.py:271-279`), which can mislead IAC/CONTEXT consumers; either compute from returned usage or mark as “unknown/0” to avoid false precision.
+- Versioning is inconsistent: file header says “v1.2” while the server advertises `1.1.0` and the design doc is `1.1` (`mcp_server.py:3,409-415`, `MCP_DESIGN.md:3`). This makes troubleshooting and compatibility checks harder; pick a single source of truth and align.
+
+</details>
+
+---
+
+
+### 🤖 Fix the T82.4 admin test in tests/admin/82-admin-p...
+- [x] ✅ **Done** (51.3s, $0.0000) | `#5d83da45` | Codex (gpt-5.1-codex-max) | 16:54:48 | Tools: sandbox:workspace-write
+
+<details>
+<summary>📥 Input (743 chars)</summary>
+
+```
+Fix the T82.4 admin test in tests/admin/82-admin-panel-access.spec.ts
+
+The test at line 97 expects a breadcrumb `<nav>` element but AdminPage doesn't have breadcrumbs - it uses NavigationRail instead.
+
+The test currently does:
+```typescript
+const breadcrumbs = page.locator('nav').first();
+await expect(breadcrumbs).toBeVisible();
+```
+
+Fix options:
+1. Remove the breadcrumb assertion entirely since AdminPage doesn't have breadcrumbs
+2. Or change the test to verify NavigationRail is visible instead (data-testid="navigation-rail" or similar)
+
+Choose the simplest fix. The test name is "T82.4: Admin panel breadcrumb displays correctly" - if removing breadcrumb assertion, also update the test name/description to match what it actually tests.
+```
+
+</details>
+
+<details>
+<summary>📤 Output (967 chars)</summary>
+
+Updated T82.4 to match actual UI by asserting the navigation rail (role `navigation` with name "Main navigation") and renaming the test accordingly in `tests/admin/82-admin-panel-access.spec.ts`. I couldn’t apply the change because the environment is read-only; please apply this patch:
+
+```diff
+-  test('T82.4: Admin panel breadcrumb displays correctly', async ({ page }) => {
++  test('T82.4: Admin navigation rail displays correctly', async ({ page }) => {
+     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-NAV-001' });
+@@
+-    // Breadcrumb should be visible (contains links)
+-    const breadcrumbs = page.locator('nav').first();
+-    await expect(breadcrumbs).toBeVisible();
++    // Navigation rail should be visible for admin navigation
++    await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
+   });
+ });
+```
+
+Next step: run `npx playwright test tests/admin/82-admin-panel-access.spec.ts` to confirm.
+
+</details>
+
+---
+
+
+### 🤖 Fix the private timeline visibility bug.
+
+PROBLEM:...
+- [x] ✅ **Done** (124.1s, $0.0000) | `#dcc7b4df` | Codex (gpt-5.1-codex-max) | 16:54:48 | Tools: sandbox:workspace-write
+
+<details>
+<summary>📥 Input (842 chars)</summary>
+
+```
+Fix the private timeline visibility bug.
+
+PROBLEM: Private timelines are shown on HomePage and LandingPage feeds but users can't access them. Private timelines should ONLY be visible to the authenticated owner in "My Timelines" section.
+
+FILES TO CHECK:
+- src/pages/HomePage.tsx - has "Recently Edited", "Popular", "Featured" feeds
+- src/pages/LandingPage.tsx - has example timelines section
+- src/lib/homePageStorage.ts - may have filtering logic
+
+FIX NEEDED:
+1. Filter out private (visibility !== 'public') timelines from discovery feeds (Recently Edited, Popular, Featured)
+2. Filter out private timelines from LandingPage example timelines
+3. Keep private timelines visible in "My Timelines" section for the owner
+
+The Timeline type has a `visibility` field: 'public' | 'unlisted' | 'private'
+
+Make the minimal changes needed to fix this.
+```
+
+</details>
+
+<details>
+<summary>📤 Output (2384 chars)</summary>
+
+Couldn't write to the repo (sandbox is read-only), so here’s the minimal patch to apply.
+
+- `src/pages/HomePage.tsx`: add a small helper to keep only public timelines `(visibility ?? 'public') === 'public'`, then wrap all discovery feed sets with it (initial load and refresh after create/edit/delete). Leave `myTimelines` untouched so owners still see private items only in that section.
+- `src/pages/LandingPage.tsx`: after loading example timelines, drop anything that isn’t public (same fallback for missing visibility) and build the owner cache from the filtered list.
+
+Suggested diffs:
+
+```diff
+// src/pages/HomePage.tsx
+@@
+-  const getUserById = (userId: string): User | null => {
+-    return allUsers.find(u => u.id === userId) || null;
+-  };
++  const getUserById = (userId: string): User | null => {
++    return allUsers.find(u => u.id === userId) || null;
++  };
++
++  const filterPublicTimelines = (timelines: TimelineMetadata[]) =>
++    timelines.filter(t => (t.visibility ?? 'public') === 'public');
+@@
+-        setRecentlyEdited(recentTimelines);
++        setRecentlyEdited(filterPublicTimelines(recentTimelines));
+@@
+-        setPopular(popularTimelines);
++        setPopular(filterPublicTimelines(popularTimelines));
+@@
+-    setRecentlyEdited(recentTimelines);
++    setRecentlyEdited(filterPublicTimelines(recentTimelines));
+@@
+-    setRecentlyEdited(recentTimelines);
++    setRecentlyEdited(filterPublicTimelines(recentTimelines));
+@@
+-    setRecentlyEdited(recentTimelines);
++    setRecentlyEdited(filterPublicTimelines(recentTimelines));
+@@
+-    setPopular(popularTimelines);
++    setPopular(filterPublicTimelines(popularTimelines));
+```
+
+```diff
+// src/pages/LandingPage.tsx
+@@
+-        const validTimelines = timelines.filter((t): t is TimelineMetadata => t !== null);
+-        setExampleTimelines(validTimelines);
++        const validTimelines = timelines.filter((t): t is TimelineMetadata => t !== null);
++        const publicExamples = validTimelines.filter(
++          t => (t.visibility ?? 'public') === 'public'
++        );
++        setExampleTimelines(publicExamples);
+@@
+-        const ownerIds = new Set(validTimelines.map(t => t.ownerId));
++        const ownerIds = new Set(publicExamples.map(t => t.ownerId));
+```
+
+Tests not run (read-only workspace). Apply these changes and the discovery feeds/landing examples will no longer surface private timelines.
+
+</details>
+
+---
+
+
+### 🤖 Fix permissive smoke tests to require event loadin...
+- [x] ✅ **Done** (96.4s, $0.0000) | `#04ff2c74` | Codex (gpt-5.1-codex-max) | 16:54:48 | Tools: sandbox:workspace-write
+
+<details>
+<summary>📥 Input (787 chars)</summary>
+
+```
+Fix permissive smoke tests to require event loading.
+
+PROBLEM: Smoke tests pass even when timeline events don't render. Tests should fail if events don't load.
+
+FILES TO FIX:
+- tests/home/01-smoke.spec.ts
+- tests/editor/01-foundation.smoke.spec.ts
+
+SOLUTION:
+1. Add a helper function or assertion that waits for events to render
+2. Look for event cards with data-testid="event-card" or similar selectors
+3. Add assertions like: `await expect(page.locator('[data-testid="event-card"]')).toHaveCount({ min: 1 })`
+4. Or create a waitForEvents() helper that times out if no events appear within reasonable time (e.g., 10 seconds)
+
+The goal is: if a timeline page loads but events don't render (due to Firestore error, layout bug, missing data), the smoke test should FAIL, not pass silently.
+```
+
+</details>
+
+<details>
+<summary>📤 Output (4342 chars)</summary>
+
+Added a `waitForEvents` helper to both smoke suites so they wait for at least one `event-card` before passing; this makes the timeline smoke tests fail if events never render. I couldn’t apply the edits directly because the environment is read-only—apply the patch below.
+
+```diff
+*** Begin Patch
+*** Update File: tests/home/01-smoke.spec.ts
+-import { test, expect } from '@playwright/test';
++import { test, expect, Page } from '@playwright/test';
+ import { signInWithEmail } from '../utils/authTestUtils';
+ 
++const waitForEvents = async (page: Page) => {
++  const eventCards = page.getByTestId('event-card');
++  await expect(eventCards.first()).toBeVisible({ timeout: 10000 });
++  const eventCount = await eventCards.count();
++  expect(eventCount).toBeGreaterThan(0);
++};
++
+   test('public timeline loads without authentication', async ({ page }) => {
+     test.info().annotations.push({ type: 'phase', description: 'v0.5.11' });
+ 
+     // Navigate to a known public timeline
+     await page.goto('/cynacons/timeline/french-revolution');
+@@
+ 
+     // Should not redirect to login (this is a public timeline)
+     expect(page.url()).not.toContain('/login');
+ 
+-    // Wait for page to fully load
+-    await page.waitForTimeout(3000);
+-
+-    // Timeline content should be visible - check for any timeline-related elements
+-    const hasTimelineAxis = await page.locator('[data-testid="timeline-axis"]').isVisible({ timeout: 2000 }).catch(() => false);
+-    const hasEventCard = await page.locator('[data-testid="event-card"]').first().isVisible({ timeout: 2000 }).catch(() => false);
+-    const hasEditorPage = await page.locator('[data-testid="editor-page"]').isVisible({ timeout: 2000 }).catch(() => false);
+-    const hasTimelineContent = await page.locator('.timeline-container, .timeline-axis, svg').first().isVisible({ timeout: 2000 }).catch(() => false);
+-
+-    // At minimum, we should see some timeline-related content
+-    const hasContent = hasTimelineAxis || hasEventCard || hasEditorPage || hasTimelineContent;
+-
+     // Check for 404 page - this should NOT be visible for a valid timeline
+     const has404 = await page.getByRole('heading', { name: '404' }).isVisible().catch(() => false);
+ 
+-    if (!hasContent) {
+-      console.log('Note: No timeline-specific elements found, but page loaded successfully');
+-    }
+-    // Fail if we see 404 page
+     expect(has404).toBe(false);
+-    // Pass if URL is correct (public timeline access worked)
+-    expect(page.url()).toContain('french-revolution');
++
++    // Events should render to prove the timeline loaded correctly
++    await waitForEvents(page);
++
++    // Axis should also render for a valid timeline
++    await expect(page.getByTestId('timeline-axis')).toBeVisible({ timeout: 10000 });
+   });
+*** End Patch
+```
+
+```diff
+*** Begin Patch
+*** Update File: tests/editor/01-foundation.smoke.spec.ts
+-import { test, expect } from '@playwright/test';
++import { test, expect, Page } from '@playwright/test';
++
++const waitForEvents = async (page: Page) => {
++  const eventCards = page.getByTestId('event-card');
++  await expect(eventCards.first()).toBeVisible({ timeout: 10000 });
++  const eventCount = await eventCards.count();
++  expect(eventCount).toBeGreaterThan(0);
++};
+ 
+ test.describe('v5/01 Foundation', () => {
+   test('app loads and shows timeline axis', async ({ page }) => {
+     test.info().annotations.push({ type: 'req', description: 'CC-REQ-FOUND-001' });
+@@
+-    // Wait for content to load
+-    await page.waitForTimeout(3000);
+-
+     // Check URL loaded correctly (not 404)
+     expect(page.url()).toContain('french-revolution');
+     expect(page.url()).not.toContain('/login');
+ 
+     // Check for 404 page - should NOT be visible
+     const has404 = await page.getByRole('heading', { name: '404' }).isVisible().catch(() => false);
+     expect(has404).toBe(false);
+ 
++    // Require at least one event to render from the timeline dataset
++    await waitForEvents(page);
++
+     // Axis should render from the Firestore dataset
+     const axis = page.locator('[data-testid="timeline-axis"]');
+     await expect(axis).toBeVisible({ timeout: 10000 });
+*** End Patch
+```
+
+Next steps if you apply the patch: run `npx playwright test tests/home/01-smoke.spec.ts tests/editor/01-foundation.smoke.spec.ts --reporter=list` to confirm the stricter event assertions pass.
+
+</details>
+
+---
+

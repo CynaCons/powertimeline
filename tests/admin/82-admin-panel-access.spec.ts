@@ -94,7 +94,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
     await expect(page.getByTestId('admin-users-tab')).toBeVisible();
   });
 
-  test('T82.4: Admin panel breadcrumb displays correctly', async ({ page }) => {
+  test('T82.4: Admin navigation rail displays correctly', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ADMIN-NAV-001' });
 
     // Sign in and go to admin
@@ -107,8 +107,7 @@ test.describe('v5/82 Admin Panel - Access Control & Navigation', () => {
       return;
     }
 
-    // Breadcrumb should be visible (contains links)
-    const breadcrumbs = page.locator('nav').first();
-    await expect(breadcrumbs).toBeVisible();
+    // Navigation rail should be visible for admin navigation
+    await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
   });
 });
