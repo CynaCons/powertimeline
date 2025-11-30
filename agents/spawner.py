@@ -248,7 +248,7 @@ def spawn_codex(
     working_dir: Optional[str] = None,
     timeout: int = 300,
     full_auto: bool = False,
-    context_level: str = "minimal",
+    context_level: str = "none",
     task_summary: Optional[str] = None,
 ) -> AgentResult:
     """
@@ -257,13 +257,16 @@ def spawn_codex(
     This collects all JSONL events and returns the final result.
     For streaming, use spawn_codex_stream() instead.
 
+    Note: Codex automatically loads AGENTS.md from the project root,
+    so context_level defaults to "none" to avoid duplicate/conflicting context.
+
     Args:
         prompt: The task/instruction for the agent
         sandbox: Sandbox mode (read-only, workspace-write, danger-full-access)
         working_dir: Working directory for the agent
         timeout: Timeout in seconds
         full_auto: Enable full-auto mode (low-friction sandboxed execution)
-        context_level: "none", "minimal", "standard", or "full"
+        context_level: "none" (default), "minimal", "standard", or "full"
         task_summary: Optional short description for logging
 
     Returns:
@@ -271,7 +274,8 @@ def spawn_codex(
     """
     start_time = time.time()
 
-    # Build the full prompt with context injection
+    # Codex loads AGENTS.md automatically, so we default to no additional context.
+    # If context_level is not "none", we still inject (for backwards compatibility).
     full_prompt = format_prompt_with_context(prompt, context_level=context_level)
 
     # Log spawn start
@@ -389,12 +393,13 @@ def _spawn_codex_stream_internal(
     if full_auto:
         cmd.append("--full-auto")
 
-    # Add prompt
-    cmd.append(prompt)
+    # Use "-" to read prompt from stdin (more reliable on Windows)
+    cmd.append("-")
 
     try:
         proc = subprocess.Popen(
             cmd,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -403,6 +408,11 @@ def _spawn_codex_stream_internal(
             encoding='utf-8',
             errors='replace',
         )
+
+        # Send prompt via stdin
+        if proc.stdin:
+            proc.stdin.write(prompt)
+            proc.stdin.close()
 
         if proc.stdout:
             for line in proc.stdout:

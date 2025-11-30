@@ -6,13 +6,21 @@ Updates IAC.md (Inter-Agent Communication) and CONTEXT.md automatically.
 
 This module ensures all agent interactions are logged consistently,
 without relying on agents to update documentation themselves.
+
+v0.5.14.1: Added file locking for concurrent agent safety
 """
 
 import uuid
+import threading
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Any
 from dataclasses import dataclass
+from contextlib import contextmanager
+
+# Global lock for file operations (thread-safe within process)
+_file_lock = threading.Lock()
 
 
 def get_agents_dir() -> Path:
@@ -89,17 +97,64 @@ class AgentLogger:
         return self.iac_path.read_text(encoding='utf-8')
 
     def _append_iac(self, content: str):
-        """Append content to IAC.md."""
-        self._ensure_iac_exists()
-        current = self._read_iac()
+        """Append content to IAC.md (thread-safe)."""
+        with _file_lock:
+            self._ensure_iac_exists()
+            current = self._read_iac()
 
-        # Check if we need a new date header
-        today = now_date()
-        if f"## {today}" not in current:
-            content = f"## {today}\n\n{content}"
+            # Check if we need a new date header
+            today = now_date()
+            if f"## {today}" not in current:
+                content = f"## {today}\n\n{content}"
 
-        with open(self.iac_path, 'a', encoding='utf-8') as f:
-            f.write(content)
+            with open(self.iac_path, 'a', encoding='utf-8') as f:
+                f.write(content)
+
+    def _update_iac_entry(
+        self,
+        spawn_id: str,
+        success: bool,
+        result_text: str,
+        duration_seconds: float,
+        cost_usd: float,
+        error: Optional[str] = None,
+    ):
+        """Update an existing IAC entry with completion data (thread-safe)."""
+        with _file_lock:
+            content = self._read_iac()
+
+            # Build status string for checkbox line
+            if success:
+                new_checkbox = f"- [x] ✅ **Done** ({duration_seconds:.1f}s, ${cost_usd:.4f})"
+            else:
+                new_checkbox = f"- [x] ❌ **Failed**: {error or 'Unknown'} ({duration_seconds:.1f}s)"
+
+            # Find and update the running checkbox line for this spawn
+            import re
+            # Match: - [ ] ⏳ **Running** | `#spawn_id` | rest of line
+            old_pattern = rf"- \[ \] ⏳ \*\*Running\*\* \| `#{spawn_id}` \| ([^\n]+)"
+            new_line = f"{new_checkbox} | `#{spawn_id}` | \\1"
+            content = re.sub(old_pattern, new_line, content)
+
+            # Replace result placeholder with actual result
+            result_placeholder = f"<!-- RESULT_{spawn_id} -->"
+            # Truncate very long results for display but keep essential info
+            display_result = result_text
+            if len(result_text) > 50000:
+                display_result = result_text[:25000] + "\n\n... [truncated] ...\n\n" + result_text[-25000:]
+
+            result_block = f"""<details>
+<summary>📤 Output ({len(result_text)} chars)</summary>
+
+{display_result}
+
+</details>
+
+---"""
+            content = content.replace(result_placeholder, result_block)
+
+            # Write back
+            self.iac_path.write_text(content, encoding='utf-8')
 
     def log_spawn_start(
         self,
@@ -133,20 +188,23 @@ class AgentLogger:
         )
         self.active_spawns[spawn_id] = record
 
-        # Write to IAC.md
+        # Write to IAC.md - unified entry format (will be updated on completion)
         tools_str = ', '.join(tools) if tools else 'None'
-        prompt_preview = prompt[:500] + ('...' if len(prompt) > 500 else '')
 
         iac_entry = f"""
-### [{now_time()}] Spawn #{spawn_id} - STARTED
-- **Agent:** {agent} ({model})
-- **Task:** {task_summary}
-- **Tools:** {tools_str}
-- **Prompt Preview:**
+### 🤖 {task_summary}
+- [ ] ⏳ **Running** | `#{spawn_id}` | {agent} ({model}) | {now_time()} | Tools: {tools_str}
+
+<details>
+<summary>📥 Input ({len(prompt)} chars)</summary>
+
 ```
-{prompt_preview}
+{prompt}
 ```
-- **Status:** Running...
+
+</details>
+
+<!-- RESULT_{spawn_id} -->
 
 """
         self._append_iac(iac_entry)
@@ -185,23 +243,11 @@ class AgentLogger:
         record.cost_usd = cost_usd
         record.error = error
 
-        # Create result summary (first 200 chars)
-        result_summary = result_text[:200] + ('...' if len(result_text) > 200 else '')
-        record.result_summary = result_summary
+        # Store full result (not truncated)
+        record.result_summary = result_text
 
-        # Write completion to IAC.md
-        status = "SUCCESS" if success else f"FAILED: {error or 'Unknown error'}"
-        iac_entry = f"""
-### [{now_time()}] Spawn #{spawn_id} - COMPLETED
-- **Status:** {status}
-- **Duration:** {duration_seconds:.1f}s
-- **Cost:** ${cost_usd:.4f}
-- **Result Summary:** {result_summary}
-
----
-
-"""
-        self._append_iac(iac_entry)
+        # Update existing entry in IAC.md instead of appending
+        self._update_iac_entry(spawn_id, success, result_text, duration_seconds, cost_usd, error)
 
         # Remove from active spawns
         if spawn_id in self.active_spawns:
@@ -230,19 +276,20 @@ class AgentLogger:
         active_table = "| ID | Agent | Task | Started |\n|-----|-------|------|--------|\n"
         if self.active_spawns:
             for sid, rec in self.active_spawns.items():
-                active_table += f"| {sid} | {rec.agent} | {rec.task_summary[:40]} | {rec.started_at} |\n"
+                active_table += f"| {sid} | {rec.agent} | {rec.task_summary[:60]} | {rec.started_at} |\n"
         else:
             active_table += "| - | - | No active agents | - |\n"
 
         # Build recent runs table
         recent_table = "| Time | Agent | Task | Duration | Result |\n|------|-------|------|----------|--------|\n"
         for run in recent_runs:
-            recent_table += f"| {run['time']} | {run['agent']} | {run['task'][:30]} | {run['duration']} | {run['result'][:20]} |\n"
+            recent_table += f"| {run['time']} | {run['agent']} | {run['task'][:50]} | {run['duration']} | {run['result'][:40]} |\n"
         if not recent_runs:
             recent_table += "| - | - | No recent runs | - | - |\n"
 
-        # Write CONTEXT.md
-        context_content = f"""# Agent Context
+        # Write CONTEXT.md (thread-safe)
+        with _file_lock:
+            context_content = f"""# Agent Context
 
 > Auto-generated by agents/logger.py. Do not edit manually.
 
@@ -268,10 +315,10 @@ class AgentLogger:
 - See IAC.md for full interaction logs
 - See DESIGN.md for architecture documentation
 """
-        self.context_path.write_text(context_content, encoding='utf-8')
+            self.context_path.write_text(context_content, encoding='utf-8')
 
-        # Save recent runs for persistence
-        self._save_recent_runs(recent_runs)
+            # Save recent runs for persistence
+            self._save_recent_runs(recent_runs)
 
     def _load_recent_runs(self) -> list[dict]:
         """Load recent runs from a simple cache file."""

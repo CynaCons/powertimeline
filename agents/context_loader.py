@@ -83,6 +83,16 @@ def extract_section(content: str, section_name: str, max_lines: int = 50) -> str
     return '\n'.join(result) if result else ""
 
 
+def load_agents_context() -> str:
+    """
+    Load AGENTS.md as the universal context for all sub-agents.
+    This is the single source of truth for spawned agents.
+    """
+    workspace = get_workspace_dir()
+    agents_md = read_file_safe(workspace / "AGENTS.md")
+    return agents_md if agents_md else ""
+
+
 def load_project_context(
     include_prd: bool = True,
     include_plan: bool = True,
@@ -94,6 +104,9 @@ def load_project_context(
 ) -> str:
     """
     Load and format project context for injection into agent prompts.
+
+    NOTE: For sub-agents, prefer load_agents_context() which uses AGENTS.md.
+    This function is kept for backward compatibility.
 
     Args:
         include_prd: Include product requirements
