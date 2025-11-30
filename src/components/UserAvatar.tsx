@@ -32,7 +32,8 @@ const sizeMap = {
 };
 
 export function UserAvatar({ user, size = 'medium', className = '' }: UserAvatarProps) {
-  const initials = getInitials(user.name);
+  // Use username for initials and display (SRS_DB.md compliant - v0.5.14)
+  const initials = getInitials(user.username);
   const bgColor = getUserColor(user.id);
   const textColor = getContrastColor(bgColor);
   const sizeClasses = sizeMap[size];
@@ -44,7 +45,7 @@ export function UserAvatar({ user, size = 'medium', className = '' }: UserAvatar
         backgroundColor: bgColor,
         color: textColor,
       }}
-      title={user.name}
+      title={user.username}
     >
       <span className={sizeClasses.text}>{initials}</span>
     </div>

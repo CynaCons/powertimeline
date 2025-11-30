@@ -59,13 +59,14 @@ export function exportToYAML(events: Event[], options: ExportOptions = {}): stri
     exported_by: "PowerTimeline v0.2.8"
   };
 
-  // Clean events for export (remove any internal properties)
+  // Clean events for export (SRS_DB.md compliant fields only)
   const cleanEvents = events.map(event => ({
     id: event.id,
     date: event.date,
     title: event.title,
     description: event.description,
-    ...(event.category && { category: event.category })
+    ...(event.endDate && { endDate: event.endDate }),
+    ...(event.time && { time: event.time })
   }));
 
   const timelineData: TimelineYAML = {

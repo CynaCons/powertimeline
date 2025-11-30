@@ -53,3 +53,36 @@ If you want to include skipped tests too, the total would be 388 across the same
 
 ---
 
+
+### 🤖 Run the admin tests and report the status.
+
+Execut...
+- [x] ✅ **Done** (125.4s, $0.0000) | `#ddd9c012` | Codex (gpt-5.1-codex-max) | 16:20:51 | Tools: sandbox:workspace-write
+
+<details>
+<summary>📥 Input (264 chars)</summary>
+
+```
+Run the admin tests and report the status.
+
+Execute: npx playwright test tests/admin/ --reporter=list
+
+Report:
+1. How many tests passed/failed/skipped
+2. List any failing tests with their error messages
+3. If the dev server fails to start, report that specifically
+```
+
+</details>
+
+<details>
+<summary>📤 Output (413 chars)</summary>
+
+- Admin test run results: 3 passed, 1 failed, 19 skipped.
+- Dev server started successfully (Vite on port 5175).
+- Failure: `tests/admin/82-admin-panel-access.spec.ts:97` (T82.4 Admin panel breadcrumb displays correctly) timed out waiting for `locator('nav').first()` to be visible (element not found). Trace and screenshot saved under `test-results/admin-82-admin-panel-acces-9f640-eadcrumb-displays-correctly/`.
+
+</details>
+
+---
+

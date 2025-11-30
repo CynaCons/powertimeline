@@ -72,16 +72,16 @@ export async function migrateLocalStorageToFirestore(): Promise<{
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
-            console.log(`⏭️  Skipping user ${user.name} (already in Firestore)`);
+            console.log(`⏭️  Skipping user ${user.username} (already in Firestore)`);
             continue;
           }
 
           // Migrate to Firestore
           await setDoc(docRef, user);
-          console.log(`✅ Migrated user: ${user.name}`);
+          console.log(`✅ Migrated user: ${user.username}`);
           migratedUsers++;
         } catch (error) {
-          console.error(`❌ Failed to migrate user ${user.name}:`, error);
+          console.error(`❌ Failed to migrate user ${user.username}:`, error);
         }
       }
     }

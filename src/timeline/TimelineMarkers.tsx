@@ -63,18 +63,8 @@ export function TimelineMarkers({
       }
     }
 
-    // Add milestone markers for high-priority events
-    const milestones = events
-      .filter(event => event.priority === 'high' || event.category === 'milestone')
-      .map(event => ({
-        id: `milestone-${event.id}`,
-        date: event.date,
-        label: event.title,
-        type: 'milestone' as const,
-        color: 'var(--color-warning-500)'
-      }));
-
-    allMarkers.push(...milestones);
+    // SRS_DB.md compliant - priority and category fields removed
+    // Milestone markers feature removed (no way to identify milestones without category/priority)
 
     // Add custom markers
     allMarkers.push(...customMarkers);

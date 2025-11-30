@@ -637,10 +637,10 @@ export function searchTimelinesAndUsers(query: string, currentUserId?: string): 
     t.description?.toLowerCase().includes(lowerQuery))
   );
 
-  // Search users
+  // Search users (SRS_DB.md compliant - v0.5.14: search by username)
   const matchingUsers = users.filter(u =>
-    u.name.toLowerCase().includes(lowerQuery) ||
-    u.bio?.toLowerCase().includes(lowerQuery)
+    u.username.toLowerCase().includes(lowerQuery) ||
+    u.email.toLowerCase().includes(lowerQuery)
   );
 
   const maxTimelines = 5;

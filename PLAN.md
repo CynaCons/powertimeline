@@ -3,10 +3,10 @@
 ## Quick Summary
 
 **Current Version:** v0.5.14.4
-**Next Milestone:** v0.5.14.5 - Test Infrastructure
+**Next Milestone:** v0.5.15 - Test & Bug Fix Backlog
 
 ### Key Metrics
-- **Total Iterations:** 185+ completed (v0.2.0 → v0.5.10)
+- **Total Iterations:** 185+ completed (v0.2.0 → v0.5.14)
 - **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~150 requirements (97%)
 - **Test Coverage:** ~113 requirements verified (73%)
@@ -14,26 +14,22 @@
 - **Production Tests:** 11/11 passing (v0.5.7)
 
 ### Recent Achievements (v0.5.x)
-- ✅ Firebase Authentication foundation (v0.5.1)
-- ✅ Landing page redesign with dark theme (v0.5.2)
-- ✅ Public timeline viewing (v0.5.3)
-- ✅ Authentication security & demo user removal (v0.5.4)
-- ✅ Public browsing & unified dark theme (v0.5.5)
-- ✅ Landing page polish & mobile responsiveness (v0.5.6)
-- ✅ Authentication production deployment with security rules (v0.5.7)
-- ✅ Documentation improvements & naming conventions (v0.5.8)
-- ✅ Test organization & GitHub Actions workflow (v0.5.9)
-- ✅ Vision & positioning update, OG tags, 404 page (v0.5.10)
+- ✅ Firebase Authentication & public browsing (v0.5.1-v0.5.7)
+- ✅ Documentation, test organization, vision update (v0.5.8-v0.5.10)
 - ✅ Test stabilization & legacy code cleanup (v0.5.11)
+- ✅ Firestore schema cleanup (v0.5.12)
+- ✅ Multi-agent orchestration MCP server (v0.5.13)
+- ✅ Username-based URLs & navigation fixes (v0.5.14)
 
-### Next Up (v0.5.12)
-- Platform statistics aggregation with Cloud Functions
-- Test fixes delegated to Tester agent
+### Next Up (v0.5.15)
+- Fix admin tests (23/23 failing - dev server issue)
+- Private timeline visibility bug (hide from public feeds)
+- Strict smoke tests requiring event loading
 
 ### Test Status
 - **Suite:** 296 tests in 92 files
-- **Coverage:** Foundation ✅ | Layout ✅ | Cards ✅ | Zoom ✅ | Minimap ✅ | Production ✅
-- **Pending Fixes:** Admin panel and home page tests (Tester agent)
+- **Admin Tests:** 23/23 failing (dev server not starting)
+- **Pending Fixes:** Admin panel, home page, private timeline visibility
 
 ### Quick Links
 - [Requirements Dashboard](docs/SRS_INDEX.md) - Complete requirements overview
@@ -1136,19 +1132,38 @@
 
 ---
 
-### v0.5.14.5 - Test Infrastructure (Backlog)
-**Goal:** Improve test reliability and agent tooling
+### v0.5.15 - Test & Bug Fix Backlog
+**Goal:** Fix test infrastructure issues and production bugs
 
+**Completed:**
 - [x] Increase agent history from 10 to 100 runs
 - [x] Add cost tracking for Codex agents
 - [x] Document Codex limitations (not suitable for shell command execution)
-- [ ] Add silent mode reporter for tests (JSON output)
+
+**MCP Agent Server Testing:**
+- [x] Test Claude agent spawn and result retrieval (SUCCESS - $0.024, 30s)
+- [x] Test Codex agent spawn and result retrieval (PARTIAL - returned "No task specified")
+- [x] Fix double logging bug (removed duplicate log_spawn_start from MCP server)
+- [x] Fix task summary (set context_level="none", CLIs auto-load their own context)
+- [x] Fix Codex prompt passing (use stdin with "-" argument)
+- [ ] Restart MCP server and retest Codex subagent
+
+**Test Infrastructure:**
+- [ ] Fix admin tests (23/23 failing - dev server not starting)
 - [ ] Create strict smoke test requiring event loading
 - [ ] Fix permissive tests to fail when events don't render
 
+**Private Timeline Visibility Bug:**
+Private timelines are shown on HomePage/LandingPage feeds but users can't click them. Should only be visible to authenticated owner in "My Timelines".
+
+- [ ] Filter out private timelines from HomePage discovery feeds (Recently Edited, Popular, Featured)
+- [ ] Filter out private timelines from LandingPage example timelines
+- [ ] Ensure "My Timelines" section still shows owner's private timelines
+- [ ] Add E2E test verifying private timelines are hidden from public feeds
+
 ---
 
-### v0.5.15 - Firestore Data Refinement (Backlog)
+### v0.5.16 - Firestore Data Refinement
 **Goal:** Complete Firestore compliance and fix remaining data issues
 
 **Code Updates (from v0.5.12):**
@@ -1172,7 +1187,7 @@
 - [ ] Update any tests that reference removed fields
 - [ ] Pass SRS_DB.md compliance tests (tests/db/)
 
-### v0.5.16 - Platform Statistics Aggregation
+### v0.5.17 - Platform Statistics Aggregation
 **Goal:** Move stats calculation from client-side scans to server-side aggregation
 
 - [ ] Create `stats/platform` document in Firestore

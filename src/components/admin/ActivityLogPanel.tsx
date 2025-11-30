@@ -193,8 +193,8 @@ export function ActivityLogPanel() {
             }}
           >
             <MenuItem value="all">All Admins</MenuItem>
-            {adminUsers.map(user => (
-              <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>
+            {adminUsers.map(adminUser => (
+              <MenuItem key={adminUser.id} value={adminUser.id}>@{adminUser.username}</MenuItem>
             ))}
           </Select>
         </FormControl>

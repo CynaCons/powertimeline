@@ -105,24 +105,25 @@ export async function setupMockUser(page: Page, _userId: string = 'cynacons'): P
  *
  * @param page - Playwright page object
  * @param timelineId - Timeline ID to navigate to
- * @param ownerId - Owner user ID (defaults to 'cynacons')
+ * @param ownerUsername - Owner username (defaults to 'cynako')
  *
  * @example
  * // View timeline without auth (read-only)
- * await page.goto('/user/cynacons/timeline/timeline-napoleon');
+ * await page.goto('/@cynako/timeline/timeline-napoleon');
  *
  * // Edit timeline (requires auth)
  * await loginWithFirebaseAuth(page);
- * await page.goto(`/user/${userId}/timeline/${timelineId}`);
+ * await page.goto(`/@${username}/timeline/${timelineId}`);
  */
 export async function openTimeline(
   page: Page,
   timelineId: string,
-  ownerId: string = 'cynacons'
+  ownerUsername: string = 'cynako'
 ): Promise<void> {
   console.warn('openTimeline() is deprecated. Just use page.goto() directly.');
 
-  const url = `/user/${ownerId}/timeline/${timelineId}`;
+  // v0.5.14: Use new username-based URL pattern
+  const url = `/@${ownerUsername}/timeline/${timelineId}`;
 
   // Simply navigate - no authentication needed for public viewing
   await page.goto(url);

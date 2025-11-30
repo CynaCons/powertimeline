@@ -108,7 +108,7 @@ async function migrateUsers(
       try {
         if (options.skipExisting && existingUserIds.has(user.id)) {
           options.onProgress?.(
-            `Skipping existing user: ${user.name}`,
+            `Skipping existing user: ${user.username}`,
             i + 1,
             localUsers.length
           );
@@ -116,7 +116,7 @@ async function migrateUsers(
         }
 
         options.onProgress?.(
-          `Migrating user: ${user.name}`,
+          `Migrating user: ${user.username}`,
           i + 1,
           localUsers.length
         );

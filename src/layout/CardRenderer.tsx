@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PositionedCard, CardType } from './types';
 import type { Event } from '../types';
-import { getEventIcon, getPriorityIcon } from './cardIcons';
+import { getEventIcon } from './cardIcons';
 
 interface CardRendererProps {
   card: PositionedCard;
@@ -18,8 +18,8 @@ export function CardRenderer({
   onClick,
   onDoubleClick
 }: CardRendererProps) {
-  const event = card.event;
-  const gradientClass = getGradientClass(card.cardType, event.category);
+  // SRS_DB.md compliant - category field removed, use default gradient
+  const gradientClass = getGradientClass(card.cardType);
   const elevationClass = getElevationClass(card.cardType, isSelected, isHovered);
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -175,7 +175,6 @@ function renderCardContent(card: PositionedCard): React.ReactNode {
 
 function FullCardContent({ event }: { event: Event }) {
   const eventIcon = getEventIcon(event);
-  const priorityIcon = getPriorityIcon(event.priority);
 
   return (
     <div className="h-full flex flex-col">
@@ -184,15 +183,6 @@ function FullCardContent({ event }: { event: Event }) {
           {event.title}
         </h3>
         <div className="flex items-center gap-1">
-          {event.priority && event.priority !== 'normal' && (
-            <span
-              className={`card-icon priority-${event.priority} material-symbols-rounded`}
-              style={{ fontSize: '0.75rem' }}
-              title={priorityIcon.description}
-            >
-              {priorityIcon.icon}
-            </span>
-          )}
           <span
             className="card-icon material-symbols-rounded"
             style={{ color: eventIcon.color, fontSize: '0.875rem' }}

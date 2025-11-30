@@ -26,13 +26,11 @@ import type { User } from '../types';
 export async function ensureUserProfile(firebaseUser: FirebaseUser): Promise<void> {
   const existingProfile = await getUser(firebaseUser.uid);
   if (!existingProfile) {
-    // Create a basic profile for the user
+    // Create a basic profile for the user (SRS_DB.md compliant - v0.5.14)
     const userProfile: Omit<User, 'createdAt'> = {
       id: firebaseUser.uid,
       email: firebaseUser.email || '',
       username: firebaseUser.email?.split('@')[0] || firebaseUser.uid.slice(0, 8),
-      name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-      avatar: '👤',
       role: 'user',
     };
     await createUser(userProfile);
@@ -61,19 +59,18 @@ export async function signUpWithEmailAndCreateProfile(
   email: string,
   password: string,
   username: string,
-  displayName?: string
+  displayName?: string // Deprecated - kept for API compatibility
 ): Promise<FirebaseUser> {
+  void displayName; // Suppress unused variable warning
   // Create Firebase Auth account
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const firebaseUser = userCredential.user;
 
-  // Create Firestore user profile
+  // Create Firestore user profile (SRS_DB.md compliant - v0.5.14)
   const userProfile: Omit<User, 'createdAt'> = {
     id: firebaseUser.uid,
     email: email,
     username: username.toLowerCase(),
-    name: displayName || username,
-    avatar: '👤', // Default avatar
     role: 'user',
   };
 

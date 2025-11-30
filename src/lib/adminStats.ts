@@ -63,7 +63,7 @@ export function calculatePlatformStats(): PlatformStats {
       if (existing) {
         existing.count++;
       } else {
-        creatorMap.set(user.id, { userName: user.name, count: 1 });
+        creatorMap.set(user.id, { userName: user.username, count: 1 });
       }
     }
   });
@@ -86,7 +86,7 @@ export function calculatePlatformStats(): PlatformStats {
       return {
         timelineId: timeline.id,
         timelineTitle: timeline.title,
-        ownerName: owner?.name || 'Unknown',
+        ownerName: owner?.username || 'Unknown',
         updatedAt: timeline.updatedAt,
       };
     });

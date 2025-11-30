@@ -103,12 +103,9 @@ export const categoryIcons: Record<string, CategoryIcon> = {
   }
 };
 
-export function getEventIcon(event: Event): CategoryIcon {
-  if (!event.category) {
-    return categoryIcons.default;
-  }
-
-  return categoryIcons[event.category] || categoryIcons.default;
+export function getEventIcon(_event?: Event): CategoryIcon {
+  void _event; // SRS_DB.md compliant - category field removed, always return default icon
+  return categoryIcons.default;
 }
 
 export function getEventTypeIcon(cardType: string): CategoryIcon {

@@ -45,3 +45,4 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+__pycache__

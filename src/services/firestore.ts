@@ -47,21 +47,47 @@ const COLLECTIONS = {
 export async function getTimelineMetadata(timelineId: string): Promise<TimelineMetadata | null> {
   try {
     console.log('[getTimelineMetadata] Fetching timeline:', timelineId);
-    // Use collection group query to search across all users' timelines
-    const q = query(
+
+    // First try: query by 'id' field (works for newer documents that store id as a field)
+    let q = query(
       collectionGroup(db, COLLECTIONS.TIMELINES),
       where('id', '==', timelineId),
       limit(1)
     );
-    const querySnapshot = await getDocs(q);
+    let querySnapshot = await getDocs(q);
 
+    // If not found by id field, try a broader search
+    // This handles legacy documents where id isn't stored as a field
     if (querySnapshot.empty) {
+      console.log('[getTimelineMetadata] Not found by id field, trying broader search...');
+      // Query recent timelines and find by doc.id (limited to avoid scanning too many)
+      q = query(
+        collectionGroup(db, COLLECTIONS.TIMELINES),
+        orderBy('updatedAt', 'desc'),
+        limit(500)
+      );
+      querySnapshot = await getDocs(q);
+
+      // Find the matching document by doc.id
+      const matchingDoc = querySnapshot.docs.find(d => d.id === timelineId);
+      if (matchingDoc) {
+        const data = matchingDoc.data();
+        // Extract ownerId from path if not in data: /users/{ownerId}/timelines/{timelineId}
+        const ownerId = data.ownerId || matchingDoc.ref.parent.parent?.id;
+        const metadata = { ...data, id: matchingDoc.id, ownerId } as TimelineMetadata;
+        console.log('[getTimelineMetadata] Found timeline via broader search:', metadata.title, 'Owner:', metadata.ownerId);
+        return metadata;
+      }
+
       console.log('[getTimelineMetadata] Timeline not found:', timelineId);
       return null;
     }
 
-    const doc = querySnapshot.docs[0];
-    const metadata = { id: doc.id, ...doc.data() } as TimelineMetadata;
+    const docSnap = querySnapshot.docs[0];
+    const data = docSnap.data();
+    // Extract ownerId from path if not in data
+    const ownerId = data.ownerId || docSnap.ref.parent.parent?.id;
+    const metadata = { ...data, id: docSnap.id, ownerId } as TimelineMetadata;
     console.log('[getTimelineMetadata] Found timeline:', metadata.title, 'Owner:', metadata.ownerId);
     return metadata;
   } catch (error) {
@@ -138,10 +164,17 @@ export async function getTimelines(options?: {
     const q = query(collectionGroup(db, COLLECTIONS.TIMELINES), ...constraints);
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as TimelineMetadata[];
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      // Extract ownerId from document path if not in data
+      // Path: /users/{ownerId}/timelines/{timelineId}
+      const ownerId = data.ownerId || doc.ref.parent.parent?.id;
+      return {
+        id: doc.id,
+        ...data,
+        ownerId,
+      };
+    }) as TimelineMetadata[];
   } catch (error) {
     console.error('Error fetching timelines:', error);
     throw error;
@@ -177,7 +210,7 @@ export async function getTimelineEvents(timelineId: string, ownerId: string): Pr
       const eventDoc = doc.data() as EventDocument;
       // Convert EventDocument back to Event by removing Firestore-specific fields
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { timelineId, createdAt, updatedAt, order, ...event } = eventDoc;
+      const { timelineId, createdAt, updatedAt, ...event } = eventDoc;
       return event as Event;
     });
   } catch (error) {
@@ -205,19 +238,18 @@ export async function addEvent(
       COLLECTIONS.EVENTS
     );
 
-    // Get current event count to determine order
+    // Get current event count for updating timeline metadata
     const existingEvents = await getTimelineEvents(timelineId, ownerId);
-    const order = existingEvents.length;
 
     const eventRef = doc(eventsCollectionRef, event.id);
     const now = new Date().toISOString();
 
+    // SRS_DB.md compliant - no order field, events sorted by date
     const eventDoc: EventDocument = {
       ...event,
       timelineId,
       createdAt: now,
       updatedAt: now,
-      order,
     };
 
     await setDoc(eventRef, eventDoc);

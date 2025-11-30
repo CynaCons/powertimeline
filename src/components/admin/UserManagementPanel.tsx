@@ -39,7 +39,7 @@ import { getUsers, getTimelines, updateUser as updateUserFirestore, deleteUser a
 import { UserAvatar } from '../UserAvatar';
 import { logAdminAction } from '../../lib/activityLog';
 
-type SortField = 'name' | 'createdAt' | 'timelineCount';
+type SortField = 'username' | 'createdAt' | 'timelineCount';
 type SortDirection = 'asc' | 'desc';
 type RoleFilter = 'all' | 'admin' | 'user';
 
@@ -52,7 +52,7 @@ export function UserManagementPanel() {
   const [timelineCounts, setTimelineCounts] = useState<Map<string, number>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
-  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortField, setSortField] = useState<SortField>('username');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Selection state for bulk operations
@@ -88,9 +88,10 @@ export function UserManagementPanel() {
     newRole: 'user' | 'admin';
   } | null>(null);
 
-  // Use Firebase Auth instead of deprecated localStorage getCurrentUser()
-  const { user } = useAuth();
+  // Use Firebase Auth and user profile instead of deprecated localStorage getCurrentUser()
+  const { user, userProfile } = useAuth();
   const currentUserId = user?.uid;
+  const currentUsername = userProfile?.username || 'Admin';
 
   // Helper function to refresh data from Firestore
   const refreshData = useCallback(async () => {
@@ -123,13 +124,14 @@ export function UserManagementPanel() {
   const filteredAndSortedUsers = useMemo(() => {
     let filtered = usersWithTimelines;
 
-    // Apply search filter
+    // Apply search filter (SRS_DB.md compliant - v0.5.14: search by username)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         user =>
-          user.name.toLowerCase().includes(query) ||
-          user.id.toLowerCase().includes(query)
+          user.username.toLowerCase().includes(query) ||
+          user.id.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query)
       );
     }
 
@@ -143,8 +145,8 @@ export function UserManagementPanel() {
       let comparison = 0;
 
       switch (sortField) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
+        case 'username':
+          comparison = a.username.localeCompare(b.username);
           break;
         case 'createdAt':
           comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -161,13 +163,13 @@ export function UserManagementPanel() {
   }, [usersWithTimelines, searchQuery, roleFilter, sortField, sortDirection]);
 
   const handleRoleChange = (userId: string, newRole: 'user' | 'admin') => {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
+    const foundUser = users.find(u => u.id === userId);
+    if (!foundUser) return;
 
     setRoleChangeDialog({
       open: true,
       userId,
-      userName: user.name,
+      userName: foundUser.username,
       newRole,
     });
   };
@@ -180,7 +182,7 @@ export function UserManagementPanel() {
       await refreshData();
       logAdminAction(
         currentUserId || '',
-        user?.displayName || 'Admin',
+        currentUsername,
         'USER_ROLE_CHANGE',
         'user',
         roleChangeDialog.userId,
@@ -196,15 +198,15 @@ export function UserManagementPanel() {
   };
 
   const handleDeleteClick = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
+    const foundUser = users.find(u => u.id === userId);
+    if (!foundUser) return;
 
     const timelineCount = timelineCounts.get(userId) || 0;
 
     setDeleteDialog({
       open: true,
       userId,
-      userName: user.name,
+      userName: foundUser.username,
       timelineCount,
     });
   };
@@ -229,7 +231,7 @@ export function UserManagementPanel() {
 
       logAdminAction(
         currentUserId || '',
-        user?.displayName || 'Admin',
+        currentUsername,
         'USER_DELETE',
         'user',
         deleteDialog.userId,
@@ -323,7 +325,7 @@ export function UserManagementPanel() {
       setBulkDeleteDialog(null);
       logAdminAction(
         currentUserId || '',
-        user?.displayName || 'Admin',
+        currentUsername,
         'BULK_OPERATION',
         'user',
         'bulk',
@@ -362,7 +364,7 @@ export function UserManagementPanel() {
       setBulkRoleDialog(null);
       logAdminAction(
         currentUserId || '',
-        user?.displayName || 'Admin',
+        currentUsername,
         'BULK_OPERATION',
         'user',
         'bulk',
@@ -466,10 +468,10 @@ export function UserManagementPanel() {
               <TableCell>Avatar</TableCell>
               <TableCell>
                 <Button
-                  onClick={() => toggleSort('name')}
+                  onClick={() => toggleSort('username')}
                   sx={{ textTransform: 'none', fontWeight: 'bold' }}
                 >
-                  Name {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  Username {sortField === 'username' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </Button>
               </TableCell>
               <TableCell>ID</TableCell>
@@ -514,7 +516,7 @@ export function UserManagementPanel() {
                     <UserAvatar user={user} size="medium" />
                   </TableCell>
                   <TableCell>
-                    <strong>{user.name}</strong>
+                    <strong>@{user.username}</strong>
                   </TableCell>
                   <TableCell>
                     <code className="text-xs text-gray-600">{user.id}</code>

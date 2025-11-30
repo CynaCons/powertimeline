@@ -1,18 +1,19 @@
+/**
+ * Event represents a single event in a timeline
+ * SRS_DB.md compliant - v0.5.14
+ */
 export interface Event {
   id: string;
-  date: string;
+  date: string;                    // ISO 8601 date (YYYY-MM-DD)
   title: string;
   description?: string;
-  // Optional extensions for richer layout & semantics
-  endDate?: string; // for ranges
-  time?: string; // optional time component in HH:MM format for minute-level precision
-  priority?: 'low' | 'normal' | 'high';
-  category?: string; // e.g., 'milestone', 'speech', 'battle'
+  endDate?: string;                // Optional end date for ranges
+  time?: string;                   // Optional time in HH:MM format
+  // Layout flags (client-side only, not stored in Firestore)
   flags?: {
     showAnchorLabel?: boolean;
     showConnector?: boolean;
   };
-  excerpt?: string; // precomputed short description
 }
 
 /**
@@ -52,29 +53,24 @@ export interface Timeline extends TimelineMetadata {
 
 /**
  * Event document as stored in Firestore subcollection
- * v0.5.0.1 - Event Persistence Optimization
+ * SRS_DB.md compliant - v0.5.14
  */
 export interface EventDocument extends Event {
   timelineId: string;        // Reference to parent timeline
   createdAt: string;         // ISO date
   updatedAt: string;         // ISO date
-  order: number;             // Order within timeline (for sorting)
 }
 
 /**
  * User represents a user profile
- * Added for v0.4.0 - Home Page & Timeline Discovery
- * v0.5.1 - Added email and username fields for authentication
+ * SRS_DB.md compliant - v0.5.14
  */
 export interface User {
-  id: string;           // Firebase Auth UID
-  email: string;        // User's email address (v0.5.1)
-  username: string;     // Unique username for URLs (v0.5.1)
-  name: string;         // Display name
-  avatar: string;       // Emoji or image URL
-  bio?: string;         // Optional biography (max 280 chars)
-  createdAt: string;    // ISO date
-  role?: 'user' | 'admin';  // User role (defaults to 'user' if undefined) - v0.4.4
+  id: string;                      // Firebase Auth UID
+  email: string;                   // User's email address (read-only from auth provider)
+  username: string;                // Unique username for URLs (3-20 chars, lowercase alphanumeric + hyphen)
+  createdAt: string;               // ISO date
+  role?: 'user' | 'admin';         // User role (defaults to 'user' if undefined)
 }
 
 /**

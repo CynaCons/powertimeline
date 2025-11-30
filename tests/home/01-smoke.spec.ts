@@ -61,11 +61,11 @@ test.describe('home/01 Smoke Tests', () => {
     test.info().annotations.push({ type: 'phase', description: 'v0.5.11' });
 
     // Navigate to a known public timeline
-    await page.goto('/user/cynacons/timeline/timeline-french-revolution');
+    await page.goto('/cynacons/timeline/french-revolution');
     await page.waitForLoadState('domcontentloaded');
 
     // Should load without redirect to login
-    await expect(page).toHaveURL(/timeline-french-revolution/);
+    await expect(page).toHaveURL(/french-revolution/);
 
     // Should not redirect to login (this is a public timeline)
     expect(page.url()).not.toContain('/login');
@@ -74,7 +74,6 @@ test.describe('home/01 Smoke Tests', () => {
     await page.waitForTimeout(3000);
 
     // Timeline content should be visible - check for any timeline-related elements
-    // The timeline viewer might use various data-testids or class patterns
     const hasTimelineAxis = await page.locator('[data-testid="timeline-axis"]').isVisible({ timeout: 2000 }).catch(() => false);
     const hasEventCard = await page.locator('[data-testid="event-card"]').first().isVisible({ timeout: 2000 }).catch(() => false);
     const hasEditorPage = await page.locator('[data-testid="editor-page"]').isVisible({ timeout: 2000 }).catch(() => false);
@@ -83,11 +82,16 @@ test.describe('home/01 Smoke Tests', () => {
     // At minimum, we should see some timeline-related content
     const hasContent = hasTimelineAxis || hasEventCard || hasEditorPage || hasTimelineContent;
 
+    // Check for 404 page - this should NOT be visible for a valid timeline
+    const has404 = await page.getByRole('heading', { name: '404' }).isVisible().catch(() => false);
+
     if (!hasContent) {
       console.log('Note: No timeline-specific elements found, but page loaded successfully');
     }
+    // Fail if we see 404 page
+    expect(has404).toBe(false);
     // Pass if URL is correct (public timeline access worked)
-    expect(page.url()).toContain('timeline-french-revolution');
+    expect(page.url()).toContain('french-revolution');
   });
 
   test('authenticated user can access home features', async ({ page }) => {

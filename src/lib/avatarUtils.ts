@@ -4,20 +4,36 @@
  */
 
 /**
- * Generate initials from a user's name
- * Examples: "John Doe" → "JD", "Alice" → "A", "Bob Lee Smith" → "BS"
+ * Generate initials from a username or name
+ * For usernames: "john-doe" → "JD", "alice" → "AL"
+ * For names: "John Doe" → "JD", "Alice" → "A"
+ * v0.5.14 - Updated to work with username (hyphen-separated) or name (space-separated)
  */
-export function getInitials(name: string): string {
-  if (!name) return '?';
+export function getInitials(input: string): string {
+  if (!input) return '?';
 
-  const words = name.trim().split(/\s+/);
+  const trimmed = input.trim();
 
-  if (words.length === 1) {
-    // Single word - use first letter
-    return words[0][0].toUpperCase();
+  // Check if it's a username (contains hyphens but no spaces)
+  if (trimmed.includes('-') && !trimmed.includes(' ')) {
+    // Username format: "john-doe" → "JD"
+    const parts = trimmed.split('-');
+    if (parts.length === 1) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+    const firstInitial = parts[0][0];
+    const lastInitial = parts[parts.length - 1][0];
+    return (firstInitial + lastInitial).toUpperCase();
   }
 
-  // Multiple words - use first letter of first word and first letter of last word
+  // Check if it's a single word (could be username like "cynacons")
+  const words = trimmed.split(/\s+/);
+  if (words.length === 1) {
+    // Single word - use first 2 letters for usernames, first letter for names
+    return words[0].substring(0, 2).toUpperCase();
+  }
+
+  // Multiple words (name format) - use first letter of first word and first letter of last word
   const firstInitial = words[0][0];
   const lastInitial = words[words.length - 1][0];
   return (firstInitial + lastInitial).toUpperCase();

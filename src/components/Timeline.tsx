@@ -126,13 +126,8 @@ const Timeline: React.FC<Props> = ({
   // Use a constant pixel threshold so zoom-in increases separation and splits clusters
   const CLUSTER_THRESHOLD_PX = 120;
     
-    // Priority-aware deterministic ordering: higher priority first, then date
-    const ordered = [...events].sort((a, b) => {
-      const prio = (p?: string) => (p === 'high' ? 2 : p === 'low' ? 0 : 1);
-      const d = prio(b.priority) - prio(a.priority);
-      if (d !== 0) return d;
-      return a.date.localeCompare(b.date);
-    });
+    // Sort events chronologically by date (SRS_DB.md compliant - no priority field)
+    const ordered = [...events].sort((a, b) => a.date.localeCompare(b.date));
 
   ordered.forEach((event) => {
       // Calculate chronological position for anchor

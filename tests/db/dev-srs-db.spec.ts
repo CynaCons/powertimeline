@@ -12,7 +12,7 @@ const RESERVED_USERNAMES = new Set([
   'admin','administrator','api','app','auth','browse','config','dashboard','edit','editor','help','home','login','logout','new','null','profile','register','search','settings','signup','support','system','test','timeline','timelines','undefined','user','users','view','www'
 ]);
 
-const ALLOWED_USER_FIELDS = new Set(['id','email','username','createdAt','role']);
+const ALLOWED_USER_FIELDS = new Set(['id','email','username','createdAt','updatedAt','role','displayName']);
 const ALLOWED_TIMELINE_FIELDS = new Set(['id','title','description','ownerId','createdAt','updatedAt','viewCount','featured','visibility','eventCount']);
 const ALLOWED_EVENT_FIELDS = new Set(['id','title','description','date','endDate','time','timelineId','createdAt','updatedAt']);
 const ALLOWED_LOG_FIELDS = new Set(['id','timestamp','adminUserId','adminUserName','action','targetType','targetId','targetName','details','metadata']);
