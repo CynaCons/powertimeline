@@ -14,14 +14,43 @@ import { signInWithEmail, getTestUserUid } from './authTestUtils';
  */
 const DEFAULT_TEST_USER_UID = getTestUserUid();
 
-// Known public timelines in Firestore (cynacons user)
-const CYNACONS_USER_ID = 'cynacons';
+// Known public timelines in Firestore
+// v0.5.14: Updated to use username-based URLs
+// The test owner (cynako@gmail.com) has username 'cynacons' in dev DB
+const TEST_OWNER_USERNAME = 'cynacons';
+
+// Actual timeline IDs in dev Firestore (format: slug without 'timeline-' prefix)
 const PUBLIC_TIMELINES = {
-  'timeline-french-revolution': CYNACONS_USER_ID,
-  'timeline-napoleon': CYNACONS_USER_ID,
-  'timeline-charles-de-gaulle': CYNACONS_USER_ID,
-  'timeline-rfk': CYNACONS_USER_ID,
+  // Primary timeline IDs (actual IDs in Firestore)
+  'french-revolution': TEST_OWNER_USERNAME,
+  'napoleon-bonaparte': TEST_OWNER_USERNAME,
+  'charles-de-gaulle': TEST_OWNER_USERNAME,
+  'rfk-1968': TEST_OWNER_USERNAME,
+  'jfk-presidency': TEST_OWNER_USERNAME,
+  // Legacy aliases (for backwards compatibility with old test code)
+  'timeline-french-revolution': TEST_OWNER_USERNAME,
+  'timeline-napoleon': TEST_OWNER_USERNAME,
+  'timeline-charles-de-gaulle': TEST_OWNER_USERNAME,
+  'timeline-rfk': TEST_OWNER_USERNAME,
+  'timeline-jfk': TEST_OWNER_USERNAME,
 };
+
+// v0.5.14: Map legacy timeline IDs to actual Firestore document IDs
+const TIMELINE_ID_MAP: Record<string, string> = {
+  'timeline-french-revolution': 'french-revolution',
+  'timeline-napoleon': 'napoleon-bonaparte',
+  'timeline-charles-de-gaulle': 'charles-de-gaulle',
+  'timeline-rfk': 'rfk-1968',
+  'timeline-jfk': 'jfk-presidency',
+};
+
+/**
+ * Resolve a timeline ID to its actual Firestore document ID
+ * Handles legacy 'timeline-*' aliases used in older test code
+ */
+function resolveTimelineId(timelineId: string): string {
+  return TIMELINE_ID_MAP[timelineId] || timelineId;
+}
 
 /**
  * Login as the test user via Firebase Auth
@@ -34,24 +63,27 @@ export async function loginAsTestUser(page: Page): Promise<void> {
 /**
  * Load a public timeline (no auth required)
  * @param page - Playwright page object
- * @param timelineId - Timeline ID to load
+ * @param timelineId - Timeline ID to load (supports legacy 'timeline-*' aliases)
  */
 export async function loadTestTimeline(page: Page, timelineId: string): Promise<void> {
   // Check if this is a known public timeline
-  const ownerId = PUBLIC_TIMELINES[timelineId as keyof typeof PUBLIC_TIMELINES] || CYNACONS_USER_ID;
-  await loadTimeline(page, ownerId, timelineId, false);
+  const ownerUsername = PUBLIC_TIMELINES[timelineId as keyof typeof PUBLIC_TIMELINES] || TEST_OWNER_USERNAME;
+  // v0.5.14: Resolve legacy timeline IDs to actual Firestore document IDs
+  const resolvedId = resolveTimelineId(timelineId);
+  await loadTimeline(page, ownerUsername, resolvedId, false);
 }
 
 /**
  * Load a specific timeline by navigating to its URL
+ * v0.5.14: Updated to use username-based URLs (/:username/timeline/:id)
  * @param page - Playwright page object
- * @param userId - Owner user ID
+ * @param username - Owner username (not user ID)
  * @param timelineId - Timeline ID
  * @param requireAuth - Whether to sign in before navigation
  */
 export async function loadTimeline(
   page: Page,
-  userId: string,
+  username: string,
   timelineId: string,
   requireAuth: boolean = false
 ): Promise<void> {
@@ -59,8 +91,8 @@ export async function loadTimeline(
     await signInWithEmail(page);
   }
 
-  // Navigate to timeline URL
-  await page.goto(`/user/${userId}/timeline/${timelineId}`);
+  // Navigate to timeline URL using clean username-based pattern
+  await page.goto(`/${username}/timeline/${timelineId}`);
   await page.waitForLoadState('domcontentloaded');
 }
 
@@ -101,11 +133,12 @@ export async function verifyTimelineLoaded(page: Page, expectedTitle: string): P
 
 /**
  * Navigate to user profile page
+ * v0.5.14: Updated to use username-based URLs (/:username)
  * @param page - Playwright page object
- * @param userId - User ID
+ * @param username - Username (not user ID)
  */
-export async function navigateToUserProfile(page: Page, userId: string): Promise<void> {
-  await page.goto(`/user/${userId}`);
+export async function navigateToUserProfile(page: Page, username: string): Promise<void> {
+  await page.goto(`/${username}`);
   await page.waitForLoadState('domcontentloaded');
 }
 

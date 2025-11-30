@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 interface TimelineCardMenuProps {
   timelineId: string;
   ownerId: string;
+  ownerUsername: string;  // v0.5.14: Required for username-based URLs
   currentUserId?: string | null;
   onEdit?: (timelineId: string) => void;
   onDelete?: (timelineId: string) => void;
@@ -19,6 +20,7 @@ interface TimelineCardMenuProps {
 export function TimelineCardMenu({
   timelineId,
   ownerId,
+  ownerUsername,
   currentUserId,
   onEdit,
   onDelete,
@@ -45,7 +47,8 @@ export function TimelineCardMenu({
   const handleView = (event: React.MouseEvent) => {
     event.stopPropagation();
     handleClose();
-    navigate(`/user/${ownerId}/timeline/${timelineId}`);
+    // v0.5.14: Use username-based URL (no @ prefix - React Router v7 bug)
+    navigate(`/${ownerUsername}/timeline/${timelineId}`);
   };
 
   const handleEdit = (event: React.MouseEvent) => {

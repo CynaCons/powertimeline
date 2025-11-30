@@ -390,3 +390,75 @@ This orchestration system is now exposed via an MCP (Model Context Protocol) ser
 - Context injection and logging handled automatically
 
 **See `MCP_DESIGN.md` for complete MCP architecture documentation.**
+
+---
+
+## 11. Agent Capability Comparison
+
+### 11.1 Claude Sub-Agents
+
+**Strengths:**
+- Full tool access (Bash, Read, Write, Edit, Glob, Grep)
+- Reliable shell command execution
+- Complex reasoning and multi-step tasks
+- Code generation and review
+- Actual cost tracking returned in result
+
+**Best For:**
+- Running tests (`npx playwright test`)
+- File analysis and modification
+- Multi-file refactoring
+- Complex code tasks
+
+**Cost:** $0.01-3.00 per task depending on model (haiku/sonnet/opus)
+
+### 11.2 Codex Agents
+
+**WARNING:** Codex agents have significant limitations discovered in production use.
+
+**Observed Behavior (2025-11-30):**
+When asked to run Playwright tests, Codex agents:
+- Read project documentation (CLAUDE.md, CONTRIBUTING.md)
+- Summarized coding conventions instead of running commands
+- Did NOT execute the requested shell commands
+- Returned documentation summaries as "results"
+
+**Root Cause Analysis:**
+1. Codex `exec` command interprets prompts as documentation/analysis queries
+2. Context injection (even minimal) causes Codex to focus on documentation
+3. Codex sandbox mode controls file access but NOT command execution reliability
+
+**DO NOT USE Codex For:**
+- Running tests or builds
+- Executing shell commands
+- Any task requiring subprocess execution
+
+**Codex IS Suitable For:**
+- Code review and analysis (reading, not modifying)
+- Documentation queries
+- File content analysis
+- Code pattern detection
+
+**Cost:** ~$0.005 per request (estimated, not metered)
+
+### 11.3 Recommendation Matrix
+
+| Task Type | Recommended Agent | Model |
+|-----------|------------------|-------|
+| Run tests | Claude | haiku/sonnet |
+| Code review | Claude | sonnet |
+| Complex analysis | Claude | opus |
+| Quick file read | Codex | - |
+| Documentation query | Codex | - |
+| Multi-file refactor | Claude | sonnet/opus |
+| Simple grep/search | Direct Bash | - |
+
+---
+
+## 12. Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2025-11-29 | Initial design document |
+| 1.1 | 2025-11-29 | Added MCP integration (see MCP_DESIGN.md for details) |
+| 1.2 | 2025-11-30 | Added Codex limitations and agent comparison matrix |

@@ -21,9 +21,11 @@ See MCP_DESIGN.md for architecture documentation.
 import asyncio
 import json
 import sys
+import threading
+import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Callable
 
 # Ensure UTF-8 encoding on Windows
 if sys.platform == "win32":
@@ -35,6 +37,8 @@ try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
     from mcp.types import Tool, TextContent
+    from mcp.server.models import InitializationOptions
+    from mcp.server.lowlevel import NotificationOptions
 except ImportError:
     print("ERROR: MCP SDK not installed. Run: pip install mcp", file=sys.stderr)
     sys.exit(1)
@@ -54,6 +58,10 @@ server = Server("agents")
 # Track running agents (for list_running tool)
 running_agents: dict[str, dict] = {}
 completed_agents: dict[str, dict] = {}
+
+# Background thread management for async spawns
+background_threads: dict[str, threading.Thread] = {}
+background_results: dict[str, dict] = {}
 
 
 def sanitize_for_json(text: str) -> str:
@@ -88,7 +96,7 @@ async def list_tools() -> list[Tool]:
                         "type": "string",
                         "enum": ["haiku", "sonnet", "opus"],
                         "default": "sonnet",
-                        "description": "Model to use. haiku=fast/cheap ($0.01-0.05), sonnet=balanced ($0.10-0.30), opus=best ($0.50-2.00)"
+                        "description": "Model to use. Typical costs per task: haiku=$0.01-0.05 (fast, simple tasks), sonnet=$0.10-0.50 (balanced, most tasks), opus=$0.50-3.00 (complex reasoning). Actual cost returned in result."
                     },
                     "tools": {
                         "type": "array",
@@ -119,9 +127,10 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="spawn_codex",
             description=(
-                "Spawn a Codex agent for code execution tasks. "
-                "Best for running tests, builds, and scripts. "
-                "Faster but less reasoning capability than Claude."
+                "Spawn a Codex agent for code analysis and documentation tasks. "
+                "NOTE: Codex does NOT reliably execute shell commands - use Claude with Bash tool for test execution. "
+                "Codex is best for: code review, documentation queries, file analysis. "
+                "Estimated cost: ~$0.005 per request."
             ),
             inputSchema={
                 "type": "object",
@@ -216,23 +225,18 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
         return [TextContent(type="text", text=json.dumps(error_response, indent=2))]
 
 
-async def handle_spawn_claude(args: dict) -> list[TextContent]:
-    """Handle spawn_claude tool call."""
-    prompt = args["prompt"]
-    model = args.get("model", "sonnet")
-    tools = args.get("tools", ["Bash", "Read", "Glob", "Grep"])
-    timeout = args.get("timeout", 300)
-    task_summary = args.get("task_summary")
-    context_level = args.get("context_level", "standard")
-
-    # Track as running
-    started_at = datetime.utcnow().isoformat() + "Z"
-
-    # Run spawn in thread pool to avoid blocking
-    loop = asyncio.get_event_loop()
-    result: AgentResult = await loop.run_in_executor(
-        None,
-        lambda: _spawn_claude(
+def _run_spawn_claude_background(
+    spawn_id: str,
+    prompt: str,
+    model: str,
+    tools: list[str],
+    timeout: int,
+    task_summary: Optional[str],
+    context_level: str,
+):
+    """Run Claude spawn in background thread."""
+    try:
+        result: AgentResult = _spawn_claude(
             prompt=prompt,
             model=model,
             tools=tools,
@@ -240,113 +244,265 @@ async def handle_spawn_claude(args: dict) -> list[TextContent]:
             task_summary=task_summary,
             context_level=context_level,
         )
-    )
 
-    # Store completed result
-    if result.spawn_id:
-        completed_agents[result.spawn_id] = {
+        # Store result for later retrieval
+        background_results[spawn_id] = {
+            "spawn_id": spawn_id,
             "success": result.success,
             "result": sanitize_for_json(result.text),
-            "cost_usd": result.cost_usd,
+            "cost_usd": round(result.cost_usd, 4),
             "model": model,
-            "completed_at": datetime.utcnow().isoformat() + "Z"
+            "completed_at": datetime.utcnow().isoformat() + "Z",
+            "status": "completed",
+            "error": result.error,
         }
 
-    # Build response
-    response = {
-        "spawn_id": result.spawn_id,
-        "success": result.success,
+        # Also store in completed_agents for get_result
+        completed_agents[spawn_id] = background_results[spawn_id]
+
+    except Exception as e:
+        background_results[spawn_id] = {
+            "spawn_id": spawn_id,
+            "success": False,
+            "result": "",
+            "cost_usd": 0,
+            "model": model,
+            "completed_at": datetime.utcnow().isoformat() + "Z",
+            "status": "failed",
+            "error": str(e),
+        }
+        completed_agents[spawn_id] = background_results[spawn_id]
+    finally:
+        # Remove from running agents
+        if spawn_id in running_agents:
+            del running_agents[spawn_id]
+
+
+async def handle_spawn_claude(args: dict) -> list[TextContent]:
+    """Handle spawn_claude tool call. Always runs async - returns immediately."""
+    prompt = args["prompt"]
+    model = args.get("model", "sonnet")
+    tools = args.get("tools", ["Bash", "Read", "Glob", "Grep"])
+    task_summary = args.get("task_summary")
+    context_level = args.get("context_level", "standard")
+
+    # Determine timeout: 600 seconds for test tasks, 300 seconds default
+    task_label = (task_summary or prompt).lower()
+    if "test" in task_label:
+        timeout = args.get("timeout", 600)
+    else:
+        timeout = args.get("timeout", 300)
+
+    # Generate spawn_id
+    spawn_id = uuid.uuid4().hex[:8]
+    started_at = datetime.utcnow().isoformat() + "Z"
+
+    # Track as running
+    running_agents[spawn_id] = {
+        "spawn_id": spawn_id,
         "model": model,
-        "cost_usd": round(result.cost_usd, 4),
-        "result": sanitize_for_json(result.text),
+        "started_at": started_at,
+        "task_summary": task_summary or prompt[:50] + "...",
+        "status": "running",
     }
 
-    if result.error:
-        response["error"] = result.error
+    # Always spawn in background thread and return immediately
+    thread = threading.Thread(
+        target=_run_spawn_claude_background,
+        args=(spawn_id, prompt, model, tools, timeout, task_summary, context_level),
+        daemon=True,
+    )
+    thread.start()
+    background_threads[spawn_id] = thread
 
+    response = {
+        "spawn_id": spawn_id,
+        "status": "running",
+        "message": "Agent spawned in background. Use list_running to monitor, get_result to retrieve output.",
+        "model": model,
+        "started_at": started_at,
+        "task_summary": task_summary or prompt[:50] + "...",
+    }
     return [TextContent(type="text", text=json.dumps(response, indent=2, ensure_ascii=False))]
 
 
-async def handle_spawn_codex(args: dict) -> list[TextContent]:
-    """Handle spawn_codex tool call."""
-    prompt = args["prompt"]
-    sandbox = args.get("sandbox", "read-only")
-    timeout = args.get("timeout", 120)
-    context_level = args.get("context_level", "minimal")
-
-    # Run spawn in thread pool
-    loop = asyncio.get_event_loop()
-    result: AgentResult = await loop.run_in_executor(
-        None,
-        lambda: _spawn_codex(
+def _run_spawn_codex_background(
+    spawn_id: str,
+    prompt: str,
+    sandbox: str,
+    timeout: int,
+    context_level: str,
+):
+    """Run Codex spawn in background thread."""
+    try:
+        result: AgentResult = _spawn_codex(
             prompt=prompt,
             sandbox=sandbox,
             timeout=timeout,
             context_level=context_level,
         )
-    )
 
-    # Store completed result
-    if result.spawn_id:
-        completed_agents[result.spawn_id] = {
+        # Codex cost estimation: ~$0.005 per request (varies by complexity)
+        # Note: Codex doesn't return actual cost, so we estimate
+        estimated_cost = 0.005 if result.success else 0.0
+
+        background_results[spawn_id] = {
+            "spawn_id": spawn_id,
             "success": result.success,
             "result": sanitize_for_json(result.text),
             "model": "codex",
-            "completed_at": datetime.utcnow().isoformat() + "Z"
+            "cost_usd": estimated_cost,
+            "completed_at": datetime.utcnow().isoformat() + "Z",
+            "status": "completed",
+            "error": result.error,
         }
+        completed_agents[spawn_id] = background_results[spawn_id]
 
-    response = {
-        "spawn_id": result.spawn_id,
-        "success": result.success,
+    except Exception as e:
+        background_results[spawn_id] = {
+            "spawn_id": spawn_id,
+            "success": False,
+            "result": "",
+            "model": "codex",
+            "cost_usd": 0.0,
+            "completed_at": datetime.utcnow().isoformat() + "Z",
+            "status": "failed",
+            "error": str(e),
+        }
+        completed_agents[spawn_id] = background_results[spawn_id]
+    finally:
+        if spawn_id in running_agents:
+            del running_agents[spawn_id]
+
+
+async def handle_spawn_codex(args: dict) -> list[TextContent]:
+    """Handle spawn_codex tool call. Always runs async - returns immediately."""
+    prompt = args["prompt"]
+    sandbox = args.get("sandbox", "read-only")
+    context_level = args.get("context_level", "minimal")
+
+    # Determine timeout: 300 seconds for test tasks, 120 seconds default
+    task_label = prompt.lower()
+    if "test" in task_label:
+        timeout = args.get("timeout", 300)
+    else:
+        timeout = args.get("timeout", 120)
+
+    spawn_id = uuid.uuid4().hex[:8]
+    started_at = datetime.utcnow().isoformat() + "Z"
+
+    running_agents[spawn_id] = {
+        "spawn_id": spawn_id,
         "model": "codex",
-        "result": sanitize_for_json(result.text),
+        "started_at": started_at,
+        "task_summary": prompt[:50] + "...",
+        "status": "running",
     }
 
-    if result.error:
-        response["error"] = result.error
+    # Always spawn in background thread and return immediately
+    thread = threading.Thread(
+        target=_run_spawn_codex_background,
+        args=(spawn_id, prompt, sandbox, timeout, context_level),
+        daemon=True,
+    )
+    thread.start()
+    background_threads[spawn_id] = thread
 
+    response = {
+        "spawn_id": spawn_id,
+        "status": "running",
+        "message": "Codex agent spawned in background. Use list_running to monitor, get_result to retrieve output.",
+        "model": "codex",
+        "started_at": started_at,
+        "task_summary": prompt[:50] + "...",
+    }
     return [TextContent(type="text", text=json.dumps(response, indent=2, ensure_ascii=False))]
 
 
 async def handle_list_running() -> list[TextContent]:
     """Return list of running agents."""
-    # Get active spawns from logger
-    logger = get_logger()
     agents = []
-
     now = datetime.utcnow()
-    for spawn_id, record in logger.active_spawns.items():
+
+    # Get running agents from our in-memory tracking
+    for spawn_id, info in running_agents.items():
+        started_str = info.get("started_at", "")
+        elapsed = 0
+        if started_str:
+            try:
+                started = datetime.fromisoformat(started_str.replace("Z", "+00:00"))
+                elapsed = (now - started.replace(tzinfo=None)).total_seconds()
+            except:
+                pass
+
         agents.append({
             "spawn_id": spawn_id,
-            "agent": record.agent,
-            "model": record.model,
-            "task_summary": record.task_summary,
-            "started_at": record.started_at,
+            "model": info.get("model", "unknown"),
+            "task_summary": info.get("task_summary", "Unknown task"),
+            "started_at": started_str,
+            "elapsed_seconds": round(elapsed),
+            "status": info.get("status", "running"),
+        })
+
+    # Get recent completed agents (last 100 for history)
+    recent = list(completed_agents.keys())[-100:]
+    recent_details = []
+    for sid in recent:
+        result = completed_agents.get(sid, {})
+        recent_details.append({
+            "spawn_id": sid,
+            "success": result.get("success"),
+            "model": result.get("model"),
+            "completed_at": result.get("completed_at"),
+            "cost_usd": result.get("cost_usd", 0),
         })
 
     response = {
         "running_agents": agents,
-        "count": len(agents),
-        "recent_completed": list(completed_agents.keys())[-5:]  # Last 5 completed
+        "running_count": len(agents),
+        "recent_completed": recent_details,
     }
 
-    return [TextContent(type="text", text=json.dumps(response, indent=2))]
+    return [TextContent(type="text", text=json.dumps(response, indent=2, ensure_ascii=False))]
 
 
 async def handle_get_result(args: dict) -> list[TextContent]:
     """Get result of a completed agent."""
     spawn_id = args["spawn_id"]
 
+    # Check completed agents first (includes background results)
     if spawn_id in completed_agents:
         return [TextContent(type="text", text=json.dumps(completed_agents[spawn_id], indent=2, ensure_ascii=False))]
 
-    # Check if still running
+    # Check if still running in memory
+    if spawn_id in running_agents:
+        info = running_agents[spawn_id]
+        now = datetime.utcnow()
+        elapsed = 0
+        started_str = info.get("started_at", "")
+        if started_str:
+            try:
+                started = datetime.fromisoformat(started_str.replace("Z", "+00:00"))
+                elapsed = (now - started.replace(tzinfo=None)).total_seconds()
+            except:
+                pass
+
+        return [TextContent(type="text", text=json.dumps({
+            "spawn_id": spawn_id,
+            "status": "running",
+            "message": "Agent is still running. Check back later.",
+            "model": info.get("model"),
+            "task_summary": info.get("task_summary"),
+            "elapsed_seconds": round(elapsed),
+        }, indent=2, ensure_ascii=False))]
+
+    # Also check logger for spawns started before this MCP session
     logger = get_logger()
     if spawn_id in logger.active_spawns:
         return [TextContent(type="text", text=json.dumps({
             "spawn_id": spawn_id,
             "status": "running",
-            "message": "Agent is still running. Check back later."
+            "message": "Agent is still running (from logger). Check back later."
         }, indent=2))]
 
     return [TextContent(type="text", text=json.dumps({
@@ -385,7 +541,15 @@ async def handle_get_context(args: dict) -> list[TextContent]:
 async def main():
     """Run the MCP server."""
     async with stdio_server() as (read_stream, write_stream):
-        await server.run(read_stream, write_stream)
+        init_options = InitializationOptions(
+            server_name="agents",
+            server_version="1.0.0",
+            capabilities=server.get_capabilities(
+                notification_options=NotificationOptions(),
+                experimental_capabilities={},
+            ),
+        )
+        await server.run(read_stream, write_stream, init_options)
 
 
 if __name__ == "__main__":

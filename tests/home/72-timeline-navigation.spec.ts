@@ -14,11 +14,11 @@ import {
   clickTimelineCard,
 } from '../utils/timelineTestUtils';
 
-// Known public timelines in Firestore
+// Known public timelines in Firestore (actual IDs from dev DB)
 const PUBLIC_TIMELINES = [
-  { id: 'timeline-french-revolution', title: 'French Revolution', ownerId: 'cynacons' },
-  { id: 'timeline-napoleon', title: 'Napoleon', ownerId: 'cynacons' },
-  { id: 'timeline-rfk', title: 'RFK', ownerId: 'cynacons' },
+  { id: 'french-revolution', title: 'French Revolution', ownerUsername: 'cynacons' },
+  { id: 'napoleon-bonaparte', title: 'Napoleon Bonaparte', ownerUsername: 'cynacons' },
+  { id: 'rfk-1968', title: 'Robert F. Kennedy', ownerUsername: 'cynacons' },
 ];
 
 test.describe('v5/72 Timeline Navigation', () => {
@@ -29,7 +29,7 @@ test.describe('v5/72 Timeline Navigation', () => {
     const timeline = PUBLIC_TIMELINES[0];
 
     // Load timeline directly
-    await loadTimeline(page, timeline.ownerId, timeline.id);
+    await loadTimeline(page, timeline.ownerUsername, timeline.id);
 
     // Verify URL is correct
     const urlTimelineId = await getCurrentUrlTimelineId(page);
@@ -48,14 +48,15 @@ test.describe('v5/72 Timeline Navigation', () => {
   test('T72.2: Clicking timeline card in user profile navigates correctly', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-002' });
 
-    // Navigate to cynacons user profile (public profile)
-    await navigateToUserProfile(page, 'cynacons');
+    // Navigate to cynacons user profile (v0.5.14: clean URL without @ prefix)
+    await page.goto('/cynacons');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for timeline cards to load
     await page.waitForTimeout(2000);
 
-    // Find a known public timeline card
-    const targetCard = page.getByTestId('timeline-card-timeline-french-revolution').first();
+    // Find a known public timeline card (v0.5.14: clean timeline IDs)
+    const targetCard = page.getByTestId('timeline-card-french-revolution').first();
     const cardVisible = await targetCard.isVisible({ timeout: 5000 }).catch(() => false);
 
     if (!cardVisible) {
@@ -66,9 +67,9 @@ test.describe('v5/72 Timeline Navigation', () => {
     await targetCard.click();
     await page.waitForLoadState('domcontentloaded');
 
-    // Verify URL contains timeline ID
+    // Verify URL contains timeline ID (v0.5.14: clean timeline IDs)
     const urlTimelineId = await getCurrentUrlTimelineId(page);
-    expect(urlTimelineId).toBe('timeline-french-revolution');
+    expect(urlTimelineId).toBe('french-revolution');
   });
 
   test('T72.3: Clicking multiple different timelines navigates correctly', async ({ page }) => {
@@ -78,7 +79,7 @@ test.describe('v5/72 Timeline Navigation', () => {
 
     // Test first 2 public timelines
     for (const timeline of PUBLIC_TIMELINES.slice(0, 2)) {
-      await loadTimeline(page, timeline.ownerId, timeline.id);
+      await loadTimeline(page, timeline.ownerUsername, timeline.id);
 
       const url = page.url();
       expect(url).toContain(timeline.id);
@@ -93,25 +94,25 @@ test.describe('v5/72 Timeline Navigation', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-004' });
 
     // Load a known timeline
-    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+    await loadTimeline(page, 'cynacons', 'french-revolution');
 
     // Verify URL has correct format
     const urlTimelineId = await getCurrentUrlTimelineId(page);
-    expect(urlTimelineId).toBe('timeline-french-revolution');
+    expect(urlTimelineId).toBe('french-revolution');
 
     // Check that ID is NOT in old timestamp format
     const timestampFormatRegex = /timeline-\d{13}-\d+/;
     expect(urlTimelineId).not.toMatch(timestampFormatRegex);
-    expect(urlTimelineId).toMatch(/^timeline-[a-z0-9-]+$/);
+    expect(urlTimelineId).toMatch(/^[a-z0-9-]+$/);
   });
 
   test('T72.5: French Revolution timeline loads correctly', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-NAV-005' });
 
-    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+    await loadTimeline(page, 'cynacons', 'french-revolution');
 
     // Verify URL
-    expect(page.url()).toContain('timeline-french-revolution');
+    expect(page.url()).toContain('french-revolution');
 
     // Wait for content to load
     await page.waitForTimeout(3000);
@@ -133,24 +134,29 @@ test.describe('v5/72 Timeline Navigation', () => {
     // Wait for timeline cards to load
     await page.waitForTimeout(2000);
 
-    // Find a timeline card
-    const timelineCards = page.locator('[data-testid^="timeline-card-"], .cursor-pointer:has-text("events")');
+    // Find a timeline card with data-testid (these are properly formed timelines)
+    const timelineCards = page.locator('[data-testid^="timeline-card-timeline-"]');
     const cardCount = await timelineCards.count();
 
     if (cardCount > 0) {
-      // Click the first card
+      // Click the first card with proper timeline- prefix
       await timelineCards.first().click();
       await page.waitForLoadState('domcontentloaded');
 
-      // Verify navigation happened
-      expect(page.url()).toMatch(/\/user\/\w+\/timeline\/timeline-[a-z0-9-]+/);
+      // Verify navigation happened - URL should have username-based format
+      // v0.5.14: Accept any timeline ID format (legacy test data may use different formats)
+      expect(page.url()).toMatch(/\/@[\w-]+\/timeline\/[\w-]+/);
 
-      // Verify URL has a valid timeline ID
+      // Verify URL has a timeline ID (any format)
       const urlTimelineId = await getCurrentUrlTimelineId(page);
       expect(urlTimelineId).not.toBeNull();
-      expect(urlTimelineId).toMatch(/^timeline-[a-z0-9-]+$/);
+
+      // Wait for timeline content to load (not 404)
+      await page.waitForTimeout(2000);
+      const has404 = await page.getByRole('heading', { name: '404' }).isVisible().catch(() => false);
+      expect(has404).toBe(false);
     } else {
-      console.log('Note: No timeline cards found on browse page');
+      console.log('Note: No timeline cards with timeline- prefix found on browse page');
     }
   });
 

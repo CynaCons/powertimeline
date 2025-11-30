@@ -14,8 +14,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
-import { getTimelineMetadata } from '../services/firestore';
-import type { TimelineMetadata } from '../types';
+import { getTimelineMetadata, getUser } from '../services/firestore';
+import type { TimelineMetadata, User } from '../types';
 
 // Example timeline IDs to display on landing page
 const EXAMPLE_TIMELINE_IDS = [
@@ -27,8 +27,9 @@ const EXAMPLE_TIMELINE_IDS = [
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [exampleTimelines, setExampleTimelines] = useState<TimelineMetadata[]>([]);
+  const [ownerCache, setOwnerCache] = useState<Map<string, User>>(new Map());
   const [loadingExamples, setLoadingExamples] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,7 +40,19 @@ export function LandingPage() {
         const timelines = await Promise.all(
           EXAMPLE_TIMELINE_IDS.map(id => getTimelineMetadata(id))
         );
-        setExampleTimelines(timelines.filter((t): t is TimelineMetadata => t !== null));
+        const validTimelines = timelines.filter((t): t is TimelineMetadata => t !== null);
+        setExampleTimelines(validTimelines);
+
+        // Cache owner usernames for navigation
+        const ownerIds = new Set(validTimelines.map(t => t.ownerId));
+        const cache = new Map<string, User>();
+        for (const ownerId of ownerIds) {
+          const owner = await getUser(ownerId);
+          if (owner) {
+            cache.set(ownerId, owner);
+          }
+        }
+        setOwnerCache(cache);
       } catch (error) {
         console.error('Error loading example timelines:', error);
       } finally {
@@ -73,16 +86,25 @@ export function LandingPage() {
   };
 
   const handleGetStarted = () => {
-    if (user) {
-      navigate(`/user/${user.uid}`);
+    if (user && userProfile) {
+      // Note: URL pattern is /:username (no @ prefix - React Router v7 bug)
+      navigate(`/${userProfile.username}`);
     } else {
       navigate('/login');
     }
   };
 
-  // Navigate to specific timeline using actual owner ID from Firestore
+  // Navigate to specific timeline using username-based URL (v0.5.14)
   const handleTimelineClick = (timeline: TimelineMetadata) => {
-    navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    const owner = ownerCache.get(timeline.ownerId);
+    if (owner?.username) {
+      // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
+      navigate(`/${owner.username}/timeline/${timeline.id}`);
+    } else {
+      // Fallback: use legacy URL pattern (EditorPage will handle redirect)
+      console.warn(`Owner not cached for timeline ${timeline.id}, using legacy URL`);
+      navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    }
   };
 
   return (

@@ -1,6 +1,6 @@
 /**
  * UserProfilePage - Display user information and their timelines
- * Implements requirements from docs/SRS_HOME_PAGE.md (v0.4.0)
+ * v0.5.14 - SRS_DB.md compliant with username-based URLs
  */
 
 import { useState, useEffect } from 'react';
@@ -9,20 +9,20 @@ import { Snackbar, Alert } from '@mui/material';
 import type { TimelineMetadata, User } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { signOutUser } from '../services/auth';
-import { getUser, getTimelines } from '../services/firestore';
+import { getUser, getUserByUsername, getTimelines } from '../services/firestore';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
-import { EditUserProfileDialog } from '../components/EditUserProfileDialog';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
 import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../hooks/useToast';
 
 export function UserProfilePage() {
-  const { userId } = useParams<{ userId: string }>();
+  // Support both /@:username (preferred) and /user/:userId (legacy) routes
+  const { username, userId } = useParams<{ username?: string; userId?: string }>();
   const navigate = useNavigate();
   const { user: firebaseUser } = useAuth();
   const [user, setUser] = useState<User | null>(null);
@@ -33,7 +33,6 @@ export function UserProfilePage() {
   const [editTimelineId, setEditTimelineId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
-  const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
   const [createTimelineDialogOpen, setCreateTimelineDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'updated' | 'title' | 'events' | 'views'>('updated');
   const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
@@ -59,12 +58,28 @@ export function UserProfilePage() {
 
   useEffect(() => {
     async function loadUserProfile() {
-      if (!userId) {
+      // Support both username and userId params
+      if (!username && !userId) {
         navigate('/');
         return;
       }
 
-      const userData = await getUser(userId);
+      let userData: User | null = null;
+
+      if (username) {
+        // New URL format: /@username
+        userData = await getUserByUsername(username);
+      } else if (userId) {
+        // Legacy URL format: /user/:userId
+        userData = await getUser(userId);
+        // If found, redirect to the new username-based URL
+        // Note: URL pattern is /:username (no @ prefix - React Router v7 bug)
+        if (userData) {
+          navigate(`/${userData.username}`, { replace: true });
+          return;
+        }
+      }
+
       if (!userData) {
         // User not found - redirect to home
         navigate('/');
@@ -74,7 +89,7 @@ export function UserProfilePage() {
       setUser(userData);
 
       const userTimelines = await getTimelines({
-        ownerId: userId,
+        ownerId: userData.id,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -95,10 +110,14 @@ export function UserProfilePage() {
     }
 
     loadUserProfile();
-  }, [userId, navigate]);
+  }, [username, userId, navigate]);
 
   const handleTimelineClick = (timeline: TimelineMetadata) => {
-    navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    // v0.5.14: Use username-based URL (no @ prefix - React Router v7 bug)
+    const owner = userCache.get(timeline.ownerId) || user;
+    if (owner) {
+      navigate(`/${owner.username}/timeline/${timeline.id}`);
+    }
   };
 
   // Sort timelines based on selected criteria
@@ -124,9 +143,9 @@ export function UserProfilePage() {
   const handleEditSuccess = async () => {
     showToast('Timeline updated successfully!', 'success');
     // Refresh timelines
-    if (userId) {
+    if (user) {
       const userTimelines = await getTimelines({
-        ownerId: userId,
+        ownerId: user.id,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -142,9 +161,9 @@ export function UserProfilePage() {
   const handleDeleteSuccess = async () => {
     showToast('Timeline deleted successfully!', 'success');
     // Refresh timelines
-    if (userId) {
+    if (user) {
       const userTimelines = await getTimelines({
-        ownerId: userId,
+        ownerId: user.id,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -152,20 +171,6 @@ export function UserProfilePage() {
     }
   };
 
-  const handleEditProfile = () => {
-    setEditProfileDialogOpen(true);
-  };
-
-  const handleEditProfileSuccess = async () => {
-    showToast('Profile updated successfully!', 'success');
-    // Refresh user data
-    if (userId) {
-      const userData = await getUser(userId);
-      if (userData) {
-        setUser(userData);
-      }
-    }
-  };
 
   const handleCreateTimeline = () => {
     setCreateTimelineDialogOpen(true);
@@ -174,9 +179,9 @@ export function UserProfilePage() {
   const handleCreateTimelineSuccess = async () => {
     showToast('Timeline created successfully!', 'success');
     // Refresh timelines
-    if (userId) {
+    if (user) {
       const userTimelines = await getTimelines({
-        ownerId: userId,
+        ownerId: user.id,
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -267,20 +272,7 @@ export function UserProfilePage() {
               <div className="flex items-center gap-6">
                 <UserAvatar user={user} size="xlarge" />
                 <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h1>
-                    {firebaseUser && firebaseUser.uid === userId && (
-                      <button
-                        onClick={handleEditProfile}
-                        className="mb-2 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
-                      >
-                        Edit Profile
-                      </button>
-                    )}
-                  </div>
-                  {user.bio && (
-                    <p className="text-gray-600 max-w-2xl">{user.bio}</p>
-                  )}
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">@{user.username}</h1>
                   <div className="mt-4 flex items-center gap-6 text-sm">
                     <div>
                       <span className="font-semibold text-gray-900">{timelines.length}</span>
@@ -334,7 +326,7 @@ export function UserProfilePage() {
               </div>
             )}
           </div>
-          {firebaseUser && firebaseUser.uid === userId && (
+          {firebaseUser && user && firebaseUser.uid === user.id && (
             <button
               onClick={handleCreateTimeline}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
@@ -358,7 +350,7 @@ export function UserProfilePage() {
           </div>
         ) : timelines.length === 0 ? (
           <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-            <p className="text-gray-600">{user?.name || 'User'} hasn't created any timelines yet</p>
+            <p className="text-gray-600">@{user?.username || 'User'} hasn't created any timelines yet</p>
           </div>
         ) : (
           <div data-testid="user-timelines-grid" className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -374,6 +366,7 @@ export function UserProfilePage() {
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
+                      ownerUsername={userCache.get(timeline.ownerId)?.username || user?.username || ''}
                       currentUserId={firebaseUser.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
@@ -395,9 +388,9 @@ export function UserProfilePage() {
                   {(() => {
                     const owner = userCache.get(timeline.ownerId);
                     return owner ? (
-                      <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          {owner.name}
+                          @{owner.username}
                         </span>
                       </div>
                     ) : null;
@@ -442,14 +435,6 @@ export function UserProfilePage() {
           setDeleteTimelineId(null);
         }}
         onSuccess={handleDeleteSuccess}
-      />
-
-      {/* User Profile Edit Dialog */}
-      <EditUserProfileDialog
-        open={editProfileDialogOpen}
-        userId={userId || null}
-        onClose={() => setEditProfileDialogOpen(false)}
-        onSuccess={handleEditProfileSuccess}
       />
 
       {/* Create Timeline Dialog */}

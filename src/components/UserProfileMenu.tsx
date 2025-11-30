@@ -57,8 +57,9 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
   const handleUserSpace = () => {
     handleClose();
-    if (firebaseUser) {
-      navigate(`/user/${firebaseUser.uid}`);
+    if (currentUser) {
+      // Note: URL pattern is /:username (no @ prefix - React Router v7 bug)
+      navigate(`/${currentUser.username}`);
     }
   };
 
@@ -106,7 +107,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           account_circle
         </span>
         <span className="text-sm font-medium hidden md:inline" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {currentUser?.name || firebaseUser?.email?.split('@')[0]}
+          {currentUser?.username || firebaseUser?.email?.split('@')[0]}
         </span>
         <span className="material-symbols-rounded text-sm">
           {open ? 'expand_less' : 'expand_more'}
@@ -144,7 +145,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-xs text-gray-500">Logged in as</span>
             </div>
-            <span className="font-semibold text-sm">{currentUser?.name || firebaseUser?.email?.split('@')[0]}</span>
+            <span className="font-semibold text-sm">{currentUser?.username || firebaseUser?.email?.split('@')[0]}</span>
             <span className="text-xs text-gray-500">
               {firebaseUser?.email}
             </span>

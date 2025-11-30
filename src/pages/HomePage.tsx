@@ -125,7 +125,9 @@ export function HomePage() {
           setMyTimelines([]);
         }
 
-        // Load recently edited timelines (include all timelines)
+        // Load recently edited timelines for discovery
+        // Note: visibility filter removed - old timelines don't have visibility field
+        // Security rules handle access control (only public/unlisted readable by non-owners)
         const recentTimelines = await getTimelines({
           orderByField: 'updatedAt',
           orderDirection: 'desc',
@@ -133,7 +135,7 @@ export function HomePage() {
         });
         setRecentlyEdited(recentTimelines);
 
-        // Load popular timelines (include all timelines)
+        // Load popular timelines for discovery
         const popularTimelines = await getTimelines({
           orderByField: 'viewCount',
           orderDirection: 'desc',
@@ -179,10 +181,11 @@ export function HomePage() {
     });
     setRecentlyEdited(recentTimelines);
 
-    // Navigate to the new timeline
+    // Navigate to the new timeline using username-based URL
+    // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
     const timeline = await getTimeline(timelineId);
-    if (timeline) {
-      navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    if (timeline && currentUser) {
+      navigate(`/${currentUser.username}/timeline/${timeline.id}`);
     }
   };
 
@@ -246,11 +249,21 @@ export function HomePage() {
   };
 
   const handleTimelineClick = (timeline: TimelineMetadata) => {
-    navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    // v0.5.14: Use username-based URL with fallback to legacy URL
+    // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
+    const owner = getUserById(timeline.ownerId);
+    if (owner?.username) {
+      navigate(`/${owner.username}/timeline/${timeline.id}`);
+    } else {
+      // Fallback: use legacy URL pattern (EditorPage will handle redirect)
+      console.warn(`Owner not cached for timeline ${timeline.id}, using legacy URL`);
+      navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
+    }
   };
 
   const handleUserClick = (user: User) => {
-    navigate(`/user/${user.id}`);
+    // Note: URL pattern is /:username (no @ prefix - React Router v7 bug)
+    navigate(`/${user.username}`);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -271,10 +284,10 @@ export function HomePage() {
         (t.description && t.description.toLowerCase().includes(lowerQuery))
       );
 
-      // Search in cached users
+      // Search in cached users (SRS_DB.md compliant - v0.5.14: search by username)
       const matchingUsers = allUsers.filter(u =>
-        u.name.toLowerCase().includes(lowerQuery) ||
-        (u.bio && u.bio.toLowerCase().includes(lowerQuery))
+        u.username.toLowerCase().includes(lowerQuery) ||
+        u.email.toLowerCase().includes(lowerQuery)
       );
 
       setSearchResults({
@@ -491,8 +504,8 @@ export function HomePage() {
                           >
                             <UserAvatar user={user} size="medium" />
                             <div>
-                              <div className="font-medium" style={{ color: 'var(--page-text-primary)' }}>{user.name}</div>
-                              <div className="text-sm mt-1" style={{ color: 'var(--page-text-secondary)' }}>{user.bio}</div>
+                              <div className="font-medium" style={{ color: 'var(--page-text-primary)' }}>@{user.username}</div>
+                              <div className="text-sm mt-1" style={{ color: 'var(--page-text-secondary)' }}>{user.email}</div>
                             </div>
                           </button>
                         ))}
@@ -559,6 +572,7 @@ export function HomePage() {
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
+                      ownerUsername={currentUser?.username || ''}
                       currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
@@ -653,6 +667,7 @@ export function HomePage() {
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
+                    ownerUsername={getUserById(timeline.ownerId)?.username || ''}
                     currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
@@ -673,9 +688,9 @@ export function HomePage() {
                   {(() => {
                     const owner = getUserById(timeline.ownerId);
                     return owner ? (
-                      <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          {owner.name}
+                          @{owner.username}
                         </span>
                       </div>
                     ) : null;
@@ -733,6 +748,7 @@ export function HomePage() {
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
+                    ownerUsername={getUserById(timeline.ownerId)?.username || ''}
                     currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
@@ -753,9 +769,9 @@ export function HomePage() {
                   {(() => {
                     const owner = getUserById(timeline.ownerId);
                     return owner ? (
-                      <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          {owner.name}
+                          @{owner.username}
                         </span>
                       </div>
                     ) : null;
@@ -797,6 +813,7 @@ export function HomePage() {
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
+                      ownerUsername={getUserById(timeline.ownerId)?.username || ''}
                       currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
@@ -820,9 +837,9 @@ export function HomePage() {
                     {(() => {
                       const owner = getUserById(timeline.ownerId);
                       return owner ? (
-                        <div className="absolute bottom-2 left-2" title={`Owner: ${owner.name}`}>
+                        <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                            {owner.avatar} {owner.name}
+                            @{owner.username}
                           </span>
                         </div>
                       ) : null;

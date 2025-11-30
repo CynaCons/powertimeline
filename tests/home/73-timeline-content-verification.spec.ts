@@ -14,7 +14,9 @@ test.describe('v5/73 Timeline Content Verification', () => {
   test('T73.1: Timeline cards show on user profile', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CONTENT-001' });
 
-    await navigateToUserProfile(page, 'cynacons');
+    // Navigate to user profile using username-based URL (clean URL without @ prefix)
+    await page.goto('/cynacons');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for content to load
     await page.waitForTimeout(3000);
@@ -35,10 +37,10 @@ test.describe('v5/73 Timeline Content Verification', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CONTENT-002' });
 
     // Load French Revolution timeline directly
-    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+    await loadTimeline(page, 'cynacons', 'french-revolution');
 
-    // Verify URL
-    expect(page.url()).toContain('/timeline/timeline-french-revolution');
+    // Verify URL (v0.5.14: clean timeline IDs without 'timeline-' prefix)
+    expect(page.url()).toContain('/timeline/french-revolution');
 
     // Wait for content to load
     await page.waitForTimeout(3000);
@@ -54,30 +56,30 @@ test.describe('v5/73 Timeline Content Verification', () => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CONTENT-003' });
 
     // Load first timeline
-    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+    await loadTimeline(page, 'cynacons', 'french-revolution');
     await page.waitForTimeout(1000);
     const url1 = page.url();
 
     // Load second timeline
-    await loadTimeline(page, 'cynacons', 'timeline-napoleon');
+    await loadTimeline(page, 'cynacons', 'napoleon-bonaparte');
     await page.waitForTimeout(1000);
     const url2 = page.url();
 
-    // URLs should be different
+    // URLs should be different (v0.5.14: clean timeline IDs)
     expect(url1).not.toBe(url2);
-    expect(url1).toContain('timeline-french-revolution');
-    expect(url2).toContain('timeline-napoleon');
+    expect(url1).toContain('french-revolution');
+    expect(url2).toContain('napoleon');
   });
 
   test('T73.4: Direct URL navigation loads correct timeline', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CONTENT-004' });
 
-    // Navigate directly via URL
-    await page.goto('/user/cynacons/timeline/timeline-french-revolution');
+    // Navigate directly via URL (v0.5.14: clean URL without @ prefix)
+    await page.goto('/cynacons/timeline/french-revolution');
     await page.waitForLoadState('domcontentloaded');
 
     // Verify URL
-    expect(page.url()).toContain('/timeline/timeline-french-revolution');
+    expect(page.url()).toContain('/timeline/french-revolution');
 
     // Should not be redirected to login (public timeline)
     expect(page.url()).not.toContain('/login');
@@ -91,7 +93,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
   test('T73.5: Timeline axis renders correctly', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CONTENT-005' });
 
-    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+    await loadTimeline(page, 'cynacons', 'french-revolution');
     await page.waitForTimeout(2000);
 
     // Timeline axis should be visible
@@ -109,7 +111,7 @@ test.describe('v5/73 Timeline Content Verification', () => {
   test('T73.6: Event cards render on timeline', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CONTENT-006' });
 
-    await loadTimeline(page, 'cynacons', 'timeline-french-revolution');
+    await loadTimeline(page, 'cynacons', 'french-revolution');
     await page.waitForTimeout(3000);
 
     // Look for event cards

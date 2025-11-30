@@ -55,7 +55,15 @@ function AppWithTheme() {
           <Route path="/browse" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected routes - require auth when VITE_ENFORCE_AUTH=true */}
+          {/* Username-based routes - clean URLs without prefix
+              Note: /@:username pattern broken in React Router v7 (see GitHub #9779, #12460) */}
+          <Route path="/:username/timeline/:timelineId" element={<EditorPage />} />
+          <Route path="/:username" element={
+            <ProtectedRoute>
+              <UserProfilePage />
+            </ProtectedRoute>
+          } />
+          {/* Legacy routes for backwards compatibility - redirect internally */}
           <Route path="/user/:userId" element={
             <ProtectedRoute>
               <UserProfilePage />

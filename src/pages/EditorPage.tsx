@@ -11,7 +11,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Snackbar, Alert, useMediaQuery, useTheme } from '@mui/material';
-import { getTimeline, getUser, incrementTimelineViewCount } from '../services/firestore';
+import { getTimeline, getUser, getUserByUsername, incrementTimelineViewCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import type { Timeline, User } from '../types';
@@ -53,7 +53,8 @@ function MobileNotice({ onDismiss }: { onDismiss: () => void }) {
 }
 
 export function EditorPage() {
-  const { timelineId, userId } = useParams<{ timelineId: string; userId: string }>();
+  // Support both username-based (/:username/timeline/:timelineId) and legacy userId-based URLs
+  const { timelineId, userId, username } = useParams<{ timelineId: string; userId?: string; username?: string }>();
   const navigate = useNavigate();
   const { user: firebaseUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -82,7 +83,37 @@ export function EditorPage() {
           return;
         }
 
-        const usr = userId ? (await getUser(userId) || null) : null;
+        // Resolve user from username, userId, or timeline.ownerId as fallback
+        let usr: User | null = null;
+        if (username) {
+          // New username-based URL - try to find user by username
+          usr = await getUserByUsername(username);
+          if (!usr) {
+            // Username not found - try getting owner from timeline's ownerId
+            console.warn(`User not found for username: ${username}, falling back to timeline owner`);
+            usr = await getUser(tl.ownerId);
+            if (usr && usr.username.toLowerCase() !== username.toLowerCase()) {
+              // Redirect to correct username URL
+              // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
+              navigate(`/${usr.username}/timeline/${timelineId}`, { replace: true });
+              return;
+            }
+          }
+        } else if (userId) {
+          // Legacy userId-based URL - redirect to username URL
+          usr = await getUser(userId);
+          if (usr) {
+            // Redirect to the new username-based URL (hard cutover)
+            // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
+            navigate(`/${usr.username}/timeline/${timelineId}`, { replace: true });
+            return;
+          }
+        }
+
+        // Final fallback: get user from timeline owner if still not found
+        if (!usr && tl.ownerId) {
+          usr = await getUser(tl.ownerId);
+        }
 
         setTimeline(tl);
         setUser(usr);
@@ -107,7 +138,7 @@ export function EditorPage() {
     }
 
     loadTimeline();
-  }, [timelineId, userId, navigate, firebaseUser]);
+  }, [timelineId, userId, username, navigate, firebaseUser]);
 
   // Determine if user is the owner (can edit)
   const isOwner = timeline && firebaseUser && firebaseUser.uid === timeline.ownerId;
@@ -138,7 +169,7 @@ export function EditorPage() {
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded px-3 py-0.5 pointer-events-auto inline-block">
               <Breadcrumb items={[
                 { label: 'Home', href: '/browse' },
-                { label: user.name, href: `/user/${user.id}` },
+                { label: `@${user.username}`, href: `/@${user.username}` },
                 { label: timeline.title }
               ]} />
             </div>
