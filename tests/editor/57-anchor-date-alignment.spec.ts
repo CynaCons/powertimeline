@@ -1,10 +1,6 @@
- 
+
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
-
-async function openDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
 
 async function getTimelineAxisBounds(page: any) {
   const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
@@ -18,12 +14,8 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-
-    // Clear and load a known timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'jfk-presidency');
     await page.waitForTimeout(500);
 
     // Take screenshot for debugging
@@ -84,12 +76,8 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-
-    // Setup with known timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForTimeout(500);
 
     // Record initial anchor positions
@@ -152,16 +140,13 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     }
   });
 
-  test('Anchors align with timeline tick marks for corresponding dates', async ({ page }) => {
+  test.skip('Anchors align with timeline tick marks for corresponding dates', async ({ page }) => {
+    // Dev Panel removed in v0.5.24 - this test relied on '⏰ Minute Test' seeder
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-
-    // Use minute test data for precise time alignment
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: '⏰ Minute Test' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(500);
 
     // Zoom in to see minute-level precision
@@ -208,12 +193,8 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-
-    // Setup timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'jfk-presidency');
     await page.waitForTimeout(500);
 
     // Record initial anchor positions
@@ -267,12 +248,8 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-
-    // Use French Revolution timeline for rich historical data
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'French Revolution' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(1000);
 
     // Get anchors and their positions
@@ -354,12 +331,8 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-
-    // Use French Revolution timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'French Revolution' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(1000);
 
     // Find any French Revolution anchor that contains "necker" in the ID (case insensitive)

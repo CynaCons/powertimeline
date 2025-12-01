@@ -1,19 +1,11 @@
  
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
+import { loadTestTimeline } from '../utils/timelineTestUtils';
 
-async function openDevPanel(page: any) {
-
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
-async function closeDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
+// Dev Panel removed in v0.5.24 - use direct navigation to Firestore timelines
 
 test.describe('Half-Column Telemetry', () => {
   test('RFK timeline — enhanced telemetry structure', async ({ page }) => {
-    await loginAsTestUser(page);
     await loadTestTimeline(page, 'timeline-rfk');
 
     // Wait for timeline to load
@@ -72,7 +64,6 @@ test.describe('Half-Column Telemetry', () => {
   });
   
   test('Half-column slot calculation — 2 slots per half-column', async ({ page }) => {
-    await loginAsTestUser(page);
     await loadTestTimeline(page, 'timeline-rfk');
 
     // Wait for timeline to load
@@ -98,7 +89,6 @@ test.describe('Half-Column Telemetry', () => {
   });
   
   test('Temporal distribution measurement', async ({ page }) => {
-    await loginAsTestUser(page);
     await loadTestTimeline(page, 'timeline-rfk');
 
     // Wait for timeline to load

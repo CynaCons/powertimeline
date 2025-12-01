@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.21.1
-**Next Milestone:** v0.5.22 - Cloud Functions for Platform Statistics
+**Current Version:** v0.5.24
+**Next Milestone:** v0.5.25 - PowerSpawn (Universal MCP), v0.5.26 - Import/Export, v0.5.27 - Stream Editor
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -25,9 +25,13 @@
 - ✅ Timeline Card Menu & Landing Page (v0.5.18)
 - ✅ Landing Page Roadmap section (v0.5.19)
 - ✅ Editor Dark Theme fixes (v0.5.20-v0.5.21)
+- ✅ Cloud Functions for platform stats (v0.5.22)
+- ✅ Dev Panel removal & test migration (v0.5.24)
 
-### Next Up (v0.5.22)
-- Cloud Functions for atomic platform statistics
+### Next Up
+- **v0.5.25**: PowerSpawn - Universal Multi-Agent MCP Server (Copilot compatible)
+- **v0.5.26**: Import/Export with AI-ready YAML format
+- **v0.5.27**: Stream Editor (mobile-first, git-style notepad editor)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -1424,38 +1428,35 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 
 ### v0.5.22 - Cloud Functions for Platform Statistics
 **Goal:** Replace client-side stats aggregation with server-side Cloud Functions for atomic, real-time counters
-**Status:** Planned
+**Status:** Complete
 
 **Infrastructure:**
-- [ ] Set up Firebase Cloud Functions in project
-- [ ] Configure functions deployment pipeline
-- [ ] Add Blaze plan if not already active
+- [x] Set up Firebase Cloud Functions in project (functions/ directory)
+- [x] Configure functions deployment pipeline (firebase.json updated)
+- [x] Blaze plan active
 
-**Cloud Functions:**
-- [ ] `onUserCreate` - Increment `stats/platform.totalUsers`
-- [ ] `onUserDelete` - Decrement `stats/platform.totalUsers`
-- [ ] `onTimelineCreate` - Increment timeline counts (total + visibility type)
-- [ ] `onTimelineDelete` - Decrement timeline counts
-- [ ] `onTimelineUpdate` - Handle visibility changes (adjust public/unlisted/private counts)
-- [ ] `onEventWrite` - Update `totalEvents` count (batch-aware)
-- [ ] `onViewCountIncrement` - Update `totalViews` aggregate
+**Cloud Functions (functions/src/index.ts):**
+- [x] `onUserCreate` - Increment `stats/platform.totalUsers`
+- [x] `onUserDelete` - Decrement `stats/platform.totalUsers`
+- [x] `onTimelineCreate` - Increment timeline counts (total + visibility type)
+- [x] `onTimelineDelete` - Decrement timeline counts
+- [x] `onTimelineUpdate` - Handle visibility changes (adjust public/unlisted/private counts)
+- [x] `onEventCreate` - Increment `totalEvents` count
+- [x] `onEventDelete` - Decrement `totalEvents` count
+- [x] `initializeStats` - HTTP callable for admin bootstrap
 
 **Database Changes:**
-- [ ] Create `/stats/platform` document with atomic counter fields
-- [ ] Add `FieldValue.increment()` for thread-safe updates
-- [ ] Remove client-side `calculatePlatformStats()` full scans
+- [x] Stats doc uses `FieldValue.increment()` for atomic updates
+- [x] Client falls back to full scan only for initial bootstrap
 
-**Client Updates:**
-- [ ] Simplify `getPlatformStats()` to read-only (no writes)
-- [ ] Remove `saveStatsToFirestore()` function
-- [ ] Keep memory cache for performance
-- [ ] Update admin dashboard to use Firestore stats
+**Client Updates (src/services/firestore.ts):**
+- [x] Simplified `getPlatformStats()` - reads from Firestore stats doc
+- [x] Kept `saveStatsToFirestore()` for bootstrap only
+- [x] Memory cache with 5-min TTL for performance
 
 **Tests:**
-- [ ] Unit tests for Cloud Functions (firebase-functions-test)
-- [ ] E2E test: Create timeline → verify stats increment
-- [ ] E2E test: Delete timeline → verify stats decrement
-- [ ] E2E test: Change visibility → verify counts adjust
+- [ ] Unit tests for Cloud Functions (firebase-functions-test) - deferred
+- [ ] E2E stats tests - deferred to v0.6.x
 
 ### v0.5.23 - Event Editor & Viewer Rework (Future)
 **Goal:** Modernize Event Editor panel and enable read-only viewing
@@ -1469,29 +1470,29 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 
 ### v0.5.24 - Dev Panel Removal
 **Goal:** Remove Dev Panel from codebase and migrate dependent tests
-**Status:** Planned (Audit Complete)
+**Status:** Complete
 
-**Audit Results:**
-- 16 test files with 95 `openDevPanel`/`closeDevPanel` references
+**Audit Results (before migration):**
+- 17 test files with 96 `openDevPanel`/`closeDevPanel` references
 - 1 SRS requirement (CC-REQ-PANELS-DEV-001)
-- Dev Panel still active in App.tsx (Alt+D, command palette)
 
-**Migration Plan (No new seeding utilities needed - timelines exist in Firestore):**
-- [ ] Update tests to navigate directly to existing Firestore timelines
-- [ ] Replace Dev Panel seeding calls with direct timeline URLs
-- [ ] Use `loadTestTimeline()` utility for test data access
-- [ ] Remove `openDevPanel`/`closeDevPanel` helper functions
+**Test Migration (completed via multi-agent orchestration):**
+- [x] Updated all 17 test files to use direct Firestore timeline navigation
+- [x] Replaced Dev Panel seeding with `loadTestTimeline()` utility
+- [x] Removed all 96 `openDevPanel`/`closeDevPanel` references (down to 0)
+- [x] Tests use existing timelines: french-revolution, napoleon-bonaparte
 
 **Code Removal:**
-- [ ] Remove `src/app/panels/DevPanel.tsx`
-- [ ] Remove Dev Panel lazy import from `src/App.tsx:22`
-- [ ] Remove command palette entry from `src/App.tsx:522-530`
-- [ ] Remove overlay state management from `src/App.tsx`
-- [ ] Remove `src/lib/devSeed.ts` (if no longer needed elsewhere)
+- [x] Remove `src/app/panels/DevPanel.tsx`
+- [x] Remove Dev Panel lazy import from `src/App.tsx:22`
+- [x] Remove command palette entry from `src/App.tsx:522-530`
+- [x] Remove overlay state management from `src/App.tsx` (removed 'dev' from overlay type)
+- [x] Remove Alt+D keyboard shortcut handler from `src/hooks/useKeyboardShortcuts.ts`
+- [x] Keep `src/lib/devSeed.ts` (still used by `src/lib/homePageStorage.ts` for seed timelines)
 
 **Documentation Updates:**
-- [ ] Deprecate CC-REQ-PANELS-DEV-001 in `docs/SRS.md`
-- [ ] Update `docs/SRS_UI_AUDIT.md` status to "REMOVED"
+- [x] Deprecate CC-REQ-PANELS-DEV-001 in `docs/SRS.md`
+- [x] Update `docs/SRS_UI_AUDIT.md` status to "REMOVED"
 
 **High-Priority Test Files (16 total):**
 1. `tests/editor/09-seeding-scenarios.spec.ts` - 12 refs
@@ -1500,6 +1501,223 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 4. `tests/editor/20-timeline-cursor-zoom.spec.ts` - Multiple refs
 5. `tests/editor/21-timeline-minimap.spec.ts` - Multiple refs
 6. Remaining 11 files with simpler migrations
+
+### v0.5.25 - PowerSpawn: Universal Multi-Agent MCP Server
+**Goal:** Extract and productize our MCP agent orchestration into a standalone project compatible with Claude Code AND GitHub Copilot
+**Status:** Planned
+
+**Project Vision:**
+"PowerSpawn" - A universal MCP server for spawning AI sub-agents across different models. Users say "can you powerspawn a Codex to handle this?" and it just works, regardless of whether they're using Claude Code or GitHub Copilot.
+
+**Key Features to Productize:**
+1. **Cross-model agent spawning** - Claude spawns Codex, Codex spawns Claude
+2. **CONTEXT.md injection** - Auto-inject project context into sub-agents
+3. **IAC.md pattern** - Inter-Agent Communication via shared markdown file
+4. **Universal MCP compatibility** - Works with Claude Code, GitHub Copilot, JetBrains, etc.
+
+**Repository Structure (new repo: `powerspawn`):**
+```
+powerspawn/
+├── README.md              # Showcase, installation, usage
+├── powerspawn/
+│   ├── __init__.py
+│   ├── server.py          # MCP server (refactored from mcp_server.py)
+│   ├── agents/
+│   │   ├── claude.py      # Claude agent spawner
+│   │   ├── codex.py       # Codex/GPT agent spawner
+│   │   └── base.py        # Base agent interface
+│   └── context/
+│       ├── injector.py    # CONTEXT.md/AGENTS.md injection
+│       └── iac.py         # Inter-Agent Communication handler
+├── examples/
+│   ├── claude-code/       # Example .mcp.json for Claude Code
+│   ├── copilot/           # Example for GitHub Copilot
+│   └── jetbrains/         # Example for JetBrains
+├── docs/
+│   ├── IAC_PATTERN.md     # Document the IAC.md pattern
+│   └── CONTEXT_INJECTION.md
+└── tests/
+```
+
+**Implementation Tasks:**
+
+*Phase 1: GitHub Copilot Compatibility*
+- [ ] Test current mcp_server.py with VS Code Copilot MCP settings
+- [ ] Document any compatibility issues
+- [ ] Fix protocol differences if any
+- [ ] Create VS Code `.vscode/mcp.json` example config
+- [ ] Test with Copilot Chat in VS Code
+
+*Phase 2: Extract to Standalone Package*
+- [ ] Create new `powerspawn` repository
+- [ ] Refactor mcp_server.py into clean module structure
+- [ ] Add proper Python packaging (pyproject.toml, setup.py)
+- [ ] Make it pip-installable: `pip install powerspawn`
+- [ ] CLI entry point: `powerspawn serve`
+
+*Phase 3: Documentation & Showcase*
+- [ ] Write comprehensive README with examples
+- [ ] Document the IAC.md pattern (potential blog post)
+- [ ] Create demo GIFs/videos
+- [ ] Landing page (GitHub Pages or simple site)
+- [ ] Submit to MCP Registry
+
+*Phase 4: Advanced Features*
+- [ ] Agent result caching
+- [ ] Parallel agent execution improvements
+- [ ] Support for more models (Gemini, local LLMs)
+- [ ] Web UI for monitoring spawned agents
+- [ ] Rate limiting and cost tracking
+
+**Novelty Research:** (pending agent research results)
+- IAC.md pattern originality
+- Comparison with AutoGen, CrewAI, LangGraph
+- Market positioning
+
+### v0.5.26 - Timeline Import/Export & AI-Ready Format
+**Goal:** Enable import/export of timelines in a simple format that AI models can generate
+**Status:** Planned
+
+**Design Principles:**
+- Simple, human-readable format (YAML primary, JSON secondary)
+- AI-friendly: any LLM can generate valid timeline files from prompts
+- Validation layer to catch errors before import
+- Round-trip fidelity: export → import produces identical timeline
+
+**YAML Format Specification:**
+```yaml
+# PowerTimeline Export Format v1
+version: 1
+timeline:
+  title: "French Revolution"
+  description: "Key events from 1789-1799"
+  visibility: public  # public | unlisted | private
+
+events:
+  - id: evt-001  # optional, auto-generated if missing
+    date: "1789-07-14"
+    title: "Storming of the Bastille"
+    description: "Parisian revolutionaries storm the Bastille fortress..."
+    color: "#e53935"  # optional, hex color
+
+  - date: "1789-08-26"
+    title: "Declaration of Rights of Man"
+    description: "The National Assembly adopts..."
+```
+
+**Implementation Tasks:**
+- [ ] Define TypeScript schema for import/export format
+- [ ] Create YAML parser with validation (use `yaml` or `js-yaml` library)
+- [ ] Build JSON schema for format validation
+- [ ] Implement `exportTimeline(timelineId)` → YAML string
+- [ ] Implement `importTimeline(yaml, ownerId)` → Timeline
+- [ ] Add Export button to timeline menu (download .yaml file)
+- [ ] Add Import button to "Create Timeline" flow
+- [ ] Create import preview screen (show parsed events before saving)
+- [ ] Validation error display with line numbers
+- [ ] Handle edge cases: duplicate IDs, invalid dates, missing required fields
+
+**AI Integration (Prompt Engineering):**
+- [ ] Create example prompts for generating timelines
+- [ ] Document format in README for AI users
+- [ ] Consider: API endpoint for direct AI-generated timeline creation
+
+**Tests:**
+- [ ] Unit tests for YAML parsing and validation
+- [ ] Round-trip tests (export → import → export = identical)
+- [ ] Invalid format rejection tests
+- [ ] E2E: Import timeline via UI
+
+### v0.5.27 - Stream Editor (Mobile-First Timeline Editor)
+**Goal:** New editing paradigm: git-style vertical timeline with inline editing, optimized for mobile
+**Status:** Planned
+
+**Concept Overview:**
+A notepad-like editor with git-style visual language. Events are displayed vertically with commit-style dots and connecting lines. Dates on the left, content on the right. Fully editable inline.
+
+**Visual Design:**
+```
+┌─────────────────────────────────────────────────┐
+│  DATE        │ ●─── EVENT CARD                  │
+│              │ │    [Title - editable]          │
+│  1789-07-14  │ │    [Description - editable]    │
+│              │ │                                │
+│              │ │                                │
+│  DATE        │ ●─── EVENT CARD                  │
+│              │ │    [Title]                     │
+│  1789-08-26  │ │    [Description]               │
+│              │ │                                │
+│              │ │                                │
+│  DATE        │ ●─── EVENT CARD                  │
+│              │      [Title]                     │
+│  1792-09-21  │      [Description]               │
+└─────────────────────────────────────────────────┘
+```
+
+**Three Viewing Modes (Total):**
+1. **Graph Viewer** - Current canvas-based timeline visualization (read-only, pan/zoom)
+2. **Classic Editor** - Current editor with central edit panel + left/right event columns
+3. **Stream Editor** - NEW: Git-style vertical list, inline editing, mobile-optimized
+
+**Two Editing Modes (Total):**
+1. **Classic Editor** - Modal editing (select event → edit in panel)
+2. **Stream Editor** - Inline editing (click to edit in place, notepad-style)
+
+**Mobile Strategy:**
+- Stream Editor is the PRIMARY mobile experience
+- Simple vertical scroll, no complex pan/zoom gestures
+- Touch-friendly inline editing
+- Responsive: full-width cards on mobile, side-by-side on tablet
+
+**Implementation Tasks:**
+
+*Phase 1: Core Component*
+- [ ] Create `StreamEditor.tsx` component
+- [ ] Implement git-style vertical timeline rail (SVG dots + lines)
+- [ ] Event card component with date/title/description layout
+- [ ] Scroll virtualization for large timelines (react-window or similar)
+- [ ] Date formatting and grouping (by year/month/day)
+
+*Phase 2: Inline Editing*
+- [ ] Click-to-edit event titles (contenteditable or input)
+- [ ] Click-to-edit event descriptions (textarea, auto-expand)
+- [ ] Date picker for event date editing
+- [ ] Color picker for event color
+- [ ] Auto-save on blur (debounced)
+- [ ] Keyboard navigation (Tab between events, Enter to confirm)
+
+*Phase 3: Event Management*
+- [ ] Add new event button (+ at bottom or between events)
+- [ ] Delete event with confirmation
+- [ ] Drag-to-reorder events (optional, may conflict with date ordering)
+- [ ] Undo/redo support
+
+*Phase 4: Mobile Optimization*
+- [ ] Touch-friendly tap targets (44px minimum)
+- [ ] Swipe gestures (swipe left to delete?)
+- [ ] Mobile keyboard handling (viewport resize)
+- [ ] Responsive breakpoints (mobile/tablet/desktop)
+
+*Phase 5: Integration*
+- [ ] Add Stream Editor tab/toggle to Editor page
+- [ ] Route: `/editor/:timelineId/stream` or toggle within existing route
+- [ ] Sync state between Classic and Stream editors
+- [ ] Mobile detection → default to Stream Editor
+
+**Design Tokens (extend tokens.css):**
+- `--stream-rail-color`: Color of the vertical line
+- `--stream-dot-size`: Size of event dots (12px)
+- `--stream-dot-color`: Dot fill color
+- `--stream-date-width`: Width of date column (100px)
+- `--stream-card-gap`: Vertical gap between cards
+
+**Tests:**
+- [ ] Unit tests for StreamEditor component
+- [ ] E2E: Create event via Stream Editor
+- [ ] E2E: Edit event inline
+- [ ] E2E: Delete event
+- [ ] Visual regression tests for git-style rail
+- [ ] Mobile viewport tests
 
 ## Phase 3: Collaboration Features (v0.6.x)
 

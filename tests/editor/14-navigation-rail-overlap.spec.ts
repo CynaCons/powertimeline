@@ -1,22 +1,15 @@
  
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
+import { loginAsTestUser, loadTestTimeline, waitForTimelineRendered } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
-
-async function openDevPanel(page: any) {
-  
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
 
 test.describe('Navigation Rail Overlap Tests', () => {
   test('Cards should not be behind navigation rail', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load a timeline with events
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.waitForTimeout(1000);
+    await loadTestTimeline(page, 'jfk-presidency');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
     
     // Take screenshot for debugging
     await page.screenshot({ path: 'test-results/navigation-rail-overlap-test.png' });
@@ -102,13 +95,11 @@ test.describe('Navigation Rail Overlap Tests', () => {
   
   test('Cards should have adequate left margin from viewport edge', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load RFK timeline (simpler case)
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await page.waitForTimeout(1000);
+    await loadTestTimeline(page, 'rfk-1968');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
     
     // Get all event cards
     const cards = await page.locator('[data-testid="event-card"]').all();

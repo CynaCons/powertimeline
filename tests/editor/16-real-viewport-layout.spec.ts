@@ -1,24 +1,17 @@
- 
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
-import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
-  
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
+import { loginAsTestUser, loadTestTimeline, waitForTimelineRendered } from '../utils/timelineTestUtils';
+import { test, expect } from '@playwright/test';
 
 test.describe('Real Viewport Layout Tests', () => {
   test('Cards should be properly positioned in realistic browser viewport', async ({ page }) => {
     // Set realistic browser viewport size (similar to user's screenshot)
     await page.setViewportSize({ width: 1400, height: 800 });
-    await page.goto('/');
-    
-    // Add some random events (similar to user's scenario)
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Random (10)' }).click(); // Creates 10 random events
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(1000);
+    await loginAsTestUser(page);
+
+    // Load Napoleon timeline (63 events - moderate size)
+    await loadTestTimeline(page, 'napoleon-bonaparte');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
     
     // Take screenshot for analysis
     await page.screenshot({ path: 'test-results/real-viewport-layout-test.png' });
@@ -89,12 +82,12 @@ test.describe('Real Viewport Layout Tests', () => {
   test('Layout should work in narrow viewport', async ({ page }) => {
     // Test with narrow viewport (like mobile or split screen)
     await page.setViewportSize({ width: 1000, height: 600 });
-    await page.goto('/');
-    
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.waitForTimeout(1000);
+    await loginAsTestUser(page);
+
+    // Load JFK timeline
+    await loadTestTimeline(page, 'jfk-presidency');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
     
     // Take screenshot
     await page.screenshot({ path: 'test-results/narrow-viewport-layout-test.png' });

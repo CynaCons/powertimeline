@@ -1,32 +1,16 @@
- 
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
+
+import { loginAsTestUser, loadTestTimeline, waitForTimelineRendered } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
-
-async function openDevPanel(page: any) {
-  // Wait for Developer Panel to become enabled
-  await page.waitForFunction(() => {
-    const btn = document.querySelector('button[aria-label="Developer Panel"]');
-    return btn && !btn.hasAttribute('disabled');
-  }, { timeout: 5000 });
-
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
-async function closeDevPanel(page: any) {
-  await page.keyboard.press('Escape');
-}
 
 test.describe('Timeline Minimap Tests', () => {
   test('Minimap displays and shows timeline range', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-001' });
-    await page.goto('/');
-    
+    await loginAsTestUser(page);
+
     // Load Napoleon timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
-    await page.waitForTimeout(1000);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
 
     // Check if minimap is visible
     const minimap = page.locator('[data-testid="timeline-minimap"]'); // Minimap container
@@ -45,14 +29,12 @@ test.describe('Timeline Minimap Tests', () => {
   
   test('Minimap view window indicator reflects zoom state', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-002' });
-    await page.goto('/');
-    
+    await loginAsTestUser(page);
+
     // Load Napoleon timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
-    await page.waitForTimeout(1000);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
 
     // Start from fit all (should show full window)
     await page.getByRole('button', { name: 'Fit All' }).click();
@@ -86,13 +68,12 @@ test.describe('Timeline Minimap Tests', () => {
   
   test('Minimap event density markers show event distribution', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-003' });
-    await page.goto('/');
-    
-    // Load clustered timeline with many events
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(1000);
+    await loginAsTestUser(page);
+
+    // Load French Revolution timeline (dense with 244 events)
+    await loadTestTimeline(page, 'french-revolution');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
     
     // Check for event markers in minimap
     const minimap = page.locator('[data-testid="timeline-minimap"]');
@@ -109,14 +90,12 @@ test.describe('Timeline Minimap Tests', () => {
   
   test('Minimap click navigation works', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-MINIMAP-004' });
-    await page.goto('/');
-    
+    await loginAsTestUser(page);
+
     // Load Napoleon timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
-    await page.waitForTimeout(1000);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
+    await waitForTimelineRendered(page);
+    await page.waitForTimeout(500);
 
     // Start from fit all
     await page.getByRole('button', { name: 'Fit All' }).click();

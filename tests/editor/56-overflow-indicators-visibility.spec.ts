@@ -1,28 +1,14 @@
- 
+
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
-
-async function openDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
 
 test.describe('Overflow Indicators Visibility Tests', () => {
   test('Overflow badges appear when events exceed capacity', async ({ page }) => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-003' });
 
-    await page.goto('/');
-
-    // Clear any existing events
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-
-    // Use clustered seeder multiple times to force overflow conditions
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clustered' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(500);
 
     // Zoom in to create overflow conditions by making clusters denser
@@ -73,12 +59,8 @@ test.describe('Overflow Indicators Visibility Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-003' });
 
-    await page.goto('/');
-
-    // Setup overflow conditions
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
 
     // Create overflow conditions with deep zoom
     for (let i = 0; i < 6; i++) {
@@ -113,12 +95,8 @@ test.describe('Overflow Indicators Visibility Tests', () => {
     // Add requirement traceability
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-OVERFLOW-003' });
 
-    await page.goto('/');
-
-    // Setup with known overflow conditions
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'rfk-1968');
 
     // Create moderate zoom to get overflow without extreme density
     for (let i = 0; i < 3; i++) {

@@ -1,28 +1,15 @@
- 
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
-import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
-  
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
+import { loginAsTestUser, loadTestTimeline, waitForTimelineRendered } from '../utils/timelineTestUtils';
+import { test, expect } from '@playwright/test';
 
 test.describe('Overflow Label Overlap Tests', () => {
   test('Overflow indicators should not overlap on timeline', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Create dense overflow scenario with clustered seeder
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    
-    // Use clustered seeder multiple times to create overlapping overflow labels
-    await page.getByRole('button', { name: 'Clustered' }).click();
+
+    // Load French Revolution timeline (dense with 244 events)
+    await loadTestTimeline(page, 'french-revolution');
+    await waitForTimelineRendered(page);
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(1000);
     
     // Take screenshot for debugging
     await page.screenshot({ path: 'test-results/overflow-label-overlap-test.png' });
@@ -105,15 +92,11 @@ test.describe('Overflow Label Overlap Tests', () => {
   
   test('Overflow badges should have minimum spacing', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Create moderate overflow scenario
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Clustered' }).click();
+
+    // Load French Revolution timeline (dense with 244 events)
+    await loadTestTimeline(page, 'french-revolution');
+    await waitForTimelineRendered(page);
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(1000);
     
     // Get overflow badges
     const badges = await page.locator('text=/^\\+\\d+$/').all();

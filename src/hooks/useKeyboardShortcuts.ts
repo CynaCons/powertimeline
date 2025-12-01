@@ -126,7 +126,6 @@ export const useNavigationShortcuts = (
   actions: {
     openEvents: () => void;
     openCreate: () => void;
-    openDev: () => void;
     toggleTheme: () => void;
     closeOverlay: () => void;
   },
@@ -145,12 +144,6 @@ export const useNavigationShortcuts = (
         altKey: true,
         action: actions.openCreate,
         description: 'Create new event',
-      },
-      {
-        key: 'd',
-        altKey: true,
-        action: actions.openDev,
-        description: 'Open Developer panel',
       },
       {
         key: 't',

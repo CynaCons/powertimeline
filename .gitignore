@@ -35,6 +35,10 @@ blob-report/
 tmp/
 temp/
 
+# Firebase Functions build output
+functions/lib/
+functions/node_modules/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

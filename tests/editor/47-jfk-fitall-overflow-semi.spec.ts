@@ -1,19 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
-async function openDevPanel(page: unknown) {
-  
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
 test.describe('JFK Fit-All overflow vs full-cards (semi-column)', () => {
   test('No semi-column shows 2 full cards plus overflow badge', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-LAYOUT-SEMICOL-001' });
 
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'jfk-presidency');
     await page.waitForTimeout(600);
 
     // Fit All view

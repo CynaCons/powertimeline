@@ -108,10 +108,10 @@
 **Verification**: OutlinePanel.tsx line 35-45 shows "+ Add Event" button with onCreate handler
 
 ### CC-REQ-PANELS-DEV-001: Developer panel
-**Status**: ✅ **FIXED** (Corrected file path)
-**Code**: `src/app/panels/DevPanel.tsx` (was incorrectly listed as src/App.tsx)
-**Tests**: ❌ None
-**Verification**: DevPanel.tsx exists as extracted component (v0.3.3)
+**Status**: 🗑️ **REMOVED - v0.5.24**
+**Code**: ~~`src/app/panels/DevPanel.tsx`~~ (deleted)
+**Tests**: N/A (component removed)
+**Verification**: Dev Panel removed - functionality superseded by seed data management in Home page
 
 ---
 

@@ -19,22 +19,10 @@ import type { Command } from './components/CommandPalette';
 // Lazy load panels, overlays and heavy components for better bundle splitting
 const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
 const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
-const DevPanel = lazy(() => import('./app/panels/DevPanel').then(m => ({ default: m.DevPanel })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
 import { EventStorage } from './lib/storage';
-import {
-  seedRandom as seedRandomUtil,
-  seedClustered as seedClusteredUtil,
-  seedLongRange as seedLongRangeUtil,
-  seedRFKTimeline,
-  seedJFKTimeline,
-  seedNapoleonTimeline,
-  seedDeGaulleTimeline,
-  seedFrenchRevolutionTimeline,
-  seedIncremental as seedIncrementalUtil,
-  seedMinuteTest as seedMinuteTestUtil
-} from './lib/devSeed';
+import { seedRFKTimeline } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
 import { useTimelineZoom } from './app/hooks/useTimelineZoom';
@@ -153,9 +141,9 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
     handleTimelineMouseDown(e);
   }, [handleTimelineMouseDown, setSelectedId]);
 
-  // Panels & Dev toggle
+  // Panels & overlays
   // Left sidebar overlays (permanent sidebar width = 56px)
-  const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'dev'>(null);
+  const [overlay, setOverlay] = useState<null | 'events' | 'editor'>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const [outlineFilter, setOutlineFilter] = useState('');
 
@@ -306,69 +294,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
     }
   }, [selectedId, events, announce, saveEvents]);
 
-
-  // Dev helpers using utilities
-  const seedRandom = useCallback((count: number) => {
-    setEvents(prev => { const next = seedRandomUtil(prev, count); saveEvents(next); return next; });
-  }, [saveEvents]);
-  const seedClustered = useCallback(() => {
-    setEvents(prev => { const next = seedClusteredUtil(prev); saveEvents(next); return next; });
-  }, [saveEvents]);
-  const seedLongRange = useCallback(() => {
-    setEvents(prev => { const next = seedLongRangeUtil(prev); saveEvents(next); return next; });
-  }, [saveEvents]);
-  const seedRFK = useCallback(() => {
-    const data = seedRFKTimeline();
-    setEvents(data);
-    saveEvents(data);
-    setSelectedId(undefined);
-  }, [saveEvents]);
-  const seedJFK = useCallback(() => {
-    const data = seedJFKTimeline();
-    setEvents(data);
-    saveEvents(data);
-    setSelectedId(undefined);
-  }, [saveEvents]);
-  const seedNapoleon = useCallback(() => {
-    const data = seedNapoleonTimeline();
-    setEvents(data);
-    saveEvents(data);
-    setSelectedId(undefined);
-  }, [saveEvents]);
-
-  const seedDeGaulle = useCallback(() => {
-    const data = seedDeGaulleTimeline();
-    setEvents(data);
-    saveEvents(data);
-    setSelectedId(undefined);
-  }, [saveEvents]);
-
-  const seedFrenchRevolution = useCallback(() => {
-    const data = seedFrenchRevolutionTimeline();
-    setEvents(data);
-    saveEvents(data);
-    setSelectedId(undefined);
-  }, [saveEvents]);
-
-  const seedMinuteTest = useCallback(() => {
-    const data = seedMinuteTestUtil();
-    setEvents(data);
-    saveEvents(data);
-    setSelectedId(undefined);
-  }, [saveEvents]);
-
-  const seedIncremental = useCallback((targetCount: number) => {
-    setEvents(prev => {
-      const next = seedIncrementalUtil(prev, targetCount);
-      saveEvents(next);
-      return next;
-    });
-  }, [saveEvents]);
-  
-  const clearAll = useCallback(() => { setEvents([]); }, []);
-
-  // Removed unused exportEvents function
-
   const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
   const filteredForList = useMemo(() => {
     const q = outlineFilter.trim().toLowerCase();
@@ -424,11 +349,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
     setEditDescription('');
     // Keep the overlay open so user can create the new event
   }, []);
-
-  const openDev = useCallback(() => {
-    setOverlay(overlay === 'dev' ? null : 'dev');
-    setActiveNavItem('dev');
-  }, [overlay]);
 
   const closeOverlay = useCallback(() => {
     setOverlay(null);
@@ -519,16 +439,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
       aliases: ['new', 'add', 'create'],
     },
     {
-      id: 'dev-panel',
-      title: 'Open Developer Panel',
-      description: 'Access developer tools and options',
-      icon: 'code',
-      shortcut: 'Alt+D',
-      category: 'dev',
-      action: openDev,
-      aliases: ['dev', 'debug', 'tools'],
-    },
-    {
       id: 'toggle-theme',
       title: 'Toggle Theme',
       description: 'Switch between light and dark themes',
@@ -548,13 +458,12 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
       action: closeOverlay,
       aliases: ['close', 'hide', 'dismiss'],
     },
-  ], [openEvents, openCreate, openDev, toggleTheme, closeOverlay]);
+  ], [openEvents, openCreate, toggleTheme, closeOverlay]);
 
   // Keyboard shortcuts
   useNavigationShortcuts({
     openEvents,
     openCreate,
-    openDev,
     toggleTheme,
     closeOverlay,
   });
@@ -569,9 +478,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
         break;
       case 'editor':
         setActiveNavItem('create');
-        break;
-      case 'dev':
-        setActiveNavItem('dev');
         break;
       default:
         setActiveNavItem(null);
@@ -675,31 +581,6 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
                     onNavigateNext={navigateToNextEvent}
                     onSelectEvent={selectEvent}
                     onCreateNew={createNewEvent}
-                  />
-                </Suspense>
-              </ErrorBoundary>
-            )}
-            {overlay === 'dev' && (
-              <ErrorBoundary>
-                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 border-r flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
-                  <DevPanel
-                    seedRandom={seedRandom}
-                    seedClustered={seedClustered}
-                    seedLongRange={seedLongRange}
-                    clearAll={clearAll}
-                    onClose={() => setOverlay(null)}
-                    seedRFK={seedRFK}
-                    seedJFK={seedJFK}
-                    seedNapoleon={seedNapoleon}
-                    seedDeGaulle={seedDeGaulle}
-                    seedFrenchRevolution={seedFrenchRevolution}
-                    seedIncremental={seedIncremental}
-                    seedMinuteTest={seedMinuteTest}
-                    events={events}
-                    onImportEvents={(importedEvents) => {
-                      setEvents(importedEvents);
-                      saveEvents(importedEvents);
-                    }}
                   />
                 </Suspense>
               </ErrorBoundary>

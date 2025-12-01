@@ -876,8 +876,10 @@ export function subscribeToActivityLogs(
 }
 
 // ============================================================================
-// Platform Statistics (v0.5.17 - Aggregated Stats with Caching)
+// Platform Statistics (v0.5.22 - Cloud Functions + Client Caching)
 // ============================================================================
+// Stats are now maintained by Cloud Functions triggers (onUserCreate, onTimelineCreate, etc.)
+// This client code provides caching and fallback calculation for initialization.
 
 /**
  * Check if cached stats are still valid
@@ -905,6 +907,7 @@ async function getStatsFromFirestore(): Promise<PlatformStats | null> {
 
 /**
  * Save platform stats to Firestore stats/platform document
+ * Used for initial bootstrap before Cloud Functions are deployed
  */
 async function saveStatsToFirestore(stats: PlatformStats): Promise<void> {
   try {
@@ -916,7 +919,9 @@ async function saveStatsToFirestore(stats: PlatformStats): Promise<void> {
 }
 
 /**
- * Calculate platform stats by scanning all documents (fallback)
+ * Calculate platform stats by scanning all documents (fallback/bootstrap)
+ * This is only used when stats/platform document doesn't exist yet.
+ * Once Cloud Functions are deployed, they maintain stats in real-time.
  */
 async function calculatePlatformStats(): Promise<PlatformStats> {
   const [users, timelines] = await Promise.all([
@@ -945,12 +950,12 @@ async function calculatePlatformStats(): Promise<PlatformStats> {
 
 /**
  * Get platform-wide statistics
- * v0.5.17 - Uses aggregated stats document with client-side caching
+ * v0.5.22 - Cloud Functions maintain stats in real-time
  *
  * Priority:
  * 1. Return from memory cache if valid (TTL: 5 minutes)
- * 2. Read from stats/platform Firestore document
- * 3. Fall back to full scan and update stats document
+ * 2. Read from stats/platform Firestore document (updated by Cloud Functions)
+ * 3. Fall back to full scan for initial bootstrap only
  */
 export async function getPlatformStats(): Promise<{
   totalUsers: number;
@@ -967,16 +972,16 @@ export async function getPlatformStats(): Promise<{
       return statsCache.data;
     }
 
-    // 2. Try to read from Firestore stats document
+    // 2. Try to read from Firestore stats document (maintained by Cloud Functions)
     let stats = await getStatsFromFirestore();
 
-    // 3. If no stats doc or it's stale (>1 hour), recalculate
-    if (!stats || (Date.now() - new Date(stats.lastUpdated).getTime()) > 60 * 60 * 1000) {
+    // 3. If no stats doc exists, calculate and save (initial bootstrap only)
+    // With Cloud Functions deployed, stats doc should always exist and be fresh
+    if (!stats) {
+      console.log('Stats document not found, calculating initial stats...');
       stats = await calculatePlatformStats();
-      // Save to Firestore for future reads (fire and forget)
-      saveStatsToFirestore(stats).catch((err) => {
-        console.warn('Failed to save stats:', err);
-      });
+      // Save to Firestore for future reads
+      await saveStatsToFirestore(stats);
     }
 
     // Update memory cache

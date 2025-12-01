@@ -1,24 +1,14 @@
  
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
+import { loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
-  
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
+// Dev Panel removed in v0.5.24 - use direct navigation to Firestore timelines
 
 test.describe('Overflow Logic Tests', () => {
   test('Half-column overflow - Simple incremental test', async ({ page }) => {
-    await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Clear any existing events and add multiple events close together
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    
-    // Add events that will cluster together temporally
-    await page.getByRole('button', { name: '+5' }).click(); // Creates 5 events in sequence
-    
+    // Dev Panel removed in v0.5.24 - use RFK timeline (10 events) for overflow testing
+    await loadTestTimeline(page, 'timeline-rfk');
+
     // Wait for layout to settle
     await page.waitForTimeout(500);
     
@@ -74,14 +64,10 @@ test.describe('Overflow Logic Tests', () => {
         console.log('BROWSER:', msg.text());
       }
     });
-    
-    await page.goto('/');
-    await openDevPanel(page);
-    
+
     // Test 1: RFK Timeline
     console.log('\n=== TESTING RFK TIMELINE ===');
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loadTestTimeline(page, 'timeline-rfk');
     await page.waitForTimeout(1000);
     
     // Take screenshot
@@ -131,8 +117,7 @@ test.describe('Overflow Logic Tests', () => {
     
     // Test 2: JFK Timeline
     console.log('\n=== TESTING JFK TIMELINE ===');
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
     
     // Take screenshot

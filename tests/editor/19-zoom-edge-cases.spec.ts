@@ -2,30 +2,12 @@
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
-  // Wait for Developer Panel to become enabled
-  await page.waitForFunction(() => {
-    const btn = document.querySelector('button[aria-label="Developer Panel"]');
-    return btn && !btn.hasAttribute('disabled');
-  }, { timeout: 5000 });
-
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
-async function closeDevPanel(page: any) {
-  await page.keyboard.press('Escape');
-}
-
 test.describe('Zoom Edge Cases Tests', () => {
   test('Extreme zoom limits should not break system', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load Napoleon timeline (long range)
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForTimeout(1000);
     
     const initialCards = await page.locator('[data-testid="event-card"]').count();
@@ -75,15 +57,13 @@ test.describe('Zoom Edge Cases Tests', () => {
   });
   
   test('Navigation rail overlap prevention - narrow viewport', async ({ page }) => {
+    await loginAsTestUser(page);
+
     // Test narrow viewport specifically for navigation rail overlap fix
     await page.setViewportSize({ width: 1000, height: 600 });
-    await page.goto('/');
-    
+
     // Load Napoleon timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForTimeout(1000);
     
     const cards = await page.locator('[data-testid="event-card"]').count();
@@ -108,22 +88,21 @@ test.describe('Zoom Edge Cases Tests', () => {
   });
 
   test('Zoom behavior with standard viewport sizes', async ({ page }) => {
+    await loginAsTestUser(page);
+
     const viewportSizes = [
       { name: 'standard', width: 1400, height: 800 },
       { name: 'wide', width: 1800, height: 1000 }
     ];
-    
+
     for (const viewport of viewportSizes) {
       console.log(`\n=== Testing ${viewport.name} viewport (${viewport.width}x${viewport.height}) ===`);
-      
+
       // Set viewport size
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto('/');
-      
+
       // Load Napoleon timeline
-      await openDevPanel(page);
-      await page.getByRole('button', { name: 'Clear All' }).click();
-      await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
+      await loadTestTimeline(page, 'napoleon-bonaparte');
       await page.waitForTimeout(1000);
       
       // Test zoom sequence
@@ -157,26 +136,15 @@ test.describe('Zoom Edge Cases Tests', () => {
   
   test('Zoom performance with dense datasets', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Create dense dataset using multiple clustered operations
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
 
-    // Add multiple clustered datasets
-    for (let i = 0; i < 5; i++) {
-      await page.getByRole('button', { name: 'Clustered' }).click();
-      await page.waitForTimeout(200);
-    }
-    await closeDevPanel(page);
-    
-    // Get total event count from localStorage
-    const totalEvents = await page.evaluate(() => {
-      const state = JSON.parse(localStorage.getItem('powertimeline-events') || '[]');
-      return state.length;
-    });
-    
-    console.log(`Dense dataset loaded: ${totalEvents} total events`);
+    // Load French Revolution timeline for dense dataset testing (244 events)
+    await loadTestTimeline(page, 'french-revolution');
+    await page.waitForTimeout(1000);
+
+    // Get total event count
+    const totalEvents = await page.locator('[data-testid="event-card"]').count();
+
+    console.log(`Dense dataset loaded: ${totalEvents} visible events`);
     
     // Measure zoom performance
     const startTime = Date.now();

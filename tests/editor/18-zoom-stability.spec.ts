@@ -2,24 +2,12 @@
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
-async function closeDevPanel(page: any) {
-  await page.keyboard.press('Escape');
-}
-
 test.describe('Zoom Stability Tests', () => {
   test('Cursor anchoring - Event should stay under cursor during zoom', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load JFK timeline with multiple events
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await closeDevPanel(page);
+    await loadTestTimeline(page, 'jfk-presidency');
     await page.waitForTimeout(1000);
     
     // Get a specific event card to target
@@ -88,13 +76,9 @@ test.describe('Zoom Stability Tests', () => {
   
   test('Visual integrity during zoom operations', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Load clustered timeline for visual complexity
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await closeDevPanel(page);
+
+    // Load French Revolution timeline for visual complexity (244 events)
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(1000);
     
     // Test multiple zoom levels for visual artifacts
@@ -163,13 +147,9 @@ test.describe('Zoom Stability Tests', () => {
   
   test('Zoom range limits and boundary behavior', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load RFK timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
-    await closeDevPanel(page);
+    await loadTestTimeline(page, 'rfk-1968');
     await page.waitForTimeout(1000);
     
     // Test extreme zoom in
@@ -212,13 +192,11 @@ test.describe('Zoom Stability Tests', () => {
   
   test('Multi-timeline zoom consistency', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    await openDevPanel(page);
 
     const timelines = [
-      { name: 'RFK 1968', button: 'RFK 1968' },
-      { name: 'JFK 1961-63', button: 'JFK 1961-63' },
-      { name: 'Napoleon 1769-1821', button: 'Napoleon 1769-1821' }
+      { name: 'RFK 1968', id: 'rfk-1968' },
+      { name: 'JFK 1961-63', id: 'jfk-presidency' },
+      { name: 'Napoleon 1769-1821', id: 'napoleon-bonaparte' }
     ];
 
     const zoomResults: Array<{ timeline: string; initial: number; zoomedIn: number; zoomedOut: number }> = [];
@@ -227,10 +205,7 @@ test.describe('Zoom Stability Tests', () => {
       console.log(`\n=== Testing ${timeline.name} ===`);
 
       // Load timeline
-      if (timeline !== timelines[0]) await openDevPanel(page);
-      await page.getByRole('button', { name: 'Clear All' }).click();
-      await page.getByRole('button', { name: timeline.button }).click();
-      await closeDevPanel(page);
+      await loadTestTimeline(page, timeline.id);
       await page.waitForTimeout(1000);
       
       // Get initial card count
@@ -282,14 +257,9 @@ test.describe('Zoom Stability Tests', () => {
   
   test('Zoom with overflow badges - No overlap regressions', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Create scenario with overflow badges
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Clustered' }).click();
+
+    // Load French Revolution timeline for overflow badge testing (244 events)
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(1000);
     
     // Function to check overflow badge overlaps

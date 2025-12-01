@@ -155,89 +155,75 @@ test('Degradation system with Napoleon dataset - Real data validation', async ({
 });
 
 test('Degradation system efficiency validation', async ({ page }) => {
-  await page.goto('/');
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  await loginAsTestUser(page);
+  await loadTestTimeline(page, 'french-revolution');
+  await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
   console.log('\n⚡ DEGRADATION EFFICIENCY VALIDATION');
-  
-  // Load data through dev panel
-  const devToggle = page.locator('button:has-text("Developer Panel")');
-  if (await devToggle.count() > 0) {
-    await devToggle.click();
-    await page.waitForTimeout(500);
-    
-    // Try clustered seed data first
-    const clusteredButton = page.locator('button:has-text("Seed Clustered")');
-    if (await clusteredButton.count() > 0) {
-      console.log('🎲 Loading clustered seed data for efficiency test...');
-      await clusteredButton.click();
-      await page.waitForTimeout(2000);
-      
-      // Wait for data to load
-      await page.waitForFunction(() => {
-        const telemetry = (window as unknown as { __ccTelemetry?: { events?: { total?: number } } }).__ccTelemetry;
-        return telemetry && telemetry.events && telemetry.events.total && telemetry.events.total > 0;
-      });
 
-      const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
-      console.log('📊 Clustered data loaded:', {
-        events: initialTelemetry.events.total,
-        groups: initialTelemetry.groups.count
-      });
-      
-      // Create high density by aggressive zooming
-      const timelineArea = page.locator('.absolute.inset-0.ml-14');
-      const timelineBox = await timelineArea.boundingBox();
-      const centerX = timelineBox!.x + timelineBox!.width * 0.5;
-      const centerY = timelineBox!.y + timelineBox!.height * 0.5;
-      
-      // Extreme zoom for maximum density
-      await page.mouse.move(centerX, centerY);
-      for (let i = 0; i < 10; i++) {
-        await page.mouse.wheel(0, -250);
-        await page.waitForTimeout(200);
+  // Wait for data to load
+  await page.waitForFunction(() => {
+    const telemetry = (window as unknown as { __ccTelemetry?: { events?: { total?: number } } }).__ccTelemetry;
+    return telemetry && telemetry.events && telemetry.events.total && telemetry.events.total > 0;
+  });
+
+  const initialTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
+  console.log('📊 French Revolution data loaded:', {
+    events: initialTelemetry.events.total,
+    groups: initialTelemetry.groups.count
+  });
+
+  // Create high density by aggressive zooming
+  const timelineArea = page.locator('.absolute.inset-0.ml-14');
+  const timelineBox = await timelineArea.boundingBox();
+  const centerX = timelineBox!.x + timelineBox!.width * 0.5;
+  const centerY = timelineBox!.y + timelineBox!.height * 0.5;
+
+  // Extreme zoom for maximum density
+  await page.mouse.move(centerX, centerY);
+  for (let i = 0; i < 10; i++) {
+    await page.mouse.wheel(0, -250);
+    await page.waitForTimeout(200);
+  }
+
+  // Get efficiency metrics
+  const efficiencyTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
+
+  if (efficiencyTelemetry && efficiencyTelemetry.degradation) {
+    const degradation = efficiencyTelemetry.degradation;
+
+    console.log('⚡ Efficiency Results:', {
+      degradationRate: `${((degradation.degradationRate || 0) * 100).toFixed(1)}%`,
+      spaceEfficiency: `${degradation.spaceReclaimed || 0}px saved`,
+      compactGroups: degradation.compactCardGroups,
+      totalGroups: degradation.totalGroups,
+      triggers: degradation.degradationTriggers?.length || 0
+    });
+
+    // Efficiency validations
+    if (degradation.compactCardGroups > 0) {
+      // Should have meaningful space savings
+      expect(degradation.spaceReclaimed).toBeGreaterThan(0);
+
+      // Degradation rate should be reasonable (not 100% unless truly necessary)
+      const degradationRate = degradation.degradationRate || 0;
+      expect(degradationRate).toBeLessThanOrEqual(1.0);
+      expect(degradationRate).toBeGreaterThanOrEqual(0);
+
+      // Space savings should be multiple of 76px per event
+      const totalEvents = degradation.degradationTriggers?.reduce((sum, t) => sum + t.eventCount, 0) || 0;
+      if (totalEvents > 0) {
+        const expectedSpaceSaved = totalEvents * 76;
+        expect(degradation.spaceReclaimed).toBe(expectedSpaceSaved);
       }
-      
-      // Get efficiency metrics
-      const efficiencyTelemetry = await page.evaluate(() => (window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry || null);
-      
-      if (efficiencyTelemetry && efficiencyTelemetry.degradation) {
-        const degradation = efficiencyTelemetry.degradation;
-        
-        console.log('⚡ Efficiency Results:', {
-          degradationRate: `${((degradation.degradationRate || 0) * 100).toFixed(1)}%`,
-          spaceEfficiency: `${degradation.spaceReclaimed || 0}px saved`,
-          compactGroups: degradation.compactCardGroups,
-          totalGroups: degradation.totalGroups,
-          triggers: degradation.degradationTriggers?.length || 0
-        });
-        
-        // Efficiency validations
-        if (degradation.compactCardGroups > 0) {
-          // Should have meaningful space savings
-          expect(degradation.spaceReclaimed).toBeGreaterThan(0);
-          
-          // Degradation rate should be reasonable (not 100% unless truly necessary)
-          const degradationRate = degradation.degradationRate || 0;
-          expect(degradationRate).toBeLessThanOrEqual(1.0);
-          expect(degradationRate).toBeGreaterThanOrEqual(0);
-          
-          // Space savings should be multiple of 76px per event
-          const totalEvents = degradation.degradationTriggers?.reduce((sum, t) => sum + t.eventCount, 0) || 0;
-          if (totalEvents > 0) {
-            const expectedSpaceSaved = totalEvents * 76;
-            expect(degradation.spaceReclaimed).toBe(expectedSpaceSaved);
-          }
-          
-          console.log('✅ Efficiency validation passed');
-        }
-      }
-      
-      // Reset
-      await page.keyboard.press('Digit0');
-      await page.waitForTimeout(1000);
+
+      console.log('✅ Efficiency validation passed');
     }
   }
-  
+
+  // Reset
+  await page.keyboard.press('Digit0');
+  await page.waitForTimeout(1000);
+
   console.log('✅ Efficiency validation completed');
 });

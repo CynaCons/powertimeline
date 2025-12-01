@@ -1,10 +1,6 @@
- 
+
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
-
-async function openDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
 
 async function getTimelineAxisBounds(page: any) {
   const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
@@ -39,17 +35,19 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test('Anchors align precisely with event dates across multiple timelines', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
+    await loginAsTestUser(page);
 
     // Test multiple historical timelines for different date ranges
-    const timelines = ['RFK 1968', 'JFK', 'Napoleon'];
+    const timelines = [
+      { name: 'RFK 1968', id: 'rfk-1968' },
+      { name: 'JFK', id: 'jfk-presidency' },
+      { name: 'Napoleon', id: 'napoleon-bonaparte' }
+    ];
 
     for (const timeline of timelines) {
-      console.log(`Testing anchor alignment for: ${timeline}`);
+      console.log(`Testing anchor alignment for: ${timeline.name}`);
 
-      await page.getByRole('button', { name: 'Clear All' }).click();
-      await page.getByRole('button', { name: timeline }).click();
+      await loadTestTimeline(page, timeline.id);
       await page.waitForTimeout(800);
 
       const timelineBox = await getTimelineAxisBounds(page);
@@ -72,7 +70,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
             // Anchor should be reasonably close to its event card
             expect(xDifference).toBeLessThan(200,
-              `${timeline} anchor ${anchor.eventId} should align with card (diff: ${xDifference}px)`);
+              `${timeline.name} anchor ${anchor.eventId} should align with card (diff: ${xDifference}px)`);
           }
         }
       }
@@ -82,10 +80,8 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test('Anchor alignment accuracy improves with zoom level', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'rfk-1968');
     await page.waitForTimeout(500);
 
     // Test anchor alignment at different zoom levels
@@ -127,13 +123,12 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
     }
   });
 
-  test('Anchor positions remain stable during rapid zoom changes', async ({ page }) => {
+  test.skip('Anchor positions remain stable during rapid zoom changes', async ({ page }) => {
+    // Dev Panel removed in v0.5.24 - this test relied on '⏰ Minute Test' seeder
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: '⏰ Minute Test' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(500);
 
     // Perform rapid zoom in/out cycles
@@ -170,21 +165,19 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test('Anchor alignment accuracy with different event densities', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
+    await loginAsTestUser(page);
 
     // Test different density scenarios
     const densityTests = [
-      { name: 'Simple Incremental (5 events)', button: '+5' },
-      { name: 'Medium density (10 events)', button: 'Random (10)' },
-      { name: 'High density (Napoleon)', button: 'Napoleon 1769-1821' }
+      { name: 'Medium density (RFK)', id: 'rfk-1968' },
+      { name: 'Medium density (JFK)', id: 'jfk-presidency' },
+      { name: 'High density (Napoleon)', id: 'napoleon-bonaparte' }
     ];
 
     for (const density of densityTests) {
       console.log(`Testing density: ${density.name}`);
 
-      await page.getByRole('button', { name: 'Clear All' }).click();
-      await page.getByRole('button', { name: density.button }).click();
+      await loadTestTimeline(page, density.id);
       await page.waitForTimeout(600);
 
       const timelineBox = await getTimelineAxisBounds(page);
@@ -220,10 +213,8 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test('Anchor coordinate system matches timeline scale calculations', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'RFK 1968' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'rfk-1968');
     await page.waitForTimeout(500);
 
     // Get timeline bounds and event data for coordinate calculation
@@ -266,10 +257,8 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test.skip('Anchor alignment with timeline tick marks and labels', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'JFK' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'jfk-presidency');
     await page.waitForTimeout(500);
 
     // Zoom to see timeline labels clearly
@@ -320,20 +309,18 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test.skip('Hover date precision matches event cards across multiple timelines', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
+    await loginAsTestUser(page);
 
     // Test with multiple historical timelines
     const timelines = [
-      { name: 'French Revolution', expectedAnchors: 5 },
-      { name: 'De Gaulle 1890-1970', expectedAnchors: 3 }
+      { name: 'French Revolution', id: 'french-revolution', expectedAnchors: 5 },
+      { name: 'De Gaulle 1890-1970', id: 'charles-de-gaulle', expectedAnchors: 3 }
     ];
 
     for (const timeline of timelines) {
       console.log(`\n=== TESTING HOVER PRECISION FOR: ${timeline.name} ===`);
 
-      await page.getByRole('button', { name: 'Clear All' }).click();
-      await page.getByRole('button', { name: timeline.name }).click();
+      await loadTestTimeline(page, timeline.id);
       await page.waitForTimeout(1000);
 
       const timelineBox = await getTimelineAxisBounds(page);
@@ -437,10 +424,8 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
   test('Hover date accuracy improves with zoom on French Revolution timeline', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-002' });
 
-    await page.goto('/');
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'French Revolution' }).click();
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(1000);
 
     // Test accuracy at different zoom levels

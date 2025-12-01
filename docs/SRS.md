@@ -150,7 +150,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | CC-REQ-NAV-RAIL-001 | Navigation rail is displayed on the left with icon buttons for panel access | `src/components/NavigationRail.tsx`, `src/App.tsx` | v5/50 |
 | CC-REQ-PANELS-OUTLINE-001 | Outline panel (Events) displays list of all events with text filter functionality | `src/app/panels/OutlinePanel.tsx` | v5/50, v5/52 |
 | CC-REQ-PANELS-OUTLINE-002 | Outline panel includes "+ Add Event" button to create new events | `src/app/panels/OutlinePanel.tsx` | - |
-| CC-REQ-PANELS-DEV-001 | Developer panel provides data seeding and debugging tools | `src/app/panels/DevPanel.tsx` | - |
+| CC-REQ-PANELS-DEV-001 | **REMOVED - v0.5.24** Developer panel (deprecated in favor of dedicated seed data management in Home page) | ~~`src/app/panels/DevPanel.tsx`~~ | - |
 
 ### 15. Event Interaction
 

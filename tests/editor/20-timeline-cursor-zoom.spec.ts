@@ -2,30 +2,12 @@
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
-async function openDevPanel(page: any) {
-  // Wait for Developer Panel to become enabled
-  await page.waitForFunction(() => {
-    const btn = document.querySelector('button[aria-label="Developer Panel"]');
-    return btn && !btn.hasAttribute('disabled');
-  }, { timeout: 5000 });
-
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
-async function closeDevPanel(page: any) {
-  await page.keyboard.press('Escape');
-}
-
 test.describe('Timeline Cursor Zoom Tests', () => {
   test('Cursor anchoring issue - Position vs Zoom behavior', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load Napoleon timeline and establish baseline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForTimeout(1000);
     await page.getByRole('button', { name: 'Fit All' }).click();
     await page.waitForTimeout(500);
@@ -124,13 +106,9 @@ test.describe('Timeline Cursor Zoom Tests', () => {
   
   test('Timeline axis cursor positioning - Napoleon 1800 area', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
+
     // Load Napoleon timeline
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await closeDevPanel(page);
+    await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForTimeout(1000);
     
     // Start from fit all
@@ -183,13 +161,9 @@ test.describe('Timeline Cursor Zoom Tests', () => {
   
   test('Timeline overflow area targeting', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-    
-    // Load clustered data with known overflow
-    await openDevPanel(page);
-    await page.getByRole('button', { name: 'Clear All' }).click();
-    await page.getByRole('button', { name: 'Clustered' }).click();
-    await closeDevPanel(page);
+
+    // Load French Revolution timeline with overflow badges (244 events)
+    await loadTestTimeline(page, 'french-revolution');
     await page.waitForTimeout(1000);
 
     // Identify overflow badges and their positions

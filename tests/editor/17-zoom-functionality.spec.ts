@@ -2,14 +2,6 @@
 import { test, expect } from '@playwright/test';
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
-async function openDevPanel(page: any) {
-  await page.getByRole('button', { name: 'Developer Panel' }).click();
-}
-
-async function closeDevPanel(page: any) {
-  await page.keyboard.press('Escape');
-}
-
 test.describe('Zoom Functionality Tests', () => {
   test('Zoom controls should filter visible events', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-001' });
