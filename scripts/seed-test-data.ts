@@ -27,7 +27,7 @@ const db = admin.firestore();
 const TEST_USER = {
   uid: 'iTMZ9n0IuzUSbhWfCaR86WsB2AC3',
   email: 'test@powertimeline.com',
-  name: 'E2E Test User',
+  username: 'E2E Test User',
   role: 'user',
 };
 
@@ -35,9 +35,8 @@ const TEST_USER = {
 const CYNACONS_USER = {
   id: 'cynacons',
   email: 'cynacons@powertimeline.dev',
-  name: 'CynaCons',
+  username: 'CynaCons',
   role: 'admin',
-  bio: 'Platform creator and timeline enthusiast',
   createdAt: admin.firestore.FieldValue.serverTimestamp(),
 };
 
@@ -54,7 +53,7 @@ async function seedTestData() {
     await db.collection('users').doc(TEST_USER.uid).set({
       id: TEST_USER.uid,
       email: TEST_USER.email,
-      name: TEST_USER.name,
+      username: TEST_USER.username,
       role: TEST_USER.role,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -73,7 +72,7 @@ async function seedTestData() {
       {
         id: 'timeline-napoleon',
         title: 'Napoleon Bonaparte',
-        description: 'Rise and fall of Napoleon from Corsica to Saint Helena',
+        description: 'Rise, exile, and fall of Napoleon from Corsica to Saint Helena',
         events: seedNapoleonTimeline(),
       },
       {

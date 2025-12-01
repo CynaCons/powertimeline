@@ -21,9 +21,8 @@ async function checkCynaCons() {
     const userData = userDoc.data();
     console.log('👤 CynaCons User:');
     console.log(`   ID: cynacons`);
-    console.log(`   Name: "${userData.name}"`);
-    console.log(`   Avatar: ${userData.avatar}`);
-    console.log(`   Bio: "${userData.bio || 'None'}"`);
+    console.log(`   Username: "${userData.username}"`);
+    console.log(`   Email: ${userData.email}`);
     console.log(`   Role: ${userData.role || 'user'}`);
     console.log(`   Created: ${userData.createdAt}`);
     console.log();

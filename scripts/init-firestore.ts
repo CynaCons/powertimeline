@@ -12,37 +12,29 @@ import type { User, Timeline } from '../src/types';
 const DEMO_USERS: User[] = [
   {
     id: 'cynacons',
-    name: 'CynaCons',
+    username: 'CynaCons',
     email: 'cynacons@powertimeline.dev',
-    avatar: '👨‍💻',
-    bio: 'Platform creator and timeline enthusiast',
     role: 'admin',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'alice',
-    name: 'Alice',
+    username: 'Alice',
     email: 'alice@powertimeline.dev',
-    avatar: '👩‍🎨',
-    bio: 'History teacher and timeline creator',
     role: 'user',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'bob',
-    name: 'Bob',
+    username: 'Bob',
     email: 'bob@powertimeline.dev',
-    avatar: '👨‍🔬',
-    bio: 'Science historian',
     role: 'user',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'charlie',
-    name: 'Charlie',
+    username: 'Charlie',
     email: 'charlie@powertimeline.dev',
-    avatar: '👨‍🏫',
-    bio: 'World history enthusiast',
     role: 'user',
     createdAt: new Date().toISOString(),
   },
@@ -95,7 +87,7 @@ async function initFirestore() {
     console.log('👥 Creating demo users...');
     for (const user of DEMO_USERS) {
       await setDoc(doc(db, 'users', user.id), user);
-      console.log(`   ✅ Created user: ${user.name} (${user.id})`);
+      console.log(`   ✅ Created user: ${user.username} (${user.id})`);
     }
 
     // Step 2: Create timelines

@@ -91,8 +91,16 @@ export function DeterministicLayoutComponent({
     // Add 2% padding to match LayoutEngine's time range calculation
     // This ensures hover dates align with anchor positions
     const padding = rawDateRange * 0.02;
-    const fullMinDate = rawMinDate - (rawDateRange / 2) - padding;
-    const fullMaxDate = rawMinDate + (rawDateRange / 2) + padding;
+
+    // Only center for single-event timelines; multi-event timelines use natural range
+    // This matches LayoutEngine.ts:303-308 logic
+    const isSingleEvent = events.length === 1;
+    const fullMinDate = isSingleEvent
+      ? rawMinDate - (rawDateRange / 2) - padding  // Center single event
+      : rawMinDate - padding;                      // Natural range for multi-event
+    const fullMaxDate = isSingleEvent
+      ? rawMaxDate + (rawDateRange / 2) + padding  // Center single event
+      : rawMaxDate + padding;                      // Natural range for multi-event
     const fullDateRange = rawDateRange + (padding * 2);
 
     // If zoomed (viewStart and viewEnd are not 0,1), calculate the visible time window
@@ -266,7 +274,12 @@ export function DeterministicLayoutComponent({
 
     // Add 2% padding to match other time range calculations
     const padding = rawDateRange * 0.02;
-    const paddedMinDate = rawMinDate - (rawDateRange / 2) - padding;
+
+    // Only center for single-event timelines; multi-event timelines use natural range
+    const isSingleEvent = events.length === 1;
+    const paddedMinDate = isSingleEvent
+      ? rawMinDate - (rawDateRange / 2) - padding  // Center single event
+      : rawMinDate - padding;                      // Natural range for multi-event
     const paddedDateRange = rawDateRange + (padding * 2);
 
     // Calculate visible time window using padded dates
@@ -572,10 +585,11 @@ export function DeterministicLayoutComponent({
 
 
   return (
-    <div 
+    <div
       key={`vw-${Number.isFinite(viewStart) ? viewStart.toFixed(3) : '0.000'}-${Number.isFinite(viewEnd) ? viewEnd.toFixed(3) : '1.000'}`}
       ref={containerRef}
-      className="absolute inset-0 bg-gray-100 overflow-hidden"
+      className="absolute inset-0 overflow-hidden"
+      style={{ backgroundColor: 'var(--color-background)' }}
     >
       {/* Column Borders removed - was a development visualization feature */}
       
@@ -759,10 +773,10 @@ export function DeterministicLayoutComponent({
 
         const cardTypeClass =
           card.cardType === 'full'
-            ? 'border-l-4 border-l-blue-500 border-gray-200 p-3'
+            ? 'border-l-4 border-l-blue-500 p-3'
             : card.cardType === 'compact'
-            ? 'border-l-4 border-l-green-500 border-gray-200 p-2'
-            : 'border-l-4 border-l-yellow-500 border-gray-200 p-1';
+            ? 'border-l-4 border-l-green-500 p-2'
+            : 'border-l-4 border-l-yellow-500 p-1';
 
         const cardHighlightClasses = isCardSelected
           ? 'ring-2 ring-amber-400 ring-opacity-80 outline outline-2 outline-offset-2 outline-amber-300 shadow-xl'
@@ -778,8 +792,10 @@ export function DeterministicLayoutComponent({
           width: card.width,
           height: card.height,
           zIndex: isCardSelected ? 25 : isCardHovered ? 22 : isCardPairHovered ? 21 : 10,
-          backgroundColor: isCardSelected ? 'rgba(254, 243, 199, 0.45)' : undefined,
-          boxShadow: isCardSelected ? '0 12px 24px rgba(251, 191, 36, 0.25)' : undefined
+          backgroundColor: isCardSelected ? 'rgba(254, 243, 199, 0.45)' : 'var(--color-surface)',
+          borderColor: 'var(--color-border-primary)',
+          boxShadow: isCardSelected ? '0 12px 24px rgba(251, 191, 36, 0.25)' : undefined,
+          color: 'var(--color-text-primary)'
         };
 
         const content =
@@ -796,7 +812,7 @@ export function DeterministicLayoutComponent({
             data-event-id={primaryCardEventId}
             data-card-type={card.cardType}
             data-cluster-id={card.clusterId}
-            className={`absolute bg-white rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} text-sm`}
+            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}
@@ -850,13 +866,13 @@ export function DeterministicLayoutComponent({
 function FullCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
-      <h3 className="card-title text-primary line-clamp-2 mb-1">{event.title}</h3>
+      <h3 className="card-title line-clamp-2 mb-1" style={{ color: 'var(--color-text-primary)' }}>{event.title}</h3>
       {event.description ? (
-        <p className="card-description text-secondary flex-1 line-clamp-3">{event.description}</p>
+        <p className="card-description flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
         <div className="flex-1" />
       )}
-      <div className="card-date text-tertiary">{formatEventDateTime(event)}</div>
+      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
     </div>
   );
 }
@@ -864,13 +880,13 @@ function FullCardContent({ event }: { event: Event }) {
 function CompactCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
-      <h3 className="card-title text-primary line-clamp-2 mb-1">{event.title}</h3>
+      <h3 className="card-title line-clamp-2 mb-1" style={{ color: 'var(--color-text-primary)' }}>{event.title}</h3>
       {event.description ? (
-        <p className="card-description text-secondary line-clamp-1">{event.description}</p>
+        <p className="card-description line-clamp-1" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
         <div className="flex-1" />
       )}
-      <div className="card-date text-tertiary">{formatEventDateTime(event)}</div>
+      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
     </div>
   );
 }
@@ -878,7 +894,7 @@ function CompactCardContent({ event }: { event: Event }) {
 function TitleOnlyCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex items-center">
-      <h3 className="card-title text-primary line-clamp-1">{event.title}</h3>
+      <h3 className="card-title line-clamp-1" style={{ color: 'var(--color-text-primary)' }}>{event.title}</h3>
     </div>
   );
 }

@@ -25,7 +25,7 @@
   --cc-bg-steel-2: #161f26;
   --cc-bg-steel-3: #1a232b;
   --cc-bg-app: #131a20;
-  --cc-color-axis-label: #000000;
+  --cc-color-axis-label: #e6edf3; /* Light text for dark theme */
   --cc-color-axis-line: #ffffff60;
   --cc-color-axis-line-strong: #ffffff80;
   --cc-color-grid-minor: #ffffff25;
@@ -104,6 +104,11 @@
   --cc-color-input-placeholder: #64748b;
   --cc-color-focus-ring: var(--cc-color-focus-accent);
   --cc-focus-ring-outline: 2px solid var(--cc-color-focus-ring);
+
+  /* Scrollbar styling (dark theme) */
+  --scrollbar-track: #0d1117;
+  --scrollbar-thumb: #8b2635;
+  --scrollbar-thumb-hover: #a62f3f;
 }
 
 /* === Light Theme Overrides === */
@@ -146,6 +151,11 @@
   --cc-color-card-title: #1f2328;
   --cc-color-card-body: #656d76;
   --cc-bg-gradient: linear-gradient(180deg, #f6f8fa 0%, #ffffff 100%);
+
+  /* Scrollbar styling (light theme) */
+  --scrollbar-track: #f0f0f0;
+  --scrollbar-thumb: #888888;
+  --scrollbar-thumb-hover: #666666;
 }
 
 /* High contrast mode adjustments (Phase F) */

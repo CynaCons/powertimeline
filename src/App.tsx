@@ -579,11 +579,11 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
   }, [overlay]);
 
   return (
-    <div className="min-h-screen bg-background text-primary transition-theme">
+    <div className="min-h-screen transition-theme" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
       {/* Full-bleed canvas area - no header, maximum space */}
       <div className="relative h-screen">
         {/* Enhanced Navigation Rail - Always visible */}
-        <aside className="absolute left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-30 flex flex-col items-center py-2">
+        <aside className="absolute left-0 top-0 bottom-0 w-14 border-r z-30 flex flex-col items-center py-2" style={{ borderColor: 'var(--color-border-primary)', backgroundColor: 'var(--color-surface-elevated)' }}>
           {/* PowerTimeline logo at top - clickable to go home */}
           <button
             onClick={() => navigate('/browse')}
@@ -618,7 +618,10 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
               type="button"
               title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'}
               onClick={() => setShowInfoPanels(!showInfoPanels)}
-              className={`material-symbols-rounded rounded-md p-2 transition-theme ${showInfoPanels ? 'bg-primary-50 text-primary-700' : 'text-secondary hover:bg-surface-elevated'}`}
+              className={`material-symbols-rounded rounded-md p-2 transition-theme ${showInfoPanels ? 'bg-primary-50 text-primary-700' : ''}`}
+              style={{ color: showInfoPanels ? undefined : 'var(--color-text-secondary)', backgroundColor: showInfoPanels ? undefined : 'transparent' }}
+              onMouseEnter={(e) => !showInfoPanels && (e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)')}
+              onMouseLeave={(e) => !showInfoPanels && (e.currentTarget.style.backgroundColor = 'transparent')}
               aria-pressed={showInfoPanels}
               aria-label="Toggle info panels"
             >
@@ -634,7 +637,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
             {overlay === 'events' && (
               <ErrorBoundary>
-                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
+                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 border-r flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
                   <OutlinePanel
                     filtered={filteredForList}
                     selectedId={selectedId}
@@ -652,7 +655,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             )}
             {overlay === 'editor' && !readOnly && (
               <ErrorBoundary>
-                <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-200 flex items-center justify-center">Loading...</div>}>
+                <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 border-l flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
                   <AuthoringOverlay
                     selected={selected}
                     isNewEvent={!selected}
@@ -678,7 +681,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             )}
             {overlay === 'dev' && (
               <ErrorBoundary>
-                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex items-center justify-center">Loading...</div>}>
+                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 border-r flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
                   <DevPanel
                     seedRandom={seedRandom}
                     seedClustered={seedClustered}
@@ -777,13 +780,13 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
 
               {/* Icon-based control bar */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
-                <div className="bg-white/95 backdrop-blur-sm border border-gray-300 rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center">
+                <div className="backdrop-blur-sm border rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)', opacity: 0.95 }}>
                   <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)}><span className="material-symbols-rounded">chevron_left</span></IconButton></Tooltip>
                   <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)}><span className="material-symbols-rounded">chevron_right</span></IconButton></Tooltip>
-                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                  <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
                   <Tooltip title="Zoom in" placement="top"><IconButton size="small" color="primary" onClick={() => zoom(0.8)}><AddIcon fontSize="small" /></IconButton></Tooltip>
                   <Tooltip title="Zoom out" placement="top"><IconButton size="small" color="default" onClick={() => zoom(1.25)}><RemoveIcon fontSize="small" /></IconButton></Tooltip>
-                  <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                  <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
                   <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }}><FitScreenIcon fontSize="small" /></IconButton></Tooltip>
                 </div>
               </div>

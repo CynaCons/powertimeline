@@ -80,7 +80,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
         {filtered.length === 0 && (
           <li>
             {filter ? (
-              <div className="text-[11px] text-gray-400">No matches</div>
+              <div className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>No matches</div>
             ) : (
               <div className="space-y-2 pr-2">
                 {Array.from({ length: 6 }).map((_, i) => (

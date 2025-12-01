@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Agent Spawner Server v1.3
+MCP Agent Spawner Server v1.4
 
 Exposes agent spawning as MCP tools for Claude Code.
 Simplified design with minimal parameters.
@@ -8,8 +8,9 @@ Simplified design with minimal parameters.
 Tools:
   spawn_claude(prompt, model?)  - Spawn Claude sub-agent (auto-loads CLAUDE.md)
   spawn_codex(prompt)           - Spawn Codex sub-agent (auto-loads AGENTS.md)
-  list()                        - List running/completed agents
+  list()                        - List running agents (compact output)
   result(agent_id)              - Get agent result
+  wait_for_agents(timeout?)     - Block until all agents complete, return results
 
 Context is auto-loaded by the respective CLIs:
   - Claude CLI: auto-loads CLAUDE.md
@@ -38,7 +39,7 @@ if sys.platform == "win32":
 IS_WINDOWS = sys.platform == "win32"
 
 # Version (single source of truth)
-SERVER_VERSION = "1.3.0"
+SERVER_VERSION = "1.4.0"
 
 # MCP SDK imports
 try:
@@ -79,8 +80,8 @@ def sanitize_for_json(text: str) -> str:
 
 
 def utc_now_iso() -> str:
-    """Get current UTC timestamp in ISO format."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    """Get current local timestamp in ISO format (for dev tool convenience)."""
+    return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def _cleanup_completed_agents():
@@ -126,6 +127,11 @@ async def list_tools() -> list[Tool]:
                         "enum": ["haiku", "sonnet", "opus"],
                         "default": "sonnet",
                         "description": "Model: haiku (fast/cheap), sonnet (balanced), opus (best)"
+                    },
+                    "timeout": {
+                        "type": "integer",
+                        "default": 600,
+                        "description": "Timeout in seconds (default 600 = 10 min). Use 300 for simple tasks, 900 for complex features."
                     }
                 }
             }
@@ -169,6 +175,23 @@ async def list_tools() -> list[Tool]:
                     }
                 }
             }
+        ),
+        Tool(
+            name="wait_for_agents",
+            description=(
+                "Block until all running agents complete, then return all results. "
+                "Use this instead of polling list(). Saves context window."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "timeout": {
+                        "type": "integer",
+                        "default": 300,
+                        "description": "Max seconds to wait (default 300 = 5 min)"
+                    }
+                }
+            }
         )
     ]
 
@@ -189,6 +212,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
             return await handle_list()
         elif name == "result":
             return await handle_result(arguments)
+        elif name == "wait_for_agents":
+            return await handle_wait_for_agents(arguments)
         else:
             return [TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]
     except Exception as e:
@@ -199,12 +224,9 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
         }, indent=2))]
 
 
-def _run_claude_background(agent_id: str, prompt: str, model: str):
+def _run_claude_background(agent_id: str, prompt: str, model: str, timeout: int = 600):
     """Run Claude spawn in background thread."""
     try:
-        # Determine timeout based on task
-        timeout = 600 if "test" in prompt.lower() else 300
-
         # Pass task directly - Claude CLI auto-loads CLAUDE.md
         # No extra context injection needed
         result: AgentResult = _spawn_claude(
@@ -214,6 +236,7 @@ def _run_claude_background(agent_id: str, prompt: str, model: str):
             timeout=timeout,
             context_level="none",  # Claude CLI auto-loads CLAUDE.md
             task_summary=prompt[:50] + "..." if len(prompt) > 50 else prompt,
+            dangerously_skip_permissions=True,  # Enable write access (like Codex bypass_sandbox)
         )
 
         with _agents_lock:
@@ -251,6 +274,7 @@ async def handle_spawn_claude(args: dict) -> list[TextContent]:
     """Handle spawn_claude tool call."""
     prompt = args["prompt"]
     model = args.get("model", "sonnet")
+    timeout = args.get("timeout", 600)  # Default 10 minutes
 
     agent_id = uuid.uuid4().hex[:8]
     started_at = utc_now_iso()
@@ -268,7 +292,7 @@ async def handle_spawn_claude(args: dict) -> list[TextContent]:
     # Spawn in background (pass original prompt for correct task_summary logging)
     thread = threading.Thread(
         target=_run_claude_background,
-        args=(agent_id, prompt, model),
+        args=(agent_id, prompt, model, timeout),
         daemon=True,
     )
     thread.start()
@@ -361,12 +385,12 @@ async def handle_spawn_codex(args: dict) -> list[TextContent]:
 
 
 async def handle_list() -> list[TextContent]:
-    """List running and completed agents."""
+    """List running agents (compact output to save context window)."""
     now = datetime.now(timezone.utc)
 
     with _agents_lock:
         running = []
-        for agent_id, info in list(running_agents.items()):  # list() for safe iteration
+        for agent_id, info in list(running_agents.items()):
             elapsed = 0
             if "started_at" in info:
                 try:
@@ -374,32 +398,18 @@ async def handle_list() -> list[TextContent]:
                     elapsed = int((now - started).total_seconds())
                 except Exception:
                     pass
+            # Compact: just ID and elapsed time
+            running.append({"id": agent_id, "sec": elapsed})
 
-            running.append({
-                "agent_id": agent_id,
-                "agent_type": info.get("agent_type", "unknown"),
-                "model": info.get("model"),
-                "elapsed_seconds": elapsed,
-                "task": info.get("task", "")[:50].replace('\n', ' '),
-            })
+        # Only last 3 completed IDs (not full details)
+        recent_ids = list(completed_agents.keys())[-3:]
 
-        # Last 20 completed
-        recent = list(completed_agents.items())[-20:]
-        completed = [
-            {
-                "agent_id": aid,
-                "agent_type": info.get("agent_type"),
-                "success": info.get("success"),
-                "cost_usd": info.get("cost_usd", 0),
-            }
-            for aid, info in recent
-        ]
-
+    # Minimal output
     return [TextContent(type="text", text=json.dumps({
         "running": running,
-        "running_count": len(running),
-        "recent_completed": completed,
-    }, indent=2, ensure_ascii=False))]
+        "completed_ids": recent_ids,
+        "tip": "Use wait_for_agents() to block until done and get all results"
+    }))]
 
 
 async def handle_result(args: dict) -> list[TextContent]:
@@ -433,6 +443,81 @@ async def handle_result(args: dict) -> list[TextContent]:
         "agent_id": agent_id,
         "status": "not_found",
         "message": "No agent found with this ID.",
+    }, indent=2, ensure_ascii=False))]
+
+
+async def handle_wait_for_agents(args: dict) -> list[TextContent]:
+    """Block until all running agents complete, then return all results.
+
+    This eliminates polling loops and saves context window by returning
+    all results in a single response.
+    """
+    timeout = args.get("timeout", 300)  # Default 5 minutes
+    poll_interval = 2  # Check every 2 seconds
+    elapsed = 0
+
+    # Track which agents we're waiting for at the start
+    with _agents_lock:
+        waiting_for = set(running_agents.keys())
+
+    if not waiting_for:
+        # No agents running - return any recent results
+        with _agents_lock:
+            recent = list(completed_agents.items())[-5:]
+        return [TextContent(type="text", text=json.dumps({
+            "status": "no_agents_running",
+            "recent_results": [
+                {"id": aid, "success": info.get("success"), "result": info.get("result", "")[:500]}
+                for aid, info in recent
+            ]
+        }, indent=2, ensure_ascii=False))]
+
+    # Wait for all agents to complete
+    while elapsed < timeout:
+        await asyncio.sleep(poll_interval)
+        elapsed += poll_interval
+
+        with _agents_lock:
+            still_running = set(running_agents.keys()) & waiting_for
+            if not still_running:
+                # All done! Gather results
+                results = []
+                for agent_id in waiting_for:
+                    if agent_id in completed_agents:
+                        info = completed_agents[agent_id]
+                        results.append({
+                            "id": agent_id,
+                            "type": info.get("agent_type"),
+                            "success": info.get("success"),
+                            "result": info.get("result", ""),
+                            "error": info.get("error"),
+                            "cost_usd": info.get("cost_usd", 0),
+                        })
+
+                return [TextContent(type="text", text=json.dumps({
+                    "status": "all_completed",
+                    "elapsed_seconds": elapsed,
+                    "results": results
+                }, indent=2, ensure_ascii=False))]
+
+    # Timeout - return partial results
+    with _agents_lock:
+        still_running = list(set(running_agents.keys()) & waiting_for)
+        completed_results = []
+        for agent_id in waiting_for:
+            if agent_id in completed_agents:
+                info = completed_agents[agent_id]
+                completed_results.append({
+                    "id": agent_id,
+                    "success": info.get("success"),
+                    "result": info.get("result", "")[:500],  # Truncate on timeout
+                })
+
+    return [TextContent(type="text", text=json.dumps({
+        "status": "timeout",
+        "elapsed_seconds": elapsed,
+        "still_running": still_running,
+        "completed_results": completed_results
     }, indent=2, ensure_ascii=False))]
 
 

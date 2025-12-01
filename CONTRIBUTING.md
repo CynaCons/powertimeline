@@ -99,6 +99,49 @@ npm test
   });
   ```
 
+### Test Environment Setup
+
+PowerTimeline uses Playwright for E2E testing with Firebase Authentication. Some tests require valid credentials.
+
+#### Quick Setup
+
+```bash
+# 1. Copy the example environment file
+cp .env.test.example .env.test
+
+# 2. Edit .env.test with real credentials
+#    - TEST_USER_EMAIL: A valid Firebase Auth account
+#    - TEST_USER_PASSWORD: Password for that account
+#    - TEST_USER_UID: Firebase Auth UID (find in Firebase Console)
+#    - TEST_USER_TIMELINE_ID: A timeline ID owned by this user
+
+# 3. Run tests
+npm test                          # All tests
+npx playwright test tests/home/   # Home page tests only
+npx playwright test --ui          # Interactive UI mode
+```
+
+#### Test Categories
+
+| Directory | Requires Auth | Description |
+|-----------|---------------|-------------|
+| `tests/production/` | No | Public smoke tests (run against powertimeline.com) |
+| `tests/editor/` | Partial | Timeline editor tests |
+| `tests/home/` | Yes | Home page and discovery tests |
+| `tests/admin/` | Yes (admin role) | Admin panel tests |
+| `tests/db/` | No | Firestore schema compliance |
+
+#### Getting Test Credentials
+
+1. **For contributors**: Ask a maintainer for dev environment credentials
+2. **For maintainers**: Use Firebase Console to create a test user in the dev project (`powertimeline-dev`)
+
+#### Troubleshooting
+
+- **Tests timeout on auth**: Check `.env.test` has valid credentials
+- **Admin tests fail**: Ensure test user has `role: 'admin'` in Firestore
+- **"Missing credentials" warning**: Create `.env.test` from `.env.test.example`
+
 ## Architecture Guidelines
 
 ### Component Structure

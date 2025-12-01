@@ -179,7 +179,7 @@ function FullCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-start justify-between mb-1">
-        <h3 className="card-title text-primary line-clamp-2 flex-1 pr-2">
+        <h3 className="card-title line-clamp-2 flex-1 pr-2" style={{ color: 'var(--color-text-primary)' }}>
           {event.title}
         </h3>
         <div className="flex items-center gap-1">
@@ -192,10 +192,10 @@ function FullCardContent({ event }: { event: Event }) {
           </span>
         </div>
       </div>
-      <p className="card-description text-secondary mb-2 flex-1 line-clamp-3">
+      <p className="card-description mb-2 flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
-      <div className="card-date text-tertiary">
+      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>
         {formatDate(event.date)}
       </div>
     </div>
@@ -208,7 +208,7 @@ function CompactCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-start justify-between mb-1">
-        <h3 className="card-title text-primary line-clamp-2 flex-1 pr-2">
+        <h3 className="card-title line-clamp-2 flex-1 pr-2" style={{ color: 'var(--color-text-primary)' }}>
           {event.title}
         </h3>
         <span
@@ -219,10 +219,10 @@ function CompactCardContent({ event }: { event: Event }) {
           {eventIcon.icon}
         </span>
       </div>
-      <p className="card-description text-secondary line-clamp-1 flex-1">
+      <p className="card-description line-clamp-1 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
-      <div className="card-date text-tertiary">
+      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>
         {formatDate(event.date)}
       </div>
     </div>
@@ -234,7 +234,7 @@ function TitleOnlyCardContent({ event }: { event: Event }) {
 
   return (
     <div className="h-full flex items-center justify-between">
-      <h3 className="card-title text-primary line-clamp-1 flex-1 pr-2">
+      <h3 className="card-title line-clamp-1 flex-1 pr-2" style={{ color: 'var(--color-text-primary)' }}>
         {event.title}
       </h3>
       <span

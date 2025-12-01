@@ -27,6 +27,7 @@ interface DeleteTimelineDialogProps {
 export function DeleteTimelineDialog({ open, timelineId, onClose, onSuccess }: DeleteTimelineDialogProps) {
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [generalError, setGeneralError] = useState('');
+  const [confirmationText, setConfirmationText] = useState('');
 
   // Load timeline data when dialog opens
   useEffect(() => {
@@ -63,6 +64,7 @@ export function DeleteTimelineDialog({ open, timelineId, onClose, onSuccess }: D
   const handleClose = () => {
     setTimeline(null);
     setGeneralError('');
+    setConfirmationText('');
     onClose();
   };
 
@@ -103,9 +105,18 @@ export function DeleteTimelineDialog({ open, timelineId, onClose, onSuccess }: D
               This action cannot be undone.
             </Alert>
 
-            <DialogContentText>
-              Are you sure you want to proceed?
+            <DialogContentText sx={{ mb: 2 }}>
+              To confirm deletion, please type the timeline name exactly as shown above:
             </DialogContentText>
+
+            <input
+              type="text"
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder="Enter timeline name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              autoFocus
+            />
           </>
         )}
       </DialogContent>
@@ -115,7 +126,7 @@ export function DeleteTimelineDialog({ open, timelineId, onClose, onSuccess }: D
           onClick={handleDelete}
           variant="contained"
           color="error"
-          disabled={!timeline}
+          disabled={!timeline || confirmationText !== timeline.title}
         >
           Delete Timeline
         </Button>

@@ -2,11 +2,11 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.15
-**Next Milestone:** v0.5.16 - Firestore Data Refinement
+**Current Version:** v0.5.21.1
+**Next Milestone:** v0.5.22 - Cloud Functions for Platform Statistics
 
 ### Key Metrics
-- **Total Iterations:** 190+ completed (v0.2.0 → v0.5.15)
+- **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
 - **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~150 requirements (97%)
 - **Test Coverage:** ~113 requirements verified (73%)
@@ -21,11 +21,13 @@
 - ✅ Multi-agent orchestration MCP server (v0.5.13)
 - ✅ Username-based URLs & navigation fixes (v0.5.14)
 - ✅ MCP server hardening & Codex write access (v0.5.15)
+- ✅ Stats caching & visibility fixes (v0.5.17)
+- ✅ Timeline Card Menu & Landing Page (v0.5.18)
+- ✅ Landing Page Roadmap section (v0.5.19)
+- ✅ Editor Dark Theme fixes (v0.5.20-v0.5.21)
 
-### Next Up (v0.5.16)
-- Complete Firestore schema compliance
-- Seed writable test data for E2E flows
-- Add missing E2E test for private timeline visibility
+### Next Up (v0.5.22)
+- Cloud Functions for atomic platform statistics
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -1171,7 +1173,7 @@
 - [x] Filter out private timelines from HomePage discovery feeds (Recently Edited, Popular)
 - [x] Filter out private timelines from LandingPage example timelines
 - [x] Ensure "My Timelines" section still shows owner's private timelines (unchanged - no filter)
-- [ ] Add E2E test verifying private timelines are hidden from public feeds
+- [x] Add E2E test verifying private timelines are hidden from public feeds (moved to v0.5.15.1, 81-private-timeline-filtering.spec.ts)
 
 **Codex Write Access Fix:**
 - [x] Investigate Codex `--sandbox workspace-write` bug (confirmed broken)
@@ -1181,37 +1183,323 @@
 
 ---
 
+### v0.5.15.1 - Stabilization & Test Health
+**Goal:** Address documentation drift, fix failing test suites, and close critical test coverage gaps
+
+**Documentation Sync:**
+- [x] Update SRS_INDEX.md version from v0.5.7 to v0.5.15
+- [x] Update AGENTS.md version reference from v0.5.14 to v0.5.15
+- [ ] Audit and sync requirement counts across all SRS documents
+- [x] Remove stale "multi-event" and "infinite card" references from ARCHITECTURE.md
+- [x] Update SRS_INDEX.md "Known Issues" section with current test status
+
+**Admin Test Suite Repair:**
+- [x] Diagnose admin test failures (authentication/routing changes)
+- [x] Fix T82 admin access control test (added admin-heading test ID)
+- [x] Fix T83 user management panel test (added 10+ data-testid hooks to UserManagementPanel)
+- [x] Fix T84 statistics dashboard test (added testids + updated selectors)
+- [x] Fix T85 bulk operations test (fixed dialog selector)
+- [x] Fix T86 activity log test (added search/filter testids to ActivityLogPanel)
+- [x] Update admin test selectors for v0.5.x routing structure
+
+**Home Test Suite Completion:**
+- [x] Add E2E test for search functionality (CC-REQ-SEARCH-001) - 77-search-functionality.spec.ts (14 tests)
+- [x] Add E2E test for Recently Edited feed (CC-REQ-RECENT-001) - 78-recently-edited-feed.spec.ts
+- [x] Add E2E test for Popular timelines feed (CC-REQ-POPULAR-001) - 79-popular-timelines-feed.spec.ts
+- [x] Add E2E test for private timeline visibility filtering - 81-private-timeline-filtering.spec.ts (security tests)
+- [x] Fix permissive tests to fail when events don't render - strict assertions in 02-navigation, 08-readonly-security
+
+**Critical Bug Fixes:**
+- [x] Investigate multi-event layout visibility bug (3 events persist, 1 visible)
+  - Root cause: DegradationEngine mixed-card-type capacity math too restrictive
+  - For 3 events, mixed types [full,compact,compact] but capacity only fits 1 full card
+  - Fix: Skip mixed types for 3-event clusters, use uniform compact cards
+- [x] Fix multi-event layout bug in DegradationEngine.ts (Codex agent, DegradationEngine.ts:391-409)
+- [x] Add strict event loading assertion to smoke tests (02-navigation.spec.ts, 08-readonly-security.spec.ts)
+- [ ] Document or fix single-event zoom positioning edge case
+
+**Test Infrastructure:**
+- [x] Create .env.test.example template for contributors
+- [x] Document test environment setup in CONTRIBUTING.md
+- [ ] Add CI check for test credential availability
+
+---
+
+### v0.5.15.2 - MCP Server Optimization & Test Fixes
+**Goal:** Reduce context window usage during agent orchestration and fix new test failures
+**Status:** Complete
+
+**MCP Server v1.4 Improvements:**
+- [x] Implement compact `list()` output (~100 bytes vs ~2KB)
+- [x] Add blocking `wait_for_agents(timeout?)` tool - eliminates polling loops
+- [x] Returns all agent results in single response after completion
+
+**Test Fixes:**
+- [x] **Fix Visibility selector** in tests 79, 81
+  - Changed `getByLabel('Visibility')` to `getByRole('combobox', { name: /public - visible to everyone/i })`
+  - Files: `tests/home/79-popular-timelines-feed.spec.ts`, `tests/home/81-private-timeline-filtering.spec.ts`
+
+- [x] **Optimize test seeding** in tests 78, 79
+  - Replaced UI-based timeline creation with direct Firestore Admin SDK writes
+  - Using `seedTimelinesForTestUser()` from `tests/utils/timelineSeedUtils.ts`
+  - Reduces beforeAll from ~45s to <1s
+
+- [x] **Fix search dropdown tests** in test 77
+  - Added `data-testid="browse-search-dropdown"` to HomePage.tsx search results container
+  - File: `src/pages/HomePage.tsx:452`
+
+- [x] **Fix isFocused API call** in test 77
+  - Replaced `input.isFocused()` with `expect(input).toBeFocused()` assertion
+  - File: `tests/home/77-search-functionality.spec.ts:159`
+
+- [x] **Fix strict mode violation** in test 77
+  - Added `.first()` qualifier to avoid multiple element matches
+  - File: `tests/home/77-search-functionality.spec.ts:211`
+
+**Known Test Data Dependencies (moved to v0.5.16):**
+- T77.9, T77.11 require seeded test data (`French Revolution`, `Napoleon Bonaparte` timelines)
+
+---
+
 ### v0.5.16 - Firestore Data Refinement
 **Goal:** Complete Firestore compliance and fix remaining data issues
+**Status:** Complete
 
-**Code Updates (from v0.5.12):**
-- [ ] Update User interface in src/types.ts
-- [ ] Update Event interface in src/types.ts
-- [ ] Update UserProfilePage to show read-only user info from Firestore
-- [ ] Remove EditUserProfileDialog (no editable fields for now)
-- [ ] Update UserAvatar component (use username initials only)
-- [ ] Remove avatar/bio references from auth service
-- [ ] Update Firestore service functions
-- [ ] Clean up any UI components referencing removed fields
+- [x] Clean up deprecated User field references in scripts directory (8 files updated)
+- [x] Fix T77 seed script to use existing cynacons user by username query
+- [x] Prevent duplicate user creation (skip if exists by email/username)
+- [x] Assign French Revolution and Napoleon timelines to real cynacons user (UID=HL3gR4MbXKe4gPc4vUwksaoKEn93)
+- [x] Run seed script: 244 French Revolution events + 63 Napoleon events seeded successfully
+- [x] Pass SRS_DB.md compliance tests (4/4 passing: users, timelines, events, activity logs)
 
-**Data Fixes (from Codex feedback):**
-- [ ] Ensure all Timeline documents have required `id` field
-- [ ] Ensure all Event documents have required `id` and `timelineId` fields
-- [ ] Run data validation script on dev and prod
-- [ ] Seed writable data for creation/persistence test flows
-
-**Testing:**
-- [ ] Verify existing tests still pass after field removal
-- [ ] Update any tests that reference removed fields
-- [ ] Pass SRS_DB.md compliance tests (tests/db/)
+**Key Changes:**
+- Modified `scripts/seed-test-77-data.ts` to query existing user by username instead of creating duplicate
+- Timelines now properly assigned to real cynacons Firebase Auth user
+- No more duplicate 'cynacons' user issues in dev database
 
 ### v0.5.17 - Platform Statistics Aggregation
 **Goal:** Move stats calculation from client-side scans to server-side aggregation
+**Status:** Complete
 
-- [ ] Create `stats/platform` document in Firestore
-- [ ] Create Cloud Functions for real-time stats updates
-- [ ] Update getPlatformStats() to read from stats doc
-- [ ] Add client-side caching with TTL
+- [x] Create `stats/platform` document in Firestore
+  - Added STATS collection and PlatformStats interface
+- [x] Update getPlatformStats() with caching strategy
+  - Memory cache (5min TTL) → Firestore doc → Full scan fallback
+  - Auto-saves stats to Firestore when recalculated
+- [x] Add client-side caching with TTL (5 minutes)
+- [x] Add cache invalidation on timeline create/delete
+- [x] Add Firestore security rules for stats collection
+- [x] Add refreshPlatformStats() and invalidateStatsCache() helpers
+
+**Note:** Cloud Functions deferred - client-side aggregation approach scales well
+
+### v0.5.18 - Timeline Card Menu Implementation
+**Goal:** Enhance timeline card menus with ownership-based actions and improved delete confirmation
+**Status:** Complete
+
+**Timeline Card Menu Enhancements:**
+- [x] Add "Open" menu option (renamed from "View")
+- [x] Add "Go to Owner" menu option for non-owner users (navigates to owner's profile)
+- [x] Add "Edit" menu option for timeline owner
+- [x] Add "Delete" menu option for timeline owner
+- [x] Enhance DeleteTimelineDialog with name confirmation requirement
+- [x] Require exact timeline name match to enable delete button
+- [x] Verify menu integration on HomePage (My Timelines, Recently Edited, Popular sections)
+- [x] Verify menu integration on UserProfilePage
+- [x] Fix unused imports in LandingPage.tsx
+- [x] Build verification successful
+
+**Files Changed:**
+- src/components/TimelineCardMenu.tsx (menu options updated, "Go to Owner" added)
+- src/components/DeleteTimelineDialog.tsx (name confirmation field added)
+- src/pages/LandingPage.tsx (cleanup unused imports)
+
+**Previous v0.5.18 Work (Landing Page & User Page):**
+- [x] Landing page rework (Explore Public Timelines, Create Timeline button)
+- [x] User page layout improvements (theme-aware CSS, responsive design)
+
+**Deferred to Future Iterations:**
+- [ ] Fix Home page dark mode: scrollbar styling
+- [x] Fix Editor dark mode: wrong colors and bad contrasts (DONE in v0.5.20-v0.5.21)
+- [ ] Home page: My Timelines display on 2 rows instead of 1, vertical scroll
+
+**Incomplete Tasks from Earlier Iterations (for discussion):**
+- v0.4.0: Responsive layout, timeline card redesign, user avatars, empty states
+- v0.4.1: 6 Playwright CRUD tests (v5/74-79)
+- v0.5.15.1: SRS audit, single-event zoom edge case, CI credential check
+
+### v0.5.19 - Landing Page Roadmap Section
+**Goal:** Add visual roadmap section to landing page
+**Status:** Complete
+
+- [x] Create git-style roadmap visualization with vertical line
+- [x] Add completed phases (v0.2.x - v0.5.x) with checkmarks
+- [x] Highlight current phase (v0.5.18)
+- [x] Show upcoming phases (v0.6.x - v1.0.0)
+- [x] Match dark theme aesthetic
+- [x] Ensure responsive design
+
+**Implementation:**
+- Added roadmap section after features section, before final CTA
+- Git-style vertical line with commit dots (green checkmarks for completed)
+- Current phase highlighted with orange color and pulsing dot
+- Future phases shown with reduced opacity and empty circle icons
+- Fully responsive with single-column layout
+- Uses existing dark theme CSS variables
+
+### v0.5.20 - Editor Dark Theme Contrast Fixes
+**Goal:** Fix dark theme contrast issues in editor components
+**Status:** Complete
+
+- [x] Fix Timeline Axis dark theme contrast (axis bar, ticks, labels)
+- [x] Fix Breadcrumb dark theme contrast (text visibility)
+- [x] Verify both light and dark themes have proper contrast
+- [x] Run production build to verify no errors
+
+**Files Modified:**
+- `src/components/EnhancedTimelineAxis.tsx` - Changed hardcoded #000000 to var(--page-text-primary) for axis bar, tick marks, and labels
+- `src/pages/EditorPage.tsx` - Changed breadcrumb wrapper from bg-white/90 to theme-aware CSS variables (--page-bg-elevated, --page-border)
+
+### v0.5.21 - Event Editor (AuthoringOverlay) Dark Mode Fix
+**Goal:** Fix dark theme contrast in the Event Editor overlay
+**Status:** Complete
+
+- [x] Fix main overlay container background (line 292: currently white, should use theme variables)
+- [x] Fix left/right navigation panel backgrounds (lines 300, 598)
+- [x] Fix form inputs to use theme-aware colors (TextField components)
+- [x] Fix header/footer backgrounds
+- [x] Fix text colors for dark theme contrast
+- [x] Fix border colors to use theme variables
+- [x] Fix EventPreviewList component theme colors
+- [x] Run build verification
+- [x] Test both light and dark modes
+
+**Files Modified:**
+- `src/app/overlays/AuthoringOverlay.tsx` - Replaced all hardcoded Tailwind classes with CSS variable inline styles
+- `src/app/components/EventPreviewList.tsx` - Updated to use theme-aware colors for text, backgrounds, and borders
+
+### v0.5.19 - Timeline Axis Date Alignment Fix
+**Goal:** Fix timeline axis labels misalignment with event anchor positions
+**Status:** Complete
+
+- [x] Fix time range calculation in DeterministicLayoutComponent.tsx (lines 94-104)
+- [x] Match LayoutEngine.ts logic: center single-event, natural range for multi-event
+- [x] Update viewTimeWindow calculation (lines 269-283) for consistency
+- [x] Build verification successful
+- [x] Axis labels now align with event anchor positions
+
+**Root Cause:**
+Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine only centers for single-event timelines, creating a mismatch.
+
+**Files Modified:**
+- `src/layout/DeterministicLayoutComponent.tsx` - Fixed fullMinDate/fullMaxDate calculations (lines 94-104, 269-283)
+
+### v0.5.19.1 - Timeline Axis Labels Dark Theme Fix
+**Goal:** Fix axis labels invisible in dark theme
+**Status:** Complete
+
+- [x] Fix axis label text colors (lines 404, 430)
+- [x] Use var(--page-text-primary) for primary labels (years)
+- [x] Use var(--page-text-secondary) for secondary/tertiary labels (months, days, hours)
+- [x] Build verification successful
+
+**Files Modified:**
+- `src/components/EnhancedTimelineAxis.tsx` - Updated labelColor to use CSS variables for theme-aware text colors
+
+### v0.5.21.1 - Modern Rectangle Scrollbar Styling
+**Goal:** Implement modern rectangular scrollbar styling with dark red accent for dark theme
+**Status:** Complete
+
+- [x] Add scrollbar CSS variables to tokens.css (dark theme: burgundy #8b2635, light theme: medium gray)
+- [x] Implement Webkit scrollbar styling (Chrome, Safari, Edge)
+- [x] Implement Firefox scrollbar styling
+- [x] 14px width for wider, modern appearance
+- [x] Rectangle shape with 2px border (no rounded corners)
+- [x] Theme-aware colors matching page backgrounds
+- [x] Build verification successful
+
+**Files Modified:**
+- `src/styles/tokens.css` - Added --scrollbar-track, --scrollbar-thumb, --scrollbar-thumb-hover CSS variables for both dark and light themes
+- `src/index.css` - Added ::-webkit-scrollbar styles and Firefox scrollbar-color/scrollbar-width rules
+
+### v0.5.22 - Cloud Functions for Platform Statistics
+**Goal:** Replace client-side stats aggregation with server-side Cloud Functions for atomic, real-time counters
+**Status:** Planned
+
+**Infrastructure:**
+- [ ] Set up Firebase Cloud Functions in project
+- [ ] Configure functions deployment pipeline
+- [ ] Add Blaze plan if not already active
+
+**Cloud Functions:**
+- [ ] `onUserCreate` - Increment `stats/platform.totalUsers`
+- [ ] `onUserDelete` - Decrement `stats/platform.totalUsers`
+- [ ] `onTimelineCreate` - Increment timeline counts (total + visibility type)
+- [ ] `onTimelineDelete` - Decrement timeline counts
+- [ ] `onTimelineUpdate` - Handle visibility changes (adjust public/unlisted/private counts)
+- [ ] `onEventWrite` - Update `totalEvents` count (batch-aware)
+- [ ] `onViewCountIncrement` - Update `totalViews` aggregate
+
+**Database Changes:**
+- [ ] Create `/stats/platform` document with atomic counter fields
+- [ ] Add `FieldValue.increment()` for thread-safe updates
+- [ ] Remove client-side `calculatePlatformStats()` full scans
+
+**Client Updates:**
+- [ ] Simplify `getPlatformStats()` to read-only (no writes)
+- [ ] Remove `saveStatsToFirestore()` function
+- [ ] Keep memory cache for performance
+- [ ] Update admin dashboard to use Firestore stats
+
+**Tests:**
+- [ ] Unit tests for Cloud Functions (firebase-functions-test)
+- [ ] E2E test: Create timeline → verify stats increment
+- [ ] E2E test: Delete timeline → verify stats decrement
+- [ ] E2E test: Change visibility → verify counts adjust
+
+### v0.5.23 - Event Editor & Viewer Rework (Future)
+**Goal:** Modernize Event Editor panel and enable read-only viewing
+**Status:** Planned
+
+- [ ] Update Event Editor (AuthoringOverlay) visual design
+- [ ] Enable read-only mode for non-owners (view event details without edit)
+- [ ] Rework Event List Viewer (left panel) UX
+- [ ] Improve navigation between events
+- [ ] Add event detail view (separate from edit mode)
+
+### v0.5.24 - Dev Panel Removal
+**Goal:** Remove Dev Panel from codebase and migrate dependent tests
+**Status:** Planned (Audit Complete)
+
+**Audit Results:**
+- 16 test files with 95 `openDevPanel`/`closeDevPanel` references
+- 1 SRS requirement (CC-REQ-PANELS-DEV-001)
+- Dev Panel still active in App.tsx (Alt+D, command palette)
+
+**Migration Plan (No new seeding utilities needed - timelines exist in Firestore):**
+- [ ] Update tests to navigate directly to existing Firestore timelines
+- [ ] Replace Dev Panel seeding calls with direct timeline URLs
+- [ ] Use `loadTestTimeline()` utility for test data access
+- [ ] Remove `openDevPanel`/`closeDevPanel` helper functions
+
+**Code Removal:**
+- [ ] Remove `src/app/panels/DevPanel.tsx`
+- [ ] Remove Dev Panel lazy import from `src/App.tsx:22`
+- [ ] Remove command palette entry from `src/App.tsx:522-530`
+- [ ] Remove overlay state management from `src/App.tsx`
+- [ ] Remove `src/lib/devSeed.ts` (if no longer needed elsewhere)
+
+**Documentation Updates:**
+- [ ] Deprecate CC-REQ-PANELS-DEV-001 in `docs/SRS.md`
+- [ ] Update `docs/SRS_UI_AUDIT.md` status to "REMOVED"
+
+**High-Priority Test Files (16 total):**
+1. `tests/editor/09-seeding-scenarios.spec.ts` - 12 refs
+2. `tests/editor/18-zoom-stability.spec.ts` - 12 refs
+3. `tests/editor/19-zoom-edge-cases.spec.ts` - Multiple refs
+4. `tests/editor/20-timeline-cursor-zoom.spec.ts` - Multiple refs
+5. `tests/editor/21-timeline-minimap.spec.ts` - Multiple refs
+6. Remaining 11 files with simpler migrations
 
 ## Phase 3: Collaboration Features (v0.6.x)
 

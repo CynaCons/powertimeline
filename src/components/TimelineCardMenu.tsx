@@ -100,10 +100,23 @@ export function TimelineCardMenu({
       >
         <MenuItem onClick={handleView}>
           <ListItemIcon>
-            <span className="material-symbols-rounded text-gray-700">visibility</span>
+            <span className="material-symbols-rounded text-gray-700">open_in_new</span>
           </ListItemIcon>
-          <ListItemText>View</ListItemText>
+          <ListItemText>Open</ListItemText>
         </MenuItem>
+
+        {!isOwner && ownerUsername && (
+          <MenuItem onClick={(e) => {
+            e.stopPropagation();
+            handleClose();
+            navigate(`/${ownerUsername}`);
+          }}>
+            <ListItemIcon>
+              <span className="material-symbols-rounded text-gray-700">person</span>
+            </ListItemIcon>
+            <ListItemText>Go to Owner</ListItemText>
+          </MenuItem>
+        )}
 
         {isOwner && onEdit && (
           <MenuItem onClick={handleEdit}>

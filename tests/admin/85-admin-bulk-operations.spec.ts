@@ -93,7 +93,7 @@ test.describe('v5/85 Admin Panel - Bulk Operations', () => {
     await bulkDeleteButton.click();
 
     // Confirmation dialog should appear
-    await expect(page.locator('text=Confirm Bulk Delete')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByRole('heading', { name: /Confirm.*Bulk.*Deletion/i })).toBeVisible({ timeout: 3000 });
 
     // Cancel instead of confirming (don't actually delete users in test)
     const cancelButton = page.locator('button:has-text("Cancel")');

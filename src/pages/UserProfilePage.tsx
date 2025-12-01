@@ -190,9 +190,9 @@ export function UserProfilePage() {
   };
 
   return (
-    <div data-testid="user-profile-page" className="min-h-screen bg-gray-50 flex">
-      {/* Navigation Rail */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
+    <div data-testid="user-profile-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
+      {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
           onClick={() => navigate('/browse')}
@@ -215,11 +215,11 @@ export function UserProfilePage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 ml-14">
+      {/* Main Content Area - full width on mobile, offset on md+ */}
+      <div className="flex-1 md:ml-14">
         {/* Header */}
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="max-w-6xl mx-auto px-6 py-3">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4">
             <div className="flex items-center justify-between">
               {/* Brand: Logo + PowerTimeline BETA */}
               <button
@@ -243,55 +243,61 @@ export function UserProfilePage() {
                   BETA
                 </span>
               </button>
-              {firebaseUser && (
-                <UserProfileMenu
-                  onLogout={async () => {
-                    await signOutUser();
-                    navigate('/');
-                  }}
-                />
-              )}
+              <div className="flex items-center gap-2">
+                {/* Mobile: Theme toggle (since nav rail is hidden) */}
+                <div className="md:hidden">
+                  <ThemeToggleButton />
+                </div>
+                {firebaseUser && (
+                  <UserProfileMenu
+                    onLogout={async () => {
+                      await signOutUser();
+                      navigate('/');
+                    }}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </header>
 
         {/* User Profile Header */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
             {loading || !user ? (
               // Skeleton loader for user profile
               <div className="flex items-center gap-6 animate-pulse">
-                <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+                <div className="w-16 h-16 rounded-full" style={{ backgroundColor: 'var(--page-bg)' }}></div>
                 <div className="flex-1">
-                  <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-96 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-32"></div>
+                  <div className="h-8 rounded w-64 mb-2" style={{ backgroundColor: 'var(--page-bg)' }}></div>
+                  <div className="h-4 rounded w-96 mb-2" style={{ backgroundColor: 'var(--page-bg)' }}></div>
+                  <div className="h-3 rounded w-32" style={{ backgroundColor: 'var(--page-bg)' }}></div>
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-6">
                 <UserAvatar user={user} size="xlarge" />
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">@{user.username}</h1>
+                  <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--page-text-primary)' }}>@{user.username}</h1>
                   <div className="mt-4 flex items-center gap-6 text-sm">
                     <div>
-                      <span className="font-semibold text-gray-900">{timelines.length}</span>
-                      <span className="text-gray-500 ml-1">Timelines</span>
+                      <span className="font-semibold" style={{ color: 'var(--page-text-primary)' }}>{timelines.length}</span>
+                      <span className="ml-1" style={{ color: 'var(--page-text-secondary)' }}>Timelines</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold" style={{ color: 'var(--page-text-primary)' }}>
                         {timelines.reduce((sum, t) => sum + (t.eventCount || 0), 0)}
                       </span>
-                      <span className="text-gray-500 ml-1">Events</span>
+                      <span className="ml-1" style={{ color: 'var(--page-text-secondary)' }}>Events</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold" style={{ color: 'var(--page-text-primary)' }}>
                         {timelines.reduce((sum, t) => sum + (t.viewCount || 0), 0)}
                       </span>
-                      <span className="text-gray-500 ml-1">Views</span>
+                      <span className="ml-1" style={{ color: 'var(--page-text-secondary)' }}>Views</span>
                     </div>
                   </div>
-                  <div className="mt-2 text-sm text-gray-500">
+                  <div className="mt-2 text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                     Joined {new Date(user.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -301,22 +307,35 @@ export function UserProfilePage() {
         </div>
 
         {/* User Timelines */}
-        <main className="max-w-6xl mx-auto px-6 py-8">
+        <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
               Timelines ({loading ? '...' : timelines.length})
             </h2>
             {!loading && timelines.length > 1 && (
               <div className="flex items-center gap-2">
-                <label htmlFor="sort-select" className="text-sm text-gray-600">
+                <label htmlFor="sort-select" className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                   Sort by:
                 </label>
                 <select
                   id="sort-select"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'updated' | 'title' | 'views')}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1 text-sm border rounded-lg focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: 'var(--input-bg)',
+                    borderColor: 'var(--input-border)',
+                    color: 'var(--page-text-primary)'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--input-focus-border)';
+                    e.currentTarget.style.boxShadow = '0 0 0 2px var(--input-focus-shadow)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--input-border)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
                   <option value="updated">Last Updated</option>
                   <option value="title">Title (A-Z)</option>
@@ -329,7 +348,10 @@ export function UserProfilePage() {
           {firebaseUser && user && firebaseUser.uid === user.id && (
             <button
               onClick={handleCreateTimeline}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              className="px-4 py-2 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+              style={{ backgroundColor: '#8b5cf6' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
             >
               <span className="text-xl">+</span>
               Create Timeline
@@ -341,24 +363,34 @@ export function UserProfilePage() {
           // Skeleton loader for timeline cards
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 animate-pulse">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div key={i} className="rounded-lg shadow-sm border p-4 animate-pulse" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+                <div className="h-6 rounded w-3/4 mb-3" style={{ backgroundColor: 'var(--page-bg)' }}></div>
+                <div className="h-4 rounded w-full mb-2" style={{ backgroundColor: 'var(--page-bg)' }}></div>
+                <div className="h-4 rounded w-2/3" style={{ backgroundColor: 'var(--page-bg)' }}></div>
               </div>
             ))}
           </div>
         ) : timelines.length === 0 ? (
-          <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-            <p className="text-gray-600">@{user?.username || 'User'} hasn't created any timelines yet</p>
+          <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <p style={{ color: 'var(--page-text-secondary)' }}>@{user?.username || 'User'} hasn't created any timelines yet</p>
           </div>
         ) : (
-          <div data-testid="user-timelines-grid" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            data-testid="user-timelines-grid"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'var(--page-border) transparent'
+            }}
+          >
             {sortedTimelines.map(timeline => (
               <div
                 key={`user-profile-${timeline.id}`}
                 data-testid={`timeline-card-${timeline.id}`}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-300 transition-all relative"
+                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
               >
                 {/* Kebab menu - only show if current user is the owner */}
                 {firebaseUser && firebaseUser.uid === timeline.ownerId && (
@@ -376,11 +408,11 @@ export function UserProfilePage() {
 
                 {/* Card content - clickable to navigate */}
                 <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                  <h3 className="font-semibold text-gray-900 mb-2 pr-8">{timeline.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[40px]">
+                  <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
+                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.eventCount} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>

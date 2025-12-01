@@ -53,6 +53,10 @@ test.describe('v5/84 Admin Panel - Statistics Dashboard', () => {
 
     // Statistics tab content should be visible
     await expect(page.getByTestId('admin-statistics-tab')).toBeVisible();
+
+    // Overview metric cards should be visible
+    await expect(page.getByTestId('metric-total-users')).toBeVisible();
+    await expect(page.getByTestId('metric-total-timelines')).toBeVisible();
   });
 
   test('T84.2: Show visibility breakdown', async ({ page }) => {
@@ -66,6 +70,12 @@ test.describe('v5/84 Admin Panel - Statistics Dashboard', () => {
 
     // Statistics tab content should be visible
     await expect(page.getByTestId('admin-statistics-tab')).toBeVisible();
+
+    // Visibility section should render chart or empty state
+    await expect(page.getByTestId('timeline-visibility-section')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="timeline-visibility-chart"], [data-testid="timeline-visibility-empty"]')
+    ).toBeVisible();
   });
 
   test('T84.3: Display top creators', async ({ page }) => {
@@ -79,5 +89,11 @@ test.describe('v5/84 Admin Panel - Statistics Dashboard', () => {
 
     // Statistics tab content should be visible
     await expect(page.getByTestId('admin-statistics-tab')).toBeVisible();
+
+    // Top creators section should render chart or empty state
+    await expect(page.getByTestId('top-creators-section')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="top-creators-chart"], [data-testid="top-creators-empty"]')
+    ).toBeVisible();
   });
 });

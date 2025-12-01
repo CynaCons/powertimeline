@@ -449,7 +449,7 @@ export function HomePage() {
 
           {/* Search Results Dropdown */}
           {searchResults && (
-            <div className="absolute top-full mt-2 w-full rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style={{ backgroundColor: 'var(--card-bg)', border: '2px solid var(--card-border)' }}>
+            <div data-testid="browse-search-dropdown" className="absolute top-full mt-2 w-full rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style={{ backgroundColor: 'var(--card-bg)', border: '2px solid var(--card-border)' }}>
               {searchResults.timelines.length === 0 && searchResults.users.length === 0 ? (
                 <div className="p-6 text-center" style={{ color: 'var(--page-text-secondary)' }}>
                   No results found for "{searchQuery}"
@@ -560,11 +560,17 @@ export function HomePage() {
               </button>
             </div>
           ) : (
-            <div className="flex gap-4 overflow-x-auto pb-4">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[28rem] overflow-y-auto overflow-x-hidden pr-2"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'var(--page-border) transparent'
+              }}
+            >
               {myTimelines.map(timeline => (
                 <div
                   key={`my-${timeline.id}`}
-                  className="flex-none w-80 border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                  className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}

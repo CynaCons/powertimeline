@@ -61,3 +61,34 @@ svg text[data-testid="axis-label"], svg text[text-anchor="start"], svg text[text
 
 /* High contrast ensure outline visible */
 @media (forced-colors: active) { :where(button, [role="button"], input, textarea, select):focus-visible { outline-color: Highlight; } }
+
+/* === Modern Rectangle Scrollbar Styling === */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 2px solid var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}

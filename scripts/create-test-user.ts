@@ -60,17 +60,15 @@ async function createTestUserInDb(keyPath: string, envName: string) {
     }
 
     const sourceUserData = sourceUserDoc.data()!;
-    console.log(`   Found source user: ${sourceUserData.name || sourceUserData.email}`);
+    console.log(`   Found source user: ${sourceUserData.username || sourceUserData.email}`);
 
     // 2. Create test user document
     const testUserData = {
-      ...sourceUserData,
       id: TEST_USER_ID,
       email: 'test@powertimeline.app',
-      name: 'Test User',
+      username: 'Test User',
       role: 'user', // Not admin for test user
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
     };
 
     await db.doc(`users/${TEST_USER_ID}`).set(testUserData);

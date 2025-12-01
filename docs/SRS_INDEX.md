@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-11-27
-**Version:** v0.5.7
+**Last Updated:** 2025-11-30
+**Version:** v0.5.15
 
 ---
 
@@ -206,7 +206,7 @@ Platform administration interface:
 - **Activity Logging** (5 requirements): CC-REQ-ADMIN-LOG-001 to 005
 
 **Known Issues:**
-- All admin panel tests currently failing (0/23 passing)
+- All admin panel tests currently failing (0/23 failing)
 - Likely due to authentication/routing changes in v0.5.x
 - Needs investigation and fixes in v0.5.6
 
@@ -277,14 +277,18 @@ Platform administration interface:
 ## ⚠️ Known Issues & Gaps
 
 ### High Priority
-1. **Admin Panel Tests Failing** (0/23 passing)
-   - All admin tests timing out or failing authentication
-   - Needs investigation in future iteration
+1. **Admin Panel Tests** (0/23 passing → partial fix in v0.5.15.1)
+   - Root cause: Missing `data-testid="admin-heading"` in AdminPage.tsx
+   - Fix applied: Added test ID and fixed dialog selector
+   - Remaining: T83, T84, T86 may need additional selector updates
    - Related: tests/admin/82-86.spec.ts
 
-2. **Test Coverage Gaps** (Home Page: 43% verified)
-   - Many home page requirements have "TBD" for tests
-   - Need comprehensive E2E tests for search, feeds, routing
+2. **Home Page Test Coverage** (43% verified)
+   - Search functionality: 0% tested
+   - Recently Edited feed: 0% tested
+   - Popular feed: 0% tested
+   - Private timeline filtering: 0% tested
+   - Need 4 new test files: 77-search, 78-recent, 79-popular, 81-private
 
 ### Resolved (v0.5.7)
 - ✅ **Authentication System Complete** - Firebase Auth deployed to production

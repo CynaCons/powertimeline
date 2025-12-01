@@ -72,6 +72,12 @@ test.describe('Production Navigation', () => {
 
     await waitForQuiet(page, 2_000);
 
+    // Strict check: timeline must render at least one event card (guards against blank timelines).
+    const eventCards = page.getByTestId('event-card');
+    const eventCount = await eventCards.count();
+    expect(eventCount, 'Expected events to render but found none').toBeGreaterThan(0);
+    await expect(eventCards.first()).toBeVisible({ timeout: 5_000 });
+
     expect(hasSevereConsoleError(consoleMonitor.errors)).toBeFalsy();
     expect(networkMonitor.failures).toEqual([]);
   });

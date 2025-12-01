@@ -140,6 +140,11 @@ export function ActivityLogPanel() {
           size="small"
           label="Search details or target name"
           value={searchQuery}
+          placeholder="Search activity log"
+          inputProps={{
+            'data-testid': 'activity-log-search',
+            'aria-label': 'Search activity log',
+          }}
           onChange={(e) => {
             setSearchQuery(e.target.value);
             setPage(0);
@@ -151,6 +156,8 @@ export function ActivityLogPanel() {
           <Select
             value={actionFilter}
             label="Action Type"
+            data-testid="action-filter-select"
+            aria-label="Action Type Filter"
             onChange={(e) => {
               setActionFilter(e.target.value as ActionFilter);
               setPage(0);

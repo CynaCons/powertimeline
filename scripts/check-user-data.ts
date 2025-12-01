@@ -21,9 +21,8 @@ async function checkUserData() {
       const userData = cynaCons.data();
       console.log('👤 CynaCons User (user-01):');
       console.log(`   ID: ${cynaCons.id}`);
-      console.log(`   Name: "${userData.name}"`);
-      console.log(`   Avatar: ${userData.avatar}`);
-      console.log(`   Bio: ${userData.bio || 'None'}`);
+      console.log(`   Username: "${userData.username}"`);
+      console.log(`   Email: ${userData.email}`);
       console.log(`   Role: ${userData.role || 'user'}`);
       console.log(`   Created: ${userData.createdAt}`);
       console.log();
@@ -54,7 +53,7 @@ async function checkUserData() {
     console.log('\n📋 All Users:');
     usersSnapshot.docs.forEach(doc => {
       const user = doc.data();
-      console.log(`   - ${doc.id}: "${user.name}" (${user.role || 'user'})`);
+      console.log(`   - ${doc.id}: "${user.username}" (${user.role || 'user'})`);
     });
 
   } catch (error) {

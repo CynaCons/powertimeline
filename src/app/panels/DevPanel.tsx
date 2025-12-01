@@ -97,34 +97,35 @@ export function DevPanel({
   };
 
   return (
-    <aside role="dialog" aria-label="Developer Panel" className="fixed left-14 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-20">
+    <aside role="dialog" aria-label="Developer Panel" className="fixed left-14 top-0 bottom-0 w-80 border-r z-20" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>
       <div className="p-4">
-        <h2 className="text-lg font-bold mb-4">Developer Panel</h2>
-        <p className="text-sm text-gray-600 mb-4">Events: {events.length}</p>
+        <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Developer Panel</h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>Events: {events.length}</p>
 
         <div className="mb-4">
-          <h3 className="text-md font-semibold mb-2">Sample Data</h3>
+          <h3 className="text-md font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Sample Data</h3>
           <div className="space-y-1 mb-4">
-            <button onClick={seedRFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">RFK 1968</button>
-            <button onClick={seedJFK} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">JFK 1961-63</button>
-            <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Napoleon 1769-1821</button>
-            <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">De Gaulle</button>
-            <button onClick={seedFrenchRevolution} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">French Revolution</button>
+            <button onClick={seedRFK} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>RFK 1968</button>
+            <button onClick={seedJFK} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>JFK 1961-63</button>
+            <button onClick={seedNapoleon} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>Napoleon 1769-1821</button>
+            <button onClick={seedDeGaulle} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>De Gaulle</button>
+            <button onClick={seedFrenchRevolution} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>French Revolution</button>
             <button onClick={seedMinuteTest} className="block w-full text-left px-2 py-1 hover:bg-orange-100 text-orange-700 text-sm">⏰ Minute Test</button>
-            <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Random (10)</button>
-            <button onClick={seedClustered} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Clustered</button>
-            <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">Long-range</button>
-            <button onClick={() => seedIncremental(5)} className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm">+5</button>
+            <button onClick={() => seedRandom(10)} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>Random (10)</button>
+            <button onClick={seedClustered} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>Clustered</button>
+            <button onClick={seedLongRange} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>Long-range</button>
+            <button onClick={() => seedIncremental(5)} className="block w-full text-left px-2 py-1 text-sm transition-colors" style={{ color: 'var(--color-text-primary)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>+5</button>
             <button onClick={clearAll} className="block w-full text-left px-2 py-1 hover:bg-red-100 text-red-700 text-sm">Clear All</button>
           </div>
         </div>
 
         <div className="mb-4">
-          <h3 className="text-md font-semibold mb-2">Timeline Export/Import</h3>
+          <h3 className="text-md font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Timeline Export/Import</h3>
           <div className="space-y-2">
             <button
               type="button"
-              className="rounded border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3 py-1"
+              className="rounded border border-blue-300 text-blue-700 hover:bg-blue-50 px-3 py-1"
+              style={{ backgroundColor: 'var(--color-surface)' }}
               disabled={events.length === 0}
               title={events.length === 0 ? "No events to export" : `Export ${events.length} events to YAML file`}
               onClick={handleExport}
@@ -133,7 +134,8 @@ export function DevPanel({
             </button>
             <button
               type="button"
-              className="rounded border border-green-300 bg-white text-green-700 hover:bg-green-50 px-3 py-1"
+              className="rounded border border-green-300 text-green-700 hover:bg-green-50 px-3 py-1"
+              style={{ backgroundColor: 'var(--color-surface)' }}
               title="Import timeline from YAML file"
               onClick={handleImportClick}
             >
@@ -162,14 +164,15 @@ export function DevPanel({
             </div>
           )}
 
-          <div className="text-gray-500 text-xs">
+          <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
             YAML format allows sharing timelines between users and applications
           </div>
         </div>
 
         <button
           onClick={onClose}
-          className="mt-4 px-3 py-1 bg-gray-500 text-white rounded text-sm"
+          className="mt-4 px-3 py-1 text-white rounded text-sm"
+          style={{ backgroundColor: 'var(--color-neutral-500)' }}
         >
           Close
         </button>

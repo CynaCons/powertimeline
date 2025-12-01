@@ -166,7 +166,15 @@ export function EditorPage() {
         {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
         {timeline && user && (
           <div className="absolute top-11 left-20 z-[100] pointer-events-none">
-            <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded px-3 py-0.5 pointer-events-auto inline-block">
+            <div
+              className="backdrop-blur-sm rounded px-3 py-0.5 pointer-events-auto inline-block"
+              style={{
+                backgroundColor: 'var(--page-bg-elevated)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'var(--page-border)'
+              }}
+            >
               <Breadcrumb items={[
                 { label: 'Home', href: '/browse' },
                 { label: `@${user.username}`, href: `/@${user.username}` },

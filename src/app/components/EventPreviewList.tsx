@@ -46,16 +46,22 @@ export const EventPreviewList: React.FC<EventPreviewListProps> = ({
   if (events.length === 0) {
     return (
       <div className={`flex flex-col h-full ${className}`}>
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="material-symbols-rounded text-base text-gray-500">
+        <div
+          className="p-4"
+          style={{
+            borderBottom: '1px solid var(--page-border)',
+            backgroundColor: 'var(--page-bg)'
+          }}
+        >
+          <h3 className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--page-text-primary)' }}>
+            <span className="material-symbols-rounded text-base" style={{ color: 'var(--page-text-secondary)' }}>
               {getDirectionIcon()}
             </span>
             {getDirectionLabel()}
           </h3>
         </div>
         <div className="flex-1 flex items-center justify-center p-4">
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-sm text-center" style={{ color: 'var(--page-text-secondary)' }}>
             {direction === 'prev' ? 'No previous events' : 'No next events'}
           </p>
         </div>
@@ -66,13 +72,19 @@ export const EventPreviewList: React.FC<EventPreviewListProps> = ({
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-          <span className="material-symbols-rounded text-base text-gray-500">
+      <div
+        className="p-4"
+        style={{
+          borderBottom: '1px solid var(--page-border)',
+          backgroundColor: 'var(--page-bg)'
+        }}
+      >
+        <h3 className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--page-text-primary)' }}>
+          <span className="material-symbols-rounded text-base" style={{ color: 'var(--page-text-secondary)' }}>
             {getDirectionIcon()}
           </span>
           {getDirectionLabel()}
-          <span className="text-xs text-gray-500 ml-auto">
+          <span className="text-xs ml-auto" style={{ color: 'var(--page-text-secondary)' }}>
             ({events.length})
           </span>
         </h3>
@@ -87,32 +99,52 @@ export const EventPreviewList: React.FC<EventPreviewListProps> = ({
             <button
               key={event.id}
               onClick={() => onSelect(event.id)}
-              className={`w-full text-left p-3 border-b border-gray-100 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors ${
-                isCurrentEvent
-                  ? 'bg-blue-100 border-blue-200'
-                  : 'hover:shadow-sm'
-              }`}
+              className="w-full text-left p-3 focus:outline-none transition-colors"
+              style={{
+                borderBottom: '1px solid var(--page-border)',
+                backgroundColor: isCurrentEvent ? 'var(--page-accent)' : 'transparent',
+                color: isCurrentEvent ? '#ffffff' : 'var(--page-text-primary)'
+              }}
+              onMouseEnter={(e) => {
+                if (!isCurrentEvent) {
+                  e.currentTarget.style.backgroundColor = 'var(--page-bg)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isCurrentEvent) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
               title={`Switch to: ${event.title}`}
             >
               {/* Event title */}
-              <div className={`text-sm font-medium mb-1 ${
-                isCurrentEvent ? 'text-blue-900' : 'text-gray-900'
-              }`}>
+              <div
+                className="text-sm font-medium mb-1"
+                style={{
+                  color: isCurrentEvent ? '#ffffff' : 'var(--page-text-primary)'
+                }}
+              >
                 {truncateText(event.title, 35)}
               </div>
 
               {/* Event date */}
-              <div className={`text-xs mb-1 ${
-                isCurrentEvent ? 'text-blue-700' : 'text-gray-600'
-              }`}>
+              <div
+                className="text-xs mb-1"
+                style={{
+                  color: isCurrentEvent ? 'rgba(255, 255, 255, 0.9)' : 'var(--page-text-secondary)'
+                }}
+              >
                 {formatDate(event.date, event.time)}
               </div>
 
               {/* Event description snippet */}
               {event.description && (
-                <div className={`text-xs ${
-                  isCurrentEvent ? 'text-blue-600' : 'text-gray-500'
-                }`}>
+                <div
+                  className="text-xs"
+                  style={{
+                    color: isCurrentEvent ? 'rgba(255, 255, 255, 0.8)' : 'var(--page-text-secondary)'
+                  }}
+                >
                   {truncateText(event.description, 60)}
                 </div>
               )}
@@ -120,10 +152,10 @@ export const EventPreviewList: React.FC<EventPreviewListProps> = ({
               {/* Current event indicator */}
               {isCurrentEvent && (
                 <div className="mt-1 flex items-center gap-1">
-                  <span className="material-symbols-rounded text-xs text-blue-600">
+                  <span className="material-symbols-rounded text-xs" style={{ color: '#ffffff' }}>
                     radio_button_checked
                   </span>
-                  <span className="text-xs text-blue-600 font-medium">
+                  <span className="text-xs font-medium" style={{ color: '#ffffff' }}>
                     Current
                   </span>
                 </div>
@@ -134,8 +166,14 @@ export const EventPreviewList: React.FC<EventPreviewListProps> = ({
       </div>
 
       {/* Footer with navigation hint */}
-      <div className="p-2 border-t border-gray-200 bg-gray-50">
-        <p className="text-xs text-gray-500 text-center">
+      <div
+        className="p-2"
+        style={{
+          borderTop: '1px solid var(--page-border)',
+          backgroundColor: 'var(--page-bg)'
+        }}
+      >
+        <p className="text-xs text-center" style={{ color: 'var(--page-text-secondary)' }}>
           {direction === 'prev' ? 'Earlier' : 'Later'} events
         </p>
       </div>

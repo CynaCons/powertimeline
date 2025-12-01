@@ -65,14 +65,14 @@ export async function migrateLocalStorageToFirestore() {
           const exists = existingDoc.docs.some(d => d.id === user.id);
 
           if (exists) {
-            console.log(`⏭️  Skipping user ${user.name} (already in Firestore)`);
+            console.log(`⏭️  Skipping user ${user.username} (already in Firestore)`);
             continue;
           }
 
           await setDoc(doc(db, 'users', user.id), user);
-          console.log(`✅ Migrated user: ${user.name}`);
+          console.log(`✅ Migrated user: ${user.username}`);
         } catch (error) {
-          console.error(`❌ Failed to migrate user ${user.name}:`, error);
+          console.error(`❌ Failed to migrate user ${user.username}:`, error);
         }
       }
     }

@@ -38,7 +38,7 @@ async function listUsers() {
   } else {
     usersSnapshot.docs.forEach((doc, index) => {
       const data = doc.data();
-      console.log(`   ${index + 1}. ${data.name || '(no name)'}`);
+      console.log(`   ${index + 1}. ${data.username || '(no username)'}`);
       console.log(`      ID: ${doc.id}`);
       console.log(`      Email: ${data.email || '(no email)'}`);
       console.log(`      Role: ${data.role || 'user'}`);

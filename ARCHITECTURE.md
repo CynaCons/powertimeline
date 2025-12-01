@@ -443,7 +443,7 @@ Anchor X = (E1.date + E3.date) / 2 (temporal center)
 ## The Desired Algorithm (User's Specification)
 
 ### Core Concept Quote
-**"Full cards should have 2 slots above and below. Compact cards should have 4 slots. Only-Title should have 8 event slots above and below. Multi-Event should have 10 slots above and below."**
+**"Full cards should have 2 slots above and below. Compact cards should have 4 slots. Only-Title should have 8 event slots above and below."**
 
 **"A full card can be split into compact or title-only presentations to absorb more density."**
 

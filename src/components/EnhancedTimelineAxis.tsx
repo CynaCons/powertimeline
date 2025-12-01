@@ -370,7 +370,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
           y={37}
           width={viewportSize.width}
           height={6}
-          fill="#000000"
+          fill="var(--page-text-primary)"
           data-testid="timeline-axis"
           rx={3}
         />
@@ -400,8 +400,8 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 
           const fontSize = isPrimary ? 14 : isSecondary ? 12 : 10;
           const fontWeight = isPrimary ? 'bold' : isSecondary ? '600' : 'normal';
-          const tickStrokeColor = '#000000';
-          const labelColor = '#000000';
+          const tickStrokeColor = 'var(--page-text-primary)';
+          const labelColor = isPrimary ? 'var(--page-text-primary)' : 'var(--page-text-secondary)';
 
           return (
             <g

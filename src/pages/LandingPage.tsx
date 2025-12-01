@@ -4,14 +4,17 @@
  * Inspired by GitHub, Linear, and modern SaaS best practices
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Typography, TextField, InputAdornment, Card, CardContent, CardActionArea, Stack, Link, Tooltip, Skeleton } from '@mui/material';
+import { Box, Button, Container, Typography, TextField, InputAdornment, Card, CardContent, Stack, Link } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GroupIcon from '@mui/icons-material/Group';
 import EmailIcon from '@mui/icons-material/Email';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
 import { getTimelineMetadata, getUser } from '../services/firestore';
@@ -28,9 +31,6 @@ const EXAMPLE_TIMELINE_IDS = [
 export function LandingPage() {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
-  const [exampleTimelines, setExampleTimelines] = useState<TimelineMetadata[]>([]);
-  const [ownerCache, setOwnerCache] = useState<Map<string, User>>(new Map());
-  const [loadingExamples, setLoadingExamples] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch example timelines from Firestore to get correct owner IDs
@@ -45,7 +45,6 @@ export function LandingPage() {
         const publicTimelines = validTimelines.filter(
           t => (t.visibility ?? 'public') === 'public'
         );
-        setExampleTimelines(publicTimelines);
 
         // Cache owner usernames for navigation
         const ownerIds = new Set(publicTimelines.map(t => t.ownerId));
@@ -56,11 +55,10 @@ export function LandingPage() {
             cache.set(ownerId, owner);
           }
         }
-        setOwnerCache(cache);
+        // Note: Not currently displaying examples, but keeping data loading for future use
+        console.log('Loaded example timelines:', publicTimelines.length, 'Owner cache:', cache.size);
       } catch (error) {
         console.error('Error loading example timelines:', error);
-      } finally {
-        setLoadingExamples(false);
       }
     }
     loadExampleTimelines();
@@ -81,33 +79,16 @@ export function LandingPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleSignIn = () => {
-    navigate('/login');
-  };
-
   const handleBrowseTimelines = () => {
     navigate('/browse');
   };
 
-  const handleGetStarted = () => {
+  const handleCreateTimeline = () => {
     if (user && userProfile) {
-      // Note: URL pattern is /:username (no @ prefix - React Router v7 bug)
-      navigate(`/${userProfile.username}`);
+      // Navigate to browse page (could open create dialog in future)
+      navigate('/browse');
     } else {
       navigate('/login');
-    }
-  };
-
-  // Navigate to specific timeline using username-based URL (v0.5.14)
-  const handleTimelineClick = (timeline: TimelineMetadata) => {
-    const owner = ownerCache.get(timeline.ownerId);
-    if (owner?.username) {
-      // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
-      navigate(`/${owner.username}/timeline/${timeline.id}`);
-    } else {
-      // Fallback: use legacy URL pattern (EditorPage will handle redirect)
-      console.warn(`Owner not cached for timeline ${timeline.id}, using legacy URL`);
-      navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
     }
   };
 
@@ -286,12 +267,12 @@ export function LandingPage() {
                 },
               }}
             >
-              Explore Examples
+              Explore Public Timelines
             </Button>
             <Button
               variant="outlined"
               size="large"
-              onClick={handleGetStarted}
+              onClick={handleCreateTimeline}
               data-testid="cta-get-started"
               sx={{
                 borderColor: '#30363d',
@@ -308,7 +289,7 @@ export function LandingPage() {
                 },
               }}
             >
-              {user ? 'Go to My Timelines' : 'Sign In'}
+              {user ? 'Create Timeline' : 'Sign In'}
             </Button>
           </Stack>
 
@@ -566,148 +547,187 @@ export function LandingPage() {
         </Container>
       </Box>
 
-      {/* Examples Gallery */}
-      <Box sx={{ bgcolor: '#161b22', py: 10, borderTop: '1px solid #30363d', borderBottom: '1px solid #30363d' }}>
-        <Container maxWidth="lg">
-          <Typography
-            variant="h3"
-            component="h2"
-            textAlign="center"
-            sx={{
-              mb: 2,
-              fontSize: { xs: '2rem', md: '2.5rem' },
-              fontWeight: 700,
-              color: '#e6edf3',
-            }}
-          >
-            Explore Example Timelines
-          </Typography>
-          <Typography
-            variant="body1"
-            textAlign="center"
-            sx={{
-              mb: 8,
-              color: '#8d96a0',
-              fontSize: '1.1rem',
-              maxWidth: 600,
-              mx: 'auto',
-            }}
-          >
-            See what's possible with PowerTimeline
-          </Typography>
+      {/* Roadmap Section */}
+      <Container maxWidth="md" sx={{ py: 10 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          textAlign="center"
+          sx={{
+            mb: 2,
+            fontSize: { xs: '2rem', md: '2.5rem' },
+            fontWeight: 700,
+            color: '#e6edf3',
+          }}
+        >
+          Product Roadmap
+        </Typography>
+        <Typography
+          variant="body1"
+          textAlign="center"
+          sx={{
+            mb: 6,
+            color: '#8d96a0',
+            fontSize: '1.1rem',
+            maxWidth: 600,
+            mx: 'auto',
+          }}
+        >
+          Our journey from timeline editor to collaborative knowledge platform
+        </Typography>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3 }}>
-            {loadingExamples ? (
-              // Loading skeletons
-              Array.from({ length: 4 }).map((_, index) => (
-                <Card
-                  key={`skeleton-${index}`}
+        {/* Git-style commit visualization */}
+        <Box sx={{ position: 'relative', maxWidth: 700, mx: 'auto' }}>
+          {/* Vertical line */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: '20px',
+              top: '24px',
+              bottom: '24px',
+              width: '2px',
+              bgcolor: '#30363d',
+            }}
+          />
+
+          {/* Roadmap items */}
+          <Stack spacing={3}>
+            {/* Completed phases */}
+            {[
+              { version: 'v0.2.x', title: 'Timeline Editor & Layout Engine', desc: 'Infinite zoom, smart card layout, degradation system' },
+              { version: 'v0.3.x', title: 'Event Navigation & Authoring', desc: 'Event editor, minimap, interactive highlighting' },
+              { version: 'v0.4.x', title: 'Home Page & Timeline Management', desc: 'Discovery feeds, CRUD operations, visibility controls' },
+              { version: 'v0.5.x', title: 'Firebase Authentication & Firestore', desc: 'User accounts, cloud storage, real-time sync' },
+            ].map((phase, index) => (
+              <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', position: 'relative', pl: 6 }}>
+                {/* Commit dot */}
+                <CheckCircleIcon
                   sx={{
-                    bgcolor: '#0d1117',
-                    border: '1px solid #30363d',
-                    borderRadius: 2,
+                    position: 'absolute',
+                    left: '11px',
+                    top: '2px',
+                    fontSize: 20,
+                    color: '#3fb950',
                   }}
-                >
-                  <Skeleton variant="rectangular" height={140} sx={{ bgcolor: '#161b22' }} />
-                  <CardContent sx={{ p: 2.5 }}>
-                    <Skeleton variant="text" width="80%" sx={{ bgcolor: '#161b22', mb: 1 }} />
-                    <Skeleton variant="text" width="100%" sx={{ bgcolor: '#161b22' }} />
-                    <Skeleton variant="text" width="60%" sx={{ bgcolor: '#161b22', mb: 1.5 }} />
-                    <Stack direction="row" justifyContent="space-between">
-                      <Skeleton variant="text" width="30%" sx={{ bgcolor: '#161b22' }} />
-                      <Skeleton variant="text" width="25%" sx={{ bgcolor: '#161b22' }} />
-                    </Stack>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              // Actual timeline cards with tooltips
-              exampleTimelines.map((timeline) => (
-                <Tooltip
-                  key={timeline.id}
-                  title={`Click to explore ${timeline.title} - ${timeline.eventCount} events spanning ${timeline.description || 'multiple time periods'}`}
-                  arrow
-                  placement="top"
-                  enterDelay={500}
-                >
-                  <Card
-                    data-testid={`timeline-card-${timeline.id}`}
+                />
+                <Box>
+                  <Typography
+                    variant="body1"
                     sx={{
-                      bgcolor: '#0d1117',
-                      border: '1px solid #30363d',
-                      borderRadius: 2,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        borderColor: '#8b5cf6',
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 8px 24px rgba(139, 92, 246, 0.2)',
-                      },
+                      color: '#e6edf3',
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      mb: 0.5,
                     }}
                   >
-                    <CardActionArea
-                      onClick={() => handleTimelineClick(timeline)}
-                      data-testid={`timeline-link-${timeline.id}`}
-                    >
-                      {/* Placeholder for timeline thumbnail */}
-                      <Box
-                        sx={{
-                          height: 140,
-                          bgcolor: '#161b22',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderBottom: '1px solid #30363d',
-                        }}
-                      >
-                        <TimelineIcon sx={{ fontSize: 48, color: '#8b5cf6', opacity: 0.5 }} />
-                      </Box>
-                      <CardContent sx={{ p: 2.5 }}>
-                        <Typography variant="h6" gutterBottom noWrap sx={{ color: '#e6edf3', fontWeight: 600, fontSize: '1rem' }}>
-                          {timeline.title}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#8d96a0', mb: 1.5, minHeight: 40, fontSize: '0.85rem', lineHeight: 1.4 }}>
-                          {timeline.description || 'No description'}
-                        </Typography>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                          <Typography variant="caption" sx={{ color: '#8d96a0' }}>
-                            {timeline.viewCount || 0} views
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: '#8b5cf6', fontWeight: 500 }}>
-                            {timeline.eventCount} events
-                          </Typography>
-                        </Stack>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                </Tooltip>
-              ))
-            )}
-          </Box>
+                    {phase.version} - {phase.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#8d96a0',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    {phase.desc}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
 
-          <Box sx={{ textAlign: 'center', mt: 6 }}>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={handleBrowseTimelines}
-              sx={{
-                borderColor: '#30363d',
-                color: '#e6edf3',
-                px: 4,
-                py: 1.5,
-                fontSize: '1rem',
-                textTransform: 'none',
-                fontWeight: 600,
-                '&:hover': {
-                  borderColor: '#8b5cf6',
-                  bgcolor: 'rgba(139, 92, 246, 0.1)',
-                },
-              }}
-            >
-              View All Timelines
-            </Button>
-          </Box>
-        </Container>
-      </Box>
+            {/* Current phase */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', position: 'relative', pl: 6 }}>
+              <FiberManualRecordIcon
+                sx={{
+                  position: 'absolute',
+                  left: '11px',
+                  top: '2px',
+                  fontSize: 20,
+                  color: '#f97316',
+                  animation: 'pulse 2s ease-in-out infinite',
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: 0.5 },
+                  },
+                }}
+              />
+              <Box
+                sx={{
+                  bgcolor: 'rgba(249, 115, 22, 0.1)',
+                  border: '1px solid rgba(249, 115, 22, 0.3)',
+                  borderRadius: 2,
+                  p: 2,
+                  flex: 1,
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: '#f97316',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    mb: 0.5,
+                  }}
+                >
+                  v0.5.18 - Current: Platform Polish & Dark Theme
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#8d96a0',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  Landing page redesign, timeline card menus, statistics optimization
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Upcoming phases */}
+            {[
+              { version: 'v0.6.x', title: 'Git-Based Version Control & Forking', desc: 'Timeline history, fork/merge workflows, attribution' },
+              { version: 'v0.7.x', title: 'Discovery & Social Features', desc: 'Advanced search, follow users, activity feeds, recommendations' },
+              { version: 'v0.8.x', title: 'Rich Media & Archival', desc: 'Image/video uploads, link previews, web page snapshots' },
+              { version: 'v0.9.x', title: 'AI Integration', desc: 'Chat interface, timeline Q&A, auto-suggestions, fact-checking' },
+              { version: 'v1.0.0', title: 'Full Platform Launch', desc: 'Complete collaborative knowledge platform with all core features' },
+            ].map((phase, index) => (
+              <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', position: 'relative', pl: 6, opacity: 0.6 }}>
+                <RadioButtonUncheckedIcon
+                  sx={{
+                    position: 'absolute',
+                    left: '11px',
+                    top: '2px',
+                    fontSize: 20,
+                    color: '#30363d',
+                  }}
+                />
+                <Box>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#8d96a0',
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      mb: 0.5,
+                    }}
+                  >
+                    {phase.version} - {phase.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#6e7681',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    {phase.desc}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+      </Container>
 
       {/* Final CTA Section */}
       <Container maxWidth="md" sx={{ py: 12, textAlign: 'center' }}>
@@ -736,29 +756,7 @@ export function LandingPage() {
           Start mapping what matters. Create your first timeline in minutes,
           or explore what others have built.
         </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleSignIn}
-            sx={{
-              bgcolor: '#f97316',
-              color: '#fff',
-              fontSize: '1.1rem',
-              px: 5,
-              py: 1.75,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              boxShadow: '0 4px 14px 0 rgba(249, 115, 22, 0.4)',
-              '&:hover': {
-                bgcolor: '#ea580c',
-                boxShadow: '0 6px 20px 0 rgba(249, 115, 22, 0.5)',
-              },
-            }}
-          >
-            Get Started Free
-          </Button>
+        <Box sx={{ textAlign: 'center' }}>
           <Button
             variant="outlined"
             size="large"
@@ -778,9 +776,9 @@ export function LandingPage() {
               },
             }}
           >
-            Browse Examples
+            View All Timelines
           </Button>
-        </Stack>
+        </Box>
       </Container>
 
       {/* Footer - Reduced prominence */}
@@ -812,18 +810,6 @@ export function LandingPage() {
                   }}
                 >
                   Browse Timelines
-                </Button>
-                <Button
-                  size="small"
-                  sx={{
-                    color: '#8d96a0',
-                    justifyContent: 'flex-start',
-                    textTransform: 'none',
-                    fontSize: '0.85rem',
-                    '&:hover': { color: '#e6edf3' },
-                  }}
-                >
-                  Documentation
                 </Button>
               </Stack>
             </Box>

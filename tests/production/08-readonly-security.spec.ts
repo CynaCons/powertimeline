@@ -20,6 +20,12 @@ test.describe('Production Read-only & Security', () => {
     await page.waitForLoadState('domcontentloaded');
     await waitForQuiet(page, 2000);
 
+    // Strict check: timeline should render events; fail fast if none appear.
+    const eventCards = page.getByTestId('event-card');
+    const eventCount = await eventCards.count();
+    expect(eventCount, 'Expected events to render but found none').toBeGreaterThan(0);
+    await expect(eventCards.first()).toBeVisible({ timeout: 5_000 });
+
     // Expect URL contains /timeline/
     expect(page.url()).toContain('/timeline/');
 

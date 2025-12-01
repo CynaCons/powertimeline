@@ -93,27 +93,36 @@ export function AdminPage() {
           <div className="max-w-7xl mx-auto px-6 py-3">
             <div className="flex items-center justify-between">
               {/* Brand: Logo + PowerTimeline BETA */}
-              <button
-                onClick={() => navigate('/')}
-                className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
-                title="Go to Landing Page"
-                data-testid="logo-button"
-              >
-                <img
-                  src="/assets/images/logo.png"
-                  alt="PowerTimeline"
-                  className="w-8 h-8 object-contain"
-                />
-                <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
-                  PowerTimeline
-                </span>
-                <span
-                  className="px-2 py-0.5 text-xs font-bold rounded"
-                  style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('/')}
+                  className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
+                  title="Go to Landing Page"
+                  data-testid="logo-button"
                 >
-                  BETA
+                  <img
+                    src="/assets/images/logo.png"
+                    alt="PowerTimeline"
+                    className="w-8 h-8 object-contain"
+                  />
+                  <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
+                    PowerTimeline
+                  </span>
+                  <span
+                    className="px-2 py-0.5 text-xs font-bold rounded"
+                    style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
+                  >
+                    BETA
+                  </span>
+                </button>
+                <span
+                  className="text-lg font-semibold"
+                  style={{ color: 'var(--page-text-primary)' }}
+                  data-testid="admin-heading"
+                >
+                  Admin Panel
                 </span>
-              </button>
+              </div>
               {currentUser && (
                 <UserProfileMenu
                   onLogout={async () => {

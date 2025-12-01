@@ -43,14 +43,14 @@ function ReadOnlyEventView({ event }: ReadOnlyEventViewProps) {
   return (
     <div className="space-y-6 h-full">
       {/* Date display */}
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--page-text-secondary)' }}>
         <span className="material-symbols-rounded text-base">calendar_today</span>
         <time dateTime={event.date}>{formatDateTime(event)}</time>
       </div>
 
       {/* Title display */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-1">
+        <h1 className="text-2xl font-bold leading-tight mb-1" style={{ color: 'var(--page-text-primary)' }}>
           {event.title}
         </h1>
       </div>
@@ -58,15 +58,15 @@ function ReadOnlyEventView({ event }: ReadOnlyEventViewProps) {
       {/* Description display */}
       {event.description && (
         <div>
-          <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
+          <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--page-text-primary)' }}>
             {event.description}
           </p>
         </div>
       )}
 
       {/* Metadata */}
-      <div className="mt-auto pt-6 border-t border-gray-100">
-        <div className="text-xs text-gray-500">
+      <div className="mt-auto pt-6" style={{ borderTop: '1px solid var(--page-border)' }}>
+        <div className="text-xs" style={{ color: 'var(--page-text-secondary)' }}>
           Event ID: {event.id}
         </div>
       </div>
@@ -289,34 +289,62 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 
       {/* Three-panel overlay container */}
       <div
-        className="relative bg-white text-gray-900 rounded-2xl shadow-2xl border border-gray-200 max-w-[1080px] w-[90vw] h-[80vh] overflow-hidden flex"
+        className="relative rounded-2xl shadow-2xl max-w-[1080px] w-[90vw] h-[80vh] overflow-hidden flex"
         ref={rootRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="authoring-overlay-title"
         data-testid="authoring-overlay"
+        style={{
+          backgroundColor: 'var(--page-bg-elevated)',
+          color: 'var(--page-text-primary)',
+          border: '1px solid var(--page-border)'
+        }}
       >
         {/* Left Panel - Previous Events */}
-        <div className="w-[240px] bg-white border-r border-gray-200 flex flex-col">
+        <div
+          className="w-[240px] flex flex-col"
+          style={{
+            backgroundColor: 'var(--page-bg-elevated)',
+            borderRight: '1px solid var(--page-border)'
+          }}
+        >
           {/* Left panel header with navigation chevron */}
-          <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+          <div
+            className="p-4 flex items-center justify-between"
+            style={{
+              borderBottom: '1px solid var(--page-border)',
+              backgroundColor: 'var(--page-bg)'
+            }}
+          >
             <div className="flex items-center gap-2">
               <button
                 onClick={onNavigatePrev}
                 disabled={!canNavigatePrev}
-                className={`p-2 rounded-lg border transition-colors ${
-                  canNavigatePrev
-                    ? 'border-gray-300 hover:bg-gray-100 text-gray-700'
-                    : 'border-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+                className="p-2 rounded-lg transition-colors"
+                style={{
+                  border: '1px solid var(--page-border)',
+                  backgroundColor: canNavigatePrev ? 'transparent' : 'var(--page-bg)',
+                  color: canNavigatePrev ? 'var(--page-text-primary)' : 'var(--page-text-secondary)',
+                  cursor: canNavigatePrev ? 'pointer' : 'not-allowed',
+                  opacity: canNavigatePrev ? 1 : 0.5
+                }}
                 title="Previous event (Left arrow)"
                 aria-label="Navigate to previous event"
+                onMouseEnter={(e) => {
+                  if (canNavigatePrev) {
+                    e.currentTarget.style.backgroundColor = 'var(--page-bg)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 <span className="material-symbols-rounded text-lg">chevron_left</span>
               </button>
               <div>
-                <h3 className="text-sm font-medium text-gray-700">Previous</h3>
-                <p className="text-xs text-gray-500">{prevEvents.length} event{prevEvents.length !== 1 ? 's' : ''}</p>
+                <h3 className="text-sm font-medium" style={{ color: 'var(--page-text-primary)' }}>Previous</h3>
+                <p className="text-xs" style={{ color: 'var(--page-text-secondary)' }}>{prevEvents.length} event{prevEvents.length !== 1 ? 's' : ''}</p>
               </div>
             </div>
           </div>
@@ -333,15 +361,25 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
         </div>
 
         {/* Center Panel - Main Editor */}
-        <div className="flex-1 bg-white flex flex-col max-w-[600px]">
+        <div
+          className="flex-1 flex flex-col max-w-[600px]"
+          style={{ backgroundColor: 'var(--page-bg-elevated)' }}
+        >
           {/* Header */}
-          <div className="px-8 py-6 border-b border-gray-200 flex items-center justify-between">
+          <div
+            className="px-8 py-6 flex items-center justify-between"
+            style={{ borderBottom: '1px solid var(--page-border)' }}
+          >
             <div className="flex items-center gap-4">
-              <h2 id="authoring-overlay-title" className="text-lg font-semibold tracking-wide">
+              <h2
+                id="authoring-overlay-title"
+                className="text-lg font-semibold tracking-wide"
+                style={{ color: 'var(--page-text-primary)' }}
+              >
                 {isEditMode ? (selected ? 'Edit Event' : 'Create Event') : 'View Event'}
               </h2>
               {selected && allEvents.length > 1 && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                   Event {currentIndex + 1} of {allEvents.length}
                 </div>
               )}
@@ -352,7 +390,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                   aria-label="Edit event"
                   size="small"
                   onClick={() => setIsEditMode(true)}
-                  sx={{ color: 'primary.main' }}
+                  sx={{ color: 'var(--page-accent)' }}
                 >
                   <span className="material-symbols-rounded">edit</span>
                 </IconButton>
@@ -362,7 +400,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                   aria-label="Create new event"
                   size="small"
                   onClick={handleCreateNewEvent}
-                  sx={{ color: 'success.main' }}
+                  sx={{ color: 'var(--page-accent)' }}
                   title="Create new event"
                 >
                   <span className="material-symbols-rounded">add</span>
@@ -371,7 +409,17 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
               <button
                 type="button"
                 aria-label="Close authoring"
-                className="text-sm px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                className="text-sm px-4 py-2 rounded-lg transition-colors"
+                style={{
+                  border: '1px solid var(--page-border)',
+                  color: 'var(--page-text-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--page-bg)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 onClick={onClose}
               >
                 Close
@@ -522,7 +570,13 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
           </div>
 
           {/* Sticky footer action bar */}
-          <div className="border-t border-gray-200 bg-white px-8 py-4 flex items-center justify-between">
+          <div
+            className="px-8 py-4 flex items-center justify-between"
+            style={{
+              borderTop: '1px solid var(--page-border)',
+              backgroundColor: 'var(--page-bg-elevated)'
+            }}
+          >
             {isEditMode ? (
               <>
                 <div>
@@ -564,7 +618,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
               </>
             ) : (
               <>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                   <span className="material-symbols-rounded text-base">keyboard</span>
                   Use ← → keys to navigate events
                 </div>
@@ -595,24 +649,47 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
         </div>
 
         {/* Right Panel - Next Events */}
-        <div className="w-[240px] bg-white border-l border-gray-200 flex flex-col">
+        <div
+          className="w-[240px] flex flex-col"
+          style={{
+            backgroundColor: 'var(--page-bg-elevated)',
+            borderLeft: '1px solid var(--page-border)'
+          }}
+        >
           {/* Right panel header with navigation chevron */}
-          <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+          <div
+            className="p-4 flex items-center justify-between"
+            style={{
+              borderBottom: '1px solid var(--page-border)',
+              backgroundColor: 'var(--page-bg)'
+            }}
+          >
             <div className="flex items-center gap-2">
               <div>
-                <h3 className="text-sm font-medium text-gray-700">Next</h3>
-                <p className="text-xs text-gray-500">{nextEvents.length} event{nextEvents.length !== 1 ? 's' : ''}</p>
+                <h3 className="text-sm font-medium" style={{ color: 'var(--page-text-primary)' }}>Next</h3>
+                <p className="text-xs" style={{ color: 'var(--page-text-secondary)' }}>{nextEvents.length} event{nextEvents.length !== 1 ? 's' : ''}</p>
               </div>
               <button
                 onClick={onNavigateNext}
                 disabled={!canNavigateNext}
-                className={`p-2 rounded-lg border transition-colors ${
-                  canNavigateNext
-                    ? 'border-gray-300 hover:bg-gray-100 text-gray-700'
-                    : 'border-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+                className="p-2 rounded-lg transition-colors"
+                style={{
+                  border: '1px solid var(--page-border)',
+                  backgroundColor: canNavigateNext ? 'transparent' : 'var(--page-bg)',
+                  color: canNavigateNext ? 'var(--page-text-primary)' : 'var(--page-text-secondary)',
+                  cursor: canNavigateNext ? 'pointer' : 'not-allowed',
+                  opacity: canNavigateNext ? 1 : 0.5
+                }}
                 title="Next event (Right arrow)"
                 aria-label="Navigate to next event"
+                onMouseEnter={(e) => {
+                  if (canNavigateNext) {
+                    e.currentTarget.style.backgroundColor = 'var(--page-bg)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 <span className="material-symbols-rounded text-lg">chevron_right</span>
               </button>

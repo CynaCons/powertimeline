@@ -58,9 +58,12 @@ export function StatisticsDashboard() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="statistics-dashboard">
       {/* Reset Statistics Section */}
-      <Paper sx={{ p: 3, bgcolor: 'error.50', border: '1px solid', borderColor: 'error.200' }}>
+      <Paper
+        sx={{ p: 3, bgcolor: 'error.50', border: '1px solid', borderColor: 'error.200' }}
+        data-testid="reset-statistics-section"
+      >
         <div className="flex items-center justify-between">
           <div>
             <Typography variant="h6" gutterBottom color="error.main">
@@ -76,12 +79,13 @@ export function StatisticsDashboard() {
             startIcon={<RestartAltIcon />}
             onClick={() => setConfirmDialogOpen(true)}
             disabled={resetting}
+            data-testid="reset-statistics-button"
           >
             Reset Statistics
           </Button>
         </div>
         {resetSuccess && (
-          <Alert severity="success" sx={{ mt: 2 }}>
+          <Alert severity="success" sx={{ mt: 2 }} data-testid="reset-success-alert">
             Statistics reset successfully! Reloading page...
           </Alert>
         )}
@@ -90,14 +94,14 @@ export function StatisticsDashboard() {
       {/* Overview Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Users */}
-        <Card>
+        <Card data-testid="metric-total-users">
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Total Users
                 </Typography>
-                <Typography variant="h4" component="div">
+                <Typography variant="h4" component="div" data-testid="metric-total-users-value">
                   {stats.totalUsers}
                 </Typography>
               </div>
@@ -107,17 +111,17 @@ export function StatisticsDashboard() {
         </Card>
 
         {/* Total Timelines */}
-        <Card>
+        <Card data-testid="metric-total-timelines">
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Total Timelines
                 </Typography>
-                <Typography variant="h4" component="div">
+                <Typography variant="h4" component="div" data-testid="metric-total-timelines-value">
                   {stats.totalTimelines}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" data-testid="metric-timelines-last30">
                   {stats.timelinesCreatedLast30Days} in last 30 days
                 </Typography>
               </div>
@@ -127,17 +131,17 @@ export function StatisticsDashboard() {
         </Card>
 
         {/* Total Events */}
-        <Card>
+        <Card data-testid="metric-total-events">
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Total Events
                 </Typography>
-                <Typography variant="h4" component="div">
+                <Typography variant="h4" component="div" data-testid="metric-total-events-value">
                   {stats.totalEvents}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" data-testid="metric-average-events">
                   Avg {stats.averageEventsPerTimeline} per timeline
                 </Typography>
               </div>
@@ -147,14 +151,14 @@ export function StatisticsDashboard() {
         </Card>
 
         {/* Total Views */}
-        <Card>
+        <Card data-testid="metric-total-views">
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Total Views
                 </Typography>
-                <Typography variant="h4" component="div">
+                <Typography variant="h4" component="div" data-testid="metric-total-views-value">
                   {stats.totalViews}
                 </Typography>
               </div>
@@ -167,34 +171,36 @@ export function StatisticsDashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Timeline Visibility Breakdown */}
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+        <Paper sx={{ p: 3 }} data-testid="timeline-visibility-section">
+          <Typography variant="h6" gutterBottom data-testid="timeline-visibility-heading">
             Timeline Visibility
           </Typography>
           {visibilityData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                { }
-                <Pie
-                  data={visibilityData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={((entry: any) => `${entry.name}: ${((entry.percent || 0) * 100).toFixed(0)}%`) as any}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {visibilityData.map((entry) => (
-                    <Cell key={`cell-${entry.name}`} fill={COLORS[entry.name.toLowerCase() as keyof typeof COLORS]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div data-testid="timeline-visibility-chart">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  { }
+                  <Pie
+                    data={visibilityData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={((entry: any) => `${entry.name}: ${((entry.percent || 0) * 100).toFixed(0)}%`) as any}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {visibilityData.map((entry) => (
+                      <Cell key={`cell-${entry.name}`} fill={COLORS[entry.name.toLowerCase() as keyof typeof COLORS]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center h-64" data-testid="timeline-visibility-empty">
               <Typography variant="body2" color="text.secondary">
                 No timeline data available
               </Typography>
@@ -203,22 +209,24 @@ export function StatisticsDashboard() {
         </Paper>
 
         {/* Top Timeline Creators */}
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+        <Paper sx={{ p: 3 }} data-testid="top-creators-section">
+          <Typography variant="h6" gutterBottom data-testid="top-creators-heading">
             Top Timeline Creators
           </Typography>
           {creatorsData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={creatorsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="timelines" fill="#1976d2" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div data-testid="top-creators-chart">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={creatorsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="timelines" fill="#1976d2" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center h-64" data-testid="top-creators-empty">
               <Typography variant="body2" color="text.secondary">
                 No creator data available
               </Typography>
@@ -229,11 +237,11 @@ export function StatisticsDashboard() {
 
       {/* Recent Activity Table */}
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom data-testid="recent-activity-heading">
           Recent Timeline Activity
         </Typography>
         <TableContainer>
-          <Table size="small">
+          <Table size="small" data-testid="recent-activity-table">
             <TableHead>
               <TableRow>
                 <TableCell><strong>Timeline</strong></TableCell>
@@ -268,11 +276,11 @@ export function StatisticsDashboard() {
 
       {/* Top Creators Table (detailed view) */}
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom data-testid="top-creators-table-heading">
           Top Creators (Detailed)
         </Typography>
         <TableContainer>
-          <Table size="small">
+          <Table size="small" data-testid="top-creators-table">
             <TableHead>
               <TableRow>
                 <TableCell><strong>Rank</strong></TableCell>

@@ -102,5 +102,18 @@ service cloud.firestore {
       // Activity logs cannot be updated or deleted
       allow update, delete: if false;
     }
+
+    // Stats collection (v0.5.17 - Platform statistics aggregation)
+    match /stats/{docId} {
+      // Anyone can read platform stats (public dashboard data)
+      allow read: if true;
+
+      // Authenticated users can create/update stats (for cache refresh)
+      // This enables the client-side stats aggregation to work
+      allow create, update: if request.auth != null;
+
+      // Stats documents cannot be deleted
+      allow delete: if false;
+    }
   }
 }

@@ -16,7 +16,6 @@ import type { Event } from '../types';
  *       date: "1961-01-20"
  *       title: "Event Title"
  *       description: "Event description"
- *       category: "politics"  # Optional
  */
 
 interface TimelineMetadata {
@@ -162,8 +161,7 @@ export function importFromYAML(yamlContent: string): ImportResult {
         id: eventData.id,
         date: eventData.date,
         title: eventData.title,
-        description: eventData.description || '',
-        ...(eventData.category && { category: eventData.category })
+        description: eventData.description || ''
       };
 
       events.push(event);

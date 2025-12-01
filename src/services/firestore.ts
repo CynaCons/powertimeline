@@ -34,7 +34,29 @@ const COLLECTIONS = {
   EVENTS: 'events', // Subcollection under timelines
   USERS: 'users',
   ACTIVITY_LOGS: 'activityLogs',
+  STATS: 'stats', // Platform-level statistics
 } as const;
+
+// Stats document IDs
+const STATS_DOCS = {
+  PLATFORM: 'platform',
+} as const;
+
+// Stats caching configuration
+const STATS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let statsCache: { data: PlatformStats | null; timestamp: number } = { data: null, timestamp: 0 };
+
+// Platform stats interface
+interface PlatformStats {
+  totalUsers: number;
+  totalTimelines: number;
+  totalEvents: number;
+  totalViews: number;
+  publicTimelines: number;
+  unlistedTimelines: number;
+  privateTimelines: number;
+  lastUpdated: string;
+}
 
 // ============================================================================
 // Timeline Operations
@@ -388,6 +410,9 @@ export async function createTimeline(
       }
     }
 
+    // v0.5.17 - Invalidate stats cache when timeline is created
+    invalidateStatsCache();
+
     return timelineId;
   } catch (error) {
     console.error('Error creating timeline:', error);
@@ -451,6 +476,9 @@ export async function deleteTimeline(timelineId: string): Promise<void> {
     // Delete from the user's timelines subcollection
     const timelineRef = doc(db, COLLECTIONS.USERS, timeline.ownerId, COLLECTIONS.TIMELINES, timelineId);
     await deleteDoc(timelineRef);
+
+    // v0.5.17 - Invalidate stats cache when timeline is deleted
+    invalidateStatsCache();
   } catch (error) {
     console.error('Error deleting timeline:', error);
     throw error;
@@ -848,11 +876,81 @@ export function subscribeToActivityLogs(
 }
 
 // ============================================================================
-// Platform Statistics
+// Platform Statistics (v0.5.17 - Aggregated Stats with Caching)
 // ============================================================================
 
 /**
+ * Check if cached stats are still valid
+ */
+function isStatsCacheValid(): boolean {
+  return statsCache.data !== null && (Date.now() - statsCache.timestamp) < STATS_CACHE_TTL_MS;
+}
+
+/**
+ * Get platform stats from Firestore stats/platform document
+ */
+async function getStatsFromFirestore(): Promise<PlatformStats | null> {
+  try {
+    const statsRef = doc(db, COLLECTIONS.STATS, STATS_DOCS.PLATFORM);
+    const statsDoc = await getDoc(statsRef);
+    if (statsDoc.exists()) {
+      return statsDoc.data() as PlatformStats;
+    }
+    return null;
+  } catch (error) {
+    console.warn('Error reading stats document:', error);
+    return null;
+  }
+}
+
+/**
+ * Save platform stats to Firestore stats/platform document
+ */
+async function saveStatsToFirestore(stats: PlatformStats): Promise<void> {
+  try {
+    const statsRef = doc(db, COLLECTIONS.STATS, STATS_DOCS.PLATFORM);
+    await setDoc(statsRef, stats);
+  } catch (error) {
+    console.warn('Error saving stats document:', error);
+  }
+}
+
+/**
+ * Calculate platform stats by scanning all documents (fallback)
+ */
+async function calculatePlatformStats(): Promise<PlatformStats> {
+  const [users, timelines] = await Promise.all([
+    getUsers(),
+    getTimelines(),
+  ]);
+
+  const totalEvents = timelines.reduce((sum, t) => sum + (t.eventCount || 0), 0);
+  const totalViews = timelines.reduce((sum, t) => sum + t.viewCount, 0);
+
+  const publicTimelines = timelines.filter(t => t.visibility === 'public').length;
+  const unlistedTimelines = timelines.filter(t => t.visibility === 'unlisted').length;
+  const privateTimelines = timelines.filter(t => t.visibility === 'private').length;
+
+  return {
+    totalUsers: users.length,
+    totalTimelines: timelines.length,
+    totalEvents,
+    totalViews,
+    publicTimelines,
+    unlistedTimelines,
+    privateTimelines,
+    lastUpdated: new Date().toISOString(),
+  };
+}
+
+/**
  * Get platform-wide statistics
+ * v0.5.17 - Uses aggregated stats document with client-side caching
+ *
+ * Priority:
+ * 1. Return from memory cache if valid (TTL: 5 minutes)
+ * 2. Read from stats/platform Firestore document
+ * 3. Fall back to full scan and update stats document
  */
 export async function getPlatformStats(): Promise<{
   totalUsers: number;
@@ -864,32 +962,49 @@ export async function getPlatformStats(): Promise<{
   privateTimelines: number;
 }> {
   try {
-    const [users, timelines] = await Promise.all([
-      getUsers(),
-      getTimelines(),
-    ]);
+    // 1. Check memory cache first
+    if (isStatsCacheValid() && statsCache.data) {
+      return statsCache.data;
+    }
 
-    // v0.5.0.1 - Use eventCount from TimelineMetadata instead of events.length
-    const totalEvents = timelines.reduce((sum, t) => sum + (t.eventCount || 0), 0);
-    const totalViews = timelines.reduce((sum, t) => sum + t.viewCount, 0);
+    // 2. Try to read from Firestore stats document
+    let stats = await getStatsFromFirestore();
 
-    const publicTimelines = timelines.filter(t => t.visibility === 'public').length;
-    const unlistedTimelines = timelines.filter(t => t.visibility === 'unlisted').length;
-    const privateTimelines = timelines.filter(t => t.visibility === 'private').length;
+    // 3. If no stats doc or it's stale (>1 hour), recalculate
+    if (!stats || (Date.now() - new Date(stats.lastUpdated).getTime()) > 60 * 60 * 1000) {
+      stats = await calculatePlatformStats();
+      // Save to Firestore for future reads (fire and forget)
+      saveStatsToFirestore(stats).catch((err) => {
+        console.warn('Failed to save stats:', err);
+      });
+    }
 
-    return {
-      totalUsers: users.length,
-      totalTimelines: timelines.length,
-      totalEvents,
-      totalViews,
-      publicTimelines,
-      unlistedTimelines,
-      privateTimelines,
-    };
+    // Update memory cache
+    statsCache = { data: stats, timestamp: Date.now() };
+
+    return stats;
   } catch (error) {
     console.error('Error fetching platform stats:', error);
     throw error;
   }
+}
+
+/**
+ * Force refresh of platform statistics
+ * Recalculates from scratch and updates cache + Firestore
+ */
+export async function refreshPlatformStats(): Promise<PlatformStats> {
+  const stats = await calculatePlatformStats();
+  await saveStatsToFirestore(stats);
+  statsCache = { data: stats, timestamp: Date.now() };
+  return stats;
+}
+
+/**
+ * Invalidate stats cache (call after user/timeline/event changes)
+ */
+export function invalidateStatsCache(): void {
+  statsCache = { data: null, timestamp: 0 };
 }
 
 /**

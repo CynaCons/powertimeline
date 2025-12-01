@@ -380,7 +380,7 @@ export function UserManagementPanel() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="user-management-panel">
       {/* Search and Filter Controls */}
       <div className="flex flex-col md:flex-row gap-4">
         <TextField
@@ -389,17 +389,25 @@ export function UserManagementPanel() {
           placeholder="Search by name or ID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          inputProps={{
+            'data-testid': 'user-search-input',
+            'aria-label': 'Search users',
+          }}
           InputProps={{
             startAdornment: <SearchIcon className="mr-2 text-gray-400" />,
           }}
         />
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl size="small" sx={{ minWidth: 150 }} data-testid="role-filter-control">
           <InputLabel>Role Filter</InputLabel>
           <Select
             value={roleFilter}
             label="Role Filter"
             onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
+            inputProps={{
+              'data-testid': 'role-filter-select',
+              'aria-label': 'Role filter',
+            }}
           >
             <MenuItem value="all">All Roles</MenuItem>
             <MenuItem value="admin">Admin</MenuItem>
@@ -412,6 +420,7 @@ export function UserManagementPanel() {
             variant="outlined"
             size="small"
             onClick={() => setSearchQuery('')}
+            data-testid="clear-search-button"
           >
             Clear Search
           </Button>
@@ -420,7 +429,7 @@ export function UserManagementPanel() {
 
       {/* Bulk Actions Toolbar */}
       {selectedUserIds.size > 0 && (
-        <Toolbar sx={{ bgcolor: 'primary.light', borderRadius: 1, px: 2 }}>
+        <Toolbar sx={{ bgcolor: 'primary.light', borderRadius: 1, px: 2 }} data-testid="bulk-actions-toolbar">
           <Typography variant="subtitle1" component="div" sx={{ flex: '1 1 100%' }}>
             {selectedUserIds.size} user{selectedUserIds.size !== 1 ? 's' : ''} selected
           </Typography>
@@ -430,6 +439,10 @@ export function UserManagementPanel() {
               value=""
               label="Assign Role"
               onChange={(e) => handleBulkRoleAssignment(e.target.value as 'user' | 'admin')}
+              inputProps={{
+                'data-testid': 'bulk-role-select',
+                'aria-label': 'Assign role to selected users',
+              }}
             >
               <MenuItem value="user">User</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
@@ -441,12 +454,14 @@ export function UserManagementPanel() {
             startIcon={<DeleteIcon />}
             onClick={handleBulkDelete}
             sx={{ mr: 2 }}
+            data-testid="bulk-delete-button"
           >
             Delete Selected
           </Button>
           <Button
             variant="outlined"
             onClick={clearSelection}
+            data-testid="bulk-clear-selection"
           >
             Clear Selection
           </Button>
@@ -454,9 +469,9 @@ export function UserManagementPanel() {
       )}
 
       {/* User Table */}
-      <TableContainer component={Paper}>
-        <Table size="small">
-          <TableHead>
+      <TableContainer component={Paper} data-testid="user-management-table-container">
+        <Table size="small" data-testid="user-management-table">
+          <TableHead data-testid="user-table-head">
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
@@ -495,16 +510,16 @@ export function UserManagementPanel() {
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody data-testid="user-table-body">
             {filteredAndSortedUsers.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+              <TableRow data-testid="no-users-row">
+                <TableCell colSpan={8} align="center" sx={{ py: 4 }} data-testid="no-users-cell">
                   <p className="text-gray-500">No users found</p>
                 </TableCell>
               </TableRow>
             ) : (
               filteredAndSortedUsers.map((user) => (
-                <TableRow key={user.id} hover>
+                <TableRow key={user.id} hover data-testid={`user-row-${user.id}`}>
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={selectedUserIds.has(user.id)}
@@ -563,7 +578,7 @@ export function UserManagementPanel() {
       </TableContainer>
 
       {/* Results Summary */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600" data-testid="user-count-summary">
         Showing {filteredAndSortedUsers.length} of {users.length} users
       </div>
 

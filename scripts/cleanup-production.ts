@@ -35,10 +35,9 @@ async function cleanupProduction() {
     console.log('👤 Fixing CynaCons user profile...');
     const userRef = doc(db, 'users', 'cynacons');
     await updateDoc(userRef, {
-      name: 'CynaCons',
-      bio: 'PowerTimeline creator and admin',
+      username: 'CynaCons',
     });
-    console.log('✅ Updated CynaCons profile: name="CynaCons", bio="PowerTimeline creator and admin"\n');
+    console.log('✅ Updated CynaCons profile: username="CynaCons"\n');
 
     // 2. Delete test timelines
     console.log('📁 Deleting test timelines...');

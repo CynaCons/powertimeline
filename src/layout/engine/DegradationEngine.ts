@@ -390,7 +390,7 @@ export class DegradationEngine {
    *
    * Mixing rules (with 75px compact cards):
    * - 1-2 events: ['full'] - uniform, uses getMaxCardsPerHalfColumn (2 cards)
-   * - 3 events: [full, compact, compact] - mixed, uses calculateMixedTypeCapacity
+   * - 3 events: ['compact'] - uniform, uses getMaxCardsPerHalfColumn (4 cards)
    * - 4 events: ['compact'] - uniform, uses getMaxCardsPerHalfColumn (4 cards)
    * - 5 events: [compact, compact, title-only, ...] - mixed
    * - 6 events: [compact, compact, title-only, ...] - mixed
@@ -404,8 +404,8 @@ export class DegradationEngine {
     if (count <= 2) {
       return ['full']; // Uniform: use getMaxCardsPerHalfColumn (2 full cards)
     } else if (count === 3) {
-      // Mixed: 1 full + 2 compact (fits nicely)
-      return ['full', 'compact', 'compact'];
+      // Uniform compact to avoid mixed-type overflow for 3-event clusters
+      return ['compact']; // Uniform: use getMaxCardsPerHalfColumn (4 compact cards)
     } else if (count === 4) {
       return ['compact']; // Uniform: use getMaxCardsPerHalfColumn (4 compact cards)
     } else if (count === 5) {
