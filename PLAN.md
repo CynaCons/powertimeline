@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.24
-**Next Milestone:** v0.5.25 - PowerSpawn (Universal MCP), v0.5.26 - Import/Export, v0.5.27 - Stream Editor
+**Current Version:** v0.5.25 (PowerSpawn standalone extraction complete)
+**Next Milestone:** v0.5.28 - Test Sweep Fixes, v0.5.29 - PowerSpawn Tests, v0.5.26 - Import/Export
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -27,9 +27,11 @@
 - ✅ Editor Dark Theme fixes (v0.5.20-v0.5.21)
 - ✅ Cloud Functions for platform stats (v0.5.22)
 - ✅ Dev Panel removal & test migration (v0.5.24)
+- ✅ PowerSpawn standalone extraction & submodule (v0.5.25)
 
 ### Next Up
-- **v0.5.25**: PowerSpawn - Universal Multi-Agent MCP Server (Copilot compatible)
+- **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
+- **v0.5.29**: PowerSpawn Test Suite (unit, integration, E2E)
 - **v0.5.26**: Import/Export with AI-ready YAML format
 - **v0.5.27**: Stream Editor (mobile-first, git-style notepad editor)
 
@@ -1504,7 +1506,45 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 
 ### v0.5.25 - PowerSpawn: Universal Multi-Agent MCP Server
 **Goal:** Extract and productize our MCP agent orchestration into a standalone project compatible with Claude Code AND GitHub Copilot
-**Status:** Planned
+**Status:** Complete
+
+**Completed (2025-12-02):**
+- [x] Create PowerSpawn repository (https://github.com/CynaCons/PowerSpawn)
+- [x] Extract standalone package with all core modules
+- [x] Copy spawner.py, logger.py, context_loader.py, parser.py, mcp_server.py
+- [x] Copy schemas/ directory (JSON output schemas)
+- [x] Copy examples/basic_spawn.py
+- [x] Fix imports for standalone operation (absolute imports)
+- [x] Fix GitHub URL reference (cynako → CynaCons)
+- [x] Add .gitignore (exclude pycache, auto-generated files)
+- [x] Set up git submodule in main PowerTimeline repo
+- [x] Add "Built with PowerSpawn" footer to LandingPage
+- [x] Remove dead code: config.yaml (not used), workflows/ (project-specific)
+
+**Novelty Research (via Opus agent):**
+- IAC.md pattern is novel - no equivalent found in 900+ MCP repos
+- Cross-model orchestration (Claude + Codex) is rare - only 19 repos mention both
+- MCP for agent spawning is uncommon - most MCP servers are for external tools
+- Closest competitor: claude-flow (1k stars) - Claude-only, no cross-model support
+
+**Repository Structure:**
+```
+powerspawn/
+├── mcp_server.py      # MCP server (main entry point)
+├── spawner.py         # Core spawn logic
+├── logger.py          # IAC.md logging
+├── context_loader.py  # Context injection
+├── parser.py          # Response parsing
+├── __init__.py        # Package exports
+├── requirements.txt   # Dependencies
+├── schemas/           # JSON output schemas
+├── examples/          # Usage examples
+├── README.md          # Documentation
+├── DESIGN.md          # Architecture rationale
+└── MCP_DESIGN.md      # MCP architecture
+```
+
+**Remaining Tasks (moved to v0.5.29):**
 
 **Project Vision:**
 "PowerSpawn" - A universal MCP server for spawning AI sub-agents across different models. Users say "can you powerspawn a Codex to handle this?" and it just works, regardless of whether they're using Claude Code or GitHub Copilot.
@@ -1718,6 +1758,105 @@ A notepad-like editor with git-style visual language. Events are displayed verti
 - [ ] E2E: Delete event
 - [ ] Visual regression tests for git-style rail
 - [ ] Mobile viewport tests
+
+### v0.5.28 - Test Sweep Corrective Actions
+**Goal:** Address test failures discovered during Dev Panel removal sweep
+**Status:** Planned
+
+**Test Sweep Results (2025-12-02):**
+- Total: 20 tests | Passed: 9 | Failed: 6 | Skipped: 5
+
+**Environment Issues (4 failures):**
+- [ ] Fix `.env.test` credentials configuration
+  - Tests failing: Necker Compte Rendu date alignment, Anchor alignment, Anchor coordinate system, Hover date accuracy
+  - Root cause: "Login failed - check credentials in .env.test"
+  - Action: Document required env vars in CONTRIBUTING.md
+  - Action: Create `.env.test.example` with all required keys
+
+**Anchor Alignment Issues (2 failures):**
+- [ ] Investigate anchor alignment tests returning 0
+  - Tests failing: "Anchors align with corresponding timeline dates at default zoom"
+  - Tests failing: "Anchors align precisely with event dates across multiple timelines"
+  - Root cause: `expect(...).toBeGreaterThan(expected) Expected: > 0, Received: 0`
+  - Action: Check if anchors are rendering at all
+  - Action: Verify coordinate calculation in test vs production
+
+**Test Infrastructure:**
+- [ ] Add CI check for test credential availability
+- [ ] Update CONTRIBUTING.md with test setup instructions
+- [ ] Create smoke test that validates .env.test is properly configured
+
+### v0.5.29 - PowerSpawn Test Suite
+**Goal:** Create comprehensive tests to verify PowerSpawn MCP server functionality
+**Status:** Planned
+
+**Unit Tests (powerspawn/tests/):**
+- [ ] `test_imports.py` - Verify all modules import correctly
+  - Test: `from spawner import spawn_claude, spawn_codex`
+  - Test: `from logger import log_spawn_start, log_spawn_complete`
+  - Test: `from parser import parse_claude_response, parse_codex_event`
+  - Test: `from context_loader import format_prompt_with_context`
+
+- [ ] `test_parser.py` - Response parsing tests
+  - Test: Parse valid Claude JSON response
+  - Test: Parse invalid JSON (returns error AgentResult)
+  - Test: Parse Codex JSONL events
+  - Test: Extract final message from Codex events
+
+- [ ] `test_logger.py` - IAC.md logging tests
+  - Test: `generate_spawn_id()` returns 8-char hex
+  - Test: `log_spawn_start()` creates IAC.md entry
+  - Test: `log_spawn_complete()` updates entry in-place
+  - Test: Thread safety with concurrent writes
+
+- [ ] `test_context_loader.py` - Context injection tests
+  - Test: Load minimal context
+  - Test: Load full context
+  - Test: Format prompt with context prepended
+  - Test: Handle missing project files gracefully
+
+**Integration Tests:**
+- [ ] `test_mcp_server.py` - MCP protocol tests
+  - Test: Server initializes without error
+  - Test: `list_tools()` returns 5 tools
+  - Test: Tool schemas are valid JSON
+  - Test: `list()` returns running/completed agents structure
+  - Test: `wait_for_agents()` with timeout returns correct structure
+
+**E2E Tests (require Claude/Codex CLI):**
+- [ ] `test_spawn_claude.py` - Claude agent spawning
+  - Test: Spawn haiku agent with simple prompt
+  - Test: Verify result contains text and cost
+  - Test: IAC.md entry created correctly
+
+- [ ] `test_spawn_codex.py` - Codex agent spawning (optional, skip if no API key)
+  - Test: Spawn Codex with simple prompt
+  - Test: Verify JSONL parsing works
+
+**Test Configuration:**
+```python
+# powerspawn/tests/conftest.py
+import pytest
+import os
+
+@pytest.fixture
+def temp_agents_dir(tmp_path):
+    """Create temp directory for IAC.md/CONTEXT.md"""
+    return tmp_path
+
+@pytest.fixture
+def skip_e2e():
+    """Skip E2E tests if CLI tools not available"""
+    return not (
+        os.system("claude --version") == 0 or
+        os.system("codex --version") == 0
+    )
+```
+
+**CI Integration:**
+- [ ] Add GitHub Actions workflow for PowerSpawn tests
+- [ ] Run unit tests on every push
+- [ ] Run E2E tests only on main branch (requires API keys)
 
 ## Phase 3: Collaboration Features (v0.6.x)
 
