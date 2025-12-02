@@ -41,32 +41,37 @@ function ReadOnlyEventView({ event }: ReadOnlyEventViewProps) {
   };
 
   return (
-    <div className="space-y-6 h-full">
-      {/* Date display */}
-      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--page-text-secondary)' }}>
-        <span className="material-symbols-rounded text-base">calendar_today</span>
-        <time dateTime={event.date}>{formatDateTime(event)}</time>
-      </div>
-
-      {/* Title display */}
+    <div className="space-y-8 h-full">
+      {/* Title display - moved to top for better hierarchy */}
       <div>
-        <h1 className="text-2xl font-bold leading-tight mb-1" style={{ color: 'var(--page-text-primary)' }}>
+        <h1 className="text-3xl font-bold leading-tight" style={{ color: 'var(--page-text-primary)' }}>
           {event.title}
         </h1>
       </div>
 
-      {/* Description display */}
+      {/* Date display with enhanced styling */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ backgroundColor: 'var(--page-bg)', border: '1px solid var(--page-border)' }}>
+        <span className="material-symbols-rounded text-xl" style={{ color: 'var(--page-accent)' }}>calendar_today</span>
+        <time dateTime={event.date} className="text-base font-medium" style={{ color: 'var(--page-text-primary)' }}>
+          {formatDateTime(event)}
+        </time>
+      </div>
+
+      {/* Description display with improved spacing */}
       {event.description && (
-        <div>
+        <div className="pt-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--page-text-secondary)' }}>
+            Description
+          </h3>
           <p className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--page-text-primary)' }}>
             {event.description}
           </p>
         </div>
       )}
 
-      {/* Metadata */}
-      <div className="mt-auto pt-6" style={{ borderTop: '1px solid var(--page-border)' }}>
-        <div className="text-xs" style={{ color: 'var(--page-text-secondary)' }}>
+      {/* Metadata - subtly placed at bottom */}
+      <div className="mt-auto pt-8" style={{ borderTop: '1px solid var(--page-border)' }}>
+        <div className="text-xs font-mono" style={{ color: 'var(--page-text-secondary)' }}>
           Event ID: {event.id}
         </div>
       </div>
@@ -95,6 +100,8 @@ interface AuthoringOverlayProps {
   onSelectEvent: (eventId: string) => void;
   // Props for event creation
   onCreateNew: () => void;
+  // Ownership control (v0.5.23)
+  isOwner?: boolean;
 }
 
 export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
@@ -116,9 +123,11 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   onNavigateNext,
   onSelectEvent,
   onCreateNew,
+  isOwner = true, // Default to true for backwards compatibility
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const [isEditMode, setIsEditMode] = useState(isNewEvent || !selected);
+  // Force view mode for non-owners (v0.5.23)
+  const [isEditMode, setIsEditMode] = useState(isOwner ? (isNewEvent || !selected) : false);
   const [errors, setErrors] = useState({ date: '', time: '', title: '', description: '' });
   const [touched, setTouched] = useState({ date: false, time: false, title: false, description: false });
   useFocusTrap(true, rootRef.current);
@@ -373,19 +382,27 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
             <div className="flex items-center gap-4">
               <h2
                 id="authoring-overlay-title"
-                className="text-lg font-semibold tracking-wide"
+                className="text-xl font-bold tracking-tight"
                 style={{ color: 'var(--page-text-primary)' }}
               >
-                {isEditMode ? (selected ? 'Edit Event' : 'Create Event') : 'View Event'}
+                {isEditMode ? (selected ? 'Edit Event' : 'Create Event') : 'Event Details'}
               </h2>
               {selected && allEvents.length > 1 && (
-                <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>
-                  Event {currentIndex + 1} of {allEvents.length}
+                <div className="text-sm px-3 py-1 rounded-full" style={{ color: 'var(--page-text-secondary)', backgroundColor: 'var(--page-bg)' }}>
+                  {currentIndex + 1} of {allEvents.length}
+                </div>
+              )}
+              {/* Read-only badge for non-owners */}
+              {!isOwner && (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(249, 115, 22, 0.1)', color: '#f97316' }}>
+                  <span className="material-symbols-rounded text-sm">lock</span>
+                  <span className="text-xs font-medium">View Only</span>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {!isEditMode && selected && (
+              {/* Only show Edit button for owners in view mode */}
+              {!isEditMode && selected && isOwner && (
                 <IconButton
                   aria-label="Edit event"
                   size="small"
@@ -395,7 +412,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                   <span className="material-symbols-rounded">edit</span>
                 </IconButton>
               )}
-              {selected && (
+              {/* Only show Create button for owners */}
+              {selected && isOwner && (
                 <IconButton
                   aria-label="Create new event"
                   size="small"
@@ -409,7 +427,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
               <button
                 type="button"
                 aria-label="Close authoring"
-                className="text-sm px-4 py-2 rounded-lg transition-colors"
+                className="text-sm px-4 py-2 rounded-lg transition-colors font-medium"
                 style={{
                   border: '1px solid var(--page-border)',
                   color: 'var(--page-text-primary)'
@@ -571,13 +589,13 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 
           {/* Sticky footer action bar */}
           <div
-            className="px-8 py-4 flex items-center justify-between"
+            className="px-8 py-5 flex items-center justify-between"
             style={{
               borderTop: '1px solid var(--page-border)',
               backgroundColor: 'var(--page-bg-elevated)'
             }}
           >
-            {isEditMode ? (
+            {isEditMode && isOwner ? (
               <>
                 <div>
                   {selected && (
@@ -632,16 +650,19 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                   >
                     Close
                   </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="button"
-                    onClick={() => setIsEditMode(true)}
-                    startIcon={<span className="material-symbols-rounded">edit</span>}
-                    sx={{ textTransform: 'none', minWidth: '100px' }}
-                  >
-                    Edit
-                  </Button>
+                  {/* Only show Edit button for owners */}
+                  {isOwner && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      type="button"
+                      onClick={() => setIsEditMode(true)}
+                      startIcon={<span className="material-symbols-rounded">edit</span>}
+                      sx={{ textTransform: 'none', minWidth: '100px' }}
+                    >
+                      Edit
+                    </Button>
+                  )}
                 </div>
               </>
             )}

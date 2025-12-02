@@ -38,6 +38,8 @@ interface AppProps {
 }
 
 function App({ timelineId, readOnly = false }: AppProps = {}) {
+  // Ownership is inverse of readOnly (readOnly = false means user owns the timeline)
+  const isOwner = !readOnly;
   usePerformanceMonitoring();
   const navigate = useNavigate();
 
@@ -559,7 +561,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
                 </Suspense>
               </ErrorBoundary>
             )}
-            {overlay === 'editor' && !readOnly && (
+            {overlay === 'editor' && (
               <ErrorBoundary>
                 <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 border-l flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
                   <AuthoringOverlay
@@ -581,6 +583,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
                     onNavigateNext={navigateToNextEvent}
                     onSelectEvent={selectEvent}
                     onCreateNew={createNewEvent}
+                    isOwner={isOwner}
                   />
                 </Suspense>
               </ErrorBoundary>
