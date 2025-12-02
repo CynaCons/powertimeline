@@ -728,7 +728,7 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 **Goal:** Extract and productize our MCP agent orchestration into a standalone project compatible with Claude Code AND GitHub Copilot
 **Status:** Complete
 
-**Completed (2025-12-02):**
+**Phase 1: Repository Creation (Complete):**
 - [x] Create PowerSpawn repository (https://github.com/CynaCons/PowerSpawn)
 - [x] Extract standalone package with all core modules
 - [x] Copy spawner.py, logger.py, context_loader.py, parser.py, mcp_server.py
@@ -740,6 +740,12 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - [x] Set up git submodule in main PowerTimeline repo
 - [x] Add "Built with PowerSpawn" footer to LandingPage
 - [x] Remove dead code: config.yaml (not used), workflows/ (project-specific)
+
+**Phase 2: Package Structure Cleanup:**
+- [x] Fix README.md path references (`agents/` → root paths)
+- [x] Add `__main__.py` for `python -m powerspawn` CLI entry point
+- [x] Add `pyproject.toml` for proper Python packaging
+- [x] Make IAC.md/CONTEXT.md output directory configurable (env var: POWERSPAWN_OUTPUT_DIR)
 
 **Novelty Research (via Opus agent):**
 - IAC.md pattern is novel - no equivalent found in 900+ MCP repos
