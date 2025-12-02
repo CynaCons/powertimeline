@@ -3,7 +3,7 @@
   "mcpServers": {
     "agents": {
       "command": "python",
-      "args": ["agents/mcp_server.py"],
+      "args": ["powerspawn/mcp_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8",
         "PYTHONUNBUFFERED": "1"

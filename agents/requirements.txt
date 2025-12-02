@@ -1,8 +1,0 @@
-# MCP Agent Spawner Dependencies
-# Install with: pip install -r agents/requirements.txt
-
-# MCP SDK for Model Context Protocol server
-mcp>=1.0.0
-
-# Note: The agents module also requires the Claude CLI and optionally Codex CLI
-# to be installed and available in PATH for spawning sub-agents.

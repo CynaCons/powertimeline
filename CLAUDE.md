@@ -22,7 +22,7 @@ src/
 ├── timeline/      # Timeline rendering (DeterministicLayoutComponent.tsx)
 tests/             # Playwright tests organized by feature
 docs/              # SRS documentation
-agents/            # MCP server for multi-agent orchestration
+powerspawn/        # PowerSpawn MCP server (git submodule)
 ```
 
 ### Key Commands
@@ -178,7 +178,6 @@ mcp__agents__wait_for_agents - Block until all agents complete
 | Codex | Any task, rate limit relief | Separate quota |
 
 ### Key Files
-- `agents/mcp_server.py` - MCP server implementation
-- `agents/MCP_DESIGN.md` - Architecture documentation
-- `agents/IAC.md` - Inter-agent communication log
+- `powerspawn/mcp_server.py` - MCP server implementation
+- `powerspawn/MCP_DESIGN.md` - Architecture documentation
 - `AGENTS.md` - Context loaded by sub-agents
