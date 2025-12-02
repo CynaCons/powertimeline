@@ -866,6 +866,27 @@ export function LandingPage() {
           >
             © 2025 PowerTimeline. Built for people who connect the dots.
           </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#484f58',
+              textAlign: 'center',
+              display: 'block',
+              fontSize: '0.75rem',
+              mt: 1,
+            }}
+          >
+            Built with{' '}
+            <Link
+              href="https://github.com/CynaCons/PowerSpawn"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: '#6e7681', '&:hover': { color: '#8b5cf6' } }}
+            >
+              PowerSpawn
+            </Link>
+            {' '}— AI-powered multi-agent orchestration
+          </Typography>
         </Container>
       </Box>
     </Box>

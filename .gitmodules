@@ -1,0 +1,3 @@
+[submodule "powerspawn"]
+	path = powerspawn
+	url = https://github.com/CynaCons/PowerSpawn.git
