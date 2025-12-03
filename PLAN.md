@@ -30,6 +30,7 @@
 - ✅ Dev Panel removal & test migration (v0.5.24)
 - ✅ PowerSpawn standalone extraction & submodule (v0.5.25)
 - ✅ PowerSpawn landing page (powerspawn.com) with GitHub Pages (v0.5.25)
+- ✅ New branding: PT logo, hero banner, favicon (v0.5.25)
 
 ### Next Up
 - **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
@@ -771,6 +772,14 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - [ ] Document any compatibility issues
 - [ ] Fix protocol differences if any
 - [ ] Create VS Code `.vscode/mcp.json` example config
+
+**Phase 5: Branding & Visual Identity:** ✅ Complete
+- [x] Create new PowerTimeline logo (PT monogram with timeline nodes, purple/violet glow)
+- [x] Create hero banner (timeline with historical era icons: Sparta → Rome → France → USA)
+- [x] Integrate banner into LandingPage hero section (replaced placeholder)
+- [x] Update favicon.png (resized to 64x64 for proper browser rendering)
+- [x] Update og-image.png for social media sharing (uses banner)
+- [x] Update logo.png in assets folder
 
 **Future Roadmap:**
 - [ ] Submit to MCP Registry
