@@ -293,31 +293,29 @@ export function LandingPage() {
             </Button>
           </Stack>
 
-          {/* Hero Demo Placeholder */}
+          {/* Hero Banner */}
           <Box
             sx={{
               mt: 6,
               mx: 'auto',
               maxWidth: 900,
-              aspectRatio: '16 / 9',
-              bgcolor: '#161b22',
-              border: '1px solid #30363d',
               borderRadius: 3,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               position: 'relative',
               overflow: 'hidden',
               boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5)',
             }}
           >
-            {/* Placeholder for future screenshot/demo */}
-            <Box sx={{ textAlign: 'center', p: 4 }}>
-              <TimelineIcon sx={{ fontSize: 80, color: '#8b5cf6', mb: 2, opacity: 0.6 }} />
-              <Typography variant="h6" sx={{ color: '#8d96a0' }}>
-                Interactive timeline editor demo coming soon
-              </Typography>
-            </Box>
+            <Box
+              component="img"
+              src="/assets/images/PowerTimeline_banner.png"
+              alt="PowerTimeline - Visualize history from ancient civilizations to modern times"
+              sx={{
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+                borderRadius: 3,
+              }}
+            />
           </Box>
         </Container>
       </Box>
