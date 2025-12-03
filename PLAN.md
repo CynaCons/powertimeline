@@ -754,92 +754,27 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - MCP for agent spawning is uncommon - most MCP servers are for external tools
 - Closest competitor: claude-flow (1k stars) - Claude-only, no cross-model support
 
-**Repository Structure:**
-```
-powerspawn/
-├── mcp_server.py      # MCP server (main entry point)
-├── spawner.py         # Core spawn logic
-├── logger.py          # IAC.md logging
-├── context_loader.py  # Context injection
-├── parser.py          # Response parsing
-├── __init__.py        # Package exports
-├── requirements.txt   # Dependencies
-├── schemas/           # JSON output schemas
-├── examples/          # Usage examples
-├── README.md          # Documentation
-├── DESIGN.md          # Architecture rationale
-└── MCP_DESIGN.md      # MCP architecture
-```
+**Phase 3: Landing Page (powerspawn.com):**
+- [ ] Scaffold Vite + React + Tailwind + Framer Motion project in `/site`
+- [ ] Hero section with animated terminal demo
+- [ ] "Why PowerSpawn?" section with 6 animated feature cards
+- [ ] "How It Works" diagram (IAC.md pattern visualization)
+- [ ] Comparison table vs AutoGen/CrewAI/LangGraph
+- [ ] Quick Start code snippets with syntax highlighting
+- [ ] Configure GitHub Pages deployment
+- [ ] Point powerspawn.com DNS to GitHub Pages
 
-**Remaining Tasks (moved to v0.5.29):**
-
-**Project Vision:**
-"PowerSpawn" - A universal MCP server for spawning AI sub-agents across different models. Users say "can you powerspawn a Codex to handle this?" and it just works, regardless of whether they're using Claude Code or GitHub Copilot.
-
-**Key Features to Productize:**
-1. **Cross-model agent spawning** - Claude spawns Codex, Codex spawns Claude
-2. **CONTEXT.md injection** - Auto-inject project context into sub-agents
-3. **IAC.md pattern** - Inter-Agent Communication via shared markdown file
-4. **Universal MCP compatibility** - Works with Claude Code, GitHub Copilot, JetBrains, etc.
-
-**Repository Structure (new repo: `powerspawn`):**
-```
-powerspawn/
-├── README.md              # Showcase, installation, usage
-├── powerspawn/
-│   ├── __init__.py
-│   ├── server.py          # MCP server (refactored from mcp_server.py)
-│   ├── agents/
-│   │   ├── claude.py      # Claude agent spawner
-│   │   ├── codex.py       # Codex/GPT agent spawner
-│   │   └── base.py        # Base agent interface
-│   └── context/
-│       ├── injector.py    # CONTEXT.md/AGENTS.md injection
-│       └── iac.py         # Inter-Agent Communication handler
-├── examples/
-│   ├── claude-code/       # Example .mcp.json for Claude Code
-│   ├── copilot/           # Example for GitHub Copilot
-│   └── jetbrains/         # Example for JetBrains
-├── docs/
-│   ├── IAC_PATTERN.md     # Document the IAC.md pattern
-│   └── CONTEXT_INJECTION.md
-└── tests/
-```
-
-**Implementation Tasks:**
-
-*Phase 1: GitHub Copilot Compatibility*
-- [ ] Test current mcp_server.py with VS Code Copilot MCP settings
+**Phase 4: GitHub Copilot Compatibility:**
+- [ ] Test mcp_server.py with VS Code Copilot MCP settings
 - [ ] Document any compatibility issues
 - [ ] Fix protocol differences if any
 - [ ] Create VS Code `.vscode/mcp.json` example config
-- [ ] Test with Copilot Chat in VS Code
 
-*Phase 2: Extract to Standalone Package*
-- [ ] Create new `powerspawn` repository
-- [ ] Refactor mcp_server.py into clean module structure
-- [ ] Add proper Python packaging (pyproject.toml, setup.py)
-- [ ] Make it pip-installable: `pip install powerspawn`
-- [ ] CLI entry point: `powerspawn serve`
-
-*Phase 3: Documentation & Showcase*
-- [ ] Write comprehensive README with examples
-- [ ] Document the IAC.md pattern (potential blog post)
-- [ ] Create demo GIFs/videos
-- [ ] Landing page (GitHub Pages or simple site)
+**Future Roadmap:**
 - [ ] Submit to MCP Registry
-
-*Phase 4: Advanced Features*
-- [ ] Agent result caching
-- [ ] Parallel agent execution improvements
-- [ ] Support for more models (Gemini, local LLMs)
-- [ ] Web UI for monitoring spawned agents
-- [ ] Rate limiting and cost tracking
-
-**Novelty Research:** (pending agent research results)
-- IAC.md pattern originality
-- Comparison with AutoGen, CrewAI, LangGraph
-- Market positioning
+- [ ] Support for Gemini models
+- [ ] Unit and integration test suite
+- [ ] Demo GIFs/videos
 
 ### v0.5.26 - Timeline Import/Export & AI-Ready Format
 **Goal:** Enable import/export of timelines in a simple format that AI models can generate
