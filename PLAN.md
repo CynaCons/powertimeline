@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.25 (PowerSpawn standalone extraction complete)
-**Next Milestone:** v0.5.28 - Test Sweep Fixes, v0.5.29 - PowerSpawn Tests, v0.5.26 - Import/Export
+**Current Version:** v0.5.25 (PowerSpawn + Landing Page complete)
+**Next Milestone:** v0.5.26 - Import/Export, v0.5.28 - Test Sweep Fixes, v0.5.29 - PowerSpawn Tests
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -29,6 +29,7 @@
 - ✅ Event Editor read-only mode & visual rework (v0.5.23)
 - ✅ Dev Panel removal & test migration (v0.5.24)
 - ✅ PowerSpawn standalone extraction & submodule (v0.5.25)
+- ✅ PowerSpawn landing page (powerspawn.com) with GitHub Pages (v0.5.25)
 
 ### Next Up
 - **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
@@ -754,17 +755,18 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - MCP for agent spawning is uncommon - most MCP servers are for external tools
 - Closest competitor: claude-flow (1k stars) - Claude-only, no cross-model support
 
-**Phase 3: Landing Page (powerspawn.com):**
-- [ ] Scaffold Vite + React + Tailwind + Framer Motion project in `/site`
-- [ ] Hero section with animated terminal demo
-- [ ] "Why PowerSpawn?" section with 6 animated feature cards
-- [ ] "How It Works" diagram (IAC.md pattern visualization)
-- [ ] Comparison table vs AutoGen/CrewAI/LangGraph
-- [ ] Quick Start code snippets with syntax highlighting
-- [ ] Configure GitHub Pages deployment
-- [ ] Point powerspawn.com DNS to GitHub Pages
+**Phase 3: Landing Page (powerspawn.com):** ✅ Complete
+- [x] Scaffold Vite + React + Tailwind + Framer Motion project in `/site`
+- [x] Hero section with animated terminal demo
+- [x] "Why PowerSpawn?" section with 6 animated feature cards
+- [x] "How It Works" diagram (IAC.md pattern visualization)
+- [x] Comparison table vs AutoGen/CrewAI/LangGraph
+- [x] Quick Start code snippets with syntax highlighting
+- [x] Configure GitHub Pages deployment (deploy-site.yml workflow)
+- [x] Fix base path for GitHub Pages (/PowerSpawn/)
+- [ ] Point powerspawn.com DNS to GitHub Pages (pending DNS config)
 
-**Phase 4: GitHub Copilot Compatibility:**
+**Phase 4: GitHub Copilot Compatibility:** 🔄 In Progress
 - [ ] Test mcp_server.py with VS Code Copilot MCP settings
 - [ ] Document any compatibility issues
 - [ ] Fix protocol differences if any
