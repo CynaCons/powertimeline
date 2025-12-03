@@ -741,11 +741,12 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - [x] Add "Built with PowerSpawn" footer to LandingPage
 - [x] Remove dead code: config.yaml (not used), workflows/ (project-specific)
 
-**Phase 2: Package Structure Cleanup:**
+**Phase 2: Documentation & Distribution:**
 - [x] Fix README.md path references (`agents/` → root paths)
-- [x] Add `__main__.py` for `python -m powerspawn` CLI entry point
-- [x] Add `pyproject.toml` for proper Python packaging
+- [x] Add Installation section with git submodule instructions
+- [x] Update Architecture section to reflect actual file structure
 - [x] Make IAC.md/CONTEXT.md output directory configurable (env var: POWERSPAWN_OUTPUT_DIR)
+- [x] Decision: Use git submodule distribution (not pip) - simpler, project-scoped, MCP-native pattern
 
 **Novelty Research (via Opus agent):**
 - IAC.md pattern is novel - no equivalent found in 900+ MCP repos
