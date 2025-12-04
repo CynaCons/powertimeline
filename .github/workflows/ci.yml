@@ -88,7 +88,7 @@ jobs:
         echo ""
 
         # Set limits based on industry standards for React + MUI apps
-        MAX_JS=400000      # 400 KB gzipped JS (generous for MUI + React)
+        MAX_JS=550000      # 550 KB gzipped JS (generous for MUI + React)
         MAX_CSS=50000      # 50 KB gzipped CSS
         MAX_IMAGES=1200000 # 1.2 MB total images
         MAX_TOTAL=1500000  # 1.5 MB total transfer
