@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.25 (PowerSpawn + Landing Page complete)
-**Next Milestone:** v0.5.26 - Import/Export, v0.5.28 - Test Sweep Fixes, v0.5.29 - PowerSpawn Tests
+**Current Version:** v0.5.26 (Stream Editor - Mobile Viewer)
+**Next Milestone:** v0.5.26 - Stream Editor, v0.5.27 - Import/Export, v0.5.28 - Test Sweep
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -33,10 +33,11 @@
 - ✅ New branding: PT logo, hero banner, favicon (v0.5.25)
 
 ### Next Up
+- **v0.5.26**: Stream Editor - Mobile Viewer (git-style vertical timeline, read-only)
+- **v0.5.27**: Import/Export with AI-ready YAML format
 - **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
-- **v0.5.29**: PowerSpawn Test Suite (unit, integration, E2E)
-- **v0.5.26**: Import/Export with AI-ready YAML format
-- **v0.5.27**: Stream Editor (mobile-first, git-style notepad editor)
+- **v0.5.29**: Technical Debt & Codebase Hygiene (consolidated)
+- **v0.5.30**: PowerSpawn Test Suite
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -767,11 +768,12 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - [x] Fix base path for GitHub Pages (/PowerSpawn/)
 - [ ] Point powerspawn.com DNS to GitHub Pages (pending DNS config)
 
-**Phase 4: GitHub Copilot Compatibility:** 🔄 In Progress
-- [ ] Test mcp_server.py with VS Code Copilot MCP settings
-- [ ] Document any compatibility issues
-- [ ] Fix protocol differences if any
-- [ ] Create VS Code `.vscode/mcp.json` example config
+**Phase 4: GitHub Copilot Integration:** ✅ Core Complete (VS Code testing moved to v0.5.29)
+- [x] Add `spawn_copilot` as third agent provider (alongside Claude/Codex)
+- [x] Implement Copilot CLI spawning in spawner.py (`copilot` command)
+- [x] Add MCP tool: `mcp__agents__spawn_copilot`
+- [x] Update README with Copilot documentation
+- [x] Update landing page with Copilot support
 
 **Phase 5: Branding & Visual Identity:** ✅ Complete
 - [x] Create new PowerTimeline logo (PT monogram with timeline nodes, purple/violet glow)
@@ -781,15 +783,17 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 - [x] Update og-image.png for social media sharing (uses banner)
 - [x] Update logo.png in assets folder
 
-**Future Roadmap:**
-- [ ] Submit to MCP Registry
-- [ ] Support for Gemini models
-- [ ] Unit and integration test suite
-- [ ] Demo GIFs/videos
+**Future Roadmap (moved to v0.5.29-30):**
+- [x] Support for Gemini models (via Copilot CLI)
+- Remaining: MCP Registry, test suite, demo videos
 
-### v0.5.26 - Timeline Import/Export & AI-Ready Format
+### v0.5.25.1 - Codebase Hygiene & Technical Debt
+**Goal:** Address technical debt, security documentation, and code quality issues identified in audit
+**Status:** Moved to v0.5.29 (consolidated Technical Debt iteration)
+
+### v0.5.27 - Timeline Import/Export & AI-Ready Format
 **Goal:** Enable import/export of timelines in a simple format that AI models can generate
-**Status:** Planned
+**Status:** Planned (renumbered from v0.5.26)
 
 **Design Principles:**
 - Simple, human-readable format (YAML primary, JSON secondary)
@@ -841,96 +845,92 @@ events:
 - [ ] Invalid format rejection tests
 - [ ] E2E: Import timeline via UI
 
-### v0.5.27 - Stream Editor (Mobile-First Timeline Editor)
-**Goal:** New editing paradigm: git-style vertical timeline with inline editing, optimized for mobile
-**Status:** Planned
+### v0.5.26 - Stream Editor: Mobile Timeline Viewer
+**Goal:** Create a mobile-friendly read-only timeline viewer using git-style vertical layout
+**Status:** In Progress
+
+**Design Inspiration:** Landing page roadmap component (git-style vertical timeline with dots and lines)
 
 **Concept Overview:**
-A notepad-like editor with git-style visual language. Events are displayed vertically with commit-style dots and connecting lines. Dates on the left, content on the right. Fully editable inline.
+A scrollable vertical timeline viewer optimized for mobile. Events displayed chronologically with git-style commit dots and connecting lines. Dates on the left, content on the right. Read-only in this iteration; editing comes later.
 
 **Visual Design:**
 ```
-┌─────────────────────────────────────────────────┐
-│  DATE        │ ●─── EVENT CARD                  │
-│              │ │    [Title - editable]          │
-│  1789-07-14  │ │    [Description - editable]    │
-│              │ │                                │
-│              │ │                                │
-│  DATE        │ ●─── EVENT CARD                  │
-│              │ │    [Title]                     │
-│  1789-08-26  │ │    [Description]               │
-│              │ │                                │
-│              │ │                                │
-│  DATE        │ ●─── EVENT CARD                  │
-│              │      [Title]                     │
-│  1792-09-21  │      [Description]               │
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  📅 STREAM VIEW              [× Close]   │
+├──────────────────────────────────────────┤
+│                                          │
+│  Jul 14   ●─── Storming of the Bastille  │
+│  1789     │    Parisian revolutionaries  │
+│           │    storm the Bastille...     │
+│           │    🔴                        │
+│           │                              │
+│  Aug 26   ●─── Declaration of Rights     │
+│  1789     │    The National Assembly     │
+│           │    adopts the Declaration... │
+│           │    🔵                        │
+│           │                              │
+│  Sep 21   ●─── First French Republic     │
+│  1792          Monarchy abolished...     │
+│                🟢                        │
+│                                          │
+└──────────────────────────────────────────┘
 ```
 
-**Three Viewing Modes (Total):**
-1. **Graph Viewer** - Current canvas-based timeline visualization (read-only, pan/zoom)
-2. **Classic Editor** - Current editor with central edit panel + left/right event columns
-3. **Stream Editor** - NEW: Git-style vertical list, inline editing, mobile-optimized
+**Access Model:**
+- **Desktop**: Overlay popup (80% viewport) over the canvas timeline
+- **Mobile**: Full-screen overlay (100% viewport)
+- **Trigger**: "Stream View" button in editor toolbar
+- **No separate route** - overlay within existing editor page
 
-**Two Editing Modes (Total):**
-1. **Classic Editor** - Modal editing (select event → edit in panel)
-2. **Stream Editor** - Inline editing (click to edit in place, notepad-style)
-
-**Mobile Strategy:**
-- Stream Editor is the PRIMARY mobile experience
-- Simple vertical scroll, no complex pan/zoom gestures
-- Touch-friendly inline editing
-- Responsive: full-width cards on mobile, side-by-side on tablet
+**Event Ordering:** Strictly chronological (sorted by date)
 
 **Implementation Tasks:**
 
-*Phase 1: Core Component*
-- [ ] Create `StreamEditor.tsx` component
-- [ ] Implement git-style vertical timeline rail (SVG dots + lines)
-- [ ] Event card component with date/title/description layout
-- [ ] Scroll virtualization for large timelines (react-window or similar)
-- [ ] Date formatting and grouping (by year/month/day)
+*Phase 1: Stream Viewer Component (this iteration)*
+- [ ] Create `StreamViewer.tsx` component
+- [ ] Implement git-style vertical rail (inspired by LandingPage roadmap)
+- [ ] Event card with date/title/description/color layout
+- [ ] Chronological sorting of events
+- [ ] Date formatting (localized, grouped by year)
+- [ ] Scroll for long timelines
+- [ ] Dark theme support using existing CSS variables
 
-*Phase 2: Inline Editing*
-- [ ] Click-to-edit event titles (contenteditable or input)
-- [ ] Click-to-edit event descriptions (textarea, auto-expand)
-- [ ] Date picker for event date editing
-- [ ] Color picker for event color
-- [ ] Auto-save on blur (debounced)
-- [ ] Keyboard navigation (Tab between events, Enter to confirm)
+*Phase 2: Overlay Integration*
+- [ ] Create `StreamViewerOverlay.tsx` wrapper (MUI Dialog or custom)
+- [ ] Add "Stream View" toggle button to EditorPage toolbar
+- [ ] Desktop: Centered modal (maxWidth: 800px, 80vh height)
+- [ ] Mobile: Full-screen overlay (100vw × 100vh)
+- [ ] Close button and Escape key handler
+- [ ] Responsive breakpoint detection
 
-*Phase 3: Event Management*
-- [ ] Add new event button (+ at bottom or between events)
-- [ ] Delete event with confirmation
-- [ ] Drag-to-reorder events (optional, may conflict with date ordering)
-- [ ] Undo/redo support
-
-*Phase 4: Mobile Optimization*
-- [ ] Touch-friendly tap targets (44px minimum)
-- [ ] Swipe gestures (swipe left to delete?)
-- [ ] Mobile keyboard handling (viewport resize)
-- [ ] Responsive breakpoints (mobile/tablet/desktop)
-
-*Phase 5: Integration*
-- [ ] Add Stream Editor tab/toggle to Editor page
-- [ ] Route: `/editor/:timelineId/stream` or toggle within existing route
-- [ ] Sync state between Classic and Stream editors
-- [ ] Mobile detection → default to Stream Editor
+*Phase 3: Mobile Polish*
+- [ ] Touch-friendly scroll (momentum scrolling)
+- [ ] 44px minimum tap targets for event cards
+- [ ] Mobile viewport meta tag compliance
+- [ ] Test on actual mobile devices (iOS Safari, Android Chrome)
 
 **Design Tokens (extend tokens.css):**
-- `--stream-rail-color`: Color of the vertical line
-- `--stream-dot-size`: Size of event dots (12px)
-- `--stream-dot-color`: Dot fill color
-- `--stream-date-width`: Width of date column (100px)
-- `--stream-card-gap`: Vertical gap between cards
+```css
+--stream-rail-color: var(--page-border);
+--stream-dot-size: 12px;
+--stream-dot-color: var(--accent-primary);
+--stream-date-width: 80px;
+--stream-card-gap: 24px;
+```
 
 **Tests:**
-- [ ] Unit tests for StreamEditor component
-- [ ] E2E: Create event via Stream Editor
-- [ ] E2E: Edit event inline
-- [ ] E2E: Delete event
-- [ ] Visual regression tests for git-style rail
-- [ ] Mobile viewport tests
+- [ ] Unit tests for StreamViewer component
+- [ ] E2E: Open Stream View overlay
+- [ ] E2E: Verify events render in chronological order
+- [ ] E2E: Close overlay with button and Escape key
+- [ ] Mobile viewport tests (375px, 768px widths)
+
+**Future Iterations (not in scope):**
+- Inline editing (Phase 2 of Stream Editor)
+- Add/delete events
+- Swipe gestures
+- Drag-to-reorder
 
 ### v0.5.28 - Test Sweep Corrective Actions
 **Goal:** Address test failures discovered during Dev Panel removal sweep
@@ -959,7 +959,33 @@ A notepad-like editor with git-style visual language. Events are displayed verti
 - [ ] Update CONTRIBUTING.md with test setup instructions
 - [ ] Create smoke test that validates .env.test is properly configured
 
-### v0.5.29 - PowerSpawn Test Suite
+### v0.5.29 - Technical Debt & Codebase Hygiene
+**Goal:** Consolidate deferred technical debt items from v0.5.15-v0.5.25
+**Status:** Planned
+
+**From v0.5.25.1 (Codebase Hygiene):**
+- [ ] **Security Documentation:** Add explicit documentation to `powerspawn/spawner.py` explaining `bypass_sandbox=True` design decision
+- [ ] **Global Namespace Cleanup:** Refactor `window.__ccTelemetry` and `window.debugTimelineScales` to use `window.PowerTimeline` namespace or strip in production
+- [ ] **Logging Cleanup:** Remove paranoid `if (console)` checks in `LayoutEngine.ts`
+- [ ] **Dead Code Removal:** Remove commented-out legacy code in `DeterministicLayoutComponent.tsx`
+- [ ] **Test Debt:** Fix or remove skipped tests in `tests/editor/09-seeding-scenarios.spec.ts`
+
+**From v0.5.15.1 (Deferred):**
+- [ ] Audit and sync requirement counts across all SRS documents
+- [ ] Document or fix single-event zoom positioning edge case
+
+**From v0.5.25 Phase 4 (Copilot Testing):**
+- [ ] Test mcp_server.py with VS Code Copilot MCP settings
+- [ ] Create VS Code `.vscode/mcp.json` example config
+- [ ] Test cross-model orchestration: Claude → Copilot → Codex
+
+**From v0.5.18 (UI Deferred):**
+- [ ] Fix Home page dark mode: scrollbar styling
+- [ ] Home page: My Timelines display on 2 rows instead of 1
+
+---
+
+### v0.5.30 - PowerSpawn Test Suite
 **Goal:** Create comprehensive tests to verify PowerSpawn MCP server functionality
 **Status:** Planned
 
@@ -1031,6 +1057,25 @@ def skip_e2e():
 - [ ] Run unit tests on every push
 - [ ] Run E2E tests only on main branch (requires API keys)
 
+### v0.5.31 - UX Polish & Resilience
+**Goal:** Enhance visual feedback and error handling for a professional-grade experience
+**Status:** Planned
+
+- [ ] **Visual Feedback:** Implement loading skeletons for Dashboard, Timeline List, and Editor
+- [ ] **Micro-interactions:** Add hover states and transitions to all interactive elements (cards, buttons, nav items)
+- [ ] **Error Recovery:** Replace hard redirects with graceful "Retry" UI for timeline loading failures
+- [ ] **Toast Notifications:** Standardize success/error feedback for async actions (save, delete, fork)
+- [ ] **Accessibility:** Audit and fix focus states and ARIA labels for screen readers
+
+### v0.5.32 - User Onboarding Experience
+**Goal:** Guide new users from "blank slate" to their first successful timeline
+**Status:** Planned
+
+- [ ] **Empty States:** Create actionable empty states for "My Timelines" with "Create" or "Fork" prompts
+- [ ] **Starter Templates:** Add "Use Template" option (Biography, Project Plan, Historical Era) to creation flow
+- [ ] **Guided Tour:** Implement interactive walkthrough for the Editor (explaining Zoom, Layout, Events)
+- [ ] **Contextual Help:** Add tooltips to complex features (Layout Engine, Visibility settings)
+
 ## Phase 3: Collaboration Features (v0.6.x)
 
 ### v0.6.0 - Git-Based Timeline Storage
@@ -1059,12 +1104,13 @@ def skip_e2e():
 
 ## Phase 4: Discovery & Social (v0.7.x)
 
-### v0.7.0 - Enhanced Discovery
-- [ ] Advanced search with filters (date range, tags, category)
-- [ ] Timeline trending algorithm
-- [ ] Featured timeline curation
-- [ ] Category-based browsing
-- [ ] Timeline recommendations
+### v0.7.0 - Enhanced Discovery & Advanced Search
+- [ ] **Global Search:** Unified search for Users and Timelines with type filtering
+- [ ] **Content Search:** Deep search within timeline events (titles, descriptions)
+- [ ] **Advanced Filters:** Filter by date range, tags, category, and popularity
+- [ ] **Timeline Trending:** Algorithm based on views, forks, and recent activity
+- [ ] **Featured Curation:** Admin-curated lists of high-quality timelines
+- [ ] **Recommendations:** "More like this" suggestions based on timeline content
 
 ### v0.7.1 - Social Features
 - [ ] Follow users and timelines
