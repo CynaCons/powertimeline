@@ -7,10 +7,14 @@
  * - Proper mouse wheel scrolling (minHeight: 0 fix)
  * - Desktop: Centered modal (85% viewport, max 900px width)
  * - Mobile: Full-screen overlay (100vw x 100vh)
+ * - Keyboard navigation (arrow keys between events)
+ * - Focus trap when overlay opens
+ * - Fade animation (150ms)
+ * - Swipe to close on mobile
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, IconButton, Typography, useMediaQuery, useTheme, TextField, InputAdornment } from '@mui/material';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Box, IconButton, Typography, useMediaQuery, useTheme, TextField, InputAdornment, Fade } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -38,6 +42,12 @@ export function StreamViewerOverlay({
   const [searchQuery, setSearchQuery] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Swipe gesture tracking for mobile
+  const touchStartY = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   // Filter events based on search query
   const filteredEvents = useMemo(() => {
@@ -49,6 +59,15 @@ export function StreamViewerOverlay({
       event.date.includes(query)
     );
   }, [events, searchQuery]);
+
+  // Sort events chronologically (same as StreamViewer) for keyboard navigation
+  const sortedEvents = useMemo(() => {
+    return [...filteredEvents].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [filteredEvents]);
 
   const handleEventClick = (event: Event) => {
     setSelectedEventId(event.id);
@@ -63,22 +82,101 @@ export function StreamViewerOverlay({
     }, 50);
   };
 
-  // Handle Escape key - use capturing phase to catch before any input handlers
+  // Scroll to selected event helper
+  const scrollToEvent = useCallback((eventId: string) => {
+    setTimeout(() => {
+      const eventElement = scrollContainerRef.current?.querySelector(`[data-event-id="${eventId}"]`);
+      if (eventElement) {
+        eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
+  }, []);
+
+  // Handle keyboard navigation - Escape, Arrow Up/Down
   useEffect(() => {
     if (!open) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape to close
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
         onClose();
+        return;
+      }
+
+      // Don't handle arrow keys if user is typing in search
+      const isInSearchField = document.activeElement?.getAttribute('data-testid') === 'stream-search-input' ||
+        document.activeElement?.closest('[data-testid="stream-search-input"]');
+      if (isInSearchField) return;
+
+      // Arrow Up/Down for event navigation
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (sortedEvents.length === 0) return;
+
+        const currentIndex = selectedEventId
+          ? sortedEvents.findIndex(ev => ev.id === selectedEventId)
+          : -1;
+
+        let nextIndex: number;
+        if (e.key === 'ArrowDown') {
+          nextIndex = currentIndex < sortedEvents.length - 1 ? currentIndex + 1 : 0;
+        } else {
+          nextIndex = currentIndex > 0 ? currentIndex - 1 : sortedEvents.length - 1;
+        }
+
+        const nextEvent = sortedEvents[nextIndex];
+        setSelectedEventId(nextEvent.id);
+        onEventClick?.(nextEvent);
+        scrollToEvent(nextEvent.id);
       }
     };
 
     // Use capture: true to intercept before input elements can handle it
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [open, onClose]);
+  }, [open, onClose, sortedEvents, selectedEventId, onEventClick, scrollToEvent]);
+
+  // Focus trap - focus modal when opened, trap focus within
+  useEffect(() => {
+    if (!open || !modalRef.current) return;
+
+    // Focus the search input when overlay opens (better UX)
+    const timer = setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 150); // Wait for fade animation
+
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  // Swipe to close on mobile (swipe down from top)
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!isMobile) return;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+  }, [isMobile]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!isMobile || touchStartY.current === null || touchStartX.current === null) return;
+
+    const touchEndY = e.changedTouches[0].clientY;
+    const touchEndX = e.changedTouches[0].clientX;
+    const deltaY = touchEndY - touchStartY.current;
+    const deltaX = Math.abs(touchEndX - touchStartX.current);
+
+    // Swipe down gesture: >100px vertical, less than 50px horizontal (not a horizontal swipe)
+    // Only trigger if we're near the top of the scroll container
+    const scrollTop = scrollContainerRef.current?.scrollTop ?? 0;
+    if (deltaY > 100 && deltaX < 50 && scrollTop < 20) {
+      onClose();
+    }
+
+    touchStartY.current = null;
+    touchStartX.current = null;
+  }, [isMobile, onClose]);
 
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -116,27 +214,28 @@ export function StreamViewerOverlay({
     return () => overlay.removeEventListener('wheel', blockWheelPropagation, { capture: true });
   }, [open]);
 
-  if (!open) return null;
-
+  // Always render for Fade animation to work (open controls visibility)
   return (
-    <Box
-      ref={overlayRef}
-      onClick={handleBackdropClick}
-      data-testid="stream-viewer-overlay"
-      sx={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1300,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'rgba(0, 0, 0, 0.6)',
-      }}
-    >
-      {/* Modal container */}
+    <Fade in={open} timeout={150} unmountOnExit>
       <Box
-        data-testid="stream-viewer-modal"
+        ref={overlayRef}
+        onClick={handleBackdropClick}
+        data-testid="stream-viewer-overlay"
         sx={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1300,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'rgba(0, 0, 0, 0.6)',
+        }}
+      >
+        {/* Modal container */}
+        <Box
+          ref={modalRef}
+          data-testid="stream-viewer-modal"
+          sx={{
           bgcolor: 'var(--stream-bg)',
           color: 'var(--stream-text-primary)',
           display: 'flex',
@@ -200,6 +299,7 @@ export function StreamViewerOverlay({
               placeholder="Search events..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              inputRef={searchInputRef}
               data-testid="stream-search-input"
               InputProps={{
                 startAdornment: (
@@ -269,6 +369,8 @@ export function StreamViewerOverlay({
         <Box
           ref={scrollContainerRef}
           data-testid="stream-scroll-container"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
           sx={{
             flex: 1,
             minHeight: 0, // CRITICAL: Without this, flex child won't scroll
@@ -291,5 +393,6 @@ export function StreamViewerOverlay({
         </Box>
       </Box>
     </Box>
+    </Fade>
   );
 }

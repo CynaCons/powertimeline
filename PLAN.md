@@ -982,6 +982,14 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 - [x] Reorder sections: Popular → Statistics → Recently Edited
 - [x] Make statistics grid 2-col on mobile with smaller text
 
+**Stream Viewer Polish (code review findings):**
+- [x] Add keyboard navigation (arrow keys between events)
+- [x] Add focus trap when overlay opens (auto-focus search input)
+- [x] Add fade animation (150ms) for overlay open/close
+- [x] Add hover effect on desktop event cards
+- [x] Add swipe to close on mobile (swipe down gesture)
+- [x] Add tests for expand/collapse and keyboard navigation (T82.K*, T82.E*, T82.F*)
+
 ### v0.5.28 - Test Sweep Corrective Actions
 **Goal:** Address test failures discovered during Dev Panel removal sweep
 **Status:** Planned

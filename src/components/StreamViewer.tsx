@@ -205,6 +205,16 @@ function StreamEventCard({
           borderRadius: 2,
           p: 1.5,
           mb: isLast ? 0 : 'var(--stream-card-gap)',
+          transition: 'all 0.15s ease',
+          // Desktop hover effect
+          '@media (hover: hover)': {
+            '&:hover': {
+              bgcolor: 'var(--stream-card-bg)',
+              borderColor: 'var(--stream-dot-color)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            },
+          },
         }}
       >
         <Typography
