@@ -1,0 +1,157 @@
+# Stream View Requirements
+
+This document defines requirements for the Stream View feature - a mobile-friendly, vertical timeline viewer that provides an alternative reading experience to the canvas-based timeline editor.
+
+## Overview
+
+Stream View presents timeline events in a scrollable, git-style vertical layout optimized for:
+- Mobile devices (touch-friendly, full-screen)
+- Quick event scanning (chronological list)
+- Event search and filtering
+- Minimap navigation
+
+## Requirement Table
+
+### Display & Layout
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-DISPLAY-001 | Stream View displays events in chronological vertical layout | • Events sorted by date (oldest first)<br>• Git-style dots connected by vertical rail<br>• Date on left, content on right<br>• Each event shows title, description (truncated 3 lines), time | `src/components/StreamViewer.tsx` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-DISPLAY-002 | Stream View header shows title and event count | • "Stream View" title with icon<br>• Event count displayed<br>• Existing breadcrumbs lifted above overlay via z-index | `src/components/StreamViewerOverlay.tsx:146-160` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-DISPLAY-003 | Existing minimap/breadcrumbs visible above overlay | • Timeline minimap z-index lifted to 1400 when stream view open<br>• Breadcrumbs z-index lifted to 1400<br>• Both remain interactive above the semi-transparent backdrop | `src/App.tsx:646`, `src/pages/EditorPage.tsx:183` | 82-stream-viewer.spec.ts |
+
+### Overlay & Modal
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-OVERLAY-001 | Desktop: Stream View opens as centered modal | • 85% viewport width, max 900px<br>• 85% viewport height<br>• Rounded corners (border-radius: 8px)<br>• Semi-transparent backdrop (rgba(0,0,0,0.6)) | `src/components/StreamViewerOverlay.tsx:233-241` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-OVERLAY-002 | Mobile: Stream View opens as full-screen overlay | • 100vw × 100vh<br>• No rounded corners<br>• Safe area padding for notch/home indicator | `src/components/StreamViewerOverlay.tsx:227-232` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-OVERLAY-003 | Stream View closes on Escape key | • Escape key listener active when overlay open<br>• Prevents default browser behavior<br>• Removes listener on unmount | `src/components/StreamViewerOverlay.tsx:166-179` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-OVERLAY-004 | Stream View closes on backdrop click | • Click on dark backdrop closes overlay<br>• Click inside modal does NOT close<br>• Close button always functional | `src/components/StreamViewerOverlay.tsx:181-186` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-OVERLAY-005 | Close button visible and accessible | • X button in header with aria-label<br>• Hover state for visual feedback<br>• Keyboard accessible | `src/components/StreamViewerOverlay.tsx:291-306` | 82-stream-viewer.spec.ts |
+
+### Navigation & Scrolling
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-SCROLL-001 | Mouse wheel scrolling works in overlay | • Content scrolls with mouse wheel<br>• Scroll container has overflow-y: auto<br>• Body scroll disabled while overlay open<br>• Scroll works on both desktop and mobile | `src/components/StreamViewerOverlay.tsx:316-329` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-SCROLL-002 | Touch scrolling works on mobile | • WebkitOverflowScrolling: touch enabled<br>• Smooth momentum scrolling on iOS<br>• Native scroll behavior on Android | `src/components/StreamViewerOverlay.tsx:324` | 82-stream-viewer.spec.ts |
+
+### Minimap Integration
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-MINIMAP-001 | Existing timeline minimap visible above overlay | • TimelineMinimap lifted to z-index 1400 when stream view open<br>• Minimap remains functional above the overlay backdrop<br>• Shows full timeline event distribution | `src/App.tsx:646`, `src/components/TimelineMinimap.tsx` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-MINIMAP-002 | Stream event selection syncs with timeline | • Clicking event in stream view selects on main timeline<br>• Timeline zooms to selected event via onEventClick callback | `src/App.tsx:382-398` | 82-stream-viewer.spec.ts |
+
+### Search & Filter
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-SEARCH-001 | Search bar filters events by title, description, date | • Case-insensitive matching<br>• Filters as user types<br>• Clear button resets search<br>• Shows filtered count | `src/components/StreamViewer.tsx:243-252` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-SEARCH-002 | Search bar sticky at top of event list | • Remains visible while scrolling events<br>• Background matches theme<br>• z-index above event cards | `src/components/StreamViewer.tsx:281-293` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-SEARCH-003 | Empty search results show message | • "No events match" message displayed<br>• Search query echoed in message<br>• Centered in content area | `src/components/StreamViewer.tsx:353-358` | 82-stream-viewer.spec.ts |
+
+### Event Selection & Interaction
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-SELECT-001 | Clicking event card selects it | • Selected event has highlighted border<br>• Selected event has background color<br>• Selected event dot larger with glow | `src/components/StreamViewer.tsx:86, 144-154, 172-173` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-SELECT-002 | Event click triggers callback | • onEventClick called with event object<br>• Can be used to sync with main timeline<br>• Can be used to zoom canvas to event date | `src/components/StreamViewerOverlay.tsx:153-155` | 82-stream-viewer.spec.ts |
+
+### Theme & Styling
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-THEME-001 | Stream View uses CSS custom properties | • All colors use --stream-* variables<br>• Dark/light theme compatible<br>• Consistent with app theme | `src/styles/tokens.css` | - |
+| CC-REQ-STREAM-THEME-002 | Event cards have visual hierarchy | • Title: 1.05rem, bold, primary color<br>• Description: 0.9rem, secondary color<br>• Time: 0.8rem, muted color | `src/components/StreamViewer.tsx:179-218` | - |
+
+## Implementation Notes
+
+### Component Structure
+
+```
+StreamViewerOverlay
+├── Header (breadcrumbs, close button)
+├── StreamMinimap (event distribution)
+└── Scroll Container
+    └── StreamViewer
+        ├── Search Bar (sticky)
+        └── Event List
+            └── StreamEventCard (×N)
+```
+
+### CSS Custom Properties (tokens.css)
+
+```css
+--stream-bg: Background color
+--stream-card-bg: Card background
+--stream-card-border: Card border color
+--stream-text-primary: Primary text
+--stream-text-secondary: Secondary text
+--stream-text-muted: Muted/tertiary text
+--stream-rail-color: Vertical rail/separator
+--stream-dot-color: Default event dot color
+--stream-date-width: Width of date column
+--stream-card-gap: Gap between event cards
+```
+
+### Responsive Breakpoints
+
+- **Desktop**: > 900px - Centered modal (85vw, max 900px)
+- **Mobile**: < 900px - Full-screen overlay (100vw × 100vh)
+
+### Scroll Architecture
+
+The scroll implementation uses native browser scrolling:
+1. Body scroll disabled via `document.body.style.overflow = 'hidden'`
+2. Scroll container has `overflowY: 'auto'`
+3. iOS smooth scrolling via `-webkit-overflow-scrolling: touch`
+4. No JavaScript scroll interception
+
+## Test Coverage
+
+### E2E Tests (tests/editor/82-stream-viewer.spec.ts)
+
+| Test ID | Description | Requirements Covered |
+|---|---|---|
+| T82.1 | Stream View button visible in NavRail | CC-REQ-STREAM-OVERLAY-001 |
+| T82.2 | Stream View opens as modal | CC-REQ-STREAM-OVERLAY-001, 002 |
+| T82.3 | Events load and display | CC-REQ-STREAM-DISPLAY-001 |
+| T82.4 | Breadcrumbs visible | CC-REQ-STREAM-DISPLAY-002 |
+| T82.5 | Minimap visible | CC-REQ-STREAM-MINIMAP-001 |
+| T82.6 | Mouse wheel scroll works | CC-REQ-STREAM-SCROLL-001 |
+| T82.7 | Click event highlights it | CC-REQ-STREAM-SELECT-001 |
+| T82.8 | Minimap shows selection | CC-REQ-STREAM-MINIMAP-002 |
+| T82.9 | Close button works | CC-REQ-STREAM-OVERLAY-005 |
+| T82.10 | Escape key closes | CC-REQ-STREAM-OVERLAY-003 |
+| T82.11 | Backdrop click closes | CC-REQ-STREAM-OVERLAY-004 |
+| T82.12 | Search filters events | CC-REQ-STREAM-SEARCH-001 |
+
+### Mobile-Specific Tests
+
+| Test ID | Description | Requirements Covered |
+|---|---|---|
+| T82.M1 | Full-screen on mobile | CC-REQ-STREAM-OVERLAY-002 |
+| T82.M2 | Touch scroll works | CC-REQ-STREAM-SCROLL-002 |
+
+## Dependencies
+
+- **MUI Theme**: Uses useMediaQuery for responsive breakpoints
+- **Event Data**: Requires Event[] with id, date, title, description
+- **Timeline Context**: Optional onEventClick for canvas sync
+
+## Known Limitations
+
+1. No keyboard navigation within event list (tab through events)
+2. No drag-to-scroll on minimap (click only)
+3. No infinite scroll / virtualization for large event lists
+
+## Change History
+
+- 2025-12-04 — Initial version (v0.5.26.3)
+- 2025-12-04 — Added minimap, breadcrumbs, fixed scrolling
+- 2025-12-04 — Removed hover effects for performance
+- 2025-12-04 — Created SRS document with 17 requirements
+- 2025-12-04 — v0.5.26.4: Removed internal minimap/breadcrumbs, lifted existing ones above overlay via z-index
+- 2025-12-04 — Fixed Escape key handling with capture phase, simplified header

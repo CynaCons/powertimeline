@@ -10,11 +10,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Snackbar, Alert, useMediaQuery, useTheme, IconButton, Tooltip } from '@mui/material';
+import { Box, Snackbar, Alert, useMediaQuery, useTheme } from '@mui/material';
 import { getTimeline, getUser, getUserByUsername, incrementTimelineViewCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { StreamViewerOverlay } from '../components/StreamViewerOverlay';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
 
@@ -179,8 +178,9 @@ export function EditorPage() {
 
       <div className="relative">
         {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
+        {/* z-[1400] when stream view open to appear above overlay (z-1300) */}
         {timeline && user && (
-          <div className="absolute top-11 left-20 z-[100] pointer-events-none">
+          <div className={`absolute top-11 left-20 pointer-events-none ${streamViewerOpen ? 'z-[1400]' : 'z-[100]'}`}>
             <div
               className="backdrop-blur-sm rounded px-3 py-0.5 pointer-events-auto inline-flex items-center gap-2"
               style={{
@@ -195,38 +195,10 @@ export function EditorPage() {
                 { label: `@${user.username}`, href: `/@${user.username}` },
                 { label: timeline.title }
               ]} />
-              {/* Stream View button */}
-              <div
-                style={{
-                  width: '1px',
-                  height: '16px',
-                  backgroundColor: 'var(--page-border)',
-                  marginLeft: '4px',
-                }}
-              />
-              <Tooltip title="Stream View (mobile-friendly)" arrow>
-                <IconButton
-                  onClick={() => setStreamViewerOpen(true)}
-                  size="small"
-                  aria-label="Open stream view"
-                  sx={{
-                    color: 'var(--page-text-secondary)',
-                    p: 0.5,
-                    '&:hover': {
-                      color: 'var(--page-accent)',
-                      bgcolor: 'transparent',
-                    },
-                  }}
-                >
-                  <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
-                    view_stream
-                  </span>
-                </IconButton>
-              </Tooltip>
             </div>
           </div>
         )}
-        <App timelineId={timelineId} readOnly={isReadOnly} />
+        <App timelineId={timelineId} readOnly={isReadOnly} initialStreamViewOpen={streamViewerOpen} onStreamViewChange={(isOpen) => setStreamViewerOpen(isOpen)} />
       </div>
 
       {/* Read-only mode toast notification */}
@@ -244,16 +216,7 @@ export function EditorPage() {
           Viewing in read-only mode. {!firebaseUser ? 'Sign in to edit your own timelines.' : 'You can fork this timeline to make your own copy.'}
         </Alert>
       </Snackbar>
-
-      {/* Stream Viewer Overlay (v0.5.26) */}
-      {timeline && (
-        <StreamViewerOverlay
-          open={streamViewerOpen}
-          onClose={() => setStreamViewerOpen(false)}
-          events={timeline.events}
-          timelineTitle={timeline.title}
-        />
-      )}
+      {/* Stream Viewer is now handled by App.tsx for proper sync with minimap/timeline */}
     </Box>
   );
 }
