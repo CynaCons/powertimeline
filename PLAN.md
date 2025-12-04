@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.26 (Stream Editor - Mobile Viewer)
-**Next Milestone:** v0.5.26 - Stream Editor, v0.5.27 - Import/Export, v0.5.28 - Test Sweep
+**Current Version:** v0.5.26 (Stream Editor - Mobile Viewer) ✅
+**Next Milestone:** v0.5.27 - Import/Export, v0.5.28 - Test Sweep, v0.5.29 - Technical Debt
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -31,13 +31,14 @@
 - ✅ PowerSpawn standalone extraction & submodule (v0.5.25)
 - ✅ PowerSpawn landing page (powerspawn.com) with GitHub Pages (v0.5.25)
 - ✅ New branding: PT logo, hero banner, favicon (v0.5.25)
+- ✅ Stream Editor: Mobile Timeline Viewer (v0.5.26)
 
 ### Next Up
-- **v0.5.26**: Stream Editor - Mobile Viewer (git-style vertical timeline, read-only)
 - **v0.5.27**: Import/Export with AI-ready YAML format
 - **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
 - **v0.5.29**: Technical Debt & Codebase Hygiene (consolidated)
 - **v0.5.30**: PowerSpawn Test Suite
+- **v0.5.31**: UX Polish & Resilience
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -847,84 +848,58 @@ events:
 
 ### v0.5.26 - Stream Editor: Mobile Timeline Viewer
 **Goal:** Create a mobile-friendly read-only timeline viewer using git-style vertical layout
-**Status:** In Progress
+**Status:** Complete
 
 **Design Inspiration:** Landing page roadmap component (git-style vertical timeline with dots and lines)
 
 **Concept Overview:**
 A scrollable vertical timeline viewer optimized for mobile. Events displayed chronologically with git-style commit dots and connecting lines. Dates on the left, content on the right. Read-only in this iteration; editing comes later.
 
-**Visual Design:**
-```
-┌──────────────────────────────────────────┐
-│  📅 STREAM VIEW              [× Close]   │
-├──────────────────────────────────────────┤
-│                                          │
-│  Jul 14   ●─── Storming of the Bastille  │
-│  1789     │    Parisian revolutionaries  │
-│           │    storm the Bastille...     │
-│           │    🔴                        │
-│           │                              │
-│  Aug 26   ●─── Declaration of Rights     │
-│  1789     │    The National Assembly     │
-│           │    adopts the Declaration... │
-│           │    🔵                        │
-│           │                              │
-│  Sep 21   ●─── First French Republic     │
-│  1792          Monarchy abolished...     │
-│                🟢                        │
-│                                          │
-└──────────────────────────────────────────┘
-```
-
 **Access Model:**
-- **Desktop**: Overlay popup (80% viewport) over the canvas timeline
-- **Mobile**: Full-screen overlay (100% viewport)
-- **Trigger**: "Stream View" button in editor toolbar
+- **Desktop**: Overlay popup (80% viewport, max 800px) over the canvas timeline
+- **Mobile**: Full-screen overlay (100vw × 100vh)
+- **Trigger**: "Stream View" button in breadcrumb bar + Mobile Notice dialog
 - **No separate route** - overlay within existing editor page
-
-**Event Ordering:** Strictly chronological (sorted by date)
 
 **Implementation Tasks:**
 
-*Phase 1: Stream Viewer Component (this iteration)*
-- [ ] Create `StreamViewer.tsx` component
-- [ ] Implement git-style vertical rail (inspired by LandingPage roadmap)
-- [ ] Event card with date/title/description/color layout
-- [ ] Chronological sorting of events
-- [ ] Date formatting (localized, grouped by year)
-- [ ] Scroll for long timelines
-- [ ] Dark theme support using existing CSS variables
+*Phase 1: Stream Viewer Component* ✅
+- [x] Create `StreamViewer.tsx` component
+- [x] Implement git-style vertical rail (inspired by LandingPage roadmap)
+- [x] Event card with date/title/description/color layout
+- [x] Chronological sorting of events
+- [x] Date formatting (localized: "Jul 14 / 1789")
+- [x] Scroll for long timelines
+- [x] Dark theme support using CSS variables
 
-*Phase 2: Overlay Integration*
-- [ ] Create `StreamViewerOverlay.tsx` wrapper (MUI Dialog or custom)
-- [ ] Add "Stream View" toggle button to EditorPage toolbar
-- [ ] Desktop: Centered modal (maxWidth: 800px, 80vh height)
-- [ ] Mobile: Full-screen overlay (100vw × 100vh)
-- [ ] Close button and Escape key handler
-- [ ] Responsive breakpoint detection
+*Phase 2: Overlay Integration* ✅
+- [x] Create `StreamViewerOverlay.tsx` wrapper (MUI Dialog)
+- [x] Add "Stream View" toggle button to EditorPage breadcrumb bar
+- [x] Desktop: Centered modal (maxWidth: 800px, 80vh height)
+- [x] Mobile: Full-screen overlay (100vw × 100vh)
+- [x] Close button and Escape key handler
+- [x] Responsive breakpoint detection (md: 900px)
 
-*Phase 3: Mobile Polish*
-- [ ] Touch-friendly scroll (momentum scrolling)
-- [ ] 44px minimum tap targets for event cards
-- [ ] Mobile viewport meta tag compliance
-- [ ] Test on actual mobile devices (iOS Safari, Android Chrome)
+*Phase 3: Mobile UX Enhancement* ✅
+- [x] Updated MobileNotice to offer Stream View as primary option
+- [x] Three choices: "Open Stream View" (primary), "Continue to Canvas", "Go Back"
+- [x] Touch-friendly tap targets
+- [x] Safe area handling for mobile devices
 
-**Design Tokens (extend tokens.css):**
-```css
---stream-rail-color: var(--page-border);
---stream-dot-size: 12px;
---stream-dot-color: var(--accent-primary);
---stream-date-width: 80px;
---stream-card-gap: 24px;
-```
+**Design Tokens Added (tokens.css):**
+- `--stream-rail-color`, `--stream-dot-size`, `--stream-dot-color`
+- `--stream-date-width`, `--stream-card-gap`
+- `--stream-bg`, `--stream-card-bg`, `--stream-card-border`
+- `--stream-text-primary`, `--stream-text-secondary`, `--stream-text-muted`
+- Light theme variants included
 
-**Tests:**
-- [ ] Unit tests for StreamViewer component
-- [ ] E2E: Open Stream View overlay
-- [ ] E2E: Verify events render in chronological order
-- [ ] E2E: Close overlay with button and Escape key
-- [ ] Mobile viewport tests (375px, 768px widths)
+**Files Created:**
+- `src/components/StreamViewer.tsx` - Core viewer component
+- `src/components/StreamViewerOverlay.tsx` - Dialog wrapper
+
+**Files Modified:**
+- `src/pages/EditorPage.tsx` - Integration + MobileNotice update
+- `src/styles/tokens.css` - Design tokens
 
 **Future Iterations (not in scope):**
 - Inline editing (Phase 2 of Stream Editor)

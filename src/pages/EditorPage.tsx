@@ -10,39 +10,47 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Snackbar, Alert, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Snackbar, Alert, useMediaQuery, useTheme, IconButton, Tooltip } from '@mui/material';
 import { getTimeline, getUser, getUserByUsername, incrementTimelineViewCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { StreamViewerOverlay } from '../components/StreamViewerOverlay';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
 
-// Mobile notice component
-function MobileNotice({ onDismiss }: { onDismiss: () => void }) {
+// Mobile notice component - now offers Stream View as primary option
+function MobileNotice({ onDismiss, onOpenStreamView }: { onDismiss: () => void; onOpenStreamView: () => void }) {
   return (
     <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
       <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6 max-w-sm text-center">
         <span className="material-symbols-rounded text-5xl text-[#8b5cf6] mb-4 block">
-          desktop_windows
+          view_stream
         </span>
         <h2 className="text-xl font-semibold text-[#e6edf3] mb-2">
-          Desktop Recommended
+          Mobile View Available
         </h2>
         <p className="text-[#8d96a0] mb-4 text-sm leading-relaxed">
-          The timeline editor works best on larger screens.
-          You can still browse and view timelines, but editing features
-          require a desktop or tablet for the best experience.
+          The timeline canvas works best on larger screens.
+          Use <strong>Stream View</strong> for a mobile-friendly experience,
+          or continue to the canvas view anyway.
         </p>
         <div className="flex flex-col gap-2">
           <button
-            onClick={onDismiss}
-            className="w-full px-4 py-2 bg-[#8b5cf6] text-white rounded-lg font-medium hover:bg-[#7c3aed] transition-colors"
+            onClick={onOpenStreamView}
+            className="w-full px-4 py-2 bg-[#8b5cf6] text-white rounded-lg font-medium hover:bg-[#7c3aed] transition-colors flex items-center justify-center gap-2"
           >
-            Continue Anyway
+            <span className="material-symbols-rounded" style={{ fontSize: 20 }}>view_stream</span>
+            Open Stream View
+          </button>
+          <button
+            onClick={onDismiss}
+            className="w-full px-4 py-2 border border-[#30363d] text-[#8d96a0] rounded-lg font-medium hover:border-[#8b5cf6] hover:text-[#e6edf3] transition-colors"
+          >
+            Continue to Canvas
           </button>
           <button
             onClick={() => window.history.back()}
-            className="w-full px-4 py-2 border border-[#30363d] text-[#8d96a0] rounded-lg font-medium hover:border-[#8b5cf6] hover:text-[#e6edf3] transition-colors"
+            className="w-full px-4 py-2 text-[#6e7681] text-sm hover:text-[#8d96a0] transition-colors"
           >
             Go Back
           </button>
@@ -62,6 +70,7 @@ export function EditorPage() {
   const [user, setUser] = useState<User | null>(null);
   const [showReadOnlyToast, setShowReadOnlyToast] = useState(false);
   const [mobileNoticeDismissed, setMobileNoticeDismissed] = useState(false);
+  const [streamViewerOpen, setStreamViewerOpen] = useState(false);
 
   // Detect mobile/small screen
   const theme = useTheme();
@@ -157,9 +166,15 @@ export function EditorPage() {
   // Render the editor/viewer with breadcrumbs
   return (
     <Box sx={{ minHeight: '100vh' }}>
-      {/* Mobile notice - show on small screens */}
-      {isMobile && !mobileNoticeDismissed && (
-        <MobileNotice onDismiss={() => setMobileNoticeDismissed(true)} />
+      {/* Mobile notice - show on small screens, offer Stream View */}
+      {isMobile && !mobileNoticeDismissed && timeline && (
+        <MobileNotice
+          onDismiss={() => setMobileNoticeDismissed(true)}
+          onOpenStreamView={() => {
+            setMobileNoticeDismissed(true);
+            setStreamViewerOpen(true);
+          }}
+        />
       )}
 
       <div className="relative">
@@ -167,7 +182,7 @@ export function EditorPage() {
         {timeline && user && (
           <div className="absolute top-11 left-20 z-[100] pointer-events-none">
             <div
-              className="backdrop-blur-sm rounded px-3 py-0.5 pointer-events-auto inline-block"
+              className="backdrop-blur-sm rounded px-3 py-0.5 pointer-events-auto inline-flex items-center gap-2"
               style={{
                 backgroundColor: 'var(--page-bg-elevated)',
                 borderWidth: '1px',
@@ -180,6 +195,34 @@ export function EditorPage() {
                 { label: `@${user.username}`, href: `/@${user.username}` },
                 { label: timeline.title }
               ]} />
+              {/* Stream View button */}
+              <div
+                style={{
+                  width: '1px',
+                  height: '16px',
+                  backgroundColor: 'var(--page-border)',
+                  marginLeft: '4px',
+                }}
+              />
+              <Tooltip title="Stream View (mobile-friendly)" arrow>
+                <IconButton
+                  onClick={() => setStreamViewerOpen(true)}
+                  size="small"
+                  aria-label="Open stream view"
+                  sx={{
+                    color: 'var(--page-text-secondary)',
+                    p: 0.5,
+                    '&:hover': {
+                      color: 'var(--page-accent)',
+                      bgcolor: 'transparent',
+                    },
+                  }}
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+                    view_stream
+                  </span>
+                </IconButton>
+              </Tooltip>
             </div>
           </div>
         )}
@@ -201,6 +244,16 @@ export function EditorPage() {
           Viewing in read-only mode. {!firebaseUser ? 'Sign in to edit your own timelines.' : 'You can fork this timeline to make your own copy.'}
         </Alert>
       </Snackbar>
+
+      {/* Stream Viewer Overlay (v0.5.26) */}
+      {timeline && (
+        <StreamViewerOverlay
+          open={streamViewerOpen}
+          onClose={() => setStreamViewerOpen(false)}
+          events={timeline.events}
+          timelineTitle={timeline.title}
+        />
+      )}
     </Box>
   );
 }

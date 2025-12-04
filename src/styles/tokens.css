@@ -109,6 +109,20 @@
   --scrollbar-track: #0d1117;
   --scrollbar-thumb: #8b2635;
   --scrollbar-thumb-hover: #a62f3f;
+
+  /* Stream Viewer (v0.5.26) */
+  --stream-rail-color: #30363d;
+  --stream-dot-size: 14px;
+  --stream-dot-color: #8b5cf6;
+  --stream-dot-color-hover: #a78bfa;
+  --stream-date-width: 72px;
+  --stream-card-gap: 20px;
+  --stream-bg: #0d1117;
+  --stream-card-bg: #161b22;
+  --stream-card-border: #30363d;
+  --stream-text-primary: #e6edf3;
+  --stream-text-secondary: #8d96a0;
+  --stream-text-muted: #6e7681;
 }
 
 /* === Light Theme Overrides === */
@@ -156,6 +170,17 @@
   --scrollbar-track: #f0f0f0;
   --scrollbar-thumb: #888888;
   --scrollbar-thumb-hover: #666666;
+
+  /* Stream Viewer (light theme) */
+  --stream-rail-color: #d0d7de;
+  --stream-dot-color: #8b5cf6;
+  --stream-dot-color-hover: #7c3aed;
+  --stream-bg: #ffffff;
+  --stream-card-bg: #f6f8fa;
+  --stream-card-border: #d0d7de;
+  --stream-text-primary: #1f2328;
+  --stream-text-secondary: #656d76;
+  --stream-text-muted: #8c959f;
 }
 
 /* High contrast mode adjustments (Phase F) */
