@@ -15,6 +15,7 @@ interface TimelineCardMenuProps {
   currentUserId?: string | null;
   onEdit?: (timelineId: string) => void;
   onDelete?: (timelineId: string) => void;
+  onExport?: (timelineId: string) => void;  // v0.5.27: Export to YAML
 }
 
 export function TimelineCardMenu({
@@ -24,6 +25,7 @@ export function TimelineCardMenu({
   currentUserId,
   onEdit,
   onDelete,
+  onExport,
 }: TimelineCardMenuProps) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -67,6 +69,14 @@ export function TimelineCardMenu({
     }
   };
 
+  const handleExport = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleClose();
+    if (onExport) {
+      onExport(timelineId);
+    }
+  };
+
   return (
     <>
       <IconButton
@@ -104,6 +114,15 @@ export function TimelineCardMenu({
           </ListItemIcon>
           <ListItemText>Open</ListItemText>
         </MenuItem>
+
+        {onExport && (
+          <MenuItem onClick={handleExport} data-testid="export-timeline-button">
+            <ListItemIcon>
+              <span className="material-symbols-rounded text-gray-700">download</span>
+            </ListItemIcon>
+            <ListItemText>Export YAML</ListItemText>
+          </MenuItem>
+        )}
 
         {!isOwner && ownerUsername && (
           <MenuItem onClick={(e) => {

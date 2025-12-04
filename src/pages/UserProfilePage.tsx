@@ -9,7 +9,8 @@ import { Snackbar, Alert } from '@mui/material';
 import type { TimelineMetadata, User } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { signOutUser } from '../services/auth';
-import { getUser, getUserByUsername, getTimelines } from '../services/firestore';
+import { getUser, getUserByUsername, getTimelines, getTimeline } from '../services/firestore';
+import { downloadTimelineAsYaml } from '../services/timelineImportExport';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
@@ -17,6 +18,7 @@ import { TimelineCardMenu } from '../components/TimelineCardMenu';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
+import { ImportTimelineDialog } from '../components/ImportTimelineDialog';
 import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../hooks/useToast';
 
@@ -34,6 +36,7 @@ export function UserProfilePage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
   const [createTimelineDialogOpen, setCreateTimelineDialogOpen] = useState(false);
+  const [importTimelineDialogOpen, setImportTimelineDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'updated' | 'title' | 'events' | 'views'>('updated');
   const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
 
@@ -158,6 +161,22 @@ export function UserProfilePage() {
     setDeleteDialogOpen(true);
   };
 
+  // v0.5.27: Export timeline to YAML
+  const handleExportTimeline = async (timelineId: string) => {
+    try {
+      const timeline = await getTimeline(timelineId);
+      if (timeline) {
+        downloadTimelineAsYaml(timeline);
+        showToast('Timeline exported as YAML', 'success');
+      } else {
+        showToast('Failed to load timeline for export', 'error');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      showToast('Export failed. Please try again.', 'error');
+    }
+  };
+
   const handleDeleteSuccess = async () => {
     showToast('Timeline deleted successfully!', 'success');
     // Refresh timelines
@@ -174,6 +193,10 @@ export function UserProfilePage() {
 
   const handleCreateTimeline = () => {
     setCreateTimelineDialogOpen(true);
+  };
+
+  const handleImportTimeline = () => {
+    setImportTimelineDialogOpen(true);
   };
 
   const handleCreateTimelineSuccess = async () => {
@@ -346,16 +369,38 @@ export function UserProfilePage() {
             )}
           </div>
           {firebaseUser && user && firebaseUser.uid === user.id && (
-            <button
-              onClick={handleCreateTimeline}
-              className="px-4 py-2 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
-              style={{ backgroundColor: '#8b5cf6' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
-            >
-              <span className="text-xl">+</span>
-              Create Timeline
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleImportTimeline}
+                className="px-4 py-2 rounded-lg transition-colors font-medium border flex items-center gap-2"
+                style={{
+                  backgroundColor: 'var(--card-bg)',
+                  borderColor: 'var(--card-border)',
+                  color: 'var(--page-text-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#8b5cf6';
+                  e.currentTarget.style.color = '#8b5cf6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--card-border)';
+                  e.currentTarget.style.color = 'var(--page-text-primary)';
+                }}
+              >
+                <span className="material-symbols-rounded text-base">upload_file</span>
+                Import
+              </button>
+              <button
+                onClick={handleCreateTimeline}
+                className="px-4 py-2 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+                style={{ backgroundColor: '#8b5cf6' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+              >
+                <span className="text-xl">+</span>
+                Create Timeline
+              </button>
+            </div>
           )}
         </div>
 
@@ -402,6 +447,7 @@ export function UserProfilePage() {
                       currentUserId={firebaseUser.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
+                      onExport={handleExportTimeline}
                     />
                   </div>
                 )}
@@ -473,6 +519,13 @@ export function UserProfilePage() {
       <CreateTimelineDialog
         open={createTimelineDialogOpen}
         onClose={() => setCreateTimelineDialogOpen(false)}
+        onSuccess={handleCreateTimelineSuccess}
+      />
+
+      {/* Import Timeline Dialog */}
+      <ImportTimelineDialog
+        open={importTimelineDialogOpen}
+        onClose={() => setImportTimelineDialogOpen(false)}
         onSuccess={handleCreateTimelineSuccess}
       />
 

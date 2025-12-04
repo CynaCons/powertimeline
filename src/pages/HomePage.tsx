@@ -15,11 +15,13 @@ import {
   getPlatformStats,
 } from '../services/firestore';
 import { signOutUser } from '../services/auth';
+import { downloadTimelineAsYaml } from '../services/timelineImportExport';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { useAuth } from '../contexts/AuthContext';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
+import { ImportTimelineDialog } from '../components/ImportTimelineDialog';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
@@ -50,6 +52,7 @@ export function HomePage() {
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editTimelineId, setEditTimelineId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -163,6 +166,10 @@ export function HomePage() {
     setCreateDialogOpen(true);
   };
 
+  const handleImportTimeline = () => {
+    setImportDialogOpen(true);
+  };
+
   const handleCreateSuccess = async (timelineId: string) => {
     showToast('Timeline created successfully!', 'success');
 
@@ -220,6 +227,22 @@ export function HomePage() {
   const handleDeleteTimeline = (timelineId: string) => {
     setDeleteTimelineId(timelineId);
     setDeleteDialogOpen(true);
+  };
+
+  // v0.5.27: Export timeline to YAML
+  const handleExportTimeline = async (timelineId: string) => {
+    try {
+      const timeline = await getTimeline(timelineId);
+      if (timeline) {
+        downloadTimelineAsYaml(timeline);
+        showToast('Timeline exported as YAML', 'success');
+      } else {
+        showToast('Failed to load timeline for export', 'error');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      showToast('Export failed. Please try again.', 'error');
+    }
   };
 
   const handleDeleteSuccess = async () => {
@@ -534,16 +557,39 @@ export function HomePage() {
             <h2 data-testid="my-timelines-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
               My Timelines ({myTimelines.length})
             </h2>
-            <button
-              data-testid="create-timeline-button"
-              onClick={handleCreateTimeline}
-              className="px-4 py-2 text-white rounded-lg transition-colors font-medium"
-              style={{ backgroundColor: '#8b5cf6' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
-            >
-              + Create New
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                data-testid="import-timeline-button"
+                onClick={handleImportTimeline}
+                className="px-4 py-2 rounded-lg transition-colors font-medium border flex items-center gap-2"
+                style={{
+                  backgroundColor: 'var(--card-bg)',
+                  borderColor: 'var(--card-border)',
+                  color: 'var(--page-text-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#8b5cf6';
+                  e.currentTarget.style.color = '#8b5cf6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--card-border)';
+                  e.currentTarget.style.color = 'var(--page-text-primary)';
+                }}
+              >
+                <span className="material-symbols-rounded text-base">upload_file</span>
+                Import
+              </button>
+              <button
+                data-testid="create-timeline-button"
+                onClick={handleCreateTimeline}
+                className="px-4 py-2 text-white rounded-lg transition-colors font-medium"
+                style={{ backgroundColor: '#8b5cf6' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+              >
+                + Create New
+              </button>
+            </div>
           </div>
 
           {myTimelines.length === 0 ? (
@@ -584,6 +630,7 @@ export function HomePage() {
                       currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
+                      onExport={handleExportTimeline}
                     />
                   </div>
 
@@ -656,6 +703,7 @@ export function HomePage() {
                     currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
+                    onExport={handleExportTimeline}
                   />
                 </div>
 
@@ -760,6 +808,7 @@ export function HomePage() {
                     currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
+                    onExport={handleExportTimeline}
                   />
                 </div>
 
@@ -825,6 +874,7 @@ export function HomePage() {
                       currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
+                      onExport={handleExportTimeline}
                     />
                   </div>
 
@@ -878,6 +928,12 @@ export function HomePage() {
       <CreateTimelineDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
+
+      <ImportTimelineDialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
         onSuccess={handleCreateSuccess}
       />
 
