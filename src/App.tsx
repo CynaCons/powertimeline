@@ -21,6 +21,7 @@ const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({
 const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
+const StreamViewerOverlay = lazy(() => import('./components/StreamViewerOverlay').then(m => ({ default: m.StreamViewerOverlay })));
 import { EventStorage } from './lib/storage';
 import { seedRFKTimeline } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
@@ -35,9 +36,11 @@ const DEV_FLAG_KEY = 'powertimeline-dev';
 interface AppProps {
   timelineId?: string;  // Optional timeline ID to load from home page storage
   readOnly?: boolean;   // Read-only mode: hide authoring overlay, show lock icon on nav rail
+  initialStreamViewOpen?: boolean;  // Open stream view on mount (for mobile first experience)
+  onStreamViewChange?: (isOpen: boolean) => void;  // Callback when stream view opens/closes
 }
 
-function App({ timelineId, readOnly = false }: AppProps = {}) {
+function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onStreamViewChange }: AppProps = {}) {
   // Ownership is inverse of readOnly (readOnly = false means user owns the timeline)
   const isOwner = !readOnly;
   usePerformanceMonitoring();
@@ -88,6 +91,19 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [streamViewerOpen, setStreamViewerOpen] = useState(initialStreamViewOpen);
+
+  // Respond to external trigger to open stream view (e.g., from MobileNotice)
+  useEffect(() => {
+    if (initialStreamViewOpen) {
+      setStreamViewerOpen(true);
+    }
+  }, [initialStreamViewOpen]);
+
+  // Notify parent when stream view state changes
+  useEffect(() => {
+    onStreamViewChange?.(streamViewerOpen);
+  }, [streamViewerOpen, onStreamViewChange]);
 
   // Use readOnly prop from EditorPage (which determines ownership via Firebase Auth)
   const isReadOnly = readOnly;
@@ -357,6 +373,30 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
     setActiveNavItem(null);
   }, []);
 
+  // Stream View toggle
+  const openStreamView = useCallback(() => {
+    setStreamViewerOpen(true);
+  }, []);
+
+  // Handle Stream View event click - zoom to event on timeline
+  const handleStreamEventClick = useCallback((event: Event) => {
+    // Parse the event date and calculate normalized position
+    const eventDate = new Date(event.date);
+    const minDate = Math.min(...events.map(e => new Date(e.date).getTime()));
+    const maxDate = Math.max(...events.map(e => new Date(e.date).getTime()));
+    const range = maxDate - minDate || 1;
+    const normalizedPos = (eventDate.getTime() - minDate) / range;
+
+    // Zoom to a window around the event (20% of timeline centered on event)
+    const windowSize = 0.2;
+    const start = Math.max(0, normalizedPos - windowSize / 2);
+    const end = Math.min(1, start + windowSize);
+    animateTo(start, end);
+
+    // Also select the event
+    setSelectedId(event.id);
+  }, [events, animateTo]);
+
   // Editor-specific navigation items (context section)
   // v0.5.6 - Simplified: Events toggle, Create (owner only), Lock indicator (read-only)
   const editorItems: NavigationItem[] = useMemo(() => {
@@ -395,8 +435,18 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
       });
     }
 
+    // Stream View button - available in all modes
+    items.push({
+      id: 'stream-view',
+      label: 'Stream View',
+      icon: 'view_stream',
+      shortcut: 'Alt+S',
+      onClick: openStreamView,
+      isActive: streamViewerOpen,
+    });
+
     return items;
-  }, [overlay, openEvents, openCreate, isReadOnly]);
+  }, [overlay, openEvents, openCreate, isReadOnly, openStreamView, streamViewerOpen]);
 
   // Get current user for navigation context
   const { user: firebaseUser } = useAuth();
@@ -593,7 +643,7 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
 
         {/* Timeline minimap positioned fixed to ensure proper z-index layering above overlays */}
         {events.length > 0 && (
-          <div className="fixed top-1 left-20 right-4 z-[90] pointer-events-auto">
+          <div className={`fixed top-1 left-20 right-4 pointer-events-auto ${streamViewerOpen ? 'z-[1400]' : 'z-[90]'}`}>
             <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
               <TimelineMinimap
                 events={events}
@@ -685,6 +735,17 @@ function App({ timelineId, readOnly = false }: AppProps = {}) {
             onClose={() => setCommandPaletteOpen(false)}
             commands={commands}
             placeholder="Search commands... (Ctrl+K)"
+          />
+        </Suspense>
+
+        {/* Stream Viewer Overlay (v0.5.26) - mobile-friendly timeline view */}
+        <Suspense fallback={null}>
+          <StreamViewerOverlay
+            open={streamViewerOpen}
+            onClose={() => setStreamViewerOpen(false)}
+            events={events}
+            timelineTitle=""
+            onEventClick={handleStreamEventClick}
           />
         </Suspense>
 

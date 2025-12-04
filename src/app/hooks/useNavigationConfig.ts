@@ -42,12 +42,16 @@ export interface NavigationConfig {
 
 /**
  * Determine navigation context from current location
+ * v0.5.26.1 - Updated to recognize new username-based URLs (/:username/timeline/:id)
  */
 function getNavigationContext(pathname: string): NavigationContext {
   if (pathname === '/') return 'home';
   if (pathname === '/admin') return 'admin';
-  if (pathname.startsWith('/user/') && pathname.includes('/timeline/')) return 'editor';
+  // Editor context: legacy /user/:id/timeline/:id OR new /:username/timeline/:id format
+  if (pathname.includes('/timeline/')) return 'editor';
   if (pathname.startsWith('/user/') || pathname.startsWith('/editor')) return 'profile';
+  // Username-based profile pages (/@username or /username without /timeline/)
+  if (pathname.startsWith('/@') || (pathname.match(/^\/[a-zA-Z][\w-]*$/) && !pathname.startsWith('/browse') && !pathname.startsWith('/login'))) return 'profile';
   return 'home';
 }
 

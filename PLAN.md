@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.26 (Stream Editor - Mobile Viewer) ✅
+**Current Version:** v0.5.26.4 (Stream Viewer UX & Home Reorder) ✅
 **Next Milestone:** v0.5.27 - Import/Export, v0.5.28 - Test Sweep, v0.5.29 - Technical Debt
 
 ### Key Metrics
@@ -32,6 +32,10 @@
 - ✅ PowerSpawn landing page (powerspawn.com) with GitHub Pages (v0.5.25)
 - ✅ New branding: PT logo, hero banner, favicon (v0.5.25)
 - ✅ Stream Editor: Mobile Timeline Viewer (v0.5.26)
+- ✅ Stream Viewer: Search, sync, focus fixes (v0.5.26.1)
+- ✅ Stream Viewer: Minimap, breadcrumbs, scroll fix, E2E tests (v0.5.26.3)
+- ✅ Stream Viewer: Expandable cards, search in header, wheel fix (v0.5.26.4)
+- ✅ Home Page: Reordered sections (Popular → Stats → Recent) (v0.5.26.4)
 
 ### Next Up
 - **v0.5.27**: Import/Export with AI-ready YAML format
@@ -906,6 +910,77 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 - Add/delete events
 - Swipe gestures
 - Drag-to-reorder
+
+### v0.5.26.1 - Stream Viewer Enhancements
+**Goal:** Fix focus issues, add search, improve minimap/timeline sync
+**Status:** Complete
+
+**Improvements:**
+
+*Focus & Interaction Fixes:*
+- [x] Fix overlay focus capture (proper MUI Dialog props)
+- [x] Escape key now properly closes overlay
+- [x] Scroll works inside overlay, not on background
+- [x] Mouse interactions blocked from background
+
+*Search & Navigation:*
+- [x] Add search bar to filter events by title/description/date
+- [x] Click event to zoom timeline to that date region
+- [x] Hover sync: hovering Stream View event highlights minimap
+
+*UI/UX Improvements:*
+- [x] Move Stream View button from breadcrumb to NavRail
+- [x] Larger overlay: 85% viewport, max 900px width
+- [x] Larger dots: 18px with glow effect on hover
+- [x] Slide-up transition for smoother appearance
+- [x] Better backdrop with blur effect
+
+**Technical Changes:**
+- `StreamViewer.tsx`: Added search, hover callbacks, click handlers
+- `StreamViewerOverlay.tsx`: Fixed Dialog props, larger size, Slide transition
+- `App.tsx`: Stream View state, NavRail button, timeline sync
+- `EditorPage.tsx`: Removed breadcrumb button, passes initialStreamViewOpen
+
+### v0.5.26.3 - Stream Viewer Polish
+**Goal:** Add minimap, breadcrumbs, fix scrolling, add tests
+**Status:** Complete
+
+**UI Improvements:**
+- [x] Add simplified minimap showing event distribution with year labels
+- [x] Add breadcrumb navigation (Home > Timeline > Stream)
+- [x] Fix mouse wheel scrolling (replaced MUI Dialog with native overlay)
+- [x] Remove hover effects for better performance
+- [x] Backdrop click closes overlay
+
+**Documentation:**
+- [x] Create docs/SRS_STREAM_VIEW.md with 17 requirements
+
+**Testing:**
+- [x] Update tests/editor/82-stream-viewer.spec.ts with comprehensive tests
+- [x] Desktop tests (12 tests): overlay, events, minimap, scroll, close
+- [x] Mobile tests (2 tests): full-screen mode, header visibility
+- [x] Scroll verification tests (3 tests): programmatic, wheel, up/down
+
+**Files Modified:**
+- `src/components/StreamViewerOverlay.tsx` - Rewritten with native overlay, minimap, breadcrumbs
+- `src/components/StreamViewer.tsx` - Simplified, removed hover state
+- `docs/SRS_STREAM_VIEW.md` - New SRS document
+- `tests/editor/82-stream-viewer.spec.ts` - Comprehensive E2E tests
+
+### v0.5.26.4 - Stream Viewer UX & Home Reorder
+**Goal:** Mobile UX improvements for Stream Viewer and Home page optimization
+**Status:** Complete
+
+**Stream Viewer:**
+- [x] Move search bar to header (between event count and close button)
+- [x] Block wheel events from leaking to canvas behind overlay
+- [x] Reduce date column width (72px → 56px) for more text space
+- [x] Add expandable event cards with "Show more/less" toggle
+- [x] Responsive line clamp: 3 lines mobile, 5 lines desktop
+
+**Home Page:**
+- [x] Reorder sections: Popular → Statistics → Recently Edited
+- [x] Make statistics grid 2-col on mobile with smaller text
 
 ### v0.5.28 - Test Sweep Corrective Actions
 **Goal:** Address test failures discovered during Dev Panel removal sweep

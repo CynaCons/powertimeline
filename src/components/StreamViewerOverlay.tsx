@@ -9,9 +9,11 @@
  * - Mobile: Full-screen overlay (100vw x 100vh)
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { Box, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Box, IconButton, Typography, useMediaQuery, useTheme, TextField, InputAdornment } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { StreamViewer } from './StreamViewer';
 import type { Event } from '../types';
 
@@ -33,8 +35,20 @@ export function StreamViewerOverlay({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Filter events based on search query
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const query = searchQuery.toLowerCase();
+    return events.filter(event =>
+      event.title.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query) ||
+      event.date.includes(query)
+    );
+  }, [events, searchQuery]);
 
   const handleEventClick = (event: Event) => {
     setSelectedEventId(event.id);
@@ -83,6 +97,23 @@ export function StreamViewerOverlay({
     return () => {
       document.body.style.overflow = '';
     };
+  }, [open]);
+
+  // Block wheel events from reaching the canvas behind the overlay
+  useEffect(() => {
+    if (!open) return;
+
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+
+    const blockWheelPropagation = (e: WheelEvent) => {
+      // Stop wheel events from propagating to canvas behind overlay
+      e.stopPropagation();
+    };
+
+    // Use capture phase to intercept before any other handlers
+    overlay.addEventListener('wheel', blockWheelPropagation, { capture: true, passive: true });
+    return () => overlay.removeEventListener('wheel', blockWheelPropagation, { capture: true });
   }, [open]);
 
   if (!open) return null;
@@ -146,7 +177,7 @@ export function StreamViewerOverlay({
           }}
         >
           {/* Stream View title with icon */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
             <span
               className="material-symbols-rounded"
               style={{ fontSize: 20, color: 'var(--stream-dot-color)' }}
@@ -156,9 +187,64 @@ export function StreamViewerOverlay({
             <Typography sx={{ color: 'var(--stream-text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
               Stream View
             </Typography>
-            <Typography sx={{ color: 'var(--stream-text-muted)', fontSize: '0.8rem', ml: 1 }}>
-              {events.length} events
+            <Typography sx={{ color: 'var(--stream-text-muted)', fontSize: '0.8rem', ml: 0.5 }}>
+              {searchQuery ? `${filteredEvents.length}/` : ''}{events.length}
             </Typography>
+          </Box>
+
+          {/* Search bar - in header */}
+          <Box sx={{ flex: 1, mx: 2, maxWidth: 300 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              data-testid="stream-search-input"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'var(--stream-text-muted)', fontSize: 18 }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setSearchQuery('')}
+                      sx={{ color: 'var(--stream-text-muted)', p: 0.25 }}
+                    >
+                      <ClearIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: 'var(--stream-bg)',
+                  borderRadius: 1,
+                  height: 32,
+                  '& fieldset': {
+                    borderColor: 'var(--stream-card-border)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'var(--stream-text-muted)',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'var(--stream-dot-color)',
+                  },
+                },
+                '& .MuiInputBase-input': {
+                  color: 'var(--stream-text-primary)',
+                  fontSize: '0.85rem',
+                  py: 0.5,
+                  '&::placeholder': {
+                    color: 'var(--stream-text-muted)',
+                    opacity: 1,
+                  },
+                },
+              }}
+            />
           </Box>
 
           {/* Close button */}
@@ -169,6 +255,7 @@ export function StreamViewerOverlay({
             data-testid="stream-close-button"
             sx={{
               color: 'var(--stream-text-secondary)',
+              flexShrink: 0,
               '&:hover': {
                 color: 'var(--stream-text-primary)',
               },
@@ -195,7 +282,9 @@ export function StreamViewerOverlay({
           }}
         >
           <StreamViewer
-            events={events}
+            events={filteredEvents}
+            totalEvents={events.length}
+            searchQuery={searchQuery}
             onEventClick={handleEventClick}
             selectedEventId={selectedEventId}
           />

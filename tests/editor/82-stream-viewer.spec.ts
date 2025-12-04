@@ -155,9 +155,10 @@ test.describe('v5/82 Stream Viewer - Desktop', () => {
     await expect(page.getByTestId('stream-viewer-overlay')).toBeVisible({ timeout: 5000 });
 
     // The timeline minimap is lifted above the overlay (z-index 1400) for visibility
-    // Check header shows event count (which is displayed in the simplified header)
+    // Check header shows event count (number displayed next to title)
     const header = page.getByTestId('stream-viewer-header');
-    await expect(header).toContainText(/\d+\s*events/i);
+    // Header shows count as just a number (e.g., "244") to save space for search bar
+    await expect(header).toContainText(/\d+/);
   });
 
   test('T82.6: Mouse wheel scrolling works', async ({ page }) => {

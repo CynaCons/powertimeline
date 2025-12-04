@@ -618,111 +618,7 @@ export function HomePage() {
         </section>
         )}
 
-        {/* Statistics Section */}
-        <section data-testid="platform-stats-section" className="mb-12">
-          <h2 data-testid="platform-stats-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
-              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Timelines</div>
-            </div>
-            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{stats.userCount}</div>
-              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
-            </div>
-            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-3xl font-bold mb-1" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
-              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Events</div>
-            </div>
-            <div className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-3xl font-bold mb-1" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
-              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Total Views</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Recently Edited Section */}
-        <section data-testid="recently-edited-section" className="mb-12">
-          <h2 data-testid="recently-edited-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {loadingTimelines ? (
-              // Loading skeletons
-              Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={`skeleton-recent-${index}`}
-                  className="border rounded-lg p-4"
-                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                >
-                  <Skeleton variant="text" width="70%" height={24} sx={{ bgcolor: 'var(--page-bg)' }} />
-                  <Skeleton variant="text" width="100%" sx={{ bgcolor: 'var(--page-bg)', mt: 1 }} />
-                  <Skeleton variant="text" width="80%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                  <div className="flex justify-between mt-3">
-                    <Skeleton variant="text" width="30%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                    <Skeleton variant="text" width="25%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                  </div>
-                </div>
-              ))
-            ) : recentlyEdited.map(timeline => (
-              <div
-                key={`recent-${timeline.id}`}
-                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
-                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
-              >
-                {/* Kebab menu */}
-                <div className="absolute top-2 right-2">
-                  <TimelineCardMenu
-                    timelineId={timeline.id}
-                    ownerId={timeline.ownerId}
-                    ownerUsername={getUserById(timeline.ownerId)?.username || ''}
-                    currentUserId={firebaseUser?.uid}
-                    onEdit={handleEditTimeline}
-                    onDelete={handleDeleteTimeline}
-                  />
-                </div>
-
-                {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
-                  <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
-                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
-                    {timeline.description || 'No description'}
-                  </p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
-                    <span>{timeline.eventCount} events</span>
-                    <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
-                  </div>
-                  {/* Owner badge - absolutely positioned at bottom-left */}
-                  {(() => {
-                    const owner = getUserById(timeline.ownerId);
-                    return owner ? (
-                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          @{owner.username}
-                        </span>
-                      </div>
-                    ) : null;
-                  })()}
-                  {/* Visibility badge - absolutely positioned at bottom-right */}
-                  <div className="absolute bottom-2 right-2">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                      timeline.visibility === 'public'
-                        ? 'bg-green-100 text-green-800'
-                        : timeline.visibility === 'private'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {timeline.visibility === 'public' ? '🌍 Public' :
-                       timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Popular Timelines Section */}
+        {/* Popular Timelines Section - First for engagement */}
         <section data-testid="popular-timelines-section" className="mb-12">
           <h2 data-testid="popular-timelines-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -772,6 +668,110 @@ export function HomePage() {
                   <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.viewCount} views</span>
                     <span>{timeline.eventCount} events</span>
+                  </div>
+                  {/* Owner badge - absolutely positioned at bottom-left */}
+                  {(() => {
+                    const owner = getUserById(timeline.ownerId);
+                    return owner ? (
+                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          @{owner.username}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
+                  {/* Visibility badge - absolutely positioned at bottom-right */}
+                  <div className="absolute bottom-2 right-2">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                      timeline.visibility === 'public'
+                        ? 'bg-green-100 text-green-800'
+                        : timeline.visibility === 'private'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {timeline.visibility === 'public' ? '🌍 Public' :
+                       timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Statistics Section - Second for credibility */}
+        <section data-testid="platform-stats-section" className="mb-12">
+          <h2 data-testid="platform-stats-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Timelines</div>
+            </div>
+            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{stats.userCount}</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
+            </div>
+            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Events</div>
+            </div>
+            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Total Views</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Recently Edited Section - Third for freshness */}
+        <section data-testid="recently-edited-section" className="mb-12">
+          <h2 data-testid="recently-edited-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {loadingTimelines ? (
+              // Loading skeletons
+              Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={`skeleton-recent-${index}`}
+                  className="border rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                >
+                  <Skeleton variant="text" width="70%" height={24} sx={{ bgcolor: 'var(--page-bg)' }} />
+                  <Skeleton variant="text" width="100%" sx={{ bgcolor: 'var(--page-bg)', mt: 1 }} />
+                  <Skeleton variant="text" width="80%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                  <div className="flex justify-between mt-3">
+                    <Skeleton variant="text" width="30%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                    <Skeleton variant="text" width="25%" sx={{ bgcolor: 'var(--page-bg)' }} />
+                  </div>
+                </div>
+              ))
+            ) : recentlyEdited.map(timeline => (
+              <div
+                key={`recent-${timeline.id}`}
+                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
+              >
+                {/* Kebab menu */}
+                <div className="absolute top-2 right-2">
+                  <TimelineCardMenu
+                    timelineId={timeline.id}
+                    ownerId={timeline.ownerId}
+                    ownerUsername={getUserById(timeline.ownerId)?.username || ''}
+                    currentUserId={firebaseUser?.uid}
+                    onEdit={handleEditTimeline}
+                    onDelete={handleDeleteTimeline}
+                  />
+                </div>
+
+                {/* Card content - clickable to navigate */}
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
+                  <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
+                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
+                    {timeline.description || 'No description'}
+                  </p>
+                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
+                    <span>{timeline.eventCount} events</span>
+                    <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
                   {/* Owner badge - absolutely positioned at bottom-left */}
                   {(() => {
