@@ -595,7 +595,8 @@ export function LandingPage() {
               { version: 'v0.2.x', title: 'Timeline Editor & Layout Engine', desc: 'Infinite zoom, smart card layout, degradation system' },
               { version: 'v0.3.x', title: 'Event Navigation & Authoring', desc: 'Event editor, minimap, interactive highlighting' },
               { version: 'v0.4.x', title: 'Home Page & Timeline Management', desc: 'Discovery feeds, CRUD operations, visibility controls' },
-              { version: 'v0.5.x', title: 'Firebase Authentication & Firestore', desc: 'User accounts, cloud storage, real-time sync' },
+              { version: 'v0.5.0-5.10', title: 'Firebase Authentication & Firestore', desc: 'User accounts, cloud storage, real-time sync' },
+              { version: 'v0.5.11-5.15', title: 'Platform Polish & Admin Tools', desc: 'Dark theme, admin panel, statistics, multi-agent orchestration' },
             ].map((phase, index) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', position: 'relative', pl: 6 }}>
                 {/* Commit dot */}
@@ -667,7 +668,7 @@ export function LandingPage() {
                     mb: 0.5,
                   }}
                 >
-                  v0.5.18 - Current: Platform Polish & Dark Theme
+                  v0.5.16+ - Current: Landing Page & Branding
                 </Typography>
                 <Typography
                   variant="body2"
@@ -676,7 +677,7 @@ export function LandingPage() {
                     fontSize: '0.9rem',
                   }}
                 >
-                  Landing page redesign, timeline card menus, statistics optimization
+                  New logo & banner, PowerSpawn Copilot integration, search & feed improvements
                 </Typography>
               </Box>
             </Box>
