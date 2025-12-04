@@ -1,6 +1,6 @@
 /**
  * StreamViewerOverlay - Modal wrapper for StreamViewer
- * v0.5.26.4 - Simplified: existing minimap/breadcrumbs lifted above via z-index
+ * v0.5.26.5 - Visual polish: softer edges, backdrop blur, refined shadows
  *
  * Features:
  * - Transparent header gap allowing existing minimap/breadcrumbs to show through
@@ -228,7 +228,8 @@ export function StreamViewerOverlay({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: 'rgba(0, 0, 0, 0.6)',
+          bgcolor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
         }}
       >
         {/* Modal container */}
@@ -254,9 +255,13 @@ export function StreamViewerOverlay({
             maxWidth: 900,
             height: '85vh',
             maxHeight: '85vh',
-            borderRadius: 2,
-            border: '1px solid var(--stream-card-border)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: `
+              0 0 0 1px var(--stream-card-border),
+              0 4px 6px -1px rgba(0, 0, 0, 0.2),
+              0 20px 40px -8px rgba(0, 0, 0, 0.4)
+            `,
           }),
         }}
       >
@@ -270,9 +275,14 @@ export function StreamViewerOverlay({
             justifyContent: 'space-between',
             bgcolor: 'var(--stream-card-bg)',
             borderBottom: '1px solid var(--stream-card-border)',
-            py: 1,
+            py: 1.25,
             px: 2,
             flexShrink: 0,
+            // Match modal border radius on top corners (desktop only)
+            ...(!isMobile && {
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
+            }),
           }}
         >
           {/* Stream View title with icon */}
@@ -321,17 +331,18 @@ export function StreamViewerOverlay({
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  bgcolor: 'var(--stream-bg)',
-                  borderRadius: 1,
+                  bgcolor: 'rgba(0, 0, 0, 0.2)',
+                  borderRadius: '8px',
                   height: 32,
                   '& fieldset': {
-                    borderColor: 'var(--stream-card-border)',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
                   },
                   '&:hover fieldset': {
-                    borderColor: 'var(--stream-text-muted)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
                   },
                   '&.Mui-focused fieldset': {
                     borderColor: 'var(--stream-dot-color)',
+                    borderWidth: '1px',
                   },
                 },
                 '& .MuiInputBase-input': {
@@ -377,6 +388,11 @@ export function StreamViewerOverlay({
             overflowY: 'auto',
             overflowX: 'hidden',
             WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+            // Match modal border radius on bottom corners (desktop only)
+            ...(!isMobile && {
+              borderBottomLeftRadius: '12px',
+              borderBottomRightRadius: '12px',
+            }),
             // Mobile: account for safe area
             ...(isMobile && {
               pb: 'env(safe-area-inset-bottom, 16px)',

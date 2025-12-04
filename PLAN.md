@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.26.4 (Stream Viewer UX & Home Reorder) ✅
-**Next Milestone:** v0.5.27 - Import/Export, v0.5.28 - Test Sweep, v0.5.29 - Technical Debt
+**Current Version:** v0.5.26.5 (Stream Viewer Visual Polish) ✅
+**Next Milestone:** v0.5.27 - Import/Export & AI-Ready Format
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -36,6 +36,7 @@
 - ✅ Stream Viewer: Minimap, breadcrumbs, scroll fix, E2E tests (v0.5.26.3)
 - ✅ Stream Viewer: Expandable cards, search in header, wheel fix (v0.5.26.4)
 - ✅ Home Page: Reordered sections (Popular → Stats → Recent) (v0.5.26.4)
+- ✅ Stream Viewer: Visual polish, softer edges, backdrop blur (v0.5.26.5)
 
 ### Next Up
 - **v0.5.27**: Import/Export with AI-ready YAML format
@@ -796,60 +797,6 @@ Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine on
 **Goal:** Address technical debt, security documentation, and code quality issues identified in audit
 **Status:** Moved to v0.5.29 (consolidated Technical Debt iteration)
 
-### v0.5.27 - Timeline Import/Export & AI-Ready Format
-**Goal:** Enable import/export of timelines in a simple format that AI models can generate
-**Status:** Planned (renumbered from v0.5.26)
-
-**Design Principles:**
-- Simple, human-readable format (YAML primary, JSON secondary)
-- AI-friendly: any LLM can generate valid timeline files from prompts
-- Validation layer to catch errors before import
-- Round-trip fidelity: export → import produces identical timeline
-
-**YAML Format Specification:**
-```yaml
-# PowerTimeline Export Format v1
-version: 1
-timeline:
-  title: "French Revolution"
-  description: "Key events from 1789-1799"
-  visibility: public  # public | unlisted | private
-
-events:
-  - id: evt-001  # optional, auto-generated if missing
-    date: "1789-07-14"
-    title: "Storming of the Bastille"
-    description: "Parisian revolutionaries storm the Bastille fortress..."
-    color: "#e53935"  # optional, hex color
-
-  - date: "1789-08-26"
-    title: "Declaration of Rights of Man"
-    description: "The National Assembly adopts..."
-```
-
-**Implementation Tasks:**
-- [ ] Define TypeScript schema for import/export format
-- [ ] Create YAML parser with validation (use `yaml` or `js-yaml` library)
-- [ ] Build JSON schema for format validation
-- [ ] Implement `exportTimeline(timelineId)` → YAML string
-- [ ] Implement `importTimeline(yaml, ownerId)` → Timeline
-- [ ] Add Export button to timeline menu (download .yaml file)
-- [ ] Add Import button to "Create Timeline" flow
-- [ ] Create import preview screen (show parsed events before saving)
-- [ ] Validation error display with line numbers
-- [ ] Handle edge cases: duplicate IDs, invalid dates, missing required fields
-
-**AI Integration (Prompt Engineering):**
-- [ ] Create example prompts for generating timelines
-- [ ] Document format in README for AI users
-- [ ] Consider: API endpoint for direct AI-generated timeline creation
-
-**Tests:**
-- [ ] Unit tests for YAML parsing and validation
-- [ ] Round-trip tests (export → import → export = identical)
-- [ ] Invalid format rejection tests
-- [ ] E2E: Import timeline via UI
-
 ### v0.5.26 - Stream Editor: Mobile Timeline Viewer
 **Goal:** Create a mobile-friendly read-only timeline viewer using git-style vertical layout
 **Status:** Complete
@@ -989,6 +936,72 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 - [x] Add hover effect on desktop event cards
 - [x] Add swipe to close on mobile (swipe down gesture)
 - [x] Add tests for expand/collapse and keyboard navigation (T82.K*, T82.E*, T82.F*)
+
+### v0.5.26.5 - Stream Viewer Visual Polish
+**Goal:** Refine visual appearance of Stream Viewer modal for better desktop experience
+**Status:** Complete
+
+**Visual Improvements:**
+- [x] Increase modal border radius (8px → 12px) for softer edges
+- [x] Add backdrop blur (4px) for visual cohesion with breadcrumbs
+- [x] Refine shadow with layered effect (subtle inner glow + outer shadow)
+- [x] Match header/content border radius to modal corners
+- [x] Polish search bar with subtle dark background and softer borders
+- [x] Increase event card border radius (8px → 10px) with subtle borders
+
+### v0.5.27 - Timeline Import/Export & AI-Ready Format
+**Goal:** Enable import/export of timelines in a simple format that AI models can generate
+**Status:** In Progress
+
+**Design Principles:**
+- Simple, human-readable format (YAML primary, JSON secondary)
+- AI-friendly: any LLM can generate valid timeline files from prompts
+- Validation layer to catch errors before import
+- Round-trip fidelity: export → import produces identical timeline
+
+**YAML Format Specification:**
+```yaml
+# PowerTimeline Export Format v1
+version: 1
+timeline:
+  title: "French Revolution"
+  description: "Key events from 1789-1799"
+  visibility: public  # public | unlisted | private
+
+events:
+  - id: evt-001  # optional, auto-generated if missing
+    date: "1789-07-14"
+    title: "Storming of the Bastille"
+    description: "Parisian revolutionaries storm the Bastille fortress..."
+    color: "#e53935"  # optional, hex color
+
+  - date: "1789-08-26"
+    title: "Declaration of Rights of Man"
+    description: "The National Assembly adopts..."
+```
+
+**Implementation Tasks:**
+- [ ] Define TypeScript schema for import/export format
+- [ ] Create YAML parser with validation (use `yaml` or `js-yaml` library)
+- [ ] Build JSON schema for format validation
+- [ ] Implement `exportTimeline(timelineId)` → YAML string
+- [ ] Implement `importTimeline(yaml, ownerId)` → Timeline
+- [ ] Add Export button to timeline menu (download .yaml file)
+- [ ] Add Import button to "Create Timeline" flow
+- [ ] Create import preview screen (show parsed events before saving)
+- [ ] Validation error display with line numbers
+- [ ] Handle edge cases: duplicate IDs, invalid dates, missing required fields
+
+**AI Integration (Prompt Engineering):**
+- [ ] Create example prompts for generating timelines
+- [ ] Document format in README for AI users
+- [ ] Consider: API endpoint for direct AI-generated timeline creation
+
+**Tests:**
+- [ ] Unit tests for YAML parsing and validation
+- [ ] Round-trip tests (export → import → export = identical)
+- [ ] Invalid format rejection tests
+- [ ] E2E: Import timeline via UI
 
 ### v0.5.28 - Test Sweep Corrective Actions
 **Goal:** Address test failures discovered during Dev Panel removal sweep

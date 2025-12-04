@@ -201,8 +201,8 @@ function StreamEventCard({
         sx={{
           flex: 1,
           bgcolor: isSelected ? 'var(--stream-card-bg)' : 'transparent',
-          border: `1px solid ${isSelected ? dotColor : 'var(--stream-card-border)'}`,
-          borderRadius: 2,
+          border: `1px solid ${isSelected ? dotColor : 'rgba(255, 255, 255, 0.08)'}`,
+          borderRadius: '10px',
           p: 1.5,
           mb: isLast ? 0 : 'var(--stream-card-gap)',
           transition: 'all 0.15s ease',
@@ -212,7 +212,7 @@ function StreamEventCard({
               bgcolor: 'var(--stream-card-bg)',
               borderColor: 'var(--stream-dot-color)',
               transform: 'translateY(-1px)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
             },
           },
         }}
