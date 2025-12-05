@@ -3,9 +3,9 @@
  * v0.5.14 - SRS_DB.md compliant with username-based URLs
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import type { CSSProperties as ReactCSSProperties } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Snackbar, Alert } from '@mui/material';
 import type { TimelineMetadata, User } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { signOutUser } from '../services/auth';
@@ -20,7 +20,9 @@ import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
 import { ImportTimelineDialog } from '../components/ImportTimelineDialog';
 import { UserAvatar } from '../components/UserAvatar';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
+import { SkeletonCard } from '../components/SkeletonCard';
+import { ErrorState } from '../components/ErrorState';
 
 export function UserProfilePage() {
   // Support both /@:username (preferred) and /user/:userId (legacy) routes
@@ -38,10 +40,11 @@ export function UserProfilePage() {
   const [createTimelineDialogOpen, setCreateTimelineDialogOpen] = useState(false);
   const [importTimelineDialogOpen, setImportTimelineDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'updated' | 'title' | 'events' | 'views'>('updated');
+  const [error, setError] = useState<Error | null>(null);
   const [userCache, setUserCache] = useState<Map<string, User>>(new Map());
 
   // Toast notifications
-  const { toast, showToast, hideToast } = useToast();
+  const { showSuccess, showError } = useToast();
 
   // Get navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
@@ -59,14 +62,17 @@ export function UserProfilePage() {
     loadCurrentUser();
   }, [firebaseUser]);
 
-  useEffect(() => {
-    async function loadUserProfile() {
-      // Support both username and userId params
-      if (!username && !userId) {
-        navigate('/');
-        return;
-      }
+  const loadUserProfile = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    // Support both username and userId params
+    if (!username && !userId) {
+      navigate('/');
+      setLoading(false);
+      return;
+    }
 
+    try {
       let userData: User | null = null;
 
       if (username) {
@@ -108,12 +114,20 @@ export function UserProfilePage() {
         }
       }
       setUserCache(cache);
-
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
+      setError(error instanceof Error ? error : new Error('Failed to load profile'));
+      setUser(null);
+      setTimelines([]);
+      setUserCache(new Map());
+    } finally {
       setLoading(false);
     }
+  }, [navigate, userId, username]);
 
+  useEffect(() => {
     loadUserProfile();
-  }, [username, userId, navigate]);
+  }, [loadUserProfile]);
 
   const handleTimelineClick = (timeline: TimelineMetadata) => {
     // v0.5.14: Use username-based URL (no @ prefix - React Router v7 bug)
@@ -138,13 +152,35 @@ export function UserProfilePage() {
     }
   });
 
+  const accentButtonStyle: ReactCSSProperties = {
+    '--pt-button-bg': 'var(--page-accent)',
+    '--pt-button-bg-hover': 'var(--page-accent-hover)',
+    '--pt-button-bg-active': 'var(--page-accent-hover)',
+    '--pt-button-border': 'var(--page-accent)',
+    '--pt-button-border-hover': 'var(--page-accent-hover)',
+    '--pt-button-color': '#ffffff',
+    '--pt-button-color-hover': '#ffffff',
+  } as ReactCSSProperties;
+
+  const secondaryButtonStyle: ReactCSSProperties = {
+    '--pt-button-bg': 'var(--card-bg)',
+    '--pt-button-bg-hover': 'color-mix(in srgb, var(--page-accent) 8%, var(--card-bg))',
+    '--pt-button-bg-active': 'color-mix(in srgb, var(--page-accent) 12%, var(--card-bg))',
+    '--pt-button-border': 'var(--card-border)',
+    '--pt-button-border-hover': 'var(--card-border-hover)',
+    '--pt-button-color': 'var(--page-text-primary)',
+    '--pt-button-color-hover': 'var(--page-accent)',
+    '--pt-button-shadow-hover': 'none',
+    '--pt-button-shadow-active': 'none',
+  } as ReactCSSProperties;
+
   const handleEditTimeline = (timelineId: string) => {
     setEditTimelineId(timelineId);
     setEditDialogOpen(true);
   };
 
   const handleEditSuccess = async () => {
-    showToast('Timeline updated successfully!', 'success');
+    showSuccess('Timeline updated successfully!');
     // Refresh timelines
     if (user) {
       const userTimelines = await getTimelines({
@@ -167,18 +203,18 @@ export function UserProfilePage() {
       const timeline = await getTimeline(timelineId);
       if (timeline) {
         downloadTimelineAsYaml(timeline);
-        showToast('Timeline exported as YAML', 'success');
+        showSuccess('Timeline exported as YAML');
       } else {
-        showToast('Failed to load timeline for export', 'error');
+        showError('Failed to load timeline for export');
       }
     } catch (error) {
       console.error('Export failed:', error);
-      showToast('Export failed. Please try again.', 'error');
+      showError('Export failed. Please try again.');
     }
   };
 
   const handleDeleteSuccess = async () => {
-    showToast('Timeline deleted successfully!', 'success');
+    showSuccess('Timeline deleted successfully!');
     // Refresh timelines
     if (user) {
       const userTimelines = await getTimelines({
@@ -200,7 +236,7 @@ export function UserProfilePage() {
   };
 
   const handleCreateTimelineSuccess = async () => {
-    showToast('Timeline created successfully!', 'success');
+    showSuccess('Timeline created successfully!');
     // Refresh timelines
     if (user) {
       const userTimelines = await getTimelines({
@@ -287,14 +323,21 @@ export function UserProfilePage() {
         {/* User Profile Header */}
         <div className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
-            {loading || !user ? (
-              // Skeleton loader for user profile
-              <div className="flex items-center gap-6 animate-pulse">
-                <div className="w-16 h-16 rounded-full" style={{ backgroundColor: 'var(--page-bg)' }}></div>
-                <div className="flex-1">
-                  <div className="h-8 rounded w-64 mb-2" style={{ backgroundColor: 'var(--page-bg)' }}></div>
-                  <div className="h-4 rounded w-96 mb-2" style={{ backgroundColor: 'var(--page-bg)' }}></div>
-                  <div className="h-3 rounded w-32" style={{ backgroundColor: 'var(--page-bg)' }}></div>
+            {error ? (
+              <div className="py-6 text-center" style={{ color: 'var(--page-text-secondary)' }}>
+                Unable to load this profile. Please try again below.
+              </div>
+            ) : loading || !user ? (
+              <div className="flex items-center gap-6">
+                <div className="skeleton-circle skeleton-block" style={{ width: '64px', height: '64px' }} />
+                <div className="flex-1 space-y-2">
+                  <div className="skeleton-block skeleton-title" style={{ width: '220px', height: '28px' }} />
+                  <div className="skeleton-block" style={{ width: '320px' }} />
+                  <div className="flex gap-6 pt-1">
+                    <div className="skeleton-block" style={{ width: '90px' }} />
+                    <div className="skeleton-block" style={{ width: '90px' }} />
+                    <div className="skeleton-block" style={{ width: '90px' }} />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -331,6 +374,16 @@ export function UserProfilePage() {
 
         {/* User Timelines */}
         <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        {error ? (
+          <div className="py-12">
+            <ErrorState
+              message="Failed to load timelines"
+              description={error.message}
+              onRetry={loadUserProfile}
+            />
+          </div>
+        ) : (
+        <>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
@@ -372,30 +425,16 @@ export function UserProfilePage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleImportTimeline}
-                className="px-4 py-2 rounded-lg transition-colors font-medium border flex items-center gap-2"
-                style={{
-                  backgroundColor: 'var(--card-bg)',
-                  borderColor: 'var(--card-border)',
-                  color: 'var(--page-text-primary)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#8b5cf6';
-                  e.currentTarget.style.color = '#8b5cf6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--card-border)';
-                  e.currentTarget.style.color = 'var(--page-text-primary)';
-                }}
+                className="pt-button px-4 py-2 rounded-lg font-medium border flex items-center gap-2"
+                style={secondaryButtonStyle}
               >
                 <span className="material-symbols-rounded text-base">upload_file</span>
                 Import
               </button>
               <button
                 onClick={handleCreateTimeline}
-                className="px-4 py-2 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
-                style={{ backgroundColor: '#8b5cf6' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+                className="pt-button px-4 py-2 text-white rounded-lg font-medium flex items-center gap-2"
+                style={accentButtonStyle}
               >
                 <span className="text-xl">+</span>
                 Create Timeline
@@ -405,14 +444,9 @@ export function UserProfilePage() {
         </div>
 
         {loading ? (
-          // Skeleton loader for timeline cards
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-lg shadow-sm border p-4 animate-pulse" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-                <div className="h-6 rounded w-3/4 mb-3" style={{ backgroundColor: 'var(--page-bg)' }}></div>
-                <div className="h-4 rounded w-full mb-2" style={{ backgroundColor: 'var(--page-bg)' }}></div>
-                <div className="h-4 rounded w-2/3" style={{ backgroundColor: 'var(--page-bg)' }}></div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonCard key={`user-timeline-skeleton-${index}`} />
             ))}
           </div>
         ) : timelines.length === 0 ? (
@@ -432,14 +466,12 @@ export function UserProfilePage() {
               <div
                 key={`user-profile-${timeline.id}`}
                 data-testid={`timeline-card-${timeline.id}`}
-                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                className="timeline-card rounded-lg p-4 relative"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
               >
                 {/* Kebab menu - only show if current user is the owner */}
                 {firebaseUser && firebaseUser.uid === timeline.ownerId && (
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 z-20">
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
@@ -491,6 +523,8 @@ export function UserProfilePage() {
             ))}
           </div>
         )}
+        </>
+        )}
         </main>
       </div>
 
@@ -528,18 +562,6 @@ export function UserProfilePage() {
         onClose={() => setImportTimelineDialogOpen(false)}
         onSuccess={handleCreateTimelineSuccess}
       />
-
-      {/* Toast Notifications */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={4000}
-        onClose={hideToast}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={hideToast} severity={toast.severity} sx={{ width: '100%' }}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }

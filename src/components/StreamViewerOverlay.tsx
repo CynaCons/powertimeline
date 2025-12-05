@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { StreamViewer } from './StreamViewer';
+import { useFocusTrap } from '../app/hooks/useFocusTrap';
 import type { Event } from '../types';
 
 interface StreamViewerOverlayProps {
@@ -48,6 +49,9 @@ export function StreamViewerOverlay({
   // Swipe gesture tracking for mobile
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
+
+  // Enable focus trap when overlay is open
+  useFocusTrap(open, modalRef.current);
 
   // Filter events based on search query
   const filteredEvents = useMemo(() => {
@@ -235,6 +239,10 @@ export function StreamViewerOverlay({
         {/* Modal container */}
         <Box
           ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="stream-viewer-title"
+          aria-describedby="stream-viewer-description"
           data-testid="stream-viewer-modal"
           sx={{
           bgcolor: 'var(--stream-bg)',
@@ -290,16 +298,21 @@ export function StreamViewerOverlay({
             <span
               className="material-symbols-rounded"
               style={{ fontSize: 20, color: 'var(--stream-dot-color)' }}
+              aria-hidden="true"
             >
               view_stream
             </span>
-            <Typography sx={{ color: 'var(--stream-text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
+            <Typography id="stream-viewer-title" sx={{ color: 'var(--stream-text-primary)', fontWeight: 600, fontSize: '0.95rem' }}>
               Stream View
             </Typography>
-            <Typography sx={{ color: 'var(--stream-text-muted)', fontSize: '0.8rem', ml: 0.5 }}>
+            <Typography sx={{ color: 'var(--stream-text-muted)', fontSize: '0.8rem', ml: 0.5 }} aria-live="polite">
               {searchQuery ? `${filteredEvents.length}/` : ''}{events.length}
             </Typography>
           </Box>
+          {/* Screen reader description */}
+          <div id="stream-viewer-description" className="sr-only">
+            View timeline events in chronological order. Use arrow keys to navigate, Escape to close.
+          </div>
 
           {/* Search bar - in header */}
           <Box sx={{ flex: 1, mx: 2, maxWidth: 300 }}>

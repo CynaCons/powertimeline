@@ -303,6 +303,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="authoring-overlay-title"
+        aria-describedby="authoring-overlay-description"
         data-testid="authoring-overlay"
         style={{
           backgroundColor: 'var(--page-bg-elevated)',
@@ -387,6 +388,12 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
               >
                 {isEditMode ? (selected ? 'Edit Event' : 'Create Event') : 'Event Details'}
               </h2>
+              {/* Screen reader description */}
+              <div id="authoring-overlay-description" className="sr-only">
+                {isEditMode
+                  ? 'Edit event details including title, date, time, and description. Use Escape to close, Ctrl+S to save.'
+                  : 'View event details. Use arrow keys to navigate between events, Escape to close.'}
+              </div>
               {selected && allEvents.length > 1 && (
                 <div className="text-sm px-3 py-1 rounded-full" style={{ color: 'var(--page-text-secondary)', backgroundColor: 'var(--page-bg)' }}>
                   {currentIndex + 1} of {allEvents.length}
@@ -458,6 +465,17 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
               >
                 {isEditMode && (
                   <form id="event-form" onSubmit={onSave} className="grid grid-cols-1 gap-6 h-full max-w-2xl">
+                    {/* Live region for validation error announcements */}
+                    <div
+                      aria-live="polite"
+                      aria-atomic="true"
+                      className="sr-only"
+                    >
+                      {touched.date && errors.date && `Date error: ${errors.date}`}
+                      {touched.time && errors.time && `Time error: ${errors.time}`}
+                      {touched.title && errors.title && `Title error: ${errors.title}`}
+                      {touched.description && errors.description && `Description error: ${errors.description}`}
+                    </div>
                     {/* Date and Time Fields */}
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -477,7 +495,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                               // Don't re-validate here - already done in onChange with correct value
                             }}
                             slotProps={{
-                               
+
                               openPickerButton: {
                                 'data-testid': 'date-picker-button'
                               } as any, // data-testid is a valid HTML attribute for testing but not in MUI types
@@ -485,7 +503,15 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                                 variant: "outlined" as const,
                                 fullWidth: true,
                                 error: touched.date && !!errors.date,
-                                helperText: touched.date && errors.date ? errors.date : "Click calendar icon to select"
+                                helperText: touched.date && errors.date ? errors.date : "Click calendar icon to select",
+                                inputProps: {
+                                  'aria-invalid': touched.date && !!errors.date,
+                                  'aria-describedby': touched.date && errors.date ? 'error-date' : undefined
+                                },
+                                FormHelperTextProps: {
+                                  id: touched.date && errors.date ? 'error-date' : undefined,
+                                  role: touched.date && errors.date ? 'alert' : undefined
+                                } as any
                               }
                             }}
                           />
@@ -510,8 +536,14 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                             }}
                             inputProps={{
                               placeholder: "14:30",
-                              pattern: "\\d{2}:\\d{2}"
+                              pattern: "\\d{2}:\\d{2}",
+                              'aria-invalid': touched.time && !!errors.time,
+                              'aria-describedby': touched.time && errors.time ? 'error-time' : undefined
                             }}
+                            FormHelperTextProps={{
+                              id: touched.time && errors.time ? 'error-time' : undefined,
+                              role: touched.time && errors.time ? 'alert' : undefined
+                            } as any}
                             fullWidth
                           />
                         </div>
@@ -531,8 +563,14 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                         placeholder="Enter event title..."
                         inputProps={{
                           maxLength: 100,
-                          style: { fontSize: '18px', fontWeight: 500 }
+                          style: { fontSize: '18px', fontWeight: 500 },
+                          'aria-invalid': touched.title && !!errors.title,
+                          'aria-describedby': touched.title && errors.title ? 'error-title' : undefined
                         }}
+                        FormHelperTextProps={{
+                          id: touched.title && errors.title ? 'error-title' : undefined,
+                          role: touched.title && errors.title ? 'alert' : undefined
+                        } as any}
                         fullWidth
                       />
                       <div className="text-xs text-gray-500 text-right">
@@ -555,6 +593,14 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                         minRows={4}
                         maxRows={8}
                         fullWidth
+                        inputProps={{
+                          'aria-invalid': touched.description && !!errors.description,
+                          'aria-describedby': touched.description && errors.description ? 'error-description' : undefined
+                        }}
+                        FormHelperTextProps={{
+                          id: touched.description && errors.description ? 'error-description' : undefined,
+                          role: touched.description && errors.description ? 'alert' : undefined
+                        } as any}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             fontSize: '16px',

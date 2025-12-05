@@ -9,6 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import Fade from '@mui/material/Fade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useFocusTrap } from '../app/hooks/useFocusTrap';
 
 export interface Command {
   id: string;
@@ -88,6 +89,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Enable focus trap when modal is open
+  useFocusTrap(isOpen, dialogRef.current);
 
   // Filter and sort commands based on query
   const filteredCommands = useMemo(() => {
@@ -179,11 +184,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       open={isOpen}
       onClose={onClose}
       aria-labelledby="command-palette-title"
+      aria-describedby="command-palette-description"
       data-keyboard-trap="true"
       closeAfterTransition
     >
       <Fade in={isOpen}>
         <Box
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
           sx={{
             position: 'fixed',
             top: '20%',
@@ -211,7 +220,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               gap: 2,
             }}
           >
-            <span className="material-symbols-rounded text-secondary">search</span>
+            <span className="material-symbols-rounded text-secondary" aria-hidden="true">search</span>
             <InputBase
               ref={inputRef}
               placeholder={placeholder}
@@ -226,11 +235,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               }}
               autoComplete="off"
               spellCheck={false}
+              aria-label="Search commands"
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" aria-live="polite" aria-atomic="true">
               {filteredCommands.length} {filteredCommands.length === 1 ? 'result' : 'results'}
             </Typography>
           </Box>
+          {/* Screen reader labels */}
+          <h2 id="command-palette-title" className="sr-only">Command Palette</h2>
+          <div id="command-palette-description" className="sr-only">
+            Use arrow keys to navigate, Enter to execute, Escape to close
+          </div>
 
           {/* Commands list */}
           <List

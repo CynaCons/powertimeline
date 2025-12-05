@@ -39,11 +39,22 @@ export function TopNavBar() {
         >
           {/* Logo/Brand */}
           <Box
+            component="button"
+            type="button"
+            aria-label="Go to home"
             sx={{
               display: 'flex',
               alignItems: 'center',
               gap: 1,
               cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              '&:focus-visible': {
+                outline: '2px solid #8b5cf6',
+                outlineOffset: '2px',
+                borderRadius: '4px',
+              },
             }}
             onClick={() => navigate('/')}
             data-testid="logo-button"

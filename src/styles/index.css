@@ -100,6 +100,8 @@
   --transition-fast: 150ms ease-in-out;
   --transition-medium: 300ms ease-in-out;
   --transition-slow: 500ms ease-in-out;
+  --pt-hover-duration: 180ms;
+  --pt-hover-ease: ease-out;
 
   /* Border Radius */
   --radius-xs: 4px;
@@ -164,6 +166,7 @@
     --transition-fast: 0ms;
     --transition-medium: 0ms;
     --transition-slow: 0ms;
+    --pt-hover-duration: 0ms;
   }
 }
 
@@ -318,6 +321,73 @@
     var(--shadow-lg),
     0 0 0 2px var(--color-primary-500);
   z-index: 20;
+}
+
+/* Timeline cards - shared hover polish */
+.timeline-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--pt-hover-duration) var(--pt-hover-ease),
+    box-shadow var(--pt-hover-duration) var(--pt-hover-ease),
+    border-color var(--pt-hover-duration) var(--pt-hover-ease);
+}
+
+.timeline-card:hover {
+  transform: scale(1.02);
+  border-color: var(--card-border-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+.timeline-card:active {
+  transform: scale(0.995);
+  box-shadow: var(--shadow-md);
+}
+
+.pt-button {
+  --pt-button-bg: transparent;
+  --pt-button-bg-hover: color-mix(in srgb, var(--page-accent) 10%, var(--card-bg, transparent));
+  --pt-button-bg-active: color-mix(in srgb, var(--page-accent) 14%, var(--card-bg, transparent));
+  --pt-button-color: var(--page-text-primary);
+  --pt-button-color-hover: var(--page-text-primary);
+  --pt-button-border: transparent;
+  --pt-button-border-hover: var(--card-border-hover);
+  --pt-button-shadow-hover: 0 10px 22px color-mix(in srgb, var(--page-accent) 16%, transparent);
+  --pt-button-shadow-active: 0 6px 14px color-mix(in srgb, var(--page-accent) 20%, transparent);
+  background-color: var(--pt-button-bg);
+  color: var(--pt-button-color);
+  border: 1px solid var(--pt-button-border);
+  box-shadow: none;
+  transition:
+    background-color var(--pt-hover-duration) var(--pt-hover-ease),
+    color var(--pt-hover-duration) var(--pt-hover-ease),
+    border-color var(--pt-hover-duration) var(--pt-hover-ease),
+    box-shadow var(--pt-hover-duration) var(--pt-hover-ease),
+    transform 120ms var(--pt-hover-ease);
+}
+
+.pt-button:hover {
+  background-color: var(--pt-button-bg-hover);
+  color: var(--pt-button-color-hover);
+  border-color: var(--pt-button-border-hover);
+  box-shadow: var(--pt-button-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.pt-button:active {
+  background-color: var(--pt-button-bg-active);
+  box-shadow: var(--pt-button-shadow-active);
+  transform: translateY(0);
+}
+
+.pt-icon-button {
+  color: var(--page-text-secondary);
+  transition: color var(--pt-hover-duration) var(--pt-hover-ease);
+}
+
+.pt-icon-button:hover {
+  color: var(--page-text-primary);
 }
 
 /* Icon Styling */
@@ -698,11 +768,30 @@
   .nav-active-indicator {
     animation: none;
   }
+
+  .timeline-card,
+  .timeline-card:hover,
+  .timeline-card:active,
+  .pt-button,
+  .pt-button:hover,
+  .pt-button:active,
+  .nav-button,
+  .nav-button:hover,
+  .nav-button:active {
+    transition: none;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 /* ================================
  * Navigation & Interaction Styles
  * ================================ */
+
+:root {
+  --nav-hover-bg: color-mix(in srgb, var(--page-accent) 16%, var(--nav-bg, transparent));
+  --nav-active-bg: color-mix(in srgb, var(--page-accent) 22%, var(--nav-bg, transparent));
+}
 
 /* Navigation Rail Styles */
 .navigation-rail {
@@ -712,6 +801,31 @@
 .nav-button {
   position: relative;
   overflow: hidden;
+  background-color: transparent;
+  color: var(--page-text-secondary);
+  border-radius: 10px;
+  transition:
+    background-color var(--pt-hover-duration) var(--pt-hover-ease),
+    color var(--pt-hover-duration) var(--pt-hover-ease),
+    box-shadow var(--pt-hover-duration) var(--pt-hover-ease),
+    transform var(--pt-hover-duration) var(--pt-hover-ease);
+}
+
+.nav-button:hover {
+  background-color: var(--nav-hover-bg);
+  color: var(--page-accent);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--page-accent) 18%, transparent);
+  transform: translateY(-1px);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--page-accent) 20%, transparent);
+}
+
+.nav-button[data-active="true"] {
+  background-color: var(--nav-active-bg);
+  color: var(--page-accent);
 }
 
 /* Ripple Effect for Button Clicks */
@@ -733,15 +847,18 @@
 
 /* Icon Animations */
 .nav-icon {
-  transition: transform var(--transition-medium);
+  color: inherit;
+  transition:
+    color var(--pt-hover-duration) var(--pt-hover-ease),
+    transform var(--pt-hover-duration) var(--pt-hover-ease);
 }
 
 .nav-button:hover .nav-icon {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .nav-button:active .nav-icon {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 /* Spinning Icons for Loading States */

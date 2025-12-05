@@ -16,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
+import { SkeletonCard } from '../components/SkeletonCard';
 
 // Mobile notice component - now offers Stream View as primary option
 function MobileNotice({ onDismiss, onOpenStreamView }: { onDismiss: () => void; onOpenStreamView: () => void }) {
@@ -154,9 +155,22 @@ export function EditorPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-xl text-gray-600">Loading timeline...</div>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-6">
+          <div className="skeleton-panel">
+            <div className="skeleton-block skeleton-title" style={{ width: '60%', height: '32px' }} />
+            <div className="flex flex-wrap gap-3 mt-4">
+              <span className="skeleton-pill" style={{ width: '120px', height: '14px' }} />
+              <span className="skeleton-pill" style={{ width: '90px', height: '14px' }} />
+              <span className="skeleton-pill" style={{ width: '140px', height: '14px' }} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonCard key={`editor-skeleton-${index}`} minHeight={140} />
+            ))}
+          </div>
         </div>
       </div>
     );

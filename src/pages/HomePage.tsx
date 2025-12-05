@@ -3,9 +3,9 @@
  * Implements requirements from docs/SRS_HOME_PAGE.md (v0.4.0)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Snackbar, Alert, Skeleton } from '@mui/material';
 import type { TimelineMetadata, User } from '../types';
 import {
   getTimeline,
@@ -26,7 +26,9 @@ import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
 import { UserAvatar } from '../components/UserAvatar';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
+import { SkeletonCard } from '../components/SkeletonCard';
+import { ErrorState } from '../components/ErrorState';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -49,6 +51,7 @@ export function HomePage() {
     users: User[];
     hasMore: boolean;
   } | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -59,7 +62,7 @@ export function HomePage() {
   const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
 
   // Toast notifications
-  const { toast, showToast, hideToast } = useToast();
+  const { showSuccess, showError } = useToast();
 
   // Search input ref for keyboard shortcut
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -91,76 +94,114 @@ export function HomePage() {
   };
 
   // Filter out private timelines from discovery feeds (only show public)
-  const filterPublicTimelines = (timelines: TimelineMetadata[]) =>
-    timelines.filter(t => (t.visibility ?? 'public') === 'public');
+  const filterPublicTimelines = useCallback(
+    (timelines: TimelineMetadata[]) => timelines.filter(t => (t.visibility ?? 'public') === 'public'),
+    []
+  );
+
+  const searchResultButtonStyle: CSSProperties = {
+    backgroundColor: 'transparent',
+    '--pt-button-bg': 'transparent',
+    '--pt-button-bg-hover': 'var(--page-bg)',
+    '--pt-button-bg-active': 'color-mix(in srgb, var(--page-bg) 88%, var(--page-text-secondary) 12%)',
+    '--pt-button-border': 'transparent',
+    '--pt-button-border-hover': 'var(--card-border)',
+    '--pt-button-color': 'var(--page-text-primary)',
+    '--pt-button-color-hover': 'var(--page-text-primary)',
+    '--pt-button-shadow-hover': 'none',
+    '--pt-button-shadow-active': 'none',
+  } as CSSProperties;
+
+  const accentButtonStyle: CSSProperties = {
+    '--pt-button-bg': 'var(--page-accent)',
+    '--pt-button-bg-hover': 'var(--page-accent-hover)',
+    '--pt-button-bg-active': 'var(--page-accent-hover)',
+    '--pt-button-border': 'var(--page-accent)',
+    '--pt-button-border-hover': 'var(--page-accent-hover)',
+    '--pt-button-color': '#ffffff',
+    '--pt-button-color-hover': '#ffffff',
+  } as CSSProperties;
+
+  const secondaryButtonStyle: CSSProperties = {
+    '--pt-button-bg': 'var(--card-bg)',
+    '--pt-button-bg-hover': 'color-mix(in srgb, var(--page-accent) 8%, var(--card-bg))',
+    '--pt-button-bg-active': 'color-mix(in srgb, var(--page-accent) 12%, var(--card-bg))',
+    '--pt-button-border': 'var(--card-border)',
+    '--pt-button-border-hover': 'var(--card-border-hover)',
+    '--pt-button-color': 'var(--page-text-primary)',
+    '--pt-button-color-hover': 'var(--page-accent)',
+    '--pt-button-shadow-hover': 'none',
+    '--pt-button-shadow-active': 'none',
+  } as CSSProperties;
+
+  const loadData = useCallback(async () => {
+    setLoadingTimelines(true);
+    setError(null);
+    try {
+      // Load current user profile from Firestore if authenticated
+      if (firebaseUser) {
+        const userProfile = await getUser(firebaseUser.uid);
+        setCurrentUser(userProfile);
+      } else {
+        setCurrentUser(null);
+      }
+
+      // Load all users for caching
+      const users = await getUsers();
+      setAllUsers(users);
+
+      // Load platform statistics
+      const platformStats = await getPlatformStats();
+      setStats({
+        timelineCount: platformStats.totalTimelines,
+        userCount: platformStats.totalUsers,
+        eventCount: platformStats.totalEvents,
+        viewCount: platformStats.totalViews,
+      });
+
+      // Load user's timelines (only if authenticated)
+      if (firebaseUser) {
+        const userTimelines = await getTimelines({
+          ownerId: firebaseUser.uid,
+          orderByField: 'updatedAt',
+          orderDirection: 'desc',
+        });
+        setMyTimelines(userTimelines);
+      } else {
+        setMyTimelines([]);
+      }
+
+      // Load recently edited timelines for discovery (public only)
+      const recentTimelines = await getTimelines({
+        orderByField: 'updatedAt',
+        orderDirection: 'desc',
+        limitCount: 12, // Fetch extra to account for filtering
+      });
+      setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
+
+      // Load popular timelines for discovery (public only)
+      const popularTimelines = await getTimelines({
+        orderByField: 'viewCount',
+        orderDirection: 'desc',
+        limitCount: 12, // Fetch extra to account for filtering
+      });
+      setPopular(filterPublicTimelines(popularTimelines).slice(0, 6));
+
+      // Note: Featured timelines functionality to be removed per PLAN.md known issues
+      setFeatured([]);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError(error instanceof Error ? error : new Error('Failed to load timelines'));
+      showError('Error loading timelines');
+    } finally {
+      setLoadingTimelines(false);
+    }
+  }, [firebaseUser, filterPublicTimelines, showError]);
 
   // Load data on mount and when firebaseUser changes
   useEffect(() => {
-    async function loadData() {
-      setLoadingTimelines(true);
-      try {
-        // Load current user profile from Firestore if authenticated
-        if (firebaseUser) {
-          const userProfile = await getUser(firebaseUser.uid);
-          setCurrentUser(userProfile);
-        } else {
-          setCurrentUser(null);
-        }
-
-        // Load all users for caching
-        const users = await getUsers();
-        setAllUsers(users);
-
-        // Load platform statistics
-        const platformStats = await getPlatformStats();
-        setStats({
-          timelineCount: platformStats.totalTimelines,
-          userCount: platformStats.totalUsers,
-          eventCount: platformStats.totalEvents,
-          viewCount: platformStats.totalViews,
-        });
-
-        // Load user's timelines (only if authenticated)
-        if (firebaseUser) {
-          const userTimelines = await getTimelines({
-            ownerId: firebaseUser.uid,
-            orderByField: 'updatedAt',
-            orderDirection: 'desc',
-          });
-          setMyTimelines(userTimelines);
-        } else {
-          setMyTimelines([]);
-        }
-
-        // Load recently edited timelines for discovery (public only)
-        const recentTimelines = await getTimelines({
-          orderByField: 'updatedAt',
-          orderDirection: 'desc',
-          limitCount: 12, // Fetch extra to account for filtering
-        });
-        setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
-
-        // Load popular timelines for discovery (public only)
-        const popularTimelines = await getTimelines({
-          orderByField: 'viewCount',
-          orderDirection: 'desc',
-          limitCount: 12, // Fetch extra to account for filtering
-        });
-        setPopular(filterPublicTimelines(popularTimelines).slice(0, 6));
-
-        // Note: Featured timelines functionality to be removed per PLAN.md known issues
-        setFeatured([]);
-      } catch (error) {
-        console.error('Error loading data:', error);
-        showToast('Error loading timelines', 'error');
-      } finally {
-        setLoadingTimelines(false);
-      }
-    }
-
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firebaseUser]); // Re-run when auth state changes
+  }, [loadData]);
 
   const handleCreateTimeline = () => {
     setCreateDialogOpen(true);
@@ -171,7 +212,7 @@ export function HomePage() {
   };
 
   const handleCreateSuccess = async (timelineId: string) => {
-    showToast('Timeline created successfully!', 'success');
+    showSuccess('Timeline created successfully!');
 
     // Refresh timeline lists
     if (firebaseUser) {
@@ -204,7 +245,7 @@ export function HomePage() {
   };
 
   const handleEditSuccess = async () => {
-    showToast('Timeline updated successfully!', 'success');
+    showSuccess('Timeline updated successfully!');
 
     // Refresh timeline lists
     if (firebaseUser) {
@@ -235,18 +276,18 @@ export function HomePage() {
       const timeline = await getTimeline(timelineId);
       if (timeline) {
         downloadTimelineAsYaml(timeline);
-        showToast('Timeline exported as YAML', 'success');
+        showSuccess('Timeline exported as YAML');
       } else {
-        showToast('Failed to load timeline for export', 'error');
+        showError('Failed to load timeline for export');
       }
     } catch (error) {
       console.error('Export failed:', error);
-      showToast('Export failed. Please try again.', 'error');
+      showError('Export failed. Please try again.');
     }
   };
 
   const handleDeleteSuccess = async () => {
-    showToast('Timeline deleted successfully!', 'success');
+    showSuccess('Timeline deleted successfully!');
 
     // Refresh timeline lists
     if (firebaseUser) {
@@ -402,8 +443,8 @@ export function HomePage() {
                 ) : (
                   <button
                     onClick={() => navigate('/login')}
-                    className="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
-                    style={{ backgroundColor: '#8b5cf6', color: '#fff' }}
+                    className="pt-button px-3 py-1.5 text-sm font-medium rounded-lg"
+                    style={accentButtonStyle}
                   >
                     Sign In
                   </button>
@@ -459,10 +500,7 @@ export function HomePage() {
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 material-symbols-rounded"
-                style={{ color: 'var(--page-text-secondary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--page-text-primary)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--page-text-secondary)'}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 material-symbols-rounded pt-icon-button"
                 aria-label="Clear search"
               >
                 close
@@ -493,10 +531,8 @@ export function HomePage() {
                               handleTimelineClick(timeline);
                               clearSearch();
                             }}
-                            className="w-full text-left px-4 py-3 rounded-lg transition-colors"
-                            style={{ backgroundColor: 'transparent' }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--page-bg)'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            className="pt-button w-full text-left px-4 py-3 rounded-lg"
+                            style={searchResultButtonStyle}
                           >
                             <div className="font-medium" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</div>
                             <div className="text-sm mt-1" style={{ color: 'var(--page-text-secondary)' }}>
@@ -522,10 +558,8 @@ export function HomePage() {
                               handleUserClick(user);
                               clearSearch();
                             }}
-                            className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3"
-                            style={{ backgroundColor: 'transparent' }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--page-bg)'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            className="pt-button w-full text-left px-4 py-3 rounded-lg flex items-center gap-3"
+                            style={searchResultButtonStyle}
                           >
                             <UserAvatar user={user} size="medium" />
                             <div>
@@ -550,31 +584,29 @@ export function HomePage() {
           )}
         </div>
 
+        {error ? (
+          <div className="py-12">
+            <ErrorState
+              message="Failed to load timelines"
+              description={error.message}
+              onRetry={loadData}
+            />
+          </div>
+        ) : (
+        <>
         {/* My Timelines Section - Only show when authenticated */}
         {firebaseUser && (
         <section data-testid="my-timelines-section" className="mb-12">
           <div className="flex items-center justify-between mb-4">
             <h2 data-testid="my-timelines-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
-              My Timelines ({myTimelines.length})
+              My Timelines ({loadingTimelines ? '...' : myTimelines.length})
             </h2>
             <div className="flex items-center gap-2">
               <button
                 data-testid="import-timeline-button"
                 onClick={handleImportTimeline}
-                className="px-4 py-2 rounded-lg transition-colors font-medium border flex items-center gap-2"
-                style={{
-                  backgroundColor: 'var(--card-bg)',
-                  borderColor: 'var(--card-border)',
-                  color: 'var(--page-text-primary)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#8b5cf6';
-                  e.currentTarget.style.color = '#8b5cf6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--card-border)';
-                  e.currentTarget.style.color = 'var(--page-text-primary)';
-                }}
+                className="pt-button px-4 py-2 rounded-lg font-medium border flex items-center gap-2"
+                style={secondaryButtonStyle}
               >
                 <span className="material-symbols-rounded text-base">upload_file</span>
                 Import
@@ -582,25 +614,33 @@ export function HomePage() {
               <button
                 data-testid="create-timeline-button"
                 onClick={handleCreateTimeline}
-                className="px-4 py-2 text-white rounded-lg transition-colors font-medium"
-                style={{ backgroundColor: '#8b5cf6' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+                className="pt-button px-4 py-2 text-white rounded-lg font-medium"
+                style={accentButtonStyle}
               >
                 + Create New
               </button>
             </div>
           </div>
 
-          {myTimelines.length === 0 ? (
+          {loadingTimelines ? (
+            <div
+              className="grid gap-4 pr-2 pb-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-none md:grid-rows-2 md:grid-flow-col md:auto-cols-[minmax(260px,1fr)] md:overflow-x-auto md:overflow-y-hidden"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'var(--page-border) transparent'
+              }}
+            >
+              {Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonCard key={`my-timelines-skeleton-${index}`} />
+              ))}
+            </div>
+          ) : myTimelines.length === 0 ? (
             <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <p className="mb-4" style={{ color: 'var(--page-text-secondary)' }}>You haven't created any timelines yet</p>
               <button
                 onClick={handleCreateTimeline}
-                className="px-6 py-3 text-white rounded-lg transition-colors font-medium"
-                style={{ backgroundColor: '#8b5cf6' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+                className="pt-button px-6 py-3 text-white rounded-lg font-medium"
+                style={accentButtonStyle}
               >
                 + Create Your First Timeline
               </button>
@@ -616,13 +656,11 @@ export function HomePage() {
               {myTimelines.map(timeline => (
                 <div
                   key={`my-${timeline.id}`}
-                  className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                  className="timeline-card rounded-lg p-4 relative"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
                 >
                   {/* Kebab menu - always visible */}
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 z-20">
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
@@ -670,32 +708,17 @@ export function HomePage() {
           <h2 data-testid="popular-timelines-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {loadingTimelines ? (
-              // Loading skeletons
-              Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={`skeleton-popular-${index}`}
-                  className="border rounded-lg p-4"
-                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                >
-                  <Skeleton variant="text" width="70%" height={24} sx={{ bgcolor: 'var(--page-bg)' }} />
-                  <Skeleton variant="text" width="100%" sx={{ bgcolor: 'var(--page-bg)', mt: 1 }} />
-                  <Skeleton variant="text" width="80%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                  <div className="flex justify-between mt-3">
-                    <Skeleton variant="text" width="30%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                    <Skeleton variant="text" width="25%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                  </div>
-                </div>
+              Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonCard key={`skeleton-popular-${index}`} />
               ))
             ) : popular.map(timeline => (
               <div
                 key={`popular-${timeline.id}`}
-                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                className="timeline-card rounded-lg p-4 relative"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
               >
                 {/* Kebab menu */}
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 z-20">
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
@@ -775,32 +798,17 @@ export function HomePage() {
           <h2 data-testid="recently-edited-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {loadingTimelines ? (
-              // Loading skeletons
-              Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={`skeleton-recent-${index}`}
-                  className="border rounded-lg p-4"
-                  style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                >
-                  <Skeleton variant="text" width="70%" height={24} sx={{ bgcolor: 'var(--page-bg)' }} />
-                  <Skeleton variant="text" width="100%" sx={{ bgcolor: 'var(--page-bg)', mt: 1 }} />
-                  <Skeleton variant="text" width="80%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                  <div className="flex justify-between mt-3">
-                    <Skeleton variant="text" width="30%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                    <Skeleton variant="text" width="25%" sx={{ bgcolor: 'var(--page-bg)' }} />
-                  </div>
-                </div>
+              Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonCard key={`skeleton-recent-${index}`} />
               ))
             ) : recentlyEdited.map(timeline => (
               <div
                 key={`recent-${timeline.id}`}
-                className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                className="timeline-card rounded-lg p-4 relative"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
               >
                 {/* Kebab menu */}
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 z-20">
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
@@ -860,13 +868,11 @@ export function HomePage() {
               {featured.map(timeline => (
                 <div
                   key={`featured-${timeline.id}`}
-                  className="border rounded-lg p-4 hover:shadow-lg transition-all relative"
+                  className="timeline-card rounded-lg p-4 relative"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#8b5cf6'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--card-border)'}
                 >
                   {/* Kebab menu */}
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 z-20">
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
@@ -921,6 +927,8 @@ export function HomePage() {
             </div>
           </section>
         )}
+        </>
+        )}
         </main>
       </div>
 
@@ -957,17 +965,6 @@ export function HomePage() {
         onSuccess={handleDeleteSuccess}
       />
 
-      {/* Toast Notifications */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={4000}
-        onClose={hideToast}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={hideToast} severity={toast.severity} sx={{ width: '100%' }}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
       </div>
     </div>
   );

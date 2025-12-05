@@ -92,24 +92,28 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   const getButtonStyles = (item: NavigationItem) => {
     const isActive = item.id === activeItemId || item.isActive;
     const hasCustomColor = item.color && item.color.startsWith('#');
+    const accentColor = hasCustomColor ? item.color! : 'var(--page-accent)';
     return {
-      bgcolor: isActive ? 'grey.900' : undefined,
-      color: isActive ? 'common.white' : item.color || 'text.primary',
+      backgroundColor: isActive ? 'var(--nav-active-bg)' : 'transparent',
+      color: isActive ? accentColor : item.color || 'var(--page-text-secondary)',
       position: 'relative',
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-      transform: 'scale(1)',
+      boxShadow: 'none',
+      transition: 'background-color var(--pt-hover-duration) var(--pt-hover-ease), color var(--pt-hover-duration) var(--pt-hover-ease), transform var(--pt-hover-duration) var(--pt-hover-ease)',
       '&:hover': {
-        bgcolor: isActive ? 'grey.800' : hasCustomColor ? `${item.color}20` : 'grey.100',
-        transform: 'scale(1.05)',
+        backgroundColor: 'var(--nav-hover-bg)',
+        color: hasCustomColor ? accentColor : 'var(--page-accent)',
       },
       '&:focus-visible': {
         outline: '2px solid',
-        outlineColor: 'primary.main',
+        outlineColor: 'var(--page-accent)',
         outlineOffset: '2px',
         borderRadius: '8px',
       },
       '&:active': {
-        transform: 'scale(0.98)',
+        transform: 'translateY(0)',
+      },
+      '& .nav-icon': {
+        color: 'inherit',
       },
       // Active state indicator
       '&::before': isActive ? {
@@ -120,7 +124,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         transform: 'translateY(-50%)',
         width: '3px',
         height: '20px',
-        backgroundColor: 'primary.main',
+        backgroundColor: accentColor,
         borderRadius: '2px',
         opacity: 1,
         transition: 'opacity 0.3s ease',
@@ -168,34 +172,38 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             )}
 
             {/* Section items (hidden when collapsed) */}
-            {!isCollapsed && section.items.map((item, itemIndex) => (
-              <EnhancedTooltip
-                key={item.id}
-                title={item.label}
-                shortcut={item.shortcut}
-                placement="right"
-              >
-                <IconButton
-                  aria-label={item.label}
-                  size="small"
-                  onClick={item.onClick}
-                  sx={getButtonStyles(item)}
-                  className="nav-button"
-                  data-testid={`nav-${item.id}`}
-                  data-nav-index={itemIndex}
-                  data-section={section.type}
-                  tabIndex={0}
+            {!isCollapsed && section.items.map((item, itemIndex) => {
+              const isActive = item.id === activeItemId || item.isActive;
+              return (
+                <EnhancedTooltip
+                  key={item.id}
+                  title={item.label}
+                  shortcut={item.shortcut}
+                  placement="right"
                 >
-                  {typeof item.icon === 'string' ? (
-                    <span className="material-symbols-rounded nav-icon">
-                      {item.icon}
-                    </span>
-                  ) : (
-                    item.icon
-                  )}
-                </IconButton>
-              </EnhancedTooltip>
-            ))}
+                  <IconButton
+                    aria-label={item.label}
+                    size="small"
+                    onClick={item.onClick}
+                    sx={getButtonStyles(item)}
+                    className="nav-button"
+                    data-testid={`nav-${item.id}`}
+                    data-active={isActive ? 'true' : undefined}
+                    data-nav-index={itemIndex}
+                    data-section={section.type}
+                    tabIndex={0}
+                  >
+                    {typeof item.icon === 'string' ? (
+                      <span className="material-symbols-rounded nav-icon">
+                        {item.icon}
+                      </span>
+                    ) : (
+                      item.icon
+                    )}
+                  </IconButton>
+                </EnhancedTooltip>
+              );
+            })}
 
             {/* Separator between sections (not after last section) */}
             {sectionIndex < displaySections.length - 1 && (
@@ -236,10 +244,11 @@ export const ThemeToggleButton: React.FC = () => {
         type="button"
         title={getThemeTitle()}
         onClick={toggleTheme}
-        className="material-symbols-rounded rounded-md p-2 transition-all"
+        className="material-symbols-rounded rounded-md p-2 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         style={{
           color: 'var(--page-text-secondary)',
           backgroundColor: 'transparent',
+          outlineColor: 'var(--page-accent)',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = 'var(--page-accent)';

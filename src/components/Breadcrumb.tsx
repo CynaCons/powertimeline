@@ -29,15 +29,22 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
             {item.href ? (
               <Link
                 to={item.href}
-                className="transition-colors hover:underline"
-                style={{ color: 'var(--page-text-secondary)' }}
+                className="transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded-sm"
+                style={{
+                  color: 'var(--page-text-secondary)',
+                  outlineColor: 'var(--page-accent)'
+                }}
                 onMouseEnter={(e) => e.currentTarget.style.color = 'var(--page-accent)'}
                 onMouseLeave={(e) => e.currentTarget.style.color = 'var(--page-text-secondary)'}
               >
                 {item.label}
               </Link>
             ) : (
-              <span className="font-medium" style={{ color: 'var(--page-text-primary)' }}>
+              <span
+                className="font-medium"
+                style={{ color: 'var(--page-text-primary)' }}
+                aria-current="page"
+              >
                 {item.label}
               </span>
             )}

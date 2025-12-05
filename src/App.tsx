@@ -31,6 +31,7 @@ import { useTimelineZoom } from './app/hooks/useTimelineZoom';
 import { useTimelineSelection } from './app/hooks/useTimelineSelection';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePerformanceMonitoring } from './app/hooks/usePerformanceMonitoring';
+import { ErrorState } from './components/ErrorState';
 
 const DEV_FLAG_KEY = 'powertimeline-dev';
 
@@ -93,6 +94,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [streamViewerOpen, setStreamViewerOpen] = useState(initialStreamViewOpen);
+  const [loadError, setLoadError] = useState<Error | null>(null);
 
   // Respond to external trigger to open stream view (e.g., from MobileNotice)
   useEffect(() => {
@@ -116,8 +118,9 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
   const [currentTimeline, setCurrentTimeline] = useState<Timeline | null>(null);
 
   // Reload events when timelineId changes
-  useEffect(() => {
-    async function loadTimelineEvents() {
+  const loadTimelineEvents = useCallback(async () => {
+    try {
+      setLoadError(null);
       if (timelineId) {
         const timeline = await getTimeline(timelineId);
         if (timeline) {
@@ -147,10 +150,17 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
+    } catch (error) {
+      console.error('Failed to load timeline:', error);
+      setLoadError(error instanceof Error ? error : new Error('Failed to load timeline'));
+      setEvents([]);
+      setCurrentTimeline(null);
     }
-
-    loadTimelineEvents();
   }, [timelineId]);
+
+  useEffect(() => {
+    loadTimelineEvents();
+  }, [loadTimelineEvents]);
 
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
   const selected = useMemo(
@@ -632,7 +642,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
         </aside>
 
         {/* Overlays next to the sidebar, never covering it */}
-        {overlay && (
+        {overlay && !loadError && (
           <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]">
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
             {overlay === 'events' && (
@@ -700,7 +710,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
         )}
 
         {/* Timeline minimap positioned fixed to ensure proper z-index layering above overlays */}
-        {events.length > 0 && (
+        {!loadError && events.length > 0 && (
           <div className={`fixed top-1 left-20 right-4 pointer-events-auto ${streamViewerOpen ? 'z-[1400]' : 'z-[90]'}`}>
             <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
               <TimelineMinimap
@@ -717,58 +727,66 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
 
         {/* Main timeline area shifts right to avoid sidebar overlap */}
         <div className="absolute inset-0 ml-14">
-          {/* Timeline takes full available space */}
-          <div
-            className="w-full h-full relative"
-            onMouseDown={handleTimelineMouseDownWithSelection}
-            style={{ cursor: timelineSelection?.isSelecting ? 'crosshair' : 'default' }}
-          >
-            <ErrorBoundary>
-              <DeterministicLayoutComponent
-                events={events}
-                showInfoPanels={showInfoPanels}
-                viewStart={viewStart}
-                viewEnd={viewEnd}
-                hoveredEventId={hoveredEventId}
-                onCardDoubleClick={isReadOnly ? undefined : (id) => { setSelectedId(id); setOverlay('editor'); }}
-                onCardMouseEnter={(id) => setHoveredEventId(id)}
-                onCardMouseLeave={() => setHoveredEventId(undefined)}
-                selectedEventId={selectedId}
-                onEventSelect={setSelectedId}
+          {loadError ? (
+            <div className="w-full h-full flex items-center justify-center px-4">
+              <ErrorState
+                message="Failed to load timeline"
+                description={loadError.message}
+                onRetry={loadTimelineEvents}
               />
-            </ErrorBoundary>
+            </div>
+          ) : (
+            <div
+              className="w-full h-full relative"
+              onMouseDown={handleTimelineMouseDownWithSelection}
+              style={{ cursor: timelineSelection?.isSelecting ? 'crosshair' : 'default' }}
+            >
+              <ErrorBoundary>
+                <DeterministicLayoutComponent
+                  events={events}
+                  showInfoPanels={showInfoPanels}
+                  viewStart={viewStart}
+                  viewEnd={viewEnd}
+                  hoveredEventId={hoveredEventId}
+                  onCardDoubleClick={isReadOnly ? undefined : (id) => { setSelectedId(id); setOverlay('editor'); }}
+                  onCardMouseEnter={(id) => setHoveredEventId(id)}
+                  onCardMouseLeave={() => setHoveredEventId(undefined)}
+                  selectedEventId={selectedId}
+                  onEventSelect={setSelectedId}
+                />
+              </ErrorBoundary>
 
-            {/* Timeline selection overlay */}
-            {timelineSelection?.isSelecting && (
-              <div
-                className="absolute pointer-events-none z-30 transition-all duration-75 ease-out"
-                style={{
-                  left: Math.min(timelineSelection.startX, timelineSelection.currentX),
-                  top: 0,
-                  width: Math.abs(timelineSelection.currentX - timelineSelection.startX),
-                  height: '100%',
-                  background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)',
-                  border: '2px solid rgb(59, 130, 246)',
-                  borderRadius: '4px',
-                  boxShadow: '0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.1)'
-                }}
-              >
-                {/* Left edge indicator */}
+              {/* Timeline selection overlay */}
+              {timelineSelection?.isSelecting && (
                 <div
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-lg"
-                  style={{ marginLeft: '-1px' }}
-                />
-                {/* Right edge indicator */}
-                <div
-                  className="absolute right-0 top-0 bottom-0 w-1 bg-blue-500 shadow-lg"
-                  style={{ marginRight: '-1px' }}
-                />
-                {/* Selection info overlay */}
-                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-lg font-mono">
-                  Select to Zoom
+                  className="absolute pointer-events-none z-30 transition-all duration-75 ease-out"
+                  style={{
+                    left: Math.min(timelineSelection.startX, timelineSelection.currentX),
+                    top: 0,
+                    width: Math.abs(timelineSelection.currentX - timelineSelection.startX),
+                    height: '100%',
+                    background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)',
+                    border: '2px solid rgb(59, 130, 246)',
+                    borderRadius: '4px',
+                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.1)'
+                  }}
+                >
+                  {/* Left edge indicator */}
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-lg"
+                    style={{ marginLeft: '-1px' }}
+                  />
+                  {/* Right edge indicator */}
+                  <div
+                    className="absolute right-0 top-0 bottom-0 w-1 bg-blue-500 shadow-lg"
+                    style={{ marginRight: '-1px' }}
+                  />
+                  {/* Selection info overlay */}
+                  <div className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-lg font-mono">
+                    Select to Zoom
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
               {/* Icon-based control bar */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
@@ -782,7 +800,8 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
                   <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }}><FitScreenIcon fontSize="small" /></IconButton></Tooltip>
                 </div>
               </div>
-          </div>
+            </div>
+          )}
         </div>
 
 

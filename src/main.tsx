@@ -18,6 +18,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { createAppTheme } from './styles/theme'
 import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 // DEPRECATED (v0.5.6): localStorage initialization disabled
@@ -110,7 +111,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ChronoThemeProvider>
       <AuthProvider>
-        <AppWithTheme />
+        <ToastProvider>
+          <AppWithTheme />
+        </ToastProvider>
       </AuthProvider>
     </ChronoThemeProvider>
   </StrictMode>,
