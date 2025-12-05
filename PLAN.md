@@ -1051,7 +1051,7 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 - [ ] **Security Documentation:** Add explicit documentation to `powerspawn/spawner.py` explaining `bypass_sandbox=True` design decision
 - [ ] **Global Namespace Cleanup:** Refactor `window.__ccTelemetry` and `window.debugTimelineScales` to use `window.PowerTimeline` namespace or strip in production
 - [ ] **Logging Cleanup:** Remove paranoid `if (console)` checks in `LayoutEngine.ts`
-- [ ] **Dead Code Removal:** Remove commented-out legacy code in `DeterministicLayoutComponent.tsx`
+- [x] **Dead Code Removal:** Remove commented-out legacy code in `DeterministicLayoutComponent.tsx`
 - [ ] **Test Debt:** Fix or remove skipped tests in `tests/editor/09-seeding-scenarios.spec.ts`
 
 **From v0.5.15.1 (Deferred):**
@@ -1156,6 +1156,7 @@ def skip_e2e():
 **Goal:** Enhance visual feedback and error handling for a professional-grade experience
 **Status:** Planned
 
+- [ ] **Timeline Card Menu:** Fix non-functional hamburger menu on homepage timeline cards
 - [ ] **Visual Feedback:** Implement loading skeletons for Dashboard, Timeline List, and Editor
 - [ ] **Micro-interactions:** Add hover states and transitions to all interactive elements (cards, buttons, nav items)
 - [ ] **Error Recovery:** Replace hard redirects with graceful "Retry" UI for timeline loading failures

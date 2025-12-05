@@ -128,7 +128,7 @@ export class DeterministicLayoutV5 {
     this.metricsCalculator = new MetricsCalculator();
 
     // Enable debug logging based on configuration
-    if (config.debugLayout && typeof console !== 'undefined' && console.warn) {
+    if (config.debugLayout) {
       console.warn('Layout debugging enabled. Turn off via config.debugLayout = false to reduce console output.');
     }
   }
@@ -137,7 +137,7 @@ export class DeterministicLayoutV5 {
    * Debug logging helper (conditionally enabled)
    */
   private dlog(...args: unknown[]) {
-    if (this.config.debugLayout && typeof console !== 'undefined' && console.log) {
+    if (this.config.debugLayout) {
       console.log('[LayoutEngine]', ...args);
     }
   }

@@ -591,8 +591,6 @@ export function DeterministicLayoutComponent({
       className="absolute inset-0 overflow-hidden"
       style={{ backgroundColor: 'var(--color-background)' }}
     >
-      {/* Column Borders removed - was a development visualization feature */}
-      
       {/* Enhanced Timeline Axis with multi-level labels and visual improvements */}
       {events.length > 0 && timelineRange && finalTicks && finalTicks.length > 0 && (
         <EnhancedTimelineAxis
@@ -653,7 +651,6 @@ export function DeterministicLayoutComponent({
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
         
         // Determine if anchor's events are above or below timeline
-        // const timelineY = config?.timelineY ?? viewportSize.height / 2;
         const anchorCards = layoutResult.positionedCards.filter(card => {
           const cardEventIds = [card.event.id];
           return cardEventIds.some(id => anchor.eventIds?.includes(id));
@@ -689,12 +686,6 @@ export function DeterministicLayoutComponent({
               };
         anchorVisualStyle.borderRadius = '1px';
 
-        // Determine connector direction based on card positions
-        // const hasCardsAbove = anchorCards.some(card => card.y < timelineY);
-        // const hasCardsBelow = anchorCards.some(card => card.y >= timelineY);
-        // const connectsUp = hasCardsAbove;
-        // const connectsDown = hasCardsBelow;
-        
         return (
           <div
             key={anchor.id}

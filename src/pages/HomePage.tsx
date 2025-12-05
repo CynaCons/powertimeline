@@ -607,7 +607,7 @@ export function HomePage() {
             </div>
           ) : (
             <div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[28rem] overflow-y-auto overflow-x-hidden pr-2"
+              className="grid gap-4 pr-2 pb-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-none md:grid-rows-2 md:grid-flow-col md:auto-cols-[minmax(260px,1fr)] md:overflow-x-auto md:overflow-y-hidden"
               style={{
                 scrollbarWidth: 'thin',
                 scrollbarColor: 'var(--page-border) transparent'

@@ -63,8 +63,7 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
     await saveViewportScreenshot(page, 'v5-rfk-1968.png');
   });
 
-  test.skip('RFK 1968 — timeline date range coverage', async ({ page }) => {
-    // Dev Panel removed in v0.5.24 - This test checked specific date formatting from Dev Panel seed data
+  test('RFK 1968 — timeline date range coverage', async ({ page }) => {
     await loadTestTimeline(page, 'timeline-rfk');
     await fitAll(page);
     
@@ -147,9 +146,8 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   expect(spread).toBeGreaterThan(1200);
   });
 
-  test.skip('Long-range — screenshot', async ({ page }) => {
-    // Dev Panel removed in v0.5.24 - "Long-range" was a Dev Panel test dataset
-    // Use Napoleon timeline instead (1769-1821, 52-year span)
+  test('Long-range — screenshot', async ({ page }) => {
+    // Use Napoleon timeline (1769-1821, 52-year span) for long-range testing
     await loadTestTimeline(page, 'napoleon-bonaparte');
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible();
     await fitAll(page);
@@ -158,19 +156,6 @@ test.describe('v5/09 Seeding scenarios and screenshots', () => {
   expect(spread).toBeGreaterThan(1200);
   });
 
-  test.skip('Clustered x1 — screenshot', async ({ page }) => {
-    // Dev Panel removed in v0.5.24 - "Clustered" was a Dev Panel seeding feature
-  });
-
-  test.skip('Clustered x2 — screenshot', async ({ page }) => {
-    // Dev Panel removed in v0.5.24 - "Clustered" was a Dev Panel seeding feature
-  });
-
-  test.skip('Clustered x3 — screenshot', async ({ page }) => {
-    // Dev Panel removed in v0.5.24 - "Clustered" was a Dev Panel seeding feature
-  });
-
-  test.skip('Clustered x5 — screenshot', async ({ page }) => {
-    // Dev Panel removed in v0.5.24 - "Clustered" was a Dev Panel seeding feature
-  });
+  // Note: "Clustered x1-x5" tests removed - they were Dev Panel-specific seeding features
+  // that are no longer applicable after Dev Panel removal in v0.5.24
 });

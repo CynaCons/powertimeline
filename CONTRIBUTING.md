@@ -127,6 +127,8 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 
 **Note:** Most editor tests (`tests/editor/`) can run without credentials by viewing public timelines. Tests that create/modify data require valid credentials.
 
+**Auto-skip behavior:** Tests that require credentials will automatically skip if `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` are not configured. You can run the test suite without setting up credentials - only public tests will execute.
+
 #### Test Categories
 
 | Directory | Requires Auth | Description |
@@ -143,10 +145,31 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 #### Running Tests
 
 ```bash
-npm test                          # All tests
+npm test                          # All tests (auto-skips tests requiring credentials if not configured)
 npx playwright test tests/home/   # Home page tests only
 npx playwright test --ui          # Interactive UI mode
 npm run test:prod                 # Production smoke tests only (no auth needed)
+```
+
+**Using credential helpers in tests:**
+
+```typescript
+import { skipIfNoCredentials, hasTestCredentials } from '../utils/timelineTestUtils';
+
+test('test requiring auth', async ({ page }, test) => {
+  // Auto-skip if credentials not configured
+  skipIfNoCredentials(test);
+
+  // Test implementation...
+});
+
+test('conditional behavior', async ({ page }) => {
+  if (hasTestCredentials()) {
+    // Test authenticated behavior
+  } else {
+    // Test public behavior
+  }
+});
 ```
 
 #### Getting Test Credentials

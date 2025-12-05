@@ -107,8 +107,8 @@
 
   /* Scrollbar styling (dark theme) */
   --scrollbar-track: #0d1117;
-  --scrollbar-thumb: #8b2635;
-  --scrollbar-thumb-hover: #a62f3f;
+  --scrollbar-thumb: #4a5568;
+  --scrollbar-thumb-hover: #718096;
 
   /* Stream Viewer (v0.5.26) */
   --stream-rail-color: #30363d;
@@ -196,4 +196,34 @@
     --cc-color-connector: ButtonText;
   }
   svg g[role="button"] rect { forced-color-adjust: auto; }
+}
+
+/* === Scrollbar Styling === */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
 }

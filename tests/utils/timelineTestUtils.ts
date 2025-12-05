@@ -194,3 +194,23 @@ export async function waitForPageReady(page: Page, delayMs: number = 500): Promi
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(delayMs);
 }
+
+/**
+ * Check if test credentials are configured
+ * @returns true if TEST_USER_EMAIL and TEST_USER_PASSWORD are set
+ */
+export function hasTestCredentials(): boolean {
+  return !!(
+    process.env.TEST_USER_EMAIL &&
+    process.env.TEST_USER_PASSWORD
+  );
+}
+
+/**
+ * Skip test if credentials are not configured
+ * Use this for tests that require authentication
+ * @param test - Playwright test object
+ */
+export function skipIfNoCredentials(test: { skip: (condition: boolean, description?: string) => void }): void {
+  test.skip(!hasTestCredentials(), 'Skipping: TEST_USER_EMAIL/PASSWORD not configured');
+}
