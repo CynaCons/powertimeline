@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-11-30
-**Version:** v0.5.15
+**Last Updated:** 2025-12-05
+**Version:** v0.5.27
 
 ---
 
@@ -34,7 +34,8 @@
 | Home Page & Discovery | 35+ | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) | 30 (86%) | 15 (43%) |
 | Timeline Creation & Management | 18 | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) | 18 (100%) | 16 (89%) |
 | Admin Panel | 25+ | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) | 25 (100%) | 13 (52%) |
-| **TOTAL** | **~155** | Multiple files | **~150 (97%)** | **~113 (73%)** |
+| Editor Import/Export | 22 | [SRS_EDITOR_IMPORT_EXPORT.md](SRS_EDITOR_IMPORT_EXPORT.md) | 22 (100%) | 0 (0%) |
+| **TOTAL** | **~177** | Multiple files | **~172 (97%)** | **~113 (64%)** |
 
 ---
 

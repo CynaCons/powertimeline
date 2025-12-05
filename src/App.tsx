@@ -13,12 +13,13 @@ import { useTheme } from './contexts/ThemeContext';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
-import type { Event } from './types';
+import type { Event, Timeline } from './types';
 import type { Command } from './components/CommandPalette';
 
 // Lazy load panels, overlays and heavy components for better bundle splitting
 const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
 const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
+const ImportExportOverlay = lazy(() => import('./app/overlays/ImportExportOverlay').then(m => ({ default: m.ImportExportOverlay })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
 const StreamViewerOverlay = lazy(() => import('./components/StreamViewerOverlay').then(m => ({ default: m.StreamViewerOverlay })));
@@ -108,6 +109,12 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
   // Use readOnly prop from EditorPage (which determines ownership via Firebase Auth)
   const isReadOnly = readOnly;
 
+  // Get current Firebase user for auth-gated features (moved up for editorItems dependency)
+  const { user: firebaseUser } = useAuth();
+
+  // Current timeline metadata (for import/export)
+  const [currentTimeline, setCurrentTimeline] = useState<Timeline | null>(null);
+
   // Reload events when timelineId changes
   useEffect(() => {
     async function loadTimelineEvents() {
@@ -116,6 +123,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
         if (timeline) {
           console.log('Loading timeline:', timeline.title, 'with', timeline.events.length, 'events');
           setEvents(timeline.events);
+          setCurrentTimeline(timeline);
           return;
         }
       }
@@ -125,6 +133,20 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
       if (stored.length > 0) {
         setEvents(stored);
       }
+      // Create a minimal timeline object for local/legacy storage
+      setCurrentTimeline({
+        id: 'local-timeline',
+        title: 'Local Timeline',
+        description: '',
+        ownerId: '',
+        visibility: 'private',
+        events: stored,
+        eventCount: stored.length,
+        viewCount: 0,
+        featured: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
     }
 
     loadTimelineEvents();
@@ -161,7 +183,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
 
   // Panels & overlays
   // Left sidebar overlays (permanent sidebar width = 56px)
-  const [overlay, setOverlay] = useState<null | 'events' | 'editor'>(null);
+  const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'import-export'>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const [outlineFilter, setOutlineFilter] = useState('');
 
@@ -373,6 +395,12 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
     setActiveNavItem(null);
   }, []);
 
+  // Import/Export overlay toggle
+  const openImportExport = useCallback(() => {
+    setOverlay(overlay === 'import-export' ? null : 'import-export');
+    setActiveNavItem('import-export');
+  }, [overlay]);
+
   // Stream View toggle
   const openStreamView = useCallback(() => {
     setStreamViewerOpen(true);
@@ -445,11 +473,22 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
       isActive: streamViewerOpen,
     });
 
-    return items;
-  }, [overlay, openEvents, openCreate, isReadOnly, openStreamView, streamViewerOpen]);
+    // Import/Export button - available to any signed-in user
+    if (firebaseUser) {
+      items.push({
+        id: 'import-export',
+        label: 'Import/Export',
+        icon: 'sync_alt',
+        shortcut: 'Alt+I',
+        onClick: openImportExport,
+        isActive: overlay === 'import-export',
+      });
+    }
 
-  // Get current user for navigation context
-  const { user: firebaseUser } = useAuth();
+    return items;
+  }, [overlay, openEvents, openCreate, isReadOnly, openStreamView, streamViewerOpen, openImportExport, firebaseUser]);
+
+  // Current user profile from Firestore (firebaseUser already declared above)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Load user profile from Firestore
@@ -530,6 +569,9 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
         break;
       case 'editor':
         setActiveNavItem('create');
+        break;
+      case 'import-export':
+        setActiveNavItem('import-export');
         break;
       default:
         setActiveNavItem(null);
@@ -634,6 +676,22 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
                     onSelectEvent={selectEvent}
                     onCreateNew={createNewEvent}
                     isOwner={isOwner}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+            {overlay === 'import-export' && currentTimeline && (
+              <ErrorBoundary>
+                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 border-r flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
+                  <ImportExportOverlay
+                    timeline={currentTimeline}
+                    events={events}
+                    dragging={dragging}
+                    onClose={() => setOverlay(null)}
+                    onImport={(importedEvents) => {
+                      setEvents(importedEvents);
+                      saveEvents(importedEvents);
+                    }}
                   />
                 </Suspense>
               </ErrorBoundary>

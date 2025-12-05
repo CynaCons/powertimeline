@@ -15,9 +15,10 @@ import type { Event, Timeline, TimelineVisibility } from '../types';
 
 /**
  * Event as represented in YAML format
- * Only includes user-editable fields (no internal IDs, timestamps, flags)
+ * Event IDs are mandatory to support external editing and change tracking
  */
 export interface YamlEvent {
+  id: string;             // Required: unique event identifier (e.g., "evt-001")
   date: string;           // Required: YYYY-MM-DD
   title: string;          // Required
   description?: string;   // Optional
@@ -125,6 +126,11 @@ export function validateYamlDocument(doc: unknown): ValidationResult {
 
       const ev = event as Record<string, unknown>;
 
+      // Required: id (mandatory for external editing and change tracking)
+      if (!ev.id || typeof ev.id !== 'string' || (ev.id as string).trim() === '') {
+        errors.push({ field: `events[${index}].id`, message: 'Event ID is required for change tracking' });
+      }
+
       // Required: date
       if (!ev.date || typeof ev.date !== 'string') {
         errors.push({ field: `events[${index}].date`, message: 'Event date is required' });
@@ -190,6 +196,7 @@ export function exportTimelineToYaml(timeline: Timeline): string {
     },
     events: timeline.events
       .map(event => ({
+        id: event.id,  // Event ID is mandatory for change tracking
         date: event.date,
         title: event.title,
         ...(event.description && { description: event.description }),
@@ -205,7 +212,8 @@ export function exportTimelineToYaml(timeline: Timeline): string {
 # Generated: ${new Date().toISOString().split('T')[0]}
 # Import this file at powertimeline.com to recreate the timeline
 #
-# Format:
+# Format (all events require an ID for change tracking):
+#   - id: Unique event identifier (required)
 #   - date: YYYY-MM-DD (required)
 #   - title: Event title (required)
 #   - description: Event description (optional)
@@ -276,18 +284,12 @@ export function parseTimelineYaml(yamlString: string): ValidationResult {
 }
 
 /**
- * Generate a unique event ID
- */
-function generateEventId(): string {
-  return `evt-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-/**
  * Convert parsed YAML to Event objects
+ * Uses IDs from YAML (mandatory) to support external editing and change tracking
  */
 export function yamlEventsToEvents(yamlEvents: YamlEvent[]): Event[] {
   return yamlEvents.map(ye => ({
-    id: generateEventId(),
+    id: ye.id,  // Use ID from YAML (mandatory field)
     date: ye.date,
     title: ye.title,
     ...(ye.description && { description: ye.description }),

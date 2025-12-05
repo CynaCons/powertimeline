@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.26.5 (Stream Viewer Visual Polish) ✅
-**Next Milestone:** v0.5.27 - Import/Export & AI-Ready Format
+**Current Version:** v0.5.27.1 (Import/Export Complete + PowerSpawn Copilot Fix) ✅
+**Next Milestone:** v0.5.28 - Test Sweep Corrective Actions
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -37,9 +37,10 @@
 - ✅ Stream Viewer: Expandable cards, search in header, wheel fix (v0.5.26.4)
 - ✅ Home Page: Reordered sections (Popular → Stats → Recent) (v0.5.26.4)
 - ✅ Stream Viewer: Visual polish, softer edges, backdrop blur (v0.5.26.5)
+- ✅ Import/Export: YAML format, ImportTimelineDialog, Export menu (v0.5.27)
 
 ### Next Up
-- **v0.5.27**: Import/Export with AI-ready YAML format
+- **v0.5.27**: Tests & documentation for Import/Export (implementation done)
 - **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
 - **v0.5.29**: Technical Debt & Codebase Hygiene (consolidated)
 - **v0.5.30**: PowerSpawn Test Suite
@@ -951,57 +952,38 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 
 ### v0.5.27 - Timeline Import/Export & AI-Ready Format
 **Goal:** Enable import/export of timelines in a simple format that AI models can generate
-**Status:** In Progress
+**Status:** Complete
 
-**Design Principles:**
-- Simple, human-readable format (YAML primary, JSON secondary)
-- AI-friendly: any LLM can generate valid timeline files from prompts
-- Validation layer to catch errors before import
-- Round-trip fidelity: export → import produces identical timeline
+**Documentation:** See [SRS_EDITOR_IMPORT_EXPORT.md](docs/SRS_EDITOR_IMPORT_EXPORT.md) for full YAML format specification and requirements.
 
-**YAML Format Specification:**
-```yaml
-# PowerTimeline Export Format v1
-version: 1
-timeline:
-  title: "French Revolution"
-  description: "Key events from 1789-1799"
-  visibility: public  # public | unlisted | private
-
-events:
-  - id: evt-001  # optional, auto-generated if missing
-    date: "1789-07-14"
-    title: "Storming of the Bastille"
-    description: "Parisian revolutionaries storm the Bastille fortress..."
-    color: "#e53935"  # optional, hex color
-
-  - date: "1789-08-26"
-    title: "Declaration of Rights of Man"
-    description: "The National Assembly adopts..."
-```
+**Key Features:**
+- YAML v1 format with mandatory event IDs for change tracking
+- Editor overlay with Import/Export tabs (NavRail button, Alt+I shortcut)
+- Merge-by-ID import: matching IDs update, new IDs add
+- File validation: type (.yaml/.yml), size (1MB max), schema validation
+- Preview before import with event list
 
 **Implementation Tasks:**
-- [ ] Define TypeScript schema for import/export format
-- [ ] Create YAML parser with validation (use `yaml` or `js-yaml` library)
-- [ ] Build JSON schema for format validation
-- [ ] Implement `exportTimeline(timelineId)` → YAML string
-- [ ] Implement `importTimeline(yaml, ownerId)` → Timeline
-- [ ] Add Export button to timeline menu (download .yaml file)
-- [ ] Add Import button to "Create Timeline" flow
-- [ ] Create import preview screen (show parsed events before saving)
-- [ ] Validation error display with line numbers
-- [ ] Handle edge cases: duplicate IDs, invalid dates, missing required fields
+- [x] Define TypeScript schema (`src/services/timelineImportExport.ts`)
+- [x] YAML parser with validation (js-yaml library)
+- [x] Export function with chronological sorting and ID preservation
+- [x] Import function with merge-by-ID behavior
+- [x] Home page: Export in TimelineCardMenu, Import button in "My Timelines"
+- [x] Editor: ImportExportOverlay in NavRail (signed-in users, Alt+I)
+- [x] Validation error display with field paths
+- [x] SRS document: `docs/SRS_EDITOR_IMPORT_EXPORT.md`
+- [x] E2E tests: `tests/editor/83-import-export-overlay.spec.ts` (T-IMEX-01 through T-IMEX-05)
+- [x] Changed visibility: signed-in users (not owner-only)
+- [x] Empty timeline handling tests
 
-**AI Integration (Prompt Engineering):**
-- [ ] Create example prompts for generating timelines
-- [ ] Document format in README for AI users
-- [ ] Consider: API endpoint for direct AI-generated timeline creation
+### v0.5.27.1 - PowerSpawn Copilot CLI Fix
+**Goal:** Fix Copilot/Gemini agent spawning
+**Status:** Complete
 
-**Tests:**
-- [ ] Unit tests for YAML parsing and validation
-- [ ] Round-trip tests (export → import → export = identical)
-- [ ] Invalid format rejection tests
-- [ ] E2E: Import timeline via UI
+- [x] Fixed Copilot CLI invocation: changed from stdin to `-p` flag for prompts
+- [x] Verified all 3 models work: Claude, Codex, Gemini (via Copilot)
+- [x] Updated `powerspawn/MCP_DESIGN.md` to v1.4 with spawn_copilot documentation
+- [x] Updated `powerspawn/spawner.py` with correct `-p` flag usage
 
 ### v0.5.28 - Test Sweep Corrective Actions
 **Goal:** Address test failures discovered during Dev Panel removal sweep
@@ -1034,6 +1016,43 @@ events:
 **Goal:** Consolidate deferred technical debt items from v0.5.15-v0.5.25
 **Status:** Planned
 
+**Version Synchronization Script:**
+- [ ] Create `scripts/sync-version.js` Node.js script to update version across all files
+  - Update `package.json` version field
+  - Update `PLAN.md` Quick Summary version
+  - Update `docs/SRS_INDEX.md` version header
+  - Update `AGENTS.md` version reference
+  - Accept version as CLI argument: `node scripts/sync-version.js 0.5.29`
+- [ ] Add npm script: `"version:sync": "node scripts/sync-version.js"`
+
+**Root Directory Cleanup:**
+- [ ] Delete Playwright test artifacts from root:
+  - `editor-31-60.json` (704KB)
+  - `home-playwright.json` (420KB)
+  - `playwright-run.json` (591KB)
+  - `playwright-run.log` (306KB)
+  - `test-run.json` (424KB)
+  - `test-run-summary.json` (31KB)
+  - `tmp-playwright-report.json` (139KB)
+- [ ] Move or delete branding assets from root:
+  - `PowerTimeline_banner.png` (5.6MB) → already in `public/`?
+  - `PowerTimeline_logo.png` (5.8MB) → already in `public/`?
+- [ ] Update `.gitignore` to prevent future Playwright artifacts:
+  - Add `*.json` patterns for test outputs
+  - Add `playwright-run.log`
+  - Add `functions/package-lock.json`
+
+**Documentation Drift Fixes:**
+- [ ] Update `README.md`: Remove "Developer Panel" references (removed in v0.5.24)
+- [ ] Sync requirement counts: PLAN.md says "~155", SRS_INDEX.md says "~130"
+
+**Test Environment & CI:**
+- [ ] Add GitHub Actions secrets for test credentials:
+  - `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`, `TEST_USER_UID`
+  - Document in `.github/workflows/tests.yml`
+- [ ] Create CI workflow that runs auth-dependent tests with secrets
+- [ ] Add "skip if no credentials" logic for local contributors without secrets
+
 **From v0.5.25.1 (Codebase Hygiene):**
 - [ ] **Security Documentation:** Add explicit documentation to `powerspawn/spawner.py` explaining `bypass_sandbox=True` design decision
 - [ ] **Global Namespace Cleanup:** Refactor `window.__ccTelemetry` and `window.debugTimelineScales` to use `window.PowerTimeline` namespace or strip in production
@@ -1056,9 +1075,15 @@ events:
 
 ---
 
-### v0.5.30 - PowerSpawn Test Suite
-**Goal:** Create comprehensive tests to verify PowerSpawn MCP server functionality
+### v0.5.30 - PowerSpawn Test Suite & Copilot Fix
+**Goal:** Create comprehensive tests and fix Copilot CLI permission issues
 **Status:** Planned
+
+**Copilot CLI Permission Fix:**
+- [ ] Investigate why `--allow-tool write` doesn't grant write permissions
+- [ ] Test alternative permission flags or configurations
+- [ ] Document working permission setup for Copilot agents
+- [ ] Update spawner.py if additional flags needed
 
 **Unit Tests (powerspawn/tests/):**
 - [ ] `test_imports.py` - Verify all modules import correctly

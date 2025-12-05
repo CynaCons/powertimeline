@@ -30,6 +30,13 @@ service-account-*.json
 test-results/
 playwright-report/
 blob-report/
+playwright-run.json
+playwright-run.log
+tmp-playwright-report.json
+test-run.json
+test-run-summary.json
+home-playwright.json
+editor-*.json
 
 # Temporary artifacts
 tmp/
@@ -38,6 +45,7 @@ temp/
 # Firebase Functions build output
 functions/lib/
 functions/node_modules/
+functions/package-lock.json
 
 # Editor directories and files
 .vscode/*

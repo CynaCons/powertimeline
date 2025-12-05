@@ -160,6 +160,10 @@ mcp__agents__spawn_claude   - Spawn Claude sub-agent
 mcp__agents__spawn_codex    - Spawn Codex (GPT-5.1) sub-agent
   prompt (required)         - The task to perform
 
+mcp__agents__spawn_copilot  - Spawn Copilot sub-agent (GPT/Claude/Gemini)
+  prompt (required)         - The task to perform
+  model (optional)          - gpt-5.1 | gpt-5 | claude-sonnet | gemini (default: gpt-5.1)
+
 mcp__agents__list           - List running/completed agents
 
 mcp__agents__result         - Get agent result by ID
@@ -176,6 +180,7 @@ mcp__agents__wait_for_agents - Block until all agents complete
 | Claude (sonnet) | Feature implementation, fixes | Balanced |
 | Claude (opus) | Complex reasoning, architecture | Expensive |
 | Codex | Any task, rate limit relief | Separate quota |
+| Copilot | Any task, multi-model | GitHub subscription |
 
 ### Key Files
 - `powerspawn/mcp_server.py` - MCP server implementation
