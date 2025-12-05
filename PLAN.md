@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.29
-**Next Milestone:** v0.5.28 - Test Sweep Corrective Actions (partial completion)
+**Current Version:** v0.5.30 (PowerSpawn Test Suite Complete) ✅
+**Next Milestone:** v0.5.31 - UX Polish & Resilience
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -38,13 +38,14 @@
 - ✅ Home Page: Reordered sections (Popular → Stats → Recent) (v0.5.26.4)
 - ✅ Stream Viewer: Visual polish, softer edges, backdrop blur (v0.5.26.5)
 - ✅ Import/Export: YAML format, ImportTimelineDialog, Export menu (v0.5.27)
+- ✅ PowerSpawn Copilot CLI fix with `-p` flag (v0.5.27.1)
+- ✅ Test Sweep: Env config, anchor alignment fixes (v0.5.28)
+- ✅ Technical Debt: Version sync script, docs drift fixes (v0.5.29)
+- ✅ PowerSpawn Test Suite: 22+ pytest tests (v0.5.30)
 
 ### Next Up
-- **v0.5.27**: Tests & documentation for Import/Export (implementation done)
-- **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
-- **v0.5.29**: Technical Debt & Codebase Hygiene (consolidated)
-- **v0.5.30**: PowerSpawn Test Suite
 - **v0.5.31**: UX Polish & Resilience
+- **v0.5.32**: PowerSpawn E2E Tests & Copilot Permission Fix
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -1013,7 +1014,7 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 
 ### v0.5.29 - Technical Debt & Codebase Hygiene
 **Goal:** Consolidate deferred technical debt items from v0.5.15-v0.5.25
-**Status:** In Progress
+**Status:** Complete
 
 **Version Synchronization Script:**
 - [x] Create `scripts/sync-version.cjs` Node.js script to update version across all files
@@ -1070,7 +1071,7 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 
 ### v0.5.30 - PowerSpawn Test Suite & Copilot Fix
 **Goal:** Create comprehensive tests and fix Copilot CLI permission issues
-**Status:** Planned
+**Status:** Complete
 
 **Copilot CLI Permission Fix:**
 - [ ] Investigate why `--allow-tool write` doesn't grant write permissions
