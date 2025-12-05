@@ -1,7 +1,7 @@
 {
   "name": "powertimeline",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.5.29",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,6 +17,7 @@
     "test:screens": "playwright test tests/seeding-screenshots.spec.ts",
     "test:clustered": "playwright test tests/clustered-count.spec.ts",
     "test:degradation": "playwright test tests/degradation-flow.spec.ts",
+    "version:sync": "node scripts/sync-version.cjs",
     "prepare": "husky"
   },
   "dependencies": {

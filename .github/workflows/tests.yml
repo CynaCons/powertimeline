@@ -1,6 +1,9 @@
 name: Test Suite
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       test_suite:
@@ -111,5 +114,42 @@ jobs:
       if: always()
       with:
         name: editor-full-results
+        path: test-results/
+        retention-days: 7
+
+  auth-tests:
+    # Requires secrets: TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_USER_UID
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.TEST_USER_EMAIL != '' && secrets.TEST_USER_PASSWORD != '' && secrets.TEST_USER_UID != '' }}
+    runs-on: ubuntu-latest
+
+    env:
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      TEST_USER_UID: ${{ secrets.TEST_USER_UID }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browsers
+      run: npx playwright install chromium
+
+    - name: Run auth tests
+      run: npx playwright test tests/auth/ --reporter=list
+
+    - name: Upload auth test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: auth-test-results
         path: test-results/
         retention-days: 7

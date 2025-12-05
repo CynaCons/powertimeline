@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
 **Last Updated:** 2025-12-05
-**Version:** v0.5.27
+**Version:** v0.5.29
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| **Total Requirements** | ~130 | 100% |
+| **Total Requirements** | ~177 | 100% |
 | **Implemented** | ~85 | 65% |
 | **Verified (with tests)** | ~70 | 54% |
 | **In Progress** | ~15 | 12% |

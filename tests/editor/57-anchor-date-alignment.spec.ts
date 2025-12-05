@@ -16,7 +16,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'jfk-presidency');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Take screenshot for debugging
     await page.screenshot({ path: 'test-results/anchor-alignment-default.png' });
@@ -78,7 +78,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'napoleon-bonaparte');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Record initial anchor positions
     const anchors = page.locator('[data-testid^="anchor-event-"]');
@@ -147,7 +147,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Zoom in to see minute-level precision
     for (let i = 0; i < 10; i++) {
@@ -195,7 +195,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'jfk-presidency');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Record initial anchor positions
     const anchors = page.locator('[data-testid^="anchor-event-"]');
@@ -250,7 +250,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForTimeout(1000);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Get anchors and their positions
     const anchors = page.locator('[data-testid^="anchor-event-"]');
@@ -333,7 +333,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForTimeout(1000);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Find any French Revolution anchor that contains "necker" in the ID (case insensitive)
     const anchors = page.locator('[data-testid^="anchor-event-fr-"]');

@@ -48,7 +48,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
       console.log(`Testing anchor alignment for: ${timeline.name}`);
 
       await loadTestTimeline(page, timeline.id);
-      await page.waitForTimeout(800);
+      await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
       const timelineBox = await getTimelineAxisBounds(page);
       const anchorPositions = await getAnchorPositions(page, 3);
@@ -82,7 +82,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'rfk-1968');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Test anchor alignment at different zoom levels
     const zoomLevels = [
@@ -129,7 +129,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Perform rapid zoom in/out cycles
     for (let cycle = 0; cycle < 3; cycle++) {
@@ -178,7 +178,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
       console.log(`Testing density: ${density.name}`);
 
       await loadTestTimeline(page, density.id);
-      await page.waitForTimeout(600);
+      await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
       const timelineBox = await getTimelineAxisBounds(page);
       const anchorPositions = await getAnchorPositions(page, 5);
@@ -215,7 +215,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'rfk-1968');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Get timeline bounds and event data for coordinate calculation
     const timelineBox = await getTimelineAxisBounds(page);
@@ -259,7 +259,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'jfk-presidency');
-    await page.waitForTimeout(500);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Zoom to see timeline labels clearly
     for (let i = 0; i < 4; i++) {
@@ -321,7 +321,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
       console.log(`\n=== TESTING HOVER PRECISION FOR: ${timeline.name} ===`);
 
       await loadTestTimeline(page, timeline.id);
-      await page.waitForTimeout(1000);
+      await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
       const timelineBox = await getTimelineAxisBounds(page);
       const anchorPositions = await getAnchorPositions(page, 4);
@@ -426,7 +426,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForTimeout(1000);
+    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Test accuracy at different zoom levels
     const zoomLevels = [

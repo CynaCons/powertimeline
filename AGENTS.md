@@ -8,7 +8,7 @@ You are a sub-agent working on the PowerTimeline project.
 
 **Tech Stack:** React + TypeScript, Vite, Firebase (Auth + Firestore), Playwright tests, MUI + Tailwind CSS.
 
-**Current State:** v0.5.15 - 296 Playwright tests, 155 requirements, production at powertimeline.com
+**Current State:** v0.5.29 - 296 Playwright tests, 155 requirements, production at powertimeline.com
 
 ## Codebase Structure
 

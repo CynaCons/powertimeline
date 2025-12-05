@@ -18,7 +18,7 @@ npm run dev
 # Visit http://localhost:5173
 ```
 
-Once running, use the Developer Panel (navigation rail) to load sample datasets like the French Revolution timeline.
+Once running, you can browse public timelines or create your own. Load sample datasets like the French Revolution timeline from the Home page.
 
 ## ✨ What Can PowerTimeline Do?
 
@@ -35,7 +35,7 @@ Once running, use the Developer Panel (navigation rail) to load sample datasets 
 ## 📚 Documentation
 
 - **[Product Requirements (PRD.md)](./PRD.md)** - Product vision and user stories
-- **[Requirements Index (docs/SRS_INDEX.md)](./docs/SRS_INDEX.md)** - Complete requirements dashboard (~155 requirements)
+- **[Requirements Index (docs/SRS_INDEX.md)](./docs/SRS_INDEX.md)** - Complete requirements dashboard (~177 requirements)
 - **[Software Requirements (docs/SRS.md)](./docs/SRS.md)** - Detailed SRS with traceability
 - **[Architecture (ARCHITECTURE.md)](./ARCHITECTURE.md)** - Technical design decisions
 - **[Implementation Plan (PLAN.md)](./PLAN.md)** - Iteration history (160+ completed)
@@ -68,7 +68,7 @@ npm install
 npm run dev
 ```
 
-The app runs on <http://localhost:5173> by default. Use the navigation rail to open the Developer Panel for loading sample datasets such as the French Revolution timeline.
+The app runs on <http://localhost:5173> by default. Browse public timelines or log in to create and edit your own.
 
 ### Optional: configure Firebase analytics
 
@@ -132,9 +132,9 @@ Refer to `ARCHITECTURE.md` for a deeper dive into the half-column system and deg
 
 ## Data import & sample content
 
-- Developer tools expose buttons to load curated timelines (e.g., French Revolution, JFK).
-- Use the YAML export/import buttons in the Developer Panel to round-trip data. The schema is documented in `src/utils/yamlSerializer.ts` and `docs/SRS.md`.
-- Persistent storage defaults to `localStorage` via `EventStorage`.
+- Curated timelines like the French Revolution are available to browse and explore.
+- Use the YAML export/import buttons in the Editor to round-trip data. The schema is documented in `src/services/timelineImportExport.ts` and `docs/SRS_EDITOR_IMPORT_EXPORT.md`.
+- Timelines are persisted in Firestore (requires authentication).
 
 ## Contributing
 

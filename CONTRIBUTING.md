@@ -103,33 +103,51 @@ npm test
 
 PowerTimeline uses Playwright for E2E testing with Firebase Authentication. Some tests require valid credentials.
 
-#### Quick Setup
+#### Required Environment Variables
+
+Create a `.env.test` file in the project root with the following variables:
 
 ```bash
 # 1. Copy the example environment file
 cp .env.test.example .env.test
 
-# 2. Edit .env.test with real credentials
-#    - TEST_USER_EMAIL: A valid Firebase Auth account
-#    - TEST_USER_PASSWORD: Password for that account
-#    - TEST_USER_UID: Firebase Auth UID (find in Firebase Console)
-#    - TEST_USER_TIMELINE_ID: A timeline ID owned by this user
+# 2. Edit .env.test with real credentials:
 
-# 3. Run tests
-npm test                          # All tests
-npx playwright test tests/home/   # Home page tests only
-npx playwright test --ui          # Interactive UI mode
+# Test User Credentials (get from Firebase Console > Authentication > Users)
+TEST_USER_EMAIL=your-test-user@example.com
+TEST_USER_PASSWORD=your-test-password
+TEST_USER_UID=your-test-user-uid
+TEST_USER_TIMELINE_ID=your-test-timeline-id
+
+# Firebase Dev Project (get from Firebase Console > Project Settings)
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
 ```
+
+**Note:** Most editor tests (`tests/editor/`) can run without credentials by viewing public timelines. Tests that create/modify data require valid credentials.
 
 #### Test Categories
 
 | Directory | Requires Auth | Description |
 |-----------|---------------|-------------|
 | `tests/production/` | No | Public smoke tests (run against powertimeline.com) |
-| `tests/editor/` | Partial | Timeline editor tests |
-| `tests/home/` | Yes | Home page and discovery tests |
-| `tests/admin/` | Yes (admin role) | Admin panel tests |
-| `tests/db/` | No | Firestore schema compliance |
+| `tests/editor/` | Partial | Timeline editor tests - most read-only, some write tests need auth |
+| `tests/home/` | Yes | Home page, timeline creation, event editing tests |
+| `tests/user/` | Yes | User profile and settings tests |
+| `tests/admin/` | Yes (admin role) | Admin panel tests - requires `role: 'admin'` in Firestore |
+| `tests/auth/` | Partial | Authentication flow tests |
+| `tests/e2e/` | Yes | Full user journey tests |
+| `tests/db/` | No | Firestore schema compliance tests |
+
+#### Running Tests
+
+```bash
+npm test                          # All tests
+npx playwright test tests/home/   # Home page tests only
+npx playwright test --ui          # Interactive UI mode
+npm run test:prod                 # Production smoke tests only (no auth needed)
+```
 
 #### Getting Test Credentials
 
