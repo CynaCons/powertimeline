@@ -1045,27 +1045,27 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
   - `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`, `TEST_USER_UID`
   - Document in `.github/workflows/tests.yml`
 - [ ] Create CI workflow that runs auth-dependent tests with secrets
-- [ ] Add "skip if no credentials" logic for local contributors without secrets
+- [x] Add "skip if no credentials" logic for local contributors without secrets
 
 **From v0.5.25.1 (Codebase Hygiene):**
 - [ ] **Security Documentation:** Add explicit documentation to `powerspawn/spawner.py` explaining `bypass_sandbox=True` design decision
 - [ ] **Global Namespace Cleanup:** Refactor `window.__ccTelemetry` and `window.debugTimelineScales` to use `window.PowerTimeline` namespace or strip in production
-- [ ] **Logging Cleanup:** Remove paranoid `if (console)` checks in `LayoutEngine.ts`
+- [x] **Logging Cleanup:** Remove paranoid `if (console)` checks in `LayoutEngine.ts`
 - [x] **Dead Code Removal:** Remove commented-out legacy code in `DeterministicLayoutComponent.tsx`
-- [ ] **Test Debt:** Fix or remove skipped tests in `tests/editor/09-seeding-scenarios.spec.ts`
+- [x] **Test Debt:** Fix or remove skipped tests in `tests/editor/09-seeding-scenarios.spec.ts`
 
 **From v0.5.15.1 (Deferred):**
 - [ ] Audit and sync requirement counts across all SRS documents
 - [ ] Document or fix single-event zoom positioning edge case
 
 **From v0.5.25 Phase 4 (Copilot Testing):**
-- [ ] Test mcp_server.py with VS Code Copilot MCP settings
+- [x] Test mcp_server.py with VS Code Copilot MCP settings (works correctly)
 - [ ] Create VS Code `.vscode/mcp.json` example config
 - [ ] Test cross-model orchestration: Claude → Copilot → Codex
 
 **From v0.5.18 (UI Deferred):**
-- [ ] Fix Home page dark mode: scrollbar styling
-- [ ] Home page: My Timelines display on 2 rows instead of 1
+- [x] Fix Home page dark mode: scrollbar styling
+- [x] Home page: My Timelines display on 2 rows instead of 1
 
 ---
 
@@ -1074,10 +1074,10 @@ A scrollable vertical timeline viewer optimized for mobile. Events displayed chr
 **Status:** Complete
 
 **Copilot CLI Permission Fix:**
-- [ ] Investigate why `--allow-tool write` doesn't grant write permissions
-- [ ] Test alternative permission flags or configurations
-- [ ] Document working permission setup for Copilot agents
-- [ ] Update spawner.py if additional flags needed
+- [x] Investigate why `--allow-tool write` doesn't grant write permissions
+  - Result: Issue could not be reproduced - writes work correctly with current flags
+- [x] Test alternative permission flags or configurations (not needed)
+- [x] Document working permission setup for Copilot agents (current setup works)
 
 **Unit Tests (powerspawn/tests/):**
 - [x] `test_imports.py` - Verify all modules import correctly
@@ -1154,8 +1154,15 @@ def skip_e2e():
 
 ### v0.5.31 - UX Polish & Resilience
 **Goal:** Enhance visual feedback and error handling for a professional-grade experience
-**Status:** Planned
+**Status:** In Progress
 
+**Completed (via multi-agent coordination):**
+- [x] **Dark Mode Scrollbar:** Fixed scrollbar styling for dark theme (tokens.css)
+- [x] **My Timelines Layout:** Now displays in 2 rows on desktop (HomePage.tsx)
+- [x] **Code Cleanup:** Removed `if(console)` checks, dead code in layout components
+- [x] **Test Infrastructure:** Added `skipIfNoCredentials()` helper, fixed skipped tests
+
+**Remaining:**
 - [ ] **Timeline Card Menu:** Fix non-functional hamburger menu on homepage timeline cards
 - [ ] **Visual Feedback:** Implement loading skeletons for Dashboard, Timeline List, and Editor
 - [ ] **Micro-interactions:** Add hover states and transitions to all interactive elements (cards, buttons, nav items)
