@@ -309,6 +309,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
         height={80}
         viewBox={`0 0 ${viewportSize.width} 80`}
         style={{ overflow: 'visible' }}
+        data-tour="timeline-axis"
       >
         {/* Main timeline bar */}
         <rect

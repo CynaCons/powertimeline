@@ -33,6 +33,8 @@ import { useTimelineSelection } from './app/hooks/useTimelineSelection';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePerformanceMonitoring } from './app/hooks/usePerformanceMonitoring';
 import { ErrorState } from './components/ErrorState';
+import { TourProvider, useTour } from './components/tours/TourProvider';
+import { EditorTour } from './components/tours/EditorTour';
 
 const DEV_FLAG_KEY = 'powertimeline-dev';
 
@@ -43,11 +45,13 @@ interface AppProps {
   onStreamViewChange?: (isOpen: boolean) => void;  // Callback when stream view opens/closes
 }
 
-function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onStreamViewChange }: AppProps = {}) {
+// Inner component that uses tour context
+function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = false, onStreamViewChange }: AppProps = {}) {
   // Ownership is inverse of readOnly (readOnly = false means user owns the timeline)
   const isOwner = !readOnly;
   usePerformanceMonitoring();
   const navigate = useNavigate();
+  const { startTour } = useTour();
 
   // Storage
   const storageRef = useRef(new EventStorage());
@@ -499,6 +503,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
         shortcut: 'Alt+C',
         onClick: openCreate,
         color: 'primary.main',
+        'data-tour': 'add-event',
       });
     }
 
@@ -522,6 +527,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
       shortcut: 'Alt+S',
       onClick: openStreamView,
       isActive: streamViewerOpen,
+      'data-tour': 'stream-view',
     });
 
     // Import/Export button - available to any signed-in user
@@ -555,8 +561,13 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
     loadUser();
   }, [firebaseUser]);
 
+  // Help handler - starts the editor tour
+  const handleHelpClick = useCallback(() => {
+    startTour('editor-tour');
+  }, [startTour]);
+
   // Get context-aware navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser);
+  const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser, handleHelpClick);
 
   // Command palette commands
   const commands: Command[] = useMemo(() => [
@@ -630,9 +641,11 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
   }, [overlay]);
 
   return (
-    <div className="min-h-screen transition-theme" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
-      {/* Full-bleed canvas area - no header, maximum space */}
-      <div className="relative h-screen">
+    <>
+      <EditorTour />
+      <div className="min-h-screen transition-theme" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
+        {/* Full-bleed canvas area - no header, maximum space */}
+        <div className="relative h-screen">
         {/* Enhanced Navigation Rail - Always visible */}
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r z-30 flex flex-col items-center py-2" style={{ borderColor: 'var(--color-border-primary)', backgroundColor: 'var(--color-surface-elevated)' }}>
           {/* PowerTimeline logo at top - clickable to go home */}
@@ -757,7 +770,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
 
         {/* Timeline minimap positioned fixed to ensure proper z-index layering above overlays */}
         {!loadError && events.length > 0 && (
-          <div className={`fixed top-1 left-20 right-4 pointer-events-auto ${streamViewerOpen ? 'z-[1400]' : 'z-[90]'}`}>
+          <div className={`fixed top-1 left-20 right-4 pointer-events-auto ${streamViewerOpen ? 'z-[1400]' : 'z-[90]'}`} data-tour="minimap">
             <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
               <TimelineMinimap
                 events={events}
@@ -835,7 +848,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
               )}
 
               {/* Icon-based control bar */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95">
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95" data-tour="zoom-controls">
                 <div className="backdrop-blur-sm border rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)', opacity: 0.95 }}>
                   <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)}><span className="material-symbols-rounded">chevron_left</span></IconButton></Tooltip>
                   <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)}><span className="material-symbols-rounded">chevron_right</span></IconButton></Tooltip>
@@ -881,11 +894,20 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
 
         {/* Live region for announcements */}
         {renderLiveRegion()}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
+// Wrapper component that provides TourProvider
+function App(props: AppProps) {
+  return (
+    <TourProvider>
+      <AppContent {...props} />
+    </TourProvider>
+  );
+}
 
 export default App;
 

@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.37 (Timeline Visual Polish) ✅
-**Next Milestone:** v0.5.38 - User Onboarding Experience
+**Current Version:** v0.5.38 (User Onboarding Experience) ✅
+**Next Milestone:** v0.6.x - Social & Sharing
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -50,9 +50,9 @@
 - ✅ Dashed Connector Line Fix: Fixed SVG width (1px → 10px), replaced CSS vars with hex colors (v0.5.36.2)
 - ✅ Timeline Axis Visual Redesign: 20% thinner axis (3px), removed dashed lines, triangle anchors (v0.5.37)
 - ✅ Timeline Visual Polish: Reverted anchor shape to diamond/milestone (rotated square) with rounded edges (v0.5.37)
+- ✅ User Onboarding: Empty State CTA, React Joyride tours (Editor 8-step, Home 5-step), NavRail Help button (v0.5.38)
 
 ### Next Up
-- **v0.5.38**: User Onboarding Experience
 - **v0.6.x**: Social & Sharing (share links, follows, discovery)
 
 ### Test Status

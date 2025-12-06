@@ -772,11 +772,12 @@ export function DeterministicLayoutComponent({
       ))}
       
       {/* Cards */}
-      {layoutResult.positionedCards.map(card => {
+      {layoutResult.positionedCards.map((card, cardIndex) => {
         const primaryCardEventId = card.event?.id ?? card.id;
         const isCardSelected = selectedEventId ? primaryCardEventId === selectedEventId : false;
         const isCardHovered = hoveredEventId ? primaryCardEventId === hoveredEventId : false;
         const isCardPairHovered = hoveredPairEventId ? primaryCardEventId === hoveredPairEventId : false;
+        const isFirstCard = cardIndex === 0;
 
         const cardTypeClass =
           card.cardType === 'full'
@@ -819,6 +820,7 @@ export function DeterministicLayoutComponent({
             data-event-id={primaryCardEventId}
             data-card-type={card.cardType}
             data-cluster-id={card.clusterId}
+            data-tour={isFirstCard ? 'event-card' : undefined}
             className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}

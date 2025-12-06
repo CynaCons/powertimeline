@@ -30,10 +30,13 @@ import { useToast } from '../contexts/ToastContext';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import { TourProvider, HomePageTour, useTour } from '../components/tours';
 
-export function HomePage() {
+// Inner component that uses the tour context
+function HomePageContent() {
   const navigate = useNavigate();
   const { user: firebaseUser } = useAuth();
+  const { startTour } = useTour();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]); // Cache all users for lookups
   const [myTimelines, setMyTimelines] = useState<TimelineMetadata[]>([]);
@@ -68,8 +71,13 @@ export function HomePage() {
   // Search input ref for keyboard shortcut
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Help handler - starts the home page tour
+  const handleHelpClick = useCallback(() => {
+    startTour('home-tour');
+  }, [startTour]);
+
   // Get navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
+  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser, handleHelpClick);
 
   // Loading state for timeline data
   const [loadingTimelines, setLoadingTimelines] = useState(true);
@@ -374,9 +382,9 @@ export function HomePage() {
 
   return (
     <div data-testid="browse-page" className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
-      <div className="flex">
+        <div className="flex">
       {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
+      <aside data-tour="nav-rail" className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
           onClick={() => navigate('/browse')}
@@ -590,7 +598,7 @@ export function HomePage() {
         {/* My Timelines Section - Only show when authenticated */}
         {firebaseUser && (
         <section data-testid="my-timelines-section" className="mb-12">
-          <div className="flex items-center justify-between mb-4">
+          <div data-tour="my-timelines" className="flex items-center justify-between mb-4">
             <h2 data-testid="my-timelines-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
               My Timelines ({loadingTimelines ? '...' : myTimelines.length})
             </h2>
@@ -622,21 +630,69 @@ export function HomePage() {
               ))}
             </div>
           ) : myTimelines.length === 0 ? (
-            <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <p className="mb-4" style={{ color: 'var(--page-text-secondary)' }}>You haven't created any timelines yet</p>
-              <button
-                onClick={handleCreateTimeline}
-                className="pt-button px-6 py-3 text-white rounded-lg font-medium"
-                style={accentButtonStyle}
+            <div
+              data-testid="empty-state-cta"
+              className="rounded-2xl p-12 md:p-16 text-center relative overflow-hidden"
+              style={{
+                backgroundColor: 'var(--card-bg)',
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%)',
+                border: '2px solid var(--card-border)'
+              }}
+            >
+              {/* Icon */}
+              <div className="flex justify-center mb-6">
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: 'var(--page-accent)',
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)'
+                  }}
+                >
+                  <TimelineIcon sx={{ fontSize: 40, color: '#ffffff' }} />
+                </div>
+              </div>
+
+              {/* Heading */}
+              <h3
+                className="text-2xl md:text-3xl font-bold mb-3"
+                style={{ color: 'var(--page-text-primary)' }}
               >
-                + Create Your First Timeline
-              </button>
+                Create your first timeline
+              </h3>
+
+              {/* Subheading */}
+              <p
+                className="text-base md:text-lg mb-8 max-w-md mx-auto"
+                style={{ color: 'var(--page-text-secondary)' }}
+              >
+                Start telling your story visually.
+              </p>
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  onClick={handleCreateTimeline}
+                  className="pt-button px-6 py-3 text-white rounded-lg font-medium flex items-center gap-2 w-full sm:w-auto"
+                  style={accentButtonStyle}
+                >
+                  <span className="material-symbols-rounded text-base">add</span>
+                  Create Timeline
+                </button>
+                <button
+                  onClick={() => startTour('home-tour')}
+                  className="pt-button px-6 py-3 rounded-lg font-medium border w-full sm:w-auto"
+                  style={secondaryButtonStyle}
+                >
+                  Take a Tour
+                </button>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
-              {myTimelines.map(timeline => (
+              {myTimelines.map((timeline, index) => (
                 <div
                   key={`my-${timeline.id}`}
+                  data-tour={index === 0 ? 'timeline-card' : undefined}
                   className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 >
@@ -685,7 +741,7 @@ export function HomePage() {
         )}
 
         {/* Popular Timelines Section - First for engagement */}
-        <section data-testid="popular-timelines-section" className="mb-12">
+        <section data-tour="browse-public" data-testid="popular-timelines-section" className="mb-12">
           <h2 data-testid="popular-timelines-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
             {loadingTimelines ? (
@@ -948,5 +1004,15 @@ export function HomePage() {
 
       </div>
     </div>
+  );
+}
+
+// Wrapper component that provides tour context
+export function HomePage() {
+  return (
+    <TourProvider>
+      <HomePageTour />
+      <HomePageContent />
+    </TourProvider>
   );
 }

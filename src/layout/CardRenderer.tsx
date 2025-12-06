@@ -9,6 +9,7 @@ interface CardRendererProps {
   isHovered?: boolean;
   onClick?: (card: PositionedCard) => void;
   onDoubleClick?: (card: PositionedCard) => void;
+  isFirstCard?: boolean;
 }
 
 export function CardRenderer({
@@ -16,7 +17,8 @@ export function CardRenderer({
   isSelected = false,
   isHovered = false,
   onClick,
-  onDoubleClick
+  onDoubleClick,
+  isFirstCard = false
 }: CardRendererProps) {
   // SRS_DB.md compliant - category field removed, use default gradient
   const gradientClass = getGradientClass(card.cardType);
@@ -42,6 +44,7 @@ export function CardRenderer({
       data-card-type={card.cardType}
       data-cluster-id={card.clusterId}
       data-density={card.cardType}
+      data-tour={isFirstCard ? 'event-card' : undefined}
       className={`
         absolute cursor-pointer card-hover-scale card-enter
         ${getCardTypeStyles(card.cardType)}

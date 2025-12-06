@@ -327,6 +327,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
         aria-labelledby="authoring-overlay-title"
         aria-describedby="authoring-overlay-description"
         data-testid="authoring-overlay"
+        data-tour="event-editor"
         style={{
           backgroundColor: 'var(--page-bg-elevated)',
           color: 'var(--page-text-primary)',

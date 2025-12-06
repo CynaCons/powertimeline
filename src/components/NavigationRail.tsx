@@ -11,6 +11,8 @@ export interface NavigationItem {
   onClick: () => void;
   isActive?: boolean;
   color?: string;
+  'data-tour'?: string;
+  badge?: string; // Optional badge (e.g., checkmark for completed tours)
 }
 
 export interface NavigationSection {
@@ -188,6 +190,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 data-active={isActive ? 'true' : undefined}
                 data-nav-index={itemIndex}
                 data-section={section.type}
+                data-tour={item['data-tour']}
                 tabIndex={0}
               >
                 {typeof item.icon === 'string' ? (
@@ -250,6 +253,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   data-active={isActive ? 'true' : undefined}
                   data-nav-index={itemIndex}
                   data-section="utilities"
+                  data-tour={item['data-tour']}
                   tabIndex={0}
                 >
                   {typeof item.icon === 'string' ? (

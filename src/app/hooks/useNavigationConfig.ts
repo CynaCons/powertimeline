@@ -5,7 +5,7 @@
  * Navigation Structure (v0.5.34 redesign):
  * - Global Navigation: Browse (all users), My Timelines (authenticated), Admin (admin only), Sign In (guest)
  * - Context Tools: Page-specific tools (Editor: Events toggle, Lock indicator)
- * - Utilities: Settings (bottom section, authenticated users only), Theme toggle
+ * - Utilities: Settings (bottom section, authenticated users only), Theme toggle, Help
  */
 
 import { useMemo } from 'react';
@@ -25,6 +25,8 @@ export interface NavigationItem {
   onClick: () => void;
   isActive?: boolean;
   color?: string;
+  'data-tour'?: string;
+  badge?: string; // Optional badge (e.g., checkmark for completed tours)
 }
 
 export interface NavigationSection {
@@ -62,7 +64,8 @@ function getNavigationContext(pathname: string): NavigationContext {
 export function useNavigationConfig(
   currentUserId?: string,
   editorItems?: NavigationItem[],
-  currentUser?: User | null
+  currentUser?: User | null,
+  onHelpClick?: () => void
 ): NavigationConfig {
   const location = useLocation();
   const navigate = useNavigate();
@@ -136,24 +139,42 @@ export function useNavigationConfig(
     return null;
   }, [context, editorItems]);
 
-  // Utilities section (bottom of nav rail) - Settings for authenticated users
+  // Utilities section (bottom of nav rail) - Settings and Help
   const utilitiesSection: NavigationSection | null = useMemo(() => {
     const isAuthenticated = !!firebaseUser;
-    if (!isAuthenticated) return null;
+
+    const items: NavigationItem[] = [];
+
+    // Settings - only for authenticated users
+    if (isAuthenticated) {
+      items.push({
+        id: 'settings',
+        label: 'Settings',
+        icon: 'settings',
+        onClick: () => navigate('/settings'),
+        isActive: location.pathname === '/settings',
+      });
+    }
+
+    // Help - always available, triggers context-aware tour
+    if (onHelpClick) {
+      items.push({
+        id: 'help',
+        label: 'Help',
+        icon: 'help_outline',
+        onClick: onHelpClick,
+        'data-tour': 'help-button',
+      });
+    }
+
+    // Don't show utilities section if no items
+    if (items.length === 0) return null;
 
     return {
       type: 'utilities',
-      items: [
-        {
-          id: 'settings',
-          label: 'Settings',
-          icon: 'settings',
-          onClick: () => navigate('/settings'),
-          isActive: location.pathname === '/settings',
-        },
-      ],
+      items,
     };
-  }, [firebaseUser, navigate, location.pathname]);
+  }, [firebaseUser, navigate, location.pathname, onHelpClick]);
 
   const sections = useMemo(() => {
     const result: NavigationSection[] = [globalNavigation];

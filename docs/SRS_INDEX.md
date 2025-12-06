@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-12-05
-**Version:** v0.5.29
+**Last Updated:** 2025-12-06
+**Version:** v0.5.30
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| **Total Requirements** | ~177 | 100% |
-| **Implemented** | ~85 | 65% |
-| **Verified (with tests)** | ~70 | 54% |
-| **In Progress** | ~15 | 12% |
-| **Planned (TBD)** | ~30 | 23% |
+| **Total Requirements** | ~202 | 100% |
+| **Implemented** | ~85 | 42% |
+| **Verified (with tests)** | ~70 | 35% |
+| **In Progress** | ~15 | 7% |
+| **Planned (TBD)** | ~32 | 16% |
 
 ### By Feature Area
 
@@ -35,7 +35,8 @@
 | Timeline Creation & Management | 18 | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) | 18 (100%) | 16 (89%) |
 | Admin Panel | 25+ | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) | 25 (100%) | 13 (52%) |
 | Editor Import/Export | 22 | [SRS_EDITOR_IMPORT_EXPORT.md](SRS_EDITOR_IMPORT_EXPORT.md) | 22 (100%) | 0 (0%) |
-| **TOTAL** | **~177** | Multiple files | **~172 (97%)** | **~113 (64%)** |
+| Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 0 (0%) | 0 (0%) |
+| **TOTAL** | **~202** | Multiple files | **~172 (85%)** | **~113 (56%)** |
 
 ---
 
@@ -245,6 +246,11 @@ Platform administration interface:
 | CC-REQ-EDIT-* | Timeline Editing | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) |
 | CC-REQ-DELETE-* | Timeline Deletion | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) |
 | CC-REQ-VISIBILITY-* | Visibility Controls | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) |
+| CC-REQ-ONBOARD-* | Empty State CTA | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
+| CC-REQ-TOUR-* | Guided Tour System | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
+| CC-REQ-TOUR-EDIT-* | Editor Tour | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
+| CC-REQ-TOUR-HOME-* | Home Page Tour | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
+| CC-REQ-HELP-* | NavRail Help | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
 | CC-REQ-ADMIN-* | Admin Panel | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) |
 
 ---
@@ -267,11 +273,38 @@ Platform administration interface:
 - **[SRS_HOME_PAGE.md](SRS_HOME_PAGE.md)** - Home page & discovery (35+ requirements)
 - **[SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md)** - Timeline CRUD (18 requirements)
 - **[SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md)** - Admin interface (25+ requirements)
+- **[SRS_ONBOARDING.md](SRS_ONBOARDING.md)** - Onboarding & guided tours (25 requirements)
 - **[SRS_UI_AUDIT.md](SRS_UI_AUDIT.md)** - UI requirements audit and fixes
 
 ### Design Documents
 - **[SDS_CARDS_SYSTEM.md](SDS_CARDS_SYSTEM.md)** - Software Design Specification for card system
 - **[TESTS.md](TESTS.md)** - Test status and organization
+
+---
+
+### 11. Onboarding & Guided Tours
+**Status:** 🔵 Proposed (0% implemented, 0% verified)
+**Documentation:** [SRS_ONBOARDING.md](SRS_ONBOARDING.md)
+
+User onboarding system with empty state CTAs and interactive guided tours:
+- 25 requirements covering empty state CTAs, tour system, editor/home tours, help integration
+- Tests: Planned (TBD)
+
+**Feature Areas:**
+- **Empty State CTA** (4 requirements): CC-REQ-ONBOARD-001 to 004
+- **Guided Tour System** (5 requirements): CC-REQ-TOUR-001 to 005
+- **Editor Tour** (8 requirements): CC-REQ-TOUR-EDIT-001 to 008
+- **Home Page Tour** (5 requirements): CC-REQ-TOUR-HOME-001 to 005
+- **NavRail Help Integration** (3 requirements): CC-REQ-HELP-001 to 003
+
+**Technology:**
+- React Joyride for tour implementation
+- localStorage for tour completion tracking
+- CSS variables for dark mode theming
+
+**In Progress:**
+- All 25 requirements pending implementation
+- Test coverage needed for all areas
 
 ---
 
