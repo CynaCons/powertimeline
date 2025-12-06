@@ -196,23 +196,25 @@ export function LandingPage() {
             sx={{ mb: 6 }}
           >
             <Button
-              variant="contained"
+              variant="outlined"
               size="large"
               onClick={handleBrowseTimelines}
               data-testid="cta-explore-examples"
               sx={{
-                bgcolor: '#f97316',
-                color: '#fff',
+                bgcolor: 'transparent',
+                borderColor: '#f97316',
+                border: '2px solid #f97316',
+                color: '#f97316',
                 fontSize: '1.1rem',
                 px: 5,
                 py: 1.75,
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
-                boxShadow: '0 4px 14px 0 rgba(249, 115, 22, 0.4)',
+                backdropFilter: 'blur(4px)',
                 '&:hover': {
-                  bgcolor: '#ea580c',
-                  boxShadow: '0 6px 20px 0 rgba(249, 115, 22, 0.5)',
+                  bgcolor: 'rgba(249, 115, 22, 0.15)',
+                  borderColor: '#f97316',
                 },
               }}
             >
@@ -270,7 +272,7 @@ export function LandingPage() {
       </Box>
 
       {/* The Problem Section */}
-      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.7)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
+      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.5)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -356,7 +358,7 @@ export function LandingPage() {
             <Card
               key={index}
               sx={{
-                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                bgcolor: 'rgba(13, 17, 23, 0.5)',
                 border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
@@ -381,7 +383,7 @@ export function LandingPage() {
       </Container>
 
       {/* Features Section */}
-      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.7)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
+      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.5)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -415,7 +417,7 @@ export function LandingPage() {
             <Card
               sx={{
                 flex: 1,
-                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                bgcolor: 'rgba(13, 17, 23, 0.5)',
                 border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
@@ -443,7 +445,7 @@ export function LandingPage() {
             <Card
               sx={{
                 flex: 1,
-                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                bgcolor: 'rgba(13, 17, 23, 0.5)',
                 border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
@@ -471,7 +473,7 @@ export function LandingPage() {
             <Card
               sx={{
                 flex: 1,
-                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                bgcolor: 'rgba(13, 17, 23, 0.5)',
                 border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
@@ -549,7 +551,8 @@ export function LandingPage() {
               { version: 'v0.3.x', title: 'Event Navigation & Authoring', desc: 'Event editor, minimap, interactive highlighting' },
               { version: 'v0.4.x', title: 'Home Page & Timeline Management', desc: 'Discovery feeds, CRUD operations, visibility controls' },
               { version: 'v0.5.0-5.10', title: 'Firebase Authentication & Firestore', desc: 'User accounts, cloud storage, real-time sync' },
-              { version: 'v0.5.11-5.15', title: 'Platform Polish & Admin Tools', desc: 'Dark theme, admin panel, statistics, multi-agent orchestration' },
+              { version: 'v0.5.11-5.20', title: 'Platform Polish & Admin Tools', desc: 'Dark theme, admin panel, statistics, multi-agent orchestration' },
+              { version: 'v0.5.21-5.36', title: 'UX Refinements & Branding', desc: 'Stream viewer, import/export, new branding, full-width layouts' },
             ].map((phase, index) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', position: 'relative', pl: 6 }}>
                 {/* Commit dot */}
@@ -621,7 +624,7 @@ export function LandingPage() {
                     mb: 0.5,
                   }}
                 >
-                  v0.5.16+ - Current: Landing Page & Branding
+                  v0.5.37+ - Current: User Onboarding Experience
                 </Typography>
                 <Typography
                   variant="body2"
@@ -630,17 +633,17 @@ export function LandingPage() {
                     fontSize: '0.9rem',
                   }}
                 >
-                  New logo & banner, PowerSpawn Copilot integration, search & feed improvements
+                  Empty states, timeline templates, guided tour, first-run experience
                 </Typography>
               </Box>
             </Box>
 
             {/* Upcoming phases */}
             {[
-              { version: 'v0.6.x', title: 'Git-Based Version Control & Forking', desc: 'Timeline history, fork/merge workflows, attribution' },
-              { version: 'v0.7.x', title: 'Discovery & Social Features', desc: 'Advanced search, follow users, activity feeds, recommendations' },
+              { version: 'v0.6.x', title: 'Social & Sharing', desc: 'Share links, follows, discovery, activity feeds' },
+              { version: 'v0.7.x', title: 'AI Integration', desc: 'Chat interface, timeline Q&A, auto-suggestions, fact-checking' },
               { version: 'v0.8.x', title: 'Rich Media & Archival', desc: 'Image/video uploads, link previews, web page snapshots' },
-              { version: 'v0.9.x', title: 'AI Integration', desc: 'Chat interface, timeline Q&A, auto-suggestions, fact-checking' },
+              { version: 'v0.9.x', title: 'Git-Based Version Control', desc: 'Timeline history, fork/merge workflows, attribution' },
               { version: 'v1.0.0', title: 'Full Platform Launch', desc: 'Complete collaborative knowledge platform with all core features' },
             ].map((phase, index) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', position: 'relative', pl: 6, opacity: 0.6 }}>

@@ -239,10 +239,10 @@ export function TimelineMinimap({
             style={{
               left: `${viewStart * 100}%`,
               width: `${(viewEnd - viewStart) * 100}%`,
-              background: 'rgba(209, 213, 219, 0.32)',
-              border: '1px solid rgba(148, 163, 184, 0.6)',
+              background: 'rgba(139, 92, 246, 0.15)',
+              border: '2px solid rgb(139, 92, 246)',
               borderRadius: '6px',
-              boxShadow: isHovering ? '0 0 4px rgba(148, 163, 184, 0.28)' : '0 1px 2px rgba(15, 23, 42, 0.08)',
+              boxShadow: isHovering ? '0 0 8px rgba(139, 92, 246, 0.4)' : '0 0 4px rgba(139, 92, 246, 0.2)',
               top: '-1px',
               height: 'calc(100% + 2px)',
               zIndex: 1

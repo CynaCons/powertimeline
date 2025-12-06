@@ -468,7 +468,7 @@
 - [x] FIX: Keep original card sizes but fit more cards per row on wide screens
 - [x] FIX: Statistics section cards now use fixed widths (flex-wrap) instead of stretching
 - [x] BUG FIX: "My Timelines" card size mismatch - now matches Popular/Recent sections
-- [ ] Evaluate UX: Compare current centered layout vs full-width expansion (User to decide)
+- [x] Evaluate UX: Compare current centered layout vs full-width expansion (User decided: keep wide layout)
 
 **Known Issues / Feedback:**
 - [x] BUG: Admin page dark mode not actually dark - FIXED
@@ -477,6 +477,10 @@
 - [x] BUG: Card menu (sandwich) poor contrast in dark mode - FIXED
 - [ ] DESIGN: Timeline axis & event anchors - consider git-style commits/lines (on standby)
 - [x] TRIAL: Landing page - use PowerTimeline banner as full-width background
+- [x] Landing page: Increased section/card transparency, glassmorphism orange button
+- [x] Unify logo: Replace custom logo.png with MUI TimelineIcon across NavRail/headers
+- [x] Landing page: Update Product Roadmap section to reflect v0.5.36 progress
+- [x] BUG FIX: Minimap viewport indicator poor contrast in dark mode - now purple accent
 
 ### v0.5.37 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline

@@ -13,6 +13,7 @@ import { useTheme } from './contexts/ThemeContext';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import type { Event, Timeline } from './types';
 import type { Command } from './components/CommandPalette';
 
@@ -640,11 +641,7 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
             className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
             title="Go to Home"
           >
-            <img
-              src="/assets/images/logo.png"
-              alt="PowerTimeline - Go to Home"
-              className="w-10 h-10 object-contain"
-            />
+            <TimelineIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
           </button>
 
           {/* Read-only lock icon - shown in read-only mode */}

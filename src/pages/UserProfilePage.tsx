@@ -23,6 +23,7 @@ import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../contexts/ToastContext';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
+import TimelineIcon from '@mui/icons-material/Timeline';
 
 export function UserProfilePage() {
   // Support both /@:username (preferred) and /user/:userId (legacy) routes
@@ -265,11 +266,7 @@ export function UserProfilePage() {
           className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
           title="Go to Home"
         >
-          <img
-            src="/assets/images/logo.png"
-            alt="PowerTimeline - Go to Home"
-            className="w-10 h-10 object-contain"
-          />
+          <TimelineIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
         </button>
 
         {/* Navigation sections */}
@@ -294,11 +291,7 @@ export function UserProfilePage() {
                 title="Go to Landing Page"
                 data-testid="logo-button"
               >
-                <img
-                  src="/assets/images/logo.png"
-                  alt="PowerTimeline"
-                  className="w-8 h-8 object-contain"
-                />
+                <TimelineIcon sx={{ fontSize: 24, color: '#8b5cf6' }} />
                 <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
                   PowerTimeline
                 </span>
