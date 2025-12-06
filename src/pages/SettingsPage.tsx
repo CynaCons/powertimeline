@@ -111,7 +111,7 @@ export function SettingsPage() {
     <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
       {/* Header */}
       <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
+        <div className="px-4 md:px-8 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(-1)}
@@ -135,7 +135,7 @@ export function SettingsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8">
+      <main className="px-4 md:px-8 py-8 max-w-5xl">
         <div className="space-y-6">
           {/* Profile Section */}
           <section className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>

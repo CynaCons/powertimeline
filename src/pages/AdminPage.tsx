@@ -61,9 +61,9 @@ export function AdminPage() {
   };
 
   return (
-    <div data-testid="admin-page" className="min-h-screen bg-gray-50 flex">
+    <div data-testid="admin-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
       {/* Navigation Rail */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-gray-200 bg-white z-50 flex flex-col items-center py-2">
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
           onClick={() => navigate('/browse')}
@@ -90,7 +90,7 @@ export function AdminPage() {
       <div className="flex-1 ml-14">
         {/* Header */}
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="px-4 md:px-8 py-3">
             <div className="flex items-center justify-between">
               {/* Brand: Logo + PowerTimeline BETA */}
               <div className="flex items-center gap-4">
@@ -136,8 +136,8 @@ export function AdminPage() {
         </header>
 
         {/* Tab Navigation */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-6">
+        <div className="border-b" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
+          <div className="px-4 md:px-8">
             <Tabs value={activeTab} onChange={handleTabChange} aria-label="Admin panel tabs">
               <Tab label="Users" value="users" />
               <Tab label="Statistics" value="statistics" />
@@ -147,24 +147,24 @@ export function AdminPage() {
         </div>
 
         {/* Tab Content */}
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="px-4 md:px-8 py-8">
           {activeTab === 'users' && (
             <div data-testid="admin-users-tab" className="space-y-4">
-              <h2 data-testid="user-management-heading" className="text-xl font-semibold text-gray-900">User Management</h2>
+              <h2 data-testid="user-management-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>User Management</h2>
               <UserManagementPanel />
             </div>
           )}
 
           {activeTab === 'statistics' && (
             <div data-testid="admin-statistics-tab" className="space-y-4">
-              <h2 data-testid="platform-statistics-heading" className="text-xl font-semibold text-gray-900">Platform Statistics</h2>
+              <h2 data-testid="platform-statistics-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
               <StatisticsDashboard />
             </div>
           )}
 
           {activeTab === 'activity' && (
             <div data-testid="admin-activity-tab" className="space-y-4">
-              <h2 data-testid="activity-log-heading" className="text-xl font-semibold text-gray-900">Admin Activity Log</h2>
+              <h2 data-testid="activity-log-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>Admin Activity Log</h2>
               <ActivityLogPanel />
             </div>
           )}

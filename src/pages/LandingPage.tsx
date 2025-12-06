@@ -6,7 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Typography, TextField, InputAdornment, Card, CardContent, Stack, Link } from '@mui/material';
+import { Box, Button, Container, Typography, Card, CardContent, Stack, Link } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GroupIcon from '@mui/icons-material/Group';
@@ -93,33 +93,48 @@ export function LandingPage() {
   };
 
   return (
-    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: '#0d1117', color: '#e6edf3' }}>
+    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#e6edf3', position: 'relative' }}>
+      {/* Fixed Background - stays while content scrolls */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -2,
+          backgroundImage: 'url(/assets/images/PowerTimeline_banner.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      {/* Fixed Dark Overlay */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+          background: 'linear-gradient(135deg, rgba(13, 17, 23, 0.85) 0%, rgba(22, 27, 34, 0.9) 100%)',
+        }}
+      />
+
       {/* Top Navigation */}
       <TopNavBar />
 
-      {/* Hero Section - Dark with Gradient Headline */}
+      {/* Hero Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #161b22 0%, #0d1117 100%)',
+          position: 'relative',
           pt: { xs: 10, md: 14 },
           pb: { xs: 8, md: 10 },
           textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '150%',
-            height: '100%',
-            background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }
         }}
       >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           {/* Gradient Headline */}
           <Typography
             variant="h1"
@@ -172,72 +187,6 @@ export function LandingPage() {
             Transform scattered information into shareable, explorable knowledge
             that anyone can verify and build upon.
           </Typography>
-
-          {/* Search Bar - Moved here below headline */}
-          <Container maxWidth="md" sx={{ mb: 5 }}>
-            <Card
-              elevation={0}
-              sx={{
-                bgcolor: '#161b22',
-                border: '1px solid #30363d',
-                borderRadius: 2,
-              }}
-            >
-              <CardContent sx={{ p: 2.5 }}>
-                <TextField
-                  fullWidth
-                  placeholder="Search timelines, users, or topics..."
-                  variant="outlined"
-                  data-testid="search-input"
-                  inputRef={searchInputRef}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: '#8d96a0' }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Box
-                          sx={{
-                            bgcolor: '#21262d',
-                            color: '#8d96a0',
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            fontSize: '0.75rem',
-                            fontFamily: 'monospace',
-                            border: '1px solid #30363d',
-                          }}
-                        >
-                          /
-                        </Box>
-                      </InputAdornment>
-                    ),
-                    sx: {
-                      bgcolor: '#0d1117',
-                      color: '#e6edf3',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#30363d',
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#8b5cf6',
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#8b5cf6',
-                      },
-                    },
-                  }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      const query = (e.target as HTMLInputElement).value;
-                      navigate(`/browse?search=${encodeURIComponent(query)}`);
-                    }
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </Container>
 
           {/* CTA Buttons - Explore primary (orange), Sign In secondary */}
           <Stack
@@ -293,8 +242,8 @@ export function LandingPage() {
             </Button>
           </Stack>
 
-          {/* Hero Banner */}
-          <Box
+          {/* Hero Banner - Now used as background, removing inline display */}
+          {/* <Box
             sx={{
               mt: 6,
               mx: 'auto',
@@ -316,12 +265,12 @@ export function LandingPage() {
                 borderRadius: 3,
               }}
             />
-          </Box>
+          </Box> */}
         </Container>
       </Box>
 
       {/* The Problem Section */}
-      <Box sx={{ bgcolor: '#161b22', py: 10, borderTop: '1px solid #30363d' }}>
+      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.7)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -407,9 +356,10 @@ export function LandingPage() {
             <Card
               key={index}
               sx={{
-                bgcolor: '#0d1117',
-                border: '1px solid #30363d',
+                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
+                backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   borderColor: '#8b5cf6',
@@ -431,7 +381,7 @@ export function LandingPage() {
       </Container>
 
       {/* Features Section */}
-      <Box sx={{ bgcolor: '#161b22', py: 10, borderTop: '1px solid #30363d' }}>
+      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.7)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -465,9 +415,10 @@ export function LandingPage() {
             <Card
               sx={{
                 flex: 1,
-                bgcolor: '#0d1117',
-                border: '1px solid #30363d',
+                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
+                backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   borderColor: '#8b5cf6',
@@ -492,9 +443,10 @@ export function LandingPage() {
             <Card
               sx={{
                 flex: 1,
-                bgcolor: '#0d1117',
-                border: '1px solid #30363d',
+                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
+                backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   borderColor: '#06b6d4',
@@ -519,9 +471,10 @@ export function LandingPage() {
             <Card
               sx={{
                 flex: 1,
-                bgcolor: '#0d1117',
-                border: '1px solid #30363d',
+                bgcolor: 'rgba(13, 17, 23, 0.6)',
+                border: '1px solid rgba(48, 54, 61, 0.5)',
                 borderRadius: 2,
+                backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   borderColor: '#f97316',
@@ -781,7 +734,7 @@ export function LandingPage() {
       </Container>
 
       {/* Footer - Reduced prominence */}
-      <Box sx={{ bgcolor: '#0d1117', borderTop: '1px solid #21262d', py: 6 }}>
+      <Box sx={{ bgcolor: 'rgba(13, 17, 23, 0.8)', borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)', py: 6 }}>
         <Container maxWidth="lg">
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={6} sx={{ mb: 4 }}>
             <Box sx={{ flex: 1 }}>

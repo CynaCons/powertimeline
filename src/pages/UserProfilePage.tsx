@@ -285,7 +285,7 @@ export function UserProfilePage() {
       <div className="flex-1 md:ml-14">
         {/* Header */}
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4">
+          <div className="px-4 md:px-8 py-3 md:py-4">
             <div className="flex items-center justify-between">
               {/* Brand: Logo + PowerTimeline BETA */}
               <button
@@ -329,7 +329,7 @@ export function UserProfilePage() {
 
         {/* User Profile Header */}
         <div className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-          <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+          <div className="px-4 md:px-8 py-6 md:py-8">
             {error ? (
               <div className="py-6 text-center" style={{ color: 'var(--page-text-secondary)' }}>
                 Unable to load this profile. Please try again below.
@@ -380,7 +380,7 @@ export function UserProfilePage() {
         </div>
 
         {/* User Timelines */}
-        <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <main className="px-4 md:px-8 py-6 md:py-8">
         {error ? (
           <div className="py-12">
             <ErrorState
@@ -451,7 +451,7 @@ export function UserProfilePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
             {Array.from({ length: 6 }).map((_, index) => (
               <SkeletonCard key={`user-timeline-skeleton-${index}`} />
             ))}
@@ -467,7 +467,7 @@ export function UserProfilePage() {
         ) : (
           <div
             data-testid="user-timelines-grid"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[600px] overflow-y-auto pr-2 justify-items-center sm:justify-items-start"
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--page-border) transparent'
@@ -477,7 +477,7 @@ export function UserProfilePage() {
               <div
                 key={`user-profile-${timeline.id}`}
                 data-testid={`timeline-card-${timeline.id}`}
-                className="timeline-card rounded-lg p-4 relative"
+                className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
               >
                 {/* Kebab menu - only show if current user is the owner */}

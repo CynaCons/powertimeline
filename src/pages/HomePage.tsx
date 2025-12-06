@@ -402,7 +402,7 @@ export function HomePage() {
       <div className="flex-1 md:ml-14">
         {/* Header - with mobile logo and navigation */}
         <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4">
+          <div className="px-4 md:px-8 py-3 md:py-4">
             <div className="flex items-center justify-between">
               {/* Brand: Logo + PowerTimeline BETA */}
               <div className="flex items-center gap-2">
@@ -455,7 +455,7 @@ export function HomePage() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <main className="px-4 md:px-8 py-6 md:py-8">
         {/* Search Bar */}
         <div className="mb-8 relative">
           <div className="relative">
@@ -623,13 +623,7 @@ export function HomePage() {
           </div>
 
           {loadingTimelines ? (
-            <div
-              className="grid gap-4 pr-2 pb-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-none md:grid-rows-2 md:grid-flow-col md:auto-cols-[minmax(260px,1fr)] md:overflow-x-auto md:overflow-y-hidden"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'var(--page-border) transparent'
-              }}
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
               {Array.from({ length: 6 }).map((_, index) => (
                 <SkeletonCard key={`my-timelines-skeleton-${index}`} />
               ))}
@@ -646,17 +640,11 @@ export function HomePage() {
               </button>
             </div>
           ) : (
-            <div
-              className="grid gap-4 pr-2 pb-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-none md:grid-rows-2 md:grid-flow-col md:auto-cols-[minmax(260px,1fr)] md:overflow-x-auto md:overflow-y-hidden"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'var(--page-border) transparent'
-              }}
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
               {myTimelines.map(timeline => (
                 <div
                   key={`my-${timeline.id}`}
-                  className="timeline-card rounded-lg p-4 relative"
+                  className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 >
                   {/* Kebab menu - always visible */}
@@ -706,7 +694,7 @@ export function HomePage() {
         {/* Popular Timelines Section - First for engagement */}
         <section data-testid="popular-timelines-section" className="mb-12">
           <h2 data-testid="popular-timelines-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
             {loadingTimelines ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <SkeletonCard key={`skeleton-popular-${index}`} />
@@ -714,7 +702,7 @@ export function HomePage() {
             ) : popular.map(timeline => (
               <div
                 key={`popular-${timeline.id}`}
-                className="timeline-card rounded-lg p-4 relative"
+                className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
               >
                 {/* Kebab menu */}
@@ -773,20 +761,20 @@ export function HomePage() {
         {/* Statistics Section - Second for credibility */}
         <section data-testid="platform-stats-section" className="mb-12">
           <h2 data-testid="platform-stats-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <div className="flex flex-wrap gap-4">
+            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Timelines</div>
             </div>
-            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{stats.userCount}</div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
             </div>
-            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Events</div>
             </div>
-            <div className="border rounded-lg p-4 md:p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Total Views</div>
             </div>
@@ -796,7 +784,7 @@ export function HomePage() {
         {/* Recently Edited Section - Third for freshness */}
         <section data-testid="recently-edited-section" className="mb-12">
           <h2 data-testid="recently-edited-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
             {loadingTimelines ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <SkeletonCard key={`skeleton-recent-${index}`} />
@@ -804,7 +792,7 @@ export function HomePage() {
             ) : recentlyEdited.map(timeline => (
               <div
                 key={`recent-${timeline.id}`}
-                className="timeline-card rounded-lg p-4 relative"
+                className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
               >
                 {/* Kebab menu */}
@@ -864,11 +852,11 @@ export function HomePage() {
         {featured.length > 0 && (
           <section className="mb-12">
             <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>✨ Featured</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
               {featured.map(timeline => (
                 <div
                   key={`featured-${timeline.id}`}
-                  className="timeline-card rounded-lg p-4 relative"
+                  className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 >
                   {/* Kebab menu */}

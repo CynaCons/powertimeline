@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.35 (Bug Fixes + Settings NavRail) ✅
-**Next Milestone:** v0.5.36 - Full-Width Layout Trial
+**Current Version:** v0.5.36 (Full-Width Layout Trial) ✅
+**Next Milestone:** v0.5.37 - User Onboarding Experience
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -45,9 +45,9 @@
 - ✅ UX Polish: Skeletons, Toasts, Error Recovery, Accessibility (v0.5.31)
 - ✅ Navigation Icons: Stream View hover icons, Event Editor navigation (v0.5.34)
 - ✅ Bug Fixes + Settings NavRail: Fixed event editor, added Settings to NavRail (v0.5.35)
+- ✅ Full-Width Layout Trial: HomePage, SettingsPage, UserProfilePage (v0.5.36)
 
 ### Next Up
-- **v0.5.36**: Full-Width Layout Trial
 - **v0.5.37**: User Onboarding Experience
 - **v0.6.x**: Social & Sharing (share links, follows, discovery)
 
@@ -459,9 +459,24 @@
 ### v0.5.36 - Full-Width Layout Trial
 **Goal:** Experiment with full-width page layouts
 
-- [ ] Expand Home, Settings, User pages to full horizontal width
-- [ ] Evaluate UX: Compare current centered layout vs full-width expansion
-- [ ] Revert if needed: Keep whichever layout feels better
+- [x] Expand Home, Settings, User pages to full horizontal width
+- [x] Remove max-width constraints from HomePage (header + main content)
+- [x] Remove max-width constraints from SettingsPage (header + main content, keep max-w-5xl for readability)
+- [x] Remove max-width constraints from UserProfilePage (header + profile + timelines)
+- [x] Remove max-width constraints from AdminPage (header + tabs + content)
+- [x] BUG FIX: Dark mode timeline axis "halo" effect - made container transparent
+- [x] FIX: Keep original card sizes but fit more cards per row on wide screens
+- [x] FIX: Statistics section cards now use fixed widths (flex-wrap) instead of stretching
+- [x] BUG FIX: "My Timelines" card size mismatch - now matches Popular/Recent sections
+- [ ] Evaluate UX: Compare current centered layout vs full-width expansion (User to decide)
+
+**Known Issues / Feedback:**
+- [x] BUG: Admin page dark mode not actually dark - FIXED
+- [x] Admin page wide layout applied
+- [x] My Timelines card sizing fixed to match other sections
+- [x] BUG: Card menu (sandwich) poor contrast in dark mode - FIXED
+- [ ] DESIGN: Timeline axis & event anchors - consider git-style commits/lines (on standby)
+- [x] TRIAL: Landing page - use PowerTimeline banner as full-width background
 
 ### v0.5.37 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
@@ -592,3 +607,11 @@
 - [ ] E2E tests for Stream View editing (mobile viewport)
 - [ ] E2E tests for Stream View swipe actions
 - [ ] Update test coverage tables in SRS files
+
+### Admin Panel Statistics
+**Goal:** Implement proper statistics dashboard in Admin page
+
+- [ ] Display platform-wide metrics (total users, timelines, events)
+- [ ] Activity charts (signups over time, timeline creation trends)
+- [ ] User engagement metrics
+- [ ] System health indicators
