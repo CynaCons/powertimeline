@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import type { Tick as AxisTick, TickScaleKind } from '../timeline/hooks/useAxisTicks';
 
-type VisualTickType = TickScaleKind | 'minute' | 'quarter' | 'season';
+type VisualTickType = TickScaleKind | 'minute' | 'quarter';
 
 interface Tick {
   t: number;
@@ -223,47 +223,6 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     return ticks.sort((a, b) => a.x - b.x);
   }, [timelineRange, viewportSize.width, baseTicks]);
 
-  // Generate season/quarter backgrounds
-  const seasonBackgrounds = useMemo(() => {
-    const { minDate, maxDate, dateRange } = timelineRange;
-    const spanDays = dateRange / (24 * 60 * 60 * 1000);
-
-    // Only show seasons if span is reasonable (less than 10 years)
-    if (spanDays > 365 * 10) return [];
-
-    const backgrounds: Array<{ x: number; width: number; color: string; label: string }> = [];
-    const startYear = new Date(minDate).getFullYear();
-    const endYear = new Date(maxDate).getFullYear();
-
-    for (let year = startYear; year <= endYear; year++) {
-      const seasons = [
-        { name: 'Spring', start: new Date(year, 2, 20), end: new Date(year, 5, 20), color: '#e8f5e8' },
-        { name: 'Summer', start: new Date(year, 5, 20), end: new Date(year, 8, 22), color: '#fff7e6' },
-        { name: 'Autumn', start: new Date(year, 8, 22), end: new Date(year, 11, 21), color: '#fdf2e9' },
-        { name: 'Winter', start: new Date(year, 11, 21), end: new Date(year + 1, 2, 20), color: '#f0f8ff' }
-      ];
-
-      seasons.forEach(season => {
-        const startTime = Math.max(season.start.getTime(), minDate);
-        const endTime = Math.min(season.end.getTime(), maxDate);
-
-        if (startTime < endTime) {
-          const x = ((startTime - minDate) / dateRange) * viewportSize.width;
-          const width = ((endTime - startTime) / dateRange) * viewportSize.width;
-
-          backgrounds.push({
-            x,
-            width,
-            color: season.color,
-            label: season.name
-          });
-        }
-      });
-    }
-
-    return backgrounds;
-  }, [timelineRange, viewportSize.width]);
-
   // Handle mouse interactions
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -351,29 +310,15 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
         viewBox={`0 0 ${viewportSize.width} 80`}
         style={{ overflow: 'visible' }}
       >
-        {/* Season/Quarter backgrounds */}
-        {seasonBackgrounds.map((bg, index) => (
-          <rect
-            key={`season-${index}`}
-            x={bg.x}
-            y={20}
-            width={bg.width}
-            height={40}
-            fill={bg.color}
-            opacity={0.3}
-            rx={2}
-          />
-        ))}
-
         {/* Main timeline bar */}
         <rect
           x={0}
-          y={37}
+          y={38.5}
           width={viewportSize.width}
-          height={6}
+          height={3}
           fill="var(--page-text-primary)"
           data-testid="timeline-axis"
-          rx={3}
+          rx={1.5}
         />
 
         {/* Tick marks and labels */}

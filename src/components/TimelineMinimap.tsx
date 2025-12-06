@@ -143,7 +143,7 @@ export function TimelineMinimap({
       const position = (index / (buckets.length - 1)) * 100;
       const intensity = density / maxDensity;
       const opacity = Math.max(0.1, intensity * 0.6);
-      return `rgba(33, 150, 243, ${opacity}) ${position}%`;
+      return `rgba(249, 115, 22, ${opacity}) ${position}%`;
     }).join(', ');
 
     return `linear-gradient(90deg, ${gradientStops})`;
@@ -209,7 +209,7 @@ export function TimelineMinimap({
                     ? 'w-1.5 h-3 bg-amber-400 opacity-100 border border-white shadow-lg rounded-sm'
                     : isHovered
                       ? 'w-1.5 h-2.5 bg-sky-400 opacity-100 border border-white shadow-md rounded-sm'
-                      : 'top-0 w-0.5 h-2 bg-primary-500 opacity-60 hover:opacity-100'
+                      : 'top-0 w-0.5 h-2 bg-orange-500 opacity-80 hover:opacity-100'
                 }`}
                 style={{
                   left: `${marker.position * 100}%`,

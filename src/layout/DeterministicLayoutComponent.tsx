@@ -649,7 +649,7 @@ export function DeterministicLayoutComponent({
       {filteredAnchors.map((anchor) => {
         // Check if this anchor is part of a merged badge group
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
-        
+
         // Determine if anchor's events are above or below timeline
         const anchorCards = layoutResult.positionedCards.filter(card => {
           const cardEventIds = [card.event.id];
@@ -666,6 +666,22 @@ export function DeterministicLayoutComponent({
         const isAnchorHovered = (hoveredEventId && anchorEventIds.includes(hoveredEventId)) ||
                                 (hoveredPairEventId && anchorEventIds.includes(hoveredPairEventId));
         const isAnchorSelected = selectedEventId ? anchorEventIds.includes(selectedEventId) : false;
+
+        // Calculate connector line positions
+        const timelineAxisY = config?.timelineY ?? viewportSize.height / 2;
+        const ANCHOR_GAP = 12; // Gap between anchor dot and axis line
+
+        // Determine if events are above or below (using first card as reference)
+        const isAboveAxis = anchorCards.length > 0 ? anchorCards[0].y < timelineAxisY : true;
+
+        // Position anchor dot away from axis with gap
+        const anchorCenterY = isAboveAxis
+          ? timelineAxisY - ANCHOR_GAP
+          : timelineAxisY + ANCHOR_GAP;
+
+        // Line starts from anchor dot center, extends to timeline axis
+        const lineStartY = anchorCenterY;
+        const lineEndY = timelineAxisY;
 
         const anchorVisualStyle: CSSProperties = isAnchorSelected
           ? {
@@ -684,18 +700,18 @@ export function DeterministicLayoutComponent({
                 borderColor: 'var(--color-neutral-600)',
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
               };
-        anchorVisualStyle.borderRadius = '1px';
 
         return (
           <div
             key={anchor.id}
             data-testid={anchor.id}
             className="absolute"
-            style={{ left: anchor.x - 8, top: anchor.y - 8 }}
+            style={{ left: anchor.x - 5, top: Math.min(anchorCenterY, timelineAxisY) - 5 }}
           >
             <div
               data-testid="timeline-anchor"
-              className="flex flex-col items-center cursor-pointer"
+              className="flex flex-col items-center cursor-pointer relative"
+              style={{ top: isAboveAxis ? Math.abs(lineEndY - lineStartY) - 5 - ANCHOR_GAP : ANCHOR_GAP }}
               aria-selected={isAnchorSelected}
               data-selected={isAnchorSelected || undefined}
               onMouseEnter={() => {
@@ -715,9 +731,9 @@ export function DeterministicLayoutComponent({
                 }
               }}
             >
-              {/* Dark-metallic diamond anchor icon with coherent highlighting */}
+              {/* Diamond/Milestone anchor shape */}
               <div
-                className={`w-3 h-3 border shadow-md z-20 transform rotate-45 transition-all duration-200 ${
+                className={`w-3 h-3 border-2 shadow-md z-20 transition-all duration-200 transform rotate-45 rounded-sm ${
                   isAnchorSelected ? 'scale-125' : isAnchorHovered ? 'scale-110' : ''
                 }`}
                 style={anchorVisualStyle}
@@ -725,7 +741,7 @@ export function DeterministicLayoutComponent({
 
               {/* Individual overflow badge - only show if NOT part of merged group */}
               {anchor.overflowCount > 0 && !isMerged && (
-                <div 
+                <div
                   data-testid={`overflow-badge-${anchor.id}`}
                   className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30"
                 >
@@ -744,8 +760,8 @@ export function DeterministicLayoutComponent({
           data-testid={`merged-overflow-badge-${index}`}
           className="absolute flex flex-col items-center"
           style={{
-            left: badge.x - 8,
-            top: (config?.timelineY ?? viewportSize.height / 2) - 8
+            left: badge.x - 4,
+            top: (config?.timelineY ?? viewportSize.height / 2) - 4
           }}
         >
           {/* Merged overflow badge */}

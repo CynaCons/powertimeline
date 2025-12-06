@@ -1500,23 +1500,29 @@ const Timeline: React.FC<Props> = ({
         data-testid="timeline-axis"
       />
       
-      {/* Timeline anchors - positioned ON the timeline line */}
+      {/* Timeline anchors - git-style dots positioned ON the timeline line */}
       {timeClusters.map((cluster, index) => (
         <div
           key={`anchor-${index}`}
           className="absolute"
           style={{
-            left: cluster.anchor.x - 8, // Center the 16px anchor
-            top: cluster.anchor.y - 8, // Center on timeline
+            left: cluster.anchor.x - 5, // Center the 10px dot
+            top: cluster.anchor.y - 5, // Center on timeline
             zIndex: 10
           }}
+          data-testid="timeline-anchor"
         >
-          {/* Base anchor - positioned exactly on timeline */}
-          <div className="w-4 h-4 bg-gray-800 rounded-full border-2 border-white shadow-md" />
-          
+          {/* Git-style circular dot - positioned exactly on timeline */}
+          <div
+            className="w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-blue-700 shadow-md"
+            style={{
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 0 2px white'
+            }}
+          />
+
           {/* Event count badge */}
           {cluster.events.length > 1 && (
-            <div 
+            <div
               className="absolute -top-2 -right-2 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-sm"
               style={{ fontSize: '10px' }}
             >
@@ -1619,21 +1625,30 @@ const Timeline: React.FC<Props> = ({
         />
       ))}
       
-      {/* Connector lines from anchors to cards */}
+      {/* Git-style vertical connector lines from dots to cards */}
       <svg className="absolute inset-0 pointer-events-none">
-  {positionedResolved.map((event) => (
-          <line
-            key={`connector-${event.id}`}
-            x1={event.anchorX}
-            y1={event.anchorY}
-      x2={event.x}
-      y2={event.y}
-            stroke="#9ca3af"
-            strokeWidth="1.5"
-            strokeDasharray="3,3"
-            opacity={0.5}
-          />
-        ))}
+        {positionedResolved.map((event) => {
+          // Determine if card is above or below the axis
+          const isAbove = event.y < event.anchorY;
+
+          // Calculate card edge Y position (top or bottom edge)
+          const cardEdgeY = isAbove
+            ? event.y + (event.cardHeight / 2)  // Bottom edge of card above axis
+            : event.y - (event.cardHeight / 2); // Top edge of card below axis
+
+          return (
+            <line
+              key={`connector-${event.id}`}
+              x1={event.anchorX}
+              y1={event.anchorY}
+              x2={event.anchorX}
+              y2={cardEdgeY}
+              stroke="#3b82f6"
+              strokeWidth="2"
+              opacity={0.7}
+            />
+          );
+        })}
       </svg>
     </div>
   );

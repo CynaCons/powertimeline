@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.36 (Full-Width Layout Trial) ✅
-**Next Milestone:** v0.5.37 - User Onboarding Experience
+**Current Version:** v0.5.37 (Timeline Visual Polish) ✅
+**Next Milestone:** v0.5.38 - User Onboarding Experience
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -46,9 +46,13 @@
 - ✅ Navigation Icons: Stream View hover icons, Event Editor navigation (v0.5.34)
 - ✅ Bug Fixes + Settings NavRail: Fixed event editor, added Settings to NavRail (v0.5.35)
 - ✅ Full-Width Layout Trial: HomePage, SettingsPage, UserProfilePage (v0.5.36)
+- ✅ Dark Mode Season Background Colors: Fixed timeline axis season colors for dark mode (v0.5.36.1)
+- ✅ Dashed Connector Line Fix: Fixed SVG width (1px → 10px), replaced CSS vars with hex colors (v0.5.36.2)
+- ✅ Timeline Axis Visual Redesign: 20% thinner axis (3px), removed dashed lines, triangle anchors (v0.5.37)
+- ✅ Timeline Visual Polish: Reverted anchor shape to diamond/milestone (rotated square) with rounded edges (v0.5.37)
 
 ### Next Up
-- **v0.5.37**: User Onboarding Experience
+- **v0.5.38**: User Onboarding Experience
 - **v0.6.x**: Social & Sharing (share links, follows, discovery)
 
 ### Test Status
@@ -475,14 +479,23 @@
 - [x] Admin page wide layout applied
 - [x] My Timelines card sizing fixed to match other sections
 - [x] BUG: Card menu (sandwich) poor contrast in dark mode - FIXED
-- [ ] DESIGN: Timeline axis & event anchors - consider git-style commits/lines (on standby)
+- [x] DESIGN: Timeline axis & event anchors - git-style circular dots with dashed connector lines - FIXED
 - [x] TRIAL: Landing page - use PowerTimeline banner as full-width background
 - [x] Landing page: Increased section/card transparency, glassmorphism orange button
 - [x] Unify logo: Replace custom logo.png with MUI TimelineIcon across NavRail/headers
 - [x] Landing page: Update Product Roadmap section to reflect v0.5.36 progress
 - [x] BUG FIX: Minimap viewport indicator poor contrast in dark mode - now purple accent
+- [x] BUG: Minimap events barely visible in dark mode (blue on dark) - switched to orange
 
-### v0.5.37 - User Onboarding Experience
+### v0.5.37 - Timeline Visual Polish
+**Goal:** Refine timeline anchor appearance
+
+- [x] **Anchor Shape:** Revert anchors from triangles back to diamond/milestone shape (rotated square)
+- [x] **Keep Size:** Maintain smaller size (w-2.5 h-3) from v0.5.37 changes
+- [x] **Border Radius:** Add rounded-sm for softer edges
+- [x] **Remove clip-path:** Simplify CSS with transform rotate-45deg
+
+### v0.5.38 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
 
 - [ ] **Empty States:** Actionable empty states for "My Timelines" with prompts
