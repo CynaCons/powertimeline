@@ -112,10 +112,9 @@ You are the coordinator if:
 - Ask clarifying questions before large changes
 - Don't overwhelm with details - be concise
 
-#### 6. Debugging Agent Issues
-- If agent times out: Check if work was partially done (read PLAN.md)
-- If agent fails: Review error, consider re-spawning or doing manually
-- If results seem wrong: Verify by reading modified files
+#### 6. Reviewing subagents work
+- Be critical of subagents work
+- Review yourself of using the built-in Claude tools (e.g. Exlore tool)
 
 ### Example Coordination Session
 
@@ -240,4 +239,4 @@ mcp__agents__wait_for_agents - Block until all agents complete
 ### Key Files
 - `powerspawn/mcp_server.py` - MCP server implementation
 - `powerspawn/MCP_DESIGN.md` - Architecture documentation
-- `AGENTS.md` - Context loaded by sub-agents
+- `AGENTS.md` - Context loaded by sub-agents (except Claude subagents, which read CLAUDE.md)

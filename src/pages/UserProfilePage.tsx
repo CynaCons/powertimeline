@@ -97,8 +97,10 @@ export function UserProfilePage() {
 
       setUser(userData);
 
+      const isOwner = firebaseUser?.uid === userData.id;
       const userTimelines = await getTimelines({
         ownerId: userData.id,
+        ...(isOwner ? {} : { visibility: 'public' }),
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -123,11 +125,13 @@ export function UserProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, userId, username]);
+  }, [firebaseUser, navigate, userId, username]);
 
   useEffect(() => {
     loadUserProfile();
   }, [loadUserProfile]);
+
+  const isViewingOwnProfile = firebaseUser?.uid === user?.id;
 
   const handleTimelineClick = (timeline: TimelineMetadata) => {
     // v0.5.14: Use username-based URL (no @ prefix - React Router v7 bug)
@@ -185,6 +189,7 @@ export function UserProfilePage() {
     if (user) {
       const userTimelines = await getTimelines({
         ownerId: user.id,
+        ...(isViewingOwnProfile ? {} : { visibility: 'public' }),
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -219,6 +224,7 @@ export function UserProfilePage() {
     if (user) {
       const userTimelines = await getTimelines({
         ownerId: user.id,
+        ...(isViewingOwnProfile ? {} : { visibility: 'public' }),
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -241,6 +247,7 @@ export function UserProfilePage() {
     if (user) {
       const userTimelines = await getTimelines({
         ownerId: user.id,
+        ...(isViewingOwnProfile ? {} : { visibility: 'public' }),
         orderByField: 'updatedAt',
         orderDirection: 'desc',
       });
@@ -451,7 +458,11 @@ export function UserProfilePage() {
           </div>
         ) : timelines.length === 0 ? (
           <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-            <p style={{ color: 'var(--page-text-secondary)' }}>@{user?.username || 'User'} hasn't created any timelines yet</p>
+            <p style={{ color: 'var(--page-text-secondary)' }}>
+              {isViewingOwnProfile
+                ? `@${user?.username || 'User'} hasn't created any timelines yet`
+                : `@${user?.username || 'User'} hasn't published any public timelines yet`}
+            </p>
           </div>
         ) : (
           <div
