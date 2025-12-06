@@ -28,6 +28,10 @@ interface StreamViewerProps {
   onDelete?: (eventId: string) => void;
   /** Whether the current user owns the timeline (enables swipe actions) */
   isOwner?: boolean;
+  /** Called when user clicks "view on canvas" icon (desktop hover action) */
+  onViewOnCanvas?: (event: Event) => void;
+  /** Called when user clicks "edit in editor" icon (desktop hover action) */
+  onEditInEditor?: (event: Event) => void;
 }
 
 /**
@@ -88,6 +92,8 @@ function StreamEventCard({
   onTouchEnd,
   onDelete,
   onEdit,
+  onViewOnCanvas,
+  onEditInEditor,
 }: {
   event: Event;
   index: number;
@@ -105,6 +111,8 @@ function StreamEventCard({
   onTouchEnd: () => void;
   onDelete?: (eventId: string) => void;
   onEdit?: (event: Event) => void;
+  onViewOnCanvas?: (event: Event) => void;
+  onEditInEditor?: (event: Event) => void;
 }) {
   const { line1, line2 } = formatEventDate(event.date);
   const dotColor = getEventColor(event, index);
@@ -246,10 +254,106 @@ function StreamEventCard({
               borderColor: 'var(--stream-dot-color)',
               transform: 'translateY(-1px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              // Show hover icons
+              '& .stream-hover-icons': {
+                opacity: 1,
+                pointerEvents: 'auto',
+              },
             },
           },
         }}
       >
+        {/* Desktop hover icons - top-right boundary */}
+        <Box
+          className="stream-hover-icons"
+          sx={{
+            position: 'absolute',
+            top: -12,
+            right: -8,
+            display: 'flex',
+            gap: 0.5,
+            opacity: 0,
+            pointerEvents: 'none',
+            transition: 'opacity 0.15s ease',
+            zIndex: 10,
+            // Hide on mobile (touch devices)
+            '@media (hover: none)': {
+              display: 'none',
+            },
+          }}
+        >
+          {/* View on canvas (eye) icon */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewOnCanvas?.(event);
+            }}
+            title="View on canvas"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              border: '1px solid var(--stream-border)',
+              background: 'var(--stream-bg)',
+              color: 'var(--stream-text-secondary)',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--stream-dot-color)';
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.borderColor = 'var(--stream-dot-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--stream-bg)';
+              e.currentTarget.style.color = 'var(--stream-text-secondary)';
+              e.currentTarget.style.borderColor = 'var(--stream-border)';
+            }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: 16 }}>visibility</span>
+          </button>
+          {/* Edit in editor icon */}
+          {isOwner && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditInEditor?.(event);
+              }}
+              title="Edit event"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                border: '1px solid var(--stream-border)',
+                background: 'var(--stream-bg)',
+                color: 'var(--stream-text-secondary)',
+                cursor: 'pointer',
+                padding: 0,
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--stream-dot-color)';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.borderColor = 'var(--stream-dot-color)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--stream-bg)';
+                e.currentTarget.style.color = 'var(--stream-text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--stream-border)';
+              }}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 16 }}>edit</span>
+            </button>
+          )}
+        </Box>
+
         {isOwner && isSwiped && swipeDirection === 'left' && (
           <button
             className="swipe-action delete"
@@ -361,6 +465,8 @@ export function StreamViewer({
   onEdit,
   onDelete,
   isOwner = false,
+  onViewOnCanvas,
+  onEditInEditor,
 }: StreamViewerProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -507,6 +613,8 @@ export function StreamViewer({
                 onTouchEnd={handleTouchEnd}
                 onDelete={onDelete}
                 onEdit={onEdit}
+                onViewOnCanvas={onViewOnCanvas}
+                onEditInEditor={onEditInEditor}
               />
             ))}
           </Stack>

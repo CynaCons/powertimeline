@@ -866,6 +866,10 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
             isOwner={isOwner}
             onEventSave={handleEventSave}
             onEventDelete={handleEventDelete}
+            onEditInEditor={(event) => {
+              setSelectedId(event.id);
+              setOverlay('editor');
+            }}
           />
         </Suspense>
 

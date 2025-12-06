@@ -36,6 +36,8 @@ interface StreamViewerOverlayProps {
   onEventSave?: (event: Event) => Promise<void>;
   /** Called when an event is deleted */
   onEventDelete?: (eventId: string) => Promise<void>;
+  /** Called when user wants to edit an event in the main editor (desktop) */
+  onEditInEditor?: (event: Event) => void;
 }
 
 export function StreamViewerOverlay({
@@ -46,6 +48,7 @@ export function StreamViewerOverlay({
   isOwner = false,
   onEventSave,
   onEventDelete,
+  onEditInEditor,
 }: StreamViewerOverlayProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -142,6 +145,18 @@ export function StreamViewerOverlay({
     setEditPanelOpen(false);
     setEditEvent(null);
   };
+
+  // Handle "view on canvas" action (eye icon) - close stream view and zoom to event
+  const handleViewOnCanvas = useCallback((event: Event) => {
+    onEventClick?.(event);
+    onClose();
+  }, [onEventClick, onClose]);
+
+  // Handle "edit in editor" action (edit icon) - close stream view and open in main editor
+  const handleEditInEditorAction = useCallback((event: Event) => {
+    onEditInEditor?.(event);
+    onClose();
+  }, [onEditInEditor, onClose]);
 
   // Scroll to selected event helper
   const scrollToEvent = useCallback((eventId: string) => {
@@ -488,6 +503,8 @@ export function StreamViewerOverlay({
             onEdit={openEditPanelForEvent}
             onDelete={handleEditDelete}
             isOwner={isOwner}
+            onViewOnCanvas={handleViewOnCanvas}
+            onEditInEditor={handleEditInEditorAction}
           />
         </Box>
       </Box>

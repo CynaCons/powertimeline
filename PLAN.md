@@ -45,10 +45,10 @@
 - ✅ UX Polish: Skeletons, Toasts, Error Recovery, Accessibility (v0.5.31)
 
 ### Next Up
-- **v0.5.34**: Settings NavRail + Full-Width Layout Trial
-- **v0.5.35**: Requirements Standardization & Traceability
-- **v0.5.36**: Test Gap Analysis & E2E Coverage
-- **v0.5.37**: User Onboarding Experience
+- **v0.5.34**: Navigation Icons (Stream ↔ Editor ↔ Canvas)
+- **v0.5.35**: Settings NavRail + Full-Width Layout Trial
+- **v0.5.36**: Requirements Standardization & Traceability
+- **v0.5.37**: Test Gap Analysis & E2E Coverage
 - **v0.6.x**: Social & Sharing (share links, follows, discovery)
 
 ### Test Status
@@ -431,7 +431,20 @@
 - [ ] E2E tests for stream view editing
 - [ ] Mobile viewport tests
 
-### v0.5.34 - Settings NavRail + Full-Width Layout Trial
+### v0.5.34 - Navigation Icons (Stream ↔ Editor ↔ Canvas)
+**Goal:** Add explicit navigation icons for quick switching between views
+
+**Stream View (hover on event card):**
+- [ ] Show icons only on hovered event card (upper-right boundary)
+- [ ] Eye icon: Close stream view, zoom to event on canvas
+- [ ] Edit icon: Close stream view, open event editor panel
+
+**Event Editor Panel (header icons):**
+- [ ] Add Eye icon: Close editor, zoom to event on canvas
+- [ ] Add Stream icon: Switch to stream view
+- [ ] Group 4 icons with modern UI (drawer/menu if space-constrained)
+
+### v0.5.35 - Settings NavRail + Full-Width Layout Trial
 **Goal:** Add Settings to NavRail and experiment with full-width page layouts
 
 - [ ] **Settings in NavRail:** Add Settings icon at bottom of nav-rail for authenticated users
@@ -439,7 +452,7 @@
 - [ ] **Evaluate UX:** Compare current centered layout vs full-width expansion
 - [ ] **Revert if needed:** Keep whichever layout feels better
 
-### v0.5.35 - Requirements Standardization & Traceability
+### v0.5.36 - Requirements Standardization & Traceability
 **Goal:** Standardize SRS format and create automated traceability tooling
 
 **Analysis:**
@@ -457,7 +470,7 @@
 - [ ] Update all SRS files to unified format
 - [ ] Add requirement tags to existing implementations
 
-### v0.5.36 - Test Gap Analysis & E2E Coverage
+### v0.5.37 - Test Gap Analysis & E2E Coverage
 **Goal:** Identify and fill testing gaps from recent features
 
 **Analysis:**
@@ -472,7 +485,7 @@
 - [ ] E2E tests for Stream View swipe actions
 - [ ] Update test coverage tables in SRS files
 
-### v0.5.37 - User Onboarding Experience
+### v0.5.38 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
 
 - [ ] **Empty States:** Actionable empty states for "My Timelines" with prompts
