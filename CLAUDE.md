@@ -146,6 +146,61 @@ Coordinator actions:
 - ❌ Leaving PLAN.md version header stale
 - ❌ Spawning dependent tasks in parallel (they need sequential execution)
 
+### Proven Multi-Phase Coordination Pattern
+
+When tackling large features, use this phased approach:
+
+```
+Phase 1: Specs First
+├── Spawn agents to create/update SRS documents
+├── Use Claude (sonnet) for spec writing
+├── Wait for all specs to complete
+└── Review specs match requirements
+
+Phase 2: Implementation
+├── Spawn agents for independent implementation tasks
+├── Mix Codex + Claude 50:50 to balance rate limits
+├── Use good prompts with clear requirements
+├── Wait for batch completion
+└── Verify build passes
+
+Phase 3: Testing
+├── Spawn agents to write E2E tests
+├── Map tests to SRS requirements
+└── Update test coverage tables
+```
+
+**Batch Coordination Example (v0.5.32-33):**
+```
+# Phase 1: Spawn 3 spec agents
+spawn_claude("Create SRS_USER_PAGE.md...")     → 0b8c3310
+spawn_claude("Create SRS_USER_SETTINGS_PAGE.md...") → 89d19a60
+spawn_claude("Update SRS_STREAM_VIEW.md...")   → 3a6a8cc0
+wait_for_agents(timeout=300)
+→ All 3 complete with 30+23+13 = 66 requirements
+
+# Phase 2: Spawn 6 implementation agents
+spawn_codex("Public profile access...")        → 0b7f863e
+spawn_codex("Nav icon fix...")                 → c9ff4fae
+spawn_claude("Settings page...")               → 95d8a245
+spawn_claude("Stream edit panel...")           → 2fbb5a16
+spawn_codex("Quick add button...")             → 43437d7a
+spawn_codex("Swipe actions...")                → 7a9092f9
+wait_for_agents(timeout=600)
+→ Verify npm run build passes
+→ Commit all changes
+
+# Report to user with summary table
+```
+
+**Key Success Factors:**
+- Start with specs to clarify requirements before coding
+- Spawn independent tasks in parallel to maximize throughput
+- Use `wait_for_agents()` instead of polling `list()` repeatedly
+- Verify build after each phase
+- Commit incrementally (don't wait until everything is done)
+- Report progress to user with clear status tables
+
 ---
 
 ## Part 3: Multi-Agent Orchestration Reference

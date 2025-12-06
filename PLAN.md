@@ -45,11 +45,11 @@
 - ✅ UX Polish: Skeletons, Toasts, Error Recovery, Accessibility (v0.5.31)
 
 ### Next Up
-- **v0.5.32**: User Settings & Bug Fixes (public profiles, settings page, icons)
-- **v0.5.33**: Stream Editor Enhancements (mobile event editing)
-- **v0.5.34**: User Onboarding Experience
+- **v0.5.34**: Settings NavRail + Full-Width Layout Trial
+- **v0.5.35**: Requirements Standardization & Traceability
+- **v0.5.36**: Test Gap Analysis & E2E Coverage
+- **v0.5.37**: User Onboarding Experience
 - **v0.6.x**: Social & Sharing (share links, follows, discovery)
-- **v0.7.x**: AI Integration (chat, suggestions, auto-generation)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -431,7 +431,48 @@
 - [ ] E2E tests for stream view editing
 - [ ] Mobile viewport tests
 
-### v0.5.34 - User Onboarding Experience
+### v0.5.34 - Settings NavRail + Full-Width Layout Trial
+**Goal:** Add Settings to NavRail and experiment with full-width page layouts
+
+- [ ] **Settings in NavRail:** Add Settings icon at bottom of nav-rail for authenticated users
+- [ ] **Full-Width Trial:** Expand Home, Settings, User pages to full horizontal width
+- [ ] **Evaluate UX:** Compare current centered layout vs full-width expansion
+- [ ] **Revert if needed:** Keep whichever layout feels better
+
+### v0.5.35 - Requirements Standardization & Traceability
+**Goal:** Standardize SRS format and create automated traceability tooling
+
+**Analysis:**
+- [ ] Audit current SRS formats (compare SRS_STREAM_VIEW vs SRS_USER_SETTINGS_PAGE)
+- [ ] Document pros/cons of each format
+- [ ] Decide on unified format and apply consistently
+
+**Tooling:**
+- [ ] Create `// @req SRS_XXX::CC-REQ-XXX-NNN` comment tag convention
+- [ ] Build npm script to extract requirement tags from code
+- [ ] Auto-generate traceability matrix and append to SRS files
+- [ ] Integrate with CI to ensure requirements are linked
+
+**Migration:**
+- [ ] Update all SRS files to unified format
+- [ ] Add requirement tags to existing implementations
+
+### v0.5.36 - Test Gap Analysis & E2E Coverage
+**Goal:** Identify and fill testing gaps from recent features
+
+**Analysis:**
+- [ ] Inventory all v0.5.31-33 features lacking tests
+- [ ] Map features to SRS requirements
+- [ ] Prioritize critical paths for testing
+
+**Implementation:**
+- [ ] E2E tests for Settings page (login, display, password reset)
+- [ ] E2E tests for public profile access (non-auth viewing)
+- [ ] E2E tests for Stream View editing (mobile viewport)
+- [ ] E2E tests for Stream View swipe actions
+- [ ] Update test coverage tables in SRS files
+
+### v0.5.37 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
 
 - [ ] **Empty States:** Actionable empty states for "My Timelines" with prompts

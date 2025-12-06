@@ -9,13 +9,13 @@ Public user profile pages displaying user information and their timeline collect
 | ID | Requirement | Priority | Status |
 |----|-------------|----------|--------|
 | CC-REQ-USER-001 | Profile page accessible at /:username URL pattern | Must | Implemented |
-| CC-REQ-USER-002 | Non-authenticated users can view any public profile | Must | Planned |
+| CC-REQ-USER-002 | Non-authenticated users can view any public profile | Must | Implemented |
 | CC-REQ-USER-003 | Profile displays username with @ prefix | Must | Implemented |
 | CC-REQ-USER-004 | Profile displays member since date (user.createdAt) | Must | Implemented |
 | CC-REQ-USER-005 | Profile displays user avatar | Must | Implemented |
 | CC-REQ-USER-006 | Profile displays timeline count, total events, and total views | Should | Implemented |
-| CC-REQ-USER-007 | Non-owners see only PUBLIC timelines (visibility=public) | Must | Planned |
-| CC-REQ-USER-008 | Private timelines NOT shown to non-owners | Must | Planned |
+| CC-REQ-USER-007 | Non-owners see only PUBLIC timelines (visibility=public) | Must | Implemented |
+| CC-REQ-USER-008 | Private timelines NOT shown to non-owners | Must | Implemented |
 | CC-REQ-USER-009 | Profile owners see all their timelines (public + private + unlisted) | Must | Implemented |
 | CC-REQ-USER-010 | Profile owners see "Create Timeline" button | Should | Implemented |
 | CC-REQ-USER-011 | Profile owners see "Import" button for timeline import | Should | Implemented |
@@ -27,7 +27,7 @@ Public user profile pages displaying user information and their timeline collect
 | CC-REQ-USER-017 | Timelines sortable by: Last Updated, Title, Event Count, Views | Should | Implemented |
 | CC-REQ-USER-018 | Sort dropdown only shown when 2+ timelines exist | Could | Implemented |
 | CC-REQ-USER-019 | 404/redirect to home if username doesn't exist | Must | Implemented |
-| CC-REQ-USER-020 | Empty state shown if user has no public timelines (non-owner view) | Must | Planned |
+| CC-REQ-USER-020 | Empty state shown if user has no public timelines (non-owner view) | Must | Implemented |
 | CC-REQ-USER-021 | Empty state shown if user has no timelines at all (owner view) | Must | Implemented |
 | CC-REQ-USER-022 | Error state with retry button on load failure | Should | Implemented |
 | CC-REQ-USER-023 | Loading state shows skeleton cards during data fetch | Should | Implemented |

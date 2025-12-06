@@ -278,45 +278,45 @@ function StreamEventCard({
           </Typography>
           {event.description && (
             <>
-            <Typography
-              ref={descriptionRef}
-              component="span"
-              variant="body2"
-              sx={{
-                color: 'var(--stream-text-secondary)',
-                fontSize: '0.9rem',
-                lineHeight: 1.5,
-                display: isExpanded ? 'block' : '-webkit-box',
-                WebkitLineClamp: isExpanded ? 'unset' : lineClamp,
-                WebkitBoxOrient: 'vertical',
-                overflow: isExpanded ? 'visible' : 'hidden',
-              }}
-            >
-              {event.description}
-            </Typography>
-            {/* Show more/less button */}
-            {(isTruncated || isExpanded) && (
               <Typography
-                component="button"
-                data-expand-button
-                onClick={handleExpandClick}
+                ref={descriptionRef}
+                component="span"
+                variant="body2"
                 sx={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  color: 'var(--stream-dot-color)',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  mt: 0.5,
-                  display: 'block',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  },
+                  color: 'var(--stream-text-secondary)',
+                  fontSize: '0.9rem',
+                  lineHeight: 1.5,
+                  display: isExpanded ? 'block' : '-webkit-box',
+                  WebkitLineClamp: isExpanded ? 'unset' : lineClamp,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: isExpanded ? 'visible' : 'hidden',
                 }}
               >
-                {isExpanded ? '← Show less' : 'Show more →'}
+                {event.description}
               </Typography>
-            )}
+              {/* Show more/less button */}
+              {(isTruncated || isExpanded) && (
+                <Typography
+                  component="button"
+                  data-expand-button
+                  onClick={handleExpandClick}
+                  sx={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    color: 'var(--stream-dot-color)',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    mt: 0.5,
+                    display: 'block',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {isExpanded ? '? Show less' : 'Show more ?'}
+                </Typography>
+              )}
             </>
           )}
           {event.time && (
