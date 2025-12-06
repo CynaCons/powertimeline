@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { StreamViewer } from './StreamViewer';
+import { StreamEditPanel } from './StreamEditPanel';
 import { useFocusTrap } from '../app/hooks/useFocusTrap';
 import type { Event } from '../types';
 
@@ -26,9 +27,15 @@ interface StreamViewerOverlayProps {
   open: boolean;
   onClose: () => void;
   events: Event[];
-  timelineTitle: string;
+  timelineTitle?: string;
   /** Called when user clicks an event (for timeline zoom/navigation) */
   onEventClick?: (event: Event) => void;
+  /** Whether the current user is the timeline owner (enables editing) */
+  isOwner?: boolean;
+  /** Called when an event is saved (create or update) */
+  onEventSave?: (event: Event) => Promise<void>;
+  /** Called when an event is deleted */
+  onEventDelete?: (eventId: string) => Promise<void>;
 }
 
 export function StreamViewerOverlay({
@@ -36,11 +43,16 @@ export function StreamViewerOverlay({
   onClose,
   events,
   onEventClick,
+  isOwner = false,
+  onEventSave,
+  onEventDelete,
 }: StreamViewerOverlayProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [editEvent, setEditEvent] = useState<Event | null>(null);
+  const [editPanelOpen, setEditPanelOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -73,17 +85,62 @@ export function StreamViewerOverlay({
     });
   }, [filteredEvents]);
 
+  const openEditPanelForEvent = (event: Event | null) => {
+    if (event) {
+      setSelectedEventId(event.id);
+      setEditEvent(event);
+    } else {
+      setSelectedEventId(undefined);
+      setEditEvent(null);
+    }
+    setEditPanelOpen(true);
+  };
+
   const handleEventClick = (event: Event) => {
     setSelectedEventId(event.id);
-    onEventClick?.(event);
 
-    // Scroll to selected event in the list
-    setTimeout(() => {
-      const eventElement = scrollContainerRef.current?.querySelector(`[data-event-id="${event.id}"]`);
-      if (eventElement) {
-        eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Mobile: owners get edit panel for quick inline editing
+    // Desktop: navigate to editor view for better editing experience
+    if (isOwner && isMobile) {
+      openEditPanelForEvent(event);
+    } else {
+      // Close Stream View and navigate to event in editor
+      onEventClick?.(event);
+      if (!isMobile) {
+        // On desktop, close Stream View to show editor
+        onClose();
+      } else {
+        // On mobile for non-owners, scroll to selected event
+        setTimeout(() => {
+          const eventElement = scrollContainerRef.current?.querySelector(`[data-event-id="${event.id}"]`);
+          if (eventElement) {
+            eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 50);
       }
-    }, 50);
+    }
+  };
+
+  // Handle edit panel save
+  const handleEditSave = async (event: Event) => {
+    await onEventSave?.(event);
+    setSelectedEventId(event.id);
+    setEditEvent(event);
+    setEditPanelOpen(false);
+  };
+
+  // Handle edit panel delete
+  const handleEditDelete = async (eventId: string) => {
+    await onEventDelete?.(eventId);
+    setSelectedEventId(prev => (prev === eventId ? undefined : prev));
+    setEditEvent(null);
+    setEditPanelOpen(false);
+  };
+
+  // Handle edit panel close
+  const handleEditClose = () => {
+    setEditPanelOpen(false);
+    setEditEvent(null);
   };
 
   // Scroll to selected event helper
@@ -309,6 +366,16 @@ export function StreamViewerOverlay({
               {searchQuery ? `${filteredEvents.length}/` : ''}{events.length}
             </Typography>
           </Box>
+          {isOwner && (
+            <button
+              className="stream-add-button"
+              onClick={() => openEditPanelForEvent(null)}
+              aria-label="Add new event"
+              data-testid="stream-add-button"
+            >
+              <span className="material-symbols-rounded">add</span>
+            </button>
+          )}
           {/* Screen reader description */}
           <div id="stream-viewer-description" className="sr-only">
             View timeline events in chronological order. Use arrow keys to navigate, Escape to close.
@@ -418,9 +485,23 @@ export function StreamViewerOverlay({
             searchQuery={searchQuery}
             onEventClick={handleEventClick}
             selectedEventId={selectedEventId}
+            onEdit={openEditPanelForEvent}
+            onDelete={handleEditDelete}
+            isOwner={isOwner}
           />
         </Box>
       </Box>
+
+      {/* Edit Panel - rendered outside modal for proper z-index layering */}
+      {isOwner && (
+        <StreamEditPanel
+          event={editEvent}
+          isOpen={editPanelOpen}
+          onClose={handleEditClose}
+          onSave={handleEditSave}
+          onDelete={handleEditDelete}
+        />
+      )}
     </Box>
     </Fade>
   );

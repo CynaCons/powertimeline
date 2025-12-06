@@ -1,4 +1,4 @@
-# Stream View Requirements
+# Stream View Requirements (v1.1)
 
 This document defines requirements for the Stream View feature - a mobile-friendly, vertical timeline viewer that provides an alternative reading experience to the canvas-based timeline editor.
 
@@ -66,19 +66,54 @@ Stream View presents timeline events in a scrollable, git-style vertical layout 
 | CC-REQ-STREAM-THEME-001 | Stream View uses CSS custom properties | • All colors use --stream-* variables<br>• Dark/light theme compatible<br>• Consistent with app theme | `src/styles/tokens.css` | - |
 | CC-REQ-STREAM-THEME-002 | Event cards have visual hierarchy | • Title: 1.05rem, bold, primary color<br>• Description: 0.9rem, secondary color<br>• Time: 0.8rem, muted color | `src/components/StreamViewer.tsx:179-218` | - |
 
+### Event Editing (v0.5.33)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-EDIT-001 | Slide-up edit panel opens on event tap | • Tap event card opens bottom sheet panel<br>• Panel slides up from bottom<br>• Shows edit form with Title, Date, Time, Description<br>• Cancel and Save buttons | - | - |
+| CC-REQ-STREAM-EDIT-002 | Edit form validates input | • Title required, max 100 chars<br>• Date required, valid format<br>• Time optional, HH:MM format<br>• Description optional, max 500 chars<br>• Validation errors shown inline | - | - |
+| CC-REQ-STREAM-EDIT-003 | Save updates event in Firestore | • Save button disabled until valid<br>• Shows loading state during save<br>• Panel closes on success<br>• Event list updates immediately | - | - |
+| CC-REQ-STREAM-EDIT-004 | Cancel discards changes | • Cancel button closes panel<br>• No changes saved<br>• Confirmation if unsaved changes | - | - |
+
+### Quick Add Event (v0.5.33)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-ADD-001 | Add button in header | • [+] button visible in Stream View header<br>• Only visible if user is timeline owner<br>• Tapping opens empty edit panel | - | - |
+| CC-REQ-STREAM-ADD-002 | New event defaults | • Date defaults to today<br>• Title and description empty<br>• Time empty (optional) | - | - |
+| CC-REQ-STREAM-ADD-003 | New event appears in list | • After save, event appears in correct chronological position<br>• Event selected/highlighted<br>• Scroll to new event | - | - |
+
+### Swipe Actions (v0.5.33)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-SWIPE-001 | Swipe left reveals delete | • Swipe left on event card reveals red delete button<br>• Only for timeline owner<br>• Swipe threshold: 80px | - | - |
+| CC-REQ-STREAM-SWIPE-002 | Swipe right reveals edit | • Swipe right reveals blue edit button<br>• Tapping opens edit panel<br>• Same as tap-to-edit | - | - |
+| CC-REQ-STREAM-SWIPE-003 | Delete confirmation | • Delete button shows confirmation dialog<br>• "Delete [event title]?" message<br>• Cancel and Delete buttons<br>• Event removed from list on confirm | - | - |
+| CC-REQ-STREAM-SWIPE-004 | Swipe auto-closes | • If no action taken, card snaps back after 3s<br>• Swiping another card closes previous | - | - |
+
+### Owner-Only Features (v0.5.33)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-OWNER-001 | Editing only for owners | • Add button hidden for non-owners<br>• Swipe actions disabled for non-owners<br>• Tap-to-edit disabled for non-owners<br>• View-only mode for visitors | - | - |
+
 ## Implementation Notes
 
 ### Component Structure
 
 ```
 StreamViewerOverlay
-├── Header (breadcrumbs, close button)
+├── Header (breadcrumbs, add button, close button)
 ├── StreamMinimap (event distribution)
 └── Scroll Container
     └── StreamViewer
         ├── Search Bar (sticky)
-        └── Event List
-            └── StreamEventCard (×N)
+        ├── Event List
+        │   └── StreamEventCard (×N, with swipe actions)
+        └── EditPanel (slide-up bottom sheet)
+            ├── Edit Form (title, date, time, description)
+            └── Actions (cancel, save)
 ```
 
 ### CSS Custom Properties (tokens.css)
@@ -146,6 +181,7 @@ The scroll implementation uses native browser scrolling:
 1. No keyboard navigation within event list (tab through events)
 2. No drag-to-scroll on minimap (click only)
 3. No infinite scroll / virtualization for large event lists
+4. Swipe gestures may conflict with horizontal scroll on some devices
 
 ## Change History
 
@@ -155,3 +191,4 @@ The scroll implementation uses native browser scrolling:
 - 2025-12-04 — Created SRS document with 17 requirements
 - 2025-12-04 — v0.5.26.4: Removed internal minimap/breadcrumbs, lifted existing ones above overlay via z-index
 - 2025-12-04 — Fixed Escape key handling with capture phase, simplified header
+- 2025-12-06 — v0.5.33 (v1.1): Added editing requirements - edit panel, quick add, swipe actions, owner-only features (13 new requirements)

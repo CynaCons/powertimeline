@@ -22,6 +22,12 @@ interface StreamViewerProps {
   onEventClick?: (event: Event) => void;
   /** Currently selected event ID */
   selectedEventId?: string;
+  /** Called when user taps edit action (owner only) */
+  onEdit?: (event: Event) => void;
+  /** Called when user taps delete action (owner only) */
+  onDelete?: (eventId: string) => void;
+  /** Whether the current user owns the timeline (enables swipe actions) */
+  isOwner?: boolean;
 }
 
 /**
@@ -74,6 +80,14 @@ function StreamEventCard({
   lineClamp,
   onClick,
   onToggleExpand,
+  isOwner,
+  swipedEventId,
+  swipeDirection,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  onDelete,
+  onEdit,
 }: {
   event: Event;
   index: number;
@@ -83,11 +97,21 @@ function StreamEventCard({
   lineClamp: number;
   onClick: () => void;
   onToggleExpand: () => void;
+  isOwner: boolean;
+  swipedEventId: string | null;
+  swipeDirection: 'left' | 'right' | null;
+  onTouchStart: (e: React.TouchEvent, eventId: string) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
+  onTouchEnd: () => void;
+  onDelete?: (eventId: string) => void;
+  onEdit?: (event: Event) => void;
 }) {
   const { line1, line2 } = formatEventDate(event.date);
   const dotColor = getEventColor(event, index);
   const descriptionRef = useRef<HTMLSpanElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
+  const isSwiped = swipedEventId === event.id;
+  const swipeClass = isSwiped && swipeDirection ? ` swiped-${swipeDirection}` : '';
 
   // Check if description is truncated (needs "show more")
   useEffect(() => {
@@ -101,6 +125,9 @@ function StreamEventCard({
   const handleCardClick = (e: React.MouseEvent) => {
     // If clicking the expand button, don't trigger the main onClick
     if ((e.target as HTMLElement).closest('[data-expand-button]')) {
+      return;
+    }
+    if (isSwiped && swipeDirection) {
       return;
     }
     onClick();
@@ -198,14 +225,20 @@ function StreamEventCard({
 
       {/* Event content card */}
       <Box
+        className={`stream-event-card${swipeClass}`}
+        onTouchStart={isOwner ? (e) => onTouchStart(e, event.id) : undefined}
+        onTouchMove={isOwner ? onTouchMove : undefined}
+        onTouchEnd={isOwner ? onTouchEnd : undefined}
         sx={{
+          position: 'relative',
           flex: 1,
           bgcolor: isSelected ? 'var(--stream-card-bg)' : 'transparent',
           border: `1px solid ${isSelected ? dotColor : 'rgba(255, 255, 255, 0.08)'}`,
           borderRadius: '10px',
           p: 1.5,
           mb: isLast ? 0 : 'var(--stream-card-gap)',
-          transition: 'all 0.15s ease',
+          overflow: 'visible',
+          transition: 'transform 200ms ease-out, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease',
           // Desktop hover effect
           '@media (hover: hover)': {
             '&:hover': {
@@ -217,20 +250,34 @@ function StreamEventCard({
           },
         }}
       >
-        <Typography
-          variant="subtitle1"
-          sx={{
-            color: 'var(--stream-text-primary)',
-            fontWeight: 600,
-            fontSize: '1.05rem',
-            mb: event.description ? 0.5 : 0,
-            lineHeight: 1.3,
-          }}
-        >
-          {event.title}
-        </Typography>
-        {event.description && (
-          <>
+        {isOwner && isSwiped && swipeDirection === 'left' && (
+          <button
+            className="swipe-action delete"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(event.id);
+            }}
+          >
+            <span className="material-symbols-rounded">delete</span>
+            Delete
+          </button>
+        )}
+
+        <Box className="card-content">
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: 'var(--stream-text-primary)',
+              fontWeight: 600,
+              fontSize: '1.05rem',
+              mb: event.description ? 0.5 : 0,
+              lineHeight: 1.3,
+            }}
+          >
+            {event.title}
+          </Typography>
+          {event.description && (
+            <>
             <Typography
               ref={descriptionRef}
               component="span"
@@ -270,18 +317,32 @@ function StreamEventCard({
                 {isExpanded ? '← Show less' : 'Show more →'}
               </Typography>
             )}
-          </>
-        )}
-        {event.time && (
-          <Typography
-            sx={{
-              color: 'var(--stream-text-muted)',
-              fontSize: '0.8rem',
-              mt: 1,
+            </>
+          )}
+          {event.time && (
+            <Typography
+              sx={{
+                color: 'var(--stream-text-muted)',
+                fontSize: '0.8rem',
+                mt: 1,
+              }}
+            >
+              {event.time}
+            </Typography>
+          )}
+        </Box>
+
+        {isOwner && isSwiped && swipeDirection === 'right' && (
+          <button
+            className="swipe-action edit"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit?.(event);
             }}
           >
-            {event.time}
-          </Typography>
+            <span className="material-symbols-rounded">edit</span>
+            Edit
+          </button>
         )}
       </Box>
     </Box>
@@ -297,12 +358,18 @@ export function StreamViewer({
   searchQuery,
   onEventClick,
   selectedEventId,
+  onEdit,
+  onDelete,
+  isOwner = false,
 }: StreamViewerProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
 
   // Track which events are expanded
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
+  const [swipedEventId, setSwipedEventId] = useState<string | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   // Responsive line clamp: 3 on mobile, 5 on desktop
   const lineClamp = isMobile ? 3 : 5;
@@ -318,6 +385,8 @@ export function StreamViewer({
 
   // Handle click - just call the callback
   const handleClick = (event: Event) => {
+    setSwipedEventId(null);
+    setSwipeDirection(null);
     onEventClick?.(event);
   };
 
@@ -333,6 +402,55 @@ export function StreamViewer({
       return next;
     });
   };
+
+  const handleTouchStart = (e: React.TouchEvent, eventId: string) => {
+    if (!isOwner) return;
+    touchStartX.current = e.touches[0].clientX;
+    setSwipedEventId(eventId);
+    setSwipeDirection(null);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isOwner || touchStartX.current === null || !swipedEventId) return;
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    if (deltaX < -50) {
+      setSwipeDirection('left');
+    } else if (deltaX > 50) {
+      setSwipeDirection('right');
+    } else {
+      setSwipeDirection(null);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isOwner) return;
+    if (!swipeDirection) {
+      setSwipedEventId(null);
+      touchStartX.current = null;
+      return;
+    }
+
+    setTimeout(() => {
+      setSwipedEventId(null);
+      setSwipeDirection(null);
+    }, 3000);
+    touchStartX.current = null;
+  };
+
+  useEffect(() => {
+    if (!isOwner) {
+      setSwipedEventId(null);
+      setSwipeDirection(null);
+      touchStartX.current = null;
+    }
+  }, [isOwner]);
+
+  useEffect(() => {
+    if (swipedEventId && !events.some(ev => ev.id === swipedEventId)) {
+      setSwipedEventId(null);
+      setSwipeDirection(null);
+    }
+  }, [events, swipedEventId]);
 
   const total = totalEvents ?? events.length;
   const isFiltered = searchQuery && searchQuery.trim().length > 0;
@@ -381,6 +499,14 @@ export function StreamViewer({
                 lineClamp={lineClamp}
                 onClick={() => handleClick(event)}
                 onToggleExpand={() => toggleExpand(event.id)}
+                isOwner={isOwner}
+                swipedEventId={swipedEventId}
+                swipeDirection={swipeDirection}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onDelete={onDelete}
+                onEdit={onEdit}
               />
             ))}
           </Stack>

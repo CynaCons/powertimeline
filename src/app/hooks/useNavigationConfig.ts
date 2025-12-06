@@ -113,7 +113,7 @@ export function useNavigationConfig(
       items.push({
         id: 'sign-in',
         label: 'Sign In',
-        icon: 'login',
+        icon: 'person',
         onClick: () => navigate('/login'),
         color: '#8b5cf6', // Purple accent
       });

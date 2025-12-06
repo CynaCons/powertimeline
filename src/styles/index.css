@@ -1012,3 +1012,46 @@ kbd {
     opacity: 0;
   }
 }
+
+/* Stream Viewer swipe actions */
+.stream-event-card {
+  position: relative;
+  overflow: visible;
+}
+
+.swipe-action {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.swipe-action.delete {
+  right: -80px;
+  background: #ef4444;
+  color: white;
+}
+
+.swipe-action.edit {
+  left: -80px;
+  background: var(--page-accent);
+  color: white;
+}
+
+.stream-event-card.swiped-left {
+  transform: translateX(-80px);
+  transition: transform 200ms ease-out;
+}
+
+.stream-event-card.swiped-right {
+  transform: translateX(80px);
+  transition: transform 200ms ease-out;
+}

@@ -3,11 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import './styles/index.css'
+import './styles/stream-edit-panel.css'
 import { LandingPage } from './pages/LandingPage'
 import { HomePage } from './pages/HomePage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { EditorPage } from './pages/EditorPage'
 import { AdminPage } from './pages/AdminPage'
+import { SettingsPage } from './pages/SettingsPage'
 import LoginPage from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { environment } from './config/environment'
@@ -56,14 +58,17 @@ function AppWithTheme() {
           <Route path="/browse" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
 
+          {/* Settings route - protected */}
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          } />
+
           {/* Username-based routes - clean URLs without prefix
               Note: /@:username pattern broken in React Router v7 (see GitHub #9779, #12460) */}
           <Route path="/:username/timeline/:timelineId" element={<EditorPage />} />
-          <Route path="/:username" element={
-            <ProtectedRoute>
-              <UserProfilePage />
-            </ProtectedRoute>
-          } />
+          <Route path="/:username" element={<UserProfilePage />} />
           {/* Legacy routes for backwards compatibility - redirect internally */}
           <Route path="/user/:userId" element={
             <ProtectedRoute>

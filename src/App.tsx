@@ -344,6 +344,46 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
     }
   }, [selectedId, events, announce, saveEvents]);
 
+  const handleEventSave = useCallback(async (event: Event) => {
+    let nextEvents: Event[] = [];
+    let isUpdate = false;
+    setEvents(prev => {
+      const existing = prev.find(ev => ev.id === event.id);
+      isUpdate = !!existing;
+      const updatedEvent = existing ? { ...existing, ...event } : event;
+      const updatedList = existing
+        ? prev.map(ev => (ev.id === event.id ? updatedEvent : ev))
+        : [...prev, updatedEvent];
+      nextEvents = updatedList;
+      return updatedList;
+    });
+    await saveEvents(nextEvents);
+    setSelectedId(event.id);
+    try {
+      announce(`${isUpdate ? 'Updated' : 'Added'} ${event.title}`);
+    } catch (error) {
+      console.warn('Failed to announce stream save:', error);
+    }
+  }, [saveEvents, announce]);
+
+  const handleEventDelete = useCallback(async (eventId: string) => {
+    let nextEvents: Event[] = [];
+    let deletedTitle = '';
+    setEvents(prev => {
+      const toDelete = prev.find(ev => ev.id === eventId);
+      deletedTitle = toDelete?.title ?? '';
+      nextEvents = prev.filter(ev => ev.id !== eventId);
+      return nextEvents;
+    });
+    await saveEvents(nextEvents);
+    setSelectedId(prev => (prev === eventId ? undefined : prev));
+    try {
+      announce(`Deleted ${deletedTitle || 'event'}`);
+    } catch (error) {
+      console.warn('Failed to announce stream delete:', error);
+    }
+  }, [saveEvents, announce]);
+
   const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
   const filteredForList = useMemo(() => {
     const q = outlineFilter.trim().toLowerCase();
@@ -823,6 +863,9 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
             events={events}
             timelineTitle=""
             onEventClick={handleStreamEventClick}
+            isOwner={isOwner}
+            onEventSave={handleEventSave}
+            onEventDelete={handleEventDelete}
           />
         </Suspense>
 

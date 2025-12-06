@@ -45,7 +45,11 @@
 - ✅ UX Polish: Skeletons, Toasts, Error Recovery, Accessibility (v0.5.31)
 
 ### Next Up
-- **v0.5.32**: User Onboarding Experience
+- **v0.5.32**: User Settings & Bug Fixes (public profiles, settings page, icons)
+- **v0.5.33**: Stream Editor Enhancements (mobile event editing)
+- **v0.5.34**: User Onboarding Experience
+- **v0.6.x**: Social & Sharing (share links, follows, discovery)
+- **v0.7.x**: AI Integration (chat, suggestions, auto-generation)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -389,57 +393,91 @@
 - [x] Toast Notifications: ToastContext, ToastContainer, useToast hook
 - [x] Accessibility: Focus states, ARIA labels, reduced-motion support
 
-### v0.5.32 - User Onboarding Experience
+### v0.5.32 - User Settings & Public Profiles
+**Goal:** Fix profile access and add user account management
+**Status:** In Progress
+
+**Documentation:**
+- [x] Create `SRS_USER_PAGE.md` - User profile page requirements (30 reqs)
+- [x] Create `SRS_USER_SETTINGS_PAGE.md` - Settings page requirements (23 reqs)
+
+**Implementation:**
+- [x] **Public Profile Access:** Remove ProtectedRoute from `/:username`, allow public viewing
+- [x] **User Settings Page:** Create `/settings` route with profile info, password, preferences
+- [x] **Password Management:** Firebase Auth password reset/change flow
+- [x] **Nav Icon Fix:** Replace nav-rail user icon with standard person icon
+- [ ] **Account Deletion:** Allow users to delete their account (GDPR compliance)
+
+**Testing:**
+- [ ] E2E tests for public profile access (dev + prod)
+- [ ] E2E tests for settings page functionality
+
+### v0.5.33 - Stream Editor Mobile Editing
+**Goal:** Make Stream Editor a full mobile editing experience
+**Status:** In Progress
+
+**Documentation:**
+- [x] Update `SRS_STREAM_VIEW.md` with editing requirements (13 new reqs)
+
+**Implementation:**
+- [x] **Slide-up Edit Panel:** StreamEditPanel component for mobile inline editing
+- [x] **Quick Add Button:** [+] button in header to create new event
+- [x] **Swipe Actions:** Swipe left/right to reveal edit/delete actions
+- [x] **Mobile Event Form:** Simplified form optimized for touch
+- [x] **Mobile Auto-open:** Stream View auto-opens on mobile viewport
+- [x] **Desktop Edit UX:** Click event closes Stream View, navigates to editor
+
+**Testing:**
+- [ ] E2E tests for stream view editing
+- [ ] Mobile viewport tests
+
+### v0.5.34 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
-**Status:** Planned
 
-- [ ] **Empty States:** Create actionable empty states for "My Timelines" with "Create" or "Fork" prompts
-- [ ] **Starter Templates:** Add "Use Template" option (Biography, Project Plan, Historical Era) to creation flow
-- [ ] **Guided Tour:** Implement interactive walkthrough for the Editor (explaining Zoom, Layout, Events)
-- [ ] **Contextual Help:** Add tooltips to complex features (Layout Engine, Visibility settings)
+- [ ] **Empty States:** Actionable empty states for "My Timelines" with prompts
+- [ ] **Starter Templates:** "Use Template" option (Biography, Project Plan, Historical Era)
+- [ ] **Guided Tour:** Interactive walkthrough for the Editor
+- [ ] **Contextual Help:** Tooltips for complex features
 
-## Phase 3: Collaboration Features (v0.6.x)
+---
 
-### v0.6.0 - Git-Based Timeline Storage
-- [ ] Set up internal Git repository management system
-- [ ] Convert timeline format to JSON (optimized for Git diffs)
-- [ ] Implement Git commit workflow for saves
-- [ ] Create version history browser
-- [ ] Add diff viewer for comparing versions
-- [ ] Implement revert functionality
+## Phase 3: Social & Sharing (v0.6.x)
+> **Priority:** Get to a shareable, usable product first
 
-### v0.6.1 - Forking System
-- [ ] Fork button and confirmation flow
-- [ ] Git clone operation for forking
-- [ ] Fork relationship tracking and display
-- [ ] Attribution system for original authors
-- [ ] Fork network graph visualization
-- [ ] Fork statistics and analytics
+### v0.6.0 - Sharing Infrastructure
+- [ ] **Share Links:** Generate shareable URLs for timelines
+- [ ] **Embed Code:** iframe embed for blogs/websites
+- [ ] **Social Meta Tags:** Open Graph, Twitter Cards for link previews
+- [ ] **QR Codes:** Generate QR codes for timeline sharing
 
-### v0.6.2 - Merge Request System
-- [ ] Create merge request workflow
-- [ ] Side-by-side diff viewer for changes
-- [ ] Comment system for review
-- [ ] Approve/reject/request changes workflow
-- [ ] Merge conflict detection and resolution UI
-- [ ] Notification system for merge requests
+### v0.6.1 - Social Features
+- [ ] **Follow System:** Follow users and timelines
+- [ ] **Activity Feed:** Show updates from followed users
+- [ ] **Notifications:** In-app and email notifications
+- [ ] **Comments:** Comment on timelines (optional)
+- [ ] **Likes/Stars:** Simple appreciation mechanic
 
-## Phase 4: Discovery & Social (v0.7.x)
+### v0.6.2 - Enhanced Discovery
+- [ ] **Global Search:** Unified search for Users and Timelines
+- [ ] **Content Search:** Search within event titles/descriptions
+- [ ] **Advanced Filters:** Date range, tags, popularity
+- [ ] **Trending:** Algorithm based on views and activity
+- [ ] **Recommendations:** "More like this" suggestions
 
-### v0.7.0 - Enhanced Discovery & Advanced Search
-- [ ] **Global Search:** Unified search for Users and Timelines with type filtering
-- [ ] **Content Search:** Deep search within timeline events (titles, descriptions)
-- [ ] **Advanced Filters:** Filter by date range, tags, category, and popularity
-- [ ] **Timeline Trending:** Algorithm based on views, forks, and recent activity
-- [ ] **Featured Curation:** Admin-curated lists of high-quality timelines
-- [ ] **Recommendations:** "More like this" suggestions based on timeline content
+## Phase 4: AI Integration (v0.7.x)
+> **Priority:** AI assistance makes the product more powerful
 
-### v0.7.1 - Social Features
-- [ ] Follow users and timelines
-- [ ] Activity feed showing updates
-- [ ] View counts and engagement metrics
-- [ ] Timeline collections/playlists
-- [ ] User notifications
+### v0.7.0 - AI Chat Interface
+- [ ] **Sidebar Chatbot:** Q&A about the timeline content
+- [ ] **Natural Language Creation:** "Add an event for when X happened"
+- [ ] **Timeline Summarization:** Auto-generate summaries
+- [ ] **Date Assistance:** Help with historical date formatting
+
+### v0.7.1 - AI-Powered Automation
+- [ ] **Event Suggestions:** Auto-suggest related events
+- [ ] **Gap Detection:** Identify missing periods in timeline
+- [ ] **Fact Checking:** Source verification assistance
+- [ ] **Auto-generation:** Create timeline from text/Wikipedia
 
 ## Phase 5: Rich Media (v0.8.x)
 
@@ -448,27 +486,32 @@
 - [ ] Firebase Storage integration
 - [ ] Link previews with automatic metadata
 - [ ] Media gallery view for timelines
-- [ ] Media organization and tagging
 
 ### v0.8.1 - Content Archival
 - [ ] Automatic web page snapshots
 - [ ] Social media post archival
-- [ ] PDF and document storage
 - [ ] Link rot prevention and backup
 
-## Phase 6: AI Integration (v0.9.x)
+## Phase 6: Collaboration & Versioning (v0.9.x)
+> **Moved later:** Complex feature, build audience first
 
-### v0.9.0 - AI Chat Interface
-- [ ] Sidebar chatbot for timeline Q&A
-- [ ] Natural language event creation
-- [ ] Timeline summarization and insights
-- [ ] Event date/time assistance
+### v0.9.0 - Version History
+- [ ] Timeline version snapshots on save
+- [ ] Version history browser
+- [ ] Diff viewer for comparing versions
+- [ ] Revert to previous version
 
-### v0.9.1 - AI-Powered Automation
-- [ ] Auto-suggest related events from news feeds
-- [ ] Timeline gap detection and suggestions
-- [ ] Fact-checking assistance and source verification
-- [ ] Automated timeline generation from text sources
+### v0.9.1 - Forking System
+- [ ] Fork button and confirmation flow
+- [ ] Fork relationship tracking
+- [ ] Attribution for original authors
+- [ ] Fork network visualization
+
+### v0.9.2 - Merge Requests (Optional)
+- [ ] Merge request workflow
+- [ ] Side-by-side diff viewer
+- [ ] Comment system for review
+- [ ] Merge conflict resolution
 
 ## Milestone: v1.0.0 - Full Platform Launch
 

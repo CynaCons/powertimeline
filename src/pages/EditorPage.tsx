@@ -70,11 +70,20 @@ export function EditorPage() {
   const [user, setUser] = useState<User | null>(null);
   const [showReadOnlyToast, setShowReadOnlyToast] = useState(false);
   const [mobileNoticeDismissed, setMobileNoticeDismissed] = useState(false);
-  const [streamViewerOpen, setStreamViewerOpen] = useState(false);
 
   // Detect mobile/small screen
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
+
+  // Auto-open Stream View on mobile for better UX (canvas is hard to use on small screens)
+  const [streamViewerOpen, setStreamViewerOpen] = useState(false);
+
+  // Auto-open Stream View when on mobile (after initial render to ensure correct detection)
+  useEffect(() => {
+    if (isMobile && !streamViewerOpen && !mobileNoticeDismissed) {
+      setStreamViewerOpen(true);
+    }
+  }, [isMobile]); // Only run when isMobile changes
 
   useEffect(() => {
     async function loadTimeline() {

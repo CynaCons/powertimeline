@@ -1,0 +1,205 @@
+/**
+ * Stream Edit Panel Styles
+ * v0.5.33 - Mobile-friendly slide-up bottom sheet
+ */
+
+.stream-edit-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--stream-card-bg);
+  border-top: 1px solid var(--stream-card-border);
+  border-radius: 16px 16px 0 0;
+  padding: 0;
+  transform: translateY(100%);
+  transition: transform 300ms ease-out;
+  z-index: 1500;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stream-edit-panel.open {
+  transform: translateY(0);
+}
+
+/* Prevent body scroll when panel is open */
+body.stream-edit-panel-open {
+  overflow: hidden;
+}
+
+/* Panel header */
+.stream-edit-panel .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--stream-card-border);
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  background: var(--stream-card-bg);
+  z-index: 1;
+}
+
+.stream-edit-panel .panel-header h3 {
+  color: var(--stream-text-primary);
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.stream-edit-panel .panel-header button {
+  background: none;
+  border: none;
+  color: var(--stream-text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 150ms ease;
+}
+
+.stream-edit-panel .panel-header button:hover {
+  color: var(--stream-text-primary);
+}
+
+/* Panel content */
+.stream-edit-panel .panel-content {
+  padding: 16px;
+}
+
+.stream-edit-panel .panel-content label {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--stream-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stream-edit-panel .panel-content input,
+.stream-edit-panel .panel-content textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--stream-card-border);
+  border-radius: 8px;
+  color: var(--stream-text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 150ms ease;
+}
+
+.stream-edit-panel .panel-content input:hover,
+.stream-edit-panel .panel-content textarea:hover {
+  border-color: var(--stream-text-secondary);
+}
+
+.stream-edit-panel .panel-content input:focus,
+.stream-edit-panel .panel-content textarea:focus {
+  outline: none;
+  border-color: var(--stream-dot-color);
+}
+
+.stream-edit-panel .panel-content textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.stream-edit-panel .panel-content .error {
+  display: block;
+  margin-top: 4px;
+  color: #ef5350;
+  font-size: 0.8rem;
+}
+
+/* Panel footer */
+.stream-edit-panel .panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--stream-card-border);
+  padding: 16px;
+  position: sticky;
+  bottom: 0;
+  background: var(--stream-card-bg);
+}
+
+.stream-edit-panel .panel-footer button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: 1px solid transparent;
+}
+
+.stream-edit-panel .panel-footer button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stream-edit-panel .panel-footer button:not(.primary) {
+  background: transparent;
+  color: var(--stream-text-secondary);
+  border-color: var(--stream-card-border);
+}
+
+.stream-edit-panel .panel-footer button:not(.primary):hover:not(:disabled) {
+  border-color: var(--stream-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stream-edit-panel .panel-footer button.primary {
+  background: var(--stream-dot-color);
+  color: #ffffff;
+  border: none;
+}
+
+.stream-edit-panel .panel-footer button.primary:hover:not(:disabled) {
+  background: var(--stream-dot-color-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.stream-edit-panel .panel-footer button.primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+}
+
+.stream-add-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--page-accent);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.stream-add-button:hover {
+  background: var(--page-accent-hover);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .stream-edit-panel {
+    transition: none;
+  }
+
+  .stream-edit-panel .panel-footer button.primary:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .stream-edit-panel .panel-footer button.primary:active:not(:disabled) {
+    transform: none;
+  }
+}

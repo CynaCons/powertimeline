@@ -65,8 +65,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
   const handleSettings = () => {
     handleClose();
-    // TODO: Navigate to settings page when implemented
-    console.log('Settings clicked - to be implemented');
+    navigate('/settings');
   };
 
   const handleLogout = async () => {
