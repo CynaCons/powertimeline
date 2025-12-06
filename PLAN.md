@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.33 (Stream Editor Mobile Editing) ✅
-**Next Milestone:** v0.5.34 - Settings NavRail + Full-Width Layout Trial
+**Current Version:** v0.5.35 (Bug Fixes + Settings NavRail) ✅
+**Next Milestone:** v0.5.36 - Full-Width Layout Trial
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
@@ -43,12 +43,12 @@
 - ✅ Technical Debt: Version sync script, docs drift fixes (v0.5.29)
 - ✅ PowerSpawn Test Suite: 22+ pytest tests (v0.5.30)
 - ✅ UX Polish: Skeletons, Toasts, Error Recovery, Accessibility (v0.5.31)
+- ✅ Navigation Icons: Stream View hover icons, Event Editor navigation (v0.5.34)
+- ✅ Bug Fixes + Settings NavRail: Fixed event editor, added Settings to NavRail (v0.5.35)
 
 ### Next Up
-- **v0.5.34**: Navigation Icons (Stream ↔ Editor ↔ Canvas)
-- **v0.5.35**: Settings NavRail + Full-Width Layout Trial
-- **v0.5.36**: Requirements Standardization & Traceability
-- **v0.5.37**: Test Gap Analysis & E2E Coverage
+- **v0.5.36**: Full-Width Layout Trial
+- **v0.5.37**: User Onboarding Experience
 - **v0.6.x**: Social & Sharing (share links, follows, discovery)
 
 ### Test Status
@@ -435,57 +435,35 @@
 **Goal:** Add explicit navigation icons for quick switching between views
 
 **Stream View (hover on event card):**
-- [ ] Show icons only on hovered event card (upper-right boundary)
-- [ ] Eye icon: Close stream view, zoom to event on canvas
-- [ ] Edit icon: Close stream view, open event editor panel
+- [x] Show icons only on hovered event card (upper-right boundary)
+- [x] Eye icon: Close stream view, zoom to event on canvas
+- [x] Edit icon: Close stream view, open event editor panel
 
 **Event Editor Panel (header icons):**
-- [ ] Add Eye icon: Close editor, zoom to event on canvas
-- [ ] Add Stream icon: Switch to stream view
-- [ ] Group 4 icons with modern UI (drawer/menu if space-constrained)
+- [x] Add Eye icon: Close editor, zoom to event on canvas
+- [x] Add Stream icon: Switch to stream view
+- [x] Group 4 icons with modern UI (drawer/menu if space-constrained)
 
-### v0.5.35 - Settings NavRail + Full-Width Layout Trial
-**Goal:** Add Settings to NavRail and experiment with full-width page layouts
+**Error Handling:**
+- [x] Add GitHub Issues link to ErrorBoundary component
 
-- [ ] **Settings in NavRail:** Add Settings icon at bottom of nav-rail for authenticated users
-- [ ] **Full-Width Trial:** Expand Home, Settings, User pages to full horizontal width
-- [ ] **Evaluate UX:** Compare current centered layout vs full-width expansion
-- [ ] **Revert if needed:** Keep whichever layout feels better
+### v0.5.35 - Bug Fixes + Settings NavRail
+**Goal:** Fix event editor bug and improve NavRail layout
 
-### v0.5.36 - Requirements Standardization & Traceability
-**Goal:** Standardize SRS format and create automated traceability tooling
+- [x] BUG FIX: "Add new event" in existing timeline doesn't load existing events in Event Editor navigation panels
+- [x] Change "My Timelines" icon from `person` to `collections` (distinct from Sign In)
+- [x] Move Settings to bottom utilities section (above theme toggle)
+- [x] Create utilities section type in NavigationRail for bottom-positioned items
+- [x] BUG FIX: Settings icon position - pin to bottom instead of floating mid-way
 
-**Analysis:**
-- [ ] Audit current SRS formats (compare SRS_STREAM_VIEW vs SRS_USER_SETTINGS_PAGE)
-- [ ] Document pros/cons of each format
-- [ ] Decide on unified format and apply consistently
+### v0.5.36 - Full-Width Layout Trial
+**Goal:** Experiment with full-width page layouts
 
-**Tooling:**
-- [ ] Create `// @req SRS_XXX::CC-REQ-XXX-NNN` comment tag convention
-- [ ] Build npm script to extract requirement tags from code
-- [ ] Auto-generate traceability matrix and append to SRS files
-- [ ] Integrate with CI to ensure requirements are linked
+- [ ] Expand Home, Settings, User pages to full horizontal width
+- [ ] Evaluate UX: Compare current centered layout vs full-width expansion
+- [ ] Revert if needed: Keep whichever layout feels better
 
-**Migration:**
-- [ ] Update all SRS files to unified format
-- [ ] Add requirement tags to existing implementations
-
-### v0.5.37 - Test Gap Analysis & E2E Coverage
-**Goal:** Identify and fill testing gaps from recent features
-
-**Analysis:**
-- [ ] Inventory all v0.5.31-33 features lacking tests
-- [ ] Map features to SRS requirements
-- [ ] Prioritize critical paths for testing
-
-**Implementation:**
-- [ ] E2E tests for Settings page (login, display, password reset)
-- [ ] E2E tests for public profile access (non-auth viewing)
-- [ ] E2E tests for Stream View editing (mobile viewport)
-- [ ] E2E tests for Stream View swipe actions
-- [ ] Update test coverage tables in SRS files
-
-### v0.5.38 - User Onboarding Experience
+### v0.5.37 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
 
 - [ ] **Empty States:** Actionable empty states for "My Timelines" with prompts
@@ -577,3 +555,40 @@
 - [ ] Community moderation tools
 - [ ] Analytics and reporting dashboard
 - [ ] Monetization system implementation
+
+---
+
+## Backlog (Deferred)
+
+### Requirements Standardization & Traceability
+**Goal:** Standardize SRS format and create automated traceability tooling
+
+**Analysis:**
+- [ ] Audit current SRS formats (compare SRS_STREAM_VIEW vs SRS_USER_SETTINGS_PAGE)
+- [ ] Document pros/cons of each format
+- [ ] Decide on unified format and apply consistently
+
+**Tooling:**
+- [ ] Create `// @req SRS_XXX::CC-REQ-XXX-NNN` comment tag convention
+- [ ] Build npm script to extract requirement tags from code
+- [ ] Auto-generate traceability matrix and append to SRS files
+- [ ] Integrate with CI to ensure requirements are linked
+
+**Migration:**
+- [ ] Update all SRS files to unified format
+- [ ] Add requirement tags to existing implementations
+
+### Test Gap Analysis & E2E Coverage
+**Goal:** Identify and fill testing gaps from recent features
+
+**Analysis:**
+- [ ] Inventory all v0.5.31-33 features lacking tests
+- [ ] Map features to SRS requirements
+- [ ] Prioritize critical paths for testing
+
+**Implementation:**
+- [ ] E2E tests for Settings page (login, display, password reset)
+- [ ] E2E tests for public profile access (non-auth viewing)
+- [ ] E2E tests for Stream View editing (mobile viewport)
+- [ ] E2E tests for Stream View swipe actions
+- [ ] Update test coverage tables in SRS files

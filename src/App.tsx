@@ -726,6 +726,15 @@ function App({ timelineId, readOnly = false, initialStreamViewOpen = false, onSt
                     onSelectEvent={selectEvent}
                     onCreateNew={createNewEvent}
                     isOwner={isOwner}
+                    onViewOnCanvas={() => {
+                      // Close editor - event stays selected and visible on canvas
+                      setOverlay(null);
+                    }}
+                    onOpenStreamView={() => {
+                      // Close editor and open stream view
+                      setOverlay(null);
+                      setStreamViewerOpen(true);
+                    }}
                   />
                 </Suspense>
               </ErrorBoundary>

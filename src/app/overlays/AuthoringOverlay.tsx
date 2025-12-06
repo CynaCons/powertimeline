@@ -3,6 +3,12 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -102,6 +108,11 @@ interface AuthoringOverlayProps {
   onCreateNew: () => void;
   // Ownership control (v0.5.23)
   isOwner?: boolean;
+  // Navigation icons (v0.5.34)
+  /** Close editor and zoom to event on canvas */
+  onViewOnCanvas?: () => void;
+  /** Switch to stream view */
+  onOpenStreamView?: () => void;
 }
 
 export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
@@ -124,12 +135,17 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   onSelectEvent,
   onCreateNew,
   isOwner = true, // Default to true for backwards compatibility
+  onViewOnCanvas,
+  onOpenStreamView,
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   // Force view mode for non-owners (v0.5.23)
   const [isEditMode, setIsEditMode] = useState(isOwner ? (isNewEvent || !selected) : false);
   const [errors, setErrors] = useState({ date: '', time: '', title: '', description: '' });
   const [touched, setTouched] = useState({ date: false, time: false, title: false, description: false });
+  // Actions menu state (for responsive icon grouping)
+  const [actionsMenuAnchor, setActionsMenuAnchor] = useState<null | HTMLElement>(null);
+  const actionsMenuOpen = Boolean(actionsMenuAnchor);
   useFocusTrap(true, rootRef.current);
 
   // Compute previous and next events (memoized to avoid re-sorting on every keystroke)
@@ -145,15 +161,21 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
     [selected, sortedEvents]
   );
 
-  const prevEvents = useMemo(() =>
-    currentIndex > 0 ? sortedEvents.slice(0, currentIndex).reverse() : [],
-    [currentIndex, sortedEvents]
-  );
+  const prevEvents = useMemo(() => {
+    if (!selected) {
+      // When creating a new event, show all prior events for context
+      return [...sortedEvents].reverse();
+    }
+    return currentIndex > 0 ? sortedEvents.slice(0, currentIndex).reverse() : [];
+  }, [selected, currentIndex, sortedEvents]);
 
-  const nextEvents = useMemo(() =>
-    currentIndex >= 0 ? sortedEvents.slice(currentIndex + 1) : [],
-    [currentIndex, sortedEvents]
-  );
+  const nextEvents = useMemo(() => {
+    if (!selected) {
+      // When creating a new event, also show the full list in the next panel
+      return sortedEvents;
+    }
+    return currentIndex >= 0 ? sortedEvents.slice(currentIndex + 1) : [];
+  }, [selected, currentIndex, sortedEvents]);
 
   const canNavigatePrev = currentIndex > 0;
   const canNavigateNext = currentIndex >= 0 && currentIndex < sortedEvents.length - 1;
@@ -407,34 +429,150 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              {/* Only show Edit button for owners in view mode */}
-              {!isEditMode && selected && isOwner && (
-                <IconButton
-                  aria-label="Edit event"
-                  size="small"
-                  onClick={() => setIsEditMode(true)}
-                  sx={{ color: 'var(--page-accent)' }}
-                >
-                  <span className="material-symbols-rounded">edit</span>
-                </IconButton>
-              )}
-              {/* Only show Create button for owners */}
-              {selected && isOwner && (
-                <IconButton
-                  aria-label="Create new event"
-                  size="small"
-                  onClick={handleCreateNewEvent}
-                  sx={{ color: 'var(--page-accent)' }}
-                  title="Create new event"
-                >
-                  <span className="material-symbols-rounded">add</span>
-                </IconButton>
-              )}
+            <div className="flex items-center gap-1">
+              {/* Desktop: Show all action icons inline */}
+              <div className="hidden sm:flex items-center gap-1">
+                {/* View on canvas icon - show when event is selected */}
+                {selected && onViewOnCanvas && (
+                  <Tooltip title="View on canvas" arrow>
+                    <IconButton
+                      aria-label="View event on canvas"
+                      size="small"
+                      onClick={onViewOnCanvas}
+                      sx={{ color: 'var(--page-text-secondary)', '&:hover': { color: 'var(--page-accent)' } }}
+                    >
+                      <span className="material-symbols-rounded">visibility</span>
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {/* Stream view icon - show when event is selected */}
+                {selected && onOpenStreamView && (
+                  <Tooltip title="Open in Stream View" arrow>
+                    <IconButton
+                      aria-label="Open in stream view"
+                      size="small"
+                      onClick={onOpenStreamView}
+                      sx={{ color: 'var(--page-text-secondary)', '&:hover': { color: 'var(--page-accent)' } }}
+                    >
+                      <span className="material-symbols-rounded">view_stream</span>
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {/* Divider between navigation and edit actions */}
+                {selected && (onViewOnCanvas || onOpenStreamView) && (
+                  <div className="w-px h-5 mx-1" style={{ backgroundColor: 'var(--page-border)' }} />
+                )}
+                {/* Edit button for owners in view mode */}
+                {!isEditMode && selected && isOwner && (
+                  <Tooltip title="Edit event" arrow>
+                    <IconButton
+                      aria-label="Edit event"
+                      size="small"
+                      onClick={() => setIsEditMode(true)}
+                      sx={{ color: 'var(--page-accent)' }}
+                    >
+                      <span className="material-symbols-rounded">edit</span>
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {/* Create button for owners */}
+                {selected && isOwner && (
+                  <Tooltip title="Create new event" arrow>
+                    <IconButton
+                      aria-label="Create new event"
+                      size="small"
+                      onClick={handleCreateNewEvent}
+                      sx={{ color: 'var(--page-accent)' }}
+                    >
+                      <span className="material-symbols-rounded">add</span>
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
+
+              {/* Mobile: Show "more" menu with all actions */}
+              <div className="sm:hidden">
+                {selected && (
+                  <>
+                    <IconButton
+                      aria-label="More actions"
+                      size="small"
+                      onClick={(e) => setActionsMenuAnchor(e.currentTarget)}
+                      sx={{ color: 'var(--page-text-secondary)' }}
+                    >
+                      <span className="material-symbols-rounded">more_vert</span>
+                    </IconButton>
+                    <Menu
+                      anchorEl={actionsMenuAnchor}
+                      open={actionsMenuOpen}
+                      onClose={() => setActionsMenuAnchor(null)}
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                      slotProps={{
+                        paper: {
+                          sx: {
+                            backgroundColor: 'var(--page-bg-elevated)',
+                            border: '1px solid var(--page-border)',
+                            minWidth: 180,
+                          }
+                        }
+                      }}
+                    >
+                      {onViewOnCanvas && (
+                        <MenuItem
+                          onClick={() => { setActionsMenuAnchor(null); onViewOnCanvas(); }}
+                          sx={{ color: 'var(--page-text-primary)' }}
+                        >
+                          <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
+                            <span className="material-symbols-rounded text-xl">visibility</span>
+                          </ListItemIcon>
+                          <ListItemText>View on canvas</ListItemText>
+                        </MenuItem>
+                      )}
+                      {onOpenStreamView && (
+                        <MenuItem
+                          onClick={() => { setActionsMenuAnchor(null); onOpenStreamView(); }}
+                          sx={{ color: 'var(--page-text-primary)' }}
+                        >
+                          <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
+                            <span className="material-symbols-rounded text-xl">view_stream</span>
+                          </ListItemIcon>
+                          <ListItemText>Stream view</ListItemText>
+                        </MenuItem>
+                      )}
+                      {(onViewOnCanvas || onOpenStreamView) && isOwner && <Divider />}
+                      {!isEditMode && isOwner && (
+                        <MenuItem
+                          onClick={() => { setActionsMenuAnchor(null); setIsEditMode(true); }}
+                          sx={{ color: 'var(--page-text-primary)' }}
+                        >
+                          <ListItemIcon sx={{ color: 'var(--page-accent)' }}>
+                            <span className="material-symbols-rounded text-xl">edit</span>
+                          </ListItemIcon>
+                          <ListItemText>Edit event</ListItemText>
+                        </MenuItem>
+                      )}
+                      {isOwner && (
+                        <MenuItem
+                          onClick={() => { setActionsMenuAnchor(null); handleCreateNewEvent(); }}
+                          sx={{ color: 'var(--page-text-primary)' }}
+                        >
+                          <ListItemIcon sx={{ color: 'var(--page-accent)' }}>
+                            <span className="material-symbols-rounded text-xl">add</span>
+                          </ListItemIcon>
+                          <ListItemText>Create new</ListItemText>
+                        </MenuItem>
+                      )}
+                    </Menu>
+                  </>
+                )}
+              </div>
+
+              {/* Close button - always visible */}
               <button
                 type="button"
                 aria-label="Close authoring"
-                className="text-sm px-4 py-2 rounded-lg transition-colors font-medium"
+                className="text-sm px-4 py-2 rounded-lg transition-colors font-medium ml-2"
                 style={{
                   border: '1px solid var(--page-border)',
                   color: 'var(--page-text-primary)'

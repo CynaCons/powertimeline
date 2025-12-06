@@ -2,10 +2,10 @@
  * useNavigationConfig - Context-aware navigation configuration
  * Provides different navigation items based on current page/context
  *
- * Navigation Structure (v0.5.6 redesign):
- * - Global Navigation: Browse (all users), My Profile (authenticated), Admin (admin only)
+ * Navigation Structure (v0.5.34 redesign):
+ * - Global Navigation: Browse (all users), My Timelines (authenticated), Admin (admin only), Sign In (guest)
  * - Context Tools: Page-specific tools (Editor: Events toggle, Lock indicator)
- * - Utilities: Theme toggle at bottom
+ * - Utilities: Settings (bottom section, authenticated users only), Theme toggle
  */
 
 import { useMemo } from 'react';
@@ -90,7 +90,7 @@ export function useNavigationConfig(
       items.push({
         id: 'my-timelines',
         label: 'My Timelines',
-        icon: 'person',
+        icon: 'collections',
         shortcut: 'Alt+M',
         onClick: () => navigate(userId ? `/user/${userId}` : '/browse'),
         isActive: context === 'profile',
@@ -123,7 +123,7 @@ export function useNavigationConfig(
       type: 'global',
       items,
     };
-  }, [context, navigate, currentUserId, firebaseUser, currentUser]);
+  }, [context, navigate, currentUserId, firebaseUser, currentUser, location.pathname]);
 
   const contextSection: NavigationSection | null = useMemo(() => {
     // Only show context tools in editor
@@ -136,13 +136,35 @@ export function useNavigationConfig(
     return null;
   }, [context, editorItems]);
 
+  // Utilities section (bottom of nav rail) - Settings for authenticated users
+  const utilitiesSection: NavigationSection | null = useMemo(() => {
+    const isAuthenticated = !!firebaseUser;
+    if (!isAuthenticated) return null;
+
+    return {
+      type: 'utilities',
+      items: [
+        {
+          id: 'settings',
+          label: 'Settings',
+          icon: 'settings',
+          onClick: () => navigate('/settings'),
+          isActive: location.pathname === '/settings',
+        },
+      ],
+    };
+  }, [firebaseUser, navigate, location.pathname]);
+
   const sections = useMemo(() => {
     const result: NavigationSection[] = [globalNavigation];
     if (contextSection) {
       result.push(contextSection);
     }
+    if (utilitiesSection) {
+      result.push(utilitiesSection);
+    }
     return result;
-  }, [globalNavigation, contextSection]);
+  }, [globalNavigation, contextSection, utilitiesSection]);
 
   return {
     context,

@@ -39,6 +39,10 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   // Support legacy items array or new sections array
   const displaySections: NavigationSection[] = sections || (items ? [{ type: 'global', items }] : []);
 
+  // Separate utilities section from main sections for bottom rendering
+  const mainSections = displaySections.filter(s => s.type !== 'utilities');
+  const utilitiesSection = displaySections.find(s => s.type === 'utilities');
+
   // State for collapsed sections (persisted in localStorage)
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
     const stored = localStorage.getItem('nav_rail_collapsed_sections');
@@ -132,91 +136,136 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
     } as const;
   };
 
-  return (
-    <div
-      ref={railRef}
-      className="flex flex-col items-center gap-2 mb-auto navigation-rail"
-      role="navigation"
-      aria-label="Main navigation"
-    >
-      {displaySections.map((section, sectionIndex) => {
-        const sectionKey = `${section.type}-${sectionIndex}`;
-        const isCollapsed = section.collapsible && collapsedSections[sectionKey];
+  const renderSection = (section: NavigationSection, sectionIndex: number, totalSections: number) => {
+    const sectionKey = `${section.type}-${sectionIndex}`;
+    const isCollapsed = section.collapsible && collapsedSections[sectionKey];
 
-        return (
-          <React.Fragment key={sectionKey}>
-            {/* Section title and collapse button (if collapsible) */}
-            {section.collapsible && section.title && (
+    return (
+      <React.Fragment key={sectionKey}>
+        {/* Section title and collapse button (if collapsible) */}
+        {section.collapsible && section.title && (
+          <EnhancedTooltip
+            title={isCollapsed ? `Expand ${section.title}` : `Collapse ${section.title}`}
+            placement="right"
+          >
+            <IconButton
+              size="small"
+              onClick={() => toggleSection(sectionKey)}
+              sx={{
+                fontSize: '0.75rem',
+                color: 'text.secondary',
+                '&:hover': {
+                  bgcolor: 'grey.100',
+                },
+              }}
+              aria-label={isCollapsed ? `Expand ${section.title}` : `Collapse ${section.title}`}
+              aria-expanded={!isCollapsed}
+            >
+              <span className="material-symbols-rounded text-sm">
+                {isCollapsed ? 'chevron_right' : 'expand_more'}
+              </span>
+            </IconButton>
+          </EnhancedTooltip>
+        )}
+
+        {/* Section items (hidden when collapsed) */}
+        {!isCollapsed && section.items.map((item, itemIndex) => {
+          const isActive = item.id === activeItemId || item.isActive;
+          return (
+            <EnhancedTooltip
+              key={item.id}
+              title={item.label}
+              shortcut={item.shortcut}
+              placement="right"
+            >
+              <IconButton
+                aria-label={item.label}
+                size="small"
+                onClick={item.onClick}
+                sx={getButtonStyles(item)}
+                className="nav-button"
+                data-testid={`nav-${item.id}`}
+                data-active={isActive ? 'true' : undefined}
+                data-nav-index={itemIndex}
+                data-section={section.type}
+                tabIndex={0}
+              >
+                {typeof item.icon === 'string' ? (
+                  <span className="material-symbols-rounded nav-icon">
+                    {item.icon}
+                  </span>
+                ) : (
+                  item.icon
+                )}
+              </IconButton>
+            </EnhancedTooltip>
+          );
+        })}
+
+        {/* Separator between sections (not after last section) */}
+        {sectionIndex < totalSections - 1 && (
+          <div
+            className="w-8 h-px bg-gray-300 my-2"
+            role="separator"
+            aria-hidden="true"
+          />
+        )}
+      </React.Fragment>
+    );
+  };
+
+  return (
+    <>
+      {/* Main navigation sections */}
+      <div
+        ref={railRef}
+        className="flex flex-col items-center gap-2 navigation-rail"
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        {mainSections.map((section, sectionIndex) =>
+          renderSection(section, sectionIndex, mainSections.length)
+        )}
+      </div>
+
+      {/* Utilities section at bottom (if present) */}
+      {utilitiesSection && (
+        <div className="flex flex-col items-center gap-2 mt-auto">
+          {utilitiesSection.items.map((item, itemIndex) => {
+            const isActive = item.id === activeItemId || item.isActive;
+            return (
               <EnhancedTooltip
-                title={isCollapsed ? `Expand ${section.title}` : `Collapse ${section.title}`}
+                key={item.id}
+                title={item.label}
+                shortcut={item.shortcut}
                 placement="right"
               >
                 <IconButton
+                  aria-label={item.label}
                   size="small"
-                  onClick={() => toggleSection(sectionKey)}
-                  sx={{
-                    fontSize: '0.75rem',
-                    color: 'text.secondary',
-                    '&:hover': {
-                      bgcolor: 'grey.100',
-                    },
-                  }}
-                  aria-label={isCollapsed ? `Expand ${section.title}` : `Collapse ${section.title}`}
-                  aria-expanded={!isCollapsed}
+                  onClick={item.onClick}
+                  sx={getButtonStyles(item)}
+                  className="nav-button"
+                  data-testid={`nav-${item.id}`}
+                  data-active={isActive ? 'true' : undefined}
+                  data-nav-index={itemIndex}
+                  data-section="utilities"
+                  tabIndex={0}
                 >
-                  <span className="material-symbols-rounded text-sm">
-                    {isCollapsed ? 'chevron_right' : 'expand_more'}
-                  </span>
+                  {typeof item.icon === 'string' ? (
+                    <span className="material-symbols-rounded nav-icon">
+                      {item.icon}
+                    </span>
+                  ) : (
+                    item.icon
+                  )}
                 </IconButton>
               </EnhancedTooltip>
-            )}
-
-            {/* Section items (hidden when collapsed) */}
-            {!isCollapsed && section.items.map((item, itemIndex) => {
-              const isActive = item.id === activeItemId || item.isActive;
-              return (
-                <EnhancedTooltip
-                  key={item.id}
-                  title={item.label}
-                  shortcut={item.shortcut}
-                  placement="right"
-                >
-                  <IconButton
-                    aria-label={item.label}
-                    size="small"
-                    onClick={item.onClick}
-                    sx={getButtonStyles(item)}
-                    className="nav-button"
-                    data-testid={`nav-${item.id}`}
-                    data-active={isActive ? 'true' : undefined}
-                    data-nav-index={itemIndex}
-                    data-section={section.type}
-                    tabIndex={0}
-                  >
-                    {typeof item.icon === 'string' ? (
-                      <span className="material-symbols-rounded nav-icon">
-                        {item.icon}
-                      </span>
-                    ) : (
-                      item.icon
-                    )}
-                  </IconButton>
-                </EnhancedTooltip>
-              );
-            })}
-
-            {/* Separator between sections (not after last section) */}
-            {sectionIndex < displaySections.length - 1 && (
-              <div
-                className="w-8 h-px bg-gray-300 my-2"
-                role="separator"
-                aria-hidden="true"
-              />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 };
 

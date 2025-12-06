@@ -62,12 +62,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </div>
             </details>
           )}
-          <button
-            onClick={() => this.setState({ hasError: false, error: undefined, errorInfo: undefined })}
-            className="mt-3 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-          >
-            Try Again
-          </button>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              onClick={() => this.setState({ hasError: false, error: undefined, errorInfo: undefined })}
+              className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+            >
+              Try Again
+            </button>
+            <a
+              href="https://github.com/CynaCons/powertimeline/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-red-700 hover:text-red-900 underline flex items-center gap-1"
+            >
+              <span className="material-symbols-rounded text-base">bug_report</span>
+              Report Issue
+            </a>
+          </div>
         </div>
       );
     }
