@@ -3,7 +3,7 @@
 ## Quick Summary
 
 **Current Version:** v0.7.3 - AI Event Persistence & UX Polish ✅
-**Next Milestone:** v0.7.4+ - AI Integration & Git-Style Workflows (Metadata Preview, Partial Import, MCP Server, Schema API)
+**Next Milestone:** v0.7.x AI Polish → v0.8.x Claude Code Integration (Firebase + MCP)
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -61,7 +61,9 @@
 - ✅ Event Persistence & Cleanup: Fixed AI events saving to Firestore subcollection, console cleanup, overflow indicator polish, rejected events restore (v0.7.3)
 
 ### Next Up
-- **v0.7.4+**: AI Integration & Git-Style Workflows (Metadata Preview → Partial Import → MCP Server → Schema API)
+- **v0.7.x**: AI Polish (Metadata Preview, Partial Import, Schema API)
+- **v0.8.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
+- **v0.9.x**: Collaboration & Versioning (fork/merge/diff)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -693,52 +695,76 @@
 - [ ] **Selective Apply:** User can approve individual events or all at once
 - [ ] **Conflict Detection:** Warn on duplicate/overlapping dates with existing events
 
-### v0.7.6 - Timeline MCP Server
-**Goal:** Expose timeline operations via MCP for AI agent integration (Claude Code, Codex, etc.)
-- [ ] **MCP Server:** Create MCP server that connects to Firebase
-- [ ] **Read Operations:** `get_timeline(id)`, `list_user_timelines(userId)`
-- [ ] **Write Operations:** `propose_events(timelineId, events)` - creates pending events for review
-- [ ] **Review Flow:** Reuse existing approve/reject/apply workflow
-- [ ] **Authentication:** Secure with Firebase Auth tokens
-
-### v0.7.7 - YAML Schema API
+### v0.7.6 - YAML Schema API
 **Goal:** Publish schema for AI agents to discover and use
 - [ ] **Schema Endpoint:** `/api/schema/timeline` returns JSON Schema for YAML format
 - [ ] **Documentation:** Add schema docs with examples
 - [ ] **Versioning:** Schema version in response for compatibility
 
-### v0.7.8 - AI-Powered Automation
-**Goal:** Enhance AI capabilities for timeline creation and maintenance
+### v0.7.7 - AI-Powered Automation (Gemini)
+**Goal:** Enhance Gemini chat capabilities for timeline creation
 - [ ] **Event Suggestions:** Auto-suggest related events based on context
 - [ ] **Gap Detection:** Identify missing periods in timeline coverage
-- [ ] **Fact Checking:** Source verification assistance with web search
 - [ ] **Auto-generation:** Create timeline from text/Wikipedia article
-
-### v0.7.9 - PowerSpawn: Context File Consolidation
-**Goal:** Simplify agent context management by merging CONTEXT.MD and IAC.md
-- [ ] **Merge CONTEXT.MD into IAC.md:** Combine context and inter-agent communication into single file
-- [ ] **Active Agents Section:** Add persistent section at top of IAC.md for tracking running agents
-- [ ] **Update MCP Server:** Adjust file reading/writing logic for new structure
-- [ ] **Documentation:** Update README and usage examples
 
 ---
 
-## Phase 5: Collaboration & Versioning (v0.8.x)
-> **Future:** Git-style workflows for timeline collaboration (builds on v0.7.x review patterns)
+## Phase 5: Claude Code Integration (v0.8.x)
+> **Vision:** Enable Claude Code to propose timeline events via Firebase, using the existing Review UI
 
-### v0.8.0 - Version History
+### v0.8.0 - Firebase Proposals Infrastructure
+**Goal:** Set up Firebase schema and listeners for external AI proposals
+- [ ] **Firestore Schema:** `/users/{uid}/ai_proposals/{id}` with status, events, source, timestamps
+- [ ] **Security Rules:** Owner-only read/write for proposals collection
+- [ ] **App Listener:** `onSnapshot` listener for incoming proposals
+- [ ] **Proposal Notification:** Badge/indicator when new proposals arrive
+
+### v0.8.1 - Claude Token & Settings
+**Goal:** Allow users to generate auth tokens for Claude Code
+- [ ] **Token Generation:** Settings page to create/revoke Claude API tokens
+- [ ] **Firebase Custom Tokens:** Cloud Function to issue scoped tokens
+- [ ] **Token Storage:** Secure storage with expiry and revocation
+- [ ] **Connection Status:** Show active Claude connections in UI
+
+### v0.8.2 - PowerTimeline MCP Server
+**Goal:** Create MCP server for Claude Code integration
+- [ ] **MCP Setup:** New `powertimeline-mcp/` repo or folder
+- [ ] **Firebase Auth:** Authenticate with user's Claude token
+- [ ] **Core Tools:** `get_timeline`, `list_timelines`, `propose_events`
+- [ ] **Status Tools:** `get_proposal_status`, `get_timeline_schema`
+
+### v0.8.3 - Review UI Integration
+**Goal:** Route Claude proposals through existing Review UI
+- [ ] **Proposal Panel:** Show "Claude proposed X events" in ChatPanel or dedicated panel
+- [ ] **Reuse Actions:** Same approve/reject/restore/apply workflow as Gemini
+- [ ] **Source Attribution:** Tag applied events with "via Claude Code"
+- [ ] **Proposal History:** View past proposals and their outcomes
+
+### v0.8.4 - Polish & Documentation
+**Goal:** Production-ready Claude integration
+- [ ] **MCP Documentation:** Setup guide, tool reference, examples
+- [ ] **Error Handling:** Connection failures, invalid proposals, quota limits
+- [ ] **E2E Tests:** Proposal flow from MCP to applied events
+- [ ] **CLAUDE.md Update:** Add PowerTimeline MCP usage instructions
+
+---
+
+## Phase 6: Collaboration & Versioning (v0.9.x)
+> **Future:** Git-style workflows for timeline collaboration (builds on v0.7.x + v0.8.x patterns)
+
+### v0.9.0 - Version History
 - [ ] Timeline version snapshots on save
 - [ ] Version history browser
 - [ ] Diff viewer for comparing versions
 - [ ] Revert to previous version
 
-### v0.8.1 - Forking System
+### v0.9.1 - Forking System
 - [ ] Fork button and confirmation flow
 - [ ] Fork relationship tracking
 - [ ] Attribution for original authors
 - [ ] Fork network visualization
 
-### v0.8.2 - Merge Requests (Optional)
+### v0.9.2 - Merge Requests (Optional)
 - [ ] Merge request workflow
 - [ ] Side-by-side diff viewer
 - [ ] Comment system for review
