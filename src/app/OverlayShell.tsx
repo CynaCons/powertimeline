@@ -29,6 +29,7 @@ export const OverlayShell: React.FC<OverlayShellProps> = ({ id, title, dragging,
       aria-labelledby={`dialog-title-${id}`}
       className={`fixed left-14 top-0 bottom-0 w-80 max-w-[75vw] p-0 z-20 group overlay panel overlay-shell ${dragging ? 'pointer-events-none' : 'pointer-events-auto'} ${className || ''}`}
       style={{ pointerEvents: dragging ? 'none' : 'auto' }}
+      onClick={(e) => e.stopPropagation()}
     >
       <div
         className="h-full bg-white text-gray-900 border-r border-gray-200 shadow-md flex flex-col transition-opacity"

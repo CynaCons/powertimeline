@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
+import { UserProfileMenu } from './components/UserProfileMenu';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
 import { useAuth } from './contexts/AuthContext';
@@ -9,6 +10,7 @@ import { getTimeline, updateTimeline, getUser } from './services/firestore';
 import type { User } from './types';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
+import { useToast } from './contexts/ToastContext';
 import { useTheme } from './contexts/ThemeContext';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -117,7 +119,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   const isReadOnly = readOnly;
 
   // Get current Firebase user for auth-gated features (moved up for editorItems dependency)
-  const { user: firebaseUser } = useAuth();
+  const { user: firebaseUser, signOut } = useAuth();
 
   // Current timeline metadata (for import/export)
   const [currentTimeline, setCurrentTimeline] = useState<Timeline | null>(null);
@@ -214,6 +216,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
   // Navigation and theme hooks
   const { toggleTheme } = useTheme();
+  const { showToast } = useToast();
 
   // Theme: dark-only (no data-theme switch)
   useEffect(() => {
@@ -566,6 +569,21 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     startTour('editor-tour');
   }, [startTour]);
 
+  // Share handler - copy timeline URL to clipboard
+  const handleShareLink = useCallback(() => {
+    if (!currentTimeline) return;
+    // Get username from URL path (format: /:username/timeline/:id)
+    const pathParts = window.location.pathname.split('/');
+    const username = pathParts[1];
+    const url = `${window.location.origin}/${username}/timeline/${currentTimeline.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Link copied to clipboard!', 'success');
+    }).catch((error) => {
+      console.error('Failed to copy link:', error);
+      showToast('Failed to copy link', 'error');
+    });
+  }, [currentTimeline, showToast]);
+
   // Get context-aware navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser, handleHelpClick);
 
@@ -693,7 +711,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
         {/* Overlays next to the sidebar, never covering it */}
         {overlay && !loadError && (
-          <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]">
+          <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]" onClick={(e) => { if (e.target === e.currentTarget) setOverlay(null); }}>
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
             {overlay === 'events' && (
               <ErrorBoundary>
@@ -709,6 +727,13 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     onClose={() => setOverlay(null)}
                     onHover={(id) => setHoveredEventId(id)}
                     onHoverEnd={() => setHoveredEventId(undefined)}
+                    onNavigateToEvent={(id) => {
+                      const event = events.find(e => e.id === id);
+                      if (event) {
+                        handleStreamEventClick(event);
+                        setOverlay(null);
+                      }
+                    }}
                   />
                 </Suspense>
               </ErrorBoundary>
@@ -737,7 +762,10 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     onCreateNew={createNewEvent}
                     isOwner={isOwner}
                     onViewOnCanvas={() => {
-                      // Close editor - event stays selected and visible on canvas
+                      // Close editor and zoom to the selected event on canvas
+                      if (selected) {
+                        handleStreamEventClick(selected);
+                      }
                       setOverlay(null);
                     }}
                     onOpenStreamView={() => {
@@ -844,6 +872,50 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   <div className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-lg font-mono">
                     Select to Zoom
                   </div>
+                </div>
+              )}
+
+              {/* Share button and user profile - top-right corner */}
+              {currentTimeline && (
+                <div
+                  className="absolute top-20 right-4 z-20 flex flex-col items-end gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  {/* Share Button - fixed size circular */}
+                  <Tooltip title="Copy link to share" placement="left">
+                    <IconButton
+                      onClick={(e) => { e.stopPropagation(); handleShareLink(); }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      size="small"
+                      sx={{
+                        backgroundColor: 'var(--color-surface)',
+                        border: '1px solid var(--color-border-primary)',
+                        backdropFilter: 'blur(8px)',
+                        width: '36px',
+                        height: '36px',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        '&:hover': {
+                          backgroundColor: 'var(--color-surface-hover)',
+                        },
+                      }}
+                    >
+                      <span className="material-symbols-rounded">share</span>
+                    </IconButton>
+                  </Tooltip>
+
+                  {/* User Profile Button - only when logged in */}
+                  {firebaseUser && (
+                    <UserProfileMenu
+                      onLogout={async () => {
+                        await signOut();
+                        navigate('/');
+                      }}
+                    />
+                  )}
                 </div>
               )}
 

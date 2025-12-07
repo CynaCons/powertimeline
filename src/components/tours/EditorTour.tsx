@@ -2,7 +2,8 @@ import React from 'react';
 import Joyride, { STATUS } from 'react-joyride';
 import type { Step, CallBackProps } from 'react-joyride';
 import { useTour } from './TourProvider';
-import { tourStyles } from './tourStyles';
+import { getTourStyles } from './tourStyles';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const EDITOR_TOUR_ID = 'editor-tour';
 
@@ -60,6 +61,7 @@ const editorSteps: Step[] = [
 
 export const EditorTour: React.FC = () => {
   const { activeTour, endTour, markTourCompleted } = useTour();
+  const { isDarkMode } = useTheme();
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status } = data;
@@ -81,7 +83,7 @@ export const EditorTour: React.FC = () => {
       continuous
       showProgress
       showSkipButton
-      styles={tourStyles}
+      styles={getTourStyles(isDarkMode)}
       callback={handleJoyrideCallback}
       run={true}
     />

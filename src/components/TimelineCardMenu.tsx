@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../contexts/ToastContext';
 
 interface TimelineCardMenuProps {
   timelineId: string;
@@ -28,6 +29,7 @@ export function TimelineCardMenu({
   onExport,
 }: TimelineCardMenuProps) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -51,6 +53,15 @@ export function TimelineCardMenu({
     handleClose();
     // v0.5.14: Use username-based URL (no @ prefix - React Router v7 bug)
     navigate(`/${ownerUsername}/timeline/${timelineId}`);
+  };
+
+  const handleCopyLink = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleClose();
+    const url = `${window.location.origin}/${ownerUsername}/timeline/${timelineId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Link copied to clipboard!', 'success');
+    });
   };
 
   const handleEdit = (event: React.MouseEvent) => {
@@ -123,6 +134,13 @@ export function TimelineCardMenu({
             <span className="material-symbols-rounded">open_in_new</span>
           </ListItemIcon>
           <ListItemText>Open</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={handleCopyLink}>
+          <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
+            <span className="material-symbols-rounded">link</span>
+          </ListItemIcon>
+          <ListItemText>Copy Link</ListItemText>
         </MenuItem>
 
         {onExport && (

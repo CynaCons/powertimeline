@@ -49,6 +49,14 @@ export function ErrorState({
           </p>
         )}
       </div>
+      <a
+        href="https://github.com/CynaCons/powertimeline/issues"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-purple-400 hover:text-purple-300 underline"
+      >
+        Report this issue on GitHub
+      </a>
       {onRetry && (
         <button
           type="button"

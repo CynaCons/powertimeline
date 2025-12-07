@@ -215,7 +215,7 @@ export function EditorPage() {
             >
               <Breadcrumb items={[
                 { label: 'Home', href: '/browse' },
-                { label: `@${user.username}`, href: `/@${user.username}` },
+                { label: `@${user.username}`, href: `/${user.username}` },
                 { label: timeline.title }
               ]} />
             </div>

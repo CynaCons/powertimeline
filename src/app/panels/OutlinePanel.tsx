@@ -6,6 +6,8 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Skeleton from '@mui/material/Skeleton';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 
 interface OutlinePanelProps {
   filtered: Event[];
@@ -18,9 +20,10 @@ interface OutlinePanelProps {
   onClose: () => void;
   onHover?: (id: string) => void;
   onHoverEnd?: () => void;
+  onNavigateToEvent?: (id: string) => void;
 }
 
-export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId, onSelect, onCreate, filter, setFilter, dragging, onClose, onHover, onHoverEnd }) => {
+export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId, onSelect, onCreate, filter, setFilter, dragging, onClose, onHover, onHoverEnd, onNavigateToEvent }) => {
   return (
     <OverlayShell id="events" title="Events" dragging={dragging} onClose={onClose}>
       <TextField
@@ -46,7 +49,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
       )}
       <List sx={{ mt: 1, maxHeight: '70vh', overflow: 'auto', pr: 1 }}>
         {filtered.map((ev) => (
-          <li key={ev.id}>
+          <li key={ev.id} className="group relative">
             <ListItemButton
               selected={ev.id === selectedId}
               onClick={() => onSelect(ev.id)}
@@ -60,6 +63,30 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
                 primaryTypographyProps={{ noWrap: true }}
               />
             </ListItemButton>
+
+            {/* Action buttons - show on hover */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+              {onNavigateToEvent && (
+                <Tooltip title="View on canvas" placement="top">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => { e.stopPropagation(); onNavigateToEvent(ev.id); }}
+                    sx={{ padding: '4px', bgcolor: 'background.paper' }}
+                  >
+                    <span className="material-symbols-rounded text-sm">visibility</span>
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title="Edit event" placement="top">
+                <IconButton
+                  size="small"
+                  onClick={(e) => { e.stopPropagation(); onSelect(ev.id); }}
+                  sx={{ padding: '4px', bgcolor: 'background.paper' }}
+                >
+                  <span className="material-symbols-rounded text-sm">edit</span>
+                </IconButton>
+              </Tooltip>
+            </div>
           </li>
         ))}
         {onCreate && (

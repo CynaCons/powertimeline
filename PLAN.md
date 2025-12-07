@@ -2,14 +2,14 @@
 
 ## Quick Summary
 
-**Current Version:** v0.5.38 (User Onboarding Experience) ✅
-**Next Milestone:** v0.6.x - Social & Sharing
+**Current Version:** v0.6.4 (Bug Fixes) ✅
+**Next Milestone:** v0.7.x - AI Integration
 
 ### Key Metrics
-- **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
-- **Requirements:** ~177 total ([SRS Index](docs/SRS_INDEX.md))
-- **Implementation:** ~150 requirements (97%)
-- **Test Coverage:** ~113 requirements verified (73%)
+- **Total Iterations:** 200+ completed (v0.2.0 → v0.6.2)
+- **Requirements:** ~230 total ([SRS Index](docs/SRS_INDEX.md))
+- **Implementation:** ~200 requirements (87%)
+- **Test Coverage:** ~119 requirements verified (52%)
 - **Test Suite:** 320 Playwright tests ([Test Status](#test-status))
 - **Production Tests:** 22/22 passing (v0.5.15)
 
@@ -51,9 +51,13 @@
 - ✅ Timeline Axis Visual Redesign: 20% thinner axis (3px), removed dashed lines, triangle anchors (v0.5.37)
 - ✅ Timeline Visual Polish: Reverted anchor shape to diamond/milestone (rotated square) with rounded edges (v0.5.37)
 - ✅ User Onboarding: Empty State CTA, React Joyride tours (Editor 8-step, Home 5-step), NavRail Help button (v0.5.38)
+- ✅ Share Links: Copy Link menu in timeline cards, toast feedback (v0.6.0)
+- ✅ Editor UX Polish: Navigation fixes, compact hover-expandable profile button, event panel improvements (v0.6.1)
+- ✅ Error Handling: GitHub issues link in ErrorState, ErrorBoundary, Toast; SRS_TIMELINE_EDITOR.md (v0.6.2)
+- ✅ Bug Fixes: Editor panel click, view on canvas zoom (v0.6.4)
 
 ### Next Up
-- **v0.6.x**: Social & Sharing (share links, follows, discovery)
+- **v0.7.x**: AI Integration (chatbot, natural language creation, summaries)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -498,35 +502,70 @@
 ### v0.5.38 - User Onboarding Experience
 **Goal:** Guide new users from "blank slate" to their first successful timeline
 
-- [ ] **Empty States:** Actionable empty states for "My Timelines" with prompts
-- [ ] **Starter Templates:** "Use Template" option (Biography, Project Plan, Historical Era)
-- [ ] **Guided Tour:** Interactive walkthrough for the Editor
-- [ ] **Contextual Help:** Tooltips for complex features
+- [x] **Empty States:** Actionable empty states for "My Timelines" with prompts
+- [x] **Starter Templates:** "Use Template" option (Biography, Project Plan, Historical Era)
+- [x] **Guided Tour:** Interactive walkthrough for the Editor
+- [x] **Contextual Help:** Tooltips for complex features
 
 ---
 
-## Phase 3: Social & Sharing (v0.6.x)
-> **Priority:** Get to a shareable, usable product first
+## Phase 3: Sharing (v0.6.x)
 
-### v0.6.0 - Sharing Infrastructure
-- [ ] **Share Links:** Generate shareable URLs for timelines
-- [ ] **Embed Code:** iframe embed for blogs/websites
-- [ ] **Social Meta Tags:** Open Graph, Twitter Cards for link previews
-- [ ] **QR Codes:** Generate QR codes for timeline sharing
+### v0.6.0 - Share Links
+**Goal:** Allow users to easily share timeline links
 
-### v0.6.1 - Social Features
-- [ ] **Follow System:** Follow users and timelines
-- [ ] **Activity Feed:** Show updates from followed users
-- [ ] **Notifications:** In-app and email notifications
-- [ ] **Comments:** Comment on timelines (optional)
-- [ ] **Likes/Stars:** Simple appreciation mechanic
+- [x] **Editor Share Button:** Add share/copy link button in editor (top-right)
+- [x] **Card Menu Share:** Add "Copy Link" option to timeline card menu (HomePage/UserProfilePage)
+- [x] **Toast Feedback:** Show "Link copied!" toast confirmation
 
-### v0.6.2 - Enhanced Discovery
-- [ ] **Global Search:** Unified search for Users and Timelines
-- [ ] **Content Search:** Search within event titles/descriptions
-- [ ] **Advanced Filters:** Date range, tags, popularity
-- [ ] **Trending:** Algorithm based on views and activity
-- [ ] **Recommendations:** "More like this" suggestions
+### v0.6.1 - Editor UX Polish
+**Goal:** Fix navigation bugs and improve editor discoverability
+
+**Bug Fixes:**
+- [x] **Breadcrumb Navigation Bug:** Clicking username in breadcrumb goes to landing page instead of user profile (fix: `/@username` → `/${username}`)
+- [x] **Share Button Position:** Move share button lower to avoid minimap overlap
+
+**Editor Enhancements:**
+- [x] **User Profile Icon:** Add profile icon below share button (opens UserProfileMenu dropdown)
+- [x] **Compact User Profile Button:** Hover-expandable profile button (circular → pill with username on hover)
+- [x] **Events Panel Click-Outside:** Collapse panel when clicking outside on timeline
+- [x] **Events Panel Action Buttons:** Add edit (pencil) and view (eye) icons on hover for each event item
+
+### v0.6.2 - Error Handling & Documentation
+**Goal:** Help users report issues and document editor requirements
+
+- [x] **GitHub Issues Link:** Add link to GitHub issues page in error messages (ErrorState, ErrorBoundary, Toast)
+- [x] **SRS_TIMELINE_EDITOR.md:** Created per-page requirements doc (28 requirements for editor controls)
+- [ ] **Firebase Error Messages:** Improve Firebase error messages with actionable guidance (deferred)
+
+### v0.6.3 - Event Sources
+**Goal:** Allow users to cite sources for timeline events
+
+**Data Model:**
+- [ ] **Event.sources Field:** Add optional `sources` array field to Event type
+- [ ] **Firestore Schema:** Update Event document schema to include sources
+- [ ] **Migration:** Ensure backward compatibility (existing events have no sources)
+
+**Editor View:**
+- [ ] **Sources Section:** New collapsible section in AuthoringOverlay for viewing/editing sources
+- [ ] **Add Source:** Button to add new source (text input or URL)
+- [ ] **Edit/Delete Source:** Inline editing and removal of individual sources
+- [ ] **URL Detection:** Auto-detect URLs vs plain text for display styling
+
+**Stream View:**
+- [ ] **Sources Indicator:** Show icon/button if event has sources
+- [ ] **Navigate to Editor:** Clicking sources button opens Editor with that event selected
+
+**NOT in Scope:**
+- No link previews or metadata fetching
+- No sources display on timeline canvas
+- No source validation or verification
+
+### v0.6.4 - Bug Fixes
+**Goal:** Address reported bugs
+
+- [x] **Editor Panel Click Bug:** Clicking events/edit buttons in Editor panels was closing the overlay (fix: check e.target === e.currentTarget)
+- [x] **View on Canvas Bug:** Eye icon in Editor wasn't zooming to event (fix: call handleStreamEventClick before closing)
 
 ## Phase 4: AI Integration (v0.7.x)
 > **Priority:** AI assistance makes the product more powerful
@@ -544,17 +583,7 @@
 - [ ] **Auto-generation:** Create timeline from text/Wikipedia
 
 ## Phase 5: Rich Media (v0.8.x)
-
-### v0.8.0 - Media Attachments
-- [ ] Image and video uploads for events
-- [ ] Firebase Storage integration
-- [ ] Link previews with automatic metadata
-- [ ] Media gallery view for timelines
-
-### v0.8.1 - Content Archival
-- [ ] Automatic web page snapshots
-- [ ] Social media post archival
-- [ ] Link rot prevention and backup
+> **Deferred:** Event images may be added in a future release
 
 ## Phase 6: Collaboration & Versioning (v0.9.x)
 > **Moved later:** Complex feature, build audience first

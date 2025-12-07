@@ -32,6 +32,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
   const { user: firebaseUser, signOut } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
   const open = Boolean(anchorEl);
 
   // Load current user profile from Firestore
@@ -81,37 +82,62 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
 
   return (
     <>
-      <IconButton
-        onClick={handleClick}
-        size="small"
-        aria-controls={open ? 'account-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        aria-label="Account menu"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          padding: '6px 12px',
-          borderRadius: '6px',
-          border: '1px solid',
-          borderColor: 'transparent',
-          '&:hover': {
-            bgcolor: 'rgba(139, 92, 246, 0.1)',
-            borderColor: '#30363d',
-          },
-        }}
+      <div
+        className="inline-flex items-center"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
-        <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>
-          account_circle
-        </span>
-        <span className="text-sm font-medium hidden md:inline" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {currentUser?.username || firebaseUser?.email?.split('@')[0]}
-        </span>
-        <span className="material-symbols-rounded text-sm">
-          {open ? 'expand_less' : 'expand_more'}
-        </span>
-      </IconButton>
+        <IconButton
+          onClick={(e) => { e.stopPropagation(); handleClick(e); }}
+          onMouseDown={(e) => e.stopPropagation()}
+          size="small"
+          aria-controls={open ? 'account-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
+          aria-label="Account menu"
+          sx={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border-primary)',
+            backdropFilter: 'blur(8px)',
+            padding: '8px',
+            minWidth: '36px',
+            height: '36px',
+            borderRadius: isHovered ? '18px' : '50%',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: 'var(--color-surface-hover)',
+            },
+          }}
+        >
+          <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>
+            account_circle
+          </span>
+
+          {/* Username and chevron - expand on hover */}
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              overflow: 'hidden',
+              maxWidth: isHovered ? '150px' : '0px',
+              opacity: isHovered ? 1 : 0,
+              marginLeft: isHovered ? '4px' : '0px',
+              transition: 'all 0.2s ease-in-out',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span className="text-sm font-medium">
+              {currentUser?.username || firebaseUser?.email?.split('@')[0]}
+            </span>
+            <span className="material-symbols-rounded text-sm ml-1">
+              expand_more
+            </span>
+          </span>
+        </IconButton>
+      </div>
 
       <Menu
         id="account-menu"
