@@ -3,7 +3,7 @@
 ## Quick Summary
 
 **Current Version:** v0.7.3 - AI Event Persistence & UX Polish ✅
-**Next Milestone:** v0.8.x - AI Agent Integration (MCP, Partial Import, Schema API)
+**Next Milestone:** v0.7.4+ - AI Integration & Git-Style Workflows (Metadata Preview, Partial Import, MCP Server, Schema API)
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -61,7 +61,7 @@
 - ✅ Event Persistence & Cleanup: Fixed AI events saving to Firestore subcollection, console cleanup, overflow indicator polish, rejected events restore (v0.7.3)
 
 ### Next Up
-- **v0.8.x**: AI Agent Integration (MCP Server, Partial Import, YAML Schema API)
+- **v0.7.4+**: AI Integration & Git-Style Workflows (Metadata Preview → Partial Import → MCP Server → Schema API)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -573,8 +573,8 @@
 - [x] **Editor Panel Click Bug:** Clicking events/edit buttons in Editor panels was closing the overlay (fix: check e.target === e.currentTarget)
 - [x] **View on Canvas Bug:** Eye icon in Editor wasn't zooming to event (fix: call handleStreamEventClick before closing)
 
-## Phase 4: AI Integration (v0.7.x)
-> **Priority:** AI assistance makes the product more powerful
+## Phase 4: AI Integration & Git-Style Workflows (v0.7.x)
+> **Vision:** AI assistance + review workflows that lay groundwork for future collaboration (fork/merge/diff)
 
 ### v0.7.0 - AI Integration (Chat Assistant)
 
@@ -686,58 +686,56 @@
 - [ ] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
 - [ ] **Apply Confirmation:** Clear feedback when metadata is updated
 
----
+### v0.7.5 - Partial Import (Preview & Review)
+**Goal:** Import events with review workflow - foundation for git-style fork/merge/diff
+- [ ] **Preview Import:** Imported events appear as temporary/preview with highlighting
+- [ ] **Review UI:** Reuse ChatPanel approve/reject/restore pattern for import review
+- [ ] **Selective Apply:** User can approve individual events or all at once
+- [ ] **Conflict Detection:** Warn on duplicate/overlapping dates with existing events
 
-## Phase 5: AI Agent Integration (v0.8.x)
-> **Vision:** Enable AI agents (Claude Code, Codex, etc.) to interact with timelines programmatically
-
-### v0.8.0 - Timeline MCP Server
-**Goal:** Expose timeline operations via MCP for AI agent integration
+### v0.7.6 - Timeline MCP Server
+**Goal:** Expose timeline operations via MCP for AI agent integration (Claude Code, Codex, etc.)
 - [ ] **MCP Server:** Create MCP server that connects to Firebase
 - [ ] **Read Operations:** `get_timeline(id)`, `list_user_timelines(userId)`
 - [ ] **Write Operations:** `propose_events(timelineId, events)` - creates pending events for review
 - [ ] **Review Flow:** Reuse existing approve/reject/apply workflow
 - [ ] **Authentication:** Secure with Firebase Auth tokens
 
-### v0.8.1 - Partial Import (Preview & Review)
-**Goal:** Import events with review workflow, foundation for fork/merge/diff
-- [ ] **Preview Import:** Imported events appear as temporary/preview with highlighting
-- [ ] **Review UI:** Reuse ChatPanel approve/reject/restore pattern
-- [ ] **Selective Apply:** User can approve individual events or all
-- [ ] **Conflict Detection:** Warn on duplicate/overlapping dates
-
-### v0.8.2 - YAML Schema API
+### v0.7.7 - YAML Schema API
 **Goal:** Publish schema for AI agents to discover and use
 - [ ] **Schema Endpoint:** `/api/schema/timeline` returns JSON Schema for YAML format
 - [ ] **Documentation:** Add schema docs with examples
 - [ ] **Versioning:** Schema version in response for compatibility
 
-### v0.8.3 - PowerSpawn: Context File Consolidation
+### v0.7.8 - AI-Powered Automation
+**Goal:** Enhance AI capabilities for timeline creation and maintenance
+- [ ] **Event Suggestions:** Auto-suggest related events based on context
+- [ ] **Gap Detection:** Identify missing periods in timeline coverage
+- [ ] **Fact Checking:** Source verification assistance with web search
+- [ ] **Auto-generation:** Create timeline from text/Wikipedia article
+
+### v0.7.9 - PowerSpawn: Context File Consolidation
 **Goal:** Simplify agent context management by merging CONTEXT.MD and IAC.md
 - [ ] **Merge CONTEXT.MD into IAC.md:** Combine context and inter-agent communication into single file
 - [ ] **Active Agents Section:** Add persistent section at top of IAC.md for tracking running agents
 - [ ] **Update MCP Server:** Adjust file reading/writing logic for new structure
 - [ ] **Documentation:** Update README and usage examples
 
-### v0.8.4 - AI-Powered Automation
-- [ ] **Event Suggestions:** Auto-suggest related events
-- [ ] **Gap Detection:** Identify missing periods in timeline
-- [ ] **Fact Checking:** Source verification assistance
-- [ ] **Auto-generation:** Create timeline from text/Wikipedia
+---
 
-## Phase 6: Rich Media (v0.9.x)
+## Phase 5: Rich Media (v0.8.x)
 > **Deferred:** Event images may be added in a future release
 
-## Phase 7: Collaboration & Versioning (v0.10.x)
-> **Moved later:** Complex feature, build audience first
+## Phase 6: Collaboration & Versioning (v0.9.x)
+> **Future:** Git-style workflows for timeline collaboration (builds on v0.7.x review patterns)
 
-### v0.10.0 - Version History
+### v0.9.0 - Version History
 - [ ] Timeline version snapshots on save
 - [ ] Version history browser
 - [ ] Diff viewer for comparing versions
 - [ ] Revert to previous version
 
-### v0.10.1 - Forking System
+### v0.9.1 - Forking System
 - [ ] Fork button and confirmation flow
 - [ ] Fork relationship tracking
 - [ ] Attribution for original authors
