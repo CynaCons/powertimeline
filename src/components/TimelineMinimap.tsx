@@ -143,7 +143,7 @@ export function TimelineMinimap({
       const position = (index / (buckets.length - 1)) * 100;
       const intensity = density / maxDensity;
       const opacity = Math.max(0.1, intensity * 0.6);
-      return `rgba(249, 115, 22, ${opacity}) ${position}%`;
+      return `rgba(59, 130, 246, ${opacity}) ${position}%`;  // blue-500
     }).join(', ');
 
     return `linear-gradient(90deg, ${gradientStops})`;
@@ -195,7 +195,7 @@ export function TimelineMinimap({
               background: generateDensityGradient(eventMarkers)
             }}
           />
-          {/* Enhanced event density markers */}
+          {/* Enhanced event density markers - blue for events */}
           {eventMarkers.map((marker, index) => {
             const isSelected = highlightedEventId === marker.event.id;
             const isHovered = hoveredEventId === marker.event.id && !isSelected;
@@ -209,7 +209,7 @@ export function TimelineMinimap({
                     ? 'w-1.5 h-3 bg-amber-400 opacity-100 border border-white shadow-lg rounded-sm'
                     : isHovered
                       ? 'w-1.5 h-2.5 bg-sky-400 opacity-100 border border-white shadow-md rounded-sm'
-                      : 'top-0 w-0.5 h-2 bg-orange-500 opacity-80 hover:opacity-100'
+                      : 'top-0 w-0.5 h-2 bg-blue-500 opacity-80 hover:opacity-100'
                 }`}
                 style={{
                   left: `${marker.position * 100}%`,
@@ -223,7 +223,7 @@ export function TimelineMinimap({
                     ? '0 0 8px rgba(251, 191, 36, 0.55), 0 2px 6px rgba(251, 191, 36, 0.35)'
                     : isHovered
                       ? '0 0 8px rgba(56, 189, 248, 0.45), 0 2px 6px rgba(56, 189, 248, 0.25)'
-                      : '0 1px 3px rgba(0,0,0,0.2)',
+                      : '0 1px 3px rgba(59, 130, 246, 0.3)',
                   zIndex: isSelected ? 4 : isHovered ? 3 : 2
                 }}
                 title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
@@ -231,7 +231,7 @@ export function TimelineMinimap({
             );
           })}
           
-          {/* Enhanced current view window indicator */}
+          {/* Enhanced current view window indicator - grey overlay */}
           <div
             className={`absolute rounded transition-all duration-200 ease-out ${
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
@@ -239,10 +239,10 @@ export function TimelineMinimap({
             style={{
               left: `${viewStart * 100}%`,
               width: `${(viewEnd - viewStart) * 100}%`,
-              background: 'rgba(139, 92, 246, 0.15)',
-              border: '2px solid rgb(139, 92, 246)',
+              background: 'rgba(107, 114, 128, 0.2)',
+              border: '2px solid rgb(107, 114, 128)',
               borderRadius: '6px',
-              boxShadow: isHovering ? '0 0 8px rgba(139, 92, 246, 0.4)' : '0 0 4px rgba(139, 92, 246, 0.2)',
+              boxShadow: isHovering ? '0 0 8px rgba(107, 114, 128, 0.4)' : '0 0 4px rgba(107, 114, 128, 0.2)',
               top: '-1px',
               height: 'calc(100% + 2px)',
               zIndex: 1
@@ -251,7 +251,7 @@ export function TimelineMinimap({
           >
             {/* View window content indicator */}
             <div
-              className="absolute bg-neutral-300 opacity-20 rounded-sm"
+              className="absolute bg-neutral-400 opacity-20 rounded-sm"
               style={{ inset: '3px 2px' }}
             ></div>
           </div>
