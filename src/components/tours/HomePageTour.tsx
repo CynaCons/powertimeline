@@ -9,34 +9,34 @@ const HOME_TOUR_ID = 'home-tour';
 const homeSteps: Step[] = [
   {
     target: 'body',
-    content: 'Welcome to PowerTimeline! Let\'s show you around the home page.',
+    content: 'PowerTimeline helps you visualize history, tell stories, and connect events across time. Let\'s explore!',
     placement: 'center',
     disableBeacon: true,
-    title: 'Welcome!',
+    title: '👋 Welcome to PowerTimeline',
   },
   {
     target: '[data-tour="my-timelines"]',
-    content: 'Your personal timelines appear here. Create, edit, and manage your work.',
+    content: 'This is your personal workspace. All the timelines you create will appear here.',
     placement: 'bottom',
-    title: 'My Timelines',
+    title: '📚 My Timelines',
   },
   {
     target: '[data-tour="timeline-card"]',
-    content: 'Click any timeline card to open it. Use the menu for more options.',
+    content: 'Each card is a timeline. Click to open it in the editor. The three-dot menu has options like delete and export.',
     placement: 'bottom',
-    title: 'Timeline Cards',
+    title: '🎴 Timeline Cards',
   },
   {
     target: '[data-tour="browse-public"]',
-    content: 'Explore timelines created by others. Fork them to make your own versions.',
+    content: 'Discover timelines created by other users. Find inspiration or fork one to create your own version.',
     placement: 'top',
-    title: 'Browse Public',
+    title: '🌍 Explore Public Timelines',
   },
   {
     target: '[data-tour="nav-rail"]',
-    content: 'Use the navigation rail to switch between Browse, My Timelines, and Settings.',
+    content: 'Quick navigation lives here. Browse timelines, access your collection, adjust settings, or start a tour anytime.',
     placement: 'right',
-    title: 'Navigation',
+    title: '🧭 Navigation',
   },
 ];
 
