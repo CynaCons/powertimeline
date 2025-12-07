@@ -10,7 +10,7 @@ const DEFAULT_CARD_CONFIGS: Record<CardType, CardConfig> = {
   compact: {
     type: 'compact',
     width: 260,
-    height: 75  // Reduced from 92px to 75px so that 4 compact cards fit in half-column (4 × 75px + 3 × 12px = 336px)
+    height: 82  // Height for 2-line titles: 82px content + 16px padding. 3 cards fit in half-column (3 × 82px + 2 × 12px = 270px)
   },
   'title-only': {
     type: 'title-only',

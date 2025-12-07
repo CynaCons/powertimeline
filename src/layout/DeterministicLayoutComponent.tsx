@@ -881,7 +881,13 @@ export function DeterministicLayoutComponent({
 function FullCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
-      <h3 className="card-title line-clamp-2 mb-1" style={{ color: 'var(--color-text-primary)' }}>{event.title}</h3>
+      <h3
+        className="card-title line-clamp-2 mb-1"
+        style={{ color: 'var(--color-text-primary)' }}
+        title={event.title}
+      >
+        {event.title}
+      </h3>
       {event.description ? (
         <p className="card-description flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
@@ -895,7 +901,13 @@ function FullCardContent({ event }: { event: Event }) {
 function CompactCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
-      <h3 className="card-title line-clamp-2 mb-1" style={{ color: 'var(--color-text-primary)' }}>{event.title}</h3>
+      <h3
+        className="card-title line-clamp-2 mb-1"
+        style={{ color: 'var(--color-text-primary)' }}
+        title={event.title}
+      >
+        {event.title}
+      </h3>
       {event.description ? (
         <p className="card-description line-clamp-1" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
@@ -909,7 +921,13 @@ function CompactCardContent({ event }: { event: Event }) {
 function TitleOnlyCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex items-center">
-      <h3 className="card-title line-clamp-1" style={{ color: 'var(--color-text-primary)' }}>{event.title}</h3>
+      <h3
+        className="card-title line-clamp-1"
+        style={{ color: 'var(--color-text-primary)' }}
+        title={event.title}
+      >
+        {event.title}
+      </h3>
     </div>
   );
 }
