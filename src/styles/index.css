@@ -442,6 +442,19 @@
   animation: cardFadeOut var(--transition-medium) ease-in forwards;
 }
 
+/* Preview Event Card Styles (AI-created temporary events) */
+.card-preview {
+  background: var(--preview-bg) !important;
+  border: 2px dashed var(--preview-border) !important;
+  box-shadow: 0 0 16px var(--preview-glow) !important;
+  opacity: 0.9;
+}
+
+.card-preview:hover {
+  opacity: 1;
+  box-shadow: 0 0 20px var(--preview-glow) !important;
+}
+
 /* Skeleton Card Styles */
 .skeleton-card {
   background: var(--color-surface);

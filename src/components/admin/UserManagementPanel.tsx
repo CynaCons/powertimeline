@@ -226,7 +226,6 @@ export function UserManagementPanel() {
       // Delete the user
       await deleteUserFirestore(deleteDialog.userId);
 
-      console.log(`Deleted user ${deleteDialog.userId}, cascade deleted ${userTimelines.length} timelines`);
       await refreshData();
 
       logAdminAction(
@@ -319,7 +318,6 @@ export function UserManagementPanel() {
         await deleteUserFirestore(userId);
       }
 
-      console.log(`Bulk deleted ${selectedUserIds.size} users, cascade deleted ${totalDeleted} timelines`);
       await refreshData();
       clearSelection();
       setBulkDeleteDialog(null);
@@ -358,7 +356,6 @@ export function UserManagementPanel() {
         await updateUserFirestore(userId, { role: bulkRoleDialog.newRole });
       }
 
-      console.log(`Bulk assigned ${selectedUserIds.size} users to role: ${bulkRoleDialog.newRole}`);
       await refreshData();
       clearSelection();
       setBulkRoleDialog(null);

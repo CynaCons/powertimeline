@@ -450,12 +450,7 @@ export class DegradationEngine {
     const visibleEvents = combined.slice(0, maxCardsPerHalfColumn);
 
     // VALIDATION: Ensure card types are coherent with actual visible count
-    if (FEATURE_FLAGS.ENABLE_MIXED_CARD_TYPES && visibleEvents.length !== cardTypes.length) {
-      console.warn(
-        `Card type mismatch: ${visibleEvents.length} visible events but ${cardTypes.length} card types specified. ` +
-        `Group: ${group.id}, Side: ${group.side}`
-      );
-    }
+    // Note: Mismatch validation removed to reduce console noise
 
     visibleEvents.forEach((event, index) => {
       // Cycle through card types if multiple provided
@@ -476,19 +471,6 @@ export class DegradationEngine {
     // Update overflowEvents to remainder for accurate anchor counts and future passes
     const remainder = combined.slice(visibleEvents.length);
     group.overflowEvents = remainder.length > 0 ? remainder : undefined;
-
-    // VALIDATION: Log card creation for telemetry
-    if (cards.length > 0) {
-      const cardTypeCounts = cards.reduce((acc, card) => {
-        acc[card.cardType] = (acc[card.cardType] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      console.log(
-        `Created ${cards.length} cards for group ${group.id} (${group.side}): ` +
-        Object.entries(cardTypeCounts).map(([type, count]) => `${count} ${type}`).join(', ')
-      );
-    }
 
     return cards;
   }

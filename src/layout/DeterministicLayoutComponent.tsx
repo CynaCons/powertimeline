@@ -223,8 +223,6 @@ export function DeterministicLayoutComponent({
         ticks: finalTicks
       };
     };
-    
-    if (DEBUG_LAYOUT) console.log('Debug function available: window.debugTimelineScales()');
   }, [viewportSize, finalTicks, DEBUG_LAYOUT]);
 
   // TODO: Fix useAxisTicks hook - currently using fallback system
@@ -321,13 +319,11 @@ export function DeterministicLayoutComponent({
 
   // Always show all anchors - they should persist even during card degradation
   const filteredAnchors = useMemo(() => {
-    if (DEBUG_LAYOUT) console.log(`ANCHOR PERSISTENCE: Showing all ${layoutResult.anchors.length} anchors regardless of card visibility`);
-
     // Return all anchors without filtering - anchors should always be visible
     // even when cards are degraded or hidden. This ensures timeline reference points
     // remain consistent and anchor-timeline alignment is preserved.
     return layoutResult.anchors;
-  }, [layoutResult.anchors, DEBUG_LAYOUT]);
+  }, [layoutResult.anchors]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
@@ -598,17 +594,11 @@ export function DeterministicLayoutComponent({
           viewportSize={viewportSize}
           timelineY={config?.timelineY ?? viewportSize.height / 2}
           baseTicks={finalTicks}
-          onDateHover={(date) => {
+          onDateHover={() => {
             // Optional: Add date hover functionality
-            if (DEBUG_LAYOUT && date) {
-              console.log('Timeline hover:', date.toLocaleDateString());
-            }
           }}
-          onTimelineClick={(date) => {
+          onTimelineClick={() => {
             // Optional: Add timeline click functionality
-            if (DEBUG_LAYOUT) {
-              console.log('Timeline clicked at:', date.toLocaleDateString());
-            }
           }}
         />
       )}
@@ -701,12 +691,16 @@ export function DeterministicLayoutComponent({
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
               };
 
+        // Calculate badge position to center on timeline axis
+        const outerContainerTop = Math.min(anchorCenterY, timelineAxisY) - 5;
+        const badgeAxisOffset = timelineAxisY - outerContainerTop - 2; // -2 to center the h-4 badge
+
         return (
           <div
             key={anchor.id}
             data-testid={anchor.id}
             className="absolute"
-            style={{ left: anchor.x - 5, top: Math.min(anchorCenterY, timelineAxisY) - 5 }}
+            style={{ left: anchor.x - 5, top: outerContainerTop }}
           >
             <div
               data-testid="timeline-anchor"
@@ -738,36 +732,34 @@ export function DeterministicLayoutComponent({
                 }`}
                 style={anchorVisualStyle}
               />
-
-              {/* Individual overflow badge - only show if NOT part of merged group */}
-              {anchor.overflowCount > 0 && !isMerged && (
-                <div
-                  data-testid={`overflow-badge-${anchor.id}`}
-                  className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30"
-                >
-                  +{anchor.overflowCount}
-                </div>
-              )}
             </div>
+
+            {/* Individual overflow badge - positioned on axis, outside the offset anchor */}
+            {anchor.overflowCount > 0 && !isMerged && (
+              <div
+                data-testid={`overflow-badge-${anchor.id}`}
+                className="absolute bg-white/90 text-rose-600 text-[10px] rounded-full min-w-4 h-4 px-1 flex items-center justify-center font-semibold border border-rose-400 z-30"
+                style={{ left: 12, top: badgeAxisOffset }}
+              >
+                +{anchor.overflowCount}
+              </div>
+            )}
           </div>
         );
       })}
       
-      {/* Render merged overflow badges at centroids */}
+      {/* Render merged overflow badges at centroids - centered on timeline axis */}
       {mergedOverflowBadges.map((badge, index) => (
         <div
           key={`merged-badge-${index}`}
           data-testid={`merged-overflow-badge-${index}`}
-          className="absolute flex flex-col items-center"
+          className="absolute bg-white/90 text-rose-600 text-[10px] rounded-full min-w-4 h-4 px-1 flex items-center justify-center font-semibold border border-rose-400 z-30"
           style={{
-            left: badge.x - 4,
-            top: (config?.timelineY ?? viewportSize.height / 2) - 4
+            left: badge.x + 4,
+            top: (config?.timelineY ?? viewportSize.height / 2) - 8
           }}
         >
-          {/* Merged overflow badge */}
-          <div className="absolute -top-4 -right-4 bg-red-500 text-white text-sm rounded-full min-w-8 h-8 px-2 flex items-center justify-center font-bold shadow-lg border-2 border-white z-30">
-            +{badge.totalOverflow}
-          </div>
+          +{badge.totalOverflow}
         </div>
       ))}
       
@@ -794,15 +786,28 @@ export function DeterministicLayoutComponent({
           ? 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg'
           : '';
 
+        // Check if this is a preview event (AI-created temporary event)
+        const isPreviewEvent = card.event.isPreview === true;
+
         const cardStyle: CSSProperties = {
           left: card.x,
           top: card.y,
           width: card.width,
           height: card.height,
           zIndex: isCardSelected ? 25 : isCardHovered ? 22 : isCardPairHovered ? 21 : 10,
-          backgroundColor: isCardSelected ? 'rgba(254, 243, 199, 0.45)' : 'var(--color-surface)',
-          borderColor: 'var(--color-border-primary)',
-          boxShadow: isCardSelected ? '0 12px 24px rgba(251, 191, 36, 0.25)' : undefined,
+          backgroundColor: isPreviewEvent
+            ? 'var(--preview-bg)'
+            : isCardSelected
+            ? 'rgba(254, 243, 199, 0.45)'
+            : 'var(--color-surface)',
+          borderColor: isPreviewEvent ? 'var(--preview-border)' : 'var(--color-border-primary)',
+          borderStyle: isPreviewEvent ? 'dashed' : 'solid',
+          borderWidth: isPreviewEvent ? '2px' : '1px',
+          boxShadow: isPreviewEvent
+            ? '0 0 16px var(--preview-glow)'
+            : isCardSelected
+            ? '0 12px 24px rgba(251, 191, 36, 0.25)'
+            : undefined,
           color: 'var(--color-text-primary)'
         };
 
@@ -821,7 +826,8 @@ export function DeterministicLayoutComponent({
             data-card-type={card.cardType}
             data-cluster-id={card.clusterId}
             data-tour={isFirstCard ? 'event-card' : undefined}
-            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} text-sm`}
+            data-preview={isPreviewEvent || undefined}
+            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}

@@ -6,7 +6,7 @@ import { UserProfileMenu } from './components/UserProfileMenu';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
 import { useAuth } from './contexts/AuthContext';
-import { getTimeline, updateTimeline, getUser } from './services/firestore';
+import { getTimeline, updateTimeline, getUser, addEvent, updateEvent as updateEventFirestore, deleteEvent as deleteEventFirestore } from './services/firestore';
 import type { User } from './types';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
@@ -26,6 +26,11 @@ const ImportExportOverlay = lazy(() => import('./app/overlays/ImportExportOverla
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
 const StreamViewerOverlay = lazy(() => import('./components/StreamViewerOverlay').then(m => ({ default: m.StreamViewerOverlay })));
+const ChatPanel = lazy(() => import('./app/panels/ChatPanel').then(m => ({ default: m.ChatPanel })));
+import { useAISession } from './hooks/useAISession';
+import { buildAIContext } from './lib/aiContextBuilder';
+import { executeActions } from './lib/aiActionHandlers';
+import type { AIAction, AIContext } from './types/ai';
 import { EventStorage } from './lib/storage';
 import { seedRFKTimeline } from './lib/devSeed';
 import { useViewWindow } from './app/hooks/useViewWindow';
@@ -58,45 +63,62 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   // Storage
   const storageRef = useRef(new EventStorage());
 
+  // Ref to always have current events (avoid stale closures)
+  const eventsRef = useRef<Event[]>([]);
+
   // Helper function to save events to the correct location
   const saveEvents = useCallback(async (events: Event[]) => {
-    console.log('[saveEvents] Called with', events.length, 'events, timelineId:', timelineId);
-    if (timelineId) {
-      // Save to timeline in Firestore
-      console.log('[saveEvents] Saving to Firestore, timelineId:', timelineId);
-      await updateTimeline(timelineId, { events });
-      console.log('[saveEvents] Timeline updated successfully in Firestore');
+    try {
+      if (timelineId) {
+        // Only owners can save - check before attempting
+        if (!isOwner) {
+          console.error('[saveEvents] Cannot save: user is not the owner');
+          throw new Error('Permission denied: only the timeline owner can save changes');
+        }
+        // Save to timeline in Firestore
+        await updateTimeline(timelineId, { events });
 
-      // Verify it was saved
-      const timeline = await getTimeline(timelineId);
-      console.log('[saveEvents] Verification - timeline now has', timeline?.events.length, 'events');
-    } else {
-      // Save to legacy EventStorage
-      console.log('[saveEvents] Saving to legacy EventStorage');
-      storageRef.current.writeThrough(events);
+        // Verify the save worked by fetching back
+        const savedTimeline = await getTimeline(timelineId);
+        if (!savedTimeline) {
+          throw new Error('Verification failed: could not fetch timeline after save');
+        }
+        if (savedTimeline.events.length !== events.length) {
+          console.error('[saveEvents] MISMATCH: Saved', events.length, 'but fetched', savedTimeline.events.length);
+          throw new Error(`Save verification failed: expected ${events.length} events, got ${savedTimeline.events.length}`);
+        }
+      } else {
+        // Save to legacy EventStorage
+        storageRef.current.writeThrough(events);
+      }
+    } catch (error) {
+      console.error('[saveEvents] Failed to save events:', error);
+      throw error; // Re-throw so caller can handle
     }
-  }, [timelineId]);
+  }, [timelineId, isOwner]);
 
   const [events, setEvents] = useState<Event[]>(() => {
-    console.log('[App] Initializing with timelineId:', timelineId);
     // If timelineId is provided, we'll load from Firestore in useEffect (can't be async here)
     if (timelineId) {
-      console.log('[App] Timeline ID provided, will load from Firestore in useEffect');
       return [];
     }
 
     // Otherwise, load from legacy EventStorage
-    console.log('[App] No timelineId, loading from legacy EventStorage');
     const stored = storageRef.current.load();
     if (stored.length > 0) {
       return stored;
     }
 
-    console.log('[App] No stored events, loading default RFK seed');
     const defaultSeed = seedRFKTimeline();
     storageRef.current.writeThrough(defaultSeed);
     return defaultSeed;
   });
+
+  // Keep eventsRef in sync with events (for callbacks that need current events)
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
+
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -131,7 +153,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       if (timelineId) {
         const timeline = await getTimeline(timelineId);
         if (timeline) {
-          console.log('Loading timeline:', timeline.title, 'with', timeline.events.length, 'events');
           setEvents(timeline.events);
           setCurrentTimeline(timeline);
           return;
@@ -170,10 +191,19 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   }, [loadTimelineEvents]);
 
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
+  // Selected regular event (used for AI context)
   const selected = useMemo(
     () => events.find((e) => e.id === selectedId),
     [events, selectedId]
   );
+
+  // AI Context for chat
+  const aiContext = useMemo<AIContext>(() => buildAIContext({
+    timeline: currentTimeline,
+    events,
+    selectedEvent: selected,
+  }), [currentTimeline, events, selected]);
+
   const [editDate, setEditDate] = useState('');
   const [editTime, setEditTime] = useState('');
   const [editTitle, setEditTitle] = useState('');
@@ -203,6 +233,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'import-export'>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const [outlineFilter, setOutlineFilter] = useState('');
+  const [chatPanelOpen, setChatPanelOpen] = useState(false);
 
   // Info panels toggle
   const [showInfoPanels, setShowInfoPanels] = useState(false);
@@ -307,12 +338,31 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   // CRUD handlers
   const saveAuthoring = useCallback((e: React.FormEvent, options?: { sources?: string[] }) => {
     e.preventDefault();
-    console.log('[saveAuthoring] Called');
-    console.log('[saveAuthoring] editDate:', editDate, 'editTitle:', editTitle, 'sources:', options?.sources);
     const isEdit = !!selectedId;
-    console.log('[saveAuthoring] isEdit:', isEdit, 'selectedId:', selectedId);
+
+    // Check if this is a preview event (AI-proposed event)
+    if (selectedId?.startsWith('preview-')) {
+      const actionId = selectedId.replace('preview-', '');
+
+      // Update the pending action's payload instead of writing to Firestore
+      updateActionPayloadRef.current(actionId, {
+        date: editDate,
+        time: editTime || undefined,
+        title: editTitle,
+        description: editDescription || undefined,
+        sources: options?.sources,
+      });
+
+      try {
+        announce(`Updated preview for ${editTitle || 'event'}`);
+      } catch (error) {
+        console.warn('Failed to announce preview update:', error);
+      }
+      setOverlay(null);
+      return;
+    }
+
     if (isEdit) {
-      console.log('[saveAuthoring] Editing existing event');
       setEvents(prev => {
         const next = prev.map(ev => ev.id === selectedId ? {
           ...ev,
@@ -332,10 +382,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       }
     } else {
       if (!editDate || !editTitle) {
-        console.log('[saveAuthoring] Missing required fields - date or title');
         return;
       }
-      console.log('[saveAuthoring] Creating new event');
       const newEvent: Event = {
         id: Date.now().toString(),
         date: editDate,
@@ -344,7 +392,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
         description: editDescription || undefined,
         sources: options?.sources,
       };
-      console.log('[saveAuthoring] New event:', newEvent);
       setEvents(prev => { const next = [...prev, newEvent]; saveEvents(next); return next; });
       try {
         announce(`Added event ${editTitle}`);
@@ -409,6 +456,156 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       console.warn('Failed to announce stream delete:', error);
     }
   }, [saveEvents, announce]);
+
+  // AI Action handlers
+  const handleApplyAIActions = useCallback(async (actions: AIAction[]) => {
+    // Use ref to get current events (avoid stale closure)
+    let currentEvents = eventsRef.current;
+
+    // Need ownerId for Firestore operations
+    const ownerId = currentTimeline?.ownerId;
+    if (!ownerId || !timelineId) {
+      throw new Error('Cannot apply AI actions: missing timeline or owner info');
+    }
+
+    // Check ownership
+    if (!isOwner) {
+      throw new Error('Permission denied: only the timeline owner can apply AI actions');
+    }
+
+    const results = await executeActions(actions, {
+      events: currentEvents,
+      timeline: currentTimeline,
+      onCreateEvent: async (eventData) => {
+        const newId = Date.now().toString();
+        const newEvent = { ...eventData, id: newId } as Event;
+
+        // Add to Firestore events subcollection
+        await addEvent(timelineId, ownerId, newEvent);
+
+        // Update local state
+        const nextEvents = [...currentEvents, newEvent];
+        currentEvents = nextEvents;
+        setEvents(nextEvents);
+        return newId;
+      },
+      onUpdateEvent: async (id, changes) => {
+        // Update in Firestore events subcollection
+        await updateEventFirestore(timelineId, ownerId, id, changes);
+
+        // Update local state
+        const nextEvents = currentEvents.map(ev => ev.id === id ? { ...ev, ...changes } : ev);
+        currentEvents = nextEvents;
+        setEvents(nextEvents);
+      },
+      onDeleteEvent: async (id) => {
+        // Delete from Firestore events subcollection
+        await deleteEventFirestore(timelineId, ownerId, id);
+
+        // Update local state
+        const nextEvents = currentEvents.filter(ev => ev.id !== id);
+        currentEvents = nextEvents;
+        setEvents(nextEvents);
+      },
+      onUpdateTimeline: async (changes) => {
+        if (currentTimeline && timelineId) {
+          await updateTimeline(timelineId, changes);
+          setCurrentTimeline(prev => prev ? { ...prev, ...changes } : null);
+        }
+      },
+    });
+
+    // Check for failures
+    const failures = results.filter(r => !r.success);
+    if (failures.length > 0) {
+      throw new Error(`Failed to apply ${failures.length} action(s)`);
+    }
+  }, [currentTimeline, timelineId, isOwner]);
+
+  // AI Session
+  const aiSession = useAISession({
+    context: aiContext,
+    onApplyActions: handleApplyAIActions,
+  });
+
+  // Ref to access updateActionPayload in saveAuthoring (declared earlier)
+  const updateActionPayloadRef = useRef(aiSession.updateActionPayload);
+  useEffect(() => {
+    updateActionPayloadRef.current = aiSession.updateActionPayload;
+  }, [aiSession.updateActionPayload]);
+
+  // Preview events from pending AI actions
+  const previewEvents = useMemo((): Event[] => {
+    return aiSession.pendingActions
+      .filter((a): a is import('./types/ai').CreateEventAction =>
+        a.type === 'CREATE_EVENT' && (a.status === 'pending' || a.status === 'approved')
+      )
+      .map(action => ({
+        id: `preview-${action.id}`,
+        title: action.payload.title,
+        date: action.payload.date,
+        description: action.payload.description,
+        endDate: action.payload.endDate,
+        time: action.payload.time,
+        sources: action.payload.sources,
+        isPreview: true,
+      }));
+  }, [aiSession.pendingActions]);
+
+  // Combine real events with preview events
+  const eventsWithPreviews = useMemo(() => {
+    return [...events, ...previewEvents];
+  }, [events, previewEvents]);
+
+  // Selected event including preview events (for editor)
+  const selectedWithPreviews = useMemo(
+    () => eventsWithPreviews.find((e) => e.id === selectedId),
+    [eventsWithPreviews, selectedId]
+  );
+
+  // Sync form fields when selecting a PREVIEW event
+  // (regular events are handled by the earlier effect at line ~292)
+  useEffect(() => {
+    if (selectedId?.startsWith('preview-') && selectedWithPreviews) {
+      setEditDate(selectedWithPreviews.date);
+      setEditTime(selectedWithPreviews.time ?? '');
+      setEditTitle(selectedWithPreviews.title);
+      setEditDescription(selectedWithPreviews.description ?? '');
+    }
+  }, [selectedId, selectedWithPreviews]);
+
+  // Handle preview action - zoom to and highlight the preview event
+  const handlePreviewAction = useCallback((action: import('./types/ai').AIAction) => {
+    if (action.type !== 'CREATE_EVENT') return;
+
+    const date = action.payload.date as string;
+    if (!date) return;
+
+    // Select the preview event to highlight it
+    const previewEventId = `preview-${action.id}`;
+    setSelectedId(previewEventId);
+
+    // Calculate normalized position for the date
+    const allEvents = [...events, ...previewEvents];
+    if (allEvents.length === 0) {
+      // No events, just center on the preview date
+      animateTo(0.4, 0.6);
+      return;
+    }
+
+    const eventDate = new Date(date);
+    const allDates = allEvents.map(e => new Date(e.date).getTime());
+    const minDate = Math.min(...allDates, eventDate.getTime());
+    const maxDate = Math.max(...allDates, eventDate.getTime());
+    const range = maxDate - minDate || 1;
+    const normalizedPos = (eventDate.getTime() - minDate) / range;
+
+    // Zoom to a window around the event
+    const windowSize = 0.2;
+    const start = Math.max(0, normalizedPos - windowSize / 2);
+    const end = Math.min(1, start + windowSize);
+    animateTo(start, end);
+  }, [events, previewEvents, animateTo]);
 
   const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
   const filteredForList = useMemo(() => {
@@ -564,7 +761,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     }
 
     return items;
-  }, [overlay, openEvents, openCreate, isReadOnly, openStreamView, streamViewerOpen, openImportExport, firebaseUser]);
+  }, [overlay, openEvents, openCreate, isReadOnly, openStreamView, streamViewerOpen, openImportExport, firebaseUser, chatPanelOpen]);
 
   // Current user profile from Firestore (firebaseUser already declared above)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -655,6 +852,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     openCreate,
     toggleTheme,
     closeOverlay,
+    openAIChat: () => setChatPanelOpen(true),
   });
 
   useCommandPaletteShortcuts(() => setCommandPaletteOpen(true));
@@ -760,8 +958,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               <ErrorBoundary>
                 <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 border-l flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
                   <AuthoringOverlay
-                    selected={selected}
-                    isNewEvent={!selected}
+                    selected={selectedWithPreviews}
+                    isNewEvent={!selectedWithPreviews}
                     editDate={editDate}
                     editTime={editTime}
                     editTitle={editTitle}
@@ -781,8 +979,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     isOwner={isOwner}
                     onViewOnCanvas={() => {
                       // Close editor and zoom to the selected event on canvas
-                      if (selected) {
-                        handleStreamEventClick(selected);
+                      if (selectedWithPreviews) {
+                        handleStreamEventClick(selectedWithPreviews);
                       }
                       setOverlay(null);
                     }}
@@ -848,7 +1046,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             >
               <ErrorBoundary>
                 <DeterministicLayoutComponent
-                  events={events}
+                  events={eventsWithPreviews}
                   showInfoPanels={showInfoPanels}
                   viewStart={viewStart}
                   viewEnd={viewEnd}
@@ -982,6 +1180,67 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             initialEventId={selectedId}
           />
         </Suspense>
+
+        {/* AI Chat Widget (v0.7.0) - Floating bottom-right, only for timeline owners */}
+        {firebaseUser && isOwner && (
+          <div className="fixed bottom-4 right-4 z-[200] flex flex-col items-end gap-3">
+            {/* Chat popup - appears above the button when open */}
+            {chatPanelOpen && (
+              <Suspense fallback={null}>
+                <div
+                  className="w-80 h-[500px] max-h-[70vh] rounded-xl shadow-2xl overflow-hidden border"
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    borderColor: 'var(--color-border-primary)'
+                  }}
+                >
+                  <ChatPanel
+                    apiKey={aiSession.apiKey}
+                    isKeyValid={aiSession.isKeyValid}
+                    messages={aiSession.messages}
+                    isLoading={aiSession.isLoading}
+                    error={aiSession.error}
+                    usage={aiSession.usage}
+                    pendingActions={aiSession.pendingActions}
+                    onSetApiKey={aiSession.setApiKey}
+                    onClearApiKey={aiSession.clearApiKey}
+                    onSendMessage={aiSession.sendMessage}
+                    onClearHistory={aiSession.clearHistory}
+                    onApproveActions={aiSession.approveActions}
+                    onRejectActions={aiSession.rejectActions}
+                    onRestoreActions={aiSession.restoreActions}
+                    onApplyActions={aiSession.applyActions}
+                    onPreviewAction={handlePreviewAction}
+                    onClose={() => setChatPanelOpen(false)}
+                  />
+                </div>
+              </Suspense>
+            )}
+
+            {/* Floating action button */}
+            <Tooltip title={chatPanelOpen ? "Close AI Assistant" : "AI Assistant"} placement="left">
+              <IconButton
+                onClick={() => setChatPanelOpen(prev => !prev)}
+                sx={{
+                  width: 56,
+                  height: 56,
+                  bgcolor: chatPanelOpen ? 'var(--color-surface-elevated)' : '#8b5cf6',
+                  color: chatPanelOpen ? 'var(--color-text-primary)' : 'white',
+                  boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                  '&:hover': {
+                    bgcolor: chatPanelOpen ? 'var(--color-surface-hover)' : '#7c3aed',
+                    transform: 'scale(1.05)',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <span className="material-symbols-rounded" style={{ fontSize: 28 }}>
+                  {chatPanelOpen ? 'close' : 'smart_toy'}
+                </span>
+              </IconButton>
+            </Tooltip>
+          </div>
+        )}
 
         {/* Live region for announcements */}
         {renderLiveRegion()}

@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.6.4 (Bug Fixes + Event Sources) ✅
-**Next Milestone:** v0.7.x - AI Integration
+**Current Version:** v0.7.3 - AI Event Persistence & UX Polish ✅
+**Next Milestone:** v0.8.x - AI Agent Integration (MCP, Partial Import, Schema API)
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -56,9 +56,12 @@
 - ✅ Error Handling: GitHub issues link in ErrorState, ErrorBoundary, Toast; SRS_TIMELINE_EDITOR.md (v0.6.2)
 - ✅ Event Sources: sources field on events, SourcesEditor component, Stream View indicator, drag-and-drop reordering, E2E tests (v0.6.3)
 - ✅ Bug Fixes: Editor panel click, view on canvas zoom, Editor-to-Stream navigation (v0.6.4)
+- ✅ AI Chat Assistant: Gemini 2.5 Flash integration with Google Search (v0.7.0)
+- ✅ AI UX Polish: Cost tracking, preview events, editor behavior fixes (v0.7.1-v0.7.2)
+- ✅ Event Persistence & Cleanup: Fixed AI events saving to Firestore subcollection, console cleanup, overflow indicator polish, rejected events restore (v0.7.3)
 
 ### Next Up
-- **v0.7.x**: AI Integration (chatbot, natural language creation, summaries)
+- **v0.8.x**: AI Agent Integration (MCP Server, Partial Import, YAML Schema API)
 
 ### Test Status
 - **Suite:** 320 tests in 92 files
@@ -537,7 +540,7 @@
 
 - [x] **GitHub Issues Link:** Add link to GitHub issues page in error messages (ErrorState, ErrorBoundary, Toast)
 - [x] **SRS_TIMELINE_EDITOR.md:** Created per-page requirements doc (28 requirements for editor controls)
-- [ ] **Firebase Error Messages:** Improve Firebase error messages with actionable guidance (deferred)
+- [x] **Firebase Error Messages:** Improve Firebase error messages with actionable guidance (deferred)
 
 ### v0.6.3 - Event Sources
 **Goal:** Allow users to cite sources for timeline events
@@ -564,11 +567,6 @@
 - [x] **SRS Documentation:** docs/SRS_EVENT_SOURCES.md with 37 requirements
 - [x] **E2E Tests:** 4 Stream View tests (indicator visibility, count, no-sources, click-to-edit)
 
-**NOT in Scope:**
-- No link previews or metadata fetching
-- No sources display on timeline canvas
-- No source validation or verification
-
 ### v0.6.4 - Bug Fixes
 **Goal:** Address reported bugs
 
@@ -578,31 +576,160 @@
 ## Phase 4: AI Integration (v0.7.x)
 > **Priority:** AI assistance makes the product more powerful
 
-### v0.7.0 - AI Chat Interface
-- [ ] **Sidebar Chatbot:** Q&A about the timeline content
-- [ ] **Natural Language Creation:** "Add an event for when X happened"
-- [ ] **Timeline Summarization:** Auto-generate summaries
-- [ ] **Date Assistance:** Help with historical date formatting
+### v0.7.0 - AI Integration (Chat Assistant)
 
-### v0.7.1 - AI-Powered Automation
+**Status:** ✅ Complete
+
+#### Completed Tasks:
+- [x] SRS_AI_INTEGRATION.md (125 requirements)
+- [x] TypeScript types (`src/types/ai.ts`)
+- [x] AI Service for Gemini API (`src/services/aiService.ts`)
+- [x] useAISession hook (`src/hooks/useAISession.ts`)
+- [x] ChatPanel component (`src/app/panels/ChatPanel.tsx`)
+- [x] Context builder (`src/lib/aiContextBuilder.ts`)
+- [x] Action handlers (`src/lib/aiActionHandlers.ts`)
+- [x] App.tsx integration
+- [x] E2E tests (`tests/ai/chat-panel.spec.ts`)
+- [x] RightPanelShell component for right-side panels (`src/app/RightPanelShell.tsx`)
+
+#### Features:
+- AI chat panel in editor sidebar
+- Google Gemini API integration
+- Session-only API key storage (secure)
+- Create/update/delete events via natural language
+- Action confirmation before applying changes
+- Conversation history (session-only)
+
+#### Files Added:
+- `docs/SRS_AI_INTEGRATION.md` - 125 requirements
+- `src/types/ai.ts` - Type definitions
+- `src/services/aiService.ts` - Gemini API wrapper
+- `src/hooks/useAISession.ts` - Session management
+- `src/app/panels/ChatPanel.tsx` - Chat UI
+- `src/lib/aiContextBuilder.ts` - Context preparation
+- `src/lib/aiActionHandlers.ts` - Action execution
+- `tests/ai/chat-panel.spec.ts` - E2E tests
+
+### v0.7.1 - AI Chat UX & Google Search Integration
+**Goal:** Improve AI chat experience with web search and preview events
+
+**API & Search:**
+- [x] **Two-Step Search Approach:** Separate google_search and function_declarations calls (REST API limitation workaround)
+- [x] **Google Search Grounding:** Gemini 2.5 Flash with google_search tool for researching historical facts
+- [x] **Source URL Filtering:** Filter out invalid sources (googleapis.com, cloud.google.com, etc.)
+- [x] **Model Upgrade:** Using gemini-2.5-flash with google_search capability
+
+**Chat Widget UX:**
+- [x] **Floating Chat Widget:** Intercom-style bottom-right floating button with popup
+- [x] **Enter Key to Send:** Enter sends message, Shift+Enter creates newline
+- [x] **Scroll Containment:** Added `overscrollBehavior: 'contain'` to prevent timeline scroll
+
+**Preview Events System:**
+- [x] **Preview Events:** Show pending AI-created events on timeline before applying
+- [x] **Eye Button (👁):** Click to zoom/navigate to preview event on timeline
+- [x] **Dashed Red Borders:** Preview events styled with dashed red borders and glow effect
+- [x] **Preview Event Editing:** Double-click preview events to open in editor, edits update pending action payload
+
+**AI Reliability:**
+- [x] **Intent Detection:** Added `wantsToCreateEvents()` to detect when user wants to create events vs get information
+- [x] **Dedicated Prompts:** `CREATE_EVENTS_PROMPT` for event creation requests, `GENERAL_ACTION_PROMPT` for informational queries
+- [x] **Function Call Enforcement:** Using Gemini `tool_config.mode: 'ANY'` to force function calls when creating events
+- [x] **Scroll Containment Fix:** Added `onWheel` handler to stop event propagation in chat panel
+
+**Known Limitations:**
+- REST API doesn't support google_search + function_declarations in same request (hence two-step approach)
+- Gemini 3 Pro Preview doesn't support this combination at all
+
+### v0.7.2 - Preview Events UX Polish & Input Refinement
+**Goal:** Fix preview event display and editing behavior, reduce input placeholder font size
+**Status:** ✅ Complete
+
+**Chat Panel:**
+- [x] **Scrollable Content:** Make entire chat content scrollable including pending actions section
+- [x] **Overflow Fix:** Ensure "Approve All" / "Apply" buttons are always visible (moved inside scrollable area)
+
+**Preview Event Styling:**
+- [x] **Consistent Highlighting:** Preview events have distinct body coloring (amber background) + boundary styling (dashed border + glow)
+- [x] **CSS Variables:** Theme-aware colors for preview styling (dark/light mode support)
+- [ ] **Pending vs Approved:** Pending events show preview styling, approved events show normal styling
+
+**Editor Behavior:**
+- [x] **Normal Editor View:** Double-clicking preview event shows normal editor (not "New Event")
+- [x] **Read-only Default:** Preview events open in read-only view, user clicks Edit to modify
+- [x] **Payload Sync:** Edits to preview events update the AI action payload
+- [x] **No Delete Button:** Preview events hide delete button (reject via chat instead)
+
+**Input Refinement:**
+- [x] **Smaller Placeholder Font:** Reduce placeholder text font size (0.75rem) with reduced opacity (0.7) for better visual hierarchy
+
+### v0.7.3 - Bug Fixes & Code Cleanup
+**Goal:** Fix AI event persistence and clean up development artifacts
+**Status:** ✅ Complete
+
+**Critical Bugs:**
+- [x] **AI Event Persistence:** Root cause identified - events stored in subcollection, not field. Fixed to use `addEvent()`, `updateEvent()`, `deleteEvent()` properly
+- [x] **Owner Permission Check:** ChatPanel only shows for owners; AI actions check `isOwner` before saving
+
+**Console Cleanup:**
+- [x] **Console.log Cleanup:** Removed debugging console.log statements (kept logger.ts, migration logs, activity logs)
+- [x] **DegradationEngine Warnings:** Silenced "Card type mismatch" and other verbose warnings
+
+**UX Polish:**
+- [x] **Overflow Indicators:** Restyled to be smaller, centered on axis, with rose outline instead of red fill
+- [x] **Rejected Events Re-enable:** Added `restoreActions` - rejected suggestions show visibility_off icon to restore
+
+---
+
+## Phase 5: AI Agent Integration (v0.8.x)
+> **Vision:** Enable AI agents (Claude Code, Codex, etc.) to interact with timelines programmatically
+
+### v0.8.0 - Timeline MCP Server
+**Goal:** Expose timeline operations via MCP for AI agent integration
+- [ ] **MCP Server:** Create MCP server that connects to Firebase
+- [ ] **Read Operations:** `get_timeline(id)`, `list_user_timelines(userId)`
+- [ ] **Write Operations:** `propose_events(timelineId, events)` - creates pending events for review
+- [ ] **Review Flow:** Reuse existing approve/reject/apply workflow
+- [ ] **Authentication:** Secure with Firebase Auth tokens
+
+### v0.8.1 - Partial Import (Preview & Review)
+**Goal:** Import events with review workflow, foundation for fork/merge/diff
+- [ ] **Preview Import:** Imported events appear as temporary/preview with highlighting
+- [ ] **Review UI:** Reuse ChatPanel approve/reject/restore pattern
+- [ ] **Selective Apply:** User can approve individual events or all
+- [ ] **Conflict Detection:** Warn on duplicate/overlapping dates
+
+### v0.8.2 - YAML Schema API
+**Goal:** Publish schema for AI agents to discover and use
+- [ ] **Schema Endpoint:** `/api/schema/timeline` returns JSON Schema for YAML format
+- [ ] **Documentation:** Add schema docs with examples
+- [ ] **Versioning:** Schema version in response for compatibility
+
+### v0.8.3 - PowerSpawn: Context File Consolidation
+**Goal:** Simplify agent context management by merging CONTEXT.MD and IAC.md
+- [ ] **Merge CONTEXT.MD into IAC.md:** Combine context and inter-agent communication into single file
+- [ ] **Active Agents Section:** Add persistent section at top of IAC.md for tracking running agents
+- [ ] **Update MCP Server:** Adjust file reading/writing logic for new structure
+- [ ] **Documentation:** Update README and usage examples
+
+### v0.8.4 - AI-Powered Automation
 - [ ] **Event Suggestions:** Auto-suggest related events
 - [ ] **Gap Detection:** Identify missing periods in timeline
 - [ ] **Fact Checking:** Source verification assistance
 - [ ] **Auto-generation:** Create timeline from text/Wikipedia
 
-## Phase 5: Rich Media (v0.8.x)
+## Phase 6: Rich Media (v0.9.x)
 > **Deferred:** Event images may be added in a future release
 
-## Phase 6: Collaboration & Versioning (v0.9.x)
+## Phase 7: Collaboration & Versioning (v0.10.x)
 > **Moved later:** Complex feature, build audience first
 
-### v0.9.0 - Version History
+### v0.10.0 - Version History
 - [ ] Timeline version snapshots on save
 - [ ] Version history browser
 - [ ] Diff viewer for comparing versions
 - [ ] Revert to previous version
 
-### v0.9.1 - Forking System
+### v0.10.1 - Forking System
 - [ ] Fork button and confirmation flow
 - [ ] Fork relationship tracking
 - [ ] Attribution for original authors

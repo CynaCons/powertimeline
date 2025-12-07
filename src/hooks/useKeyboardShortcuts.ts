@@ -128,35 +128,48 @@ export const useNavigationShortcuts = (
     openCreate: () => void;
     toggleTheme: () => void;
     closeOverlay: () => void;
+    openAIChat?: () => void;
   },
   disabled = false
 ) => {
+  const shortcuts = [
+    {
+      key: 'e',
+      altKey: true,
+      action: actions.openEvents,
+      description: 'Open Events panel',
+    },
+    {
+      key: 'c',
+      altKey: true,
+      action: actions.openCreate,
+      description: 'Create new event',
+    },
+    {
+      key: 't',
+      altKey: true,
+      action: actions.toggleTheme,
+      description: 'Toggle theme',
+    },
+    {
+      key: 'Escape',
+      action: actions.closeOverlay,
+      description: 'Close overlay',
+    },
+  ];
+
+  // Add AI chat shortcut if provided
+  if (actions.openAIChat) {
+    shortcuts.push({
+      key: 'a',
+      altKey: true,
+      action: actions.openAIChat,
+      description: 'Open AI Assistant',
+    });
+  }
+
   return useKeyboardShortcuts({
-    shortcuts: [
-      {
-        key: 'e',
-        altKey: true,
-        action: actions.openEvents,
-        description: 'Open Events panel',
-      },
-      {
-        key: 'c',
-        altKey: true,
-        action: actions.openCreate,
-        description: 'Create new event',
-      },
-      {
-        key: 't',
-        altKey: true,
-        action: actions.toggleTheme,
-        description: 'Toggle theme',
-      },
-      {
-        key: 'Escape',
-        action: actions.closeOverlay,
-        description: 'Close overlay',
-      },
-    ],
+    shortcuts,
     disabled,
   });
 };

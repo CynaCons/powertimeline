@@ -68,8 +68,6 @@ interface PlatformStats {
  */
 export async function getTimelineMetadata(timelineId: string): Promise<TimelineMetadata | null> {
   try {
-    console.log('[getTimelineMetadata] Fetching timeline:', timelineId);
-
     // First try: query by 'id' field (works for newer documents that store id as a field)
     let q = query(
       collectionGroup(db, COLLECTIONS.TIMELINES),
@@ -81,7 +79,6 @@ export async function getTimelineMetadata(timelineId: string): Promise<TimelineM
     // If not found by id field, try a broader search
     // This handles legacy documents where id isn't stored as a field
     if (querySnapshot.empty) {
-      console.log('[getTimelineMetadata] Not found by id field, trying broader search...');
       // Query recent timelines and find by doc.id (limited to avoid scanning too many)
       q = query(
         collectionGroup(db, COLLECTIONS.TIMELINES),
@@ -97,11 +94,9 @@ export async function getTimelineMetadata(timelineId: string): Promise<TimelineM
         // Extract ownerId from path if not in data: /users/{ownerId}/timelines/{timelineId}
         const ownerId = data.ownerId || matchingDoc.ref.parent.parent?.id;
         const metadata = { ...data, id: matchingDoc.id, ownerId } as TimelineMetadata;
-        console.log('[getTimelineMetadata] Found timeline via broader search:', metadata.title, 'Owner:', metadata.ownerId);
         return metadata;
       }
 
-      console.log('[getTimelineMetadata] Timeline not found:', timelineId);
       return null;
     }
 
@@ -110,7 +105,6 @@ export async function getTimelineMetadata(timelineId: string): Promise<TimelineM
     // Extract ownerId from path if not in data
     const ownerId = data.ownerId || docSnap.ref.parent.parent?.id;
     const metadata = { ...data, id: docSnap.id, ownerId } as TimelineMetadata;
-    console.log('[getTimelineMetadata] Found timeline:', metadata.title, 'Owner:', metadata.ownerId);
     return metadata;
   } catch (error) {
     console.error('[getTimelineMetadata] Error:', error);
@@ -213,7 +207,6 @@ export async function getTimelines(options?: {
  */
 export async function getTimelineEvents(timelineId: string, ownerId: string): Promise<Event[]> {
   try {
-    console.log('[getTimelineEvents] Fetching events for timeline:', timelineId, 'owner:', ownerId);
     const eventsCollectionRef = collection(
       db,
       COLLECTIONS.USERS,
@@ -227,7 +220,6 @@ export async function getTimelineEvents(timelineId: string, ownerId: string): Pr
     const q = query(eventsCollectionRef, orderBy('date', 'asc'));
     const querySnapshot = await getDocs(q);
 
-    console.log('[getTimelineEvents] Found', querySnapshot.size, 'events');
     return querySnapshot.docs.map(doc => {
       const eventDoc = doc.data() as EventDocument;
       // Convert EventDocument back to Event by removing Firestore-specific fields
@@ -978,7 +970,6 @@ export async function getPlatformStats(): Promise<{
     // 3. If no stats doc exists, calculate and save (initial bootstrap only)
     // With Cloud Functions deployed, stats doc should always exist and be fresh
     if (!stats) {
-      console.log('Stats document not found, calculating initial stats...');
       stats = await calculatePlatformStats();
       // Save to Firestore for future reads
       await saveStatsToFirestore(stats);

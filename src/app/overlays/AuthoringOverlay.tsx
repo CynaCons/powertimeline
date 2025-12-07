@@ -878,7 +878,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
             {isEditMode && isOwner ? (
               <>
                 <div>
-                  {selected && (
+                  {/* Only show delete for real events, not preview events */}
+                  {selected && !selected.isPreview && (
                     <Button
                       variant="text"
                       color="error"

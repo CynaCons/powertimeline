@@ -123,6 +123,11 @@
   --stream-text-primary: #e6edf3;
   --stream-text-secondary: #8d96a0;
   --stream-text-muted: #6e7681;
+
+  /* Preview Event Styling (AI-created temporary events) */
+  --preview-bg: rgba(245, 158, 11, 0.15); /* amber with transparency for dark mode */
+  --preview-border: #f59e0b; /* amber-500 */
+  --preview-glow: rgba(245, 158, 11, 0.3);
 }
 
 /* === Light Theme Overrides === */
@@ -181,6 +186,11 @@
   --stream-text-primary: #1f2328;
   --stream-text-secondary: #656d76;
   --stream-text-muted: #8c959f;
+
+  /* Preview Event Styling (light mode) */
+  --preview-bg: rgba(251, 191, 36, 0.2); /* amber-400 with transparency for light mode */
+  --preview-border: #f59e0b; /* amber-500 */
+  --preview-glow: rgba(245, 158, 11, 0.4);
 }
 
 /* High contrast mode adjustments (Phase F) */

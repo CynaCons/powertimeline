@@ -39,8 +39,6 @@ function determineTimeUnit(rangeMs: number): TimeRange {
   const year = 365 * day;
   const decade = 10 * year;
   
-  console.log(`🕒 Range: ${Math.round(rangeMs / day)} days (${rangeMs}ms)`);
-  
   if (rangeMs < hour) {
     return { duration: 15 * minute, unit: 'hour', count: Math.ceil(rangeMs / (15 * minute)) };
   } else if (rangeMs < day) {
@@ -257,8 +255,6 @@ export function generateTimelineTicks(config: TickGeneratorConfig): TickMark[] {
   const timeRange = determineTimeUnit(range);
   const startDate = new Date(minDate);
   const endDate = new Date(maxDate);
-  
-  console.log(`🕒 Generating ${timeRange.unit} ticks for ${Math.round(range / (24 * 60 * 60 * 1000))} day range`);
   
   return generateAlignedTicks(startDate, endDate, timeRange, config);
 }

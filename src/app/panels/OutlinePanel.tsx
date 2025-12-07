@@ -65,7 +65,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
             </ListItemButton>
 
             {/* Action buttons - show on hover */}
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
               {onNavigateToEvent && (
                 <Tooltip title="View on canvas" placement="top">
                   <IconButton

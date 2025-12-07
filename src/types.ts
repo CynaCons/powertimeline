@@ -15,6 +15,8 @@ export interface Event {
     showAnchorLabel?: boolean;
     showConnector?: boolean;
   };
+  // AI preview flag (client-side only)
+  isPreview?: boolean;
 }
 
 /**

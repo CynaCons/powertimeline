@@ -35,6 +35,7 @@ export function CardRenderer({
 
   // Get the event date for data attribute
   const eventDate = card.event.date;
+  const isPreview = card.event.isPreview === true;
 
   return (
     <div
@@ -45,12 +46,14 @@ export function CardRenderer({
       data-cluster-id={card.clusterId}
       data-density={card.cardType}
       data-tour={isFirstCard ? 'event-card' : undefined}
+      data-preview={isPreview || undefined}
       className={`
         absolute cursor-pointer card-hover-scale card-enter
         ${getCardTypeStyles(card.cardType)}
         ${gradientClass}
         ${elevationClass}
         ${isSelected ? 'card-selected' : ''}
+        ${isPreview ? 'card-preview' : ''}
       `}
       style={{
         left: card.x - card.width / 2,

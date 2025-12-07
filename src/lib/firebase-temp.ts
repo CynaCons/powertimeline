@@ -21,8 +21,6 @@ const firebaseConfig = {
   measurementId: "G-G2C76ZT1PG",
 };
 
-console.log('🔥 Firebase config loaded (hardcoded)', firebaseConfig.projectId);
-
 // Initialize Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);
 

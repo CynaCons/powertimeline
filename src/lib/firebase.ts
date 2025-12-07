@@ -19,7 +19,6 @@ const firebaseConfig = {
 // Debug: Check if config is loaded
 if (!firebaseConfig.projectId) {
   console.error('❌ Firebase config not loaded! Check .env.local file');
-  console.log('Available env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
 }
 
 // Initialize Firebase

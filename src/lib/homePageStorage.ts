@@ -64,7 +64,6 @@ export function checkAndMigrateData(): boolean {
     // Check if data is actually valid (no old-format IDs)
     const timelines = getTimelines();
     if (timelines.length > 0 && hasOldTimelineIdFormat(timelines)) {
-      console.log('Detected old timeline ID format, resetting data...');
       // Clear old data including legacy EventStorage
       localStorage.removeItem(STORAGE_KEYS.TIMELINES);
       localStorage.removeItem('powertimeline-events'); // Legacy EventStorage key
@@ -73,8 +72,6 @@ export function checkAndMigrateData(): boolean {
     }
     return false; // No migration needed
   }
-
-  console.log(`Migrating data from version ${currentVersion} to ${CURRENT_DATA_VERSION}...`);
 
   // Clear old data including legacy EventStorage and let initialization create fresh data
   localStorage.removeItem(STORAGE_KEYS.TIMELINES);

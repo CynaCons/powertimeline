@@ -55,8 +55,6 @@ export function LandingPage() {
             cache.set(ownerId, owner);
           }
         }
-        // Note: Not currently displaying examples, but keeping data loading for future use
-        console.log('Loaded example timelines:', publicTimelines.length, 'Owner cache:', cache.size);
       } catch (error) {
         console.error('Error loading example timelines:', error);
       }
