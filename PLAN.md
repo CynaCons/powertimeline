@@ -723,25 +723,22 @@
 
 ---
 
-## Phase 5: Rich Media (v0.8.x)
-> **Deferred:** Event images may be added in a future release
-
-## Phase 6: Collaboration & Versioning (v0.9.x)
+## Phase 5: Collaboration & Versioning (v0.8.x)
 > **Future:** Git-style workflows for timeline collaboration (builds on v0.7.x review patterns)
 
-### v0.9.0 - Version History
+### v0.8.0 - Version History
 - [ ] Timeline version snapshots on save
 - [ ] Version history browser
 - [ ] Diff viewer for comparing versions
 - [ ] Revert to previous version
 
-### v0.9.1 - Forking System
+### v0.8.1 - Forking System
 - [ ] Fork button and confirmation flow
 - [ ] Fork relationship tracking
 - [ ] Attribution for original authors
 - [ ] Fork network visualization
 
-### v0.9.2 - Merge Requests (Optional)
+### v0.8.2 - Merge Requests (Optional)
 - [ ] Merge request workflow
 - [ ] Side-by-side diff viewer
 - [ ] Comment system for review
