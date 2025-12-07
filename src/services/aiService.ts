@@ -165,16 +165,34 @@ function wantsToCreateEvents(message: string): boolean {
 }
 
 /**
+ * Detect if user is asking about the current timeline (no search needed)
+ */
+function isAskingAboutCurrentTimeline(message: string): boolean {
+  const currentTimelineIndicators = [
+    /\b(this timeline|the timeline|my timeline|current timeline)\b/i,
+    /\b(these events|the events|my events|existing events)\b/i,
+    /\b(what('s| is) (on|in) (this|the|my))\b/i,
+    /\b(summarize|overview|summary of) (this|the|my)\b/i,
+  ];
+  return currentTimelineIndicators.some(regex => regex.test(message));
+}
+
+/**
  * Detect if user message requires web search for research
  */
 function needsWebSearch(message: string): boolean {
+  // Don't search if user is asking about the current timeline
+  if (isAskingAboutCurrentTimeline(message)) {
+    return false;
+  }
+
   // If user wants to create events, we need to search for facts
   if (wantsToCreateEvents(message)) {
     return true;
   }
 
   const searchIndicators = [
-    /\b(research|find|search|look up|tell me about|what happened|when did|who was|history of)\b/i,
+    /\b(research|find|search|look up|what happened|when did|who was|history of)\b/i,
     /\b(napoleonic|historical|world war|civil war|revolution|ancient|medieval)\b/i,
   ];
   return searchIndicators.some(regex => regex.test(message));
