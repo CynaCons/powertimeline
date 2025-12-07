@@ -141,7 +141,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   // Force view mode for non-owners (v0.5.23)
-  const [isEditMode, setIsEditMode] = useState(isOwner ? (isNewEvent || !selected) : false);
+  // Start in VIEW mode for existing events, EDIT mode only for new events
+  const [isEditMode, setIsEditMode] = useState(isOwner ? isNewEvent : false);
   const [errors, setErrors] = useState({ date: '', time: '', title: '', description: '' });
   const [touched, setTouched] = useState({ date: false, time: false, title: false, description: false });
   const [editSources, setEditSources] = useState<string[]>(selected?.sources ?? []);
@@ -198,6 +199,18 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
     setEditSources(selected?.sources ?? []);
     setIsSourcesExpanded(true);
   }, [selected]);
+
+  // Reset to view mode when navigating to a different event (v0.5.x)
+  // Only enter edit mode for new events, not when viewing existing ones
+  useEffect(() => {
+    if (isOwner) {
+      // New event: start in edit mode; Existing event: start in view mode
+      setIsEditMode(isNewEvent);
+    } else {
+      // Non-owners: always view mode
+      setIsEditMode(false);
+    }
+  }, [selected?.id, isNewEvent, isOwner]);
 
   // Keyboard shortcuts for edit mode and navigation
   useEffect(() => {
