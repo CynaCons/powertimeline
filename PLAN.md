@@ -2,12 +2,12 @@
 
 ## Quick Summary
 
-**Current Version:** v0.6.4 (Bug Fixes) ✅
+**Current Version:** v0.6.4 (Bug Fixes + Event Sources) ✅
 **Next Milestone:** v0.7.x - AI Integration
 
 ### Key Metrics
-- **Total Iterations:** 200+ completed (v0.2.0 → v0.6.2)
-- **Requirements:** ~230 total ([SRS Index](docs/SRS_INDEX.md))
+- **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
+- **Requirements:** ~267 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~200 requirements (87%)
 - **Test Coverage:** ~119 requirements verified (52%)
 - **Test Suite:** 320 Playwright tests ([Test Status](#test-status))
@@ -54,7 +54,8 @@
 - ✅ Share Links: Copy Link menu in timeline cards, toast feedback (v0.6.0)
 - ✅ Editor UX Polish: Navigation fixes, compact hover-expandable profile button, event panel improvements (v0.6.1)
 - ✅ Error Handling: GitHub issues link in ErrorState, ErrorBoundary, Toast; SRS_TIMELINE_EDITOR.md (v0.6.2)
-- ✅ Bug Fixes: Editor panel click, view on canvas zoom (v0.6.4)
+- ✅ Event Sources: sources field on events, SourcesEditor component, Stream View indicator, drag-and-drop reordering, E2E tests (v0.6.3)
+- ✅ Bug Fixes: Editor panel click, view on canvas zoom, Editor-to-Stream navigation (v0.6.4)
 
 ### Next Up
 - **v0.7.x**: AI Integration (chatbot, natural language creation, summaries)

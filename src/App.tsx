@@ -305,15 +305,26 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
 
   // CRUD handlers
-  const saveAuthoring = useCallback((e: React.FormEvent) => {
+  const saveAuthoring = useCallback((e: React.FormEvent, options?: { sources?: string[] }) => {
     e.preventDefault();
     console.log('[saveAuthoring] Called');
-    console.log('[saveAuthoring] editDate:', editDate, 'editTitle:', editTitle);
+    console.log('[saveAuthoring] editDate:', editDate, 'editTitle:', editTitle, 'sources:', options?.sources);
     const isEdit = !!selectedId;
     console.log('[saveAuthoring] isEdit:', isEdit, 'selectedId:', selectedId);
     if (isEdit) {
       console.log('[saveAuthoring] Editing existing event');
-      setEvents(prev => { const next = prev.map(ev => ev.id === selectedId ? { ...ev, date: editDate || ev.date, time: editTime || undefined, title: editTitle || ev.title, description: editDescription || undefined } : ev); saveEvents(next); return next; });
+      setEvents(prev => {
+        const next = prev.map(ev => ev.id === selectedId ? {
+          ...ev,
+          date: editDate || ev.date,
+          time: editTime || undefined,
+          title: editTitle || ev.title,
+          description: editDescription || undefined,
+          sources: options?.sources ?? ev.sources,
+        } : ev);
+        saveEvents(next);
+        return next;
+      });
       try {
         announce(`Saved changes to ${editTitle || 'event'}`);
       } catch (error) {
@@ -325,7 +336,14 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
         return;
       }
       console.log('[saveAuthoring] Creating new event');
-      const newEvent: Event = { id: Date.now().toString(), date: editDate, time: editTime || undefined, title: editTitle, description: editDescription || undefined };
+      const newEvent: Event = {
+        id: Date.now().toString(),
+        date: editDate,
+        time: editTime || undefined,
+        title: editTitle,
+        description: editDescription || undefined,
+        sources: options?.sources,
+      };
       console.log('[saveAuthoring] New event:', newEvent);
       setEvents(prev => { const next = [...prev, newEvent]; saveEvents(next); return next; });
       try {
@@ -961,6 +979,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               setSelectedId(event.id);
               setOverlay('editor');
             }}
+            initialEventId={selectedId}
           />
         </Suspense>
 

@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
 **Last Updated:** 2025-12-07
-**Version:** v0.6.1
+**Version:** v0.6.3
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| **Total Requirements** | ~202 | 100% |
-| **Implemented** | ~85 | 42% |
-| **Verified (with tests)** | ~70 | 35% |
-| **In Progress** | ~15 | 7% |
-| **Planned (TBD)** | ~32 | 16% |
+| **Total Requirements** | ~267 | 100% |
+| **Implemented** | ~200 | 76% |
+| **Verified (with tests)** | ~119 | 45% |
+| **In Progress** | ~5 | 2% |
+| **Planned (TBD)** | ~58 | 22% |
 
 ### By Feature Area
 
@@ -37,7 +37,8 @@
 | Editor Import/Export | 22 | [SRS_EDITOR_IMPORT_EXPORT.md](SRS_EDITOR_IMPORT_EXPORT.md) | 22 (100%) | 0 (0%) |
 | Timeline Editor Page | 28 | [SRS_TIMELINE_EDITOR.md](SRS_TIMELINE_EDITOR.md) | 28 (100%) | 6 (21%) |
 | Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 0 (0%) | 0 (0%) |
-| **TOTAL** | **~230** | Multiple files | **~200 (87%)** | **~119 (52%)** |
+| Event Sources | 37 | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) | 0 (0%) | 0 (0%) |
+| **TOTAL** | **~267** | Multiple files | **~200 (75%)** | **~119 (45%)** |
 
 ---
 
@@ -253,6 +254,7 @@ Platform administration interface:
 | CC-REQ-TOUR-HOME-* | Home Page Tour | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
 | CC-REQ-HELP-* | NavRail Help | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
 | CC-REQ-ADMIN-* | Admin Panel | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) |
+| CC-REQ-SOURCES-* | Event Sources | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) |
 
 ---
 
@@ -275,6 +277,7 @@ Platform administration interface:
 - **[SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md)** - Timeline CRUD (18 requirements)
 - **[SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md)** - Admin interface (25+ requirements)
 - **[SRS_ONBOARDING.md](SRS_ONBOARDING.md)** - Onboarding & guided tours (25 requirements)
+- **[SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md)** - Event sources & citations (37 requirements)
 - **[SRS_UI_AUDIT.md](SRS_UI_AUDIT.md)** - UI requirements audit and fixes
 
 ### Design Documents
@@ -305,6 +308,27 @@ User onboarding system with empty state CTAs and interactive guided tours:
 
 **In Progress:**
 - All 25 requirements pending implementation
+- Test coverage needed for all areas
+
+---
+
+### 12. Event Sources
+**Status:** 🔵 Planned (0% implemented, 0% verified)
+**Documentation:** [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md)
+
+Event sources allow users to cite references, links, or notes that support timeline events:
+- 37 requirements covering data model, editor view (with drag-and-drop reordering), stream view, canvas view, read-only mode
+- Tests: Planned (tests/editor/event-sources.spec.ts, tests/stream/event-sources.spec.ts)
+
+**Feature Areas:**
+- **Data Model** (6 requirements): CC-REQ-SOURCES-001 to 012
+- **Editor View** (16 requirements): CC-REQ-SOURCES-020 to 052
+- **Stream View** (6 requirements): CC-REQ-SOURCES-060 to 072
+- **Canvas View** (2 requirements): CC-REQ-SOURCES-080 to 081
+- **Read-Only Mode** (3 requirements): CC-REQ-SOURCES-090 to 092
+
+**In Progress:**
+- All 33 requirements pending implementation
 - Test coverage needed for all areas
 
 ---

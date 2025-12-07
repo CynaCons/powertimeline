@@ -9,6 +9,7 @@ export interface Event {
   description?: string;
   endDate?: string;                // Optional end date for ranges
   time?: string;                   // Optional time in HH:MM format
+  sources?: string[];              // Array of source references (text or URLs)
   // Layout flags (client-side only, not stored in Firestore)
   flags?: {
     showAnchorLabel?: boolean;

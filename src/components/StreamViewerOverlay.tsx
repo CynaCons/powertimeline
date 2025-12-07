@@ -38,6 +38,8 @@ interface StreamViewerOverlayProps {
   onEventDelete?: (eventId: string) => Promise<void>;
   /** Called when user wants to edit an event in the main editor (desktop) */
   onEditInEditor?: (event: Event) => void;
+  /** Initial event ID to select and scroll to when overlay opens */
+  initialEventId?: string;
 }
 
 export function StreamViewerOverlay({
@@ -49,6 +51,7 @@ export function StreamViewerOverlay({
   onEventSave,
   onEventDelete,
   onEditInEditor,
+  initialEventId,
 }: StreamViewerOverlayProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -167,6 +170,17 @@ export function StreamViewerOverlay({
       }
     }, 50);
   }, []);
+
+  // When overlay opens with an initialEventId, select and scroll to it
+  useEffect(() => {
+    if (open && initialEventId) {
+      setSelectedEventId(initialEventId);
+      // Delay scroll slightly to ensure DOM is ready after fade animation
+      setTimeout(() => {
+        scrollToEvent(initialEventId);
+      }, 200);
+    }
+  }, [open, initialEventId, scrollToEvent]);
 
   // Handle keyboard navigation - Escape, Arrow Up/Down
   useEffect(() => {

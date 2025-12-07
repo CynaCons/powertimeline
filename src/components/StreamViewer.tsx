@@ -368,18 +368,65 @@ function StreamEventCard({
         )}
 
         <Box className="card-content">
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: 'var(--stream-text-primary)',
-              fontWeight: 600,
-              fontSize: '1.05rem',
-              mb: event.description ? 0.5 : 0,
-              lineHeight: 1.3,
-            }}
-          >
-            {event.title}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: event.description ? 0.5 : 0 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: 'var(--stream-text-primary)',
+                fontWeight: 600,
+                fontSize: '1.05rem',
+                lineHeight: 1.3,
+              }}
+            >
+              {event.title}
+            </Typography>
+            {/* Sources indicator badge */}
+            {event.sources && event.sources.length > 0 && (
+              <Box
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditInEditor?.(event);
+                }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.3,
+                  px: 0.6,
+                  py: 0.2,
+                  borderRadius: '4px',
+                  bgcolor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: 'var(--stream-dot-color)',
+                  },
+                }}
+                title={`${event.sources.length} source${event.sources.length !== 1 ? 's' : ''} - click to view`}
+              >
+                <span
+                  className="material-symbols-rounded"
+                  style={{
+                    fontSize: 16,
+                    color: 'var(--stream-text-secondary)',
+                  }}
+                >
+                  source
+                </span>
+                <Typography
+                  sx={{
+                    color: 'var(--stream-text-secondary)',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    lineHeight: 1,
+                  }}
+                >
+                  {event.sources.length}
+                </Typography>
+              </Box>
+            )}
+          </Box>
           {event.description && (
             <>
               <Typography

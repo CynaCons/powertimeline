@@ -16,6 +16,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import type { Event } from '../../types';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { EventPreviewList } from '../components/EventPreviewList';
+import { SourcesEditor } from '../components/SourcesEditor';
 
 // Read-only view component for displaying event details
 interface ReadOnlyEventViewProps {
@@ -96,7 +97,7 @@ interface AuthoringOverlayProps {
   setEditTime: (v: string) => void;
   setEditTitle: (v: string) => void;
   setEditDescription: (v: string) => void;
-  onSave: (e: React.FormEvent) => void;
+  onSave: (e: React.FormEvent, options?: { sources: string[] }) => void;
   onDelete: () => void;
   onClose: () => void;
   // New props for navigation
@@ -143,6 +144,8 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   const [isEditMode, setIsEditMode] = useState(isOwner ? (isNewEvent || !selected) : false);
   const [errors, setErrors] = useState({ date: '', time: '', title: '', description: '' });
   const [touched, setTouched] = useState({ date: false, time: false, title: false, description: false });
+  const [editSources, setEditSources] = useState<string[]>(selected?.sources ?? []);
+  const [isSourcesExpanded, setIsSourcesExpanded] = useState(true);
   // Actions menu state (for responsive icon grouping)
   const [actionsMenuAnchor, setActionsMenuAnchor] = useState<null | HTMLElement>(null);
   const actionsMenuOpen = Boolean(actionsMenuAnchor);
@@ -190,6 +193,11 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
     window.addEventListener('keydown', onEsc);
     return () => window.removeEventListener('keydown', onEsc);
   }, [onClose]);
+
+  useEffect(() => {
+    setEditSources(selected?.sources ?? []);
+    setIsSourcesExpanded(true);
+  }, [selected]);
 
   // Keyboard shortcuts for edit mode and navigation
   useEffect(() => {
@@ -293,6 +301,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 
   // Check if form has errors
   const hasErrors = errors.date || errors.time || errors.title || errors.description;
+  const sourcesCount = editSources.length;
 
   // Auto-focus date field when entering edit mode
   useEffect(() => {
@@ -603,7 +612,11 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                 }`}
               >
                 {isEditMode && (
-                  <form id="event-form" onSubmit={onSave} className="grid grid-cols-1 gap-6 h-full max-w-2xl">
+                  <form
+                    id="event-form"
+                    onSubmit={(e) => onSave(e, { sources: editSources })}
+                    className="grid grid-cols-1 gap-6 h-full max-w-2xl"
+                  >
                     {/* Live region for validation error announcements */}
                     <div
                       aria-live="polite"
@@ -751,6 +764,48 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                         {editDescription.length}/500
                       </div>
                     </div>
+
+                    {/* Sources Section */}
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors"
+                        style={{
+                          backgroundColor: 'var(--page-bg)',
+                          border: '1px solid var(--page-border)',
+                          color: 'var(--page-text-primary)',
+                        }}
+                        onClick={() => setIsSourcesExpanded((prev) => !prev)}
+                        aria-expanded={isSourcesExpanded}
+                        aria-controls="sources-editor-panel"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-rounded text-base" aria-hidden="true">source_notes</span>
+                          <span className="text-sm font-semibold tracking-wide">
+                            Sources ({sourcesCount})
+                          </span>
+                        </div>
+                        <span className="material-symbols-rounded text-lg" aria-hidden="true">
+                          {isSourcesExpanded ? 'expand_less' : 'expand_more'}
+                        </span>
+                      </button>
+                      {isSourcesExpanded && (
+                        <div
+                          id="sources-editor-panel"
+                          className="rounded-xl px-4 py-3"
+                          style={{
+                            border: '1px solid var(--page-border)',
+                            backgroundColor: 'var(--page-bg)',
+                          }}
+                        >
+                          <SourcesEditor
+                            sources={editSources}
+                            onChange={setEditSources}
+                            readOnly={!isOwner}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </form>
                 )}
               </div>
@@ -764,8 +819,48 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                 }`}
               >
                 {!isEditMode && selected && (
-                  <div className="max-w-2xl">
+                  <div className="max-w-2xl space-y-6">
                     <ReadOnlyEventView event={selected} />
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors"
+                        style={{
+                          backgroundColor: 'var(--page-bg)',
+                          border: '1px solid var(--page-border)',
+                          color: 'var(--page-text-primary)',
+                        }}
+                        onClick={() => setIsSourcesExpanded((prev) => !prev)}
+                        aria-expanded={isSourcesExpanded}
+                        aria-controls="sources-viewer-panel"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-rounded text-base" aria-hidden="true">source_notes</span>
+                          <span className="text-sm font-semibold tracking-wide">
+                            Sources ({selected.sources?.length ?? 0})
+                          </span>
+                        </div>
+                        <span className="material-symbols-rounded text-lg" aria-hidden="true">
+                          {isSourcesExpanded ? 'expand_less' : 'expand_more'}
+                        </span>
+                      </button>
+                      {isSourcesExpanded && (
+                        <div
+                          id="sources-viewer-panel"
+                          className="rounded-xl px-4 py-3"
+                          style={{
+                            border: '1px solid var(--page-border)',
+                            backgroundColor: 'var(--page-bg)',
+                          }}
+                        >
+                          <SourcesEditor
+                            sources={selected.sources ?? []}
+                            onChange={() => { /* read-only, no changes */ }}
+                            readOnly
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
