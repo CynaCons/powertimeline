@@ -19,7 +19,8 @@ on:
 
 jobs:
   production-tests:
-    if: ${{ github.event.inputs.test_suite == 'production' || github.event.inputs.test_suite == 'all' }}
+    # Run on push (no inputs) OR when production/all selected via workflow_dispatch
+    if: ${{ github.event_name == 'push' || github.event.inputs.test_suite == 'production' || github.event.inputs.test_suite == 'all' }}
     runs-on: ubuntu-latest
 
     steps:
