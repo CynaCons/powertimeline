@@ -678,6 +678,14 @@
 - [x] **Overflow Indicators:** Restyled to be smaller, centered on axis, with rose outline instead of red fill
 - [x] **Rejected Events Re-enable:** Added `restoreActions` - rejected suggestions show visibility_off icon to restore
 
+### v0.7.4 - AI Metadata Preview
+**Goal:** Allow users to preview and review timeline metadata changes proposed by AI
+
+- [ ] **Metadata Preview UI:** Show current vs proposed title/description in ChatPanel
+- [ ] **Diff View:** Side-by-side or inline diff for text changes
+- [ ] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
+- [ ] **Apply Confirmation:** Clear feedback when metadata is updated
+
 ---
 
 ## Phase 5: AI Agent Integration (v0.8.x)
