@@ -543,19 +543,26 @@
 **Goal:** Allow users to cite sources for timeline events
 
 **Data Model:**
-- [ ] **Event.sources Field:** Add optional `sources` array field to Event type
-- [ ] **Firestore Schema:** Update Event document schema to include sources
-- [ ] **Migration:** Ensure backward compatibility (existing events have no sources)
+- [x] **Event.sources Field:** Add optional `sources: string[]` field to Event type
+- [x] **Firestore Schema:** Update Event document schema to include sources
+- [x] **Migration:** Backward compatible (existing events have no sources)
 
 **Editor View:**
-- [ ] **Sources Section:** New collapsible section in AuthoringOverlay for viewing/editing sources
-- [ ] **Add Source:** Button to add new source (text input or URL)
-- [ ] **Edit/Delete Source:** Inline editing and removal of individual sources
-- [ ] **URL Detection:** Auto-detect URLs vs plain text for display styling
+- [x] **Sources Section:** Collapsible section in AuthoringOverlay for viewing/editing sources
+- [x] **SourcesEditor Component:** New component with add/edit/delete functionality
+- [x] **Add Source:** Button to add new source with Enter to save, icon button for validation
+- [x] **Edit/Delete Source:** Inline editing and removal of individual sources
+- [x] **URL Detection:** Auto-detect URLs (http/https) vs plain text for display styling
+- [x] **Drag-and-Drop Reordering:** HTML5 drag-and-drop for source reordering
 
 **Stream View:**
-- [ ] **Sources Indicator:** Show icon/button if event has sources
-- [ ] **Navigate to Editor:** Clicking sources button opens Editor with that event selected
+- [x] **Sources Indicator:** Badge with source icon + count if event has sources
+- [x] **Navigate to Editor:** Clicking sources badge opens Editor with that event selected
+- [x] **Escape Key Fix:** stopPropagation to prevent overlay closing when canceling source input
+
+**Testing & Documentation:**
+- [x] **SRS Documentation:** docs/SRS_EVENT_SOURCES.md with 37 requirements
+- [x] **E2E Tests:** 4 Stream View tests (indicator visibility, count, no-sources, click-to-edit)
 
 **NOT in Scope:**
 - No link previews or metadata fetching
