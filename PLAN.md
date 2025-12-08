@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.3 - AI Event Persistence & UX Polish ✅
+**Current Version:** v0.7.4 - Production Bug Fixes ✅
 **Next Milestone:** v0.7.x AI Polish → v0.8.x Claude Code Integration (Firebase + MCP)
 
 ### Key Metrics
@@ -59,6 +59,7 @@
 - ✅ AI Chat Assistant: Gemini 2.5 Flash integration with Google Search (v0.7.0)
 - ✅ AI UX Polish: Cost tracking, preview events, editor behavior fixes (v0.7.1-v0.7.2)
 - ✅ Event Persistence & Cleanup: Fixed AI events saving to Firestore subcollection, console cleanup, overflow indicator polish, rejected events restore (v0.7.3)
+- ✅ Production Bug Fixes: Firestore event ID fix, minimap glow fix, overlay view mode (v0.7.4)
 
 ### Next Up
 - **v0.7.x**: AI Polish (Metadata Preview, Partial Import, Schema API)
@@ -409,7 +410,7 @@
 
 ### v0.5.32 - User Settings & Public Profiles
 **Goal:** Fix profile access and add user account management
-**Status:** In Progress
+**Status:** Deferred
 
 **Documentation:**
 - [x] Create `SRS_USER_PAGE.md` - User profile page requirements (30 reqs)
@@ -428,7 +429,7 @@
 
 ### v0.5.33 - Stream Editor Mobile Editing
 **Goal:** Make Stream Editor a full mobile editing experience
-**Status:** In Progress
+**Status:** Deferred
 
 **Documentation:**
 - [x] Update `SRS_STREAM_VIEW.md` with editing requirements (13 new reqs)
@@ -680,7 +681,17 @@
 - [x] **Overflow Indicators:** Restyled to be smaller, centered on axis, with rose outline instead of red fill
 - [x] **Rejected Events Re-enable:** Added `restoreActions` - rejected suggestions show visibility_off icon to restore
 
-### v0.7.4 - AI Metadata Preview
+### v0.7.4 - Production Bug Fixes
+**Status:** ✅ Complete
+
+- [x] **Firestore Event ID Fix:** Events loaded from Firestore were missing `id` field (doc.data() doesn't include doc.id)
+- [x] **Minimap Glow Fix:** Added undefined check to prevent all markers appearing highlighted
+- [x] **Side Panels Fix:** Fixed undefined === undefined comparison causing all events to show as "current"
+- [x] **Overlay View Mode:** AuthoringOverlay now opens for all users in view-only mode
+- [x] **API Key Hint:** Added security reminder in ChatPanel that API key is session-only
+- [x] **Favicon Cache-Bust:** New favicon with cache-busting query parameter
+
+### v0.7.5 - AI Metadata Preview
 **Goal:** Allow users to preview and review timeline metadata changes proposed by AI
 
 - [ ] **Metadata Preview UI:** Show current vs proposed title/description in ChatPanel
@@ -688,20 +699,20 @@
 - [ ] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
 - [ ] **Apply Confirmation:** Clear feedback when metadata is updated
 
-### v0.7.5 - Partial Import (Preview & Review)
+### v0.7.6 - Partial Import (Preview & Review)
 **Goal:** Import events with review workflow - foundation for git-style fork/merge/diff
 - [ ] **Preview Import:** Imported events appear as temporary/preview with highlighting
 - [ ] **Review UI:** Reuse ChatPanel approve/reject/restore pattern for import review
 - [ ] **Selective Apply:** User can approve individual events or all at once
 - [ ] **Conflict Detection:** Warn on duplicate/overlapping dates with existing events
 
-### v0.7.6 - YAML Schema API
+### v0.7.7 - YAML Schema API
 **Goal:** Publish schema for AI agents to discover and use
 - [ ] **Schema Endpoint:** `/api/schema/timeline` returns JSON Schema for YAML format
 - [ ] **Documentation:** Add schema docs with examples
 - [ ] **Versioning:** Schema version in response for compatibility
 
-### v0.7.7 - AI-Powered Automation (Gemini)
+### v0.7.8 - AI-Powered Automation (Gemini)
 **Goal:** Enhance Gemini chat capabilities for timeline creation
 - [ ] **Event Suggestions:** Auto-suggest related events based on context
 - [ ] **Gap Detection:** Identify missing periods in timeline coverage
