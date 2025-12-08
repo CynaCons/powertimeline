@@ -199,26 +199,23 @@ export function TimelineMinimap({
           {eventMarkers.map((marker, index) => {
             const isSelected = highlightedEventId === marker.event.id;
             const isHovered = hoveredEventId === marker.event.id && !isSelected;
-            const baseTransform = isHovering ? 'scaleY(1.2)' : '';
-            const activeTransform = isHovering ? 'scaleY(1.1)' : '';
+            // Removed container-wide hover scaling - it made ALL markers appear highlighted
             return (
               <div
                 key={index}
                 className={`absolute transition-all duration-200 ease-out transform ${
                   isSelected
-                    ? 'w-1.5 h-3 bg-amber-400 opacity-100 border border-white shadow-lg rounded-sm'
+                    ? 'w-1.5 h-3 bg-amber-400 border border-white rounded-sm'
                     : isHovered
-                      ? 'w-1.5 h-2.5 bg-sky-400 opacity-100 border border-white shadow-md rounded-sm'
-                      : 'top-0 w-0.5 h-2 bg-blue-500 opacity-80 hover:opacity-100'
+                      ? 'w-1.5 h-2.5 bg-sky-400 border border-white rounded-sm'
+                      : 'top-0 w-0.5 h-2 bg-blue-500'
                 }`}
                 style={{
                   left: `${marker.position * 100}%`,
                   top: isSelected || isHovered ? '50%' : 0,
-                  transform: isSelected
-                    ? `translate(-50%, -50%) ${activeTransform}`
-                    : isHovered
-                      ? `translate(-50%, -50%) ${activeTransform}`
-                      : `translateX(-50%) ${baseTransform}`,
+                  transform: isSelected || isHovered
+                    ? 'translate(-50%, -50%)'
+                    : 'translateX(-50%)',
                   boxShadow: isSelected
                     ? '0 0 8px rgba(251, 191, 36, 0.55), 0 2px 6px rgba(251, 191, 36, 0.35)'
                     : isHovered

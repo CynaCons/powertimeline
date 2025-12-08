@@ -65,7 +65,7 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     await expect(overlay).toBeVisible();
 
     // Should open in view mode for existing events
-    await expect(page.getByText('View Event')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Event Details' })).toBeVisible();
 
     // Should show read-only content (calendar icon, formatted date)
     await expect(page.locator('.material-symbols-rounded:has-text("calendar_today")')).toBeVisible();

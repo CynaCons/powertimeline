@@ -77,7 +77,7 @@ test.describe('Timeline Minimap Tests', () => {
     
     // Check for event markers in minimap
     const minimap = page.locator('[data-testid="timeline-minimap"]');
-    const eventMarkers = minimap.locator('.bg-primary-500, .bg-sky-400, .bg-amber-400');
+    const eventMarkers = minimap.locator('.bg-blue-500, .bg-sky-400, .bg-amber-400');
 
     const markerCount = await eventMarkers.count();
     console.log(`Event markers found: ${markerCount}`);

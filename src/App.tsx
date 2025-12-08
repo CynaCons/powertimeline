@@ -1051,7 +1051,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   viewStart={viewStart}
                   viewEnd={viewEnd}
                   hoveredEventId={hoveredEventId}
-                  onCardDoubleClick={isReadOnly ? undefined : (id) => {
+                  onCardDoubleClick={(id) => {
+                    // Allow ALL users to open overlay - AuthoringOverlay handles view vs edit mode
                     // Set selection first, then delay overlay opening to next frame
                     // This prevents race condition where selectedWithPreviews is undefined
                     setSelectedId(id);
