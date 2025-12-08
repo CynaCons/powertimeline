@@ -124,6 +124,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [streamViewerOpen, setStreamViewerOpen] = useState(initialStreamViewOpen);
   const [loadError, setLoadError] = useState<Error | null>(null);
+  // Pending overlay ID - used to defer overlay opening until event data is ready
+  const [pendingOverlayId, setPendingOverlayId] = useState<string | null>(null);
 
   // Respond to external trigger to open stream view (e.g., from MobileNotice)
   useEffect(() => {
@@ -562,6 +564,15 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     () => eventsWithPreviews.find((e) => e.id === selectedId),
     [eventsWithPreviews, selectedId]
   );
+
+  // Open overlay when pending and event data is ready
+  // This ensures the overlay only opens after selectedWithPreviews is computed
+  useEffect(() => {
+    if (pendingOverlayId && selectedWithPreviews && selectedWithPreviews.id === pendingOverlayId) {
+      setOverlay('editor');
+      setPendingOverlayId(null);
+    }
+  }, [pendingOverlayId, selectedWithPreviews]);
 
   // Sync form fields when selecting a PREVIEW event
   // (regular events are handled by the earlier effect at line ~292)
@@ -1053,9 +1064,9 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   hoveredEventId={hoveredEventId}
                   onCardDoubleClick={(id) => {
                     // Allow ALL users to open overlay - AuthoringOverlay handles view vs edit mode
-                    // Batch both state updates together so React processes them in one render cycle
+                    // Use pending pattern to ensure selectedWithPreviews is ready before overlay opens
                     setSelectedId(id);
-                    setOverlay('editor');
+                    setPendingOverlayId(id);
                   }}
                   onCardMouseEnter={(id) => setHoveredEventId(id)}
                   onCardMouseLeave={() => setHoveredEventId(undefined)}
