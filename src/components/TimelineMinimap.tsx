@@ -197,9 +197,9 @@ export function TimelineMinimap({
           />
           {/* Enhanced event density markers - blue for events */}
           {eventMarkers.map((marker, index) => {
-            const isSelected = highlightedEventId === marker.event.id;
-            const isHovered = hoveredEventId === marker.event.id && !isSelected;
-            // Removed container-wide hover scaling - it made ALL markers appear highlighted
+            // Explicit undefined checks to prevent undefined === undefined matching all markers
+            const isSelected = highlightedEventId !== undefined && highlightedEventId === marker.event.id;
+            const isHovered = hoveredEventId !== undefined && hoveredEventId === marker.event.id && !isSelected;
             return (
               <div
                 key={index}
