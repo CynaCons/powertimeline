@@ -74,7 +74,8 @@ export const EventPreviewList: React.FC<EventPreviewListProps> = ({
       {/* Event list - removed header and footer for cleaner look */}
       <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
         {events.map((event) => {
-          const isCurrentEvent = event.id === currentEventId;
+          // Only match if both IDs are defined AND equal (prevents undefined === undefined bug)
+          const isCurrentEvent = currentEventId !== undefined && event.id === currentEventId;
 
           return (
             <button
