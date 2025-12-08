@@ -1053,10 +1053,11 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   hoveredEventId={hoveredEventId}
                   onCardDoubleClick={(id) => {
                     // Allow ALL users to open overlay - AuthoringOverlay handles view vs edit mode
-                    // Set selection first, then delay overlay opening to next frame
-                    // This prevents race condition where selectedWithPreviews is undefined
+                    // Set selection first, then delay overlay opening to allow React to recompute
+                    // selectedWithPreviews before the overlay renders
                     setSelectedId(id);
-                    requestAnimationFrame(() => setOverlay('editor'));
+                    // Use setTimeout(0) to ensure state update and useMemo recomputation complete
+                    setTimeout(() => setOverlay('editor'), 0);
                   }}
                   onCardMouseEnter={(id) => setHoveredEventId(id)}
                   onCardMouseLeave={() => setHoveredEventId(undefined)}
