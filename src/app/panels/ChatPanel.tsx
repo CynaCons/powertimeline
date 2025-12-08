@@ -155,6 +155,18 @@ export function ChatPanel({
           {isValidatingKey ? <CircularProgress size={20} /> : 'Connect'}
         </Button>
       </form>
+      <Typography
+        variant="caption"
+        sx={{
+          mt: 1,
+          display: 'block',
+          color: 'var(--page-text-tertiary)',
+          fontSize: '0.7rem',
+          fontStyle: 'italic'
+        }}
+      >
+        💡 API keys are not stored for security. You'll need to enter it each session.
+      </Typography>
       {error && (
         <Alert severity="error" sx={{ mt: 1 }}>
           {error}
