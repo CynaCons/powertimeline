@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
 import { monitorConsole, waitForQuiet } from './utils';
 
 const PRODUCTION_URL = 'https://powertimeline.com';
-const TEST_TIMELINE_URL = `${PRODUCTION_URL}/cynacons/timeline-french-revolution`;
+const TEST_TIMELINE_URL = `${PRODUCTION_URL}/cynacons/timeline/timeline-french-revolution`;
 
 test.describe('Production Editor Functionality', () => {
 
