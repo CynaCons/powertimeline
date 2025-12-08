@@ -223,7 +223,7 @@ export function TimelineMinimap({
                     ? '0 0 8px rgba(251, 191, 36, 0.55), 0 2px 6px rgba(251, 191, 36, 0.35)'
                     : isHovered
                       ? '0 0 8px rgba(56, 189, 248, 0.45), 0 2px 6px rgba(56, 189, 248, 0.25)'
-                      : '0 1px 3px rgba(59, 130, 246, 0.3)',
+                      : 'none', // Removed default shadow to prevent glow in dense areas
                   zIndex: isSelected ? 4 : isHovered ? 3 : 2
                 }}
                 title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
