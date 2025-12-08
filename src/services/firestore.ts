@@ -225,7 +225,8 @@ export async function getTimelineEvents(timelineId: string, ownerId: string): Pr
       // Convert EventDocument back to Event by removing Firestore-specific fields
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { timelineId, createdAt, updatedAt, ...event } = eventDoc;
-      return event as Event;
+      // Ensure event has the document ID (doc.data() doesn't include it)
+      return { ...event, id: doc.id } as Event;
     });
   } catch (error) {
     console.error('[getTimelineEvents] Error:', error);
