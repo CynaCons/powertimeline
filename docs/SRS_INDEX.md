@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-12-07
-**Version:** v0.6.3
+**Last Updated:** 2025-12-10
+**Version:** v0.7.13
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| **Total Requirements** | ~267 | 100% |
-| **Implemented** | ~200 | 76% |
-| **Verified (with tests)** | ~119 | 45% |
-| **In Progress** | ~5 | 2% |
-| **Planned (TBD)** | ~58 | 22% |
+| **Total Requirements** | ~340 | 100% |
+| **Implemented** | ~200 | 59% |
+| **Verified (with tests)** | ~119 | 35% |
+| **In Progress** | ~10 | 3% |
+| **Planned (TBD)** | ~140 | 41% |
 
 ### By Feature Area
 
@@ -28,17 +28,21 @@
 | Minimap | 12 | [SRS_MINIMAP.md](SRS_MINIMAP.md) | 10 (83%) | 8 (67%) |
 | Timeline Axis & Scales | 5 | [SRS.md](SRS.md#8-timeline-axis--scales) | 5 (100%) | 5 (100%) |
 | User Interface & Panels | 8 | [SRS.md](SRS.md#9-user-interface--panels) | 8 (100%) | 6 (75%) |
-| Data Management & Export | 3 | [SRS.md](SRS.md#10-data-management--export) | 3 (100%) | 2 (67%) |
+| Data Management & Export | 15 | [SRS_EDITOR_IMPORT_EXPORT.md](SRS_EDITOR_IMPORT_EXPORT.md) | 15 (100%) | 15 (100%) |
 | Visual Design & Theming | 3 | [SRS.md](SRS.md#11-visual-design--theming) | 3 (100%) | 2 (67%) |
 | Event Interaction | 5 | [SRS.md](SRS.md#15-event-interaction) | 5 (100%) | 3 (60%) |
 | Home Page & Discovery | 35+ | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) | 30 (86%) | 15 (43%) |
 | Timeline Creation & Management | 18 | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) | 18 (100%) | 16 (89%) |
 | Admin Panel | 25+ | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) | 25 (100%) | 13 (52%) |
-| Editor Import/Export | 22 | [SRS_EDITOR_IMPORT_EXPORT.md](SRS_EDITOR_IMPORT_EXPORT.md) | 22 (100%) | 0 (0%) |
 | Timeline Editor Page | 28 | [SRS_TIMELINE_EDITOR.md](SRS_TIMELINE_EDITOR.md) | 28 (100%) | 6 (21%) |
-| Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 0 (0%) | 0 (0%) |
-| Event Sources | 37 | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) | 0 (0%) | 0 (0%) |
-| **TOTAL** | **~267** | Multiple files | **~200 (75%)** | **~119 (45%)** |
+| User Profile Page | 30 | [SRS_USER_PAGE.md](SRS_USER_PAGE.md) | 30 (100%) | 10 (33%) |
+| User Settings Page | 23 | [SRS_USER_SETTINGS_PAGE.md](SRS_USER_SETTINGS_PAGE.md) | 23 (100%) | 8 (35%) |
+| Stream View | 45 | [SRS_STREAM_VIEW.md](SRS_STREAM_VIEW.md) | 45 (100%) | 12 (27%) |
+| Landing Page | 15 | [SRS_LANDING_PAGE.md](SRS_LANDING_PAGE.md) | 15 (100%) | 5 (33%) |
+| Event Sources | 37 | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) | 37 (100%) | 10 (27%) |
+| AI Integration | 98 | [SRS_AI_INTEGRATION.md](SRS_AI_INTEGRATION.md) | 50 (51%) | 15 (15%) |
+| Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 25 (100%) | 8 (32%) |
+| **TOTAL** | **~340** | Multiple files | **~200 (59%)** | **~119 (35%)** |
 
 ---
 

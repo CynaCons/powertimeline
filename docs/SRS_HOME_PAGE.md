@@ -91,12 +91,7 @@ The home page sections appear in this order (top to bottom):
 
 ### User Profile System
 
-| ID | Requirement | Acceptance Criteria | Code | Tests |
-|---|---|---|---|---|
-| CC-REQ-USER-001 | Demo user profiles include essential metadata | • User object contains: id, name, avatar, bio, createdAt<br>• Three default users: Alice, Bob, Charlie<br>• Avatar can be emoji or image URL<br>• Bio is optional text field (max 280 characters) | TBD | TBD |
-| CC-REQ-USER-002 | User profile page displays user info and their timelines | • URL pattern: /user/:userId<br>• Page shows user avatar, name, bio<br>• Timeline list filtered by ownerId<br>• Shows timeline count and creation stats<br>• Same feed structure as home page (but filtered) | TBD | TBD |
-| CC-REQ-USER-003 | User data persists in localStorage | • Users stored in localStorage key: 'powertimeline_users'<br>• JSON serialization of user array<br>• Data survives page refresh<br>• Graceful handling of corrupted data | TBD | TBD |
-| CC-REQ-USER-004 | User profile accessible from timeline cards | • Clicking owner name/avatar navigates to /user/:userId<br>• Link styled distinctly (underline, color change)<br>• Breadcrumb navigation works (Home > User) | TBD | TBD |
+➡️ See [`SRS_USER_PAGE.md`](SRS_USER_PAGE.md) for detailed user profile requirements.
 
 ### Routing & Navigation
 
@@ -118,19 +113,21 @@ The home page sections appear in this order (top to bottom):
 
 ### Page Layout & Design
 
+➡️ See [`SRS_LAYOUT.md`](SRS_LAYOUT.md) for detailed layout requirements.
+
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-LAYOUT-001 | Header contains branding and navigation | • PowerTimeline logo/text on left<br>• User profile link on right ("My Profile" or user avatar)<br>• Sticky header on scroll (optional)<br>• Responsive: hamburger menu on mobile | TBD | TBD |
-| CC-REQ-LAYOUT-002 | Main content area has max-width constraint | • Max width: 1200px (centered)<br>• Padding: 16-24px on sides<br>• Responsive scaling for smaller screens<br>• Consistent vertical spacing between sections | TBD | TBD |
-| CC-REQ-LAYOUT-003 | Section headers styled consistently | • Typography: H2 or H3, semi-bold<br>• Icon + text combination<br>• Horizontal rule or divider below (optional)<br>• Margin: 32-48px top, 16-24px bottom | TBD | TBD |
-| CC-REQ-LAYOUT-004 | Empty states provide clear guidance | • Icon or illustration for visual appeal<br>• Clear message explaining why empty<br>• Call-to-action button when applicable<br>• Friendly, encouraging tone | TBD | TBD |
+| CC-REQ-PAGE-LAYOUT-001 | Header contains branding and navigation | • PowerTimeline logo/text on left<br>• User profile link on right ("My Profile" or user avatar)<br>• Sticky header on scroll (optional)<br>• Responsive: hamburger menu on mobile | TBD | TBD |
+| CC-REQ-PAGE-LAYOUT-002 | Main content area has max-width constraint | • Max width: 1200px (centered)<br>• Padding: 16-24px on sides<br>• Responsive scaling for smaller screens<br>• Consistent vertical spacing between sections | TBD | TBD |
+| CC-REQ-PAGE-LAYOUT-003 | Section headers styled consistently | • Typography: H2 or H3, semi-bold<br>• Icon + text combination<br>• Horizontal rule or divider below (optional)<br>• Margin: 32-48px top, 16-24px bottom | TBD | TBD |
+| CC-REQ-PAGE-LAYOUT-004 | Empty states provide clear guidance | • Icon or illustration for visual appeal<br>• Clear message explaining why empty<br>• Call-to-action button when applicable<br>• Friendly, encouraging tone | TBD | TBD |
 
 ### Data Management
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-DATA-001 | Timeline objects include ownership and engagement metadata | • Timeline has: id, title, description, events, ownerId<br>• New fields: viewCount (number), featured (boolean)<br>• Timestamps: createdAt, updatedAt (ISO strings)<br>• Existing timelines migrated with default values | TBD | TBD |
-| CC-REQ-DATA-002 | localStorage schema supports multi-user timelines and stats | • Timelines: 'powertimeline_timelines'<br>• Users: 'powertimeline_users'<br>• Stats: 'powertimeline_stats' (optional cache)<br>• View preferences: 'powertimeline_prefs' | TBD | TBD |
+| CC-REQ-HOME-DATA-001 | Timeline objects include ownership and engagement metadata | • Timeline has: id, title, description, events, ownerId<br>• New fields: viewCount (number), featured (boolean)<br>• Timestamps: createdAt, updatedAt (ISO strings)<br>• Existing timelines migrated with default values | TBD | TBD |
+| CC-REQ-HOME-DATA-002 | localStorage schema supports multi-user timelines and stats | • Timelines: 'powertimeline_timelines'<br>• Users: 'powertimeline_users'<br>• Stats: 'powertimeline_stats' (optional cache)<br>• View preferences: 'powertimeline_prefs' | TBD | TBD |
 | CC-REQ-DATA-003 | Demo users pre-populated on first load | • Check if users exist in localStorage<br>• If empty, create Alice, Bob, Charlie with bios/avatars<br>• Assign sample timelines to demo users<br>• Idempotent initialization (safe to run multiple times) | TBD | TBD |
 | CC-REQ-DATA-004 | View count increments on timeline access | • When timeline editor opens, increment viewCount<br>• Debounced: max 1 increment per session per timeline<br>• Persist to localStorage immediately<br>• Handle concurrent tab scenarios gracefully | TBD | TBD |
 

@@ -35,11 +35,11 @@ Once running, you can browse public timelines or create your own. Load sample da
 ## 📚 Documentation
 
 - **[Product Requirements (PRD.md)](./PRD.md)** - Product vision and user stories
-- **[Requirements Index (docs/SRS_INDEX.md)](./docs/SRS_INDEX.md)** - Complete requirements dashboard (~177 requirements)
+- **[Requirements Index (docs/SRS_INDEX.md)](./docs/SRS_INDEX.md)** - Complete requirements dashboard (~340 requirements)
 - **[Software Requirements (docs/SRS.md)](./docs/SRS.md)** - Detailed SRS with traceability
 - **[Architecture (ARCHITECTURE.md)](./ARCHITECTURE.md)** - Technical design decisions
-- **[Implementation Plan (PLAN.md)](./PLAN.md)** - Iteration history (160+ completed)
-- **[Test Suite (tests/)](./tests)** - 287 Playwright E2E tests
+- **[Implementation Plan (PLAN.md)](./PLAN.md)** - Iteration history (200+ completed)
+- **[Test Suite (tests/)](./tests)** - 320 Playwright E2E tests + 58 unit tests
 
 ## 📦 Features at a glance
 

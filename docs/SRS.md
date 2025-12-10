@@ -14,11 +14,6 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ➡️ See [`SRS_FOUNDATION.md`](SRS_FOUNDATION.md) for detailed acceptance criteria and change history.
 
-| ID | Requirement (summary) | Code | Tests |
-|---|---|---|---|
-| CC-REQ-FOUND-001 | Timeline axis appears within 1s of startup with ticks and accessibility hooks | `src/layout/DeterministicLayoutComponent.tsx`, `src/App.tsx` | v5/01 |
-| CC-REQ-CARDS-001 | Default seed renders balanced cards above/below axis with visible content | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/02 |
-
 ### 2. Card Layout & Positioning
 
 ➡️ See [`SRS_LAYOUT.md`](SRS_LAYOUT.md) for detailed acceptance criteria, implementation notes, and change history covering the layout engine and positioning guarantees.
@@ -29,25 +24,9 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ➡️ See [`SDS_CARDS_SYSTEM.md`](SDS_CARDS_SYSTEM.md) for technical design specifications including degradation algorithms, badge merging strategy, and implementation architecture.
 
-| ID | Requirement (summary) | Code | Tests |
-|---|---|---|---|
-| CC-REQ-CARD-FULL-001 | Full cards are ~169px tall and show multi-line body without clipping | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 |
-| CC-REQ-CARD-COMPACT-001 | Compact cards have same width as full (260px), ~92px tall, and show 1–2 description lines | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/47 |
-| CC-REQ-CARD-TITLE-ONLY | Title-only cards appear when cluster density exceeds compact capacity, with no overlaps | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/48 |
-| CC-REQ-SEMICOL-002 | If a semi-column totals 3–4 events, degrade to compact and show them without overflow; overflow only after visible budget is exceeded | `src/layout/LayoutEngine.ts`, `src/layout/config.ts` | v5/47 |
-| CC-REQ-DEGRADATION-001 | Cards automatically degrade from full → compact → title-only based on density to prevent overlaps | `src/layout/LayoutEngine.ts` | v5/36, v5/37, v5/38, v5/39 |
-
 ### 4. Overflow & Capacity Management
 
 ➡️ See [`SRS_CARDS_SYSTEM.md`](SRS_CARDS_SYSTEM.md) for complete overflow and capacity requirements.
-
-| ID | Requirement (summary) | Code | Tests |
-|---|---|---|---|
-| CC-REQ-OVERFLOW-001 | Navigating to an empty period shows no leftover overflow badges | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/30 |
-| CC-REQ-OVERFLOW-002 | Overflow reduces/disappears appropriately when zooming out | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/30 |
-| CC-REQ-OVERFLOW-003 | When events exceed capacity, overflow badges (+N) appear showing hidden event count | `src/layout/LayoutEngine.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/56 |
-| CC-REQ-OVERFLOW-004 | Overflow indicators maintain minimum spacing to prevent visual overlap | `src/layout/DeterministicLayoutComponent.tsx` | v5/15 |
-| CC-REQ-CAPACITY-001 | System reports total/used cells and utilization metrics for monitoring | `src/layout/LayoutEngine.ts` | v5/05 |
 
 ### 5. Anchors & Timeline Alignment
 
@@ -61,12 +40,6 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 ### 6. Zoom & Navigation
 
 ➡️ See [`SRS_ZOOM.md`](SRS_ZOOM.md) for detailed acceptance criteria, implementation notes, edge case handling, and change history covering the zoom and navigation system.
-
-| ID | Requirement (summary) | Code | Tests |
-|---|---|---|---|
-| CC-REQ-ZOOM-001 | Zoom filters visible events; cursor-anchored zoom keeps time under cursor stable; boundaries clamp | `src/App.tsx`, `src/app/hooks/useViewWindow.ts` | v5/17, v5/20, v5/24 |
-| CC-REQ-ZOOM-002 | Zoom operations maintain event positions relative to cursor and handle edge cases gracefully | `src/app/hooks/useViewWindow.ts` | v5/18, v5/19, v5/23 |
-| CC-REQ-ZOOM-003 | System supports maximum zoom down to minute-level precision with appropriate scaling | `src/app/hooks/useViewWindow.ts` | v5/25, v5/29 |
 
 ### 7. Minimap
 
@@ -100,10 +73,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 
 ### 10. Data Management & Export
 
-| ID | Requirement | Code | Tests |
-|---|---|---|---|
-| CC-REQ-DATA-001 | Timeline data can be exported to and imported from YAML format with validation | `src/utils/yamlSerializer.ts` | v5/55 |
-| CC-REQ-DATA-002 | Timeline events are stored and retrieved reliably across sessions | `src/lib/storage.ts` | - |
+➡️ See [`SRS_EDITOR_IMPORT_EXPORT.md`](SRS_EDITOR_IMPORT_EXPORT.md) for YAML import/export requirements.
 
 ### 11. Visual Design & Theming
 
@@ -135,13 +105,6 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 ### 19. Timeline Creation & Management
 
 ➡️ See [`SRS_TIMELINE_CREATION.md`](SRS_TIMELINE_CREATION.md) for ASPICE-style requirements covering timeline CRUD operations (Create, Edit, Delete) with ID/title distinction, form validation, and localStorage persistence (v0.4.1).
-
-| ID | Requirement (summary) | Code | Tests |
-|---|---|---|---|
-| CC-REQ-CREATE-001 | The software shall provide a dialog to create new timelines | TBD | v5/74 |
-| CC-REQ-CREATE-ID-001 | The software shall generate unique timeline IDs from titles with per-user uniqueness validation | TBD | v5/75 |
-| CC-REQ-EDIT-001 | The software shall allow editing timeline metadata (title, description, ID) from card menu | TBD | v5/76 |
-| CC-REQ-DELETE-001 | The software shall require confirmation before deleting timelines | TBD | v5/77 |
 
 ### 14. Navigation & Panels
 

@@ -2,15 +2,15 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.12 - Unit Testing Infrastructure ✅
-**Next Milestone:** v0.7.13-v0.7.14 Docs & API → v0.8.x Claude Code Integration
+**Current Version:** v0.7.13 - Documentation Consistency ✅
+**Next Milestone:** v0.7.14 YAML Schema API → v0.8.x Claude Code Integration
 
 ### Key Metrics
-- **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
-- **Requirements:** ~267 total ([SRS Index](docs/SRS_INDEX.md))
-- **Implementation:** ~200 requirements (87%)
-- **Test Coverage:** ~119 requirements verified (52%)
-- **Test Suite:** 320 Playwright tests ([Test Status](#test-status))
+- **Total Iterations:** 200+ completed (v0.2.0 → v0.7.12)
+- **Requirements:** ~340 total ([SRS Index](docs/SRS_INDEX.md))
+- **Implementation:** ~200 requirements (59%)
+- **Test Coverage:** ~119 requirements verified (35%)
+- **Test Suite:** 320 Playwright E2E + 58 unit = 378 automated tests ([Test Status](#test-status))
 - **Production Tests:** 22/22 passing (v0.5.15)
 
 ### Recent Achievements (v0.5.x)
@@ -73,7 +73,9 @@
 - **v0.9.x**: Collaboration & Versioning (fork/merge/diff)
 
 ### Test Status
-- **Suite:** 320 tests in 92 files
+- **Playwright E2E:** 320 tests in 112 spec files
+- **Vitest Unit:** 58 tests
+- **Total:** 378 automated tests
 - **Production Tests:** 22/22 passing
 - **Dev Tests:** Running (requires .env.test credentials)
 
@@ -772,12 +774,11 @@
 ### v0.7.13 - Documentation Consistency Fix
 **Goal:** Resolve documentation drift and contradictions
 
-- [ ] Deduplicate 20+ duplicate requirement IDs across SRS files
-- [ ] Update README.md metrics (177 → 267 requirements, 287 → 320 tests)
-- [ ] Re-audit SRS_INDEX.md against v0.7.x codebase
-- [ ] Resolve PLAN.md vs SRS status contradictions
-- [ ] Add `// @req CC-REQ-XXX` comments to codebase (traceability)
-- [ ] Mark deprecated features in SRS files (DevPanel, etc.)
+- [x] Deduplicate 25 duplicate requirement IDs across SRS files
+- [x] Update README.md metrics (177 → 340 requirements, 287 → 378 tests)
+- [x] Re-audit SRS_INDEX.md against v0.7.x codebase
+- [x] Update PLAN.md metrics to match SRS_INDEX.md
+- [x] Create DOCUMENTATION_FIXES_v0.7.13.md analysis report
 
 ### v0.7.14 - YAML Schema API
 **Goal:** Publish schema for AI agents to discover and use
