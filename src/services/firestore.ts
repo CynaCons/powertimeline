@@ -403,8 +403,11 @@ export async function createTimeline(
 
     // Extract events if present (backward compatibility)
     const events = 'events' in timeline ? timeline.events : [];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { events: _events, ...timelineData } = timeline as any;
+    // Remove events property if present (TypeScript-safe destructuring)
+    const timelineData: Omit<typeof timeline, 'events'> = 'events' in timeline
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ? (({ events: _eventsToOmit, ...rest }) => rest)(timeline)
+      : timeline;
 
     const newTimeline: TimelineMetadata = {
       ...timelineData,

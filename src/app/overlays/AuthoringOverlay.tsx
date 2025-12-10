@@ -663,7 +663,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 
                               openPickerButton: {
                                 'data-testid': 'date-picker-button'
-                              } as any, // data-testid is a valid HTML attribute for testing but not in MUI types
+                              } as unknown as Record<string, unknown>, // data-testid is a valid HTML attribute for testing
                               textField: {
                                 variant: "outlined" as const,
                                 fullWidth: true,
@@ -676,7 +676,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                                 FormHelperTextProps: {
                                   id: touched.date && errors.date ? 'error-date' : undefined,
                                   role: touched.date && errors.date ? 'alert' : undefined
-                                } as any
+                                } as React.ComponentProps<'p'>
                               }
                             }}
                           />
@@ -708,7 +708,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                             FormHelperTextProps={{
                               id: touched.time && errors.time ? 'error-time' : undefined,
                               role: touched.time && errors.time ? 'alert' : undefined
-                            } as any}
+                            } as React.ComponentProps<'p'>}
                             fullWidth
                           />
                         </div>
@@ -735,7 +735,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                         FormHelperTextProps={{
                           id: touched.title && errors.title ? 'error-title' : undefined,
                           role: touched.title && errors.title ? 'alert' : undefined
-                        } as any}
+                        } as React.ComponentProps<'p'>}
                         fullWidth
                       />
                       <div className="text-xs text-gray-500 text-right">
@@ -765,7 +765,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
                         FormHelperTextProps={{
                           id: touched.description && errors.description ? 'error-description' : undefined,
                           role: touched.description && errors.description ? 'alert' : undefined
-                        } as any}
+                        } as React.ComponentProps<'p'>}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             fontSize: '16px',
