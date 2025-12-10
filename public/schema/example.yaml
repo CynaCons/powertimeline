@@ -1,0 +1,58 @@
+# PowerTimeline YAML Example
+# This file demonstrates the timeline format supported by PowerTimeline
+
+timeline:
+  metadata:
+    name: "Historical Space Milestones"
+    description: "Key achievements in space exploration"
+    created: "2024-12-10T00:00:00.000Z"
+    version: "1.0"
+    exported_by: "PowerTimeline v0.7.14"
+
+  events:
+    - id: "sputnik-1957"
+      date: "1957-10-04"
+      title: "Sputnik 1 Launch"
+      description: "Soviet Union launches the first artificial satellite into orbit."
+      sources:
+        - "https://en.wikipedia.org/wiki/Sputnik_1"
+
+    - id: "yuri-gagarin-1961"
+      date: "1961-04-12"
+      title: "First Human in Space"
+      description: "Yuri Gagarin becomes the first human to journey into outer space."
+      time: "06:07"
+      sources:
+        - "https://en.wikipedia.org/wiki/Yuri_Gagarin"
+
+    - id: "moon-landing-1969"
+      date: "1969-07-20"
+      endDate: "1969-07-21"
+      title: "Apollo 11 Moon Landing"
+      description: |
+        **Apollo 11** mission achievements:
+
+        - Neil Armstrong: First person on the Moon
+        - Buzz Aldrin: Second person on the Moon
+        - Michael Collins: Command module pilot
+
+        Famous quote: "That's one small step for man, one giant leap for mankind."
+      time: "20:17"
+      sources:
+        - "https://www.nasa.gov/mission_pages/apollo/apollo11.html"
+        - "NASA Apollo Program Archives"
+
+    - id: "skylab-1973"
+      date: "1973-05-14"
+      endDate: "1979-07-11"
+      title: "Skylab Space Station"
+      description: "America's first space station operates in low Earth orbit."
+      sources:
+        - "https://en.wikipedia.org/wiki/Skylab"
+
+    - id: "iss-construction-1998"
+      date: "1998-11-20"
+      title: "ISS Construction Begins"
+      description: "The first module (Zarya) of the International Space Station is launched."
+      sources:
+        - "https://www.nasa.gov/mission_pages/station/main/index.html"

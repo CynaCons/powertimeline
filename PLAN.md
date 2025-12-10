@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.13 - Documentation Consistency ✅
-**Next Milestone:** v0.7.14 YAML Schema API → v0.8.x Claude Code Integration
+**Current Version:** v0.7.14 - YAML Schema API ✅
+**Next Milestone:** v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.7.12)
@@ -65,10 +65,13 @@
 - ✅ Firebase Data Consistency: Optional chaining, safe fallbacks, timeline loading fixes (v0.7.7)
 - ✅ Offline Support: Connection monitoring, retry logic, error recovery (v0.7.8)
 - ✅ AI Metadata Preview: Diff view for title/description changes in ChatPanel (v0.7.9)
+- ✅ AI Partial Import: Preview and review mode with selective confirmation (v0.7.10)
+- ✅ Code Quality: Removed `any` types, TypeScript strict checks (v0.7.11)
+- ✅ Unit Testing: Set up Vitest with 58 unit tests (v0.7.12)
+- ✅ Documentation: Fixed consistency and updated metrics (v0.7.13)
+- ✅ YAML Schema API: JSON Schema endpoint for AI discovery (v0.7.14)
 
 ### Next Up
-- **v0.7.10**: AI Partial Import (Preview & Review)
-- **v0.7.11-v0.7.13**: Code Quality & Documentation Fixes
 - **v0.8.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v0.9.x**: Collaboration & Versioning (fork/merge/diff)
 
@@ -780,12 +783,13 @@
 - [x] Update PLAN.md metrics to match SRS_INDEX.md
 - [x] Create DOCUMENTATION_FIXES_v0.7.13.md analysis report
 
-### v0.7.14 - YAML Schema API
+### v0.7.14 - YAML Schema API ✅
 **Goal:** Publish schema for AI agents to discover and use
 
-- [ ] Schema endpoint `/api/schema/timeline` returns JSON Schema
-- [ ] Add schema documentation with examples
-- [ ] Schema versioning for compatibility
+- [x] Create JSON Schema file at `/schema/timeline.schema.json`
+- [x] Add comprehensive documentation with examples (README.md)
+- [x] Include field descriptions, validation rules, and format requirements
+- [x] Verify schema is served in production build
 
 ---
 
