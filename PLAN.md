@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.11 - Code Quality Cleanup ✅
-**Next Milestone:** v0.7.12-v0.7.14 Testing & Polish → v0.8.x Claude Code Integration
+**Current Version:** v0.7.12 - Unit Testing Infrastructure ✅
+**Next Milestone:** v0.7.13-v0.7.14 Docs & API → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -763,12 +763,11 @@
 ### v0.7.12 - Unit Testing Infrastructure
 **Goal:** Add unit tests for business logic (currently 0 unit tests)
 
-- [ ] Set up Vitest for unit testing
-- [ ] Add unit tests for layout engine (LayoutEngine.ts)
-- [ ] Add unit tests for DegradationEngine
-- [ ] Add unit tests for PositioningEngine
-- [ ] Add unit tests for clustering.ts
-- [ ] Add unit tests for utility functions (validation, formatting)
+- [x] Set up Vitest for unit testing (vitest.config.ts, npm scripts)
+- [x] Add unit tests for emailValidation.ts (7 tests)
+- [x] Add unit tests for clustering.ts (15 tests)
+- [x] Add unit tests for CapacityModel.ts (36 tests)
+- [x] Total: 58 unit tests passing
 
 ### v0.7.13 - Documentation Consistency Fix
 **Goal:** Resolve documentation drift and contradictions

@@ -58,3 +58,4 @@ functions/package-lock.json
 *.sln
 *.sw?
 __pycache__
+coverage/
