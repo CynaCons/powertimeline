@@ -273,7 +273,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: '36px' }}>
-                    <span className="material-symbols-rounded text-lg">
+                    <span className="material-symbols-rounded text-lg" aria-hidden="true">
                       {command.icon || getCategoryIcon(command.category)}
                     </span>
                   </ListItemIcon>

@@ -747,6 +747,25 @@
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
+  /* Override transition duration CSS variables to near-zero */
+  :root {
+    --transition-fast: 0ms;
+    --transition-medium: 0ms;
+    --transition-slow: 0ms;
+    --pt-hover-duration: 0ms;
+  }
+
+  /* Global reduced motion rule for all elements */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Specific class overrides for backwards compatibility */
   .card-hover-scale {
     transition: none;
   }

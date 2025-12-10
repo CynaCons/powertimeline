@@ -99,14 +99,16 @@ export function TimelineCardMenu({
         size="small"
         className="timeline-menu-button"
         sx={{
-          padding: '4px',
+          minWidth: '44px',
+          minHeight: '44px',
+          padding: '10px',
           color: 'var(--page-text-secondary)',
           '&:hover': {
             backgroundColor: 'var(--page-bg-hover)',
           },
         }}
       >
-        <span className="material-symbols-rounded text-base">more_vert</span>
+        <span className="material-symbols-rounded text-base" aria-hidden="true">more_vert</span>
       </IconButton>
 
       <Menu
@@ -131,14 +133,14 @@ export function TimelineCardMenu({
       >
         <MenuItem onClick={handleView}>
           <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
-            <span className="material-symbols-rounded">open_in_new</span>
+            <span className="material-symbols-rounded" aria-hidden="true">open_in_new</span>
           </ListItemIcon>
           <ListItemText>Open</ListItemText>
         </MenuItem>
 
         <MenuItem onClick={handleCopyLink}>
           <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
-            <span className="material-symbols-rounded">link</span>
+            <span className="material-symbols-rounded" aria-hidden="true">link</span>
           </ListItemIcon>
           <ListItemText>Copy Link</ListItemText>
         </MenuItem>
@@ -146,7 +148,7 @@ export function TimelineCardMenu({
         {onExport && (
           <MenuItem onClick={handleExport} data-testid="export-timeline-button">
             <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
-              <span className="material-symbols-rounded">download</span>
+              <span className="material-symbols-rounded" aria-hidden="true">download</span>
             </ListItemIcon>
             <ListItemText>Export YAML</ListItemText>
           </MenuItem>
@@ -159,7 +161,7 @@ export function TimelineCardMenu({
             navigate(`/${ownerUsername}`);
           }}>
             <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
-              <span className="material-symbols-rounded">person</span>
+              <span className="material-symbols-rounded" aria-hidden="true">person</span>
             </ListItemIcon>
             <ListItemText>Go to Owner</ListItemText>
           </MenuItem>
@@ -168,7 +170,7 @@ export function TimelineCardMenu({
         {isOwner && onEdit && (
           <MenuItem onClick={handleEdit}>
             <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
-              <span className="material-symbols-rounded">edit</span>
+              <span className="material-symbols-rounded" aria-hidden="true">edit</span>
             </ListItemIcon>
             <ListItemText>Edit</ListItemText>
           </MenuItem>
@@ -177,7 +179,7 @@ export function TimelineCardMenu({
         {isOwner && onDelete && (
           <MenuItem onClick={handleDelete}>
             <ListItemIcon sx={{ color: 'error.main' }}>
-              <span className="material-symbols-rounded">delete</span>
+              <span className="material-symbols-rounded" aria-hidden="true">delete</span>
             </ListItemIcon>
             <ListItemText sx={{ color: 'error.main' }}>Delete</ListItemText>
           </MenuItem>

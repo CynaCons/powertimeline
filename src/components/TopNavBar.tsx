@@ -19,6 +19,8 @@ export function TopNavBar() {
 
   return (
     <Box
+      component="nav"
+      aria-label="Top navigation"
       sx={{
         bgcolor: '#0d1117',
         borderBottom: '1px solid #21262d',

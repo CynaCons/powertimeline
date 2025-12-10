@@ -5,7 +5,7 @@
   --page-bg-elevated: #161b22;
   --page-border: #30363d;
   --page-text-primary: #e6edf3;
-  --page-text-secondary: #8d96a0;
+  --page-text-secondary: #9ba3af; /* Improved from #8d96a0 for WCAG AA contrast */
   --page-accent: #8b5cf6;
   --page-accent-hover: #7c3aed;
   --nav-bg: #161b22;
@@ -121,8 +121,8 @@
   --stream-card-bg: #161b22;
   --stream-card-border: #30363d;
   --stream-text-primary: #e6edf3;
-  --stream-text-secondary: #8d96a0;
-  --stream-text-muted: #6e7681;
+  --stream-text-secondary: #9ba3af; /* Improved from #8d96a0 for WCAG AA contrast */
+  --stream-text-muted: #8d96a0; /* Improved from #6e7681 for WCAG AA contrast */
 
   /* Preview Event Styling (AI-created temporary events) */
   --preview-bg: rgba(245, 158, 11, 0.15); /* amber with transparency for dark mode */
@@ -137,7 +137,7 @@
   --page-bg-elevated: #f6f8fa;
   --page-border: #d0d7de;
   --page-text-primary: #1f2328;
-  --page-text-secondary: #656d76;
+  --page-text-secondary: #57606a; /* Improved from #656d76 for WCAG AA contrast */
   --page-accent: #8b5cf6;
   --page-accent-hover: #7c3aed;
   --nav-bg: #f6f8fa;
@@ -184,8 +184,8 @@
   --stream-card-bg: #f6f8fa;
   --stream-card-border: #d0d7de;
   --stream-text-primary: #1f2328;
-  --stream-text-secondary: #656d76;
-  --stream-text-muted: #8c959f;
+  --stream-text-secondary: #57606a; /* Improved from #656d76 for WCAG AA contrast */
+  --stream-text-muted: #656d76; /* Improved from #8c959f for WCAG AA contrast */
 
   /* Preview Event Styling (light mode) */
   --preview-bg: rgba(251, 191, 36, 0.2); /* amber-400 with transparency for light mode */

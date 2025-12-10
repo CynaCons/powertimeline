@@ -64,7 +64,7 @@ export function AdminPage() {
   return (
     <div data-testid="admin-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
       {/* Navigation Rail */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" role="navigation" aria-label="Main navigation" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
         <button
           onClick={() => navigate('/browse')}

@@ -73,7 +73,7 @@ export const RightPanelShell: React.FC<RightPanelShellProps> = ({
               type="button"
               onClick={onClose}
               aria-label="Close panel"
-              className="p-1 rounded transition-colors"
+              className="p-2.5 rounded transition-colors min-w-11 min-h-11"
               style={{ color: 'var(--color-text-secondary)' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)';
@@ -82,7 +82,7 @@ export const RightPanelShell: React.FC<RightPanelShellProps> = ({
                 e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
-              <span className="material-symbols-rounded text-lg">close</span>
+              <span className="material-symbols-rounded text-lg" aria-hidden="true">close</span>
             </button>
           )}
         </div>

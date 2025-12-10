@@ -905,8 +905,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
           {/* Read-only lock icon - shown in read-only mode */}
           {readOnly && (
             <Tooltip title="You are viewing in read-only mode. Sign in to edit your own timelines, or fork this timeline to make your own copy." placement="right">
-              <div className="mb-4 p-2 text-gray-400">
-                <span className="material-symbols-rounded text-xl">lock</span>
+              <div className="mb-4 p-2 text-gray-400" aria-label="Read-only mode">
+                <span className="material-symbols-rounded text-xl" aria-hidden="true">lock</span>
               </div>
             </Tooltip>
           )}
@@ -923,14 +923,14 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               type="button"
               title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'}
               onClick={() => setShowInfoPanels(!showInfoPanels)}
-              className={`material-symbols-rounded rounded-md p-2 transition-theme ${showInfoPanels ? 'bg-primary-50 text-primary-700' : ''}`}
+              className={`material-symbols-rounded rounded-md p-2.5 min-w-11 min-h-11 transition-theme ${showInfoPanels ? 'bg-primary-50 text-primary-700' : ''}`}
               style={{ color: showInfoPanels ? undefined : 'var(--color-text-secondary)', backgroundColor: showInfoPanels ? undefined : 'transparent' }}
               onMouseEnter={(e) => !showInfoPanels && (e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)')}
               onMouseLeave={(e) => !showInfoPanels && (e.currentTarget.style.backgroundColor = 'transparent')}
               aria-pressed={showInfoPanels}
               aria-label="Toggle info panels"
             >
-              info
+              <span aria-hidden="true">info</span>
             </button>
             <ThemeToggleButton />
           </div>
@@ -1134,8 +1134,9 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                           backgroundColor: 'var(--color-surface-hover)',
                         },
                       }}
+                      aria-label="Share timeline"
                     >
-                      <span className="material-symbols-rounded">share</span>
+                      <span className="material-symbols-rounded" aria-hidden="true">share</span>
                     </IconButton>
                   </Tooltip>
 
@@ -1154,13 +1155,13 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               {/* Icon-based control bar */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 transition-opacity duration-200 opacity-20 hover:opacity-95" data-tour="zoom-controls">
                 <div className="backdrop-blur-sm border rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)', opacity: 0.95 }}>
-                  <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)}><span className="material-symbols-rounded">chevron_left</span></IconButton></Tooltip>
-                  <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)}><span className="material-symbols-rounded">chevron_right</span></IconButton></Tooltip>
+                  <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Pan left"><span className="material-symbols-rounded" aria-hidden="true">chevron_left</span></IconButton></Tooltip>
+                  <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Pan right"><span className="material-symbols-rounded" aria-hidden="true">chevron_right</span></IconButton></Tooltip>
                   <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
-                  <Tooltip title="Zoom in" placement="top"><IconButton size="small" color="primary" onClick={() => zoom(0.8)}><AddIcon fontSize="small" /></IconButton></Tooltip>
-                  <Tooltip title="Zoom out" placement="top"><IconButton size="small" color="default" onClick={() => zoom(1.25)}><RemoveIcon fontSize="small" /></IconButton></Tooltip>
+                  <Tooltip title="Zoom in" placement="top"><IconButton size="small" color="primary" onClick={() => zoom(0.8)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Zoom in"><AddIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
+                  <Tooltip title="Zoom out" placement="top"><IconButton size="small" color="default" onClick={() => zoom(1.25)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Zoom out"><RemoveIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
                   <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
-                  <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }}><FitScreenIcon fontSize="small" /></IconButton></Tooltip>
+                  <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Fit all"><FitScreenIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
                 </div>
               </div>
             </div>
@@ -1237,6 +1238,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             <Tooltip title={chatPanelOpen ? "Close AI Assistant" : "AI Assistant"} placement="left">
               <IconButton
                 onClick={() => setChatPanelOpen(prev => !prev)}
+                aria-label={chatPanelOpen ? 'Close AI chat' : 'Open AI chat'}
                 sx={{
                   width: 56,
                   height: 56,
@@ -1250,7 +1252,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   transition: 'all 0.2s ease',
                 }}
               >
-                <span className="material-symbols-rounded" style={{ fontSize: 28 }}>
+                <span className="material-symbols-rounded" style={{ fontSize: 28 }} aria-hidden="true">
                   {chatPanelOpen ? 'close' : 'smart_toy'}
                 </span>
               </IconButton>

@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.5 - Default Light Theme ✅
-**Next Milestone:** v0.7.6-v0.7.8 Critical Fixes → v0.7.9-v0.7.14 Polish → v0.8.x Claude Code Integration
+**Current Version:** v0.7.6 - Critical Accessibility Fixes ✅
+**Next Milestone:** v0.7.7-v0.7.8 Firebase/Offline → v0.7.9-v0.7.14 Polish → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -706,11 +706,11 @@
 ### v0.7.6 - Critical Accessibility Fixes
 **Goal:** Address WCAG compliance gaps identified in codebase audit
 
-- [ ] Add landmark regions (`<main>`, `<nav>`, `<aside>`) to key layouts
-- [ ] Implement `prefers-reduced-motion` media query support
-- [ ] Audit and fix gray-on-gray contrast issues (WCAG AA)
-- [ ] Ensure all touch targets are minimum 44px
-- [ ] Add `aria-hidden` to decorative Material Symbols icons
+- [x] Add landmark regions (`<main>`, `<nav>`, `<aside>`) to key layouts
+- [x] Implement `prefers-reduced-motion` media query support
+- [x] Audit and fix gray-on-gray contrast issues (WCAG AA)
+- [x] Ensure all touch targets are minimum 44px
+- [x] Add `aria-hidden` to decorative Material Symbols icons
 
 ### v0.7.7 - Firebase Data Consistency Fixes
 **Goal:** Fix race conditions and N+1 query problems

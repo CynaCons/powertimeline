@@ -71,9 +71,10 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
                   <IconButton
                     size="small"
                     onClick={(e) => { e.stopPropagation(); onNavigateToEvent(ev.id); }}
-                    sx={{ padding: '4px', bgcolor: 'background.paper' }}
+                    sx={{ padding: '10px', minWidth: '44px', minHeight: '44px', bgcolor: 'background.paper' }}
+                    aria-label="View on canvas"
                   >
-                    <span className="material-symbols-rounded text-sm">visibility</span>
+                    <span className="material-symbols-rounded text-sm" aria-hidden="true">visibility</span>
                   </IconButton>
                 </Tooltip>
               )}
@@ -81,9 +82,10 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({ filtered, selectedId
                 <IconButton
                   size="small"
                   onClick={(e) => { e.stopPropagation(); onSelect(ev.id); }}
-                  sx={{ padding: '4px', bgcolor: 'background.paper' }}
+                  sx={{ padding: '10px', minWidth: '44px', minHeight: '44px', bgcolor: 'background.paper' }}
+                  aria-label="Edit event"
                 >
-                  <span className="material-symbols-rounded text-sm">edit</span>
+                  <span className="material-symbols-rounded text-sm" aria-hidden="true">edit</span>
                 </IconButton>
               </Tooltip>
             </div>

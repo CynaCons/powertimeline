@@ -103,16 +103,16 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             border: '1px solid var(--color-border-primary)',
             backdropFilter: 'blur(8px)',
             padding: '8px',
-            minWidth: '36px',
-            height: '36px',
-            borderRadius: isHovered ? '18px' : '50%',
+            minWidth: '44px',
+            minHeight: '44px',
+            borderRadius: isHovered ? '22px' : '50%',
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
               backgroundColor: 'var(--color-surface-hover)',
             },
           }}
         >
-          <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>
+          <span className="material-symbols-rounded" style={{ fontSize: '20px' }} aria-hidden="true">
             account_circle
           </span>
 
@@ -132,7 +132,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             <span className="text-sm font-medium">
               {currentUser?.username || firebaseUser?.email?.split('@')[0]}
             </span>
-            <span className="material-symbols-rounded text-sm ml-1">
+            <span className="material-symbols-rounded text-sm ml-1" aria-hidden="true">
               expand_more
             </span>
           </span>
@@ -163,7 +163,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
       >
         {/* User Info Header with "Logged in as" label */}
         <MenuItem disabled sx={{ opacity: '1 !important', cursor: 'default !important', pb: 2 }}>
-          <span className="material-symbols-rounded" style={{ fontSize: '32px', marginRight: '8px', color: '#8b5cf6' }}>
+          <span className="material-symbols-rounded" style={{ fontSize: '32px', marginRight: '8px', color: '#8b5cf6' }} aria-hidden="true">
             account_circle
           </span>
           <div className="flex flex-col w-full">
@@ -182,7 +182,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
         {/* User Space */}
         <MenuItem onClick={handleUserSpace}>
           <ListItemIcon>
-            <span className="material-symbols-rounded">person</span>
+            <span className="material-symbols-rounded" aria-hidden="true">person</span>
           </ListItemIcon>
           <ListItemText>My Timelines</ListItemText>
         </MenuItem>
@@ -190,7 +190,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
         {/* Settings */}
         <MenuItem onClick={handleSettings}>
           <ListItemIcon>
-            <span className="material-symbols-rounded">settings</span>
+            <span className="material-symbols-rounded" aria-hidden="true">settings</span>
           </ListItemIcon>
           <ListItemText>Settings</ListItemText>
         </MenuItem>
@@ -200,7 +200,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
         {/* Sign Out */}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
-            <span className="material-symbols-rounded">logout</span>
+            <span className="material-symbols-rounded" aria-hidden="true">logout</span>
           </ListItemIcon>
           <ListItemText>Sign Out</ListItemText>
         </MenuItem>

@@ -155,6 +155,8 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               onClick={() => toggleSection(sectionKey)}
               sx={{
                 fontSize: '0.75rem',
+                minWidth: '44px',
+                minHeight: '44px',
                 color: 'text.secondary',
                 '&:hover': {
                   bgcolor: 'grey.100',
@@ -163,7 +165,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
               aria-label={isCollapsed ? `Expand ${section.title}` : `Collapse ${section.title}`}
               aria-expanded={!isCollapsed}
             >
-              <span className="material-symbols-rounded text-sm">
+              <span className="material-symbols-rounded text-sm" aria-hidden="true">
                 {isCollapsed ? 'chevron_right' : 'expand_more'}
               </span>
             </IconButton>
@@ -194,7 +196,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 tabIndex={0}
               >
                 {typeof item.icon === 'string' ? (
-                  <span className="material-symbols-rounded nav-icon">
+                  <span className="material-symbols-rounded nav-icon" aria-hidden="true">
                     {item.icon}
                   </span>
                 ) : (
@@ -257,7 +259,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   tabIndex={0}
                 >
                   {typeof item.icon === 'string' ? (
-                    <span className="material-symbols-rounded nav-icon">
+                    <span className="material-symbols-rounded nav-icon" aria-hidden="true">
                       {item.icon}
                     </span>
                   ) : (
@@ -313,7 +315,7 @@ export const ThemeToggleButton: React.FC = () => {
         }}
         aria-label="Toggle theme"
       >
-        {getThemeIcon()}
+        <span aria-hidden="true">{getThemeIcon()}</span>
       </button>
     </EnhancedTooltip>
   );

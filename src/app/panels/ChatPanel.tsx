@@ -270,10 +270,11 @@ export function ChatPanel({
               <IconButton
                 size="small"
                 onClick={() => onPreviewAction(action)}
-                sx={{ color: 'info.main', p: 0.5 }}
+                sx={{ color: 'info.main', p: 0.5, minWidth: '44px', minHeight: '44px' }}
                 title="Preview on timeline"
+                aria-label="Preview on timeline"
               >
-                <span className="material-symbols-rounded" style={{ fontSize: 16 }}>visibility</span>
+                <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">visibility</span>
               </IconButton>
             )}
             {/* Restore button for rejected actions */}
@@ -281,10 +282,11 @@ export function ChatPanel({
               <IconButton
                 size="small"
                 onClick={() => onRestoreActions([action.id])}
-                sx={{ color: 'text.secondary', p: 0.5 }}
+                sx={{ color: 'text.secondary', p: 0.5, minWidth: '44px', minHeight: '44px' }}
                 title="Restore this suggestion"
+                aria-label="Restore this suggestion"
               >
-                <span className="material-symbols-rounded" style={{ fontSize: 16 }}>visibility_off</span>
+                <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">visibility_off</span>
               </IconButton>
             )}
             {action.status === 'pending' && (
@@ -292,16 +294,18 @@ export function ChatPanel({
                 <IconButton
                   size="small"
                   onClick={() => onApproveActions([action.id])}
-                  sx={{ color: 'success.main', p: 0.5 }}
+                  sx={{ color: 'success.main', p: 0.5, minWidth: '44px', minHeight: '44px' }}
+                  aria-label="Approve action"
                 >
-                  <span className="material-symbols-rounded" style={{ fontSize: 16 }}>check</span>
+                  <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">check</span>
                 </IconButton>
                 <IconButton
                   size="small"
                   onClick={() => onRejectActions([action.id])}
-                  sx={{ color: 'error.main', p: 0.5 }}
+                  sx={{ color: 'error.main', p: 0.5, minWidth: '44px', minHeight: '44px' }}
+                  aria-label="Reject action"
                 >
-                  <span className="material-symbols-rounded" style={{ fontSize: 16 }}>close</span>
+                  <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">close</span>
                 </IconButton>
               </>
             )}
@@ -358,11 +362,11 @@ export function ChatPanel({
           )}
         </Box>
         <Box>
-          <IconButton size="small" onClick={onClearHistory} title="Clear history">
-            <span className="material-symbols-rounded" style={{ fontSize: 16 }}>delete</span>
+          <IconButton size="small" onClick={onClearHistory} title="Clear history" aria-label="Clear history" sx={{ minWidth: '44px', minHeight: '44px' }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">delete</span>
           </IconButton>
-          <IconButton size="small" onClick={onClearApiKey} title="Disconnect">
-            <span className="material-symbols-rounded" style={{ fontSize: 16 }}>logout</span>
+          <IconButton size="small" onClick={onClearApiKey} title="Disconnect" aria-label="Disconnect" sx={{ minWidth: '44px', minHeight: '44px' }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">logout</span>
           </IconButton>
         </Box>
       </Box>

@@ -125,6 +125,7 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <Box
+        component="main"
         sx={{
           position: 'relative',
           pt: { xs: 10, md: 14 },

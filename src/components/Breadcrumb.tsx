@@ -53,6 +53,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
               <span
                 className="material-symbols-rounded text-sm"
                 style={{ color: 'var(--page-text-secondary)', opacity: 0.6 }}
+                aria-hidden="true"
               >
                 chevron_right
               </span>

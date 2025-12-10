@@ -187,7 +187,7 @@ export function EditorPage() {
 
   // Render the editor/viewer with breadcrumbs
   return (
-    <Box sx={{ minHeight: '100vh' }}>
+    <Box component="main" sx={{ minHeight: '100vh' }}>
       {/* Mobile notice - show on small screens, offer Stream View */}
       {isMobile && !mobileNoticeDismissed && timeline && (
         <MobileNotice

@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               rel="noopener noreferrer"
               className="text-sm text-red-700 hover:text-red-900 underline flex items-center gap-1"
             >
-              <span className="material-symbols-rounded text-base">bug_report</span>
+              <span className="material-symbols-rounded text-base" aria-hidden="true">bug_report</span>
               Report Issue
             </a>
           </div>
