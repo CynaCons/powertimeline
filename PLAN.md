@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.4 - Production Bug Fixes ✅
-**Next Milestone:** v0.7.x AI Polish → v0.8.x Claude Code Integration (Firebase + MCP)
+**Current Version:** v0.7.5 - Default Light Theme ✅
+**Next Milestone:** v0.7.6-v0.7.8 Critical Fixes → v0.7.9-v0.7.14 Polish → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -62,7 +62,10 @@
 - ✅ Production Bug Fixes: Firestore event ID fix, minimap glow fix, overlay view mode (v0.7.4)
 
 ### Next Up
-- **v0.7.x**: AI Polish (Metadata Preview, Partial Import, Schema API)
+- **v0.7.5**: Default Light Theme
+- **v0.7.6-v0.7.8**: Critical Fixes (Accessibility, Firebase, Offline Support)
+- **v0.7.9-v0.7.10**: AI Polish (Metadata Preview, Partial Import)
+- **v0.7.11-v0.7.13**: Code Quality & Documentation Fixes
 - **v0.8.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v0.9.x**: Collaboration & Versioning (fork/merge/diff)
 
@@ -691,7 +694,44 @@
 - [x] **API Key Hint:** Added security reminder in ChatPanel that API key is session-only
 - [x] **Favicon Cache-Bust:** New favicon with cache-busting query parameter
 
-### v0.7.5 - AI Metadata Preview
+### v0.7.5 - Default Light Theme & Theme Fixes
+**Goal:** Change default theme to light and fix theme-related issues
+
+- [x] Change default theme from dark to light
+- [x] Update ThemeContext to default `isDarkMode: false`
+- [x] Update localStorage initialization to prefer light mode
+- [x] Update index.html theme-color meta tag to light (#FAFAFA)
+- [x] Verify all pages render correctly in light mode by default
+
+### v0.7.6 - Critical Accessibility Fixes
+**Goal:** Address WCAG compliance gaps identified in codebase audit
+
+- [ ] Add landmark regions (`<main>`, `<nav>`, `<aside>`) to key layouts
+- [ ] Implement `prefers-reduced-motion` media query support
+- [ ] Audit and fix gray-on-gray contrast issues (WCAG AA)
+- [ ] Ensure all touch targets are minimum 44px
+- [ ] Add `aria-hidden` to decorative Material Symbols icons
+
+### v0.7.7 - Firebase Data Consistency Fixes
+**Goal:** Fix race conditions and N+1 query problems
+
+- [ ] Fix race condition in `addEvent()` - use `increment(1)` instead of read-count-write
+- [ ] Fix race condition in `deleteEvent()` - use `increment(-1)`
+- [ ] Add batch/transaction support to event CRUD operations
+- [ ] Fix N+1 query in `getTimelineMetadata()` - avoid 500-doc fallback scan
+- [ ] Fix sequential user fetches in UserProfilePage - use `Promise.all`
+- [ ] Consolidate event CRUD patterns (remove App.tsx bulk updates)
+
+### v0.7.8 - Offline Support & Error Recovery
+**Goal:** Enable Firebase offline persistence and improve error handling
+
+- [ ] Enable `enableIndexedDbPersistence()` in Firebase config
+- [ ] Add offline status indicator in UI
+- [ ] Add retry logic with exponential backoff for transient failures
+- [ ] Improve error messages with actionable guidance
+- [ ] Add connection status monitoring
+
+### v0.7.9 - AI Metadata Preview
 **Goal:** Allow users to preview and review timeline metadata changes proposed by AI
 
 - [ ] **Metadata Preview UI:** Show current vs proposed title/description in ChatPanel
@@ -699,24 +739,50 @@
 - [ ] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
 - [ ] **Apply Confirmation:** Clear feedback when metadata is updated
 
-### v0.7.6 - Partial Import (Preview & Review)
+### v0.7.10 - Partial Import (Preview & Review)
 **Goal:** Import events with review workflow - foundation for git-style fork/merge/diff
-- [ ] **Preview Import:** Imported events appear as temporary/preview with highlighting
-- [ ] **Review UI:** Reuse ChatPanel approve/reject/restore pattern for import review
-- [ ] **Selective Apply:** User can approve individual events or all at once
-- [ ] **Conflict Detection:** Warn on duplicate/overlapping dates with existing events
 
-### v0.7.7 - YAML Schema API
+- [ ] Preview imported events as temporary with highlighting
+- [ ] Reuse ChatPanel approve/reject/restore pattern for import review
+- [ ] Selective apply - approve individual events or all at once
+- [ ] Conflict detection for duplicate/overlapping dates
+
+### v0.7.11 - Code Quality & TypeScript Cleanup
+**Goal:** Address code quality issues from codebase audit
+
+- [ ] Remove `any` types from critical files (74 files flagged)
+- [ ] Remove or convert `console.log` statements to logger (111 files)
+- [ ] Split App.tsx (1,282 lines) into smaller components
+- [ ] Split AuthoringOverlay (44KB) into sub-components
+- [ ] Fix TODO in DeterministicLayoutComponent.tsx:228 (axis tick system)
+- [ ] Clean up legacy homePageStorage.ts (20KB)
+
+### v0.7.12 - Unit Testing Infrastructure
+**Goal:** Add unit tests for business logic (currently 0 unit tests)
+
+- [ ] Set up Vitest for unit testing
+- [ ] Add unit tests for layout engine (LayoutEngine.ts)
+- [ ] Add unit tests for DegradationEngine
+- [ ] Add unit tests for PositioningEngine
+- [ ] Add unit tests for clustering.ts
+- [ ] Add unit tests for utility functions (validation, formatting)
+
+### v0.7.13 - Documentation Consistency Fix
+**Goal:** Resolve documentation drift and contradictions
+
+- [ ] Deduplicate 20+ duplicate requirement IDs across SRS files
+- [ ] Update README.md metrics (177 → 267 requirements, 287 → 320 tests)
+- [ ] Re-audit SRS_INDEX.md against v0.7.x codebase
+- [ ] Resolve PLAN.md vs SRS status contradictions
+- [ ] Add `// @req CC-REQ-XXX` comments to codebase (traceability)
+- [ ] Mark deprecated features in SRS files (DevPanel, etc.)
+
+### v0.7.14 - YAML Schema API
 **Goal:** Publish schema for AI agents to discover and use
-- [ ] **Schema Endpoint:** `/api/schema/timeline` returns JSON Schema for YAML format
-- [ ] **Documentation:** Add schema docs with examples
-- [ ] **Versioning:** Schema version in response for compatibility
 
-### v0.7.8 - AI-Powered Automation (Gemini)
-**Goal:** Enhance Gemini chat capabilities for timeline creation
-- [ ] **Event Suggestions:** Auto-suggest related events based on context
-- [ ] **Gap Detection:** Identify missing periods in timeline coverage
-- [ ] **Auto-generation:** Create timeline from text/Wikipedia article
+- [ ] Schema endpoint `/api/schema/timeline` returns JSON Schema
+- [ ] Add schema documentation with examples
+- [ ] Schema versioning for compatibility
 
 ---
 
