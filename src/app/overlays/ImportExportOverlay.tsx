@@ -1,15 +1,18 @@
 /**
  * ImportExportOverlay - Editor overlay for importing and exporting timeline data
- * Implements CC-REQ-IMPORT-xxx and CC-REQ-EXPORT-xxx (v0.5.27)
+ * Implements CC-REQ-IMPORT-xxx and CC-REQ-EXPORT-xxx (v0.5.27, v0.7.10)
  *
  * Features:
  * - Export current timeline to YAML
- * - Import events from YAML file
- * - Preview before import with event list
+ * - Import events from YAML file with per-event approval
+ * - Preview before import with conflict detection
+ * - Individual approve/reject for each event
+ * - Bulk approve/reject all events
+ * - Conflict warnings for duplicate IDs and same dates
  * - Validation error display
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import {
   Button,
   Alert,
@@ -24,6 +27,8 @@ import {
   Tabs,
   Tab,
   CircularProgress,
+  IconButton,
+  Stack,
 } from '@mui/material';
 import { OverlayShell } from '../OverlayShell';
 import {
@@ -44,6 +49,16 @@ interface ImportExportOverlayProps {
 
 type TabValue = 'export' | 'import';
 
+type EventStatus = 'pending' | 'approved' | 'rejected';
+
+interface ImportEventStatus {
+  eventId: string;
+  status: EventStatus;
+  hasConflict: boolean;
+  conflictType?: 'duplicate_id' | 'same_date';
+  conflictDetails?: string;
+}
+
 export function ImportExportOverlay({
   timeline,
   events,
@@ -59,6 +74,7 @@ export function ImportExportOverlay({
   const [isImporting, setIsImporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [eventStatuses, setEventStatuses] = useState<Map<string, ImportEventStatus>>(new Map());
 
   // Handle export
   const handleExport = useCallback(() => {
@@ -94,11 +110,51 @@ export function ImportExportOverlay({
     }
   }, [timeline]);
 
+  // Detect conflicts for imported events
+  const detectConflicts = useCallback((importedEvents: Event[]): Map<string, ImportEventStatus> => {
+    const statusMap = new Map<string, ImportEventStatus>();
+
+    for (const importedEvent of importedEvents) {
+      let hasConflict = false;
+      let conflictType: 'duplicate_id' | 'same_date' | undefined;
+      let conflictDetails: string | undefined;
+
+      // Check for duplicate ID
+      const existingEventById = events.find(e => e.id === importedEvent.id);
+      if (existingEventById) {
+        hasConflict = true;
+        conflictType = 'duplicate_id';
+        conflictDetails = `Will overwrite existing event: "${existingEventById.title}"`;
+      }
+
+      // Check for same date (warn only)
+      const existingEventByDate = events.find(
+        e => e.date === importedEvent.date && e.id !== importedEvent.id
+      );
+      if (existingEventByDate && !conflictType) {
+        hasConflict = true;
+        conflictType = 'same_date';
+        conflictDetails = `Same date as existing event: "${existingEventByDate.title}"`;
+      }
+
+      statusMap.set(importedEvent.id, {
+        eventId: importedEvent.id,
+        status: 'pending',
+        hasConflict,
+        conflictType,
+        conflictDetails,
+      });
+    }
+
+    return statusMap;
+  }, [events]);
+
   // Process uploaded file
   const processFile = useCallback(async (file: File) => {
     setGeneralError('');
     setValidationErrors([]);
     setImportResult(null);
+    setEventStatuses(new Map());
 
     // Validate file type
     if (!file.name.endsWith('.yaml') && !file.name.endsWith('.yml')) {
@@ -122,10 +178,13 @@ export function ImportExportOverlay({
       }
 
       setImportResult(result.result);
+      // Initialize event statuses with conflict detection
+      const statuses = detectConflicts(result.result.events);
+      setEventStatuses(statuses);
     } catch (error) {
       setGeneralError(error instanceof Error ? error.message : 'Failed to read file');
     }
-  }, []);
+  }, [detectConflicts]);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -158,17 +217,70 @@ export function ImportExportOverlay({
     fileInputRef.current?.click();
   };
 
-  // Confirm import
+  // Update event status
+  const updateEventStatus = useCallback((eventId: string, status: EventStatus) => {
+    setEventStatuses(prev => {
+      const newMap = new Map(prev);
+      const existing = newMap.get(eventId);
+      if (existing) {
+        newMap.set(eventId, { ...existing, status });
+      }
+      return newMap;
+    });
+  }, []);
+
+  // Bulk approve all events
+  const handleApproveAll = useCallback(() => {
+    setEventStatuses(prev => {
+      const newMap = new Map(prev);
+      for (const [eventId, status] of newMap.entries()) {
+        newMap.set(eventId, { ...status, status: 'approved' });
+      }
+      return newMap;
+    });
+  }, []);
+
+  // Bulk reject all events
+  const handleRejectAll = useCallback(() => {
+    setEventStatuses(prev => {
+      const newMap = new Map(prev);
+      for (const [eventId, status] of newMap.entries()) {
+        newMap.set(eventId, { ...status, status: 'rejected' });
+      }
+      return newMap;
+    });
+  }, []);
+
+  // Count approved events
+  const approvedCount = useMemo(() => {
+    let count = 0;
+    for (const status of eventStatuses.values()) {
+      if (status.status === 'approved') count++;
+    }
+    return count;
+  }, [eventStatuses]);
+
+  // Confirm import - only import approved events
   const handleConfirmImport = async () => {
     if (!importResult) return;
 
     setIsImporting(true);
     try {
-      // Merge imported events with existing events
-      // Events with same ID will be updated, new IDs will be added
+      // Get only approved events
+      const approvedEvents = importResult.events.filter(
+        event => eventStatuses.get(event.id)?.status === 'approved'
+      );
+
+      if (approvedEvents.length === 0) {
+        setGeneralError('No events approved for import');
+        setIsImporting(false);
+        return;
+      }
+
+      // Merge approved events with existing events
       const newEvents = [...events];
 
-      for (const importedEvent of importResult.events) {
+      for (const importedEvent of approvedEvents) {
         const existingIndex = newEvents.findIndex(e => e.id === importedEvent.id);
         if (existingIndex >= 0) {
           // Update existing event
@@ -181,6 +293,7 @@ export function ImportExportOverlay({
 
       onImport(newEvents);
       setImportResult(null);
+      setEventStatuses(new Map());
       setGeneralError('');
       onClose();
     } catch (error) {
@@ -194,6 +307,7 @@ export function ImportExportOverlay({
     setImportResult(null);
     setValidationErrors([]);
     setGeneralError('');
+    setEventStatuses(new Map());
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -359,49 +473,130 @@ export function ImportExportOverlay({
               </>
             ) : (
               <>
-                {/* Import Preview */}
-                <Typography variant="subtitle2" gutterBottom>
-                  Preview: {importResult.events.length} events to import
-                </Typography>
+                {/* Import Preview with Per-Event Approval */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="subtitle2">
+                    Review {importResult.events.length} events
+                  </Typography>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleApproveAll}
+                      data-testid="approve-all-button"
+                    >
+                      Approve All
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleRejectAll}
+                      data-testid="reject-all-button"
+                    >
+                      Reject All
+                    </Button>
+                  </Stack>
+                </Box>
 
                 <Paper
                   variant="outlined"
-                  sx={{ flex: 1, overflow: 'auto', mb: 2, maxHeight: 300 }}
+                  sx={{ flex: 1, overflow: 'auto', mb: 2, maxHeight: 350 }}
                 >
                   <List dense>
-                    {importResult.events.slice(0, 20).map((event, i) => (
-                      <ListItem key={i} sx={{ py: 0.5 }}>
-                        <ListItemText
-                          primary={event.title}
-                          secondary={
-                            <>
-                              <span style={{ fontFamily: 'monospace', fontSize: '0.7rem' }}>
-                                {event.id}
-                              </span>
-                              {' • '}
-                              {event.date}
-                              {event.endDate && ` - ${event.endDate}`}
-                            </>
-                          }
-                          primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-                          secondaryTypographyProps={{ variant: 'caption' }}
-                        />
-                      </ListItem>
-                    ))}
-                    {importResult.events.length > 20 && (
-                      <ListItem>
-                        <ListItemText
-                          secondary={`...and ${importResult.events.length - 20} more events`}
-                          secondaryTypographyProps={{ variant: 'caption', fontStyle: 'italic' }}
-                        />
-                      </ListItem>
-                    )}
+                    {importResult.events.map((event) => {
+                      const status = eventStatuses.get(event.id);
+                      if (!status) return null;
+
+                      const isApproved = status.status === 'approved';
+                      const isRejected = status.status === 'rejected';
+
+                      return (
+                        <ListItem
+                          key={event.id}
+                          sx={{
+                            py: 1,
+                            borderLeft: status.hasConflict ? '3px solid' : 'none',
+                            borderColor: status.conflictType === 'duplicate_id'
+                              ? 'warning.main'
+                              : 'info.main',
+                            backgroundColor: isApproved
+                              ? 'success.50'
+                              : isRejected
+                              ? 'action.disabledBackground'
+                              : 'transparent',
+                            opacity: isRejected ? 0.5 : 1,
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {status.hasConflict && (
+                                  <span className="material-symbols-rounded" style={{ fontSize: '16px', color: 'var(--color-warning)' }}>
+                                    warning
+                                  </span>
+                                )}
+                                <Typography variant="body2" noWrap>
+                                  {event.title}
+                                </Typography>
+                                {isApproved && (
+                                  <Chip label="Approved" size="small" color="success" sx={{ ml: 'auto' }} />
+                                )}
+                                {isRejected && (
+                                  <Chip label="Rejected" size="small" sx={{ ml: 'auto' }} />
+                                )}
+                              </Box>
+                            }
+                            secondary={
+                              <Box sx={{ mt: 0.5 }}>
+                                <Typography variant="caption" component="div">
+                                  {event.date}
+                                  {event.endDate && ` - ${event.endDate}`}
+                                </Typography>
+                                {status.hasConflict && status.conflictDetails && (
+                                  <Typography variant="caption" color="text.secondary" component="div">
+                                    {status.conflictDetails}
+                                  </Typography>
+                                )}
+                              </Box>
+                            }
+                          />
+                          <Stack direction="row" spacing={0.5} sx={{ ml: 1 }}>
+                            {!isApproved && (
+                              <IconButton
+                                size="small"
+                                color="success"
+                                onClick={() => updateEventStatus(event.id, 'approved')}
+                                data-testid={`approve-event-${event.id}`}
+                                title="Approve"
+                              >
+                                <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>
+                                  check_circle
+                                </span>
+                              </IconButton>
+                            )}
+                            {!isRejected && (
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => updateEventStatus(event.id, 'rejected')}
+                                data-testid={`reject-event-${event.id}`}
+                                title="Reject"
+                              >
+                                <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>
+                                  cancel
+                                </span>
+                              </IconButton>
+                            )}
+                          </Stack>
+                        </ListItem>
+                      );
+                    })}
                   </List>
                 </Paper>
 
                 <Divider sx={{ my: 2 }} />
 
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <Button
                     variant="outlined"
                     onClick={handleCancelImport}
@@ -409,14 +604,18 @@ export function ImportExportOverlay({
                   >
                     Cancel
                   </Button>
+                  <Box sx={{ flex: 1 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                    {approvedCount} of {importResult.events.length} approved
+                  </Typography>
                   <Button
                     variant="contained"
                     onClick={handleConfirmImport}
-                    disabled={isImporting}
+                    disabled={isImporting || approvedCount === 0}
                     startIcon={isImporting ? <CircularProgress size={16} /> : undefined}
                     data-testid="confirm-import-button"
                   >
-                    {isImporting ? 'Importing...' : 'Import Events'}
+                    {isImporting ? 'Importing...' : `Import ${approvedCount} Event${approvedCount !== 1 ? 's' : ''}`}
                   </Button>
                 </Box>
               </>

@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.9 - AI Metadata Preview ✅
-**Next Milestone:** v0.7.10-v0.7.14 Polish & Features → v0.8.x Claude Code Integration
+**Current Version:** v0.7.10 - Partial Import Preview ✅
+**Next Milestone:** v0.7.11-v0.7.14 Code Quality & Polish → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -745,10 +745,10 @@
 ### v0.7.10 - Partial Import (Preview & Review)
 **Goal:** Import events with review workflow - foundation for git-style fork/merge/diff
 
-- [ ] Preview imported events as temporary with highlighting
-- [ ] Reuse ChatPanel approve/reject/restore pattern for import review
-- [ ] Selective apply - approve individual events or all at once
-- [ ] Conflict detection for duplicate/overlapping dates
+- [x] Preview imported events with per-event status tracking
+- [x] Per-event approve/reject controls with visual feedback
+- [x] Selective apply - approve individual events or all at once
+- [x] Conflict detection for duplicate IDs and overlapping dates
 
 ### v0.7.11 - Code Quality & TypeScript Cleanup
 **Goal:** Address code quality issues from codebase audit
