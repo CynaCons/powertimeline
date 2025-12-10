@@ -22,6 +22,7 @@ import { ChronoThemeProvider, useTheme } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { OfflineIndicator } from './components/OfflineIndicator'
 
 // DEPRECATED (v0.5.6): localStorage initialization disabled
 // App now uses Firebase Auth + Firestore exclusively
@@ -51,6 +52,7 @@ function AppWithTheme() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <OfflineIndicator />
       <BrowserRouter>
         <Routes>
           {/* Public routes - accessible to everyone */}

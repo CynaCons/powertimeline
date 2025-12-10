@@ -47,6 +47,32 @@ const STATS_DOCS = {
 const STATS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 let statsCache: { data: PlatformStats | null; timestamp: number } = { data: null, timestamp: 0 };
 
+// ============================================================================
+// Error Handling Utilities
+// ============================================================================
+
+/**
+ * Convert Firebase/Firestore errors into user-friendly messages
+ * v0.7.8 - Improved error messages with actionable guidance
+ */
+export function getFirestoreErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.message.includes('permission-denied')) {
+      return 'You do not have permission to perform this action.';
+    }
+    if (error.message.includes('unavailable')) {
+      return 'Service temporarily unavailable. Please try again.';
+    }
+    if (error.message.includes('not-found')) {
+      return 'The requested resource was not found.';
+    }
+    if (error.message.includes('network-request-failed') || error.message.includes('offline')) {
+      return 'Network connection lost. Please check your internet connection and try again.';
+    }
+  }
+  return 'An unexpected error occurred. Please try again.';
+}
+
 // Platform stats interface
 interface PlatformStats {
   totalUsers: number;

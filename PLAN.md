@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.7 - Firebase Data Consistency Fixes ✅
-**Next Milestone:** v0.7.8 Offline Support → v0.7.9-v0.7.14 Polish → v0.8.x Claude Code Integration
+**Current Version:** v0.7.8 - Offline Support & Error Recovery ✅
+**Next Milestone:** v0.7.9-v0.7.14 Polish & Features → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -725,11 +725,11 @@
 ### v0.7.8 - Offline Support & Error Recovery
 **Goal:** Enable Firebase offline persistence and improve error handling
 
-- [ ] Enable `enableIndexedDbPersistence()` in Firebase config
-- [ ] Add offline status indicator in UI
-- [ ] Add retry logic with exponential backoff for transient failures
-- [ ] Improve error messages with actionable guidance
-- [ ] Add connection status monitoring
+- [x] Enable `enableIndexedDbPersistence()` in Firebase config
+- [x] Add offline status indicator in UI (OfflineIndicator component)
+- [x] Add retry logic with exponential backoff (src/utils/retry.ts)
+- [x] Improve error messages with actionable guidance (getFirestoreErrorMessage)
+- [x] Add connection status monitoring (online/offline event listeners)
 
 ### v0.7.9 - AI Metadata Preview
 **Goal:** Allow users to preview and review timeline metadata changes proposed by AI
