@@ -1330,6 +1330,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     error={aiSession.error}
                     usage={aiSession.usage}
                     pendingActions={aiSession.pendingActions}
+                    timelineTitle={currentTimeline?.title}
+                    timelineDescription={currentTimeline?.description}
                     onSetApiKey={aiSession.setApiKey}
                     onClearApiKey={aiSession.clearApiKey}
                     onSendMessage={aiSession.sendMessage}

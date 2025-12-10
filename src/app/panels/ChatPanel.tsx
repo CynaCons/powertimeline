@@ -26,6 +26,9 @@ interface ChatPanelProps {
   error: string | null;
   pendingActions: AIAction[];
   usage?: AIUsageStats;
+  // Timeline metadata (for showing metadata change preview)
+  timelineTitle?: string;
+  timelineDescription?: string;
   // Actions
   onSetApiKey: (key: string) => Promise<boolean>;
   onClearApiKey: () => void;
@@ -48,6 +51,8 @@ export function ChatPanel({
   error,
   pendingActions,
   usage,
+  timelineTitle,
+  timelineDescription,
   onSetApiKey,
   onClearApiKey,
   onSendMessage,
@@ -231,11 +236,96 @@ export function ChatPanel({
     );
   };
 
+  // Render metadata preview (UPDATE_METADATA actions)
+  const renderMetadataPreview = () => {
+    const metadataActions = pendingActions.filter(
+      (a): a is import('../../types/ai').UpdateMetadataAction =>
+        a.type === 'UPDATE_METADATA' && a.status !== 'rejected'
+    );
+
+    if (metadataActions.length === 0) return null;
+
+    // Get the latest metadata action (in case there are multiple)
+    const latestAction = metadataActions[metadataActions.length - 1];
+    const { changes } = latestAction.payload;
+
+    return (
+      <Box sx={{ p: 1.5, bgcolor: 'var(--page-bg-elevated)', borderRadius: 1, mb: 1, border: '1px solid var(--page-border)' }}>
+        <Typography variant="caption" sx={{ fontWeight: 'bold', mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <span>📝</span> Metadata Changes
+        </Typography>
+
+        {/* Title change */}
+        {changes.title !== undefined && (
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant="caption" sx={{ color: 'var(--page-text-secondary)', fontWeight: 'bold', display: 'block', mb: 0.5 }}>
+              Title:
+            </Typography>
+            <Box sx={{ pl: 1 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'var(--page-text-tertiary)', mb: 0.25 }}>
+                Current: {timelineTitle || '(untitled)'}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'success.main', fontWeight: 'bold' }}>
+                → New: {changes.title}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        {/* Description change */}
+        {changes.description !== undefined && (
+          <Box sx={{ mb: 1 }}>
+            <Typography variant="caption" sx={{ color: 'var(--page-text-secondary)', fontWeight: 'bold', display: 'block', mb: 0.5 }}>
+              Description:
+            </Typography>
+            <Box sx={{ pl: 1 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'var(--page-text-tertiary)', mb: 0.25, whiteSpace: 'pre-wrap' }}>
+                Current: {timelineDescription || '(no description)'}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'success.main', fontWeight: 'bold', whiteSpace: 'pre-wrap' }}>
+                → New: {changes.description}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        {/* Action buttons */}
+        <Box sx={{ display: 'flex', gap: 1, mt: 1.5 }}>
+          {latestAction.status === 'pending' && (
+            <>
+              <Button
+                size="small"
+                variant="outlined"
+                color="success"
+                onClick={() => onApproveActions([latestAction.id])}
+              >
+                Approve
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                onClick={() => onRejectActions([latestAction.id])}
+              >
+                Reject
+              </Button>
+            </>
+          )}
+          {latestAction.status === 'approved' && (
+            <Chip label="✓ Approved" size="small" color="success" />
+          )}
+        </Box>
+      </Box>
+    );
+  };
+
   // Render pending actions confirmation
   const renderPendingActions = () => {
-    const pending = pendingActions.filter(a => a.status === 'pending');
-    const approved = pendingActions.filter(a => a.status === 'approved');
-    const rejected = pendingActions.filter(a => a.status === 'rejected');
+    // Filter out metadata actions (they're shown separately)
+    const nonMetadataActions = pendingActions.filter(a => a.type !== 'UPDATE_METADATA');
+    const pending = nonMetadataActions.filter(a => a.status === 'pending');
+    const approved = nonMetadataActions.filter(a => a.status === 'approved');
+    const rejected = nonMetadataActions.filter(a => a.status === 'rejected');
     const activeActions = pending.length + approved.length + rejected.length;
 
     if (activeActions === 0) return null;
@@ -246,7 +336,7 @@ export function ChatPanel({
           Proposed Changes ({pending.length + approved.length}{rejected.length > 0 ? `, ${rejected.length} hidden` : ''})
         </Typography>
 
-        {pendingActions.map(action => (
+        {nonMetadataActions.map(action => (
           <Box
             key={action.id}
             sx={{
@@ -262,7 +352,6 @@ export function ChatPanel({
               {action.type === 'CREATE_EVENT' && '➕'}
               {action.type === 'UPDATE_EVENT' && '✏️'}
               {action.type === 'DELETE_EVENT' && '🗑️'}
-              {action.type === 'UPDATE_METADATA' && '📝'}
               {' '}{action.description}
             </Typography>
             {/* Preview button for events with dates - only for pending/approved */}
@@ -399,6 +488,9 @@ export function ChatPanel({
             </Typography>
           </Box>
         )}
+
+        {/* Metadata preview - shown separately from other actions */}
+        {renderMetadataPreview()}
 
         {/* Pending actions - now inside scrollable area */}
         {renderPendingActions()}

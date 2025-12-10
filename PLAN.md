@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.8 - Offline Support & Error Recovery ✅
-**Next Milestone:** v0.7.9-v0.7.14 Polish & Features → v0.8.x Claude Code Integration
+**Current Version:** v0.7.9 - AI Metadata Preview ✅
+**Next Milestone:** v0.7.10-v0.7.14 Polish & Features → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -60,11 +60,14 @@
 - ✅ AI UX Polish: Cost tracking, preview events, editor behavior fixes (v0.7.1-v0.7.2)
 - ✅ Event Persistence & Cleanup: Fixed AI events saving to Firestore subcollection, console cleanup, overflow indicator polish, rejected events restore (v0.7.3)
 - ✅ Production Bug Fixes: Firestore event ID fix, minimap glow fix, overlay view mode (v0.7.4)
+- ✅ Default Light Theme: Changed default theme to light with fixed component styles (v0.7.5)
+- ✅ Critical Accessibility Fixes: Focus traps, keyboard navigation, ARIA labels (v0.7.6)
+- ✅ Firebase Data Consistency: Optional chaining, safe fallbacks, timeline loading fixes (v0.7.7)
+- ✅ Offline Support: Connection monitoring, retry logic, error recovery (v0.7.8)
+- ✅ AI Metadata Preview: Diff view for title/description changes in ChatPanel (v0.7.9)
 
 ### Next Up
-- **v0.7.5**: Default Light Theme
-- **v0.7.6-v0.7.8**: Critical Fixes (Accessibility, Firebase, Offline Support)
-- **v0.7.9-v0.7.10**: AI Polish (Metadata Preview, Partial Import)
+- **v0.7.10**: AI Partial Import (Preview & Review)
 - **v0.7.11-v0.7.13**: Code Quality & Documentation Fixes
 - **v0.8.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v0.9.x**: Collaboration & Versioning (fork/merge/diff)
@@ -731,13 +734,13 @@
 - [x] Improve error messages with actionable guidance (getFirestoreErrorMessage)
 - [x] Add connection status monitoring (online/offline event listeners)
 
-### v0.7.9 - AI Metadata Preview
+### v0.7.9 - AI Metadata Preview ✅
 **Goal:** Allow users to preview and review timeline metadata changes proposed by AI
 
-- [ ] **Metadata Preview UI:** Show current vs proposed title/description in ChatPanel
-- [ ] **Diff View:** Side-by-side or inline diff for text changes
-- [ ] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
-- [ ] **Apply Confirmation:** Clear feedback when metadata is updated
+- [x] **Metadata Preview UI:** Show current vs proposed title/description in ChatPanel
+- [x] **Diff View:** Side-by-side or inline diff for text changes
+- [x] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
+- [x] **Apply Confirmation:** Clear feedback when metadata is updated
 
 ### v0.7.10 - Partial Import (Preview & Review)
 **Goal:** Import events with review workflow - foundation for git-style fork/merge/diff
