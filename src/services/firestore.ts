@@ -12,6 +12,7 @@ import {
   limit,
   onSnapshot,
   increment,
+  serverTimestamp,
   collectionGroup,
   writeBatch,
   type QueryConstraint,
@@ -79,11 +80,12 @@ export async function getTimelineMetadata(timelineId: string): Promise<TimelineM
     // If not found by id field, try a broader search
     // This handles legacy documents where id isn't stored as a field
     if (querySnapshot.empty) {
+      console.warn(`[getTimelineMetadata] Fallback triggered for timeline ${timelineId} - 'id' field not found`);
       // Query recent timelines and find by doc.id (limited to avoid scanning too many)
       q = query(
         collectionGroup(db, COLLECTIONS.TIMELINES),
         orderBy('updatedAt', 'desc'),
-        limit(500)
+        limit(50)
       );
       querySnapshot = await getDocs(q);
 
@@ -253,9 +255,6 @@ export async function addEvent(
       COLLECTIONS.EVENTS
     );
 
-    // Get current event count for updating timeline metadata
-    const existingEvents = await getTimelineEvents(timelineId, ownerId);
-
     const eventRef = doc(eventsCollectionRef, event.id);
     const now = new Date().toISOString();
 
@@ -269,11 +268,11 @@ export async function addEvent(
 
     await setDoc(eventRef, eventDoc);
 
-    // Update timeline's eventCount and updatedAt
+    // Update timeline's eventCount and updatedAt atomically using increment
     const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
     await updateDoc(timelineRef, {
-      eventCount: existingEvents.length + 1,
-      updatedAt: now,
+      eventCount: increment(1),
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
     console.error('Error adding event:', error);
@@ -342,14 +341,11 @@ export async function deleteEvent(
 
     await deleteDoc(eventRef);
 
-    // Update timeline's eventCount and updatedAt
-    const events = await getTimelineEvents(timelineId, ownerId);
-    const now = new Date().toISOString();
-
+    // Update timeline's eventCount and updatedAt atomically using increment
     const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
     await updateDoc(timelineRef, {
-      eventCount: events.length,
-      updatedAt: now,
+      eventCount: increment(-1),
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
     console.error('Error deleting event:', error);

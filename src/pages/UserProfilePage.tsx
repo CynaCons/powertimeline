@@ -107,15 +107,17 @@ export function UserProfilePage() {
       });
       setTimelines(userTimelines);
 
-      // Build user cache from timeline owners
+      // Build user cache from timeline owners (parallel fetching)
       const cache = new Map<string, User>();
-      const ownerIds = new Set(userTimelines.map(t => t.ownerId));
-      for (const ownerId of ownerIds) {
-        const owner = await getUser(ownerId);
+      const ownerIds = Array.from(new Set(userTimelines.map(t => t.ownerId)));
+      const owners = await Promise.all(
+        ownerIds.map(id => getUser(id))
+      );
+      owners.forEach((owner, index) => {
         if (owner) {
-          cache.set(ownerId, owner);
+          cache.set(ownerIds[index], owner);
         }
-      }
+      });
       setUserCache(cache);
     } catch (error) {
       console.error('Failed to load user profile:', error);

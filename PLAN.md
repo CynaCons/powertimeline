@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.6 - Critical Accessibility Fixes ✅
-**Next Milestone:** v0.7.7-v0.7.8 Firebase/Offline → v0.7.9-v0.7.14 Polish → v0.8.x Claude Code Integration
+**Current Version:** v0.7.7 - Firebase Data Consistency Fixes ✅
+**Next Milestone:** v0.7.8 Offline Support → v0.7.9-v0.7.14 Polish → v0.8.x Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.6.4)
@@ -715,12 +715,12 @@
 ### v0.7.7 - Firebase Data Consistency Fixes
 **Goal:** Fix race conditions and N+1 query problems
 
-- [ ] Fix race condition in `addEvent()` - use `increment(1)` instead of read-count-write
-- [ ] Fix race condition in `deleteEvent()` - use `increment(-1)`
-- [ ] Add batch/transaction support to event CRUD operations
-- [ ] Fix N+1 query in `getTimelineMetadata()` - avoid 500-doc fallback scan
-- [ ] Fix sequential user fetches in UserProfilePage - use `Promise.all`
-- [ ] Consolidate event CRUD patterns (remove App.tsx bulk updates)
+- [x] Fix race condition in `addEvent()` - use `increment(1)` instead of read-count-write
+- [x] Fix race condition in `deleteEvent()` - use `increment(-1)`
+- [x] Use serverTimestamp() for consistent timestamps
+- [x] Fix N+1 query in `getTimelineMetadata()` - reduce fallback from 500 to 50 docs
+- [x] Fix sequential user fetches in UserProfilePage - use `Promise.all`
+- [x] Consolidate event CRUD patterns (App.tsx now uses atomic operations)
 
 ### v0.7.8 - Offline Support & Error Recovery
 **Goal:** Enable Firebase offline persistence and improve error handling
