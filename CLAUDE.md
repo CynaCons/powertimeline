@@ -7,7 +7,7 @@ You are developing **PowerTimeline**, a web application for visualizing and edit
 ### Project Overview
 - **Stack:** React 18, TypeScript, Vite, Firebase (Auth + Firestore), Tailwind CSS, MUI
 - **Architecture:** SPA with timeline editor, home/browse pages, user profiles, admin panel
-- **Testing:** Playwright E2E tests (~320 tests)
+- **Testing:** Playwright E2E tests + Vitest unit tests (see PLAN.md for counts)
 - **Documentation:** ASPICE-style SRS with requirements traceability
 
 ### Key Directories
@@ -199,6 +199,31 @@ wait_for_agents(timeout=600)
 - Verify build after each phase
 - Commit incrementally (don't wait until everything is done)
 - Report progress to user with clear status tables
+
+### Large-Scale Audit Pattern
+
+For auditing/updating many files (docs, tests, components):
+
+```
+Round 1: Audit (READ-ONLY)
+├── Spawn agents to analyze files in batches
+├── Agents report findings without modifying
+├── Consolidate into actionable fix list
+└── Present summary to user for approval
+
+Round 2: Fixes (PARALLEL EDITS)
+├── Group fixes by type (critical, format, references)
+├── Spawn agents for independent batches
+├── Each agent verifies build after changes
+└── Commit after each round completes
+
+Round 3: Finalization
+├── Update index/summary files
+├── Verify all links valid
+└── Final commit
+```
+
+**Optimal batch size:** 4-5 files per agent, 3-4 agents in parallel
 
 ---
 
