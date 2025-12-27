@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.0 - Documentation and SRS Cleanup
-**Next Milestone:** v0.8.1 UI Audit and Visual Bug Fixes
+**Current Version:** v0.8.1 - UI Audit (Complete)
+**Next Milestone:** v0.8.2 UI Visual Bug Fixes
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -830,56 +830,88 @@
 
 | Gap Type | Area | SRS File | Target Iteration |
 |----------|------|----------|------------------|
-| Not Implemented | API Key localStorage + Settings UI | SRS_API_KEY_STORAGE.md | v0.8.6 |
-| Not Implemented | Stream View editing (swipe, quick add) | SRS_STREAM_VIEW.md | v0.8.4 |
-| Not Implemented | Account Deletion (GDPR) | SRS_USER_SETTINGS_PAGE.md | v0.8.6 |
-| Not Implemented | Default Visibility Setting | SRS_USER_SETTINGS_PAGE.md | v0.8.6 |
-| Not Implemented | Onboarding Tours (0%) | SRS_ONBOARDING.md | v0.8.6 |
-| No Tests | User Profile Page | SRS_USER_PAGE.md | v0.8.5 |
-| No Tests | Settings Page | SRS_USER_SETTINGS_PAGE.md | v0.8.5 |
-| Failing Tests | Admin Panel (T83, T84, T86) | SRS_ADMIN_PANEL.md | v0.8.5 |
-| Low Coverage | AI Integration (~15%) | SRS_AI_INTEGRATION.md | v0.8.5 |
-| Low Coverage | Stream View (~27%) | SRS_STREAM_VIEW.md | v0.8.5 |
+| Not Implemented | API Key localStorage + Settings UI | SRS_API_KEY_STORAGE.md | v0.8.7 |
+| Not Implemented | Stream View editing (swipe, quick add) | SRS_STREAM_VIEW.md | v0.8.5 |
+| Not Implemented | Account Deletion (GDPR) | SRS_USER_SETTINGS_PAGE.md | v0.8.7 |
+| Not Implemented | Default Visibility Setting | SRS_USER_SETTINGS_PAGE.md | v0.8.7 |
+| Not Implemented | Onboarding Tours (0%) | SRS_ONBOARDING.md | v0.8.7 |
+| No Tests | User Profile Page | SRS_USER_PAGE.md | v0.8.6 |
+| No Tests | Settings Page | SRS_USER_SETTINGS_PAGE.md | v0.8.6 |
+| Failing Tests | Admin Panel (T83, T84, T86) | SRS_ADMIN_PANEL.md | v0.8.6 |
+| Low Coverage | AI Integration (~15%) | SRS_AI_INTEGRATION.md | v0.8.6 |
+| Low Coverage | Stream View (~27%) | SRS_STREAM_VIEW.md | v0.8.6 |
 
-### v0.8.1 - UI Audit and Visual Bug Fixes
-**Goal:** Systematic review of all UI elements to identify and fix unprofessional visuals, overlaps, and inconsistencies
+### v0.8.1 - UI Audit ✅
+**Goal:** Systematic review of all UI elements to identify visual bugs and inconsistencies
 
-See [docs/UI_AUDIT_CHECKLIST.md](docs/UI_AUDIT_CHECKLIST.md) for detailed audit criteria.
+See [docs/UI_AUDIT_CHECKLIST.md](docs/UI_AUDIT_CHECKLIST.md) for audit criteria.
 
-**Known Issues to Fix:**
-- [ ] User profile button (top-right) - inconsistent states, unclear logged-in indicator
-- [ ] Breadcrumbs overlapping with event cards on canvas
-- [ ] Minimap overlapping with cards at certain zoom levels
-- [ ] Z-index issues across overlay components
+**Audit Completed:**
+- [x] Canvas/Editor audit (cards, axis, anchors, minimap, panels, breadcrumbs)
+- [x] Navigation audit (NavRail, TopNavBar, User menu)
+- [x] Pages audit (HomePage, UserProfilePage, SettingsPage, LandingPage, AdminPage)
+- [x] Cross-cutting audit (theme, z-index, loading/error states, toasts)
 
-**Canvas/Editor Audit:**
-- [ ] Event cards: borders, shadows, hover states, selection states
-- [ ] Timeline axis: alignment, labels, tick marks
-- [ ] Anchors and connectors: visual consistency
-- [ ] Minimap: positioning, contrast, interaction areas
-- [ ] Panels: overlay edges, backdrop, focus states
-- [ ] Breadcrumbs: positioning, contrast, clickable areas
+**Findings:** 59 issues documented in [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md)
+- Critical: 7 | High: 13 | Medium: 24 | Low: 15
 
-**Navigation Audit:**
-- [ ] NavRail: icon consistency, hover states, active states
-- [ ] TopNavBar: alignment, spacing, responsive behavior
-- [ ] User menu: dropdown positioning, items alignment
-- [ ] Breadcrumbs: truncation, separator styling
+### v0.8.2 - UI Visual Bug Fixes
+**Goal:** Fix all issues identified in v0.8.1 audit
 
-**Pages Audit:**
-- [ ] HomePage: card alignment, section spacing, empty states
-- [ ] UserProfilePage: header layout, stats display, card grid
-- [ ] SettingsPage: form alignment, section headers, button styles
-- [ ] LandingPage: hero section, feature cards, CTA buttons
+See [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md) for detailed fix instructions per batch.
 
-**Cross-cutting Concerns:**
-- [ ] Dark/light theme consistency across all components
-- [ ] Focus states visible for keyboard navigation
-- [ ] Loading states and skeletons consistent styling
-- [ ] Error states consistent styling and messaging
-- [ ] Toast notifications positioning and styling
+**Batch A: Node/Card Theme System** (3 issues)
+- [ ] A1: Node.tsx - Replace Tailwind colors with CSS variables
+- [ ] A2: TimelineMarkers.tsx - Fix dark mode visibility
+- [ ] A3-A4: TimelineMinimap.tsx, CreateAffordance.tsx - Theme consistency
 
-### v0.8.2 - Code Architecture and Performance
+**Batch B: Badge Dark Mode** (3 issues)
+- [ ] B1: Owner badges - Add dark mode styles (HomePage, UserProfilePage)
+- [ ] B2: Visibility badges - Add `dark:` Tailwind variants
+- [ ] B3: Statistics cards - Add icon indicators for accessibility
+
+**Batch C: Navigation Theme** (5 issues)
+- [ ] C1: TopNavBar.tsx - Replace all hardcoded hex colors with CSS variables
+- [ ] C2: UserProfileMenu.tsx - Fix undefined CSS variables
+- [ ] C3-C5: NavigationRail.tsx - Separator, hover states, theme toggle
+
+**Batch D: App.tsx Theme Fixes** (2 issues)
+- [ ] D1: AI preview glow - Use theme accent instead of hardcoded blue
+- [ ] D2: Chat FAB - Use CSS variables for colors
+
+**Batch E: Error/Offline States** (3 issues)
+- [ ] E1: EditorPage.tsx - Fix "No timeline" modal for light theme
+- [ ] E2: ErrorState.tsx - Use semantic error color variables
+- [ ] E3: OfflineIndicator.tsx - Use warning color variable
+
+**Batch F: Z-Index Standardization** (1 systematic issue)
+- [ ] F1: Add z-index layer system to tokens.css
+- [ ] F1: Update 10+ components to use standardized z-index variables
+
+**Batch G: Settings & Danger Zone** (1 issue)
+- [ ] G1: SettingsPage.tsx - Add semantic danger color variables
+
+**Batch H: Card Layout Consistency** (2 issues)
+- [ ] H1: Timeline cards - Use flexbox for consistent height
+- [ ] H2: Add webkit scrollbar styling for cross-browser consistency
+
+**Batch I: LoginPage Dark Mode** (1 issue)
+- [ ] I1: LoginPage.tsx - Replace all hardcoded colors with CSS variables
+
+**Batch J: SVG and Shadow Colors** (2 systematic issues)
+- [ ] J1: Replace hardcoded SVG fills/strokes with CSS variables
+- [ ] J2: Use shadow CSS variables instead of hardcoded rgba
+
+**Batch K: Focus States & Accessibility** (1 systematic issue)
+- [ ] K1: Add global focus-visible styles for buttons and interactive elements
+
+**Batch L: Minor Polish** (4 issues)
+- [ ] L1: Breadcrumb truncation
+- [ ] L2: Icon sizing consistency
+- [ ] L3: TimelineIcon hardcoded purple
+- [ ] L4: LandingPage roadmap line visibility
+
+### v0.8.3 - Code Architecture and Performance
 **Goal:** Refactor monolithic components and establish performance baseline
 
 **App.tsx Refactor:**
@@ -902,7 +934,7 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 - [ ] Update Home/Profile card grids: 3xl:grid-cols-6, 4xl:grid-cols-7
 - [ ] Test timeline canvas at 2560px and 3840px widths
 
-### v0.8.3 - Mobile and Responsive Testing Infrastructure
+### v0.8.4 - Mobile and Responsive Testing Infrastructure
 **Goal:** Establish multi-viewport testing and ensure mobile reliability
 
 **Playwright Multi-Viewport Setup:**
@@ -933,7 +965,7 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 - [ ] Large screen layout (2560px, 3840px) - card grids fill space
 - [ ] Timeline canvas scales horizontally on wide screens
 
-### v0.8.4 - Mobile Performance and Offline
+### v0.8.5 - Mobile Performance and Offline
 **Goal:** Fast loading and offline resilience for mobile users
 
 **Stream View Mobile Editing (from SRS_STREAM_VIEW.md):**
@@ -953,7 +985,7 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 - [ ] Stream View performance on 100+ events
 - [ ] Mobile-specific lazy loading (defer non-critical)
 
-### v0.8.5 - Test Coverage and Stability
+### v0.8.6 - Test Coverage and Stability
 **Goal:** Fill critical test gaps and fix flaky tests
 
 **Admin Panel Fix:**
@@ -972,7 +1004,7 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 - [ ] Error recovery audit (ensure UI never gets stuck)
 - [ ] Console error/warning cleanup in test runs
 
-### v0.8.6 - UX Polish and Final Touches
+### v0.8.7 - UX Polish and Final Touches
 **Goal:** Production-ready visual polish and user experience
 
 **Home Page:**
@@ -1003,7 +1035,7 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 - [ ] Open Graph preview images for timeline sharing
 - [ ] Performance budget: Lighthouse score 90+ on mobile
 
-### v0.8.7 - Launch Preparation
+### v0.8.8 - Launch Preparation
 **Goal:** Final validation before social media launch
 
 - [ ] Production smoke tests pass (all 22)
