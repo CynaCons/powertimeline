@@ -2,15 +2,15 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.14 - YAML Schema API
-**Next Milestone:** v0.8.x Production Polish and Stability
+**Current Version:** v0.8.0 - Documentation and SRS Cleanup
+**Next Milestone:** v0.8.1 UI Audit and Visual Bug Fixes
 
 ### Key Metrics
-- **Total Iterations:** 200+ completed (v0.2.0 → v0.7.12)
-- **Requirements:** ~340 total ([SRS Index](docs/SRS_INDEX.md))
-- **Implementation:** ~200 requirements (59%)
-- **Test Coverage:** ~119 requirements verified (35%)
-- **Test Suite:** 320 Playwright E2E + 58 unit = 378 automated tests ([Test Status](#test-status))
+- **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
+- **Requirements:** ~352 total ([SRS Index](docs/SRS_INDEX.md))
+- **Implementation:** ~200 requirements (57%)
+- **Test Coverage:** ~119 requirements verified (34%)
+- **Test Suite:** 415 Playwright E2E + 58 unit = 473 automated tests ([Test Status](#test-status))
 - **Production Tests:** 22/22 passing (v0.5.15)
 
 ### Recent Achievements (v0.5.x)
@@ -70,16 +70,17 @@
 - ✅ Unit Testing: Set up Vitest with 58 unit tests (v0.7.12)
 - ✅ Documentation: Fixed consistency and updated metrics (v0.7.13)
 - ✅ YAML Schema API: JSON Schema endpoint for AI discovery (v0.7.14)
+- ✅ Documentation & SRS Cleanup: Format standardization, code refs, metrics update (v0.8.0)
 
 ### Next Up
-- **v0.8.x**: Production Polish and Stability (code refactor, mobile, tests, UX)
+- **v0.8.1**: UI Audit and Visual Bug Fixes
 - **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
-- **Playwright E2E:** 320 tests in 112 spec files
+- **Playwright E2E:** 415 tests in 112 spec files
 - **Vitest Unit:** 58 tests
-- **Total:** 378 automated tests
+- **Total:** 473 automated tests
 - **Production Tests:** 22/22 passing
 - **Dev Tests:** Running (requires .env.test credentials)
 
@@ -797,27 +798,33 @@
 ## Phase 5: Production Polish & Stability (v0.8.x)
 > **Vision:** Make PowerTimeline production-ready for social media publishing - clean, fast, and reliable on both desktop and mobile
 
-### v0.8.0 - Documentation and SRS Cleanup
+### v0.8.0 - Documentation and SRS Cleanup ✅
 **Goal:** Ensure all documentation is accurate, consistent, and up-to-date before implementation work
 
 **SRS Audit:**
-- [ ] Review all SRS files for accuracy against current implementation
-- [ ] Update requirement status (Implemented/Verified) in each SRS
-- [ ] Remove deprecated requirements or mark as deprecated
-- [ ] Ensure consistent format across all SRS files
-- [ ] Add SRS_API_KEY_STORAGE.md to SRS_INDEX.md
+- [x] Review all SRS files for accuracy against current implementation
+- [x] Update requirement status (Implemented/Verified) in each SRS
+- [x] Remove deprecated requirements or mark as deprecated
+- [x] Ensure consistent format across all SRS files (5-column: ID | Requirement | Acceptance Criteria | Code | Tests)
+- [x] Add SRS_API_KEY_STORAGE.md to SRS_INDEX.md
 
 **Documentation Updates:**
-- [ ] Update SRS_INDEX.md metrics and requirement counts
-- [ ] Review ARCHITECTURE.md against current codebase
-- [ ] Update README.md with current features and setup
-- [ ] Verify all internal doc links are valid
-- [ ] Remove or update stale information in docs/
+- [x] Update SRS_INDEX.md metrics and requirement counts (~352 requirements)
+- [x] Review ARCHITECTURE.md against current codebase (added AI, Stream View, Import/Export sections)
+- [x] Update README.md with current features and setup (473 tests, tech stack)
+- [x] Verify all internal doc links are valid
+- [x] Remove or update stale information in docs/
+
+**Critical Fixes Applied:**
+- [x] SRS_CARDS_SYSTEM.md: Fixed compact card height (92px → 82px), capacity cells (2 → 4)
+- [x] SRS_API_KEY_STORAGE.md: Added "Status: Proposed" header
+- [x] SRS.md: Removed deprecated CC-REQ-PANELS-DEV-001
+- [x] SRS_ADMIN_PANEL.md: Updated for Firebase Auth (v0.5.6+)
 
 **Test Coverage Tables:**
-- [ ] Update test coverage percentages in each SRS
-- [ ] Map new tests to requirement IDs
-- [ ] Identify requirements lacking test coverage
+- [x] Update test coverage percentages in each SRS
+- [x] Map new tests to requirement IDs
+- [x] Identify requirements lacking test coverage
 
 ### v0.8.1 - UI Audit and Visual Bug Fixes
 **Goal:** Systematic review of all UI elements to identify and fix unprofessional visuals, overlaps, and inconsistencies
