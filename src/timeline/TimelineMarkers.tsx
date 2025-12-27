@@ -118,10 +118,12 @@ export function TimelineMarkers({
 
           {/* Marker label */}
           <div
-            className={`absolute top-2 left-0 transform -translate-x-1/2 bg-surface border border-primary rounded-md px-2 py-1 shadow-lg cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 ${
+            className={`absolute top-2 left-0 transform -translate-x-1/2 rounded-md px-2 py-1 shadow-lg cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 ${
               marker.pulse ? 'animate-pulse' : ''
             }`}
             style={{
+              backgroundColor: 'var(--page-bg-elevated)',
+              border: '1px solid var(--page-border)',
               borderColor: marker.color,
               boxShadow: marker.pulse
                 ? `0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px ${marker.color}40`
@@ -145,8 +147,8 @@ export function TimelineMarkers({
                 </span>
               )}
               <span
-                className="text-xs font-medium text-primary whitespace-nowrap"
-                style={{ maxWidth: '120px' }}
+                className="text-xs font-medium whitespace-nowrap"
+                style={{ maxWidth: '120px', color: 'var(--page-text-primary)' }}
               >
                 {marker.label}
               </span>

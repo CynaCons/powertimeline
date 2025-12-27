@@ -159,7 +159,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 minHeight: '44px',
                 color: 'text.secondary',
                 '&:hover': {
-                  bgcolor: 'grey.100',
+                  bgcolor: 'action.hover',
                 },
               }}
               aria-label={isCollapsed ? `Expand ${section.title}` : `Collapse ${section.title}`}
@@ -196,7 +196,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 tabIndex={0}
               >
                 {typeof item.icon === 'string' ? (
-                  <span className="material-symbols-rounded nav-icon" aria-hidden="true">
+                  <span className="material-symbols-rounded nav-icon" aria-hidden="true" style={{ fontSize: '24px' }}>
                     {item.icon}
                   </span>
                 ) : (
@@ -210,7 +210,8 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         {/* Separator between sections (not after last section) */}
         {sectionIndex < totalSections - 1 && (
           <div
-            className="w-8 h-px bg-gray-300 my-2"
+            className="w-8 h-px my-2"
+            style={{ backgroundColor: 'var(--page-border)' }}
             role="separator"
             aria-hidden="true"
           />
@@ -259,7 +260,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   tabIndex={0}
                 >
                   {typeof item.icon === 'string' ? (
-                    <span className="material-symbols-rounded nav-icon" aria-hidden="true">
+                    <span className="material-symbols-rounded nav-icon" aria-hidden="true" style={{ fontSize: '24px' }}>
                       {item.icon}
                     </span>
                   ) : (
@@ -307,7 +308,7 @@ export const ThemeToggleButton: React.FC = () => {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = 'var(--page-accent)';
-          e.currentTarget.style.color = '#ffffff';
+          e.currentTarget.style.color = 'var(--page-accent-contrast-text, #ffffff)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';

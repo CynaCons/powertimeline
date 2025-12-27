@@ -22,14 +22,14 @@ import { SkeletonCard } from '../components/SkeletonCard';
 function MobileNotice({ onDismiss, onOpenStreamView }: { onDismiss: () => void; onOpenStreamView: () => void }) {
   return (
     <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6 max-w-sm text-center">
-        <span className="material-symbols-rounded text-5xl text-[#8b5cf6] mb-4 block">
+      <div className="rounded-xl p-6 max-w-sm text-center" style={{ backgroundColor: 'var(--page-bg-elevated)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--page-border)' }}>
+        <span className="material-symbols-rounded text-5xl mb-4 block" style={{ color: 'var(--page-accent)' }}>
           view_stream
         </span>
-        <h2 className="text-xl font-semibold text-[#e6edf3] mb-2">
+        <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--page-text-primary)' }}>
           Mobile View Available
         </h2>
-        <p className="text-[#8d96a0] mb-4 text-sm leading-relaxed">
+        <p className="mb-4 text-sm leading-relaxed" style={{ color: 'var(--page-text-secondary)' }}>
           The timeline canvas works best on larger screens.
           Use <strong>Stream View</strong> for a mobile-friendly experience,
           or continue to the canvas view anyway.
@@ -37,20 +37,35 @@ function MobileNotice({ onDismiss, onOpenStreamView }: { onDismiss: () => void; 
         <div className="flex flex-col gap-2">
           <button
             onClick={onOpenStreamView}
-            className="w-full px-4 py-2 bg-[#8b5cf6] text-white rounded-lg font-medium hover:bg-[#7c3aed] transition-colors flex items-center justify-center gap-2"
+            className="w-full px-4 py-2 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            style={{ backgroundColor: 'var(--page-accent)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--page-accent-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--page-accent)'}
           >
             <span className="material-symbols-rounded" style={{ fontSize: 20 }}>view_stream</span>
             Open Stream View
           </button>
           <button
             onClick={onDismiss}
-            className="w-full px-4 py-2 border border-[#30363d] text-[#8d96a0] rounded-lg font-medium hover:border-[#8b5cf6] hover:text-[#e6edf3] transition-colors"
+            className="w-full px-4 py-2 rounded-lg font-medium transition-colors"
+            style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--page-border)', color: 'var(--page-text-secondary)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--page-accent)';
+              e.currentTarget.style.color = 'var(--page-text-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--page-border)';
+              e.currentTarget.style.color = 'var(--page-text-secondary)';
+            }}
           >
             Continue to Canvas
           </button>
           <button
             onClick={() => window.history.back()}
-            className="w-full px-4 py-2 text-[#6e7681] text-sm hover:text-[#8d96a0] transition-colors"
+            className="w-full px-4 py-2 text-sm transition-colors"
+            style={{ color: 'var(--page-text-secondary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--page-text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--page-text-secondary)'}
           >
             Go Back
           </button>

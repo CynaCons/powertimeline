@@ -157,8 +157,8 @@ export function TimelineMinimap({
   // Don't render if no events
   if (events.length === 0) {
     return (
-      <div className={`relative bg-surface border border-primary rounded-lg p-3 ${className}`}>
-        <div className="flex items-center justify-center text-secondary text-sm">
+      <div className={`relative rounded-lg p-3 ${className}`} style={{ backgroundColor: 'var(--page-bg-elevated)', border: '1px solid var(--page-border)' }}>
+        <div className="flex items-center justify-center text-sm" style={{ color: 'var(--page-text-secondary)' }}>
           No events to display
         </div>
       </div>
@@ -169,13 +169,14 @@ export function TimelineMinimap({
   return (
     <div
       data-testid="timeline-minimap"
-      className={`relative bg-surface border border-primary rounded px-2 py-1 transition-all duration-300 ease-out shadow-sm hover:shadow-md ${className}`}
+      className={`relative rounded px-2 py-1 transition-all duration-300 ease-out shadow-sm hover:shadow-md ${className}`}
+      style={{ backgroundColor: 'var(--page-bg-elevated)', border: '1px solid var(--page-border)' }}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       {/* Enhanced timeline bar with dates inline */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-secondary font-medium flex-shrink-0 transition-colors duration-200">
+        <span className="text-xs font-medium flex-shrink-0 transition-colors duration-200" style={{ color: 'var(--page-text-secondary)' }}>
           {formatYear(timelineRange.startDate)}
         </span>
         
@@ -254,11 +255,11 @@ export function TimelineMinimap({
           </div>
         </div>
 
-        <span className="text-xs text-secondary font-medium flex-shrink-0 transition-colors duration-200">
+        <span className="text-xs font-medium flex-shrink-0 transition-colors duration-200" style={{ color: 'var(--page-text-secondary)' }}>
           {formatYear(timelineRange.endDate)}
         </span>
-        <div className="flex items-center gap-2 text-xs text-tertiary">
-          <span className="bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded-full font-medium">
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--page-text-secondary)' }}>
+          <span className="px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: 'var(--card-bg)', color: 'var(--page-accent)', border: '1px solid var(--page-accent)' }}>
             {events.length} events
           </span>
           <span className="hidden sm:inline opacity-70">

@@ -99,8 +99,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           aria-expanded={open ? 'true' : undefined}
           aria-label="Account menu"
           sx={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border-primary)',
+            backgroundColor: 'var(--page-bg-elevated)',
+            border: '1px solid var(--page-border)',
             backdropFilter: 'blur(8px)',
             padding: '8px',
             minWidth: '44px',
@@ -108,7 +108,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             borderRadius: isHovered ? '22px' : '50%',
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
-              backgroundColor: 'var(--color-surface-hover)',
+              backgroundColor: 'var(--page-bg-elevated)',
+              opacity: 0.8,
             },
           }}
         >
@@ -163,15 +164,15 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
       >
         {/* User Info Header with "Logged in as" label */}
         <MenuItem disabled sx={{ opacity: '1 !important', cursor: 'default !important', pb: 2 }}>
-          <span className="material-symbols-rounded" style={{ fontSize: '32px', marginRight: '8px', color: '#8b5cf6' }} aria-hidden="true">
+          <span className="material-symbols-rounded" style={{ fontSize: '32px', marginRight: '8px', color: 'var(--page-accent)' }} aria-hidden="true">
             account_circle
           </span>
           <div className="flex flex-col w-full">
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-xs text-gray-500">Logged in as</span>
+              <span className="text-xs" style={{ color: 'var(--page-text-secondary)' }}>Logged in as</span>
             </div>
             <span className="font-semibold text-sm">{currentUser?.username || firebaseUser?.email?.split('@')[0]}</span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs" style={{ color: 'var(--page-text-secondary)' }}>
               {firebaseUser?.email}
             </span>
           </div>

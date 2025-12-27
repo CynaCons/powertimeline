@@ -19,7 +19,7 @@ export function OfflineIndicator() {
   if (isOnline) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 bg-amber-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+    <div className="fixed bottom-4 left-4 z-50 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2" style={{ backgroundColor: 'var(--color-warning-500, #f59e0b)' }}>
       <span className="material-symbols-rounded text-sm" aria-hidden="true">wifi_off</span>
       <span className="text-sm font-medium">You're offline</span>
     </div>

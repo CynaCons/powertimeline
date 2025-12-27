@@ -234,8 +234,8 @@ export function SettingsPage() {
           </section>
 
           {/* Danger Zone */}
-          <section className="border-2 rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: '#dc2626' }}>
-            <h2 className="text-xl font-semibold mb-2" style={{ color: '#dc2626' }}>
+          <section className="border-2 rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--color-danger)' }}>
+            <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-danger)' }}>
               Danger Zone
             </h2>
             <p className="text-sm mb-4" style={{ color: 'var(--page-text-secondary)' }}>
@@ -250,14 +250,14 @@ export function SettingsPage() {
                   onClick={handleDeleteAccount}
                   className="px-4 py-2 rounded-lg font-medium transition-colors"
                   style={{
-                    backgroundColor: '#dc2626',
+                    backgroundColor: 'var(--color-danger)',
                     color: '#ffffff',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#b91c1c';
+                    e.currentTarget.style.backgroundColor = 'var(--color-danger-hover)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#dc2626';
+                    e.currentTarget.style.backgroundColor = 'var(--color-danger)';
                   }}
                 >
                   Delete Account

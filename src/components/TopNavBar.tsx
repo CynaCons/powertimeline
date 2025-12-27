@@ -22,8 +22,8 @@ export function TopNavBar() {
       component="nav"
       aria-label="Top navigation"
       sx={{
-        bgcolor: '#0d1117',
-        borderBottom: '1px solid #21262d',
+        bgcolor: 'var(--page-bg)',
+        borderBottom: '1px solid var(--page-border)',
         py: 1.5,
         position: 'sticky',
         top: 0,
@@ -53,7 +53,7 @@ export function TopNavBar() {
               border: 'none',
               padding: 0,
               '&:focus-visible': {
-                outline: '2px solid #8b5cf6',
+                outline: '2px solid var(--page-accent)',
                 outlineOffset: '2px',
                 borderRadius: '4px',
               },
@@ -61,11 +61,11 @@ export function TopNavBar() {
             onClick={() => navigate('/')}
             data-testid="logo-button"
           >
-            <TimelineIcon sx={{ color: '#8b5cf6', fontSize: 28 }} />
+            <TimelineIcon sx={{ color: 'var(--page-accent)', fontSize: 28 }} />
             <Typography
               variant="h6"
               sx={{
-                color: '#e6edf3',
+                color: 'var(--page-text-primary)',
                 fontWeight: 700,
                 fontSize: '1.2rem',
               }}
@@ -96,13 +96,13 @@ export function TopNavBar() {
               onClick={() => navigate('/browse')}
               data-testid="browse-button"
               sx={{
-                color: '#8d96a0',
+                color: 'var(--page-text-secondary)',
                 textTransform: 'none',
                 fontSize: '0.95rem',
                 fontWeight: 500,
                 '&:hover': {
-                  color: '#e6edf3',
-                  bgcolor: 'rgba(139, 92, 246, 0.1)',
+                  color: 'var(--page-text-primary)',
+                  bgcolor: 'color-mix(in srgb, var(--page-accent) 10%, transparent)',
                 },
               }}
             >
@@ -113,14 +113,14 @@ export function TopNavBar() {
               <Box sx={{
                 '& .MuiIconButton-root': {
                   '&:hover': {
-                    bgcolor: 'rgba(139, 92, 246, 0.1)',
+                    bgcolor: 'color-mix(in srgb, var(--page-accent) 10%, transparent)',
                   },
                 },
                 '& .MuiAvatar-root': {
-                  bgcolor: '#8b5cf6',
+                  bgcolor: 'var(--page-accent)',
                 },
                 '& span': {
-                  color: '#e6edf3',
+                  color: 'var(--page-text-primary)',
                 },
               }}>
                 <UserProfileMenu
@@ -137,14 +137,14 @@ export function TopNavBar() {
                 onClick={() => navigate('/login')}
                 data-testid="sign-in-button"
                 sx={{
-                  borderColor: '#30363d',
-                  color: '#e6edf3',
+                  borderColor: 'var(--card-border)',
+                  color: 'var(--page-text-primary)',
                   textTransform: 'none',
                   fontWeight: 600,
                   px: 2,
                   '&:hover': {
-                    borderColor: '#8b5cf6',
-                    bgcolor: 'rgba(139, 92, 246, 0.1)',
+                    borderColor: 'var(--page-accent)',
+                    bgcolor: 'color-mix(in srgb, var(--page-accent) 10%, transparent)',
                   },
                 }}
               >

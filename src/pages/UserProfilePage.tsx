@@ -268,7 +268,7 @@ export function UserProfilePage() {
           className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
           title="Go to Home"
         >
-          <TimelineIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
+          <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
         </button>
 
         {/* Navigation sections */}
@@ -293,7 +293,7 @@ export function UserProfilePage() {
                 title="Go to Landing Page"
                 data-testid="logo-button"
               >
-                <TimelineIcon sx={{ fontSize: 24, color: '#8b5cf6' }} />
+                <TimelineIcon sx={{ fontSize: 24, color: 'var(--page-accent)' }} />
                 <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
                   PowerTimeline
                 </span>
@@ -491,12 +491,12 @@ export function UserProfilePage() {
                 )}
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
                   <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
-                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
+                  <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
+                  <div className="flex items-center justify-between text-sm mt-auto pb-8" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.eventCount} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
@@ -505,7 +505,14 @@ export function UserProfilePage() {
                     const owner = userCache.get(timeline.ownerId);
                     return owner ? (
                       <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                          style={{
+                            backgroundColor: 'var(--card-bg)',
+                            color: 'var(--page-text-secondary)',
+                            border: '1px solid var(--card-border)',
+                          }}
+                        >
                           @{owner.username}
                         </span>
                       </div>
@@ -515,10 +522,10 @@ export function UserProfilePage() {
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       timeline.visibility === 'public'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                         : timeline.visibility === 'private'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                     }`}>
                       {timeline.visibility === 'public' ? '🌍 Public' :
                        timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}

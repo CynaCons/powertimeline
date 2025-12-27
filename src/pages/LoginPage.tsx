@@ -245,7 +245,7 @@ export default function LoginPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: '#f6f8fa',
+          bgcolor: 'var(--page-bg)',
         }}
       >
         <Box
@@ -253,16 +253,16 @@ export default function LoginPage() {
             width: '100%',
             maxWidth: 340,
             p: 3,
-            bgcolor: 'white',
-            border: '1px solid #d0d7de',
+            bgcolor: 'var(--card-bg)',
+            border: '1px solid var(--card-border)',
             borderRadius: '6px',
             textAlign: 'center',
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 400 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 400, color: 'var(--page-text-primary)' }}>
             Signed in as
           </Typography>
-          <Typography variant="body1" sx={{ mb: 3, color: '#24292f', fontWeight: 600 }}>
+          <Typography variant="body1" sx={{ mb: 3, color: 'var(--page-text-primary)', fontWeight: 600 }}>
             {user.email}
           </Typography>
           <Button
@@ -270,12 +270,12 @@ export default function LoginPage() {
             variant="contained"
             onClick={handleSignOut}
             sx={{
-              bgcolor: '#24292f',
-              color: 'white',
+              bgcolor: 'var(--page-text-primary)',
+              color: 'var(--page-bg)',
               textTransform: 'none',
               py: 1,
               '&:hover': {
-                bgcolor: '#1f2328',
+                bgcolor: 'var(--page-text-secondary)',
               },
             }}
           >
@@ -294,13 +294,13 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: '#f6f8fa',
+        bgcolor: 'var(--page-bg)',
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 340 }}>
         {/* Logo/Title */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h4" sx={{ fontWeight: 400, color: '#24292f' }}>
+          <Typography variant="h4" sx={{ fontWeight: 400, color: 'var(--page-text-primary)' }}>
             PowerTimeline
           </Typography>
         </Box>
@@ -309,12 +309,12 @@ export default function LoginPage() {
         <Box
           sx={{
             p: 3,
-            bgcolor: 'white',
-            border: '1px solid #d0d7de',
+            bgcolor: 'var(--card-bg)',
+            border: '1px solid var(--card-border)',
             borderRadius: '6px',
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 300, color: '#24292f' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 300, color: 'var(--page-text-primary)' }}>
             {isSignUp ? 'Create your account' : 'Sign in to PowerTimeline'}
           </Typography>
 
@@ -329,7 +329,7 @@ export default function LoginPage() {
             <Box sx={{ mb: 2 }}>
               <Typography
                 variant="body2"
-                sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: '#24292f' }}
+                sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: 'var(--page-text-primary)' }}
               >
                 Email address
               </Typography>
@@ -348,9 +348,9 @@ export default function LoginPage() {
                       {emailChecking ? (
                         <CircularProgress size={20} />
                       ) : emailValid && emailAvailable ? (
-                        <CheckCircleIcon sx={{ color: '#2da44e' }} />
+                        <CheckCircleIcon sx={{ color: 'var(--color-success)' }} />
                       ) : emailFeedback ? (
-                        <ErrorIcon sx={{ color: '#dc2626' }} />
+                        <ErrorIcon sx={{ color: 'var(--color-danger)' }} />
                       ) : null}
                     </InputAdornment>
                   ) : undefined,
@@ -358,7 +358,11 @@ export default function LoginPage() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '6px',
-                    bgcolor: '#f6f8fa',
+                    bgcolor: 'var(--input-bg)',
+                    color: 'var(--page-text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--input-border)',
+                    },
                   },
                 }}
               />
@@ -369,7 +373,7 @@ export default function LoginPage() {
               <Box sx={{ mb: 2 }}>
                 <Typography
                   variant="body2"
-                  sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: '#24292f' }}
+                  sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: 'var(--page-text-primary)' }}
                 >
                   Username
                 </Typography>
@@ -393,9 +397,9 @@ export default function LoginPage() {
                         {usernameChecking ? (
                           <CircularProgress size={20} />
                         ) : usernameValid && usernameAvailable ? (
-                          <CheckCircleIcon sx={{ color: '#2da44e' }} />
+                          <CheckCircleIcon sx={{ color: 'var(--color-success)' }} />
                         ) : usernameFeedback ? (
-                          <ErrorIcon sx={{ color: '#dc2626' }} />
+                          <ErrorIcon sx={{ color: 'var(--color-danger)' }} />
                         ) : null}
                       </InputAdornment>
                     ) : undefined,
@@ -403,7 +407,11 @@ export default function LoginPage() {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '6px',
-                      bgcolor: '#f6f8fa',
+                      bgcolor: 'var(--input-bg)',
+                      color: 'var(--page-text-primary)',
+                      '& fieldset': {
+                        borderColor: 'var(--input-border)',
+                      },
                     },
                   }}
                 />
@@ -414,7 +422,7 @@ export default function LoginPage() {
             <Box sx={{ mb: 2 }}>
               <Typography
                 variant="body2"
-                sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: '#24292f' }}
+                sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: 'var(--page-text-primary)' }}
               >
                 Password
               </Typography>
@@ -428,7 +436,11 @@ export default function LoginPage() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '6px',
-                    bgcolor: '#f6f8fa',
+                    bgcolor: 'var(--input-bg)',
+                    color: 'var(--page-text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--input-border)',
+                    },
                   },
                 }}
               />
@@ -448,7 +460,7 @@ export default function LoginPage() {
                     sx={{
                       height: 4,
                       borderRadius: 2,
-                      bgcolor: '#e1e4e8',
+                      bgcolor: 'var(--page-border)',
                       '& .MuiLinearProgress-bar': {
                         bgcolor: passwordStrength.color,
                         borderRadius: 2,
@@ -461,7 +473,7 @@ export default function LoginPage() {
                         <Typography
                           key={idx}
                           variant="body2"
-                          sx={{ fontSize: '12px', color: '#656d76' }}
+                          sx={{ fontSize: '12px', color: 'var(--page-text-secondary)' }}
                         >
                           • {fb}
                         </Typography>
@@ -472,7 +484,7 @@ export default function LoginPage() {
               )}
               {!isSignUp && (
                 <Typography variant="body2" sx={{ mt: 0.5, fontSize: '12px' }}>
-                  <Link href="#" sx={{ color: '#0969da', textDecoration: 'none' }}>
+                  <Link href="#" sx={{ color: 'var(--page-accent)', textDecoration: 'none' }}>
                     Forgot password?
                   </Link>
                 </Typography>
@@ -486,7 +498,7 @@ export default function LoginPage() {
               disabled={isSignUp && !canSubmit()}
               data-testid={isSignUp ? 'create-account-submit-button' : 'sign-in-submit-button'}
               sx={{
-                bgcolor: '#2da44e',
+                bgcolor: 'var(--color-success)',
                 color: 'white',
                 textTransform: 'none',
                 py: 1,
@@ -494,11 +506,11 @@ export default function LoginPage() {
                 fontWeight: 500,
                 borderRadius: '6px',
                 '&:hover': {
-                  bgcolor: '#2c974b',
+                  bgcolor: 'var(--color-success-hover)',
                 },
                 '&:disabled': {
-                  bgcolor: '#94d3a2',
-                  color: 'white',
+                  bgcolor: 'var(--page-border)',
+                  color: 'var(--page-text-secondary)',
                 },
               }}
             >
@@ -507,7 +519,7 @@ export default function LoginPage() {
           </form>
 
           <Divider sx={{ my: 2 }}>
-            <Typography variant="body2" sx={{ color: '#656d76', fontSize: '12px' }}>
+            <Typography variant="body2" sx={{ color: 'var(--page-text-secondary)', fontSize: '12px' }}>
               OR
             </Typography>
           </Divider>
@@ -518,16 +530,16 @@ export default function LoginPage() {
             onClick={handleGoogleSignIn}
             data-testid="sign-in-google-button"
             sx={{
-              borderColor: '#d0d7de',
-              color: '#24292f',
+              borderColor: 'var(--card-border)',
+              color: 'var(--page-text-primary)',
               textTransform: 'none',
               py: 1,
               fontSize: '14px',
               fontWeight: 500,
               borderRadius: '6px',
               '&:hover': {
-                bgcolor: '#f6f8fa',
-                borderColor: '#d0d7de',
+                bgcolor: 'var(--page-bg-elevated)',
+                borderColor: 'var(--card-border)',
               },
             }}
           >
@@ -540,13 +552,13 @@ export default function LoginPage() {
           sx={{
             mt: 2,
             p: 2,
-            bgcolor: 'white',
-            border: '1px solid #d0d7de',
+            bgcolor: 'var(--card-bg)',
+            border: '1px solid var(--card-border)',
             borderRadius: '6px',
             textAlign: 'center',
           }}
         >
-          <Typography variant="body2" sx={{ fontSize: '14px', color: '#24292f' }}>
+          <Typography variant="body2" sx={{ fontSize: '14px', color: 'var(--page-text-primary)' }}>
             {isSignUp ? 'Already have an account?' : 'New to PowerTimeline?'}{' '}
             <Link
               component="button"
@@ -558,7 +570,7 @@ export default function LoginPage() {
                 setUsername('');
               }}
               sx={{
-                color: '#0969da',
+                color: 'var(--page-accent)',
                 textDecoration: 'none',
                 cursor: 'pointer',
                 '&:hover': {

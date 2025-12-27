@@ -78,13 +78,62 @@
   /* Effects */
   --cc-focus-ring-width: 0.6;
   --cc-shadow-card: 0 2px 4px -2px #00000080, 0 4px 16px -4px #00000066;
-  
+
+  /* Shadow System (Batch J) - Dark Theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
+
   /* Z-index conventions */
   --cc-z-hud: 1000;
   --cc-z-anchors: 500;
   --cc-z-cards: 200;
   --cc-z-grid: 150;
   --cc-z-background: 0;
+
+  /* ================================================
+     Z-Index Layer System
+     ================================================
+     Consistent layering for UI components across the app.
+     Use these variables instead of arbitrary z-index values.
+
+     Layers (lowest to highest):
+     - Canvas layers (0-20): Timeline content rendering
+       --z-canvas (0): Base timeline SVG content
+       --z-cards (10): Event cards on canvas
+       --z-anchors (20): Timeline anchors and connectors
+
+     - Fixed UI layers (50-100): Persistent UI components
+       --z-minimap (50): Minimap component (bottom-right)
+       --z-navigation (60): NavigationRail, breadcrumbs, TopNavBar
+       --z-panels (100): Side panels (EventsPanel, ChatPanel)
+
+     - Overlay layers (500+): Temporary UI overlays
+       --z-overlays (500): Full-screen overlays (StreamView, AuthoringOverlay)
+       --z-modals (1000): Modal dialogs and backdrops
+       --z-toasts (1400): Toast notifications
+       --z-stream-panel (1500): Stream edit panel (must be above toasts)
+
+     Usage example:
+       .my-component { z-index: var(--z-navigation); }
+     ================================================ */
+
+  /* Canvas layers */
+  --z-canvas: 0;
+  --z-cards: 10;
+  --z-anchors: 20;
+
+  /* Fixed UI layers */
+  --z-minimap: 50;
+  --z-navigation: 60;
+  --z-panels: 100;
+
+  /* Overlay layers */
+  --z-overlays: 500;
+  --z-modals: 1000;
+  --z-toasts: 1400;
+  --z-stream-panel: 1500;
 
   /* Axis sizing */
   --cc-axis-line-width: 0.18;
@@ -128,6 +177,16 @@
   --preview-bg: rgba(245, 158, 11, 0.15); /* amber with transparency for dark mode */
   --preview-border: #f59e0b; /* amber-500 */
   --preview-glow: rgba(245, 158, 11, 0.3);
+
+  /* Semantic colors */
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-success: #1f883d;
+  --color-success-hover: #1a7f37;
+  --color-error-500: #ef4444;
+  --color-error-200: rgba(239, 68, 68, 0.3);
+  --color-error-50: rgba(239, 68, 68, 0.08);
+  --color-warning-500: #f59e0b;
 }
 
 /* === Light Theme Overrides === */
@@ -170,6 +229,12 @@
   --cc-color-card-title: #1f2328;
   --cc-color-card-body: #656d76;
   --cc-bg-gradient: linear-gradient(180deg, #f6f8fa 0%, #ffffff 100%);
+
+  /* Shadow System (Batch J) - Light Theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 
   /* Scrollbar styling (light theme) */
   --scrollbar-track: #f0f0f0;

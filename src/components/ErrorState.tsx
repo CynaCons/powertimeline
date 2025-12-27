@@ -27,9 +27,9 @@ export function ErrorState({
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-3xl"
         style={{
-          backgroundColor: 'rgba(239, 68, 68, 0.08)',
-          color: '#ef4444',
-          border: '2px solid rgba(239, 68, 68, 0.3)',
+          backgroundColor: 'var(--color-error-50, rgba(239, 68, 68, 0.08))',
+          color: 'var(--color-error-500, #ef4444)',
+          border: '2px solid var(--color-error-200, rgba(239, 68, 68, 0.3))',
         }}
         aria-hidden="true"
       >
@@ -53,7 +53,8 @@ export function ErrorState({
         href="https://github.com/CynaCons/powertimeline/issues"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-sm text-purple-400 hover:text-purple-300 underline"
+        className="text-sm underline"
+        style={{ color: 'var(--page-accent)' }}
       >
         Report this issue on GitHub
       </a>
@@ -61,19 +62,16 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-2 px-4 py-2 rounded-lg font-medium transition-colors border"
+          className="mt-2 px-4 py-2 rounded-lg font-medium transition-colors"
           style={{
             backgroundColor: 'var(--page-accent)',
             color: '#fff',
-            borderColor: 'var(--page-accent)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--page-accent-hover)';
-            e.currentTarget.style.borderColor = 'var(--page-accent-hover)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--page-accent)';
-            e.currentTarget.style.borderColor = 'var(--page-accent)';
           }}
         >
           {actionLabel}

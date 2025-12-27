@@ -46,32 +46,32 @@ export const Node: React.FC<NodeProps> = ({
   const getCardStyles = () => {
   const baseStyles = {
       minimal: {
-    title: 'font-medium text-gray-900 text-xs truncate',
-        description: 'text-gray-600 text-xs mt-1 line-clamp-1',
-    date: 'text-gray-400 text-[10px] mt-1',
+    title: 'font-medium text-xs truncate',
+        description: 'text-xs mt-1 line-clamp-1',
+    date: 'text-[10px] mt-1',
         showDescription: false,
         showDate: false,
     padding: 'px-2 py-1.5'
       },
       compact: {
     // Two-line clamp for titles in compact/full
-    title: 'font-semibold text-gray-900 text-sm leading-5',
-        description: 'text-gray-600 text-xs mt-1 leading-4 line-clamp-1',
-    date: 'text-gray-400 text-[11px] mt-1 leading-4',
+    title: 'font-semibold text-sm leading-5',
+        description: 'text-xs mt-1 leading-4 line-clamp-1',
+    date: 'text-[11px] mt-1 leading-4',
         showDescription: true,
         showDate: true,
     padding: 'px-3 py-2'
       },
       full: {
-  title: 'font-semibold text-gray-900 text-base leading-5',
-  description: 'text-gray-600 text-sm mt-2 leading-5 line-clamp-3',
-  date: 'text-gray-400 text-xs mt-2 leading-4',
+  title: 'font-semibold text-base leading-5',
+  description: 'text-sm mt-2 leading-5 line-clamp-3',
+  date: 'text-xs mt-2 leading-4',
         showDescription: true,
         showDate: true,
     padding: 'px-4 py-3'
       }
     };
-    
+
     return baseStyles[contentDensity] || baseStyles.full;
   };
 
@@ -83,7 +83,7 @@ export const Node: React.FC<NodeProps> = ({
   const finalHeight = cardHeight || (contentDensity === 'minimal' ? 40 : contentDensity === 'compact' ? 96 : 172);
   
   return (
-    <div 
+    <div
       data-testid="event-card"
   data-event-id={id}
   data-summary={isSummaryCard ? 'true' : undefined}
@@ -91,8 +91,8 @@ export const Node: React.FC<NodeProps> = ({
   data-density={contentDensity}
   data-cluster-id={clusterId}
       className={`
-  absolute bg-white rounded-lg shadow-md cursor-pointer
-  hover:shadow-lg border border-gray-100
+  absolute rounded-lg shadow-md cursor-pointer
+  hover:shadow-lg
         ${isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''}
         ${styles.padding}
       `}
@@ -104,7 +104,11 @@ export const Node: React.FC<NodeProps> = ({
   boxSizing: 'border-box',
         transform: 'translate(-50%, -50%)',
   overflow: 'hidden',
-  minHeight: `${finalHeight}px` // defensive against font metrics differences
+  minHeight: `${finalHeight}px`, // defensive against font metrics differences
+        backgroundColor: 'var(--cc-color-card-bg)',
+        borderColor: 'var(--cc-color-card-border)',
+        borderWidth: '1px',
+        borderStyle: 'solid'
       }}
       onClick={() => onSelect?.(id)}
     >
@@ -121,7 +125,8 @@ export const Node: React.FC<NodeProps> = ({
     whiteSpace: contentDensity === 'minimal' ? 'nowrap' : undefined,
   wordBreak: 'break-word',
   overflowWrap: 'break-word',
-  hyphens: 'none'
+  hyphens: 'none',
+            color: 'var(--cc-color-card-title)'
           }}
           title={title}
         >
@@ -132,9 +137,9 @@ export const Node: React.FC<NodeProps> = ({
       {isMultiEvent && description && (showDescription ?? styles.showDescription) && (
         <div className="mt-1 space-y-1">
           {/* Light separator line */}
-          <div className="w-full h-px bg-gray-200"></div>
+          <div className="w-full h-px" style={{ backgroundColor: 'var(--cc-color-card-divider)' }}></div>
           {description.split('\n').map((eventLine, index) => (
-            <div key={index} className="text-xs text-gray-600 leading-tight">
+            <div key={index} className="text-xs leading-tight" style={{ color: 'var(--cc-color-card-body)' }}>
               {eventLine}
             </div>
           ))}
@@ -152,7 +157,8 @@ export const Node: React.FC<NodeProps> = ({
       WebkitLineClamp: contentDensity === 'full' ? 3 : contentDensity === 'compact' ? 1 : 0,
   wordBreak: 'break-word',
   overflowWrap: 'anywhere',
-      hyphens: 'auto'
+      hyphens: 'auto',
+              color: 'var(--cc-color-card-body)'
             }}
           >
             {description}
@@ -167,7 +173,8 @@ export const Node: React.FC<NodeProps> = ({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              letterSpacing: '0.01em'
+              letterSpacing: '0.01em',
+              color: 'var(--cc-color-card-body)'
             }}
             dateTime={formatISODate(date)}
           >

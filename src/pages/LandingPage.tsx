@@ -538,7 +538,7 @@ export function LandingPage() {
               top: '24px',
               bottom: '24px',
               width: '2px',
-              bgcolor: '#30363d',
+              bgcolor: '#3d4450',
             }}
           />
 

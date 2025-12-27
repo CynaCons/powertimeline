@@ -29,7 +29,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
             {item.href ? (
               <Link
                 to={item.href}
-                className="transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded-sm"
+                className="transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded-sm max-w-32 truncate"
                 style={{
                   color: 'var(--page-text-secondary)',
                   outlineColor: 'var(--page-accent)'
@@ -41,7 +41,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
               </Link>
             ) : (
               <span
-                className="font-medium"
+                className="font-medium max-w-32 truncate"
                 style={{ color: 'var(--page-text-primary)' }}
                 aria-current="page"
               >

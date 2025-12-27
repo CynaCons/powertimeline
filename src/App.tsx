@@ -992,7 +992,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
             title="Go to Home"
           >
-            <TimelineIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
+            <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
           </button>
 
           {/* Read-only lock icon - shown in read-only mode */}
@@ -1195,10 +1195,10 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     top: 0,
                     width: Math.abs(timelineSelection.currentX - timelineSelection.startX),
                     height: '100%',
-                    background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)',
-                    border: '2px solid rgb(59, 130, 246)',
+                    background: 'linear-gradient(180deg, color-mix(in srgb, var(--page-accent) 25%, transparent) 0%, color-mix(in srgb, var(--page-accent) 15%, transparent) 100%)',
+                    border: '2px solid var(--page-accent)',
                     borderRadius: '4px',
-                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.1)'
+                    boxShadow: '0 0 15px color-mix(in srgb, var(--page-accent) 50%, transparent)'
                   }}
                 >
                   {/* Left edge indicator */}
@@ -1355,11 +1355,12 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                 sx={{
                   width: 56,
                   height: 56,
-                  bgcolor: chatPanelOpen ? 'var(--color-surface-elevated)' : '#8b5cf6',
-                  color: chatPanelOpen ? 'var(--color-text-primary)' : 'white',
-                  boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                  bgcolor: chatPanelOpen ? 'var(--page-bg-elevated)' : 'var(--page-accent)',
+                  color: chatPanelOpen ? 'var(--page-text-primary)' : '#ffffff',
+                  boxShadow: '0 4px 20px color-mix(in srgb, var(--page-accent) 40%, transparent)',
                   '&:hover': {
-                    bgcolor: chatPanelOpen ? 'var(--color-surface-hover)' : '#7c3aed',
+                    bgcolor: chatPanelOpen ? 'var(--page-bg)' : 'var(--page-accent)',
+                    filter: 'brightness(1.1)',
                     transform: 'scale(1.05)',
                   },
                   transition: 'all 0.2s ease',

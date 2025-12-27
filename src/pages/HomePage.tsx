@@ -710,12 +710,12 @@ function HomePageContent() {
                   </div>
 
                   {/* Card content - clickable to navigate */}
-                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
+                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
                     <h3 className="font-semibold mb-2 pr-10" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
-                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
+                    <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                       {timeline.description || 'No description'}
                     </p>
-                    <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
+                    <div className="flex items-center justify-between text-sm mt-auto pb-8" style={{ color: 'var(--page-text-secondary)' }}>
                       <span>{timeline.eventCount} events</span>
                       <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                     </div>
@@ -723,10 +723,10 @@ function HomePageContent() {
                     <div className="absolute bottom-2 right-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                         timeline.visibility === 'public'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           : timeline.visibility === 'private'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                       }`}>
                         {timeline.visibility === 'public' ? '🌍 Public' :
                          timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
@@ -768,12 +768,12 @@ function HomePageContent() {
                 </div>
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
                   <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
-                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
+                  <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
+                  <div className="flex items-center justify-between text-sm mt-auto pb-8" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.viewCount} views</span>
                     <span>{timeline.eventCount} events</span>
                   </div>
@@ -782,7 +782,14 @@ function HomePageContent() {
                     const owner = getUserById(timeline.ownerId);
                     return owner ? (
                       <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                          style={{
+                            backgroundColor: 'var(--card-bg)',
+                            color: 'var(--page-text-secondary)',
+                            border: '1px solid var(--card-border)',
+                          }}
+                        >
                           @{owner.username}
                         </span>
                       </div>
@@ -792,10 +799,10 @@ function HomePageContent() {
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       timeline.visibility === 'public'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                         : timeline.visibility === 'private'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                     }`}>
                       {timeline.visibility === 'public' ? '🌍 Public' :
                        timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
@@ -812,19 +819,31 @@ function HomePageContent() {
           <h2 data-testid="platform-stats-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
           <div className="flex flex-wrap gap-4">
             <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-rounded text-lg" style={{ color: '#06b6d4' }}>timeline</span>
+                <div className="text-2xl md:text-3xl font-bold" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
+              </div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Timelines</div>
             </div>
             <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{stats.userCount}</div>
-              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
-            </div>
-            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-rounded text-lg" style={{ color: '#8b5cf6' }}>event</span>
+                <div className="text-2xl md:text-3xl font-bold" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
+              </div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Events</div>
             </div>
             <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-              <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-rounded text-lg" style={{ color: '#10b981' }}>group</span>
+                <div className="text-2xl md:text-3xl font-bold" style={{ color: '#10b981' }}>{stats.userCount}</div>
+              </div>
+              <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
+            </div>
+            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-rounded text-lg" style={{ color: '#f59e0b' }}>visibility</span>
+                <div className="text-2xl md:text-3xl font-bold" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
+              </div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Total Views</div>
             </div>
           </div>
@@ -858,12 +877,12 @@ function HomePageContent() {
                 </div>
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
+                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
                   <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
-                  <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
+                  <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
                   </p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
+                  <div className="flex items-center justify-between text-sm mt-auto pb-8" style={{ color: 'var(--page-text-secondary)' }}>
                     <span>{timeline.eventCount} events</span>
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
@@ -872,7 +891,14 @@ function HomePageContent() {
                     const owner = getUserById(timeline.ownerId);
                     return owner ? (
                       <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                          style={{
+                            backgroundColor: 'var(--card-bg)',
+                            color: 'var(--page-text-secondary)',
+                            border: '1px solid var(--card-border)',
+                          }}
+                        >
                           @{owner.username}
                         </span>
                       </div>
@@ -882,10 +908,10 @@ function HomePageContent() {
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       timeline.visibility === 'public'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                         : timeline.visibility === 'private'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                     }`}>
                       {timeline.visibility === 'public' ? '🌍 Public' :
                        timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
@@ -922,15 +948,15 @@ function HomePageContent() {
                   </div>
 
                   {/* Card content - clickable to navigate */}
-                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative min-h-[140px] pb-8">
+                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
                     <div className="flex items-center gap-2 mb-2 pr-8">
                       <span className="text-yellow-500">⭐</span>
                       <h3 className="font-semibold flex-1" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
                     </div>
-                    <p className="text-sm mb-3 line-clamp-2 min-h-[40px]" style={{ color: 'var(--page-text-secondary)' }}>
+                    <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                       {timeline.description || 'No description'}
                     </p>
-                    <div className="flex items-center justify-between text-sm" style={{ color: 'var(--page-text-secondary)' }}>
+                    <div className="flex items-center justify-between text-sm mt-auto pb-8" style={{ color: 'var(--page-text-secondary)' }}>
                       <span>{timeline.eventCount} events</span>
                       <span>{timeline.viewCount} views</span>
                     </div>
@@ -939,7 +965,14 @@ function HomePageContent() {
                       const owner = getUserById(timeline.ownerId);
                       return owner ? (
                         <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                            style={{
+                              backgroundColor: 'var(--card-bg)',
+                              color: 'var(--page-text-secondary)',
+                              border: '1px solid var(--card-border)',
+                            }}
+                          >
                             @{owner.username}
                           </span>
                         </div>
@@ -949,10 +982,10 @@ function HomePageContent() {
                     <div className="absolute bottom-2 right-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                         timeline.visibility === 'public'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           : timeline.visibility === 'private'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                       }`}>
                         {timeline.visibility === 'public' ? '🌍 Public' :
                          timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}

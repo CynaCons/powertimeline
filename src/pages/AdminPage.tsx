@@ -71,7 +71,7 @@ export function AdminPage() {
           className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
           title="Go to Home"
         >
-          <TimelineIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
+          <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
         </button>
 
         {/* Navigation sections */}
@@ -97,7 +97,7 @@ export function AdminPage() {
                   title="Go to Landing Page"
                   data-testid="logo-button"
                 >
-                  <TimelineIcon sx={{ fontSize: 24, color: '#8b5cf6' }} />
+                  <TimelineIcon sx={{ fontSize: 24, color: 'var(--page-accent)' }} />
                   <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
                     PowerTimeline
                   </span>
