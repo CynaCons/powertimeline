@@ -826,6 +826,21 @@
 - [x] Map new tests to requirement IDs
 - [x] Identify requirements lacking test coverage
 
+**Gaps Identified (to address in later iterations):**
+
+| Gap Type | Area | SRS File | Target Iteration |
+|----------|------|----------|------------------|
+| Not Implemented | API Key localStorage + Settings UI | SRS_API_KEY_STORAGE.md | v0.8.6 |
+| Not Implemented | Stream View editing (swipe, quick add) | SRS_STREAM_VIEW.md | v0.8.4 |
+| Not Implemented | Account Deletion (GDPR) | SRS_USER_SETTINGS_PAGE.md | v0.8.6 |
+| Not Implemented | Default Visibility Setting | SRS_USER_SETTINGS_PAGE.md | v0.8.6 |
+| Not Implemented | Onboarding Tours (0%) | SRS_ONBOARDING.md | v0.8.6 |
+| No Tests | User Profile Page | SRS_USER_PAGE.md | v0.8.5 |
+| No Tests | Settings Page | SRS_USER_SETTINGS_PAGE.md | v0.8.5 |
+| Failing Tests | Admin Panel (T83, T84, T86) | SRS_ADMIN_PANEL.md | v0.8.5 |
+| Low Coverage | AI Integration (~15%) | SRS_AI_INTEGRATION.md | v0.8.5 |
+| Low Coverage | Stream View (~27%) | SRS_STREAM_VIEW.md | v0.8.5 |
+
 ### v0.8.1 - UI Audit and Visual Bug Fixes
 **Goal:** Systematic review of all UI elements to identify and fix unprofessional visuals, overlaps, and inconsistencies
 
@@ -921,6 +936,12 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 ### v0.8.4 - Mobile Performance and Offline
 **Goal:** Fast loading and offline resilience for mobile users
 
+**Stream View Mobile Editing (from SRS_STREAM_VIEW.md):**
+- [ ] Swipe left/right to reveal edit/delete actions
+- [ ] Quick add button in Stream View header
+- [ ] Mobile-optimized event form
+- [ ] Touch gesture refinements
+
 **Offline Support:**
 - [ ] Service worker for static asset caching (Vite PWA plugin)
 - [ ] Offline indicator with retry action
@@ -959,13 +980,22 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 - [ ] Infinite scroll or "Load More" for Popular/Recent feeds
 - [ ] Empty state improvements (clearer CTAs)
 
-**API Key Storage:**
-See [docs/SRS_API_KEY_STORAGE.md](docs/SRS_API_KEY_STORAGE.md) for requirements.
+**API Key Storage (from SRS_API_KEY_STORAGE.md):**
 - [ ] Add "Remember on this device" checkbox to ChatPanel
 - [ ] Store key in localStorage when checkbox enabled
 - [ ] Add trust disclaimer text below API key input
 - [ ] Add API key management section to Settings page
 - [ ] Add "Clear stored key" button
+
+**Settings Page Enhancements (from SRS_USER_SETTINGS_PAGE.md):**
+- [ ] Account Deletion with confirmation (GDPR compliance)
+- [ ] Default timeline visibility setting
+
+**Onboarding Tours (from SRS_ONBOARDING.md):**
+- [ ] Empty state CTAs for new users
+- [ ] Editor guided tour (React Joyride)
+- [ ] Home page tour
+- [ ] NavRail help integration
 
 **Final Checks:**
 - [ ] Accessibility audit (WCAG AA compliance verification)
