@@ -708,3 +708,85 @@ TimelineMinimap Component:
 - **Smooth transitions** - Animated navigation between timeline sections
 
 **PURPOSE**: Solves cursor positioning confusion by providing visual context of zoom position within full timeline, enabling precise temporal navigation.
+
+## Viewport-Responsive Layout Design
+
+### Design Principle: Fixed Cards, Dynamic Distribution
+
+The layout system separates what is FIXED from what is DYNAMIC:
+
+**Fixed by Design (viewport-independent):**
+- Card widths: Full (256px), Compact (176px), Title-only (140px)
+- Half-column slot capacity: 2 slots above, 2 slots below timeline
+- Degradation cascade: Full -> Compact -> Title-only -> Overflow
+- Card typography, padding, and visual styling
+- Minimum spacing between half-columns
+
+**Dynamic (viewport-dependent):**
+- Number of half-columns that fit horizontally
+- Horizontal distribution of events across the viewport
+- How "spread out" or "clustered" events appear
+- When degradation triggers (based on density per visible area)
+
+### Why This Matters
+
+On different screen widths, the SAME timeline data renders differently:
+
+```
+Mobile (375px) - 1-2 half-columns visible
++------------------+
+| HC1 |            |
+|=====|============|
+| HC1 |            |
++------------------+
+Events clustered, more degradation needed
+
+Desktop (1920px) - 6-8 half-columns visible
++------------------------------------------+
+| HC1 | HC2 | HC3 | HC4 | HC5 | HC6 |      |
+|===========================================|
+| HC1 | HC2 | HC3 | HC4 | HC5 | HC6 |      |
++------------------------------------------+
+Events spread out, less degradation needed
+
+4K/Ultrawide (3840px) - 12-16 half-columns visible
++--------------------------------------------------------------------------------+
+| HC1 | HC2 | HC3 | HC4 | HC5 | HC6 | HC7 | HC8 | HC9 | HC10| HC11| HC12|       |
+|================================================================================|
+| HC1 | HC2 | HC3 | HC4 | HC5 | HC6 | HC7 | HC8 | HC9 | HC10| HC11| HC12|       |
++--------------------------------------------------------------------------------+
+Maximum spread, minimal degradation, best visual quality
+```
+
+### Implementation Requirements
+
+1. **LayoutEngine must use actual viewport width** for horizontal distribution calculations
+2. **Half-column count is computed**, not hardcoded: `maxColumns = floor(viewportWidth / minColumnWidth)`
+3. **Clustering algorithm considers available horizontal space** before grouping events
+4. **Degradation thresholds are density-based**, not absolute event counts
+
+### Benefits of This Approach
+
+| Benefit | Explanation |
+|---------|-------------|
+| Consistent card readability | Same card sizes on all screens |
+| Optimal space utilization | Wider screens show more, not bigger |
+| Natural density adaptation | Less crowding on larger displays |
+| Better 4K/ultrawide support | Users with large monitors see more context |
+| Mobile-friendly | Small screens still work via degradation |
+
+### UI Grid Breakpoints
+
+For non-canvas UI elements (Home page card grids, etc.), use Tailwind breakpoints:
+
+| Breakpoint | Width | Columns | Use Case |
+|------------|-------|---------|----------|
+| sm | 640px | 2 | Large phones |
+| md | 768px | 2-3 | Tablets |
+| lg | 1024px | 3 | Small laptops |
+| xl | 1280px | 4 | Laptops |
+| 2xl | 1536px | 5 | Desktops |
+| 3xl | 1920px | 6 | Full HD monitors |
+| 4xl | 2560px | 7+ | 2K/4K monitors |
+
+Note: 3xl and 4xl are custom breakpoints added to tailwind.config.js.

@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.7.14 - YAML Schema API ✅
-**Next Milestone:** v0.8.x Claude Code Integration
+**Current Version:** v0.7.14 - YAML Schema API
+**Next Milestone:** v0.8.x Production Polish and Stability
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.7.12)
@@ -72,8 +72,9 @@
 - ✅ YAML Schema API: JSON Schema endpoint for AI discovery (v0.7.14)
 
 ### Next Up
-- **v0.8.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
-- **v0.9.x**: Collaboration & Versioning (fork/merge/diff)
+- **v0.8.x**: Production Polish and Stability (code refactor, mobile, tests, UX)
+- **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
+- **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
 - **Playwright E2E:** 320 tests in 112 spec files
@@ -793,77 +794,253 @@
 
 ---
 
-## Phase 5: Claude Code Integration (v0.8.x)
-> **Vision:** Enable Claude Code to propose timeline events via Firebase, using the existing Review UI
+## Phase 5: Production Polish & Stability (v0.8.x)
+> **Vision:** Make PowerTimeline production-ready for social media publishing - clean, fast, and reliable on both desktop and mobile
 
-### v0.8.0 - Firebase Proposals Infrastructure
-**Goal:** Set up Firebase schema and listeners for external AI proposals
-- [ ] **Firestore Schema:** `/users/{uid}/ai_proposals/{id}` with status, events, source, timestamps
-- [ ] **Security Rules:** Owner-only read/write for proposals collection
-- [ ] **App Listener:** `onSnapshot` listener for incoming proposals
-- [ ] **Proposal Notification:** Badge/indicator when new proposals arrive
+### v0.8.0 - Documentation and SRS Cleanup
+**Goal:** Ensure all documentation is accurate, consistent, and up-to-date before implementation work
 
-### v0.8.1 - Claude Token & Settings
-**Goal:** Allow users to generate auth tokens for Claude Code
-- [ ] **Token Generation:** Settings page to create/revoke Claude API tokens
-- [ ] **Firebase Custom Tokens:** Cloud Function to issue scoped tokens
-- [ ] **Token Storage:** Secure storage with expiry and revocation
-- [ ] **Connection Status:** Show active Claude connections in UI
+**SRS Audit:**
+- [ ] Review all SRS files for accuracy against current implementation
+- [ ] Update requirement status (Implemented/Verified) in each SRS
+- [ ] Remove deprecated requirements or mark as deprecated
+- [ ] Ensure consistent format across all SRS files
+- [ ] Add SRS_API_KEY_STORAGE.md to SRS_INDEX.md
 
-### v0.8.2 - PowerTimeline MCP Server
-**Goal:** Create MCP server for Claude Code integration
-- [ ] **MCP Setup:** New `powertimeline-mcp/` repo or folder
-- [ ] **Firebase Auth:** Authenticate with user's Claude token
-- [ ] **Core Tools:** `get_timeline`, `list_timelines`, `propose_events`
-- [ ] **Status Tools:** `get_proposal_status`, `get_timeline_schema`
+**Documentation Updates:**
+- [ ] Update SRS_INDEX.md metrics and requirement counts
+- [ ] Review ARCHITECTURE.md against current codebase
+- [ ] Update README.md with current features and setup
+- [ ] Verify all internal doc links are valid
+- [ ] Remove or update stale information in docs/
 
-### v0.8.3 - Review UI Integration
-**Goal:** Route Claude proposals through existing Review UI
-- [ ] **Proposal Panel:** Show "Claude proposed X events" in ChatPanel or dedicated panel
-- [ ] **Reuse Actions:** Same approve/reject/restore/apply workflow as Gemini
-- [ ] **Source Attribution:** Tag applied events with "via Claude Code"
-- [ ] **Proposal History:** View past proposals and their outcomes
+**Test Coverage Tables:**
+- [ ] Update test coverage percentages in each SRS
+- [ ] Map new tests to requirement IDs
+- [ ] Identify requirements lacking test coverage
 
-### v0.8.4 - Polish & Documentation
-**Goal:** Production-ready Claude integration
-- [ ] **MCP Documentation:** Setup guide, tool reference, examples
-- [ ] **Error Handling:** Connection failures, invalid proposals, quota limits
-- [ ] **E2E Tests:** Proposal flow from MCP to applied events
-- [ ] **CLAUDE.md Update:** Add PowerTimeline MCP usage instructions
+### v0.8.1 - UI Audit and Visual Bug Fixes
+**Goal:** Systematic review of all UI elements to identify and fix unprofessional visuals, overlaps, and inconsistencies
+
+See [docs/UI_AUDIT_CHECKLIST.md](docs/UI_AUDIT_CHECKLIST.md) for detailed audit criteria.
+
+**Known Issues to Fix:**
+- [ ] User profile button (top-right) - inconsistent states, unclear logged-in indicator
+- [ ] Breadcrumbs overlapping with event cards on canvas
+- [ ] Minimap overlapping with cards at certain zoom levels
+- [ ] Z-index issues across overlay components
+
+**Canvas/Editor Audit:**
+- [ ] Event cards: borders, shadows, hover states, selection states
+- [ ] Timeline axis: alignment, labels, tick marks
+- [ ] Anchors and connectors: visual consistency
+- [ ] Minimap: positioning, contrast, interaction areas
+- [ ] Panels: overlay edges, backdrop, focus states
+- [ ] Breadcrumbs: positioning, contrast, clickable areas
+
+**Navigation Audit:**
+- [ ] NavRail: icon consistency, hover states, active states
+- [ ] TopNavBar: alignment, spacing, responsive behavior
+- [ ] User menu: dropdown positioning, items alignment
+- [ ] Breadcrumbs: truncation, separator styling
+
+**Pages Audit:**
+- [ ] HomePage: card alignment, section spacing, empty states
+- [ ] UserProfilePage: header layout, stats display, card grid
+- [ ] SettingsPage: form alignment, section headers, button styles
+- [ ] LandingPage: hero section, feature cards, CTA buttons
+
+**Cross-cutting Concerns:**
+- [ ] Dark/light theme consistency across all components
+- [ ] Focus states visible for keyboard navigation
+- [ ] Loading states and skeletons consistent styling
+- [ ] Error states consistent styling and messaging
+- [ ] Toast notifications positioning and styling
+
+### v0.8.2 - Code Architecture and Performance
+**Goal:** Refactor monolithic components and establish performance baseline
+
+**App.tsx Refactor:**
+- [ ] Extract `useEditorState` hook (events, selection, edit fields)
+- [ ] Extract `useEditorActions` hook (CRUD operations, handlers)
+- [ ] Extract `useAIChat` hook (AI session, preview events, actions)
+- [ ] Reduce App.tsx from 1400+ lines to under 400
+
+**Performance Foundations:**
+- [ ] Add React.memo to CardRenderer, StreamViewer, EventCard
+- [ ] Create `src/layout/constants.ts` for magic numbers
+- [ ] Add useCallback to inline event handlers in render
+- [ ] Benchmark 100/500/1000 event timelines (document results)
+
+**Large Screen Support:**
+See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewport-responsive-layout-design) for design rationale.
+- [ ] Audit LayoutEngine viewport width handling (ensure dynamic horizontal distribution)
+- [ ] Verify half-column count scales with viewport width
+- [ ] Add Tailwind 3xl (1920px) and 4xl (2560px) breakpoints to tailwind.config
+- [ ] Update Home/Profile card grids: 3xl:grid-cols-6, 4xl:grid-cols-7
+- [ ] Test timeline canvas at 2560px and 3840px widths
+
+### v0.8.3 - Mobile and Responsive Testing Infrastructure
+**Goal:** Establish multi-viewport testing and ensure mobile reliability
+
+**Playwright Multi-Viewport Setup:**
+- [ ] Add projects to playwright.config.ts (desktop, desktop-xl, tablet, mobile)
+- [ ] Configure device emulation (iPhone 14, iPad Mini)
+- [ ] Add desktop-xl project (2560x1440) for large screen testing
+- [ ] Add npm scripts: test:mobile, test:responsive, test:all
+- [ ] Document test categories in tests/README.md
+
+**Test Directory Structure:**
+- [ ] Create tests/responsive/ for cross-viewport tests
+- [ ] Create tests/mobile/ for mobile-only tests
+- [ ] Migrate relevant existing tests to responsive category
+- [ ] Add viewport metadata to test descriptions
+
+**Mobile-Specific Tests (tests/mobile/):**
+- [ ] Stream View auto-opens on mobile viewport
+- [ ] Swipe gestures (left/right on event cards)
+- [ ] Touch target sizes (minimum 44px)
+- [ ] No horizontal overflow on any page
+- [ ] Navigation rail behavior on mobile
+
+**Responsive Tests (tests/responsive/):**
+- [ ] Home page layout at desktop/tablet/mobile
+- [ ] Timeline card rendering across viewports
+- [ ] Navigation transitions between breakpoints
+- [ ] Loading skeletons display correctly
+- [ ] Large screen layout (2560px, 3840px) - card grids fill space
+- [ ] Timeline canvas scales horizontally on wide screens
+
+### v0.8.4 - Mobile Performance and Offline
+**Goal:** Fast loading and offline resilience for mobile users
+
+**Offline Support:**
+- [ ] Service worker for static asset caching (Vite PWA plugin)
+- [ ] Offline indicator with retry action
+- [ ] Graceful degradation when offline
+
+**Performance Targets:**
+- [ ] First Contentful Paint under 1.5s on 3G
+- [ ] Skeleton loading states audit (all pages)
+- [ ] Stream View performance on 100+ events
+- [ ] Mobile-specific lazy loading (defer non-critical)
+
+### v0.8.5 - Test Coverage and Stability
+**Goal:** Fill critical test gaps and fix flaky tests
+
+**Admin Panel Fix:**
+- [ ] Fix T83, T84, T86 selector issues
+- [ ] Verify all 23 admin tests pass consistently
+- [ ] Add missing test IDs to admin components
+
+**Test Coverage Expansion:**
+- [ ] AI Integration: Expand from 15% to 40% coverage
+- [ ] Stream View: Add 10+ editing/navigation tests
+- [ ] Settings Page: Add login, display, password reset tests
+- [ ] Public Profile: Add non-auth viewing tests
+
+**Stability:**
+- [ ] Fix flaky tests (add proper waits, remove race conditions)
+- [ ] Error recovery audit (ensure UI never gets stuck)
+- [ ] Console error/warning cleanup in test runs
+
+### v0.8.6 - UX Polish and Final Touches
+**Goal:** Production-ready visual polish and user experience
+
+**Home Page:**
+- [ ] Pagination for My Timelines (load 12, then more)
+- [ ] Infinite scroll or "Load More" for Popular/Recent feeds
+- [ ] Empty state improvements (clearer CTAs)
+
+**API Key Storage:**
+See [docs/SRS_API_KEY_STORAGE.md](docs/SRS_API_KEY_STORAGE.md) for requirements.
+- [ ] Add "Remember on this device" checkbox to ChatPanel
+- [ ] Store key in localStorage when checkbox enabled
+- [ ] Add trust disclaimer text below API key input
+- [ ] Add API key management section to Settings page
+- [ ] Add "Clear stored key" button
+
+**Final Checks:**
+- [ ] Accessibility audit (WCAG AA compliance verification)
+- [ ] SEO meta tags on all public pages
+- [ ] Open Graph preview images for timeline sharing
+- [ ] Performance budget: Lighthouse score 90+ on mobile
+
+### v0.8.7 - Launch Preparation
+**Goal:** Final validation before social media launch
+
+- [ ] Production smoke tests pass (all 22)
+- [ ] Manual testing checklist (10 critical user journeys)
+- [ ] Analytics setup (page views, timeline views, event creates)
+- [ ] Error tracking setup (Sentry or similar)
+- [ ] Final documentation review (README, landing page accuracy)
 
 ---
 
-## Phase 6: Collaboration & Versioning (v0.9.x)
-> **Future:** Git-style workflows for timeline collaboration (builds on v0.7.x + v0.8.x patterns)
+## Phase 6: Claude Code Integration (v0.9.x)
+> **Vision:** Enable Claude Code to propose timeline events via Firebase, using the existing Review UI
 
-### v0.9.0 - Version History
+### v0.9.0 - Firebase Proposals Infrastructure
+**Goal:** Set up Firebase schema and listeners for external AI proposals
+- [ ] Firestore Schema: `/users/{uid}/ai_proposals/{id}` with status, events, source, timestamps
+- [ ] Security Rules: Owner-only read/write for proposals collection
+- [ ] App Listener: `onSnapshot` listener for incoming proposals
+- [ ] Proposal Notification: Badge/indicator when new proposals arrive
+
+### v0.9.1 - Claude Token & Settings
+**Goal:** Allow users to generate auth tokens for Claude Code
+- [ ] Token Generation: Settings page to create/revoke Claude API tokens
+- [ ] Firebase Custom Tokens: Cloud Function to issue scoped tokens
+- [ ] Token Storage: Secure storage with expiry and revocation
+- [ ] Connection Status: Show active Claude connections in UI
+
+### v0.9.2 - PowerTimeline MCP Server
+**Goal:** Create MCP server for Claude Code integration
+- [ ] MCP Setup: New `powertimeline-mcp/` repo or folder
+- [ ] Firebase Auth: Authenticate with user's Claude token
+- [ ] Core Tools: `get_timeline`, `list_timelines`, `propose_events`
+- [ ] Status Tools: `get_proposal_status`, `get_timeline_schema`
+
+### v0.9.3 - Review UI Integration
+**Goal:** Route Claude proposals through existing Review UI
+- [ ] Proposal Panel: Show "Claude proposed X events" in ChatPanel or dedicated panel
+- [ ] Reuse Actions: Same approve/reject/restore/apply workflow as Gemini
+- [ ] Source Attribution: Tag applied events with "via Claude Code"
+- [ ] Proposal History: View past proposals and their outcomes
+
+---
+
+## Phase 7: Collaboration & Versioning (v1.0.x)
+> **Future:** Git-style workflows for timeline collaboration
+
+### v1.0.0 - Version History
 - [ ] Timeline version snapshots on save
 - [ ] Version history browser
 - [ ] Diff viewer for comparing versions
 - [ ] Revert to previous version
 
-### v0.9.1 - Forking System
+### v1.0.1 - Forking System
 - [ ] Fork button and confirmation flow
 - [ ] Fork relationship tracking
 - [ ] Attribution for original authors
 - [ ] Fork network visualization
 
-### v0.9.2 - Merge Requests (Optional)
+### v1.0.2 - Merge Requests (Optional)
 - [ ] Merge request workflow
 - [ ] Side-by-side diff viewer
 - [ ] Comment system for review
 - [ ] Merge conflict resolution
 
-## Milestone: v1.0.0 - Full Platform Launch
+---
+
+## Milestone: v1.1.0 - Full Platform Launch
 
 - [ ] All core platform features implemented and tested
 - [ ] Scalable infrastructure supporting thousands of users
 - [ ] Comprehensive documentation and API
-- [ ] Mobile-responsive design
-- [ ] Enterprise features and security
+- [ ] Mobile-responsive design verified
 - [ ] Community moderation tools
 - [ ] Analytics and reporting dashboard
-- [ ] Monetization system implementation
 
 ---
 
