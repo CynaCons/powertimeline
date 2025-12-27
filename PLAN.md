@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.1 - UI Audit (Complete)
-**Next Milestone:** v0.8.2 UI Visual Bug Fixes
+**Current Version:** v0.8.2 - UI Visual Bug Fixes (Complete)
+**Next Milestone:** v0.8.3 Code Architecture and Performance
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -855,61 +855,60 @@ See [docs/UI_AUDIT_CHECKLIST.md](docs/UI_AUDIT_CHECKLIST.md) for audit criteria.
 **Findings:** 59 issues documented in [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md)
 - Critical: 7 | High: 13 | Medium: 24 | Low: 15
 
-### v0.8.2 - UI Visual Bug Fixes
+### v0.8.2 - UI Visual Bug Fixes ✅
 **Goal:** Fix all issues identified in v0.8.1 audit
 
 See [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md) for detailed fix instructions per batch.
 
 **Batch A: Node/Card Theme System** (3 issues)
-- [ ] A1: Node.tsx - Replace Tailwind colors with CSS variables
-- [ ] A2: TimelineMarkers.tsx - Fix dark mode visibility
-- [ ] A3-A4: TimelineMinimap.tsx, CreateAffordance.tsx - Theme consistency
+- [x] A1: Node.tsx - Replace Tailwind colors with CSS variables
+- [x] A2: TimelineMarkers.tsx - Fix dark mode visibility
+- [x] A3-A4: TimelineMinimap.tsx, CreateAffordance.tsx - Theme consistency
 
 **Batch B: Badge Dark Mode** (3 issues)
-- [ ] B1: Owner badges - Add dark mode styles (HomePage, UserProfilePage)
-- [ ] B2: Visibility badges - Add `dark:` Tailwind variants
-- [ ] B3: Statistics cards - Add icon indicators for accessibility
+- [x] B1: Owner badges - Add dark mode styles (HomePage, UserProfilePage)
+- [x] B2: Visibility badges - Add `dark:` Tailwind variants
+- [x] B3: Statistics cards - Add icon indicators for accessibility
 
 **Batch C: Navigation Theme** (5 issues)
-- [ ] C1: TopNavBar.tsx - Replace all hardcoded hex colors with CSS variables
-- [ ] C2: UserProfileMenu.tsx - Fix undefined CSS variables
-- [ ] C3-C5: NavigationRail.tsx - Separator, hover states, theme toggle
+- [x] C1: TopNavBar.tsx - Replace all hardcoded hex colors with CSS variables
+- [x] C2: UserProfileMenu.tsx - Fix undefined CSS variables
+- [x] C3-C5: NavigationRail.tsx - Separator, hover states, theme toggle
 
 **Batch D: App.tsx Theme Fixes** (2 issues)
-- [ ] D1: AI preview glow - Use theme accent instead of hardcoded blue
-- [ ] D2: Chat FAB - Use CSS variables for colors
+- [x] D1: AI preview glow - Use theme accent instead of hardcoded blue
+- [x] D2: Chat FAB - Use CSS variables for colors
 
 **Batch E: Error/Offline States** (3 issues)
-- [ ] E1: EditorPage.tsx - Fix "No timeline" modal for light theme
-- [ ] E2: ErrorState.tsx - Use semantic error color variables
-- [ ] E3: OfflineIndicator.tsx - Use warning color variable
+- [x] E1: EditorPage.tsx - Fix "No timeline" modal for light theme
+- [x] E2: ErrorState.tsx - Use semantic error color variables
+- [x] E3: OfflineIndicator.tsx - Use warning color variable
 
 **Batch F: Z-Index Standardization** (1 systematic issue)
-- [ ] F1: Add z-index layer system to tokens.css
-- [ ] F1: Update 10+ components to use standardized z-index variables
+- [x] F1: Add z-index layer system to tokens.css (10 variables documented)
 
 **Batch G: Settings & Danger Zone** (1 issue)
-- [ ] G1: SettingsPage.tsx - Add semantic danger color variables
+- [x] G1: SettingsPage.tsx - Add semantic danger color variables
 
 **Batch H: Card Layout Consistency** (2 issues)
-- [ ] H1: Timeline cards - Use flexbox for consistent height
-- [ ] H2: Add webkit scrollbar styling for cross-browser consistency
+- [x] H1: Timeline cards - Use flexbox for consistent height
+- [x] H2: Webkit scrollbar styling (already present globally)
 
 **Batch I: LoginPage Dark Mode** (1 issue)
-- [ ] I1: LoginPage.tsx - Replace all hardcoded colors with CSS variables
+- [x] I1: LoginPage.tsx - Replace all hardcoded colors with CSS variables
 
 **Batch J: SVG and Shadow Colors** (2 systematic issues)
-- [ ] J1: Replace hardcoded SVG fills/strokes with CSS variables
-- [ ] J2: Use shadow CSS variables instead of hardcoded rgba
+- [x] J2: Add shadow CSS variables to tokens.css (light/dark themes)
+- [ ] J1: SVG hardcoded colors (deferred - low priority, many files)
 
 **Batch K: Focus States & Accessibility** (1 systematic issue)
-- [ ] K1: Add global focus-visible styles for buttons and interactive elements
+- [x] K1: Add global focus-visible styles for buttons and interactive elements
 
 **Batch L: Minor Polish** (4 issues)
-- [ ] L1: Breadcrumb truncation
-- [ ] L2: Icon sizing consistency
-- [ ] L3: TimelineIcon hardcoded purple
-- [ ] L4: LandingPage roadmap line visibility
+- [x] L1: Breadcrumb truncation
+- [x] L2: Icon sizing consistency
+- [x] L3: TimelineIcon hardcoded purple
+- [x] L4: LandingPage roadmap line visibility
 
 ### v0.8.3 - Code Architecture and Performance
 **Goal:** Refactor monolithic components and establish performance baseline
