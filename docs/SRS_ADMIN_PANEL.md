@@ -34,10 +34,10 @@ The admin panel (/admin) contains these sections:
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-ADMIN-001 | User type supports role field | • User interface includes optional `role?: 'user' \| 'admin'`<br>• Undefined role defaults to 'user'<br>• Role persisted in localStorage | `src/types.ts` | T82.x |
-| CC-REQ-ADMIN-002 | Demo users initialized with roles | • cynacons user has `role: 'admin'`<br>• All other demo users default to 'user' role<br>• DATA_VERSION incremented to trigger migration | `src/lib/homePageStorage.ts` | T82.x |
+| CC-REQ-ADMIN-001 | User type supports role field | • User interface includes optional `role?: 'user' \| 'admin'`<br>• Undefined role defaults to 'user'<br>• Role persisted in localStorage | `src/types.ts:76` | T82.x |
+| CC-REQ-ADMIN-002 | Admin identification (v0.5.6: Firebase Auth) | • **DEPRECATED:** Demo users removed in v0.5.6<br>• Admin role now managed via Firebase Auth + Firestore<br>• Role field stored in Firestore user document<br>• See SRS_DB.md for Firestore schema | `src/lib/adminUtils.ts` | T82.x |
 | CC-REQ-ADMIN-003 | Access control utilities | • `isAdmin(user)` helper returns boolean<br>• `canAccessAdmin(user)` checks admin status<br>• `requireAdmin(user)` throws if not admin<br>• Functions handle null/undefined gracefully | `src/lib/adminUtils.ts` | T82.x |
-| CC-REQ-ADMIN-004 | Non-admin users cannot access admin pages | • /admin route redirects non-admins to home page<br>• Admin navigation item hidden for non-admins<br>• Admin components check permissions on mount<br>• Clear error message if access denied | `src/pages/AdminPage.tsx` | T82.2 |
+| CC-REQ-ADMIN-004 | Non-admin users cannot access admin pages | • /admin route redirects non-admins to home page<br>• Admin navigation item hidden for non-admins<br>• Admin components check permissions on mount<br>• Clear error message if access denied | `src/pages/AdminPage.tsx:48-53` | T82.2 |
 
 ### Admin Navigation & Routing
 
@@ -63,7 +63,7 @@ The admin panel (/admin) contains these sections:
 | CC-REQ-ADMIN-STAT-001 | Display platform-wide metrics | • Total users count<br>• Total timelines count<br>• Total events count<br>• Total views count<br>• Metrics displayed in card/grid layout<br>• Icons for visual clarity | `src/components/admin/StatisticsDashboard.tsx` | T84.1 |
 | CC-REQ-ADMIN-STAT-002 | Timeline visibility breakdown | • Pie or bar chart showing: Public, Private, Unlisted counts<br>• Percentages displayed<br>• Clickable segments (future: filter to that type)<br>• Color-coded (green=public, red=private, yellow=unlisted) | `src/components/admin/StatisticsDashboard.tsx` | T84.2 |
 | CC-REQ-ADMIN-STAT-003 | Top creators list | • Table showing top 5 timeline creators<br>• Columns: User, Timeline Count, Total Events<br>• Sorted by timeline count descending<br>• Clickable user names navigate to profile | `src/components/admin/StatisticsDashboard.tsx` | T84.3 |
-| CC-REQ-ADMIN-STAT-004 | Statistics update reactively | • Stats recalculate when data changes<br>• Dashboard refreshes when navigating back from other tabs<br>• Manual refresh button available<br>• Timestamp of last calculation shown | `src/lib/adminStats.ts` | T84.4 |
+| CC-REQ-ADMIN-STAT-004 | Statistics update reactively | • Stats recalculate when data changes<br>• Dashboard refreshes when navigating back from other tabs<br>• Manual refresh button available<br>• Timestamp of last calculation shown | `src/components/admin/StatisticsDashboard.tsx` | T84.4 |
 
 ### Bulk Operations
 
@@ -78,7 +78,7 @@ The admin panel (/admin) contains these sections:
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-ADMIN-LOG-001 | Activity log type system | • AdminActivityLog interface: id, timestamp, adminUserId, action, targetType, targetId, details<br>• Action types: USER_ROLE_CHANGE, USER_DELETE, TIMELINE_DELETE, BULK_OPERATION, CONFIG_CHANGE<br>• Stored in localStorage array | `src/types.ts` | T86.x |
+| CC-REQ-ADMIN-LOG-001 | Activity log type system | • AdminActivityLog interface: id, timestamp, adminUserId, action, targetType, targetId, details<br>• Action types: USER_ROLE_CHANGE, USER_DELETE, TIMELINE_DELETE, BULK_OPERATION, CONFIG_CHANGE<br>• Stored in localStorage array | `src/types.ts:92-121` | T86.x |
 | CC-REQ-ADMIN-LOG-002 | Log admin actions automatically | • logAdminAction(...) function<br>• Called after every admin operation<br>• Max 1000 entries (auto-prune oldest)<br>• Includes admin username, timestamp, action details<br>• Fails gracefully if logging errors | `src/lib/activityLog.ts` | T86.2 |
 | CC-REQ-ADMIN-LOG-003 | Activity log display | • Table shows: Timestamp, Admin User, Action, Target, Details<br>• Sorted by timestamp descending (newest first)<br>• Pagination: 20 entries per page<br>• Expandable rows for full details JSON | `src/components/admin/ActivityLogPanel.tsx` | T86.1 |
 | CC-REQ-ADMIN-LOG-004 | Activity log filtering | • Filter by action type dropdown<br>• Filter by admin user dropdown<br>• Date range picker (last 24h, 7 days, 30 days, all time)<br>• Clear filters button<br>• Export to JSON button | `src/components/admin/ActivityLogPanel.tsx` | T86.3, T86.4 |
@@ -136,11 +136,29 @@ Existing keys remain unchanged (users, timelines, current_user, etc.).
 
 ## Security Notes
 
-**Important:** This admin system is client-side only and provides NO real security. It is a UI convenience layer for demo/development purposes. Key limitations:
+**Important:** As of v0.5.6, the admin system now uses Firebase Authentication and Firestore for user management:
 
-- Role checks are client-side only (easily bypassed via browser dev tools)
-- localStorage data is fully accessible and modifiable by any user
-- No server-side validation or authentication
+- **v0.5.6+:** Firebase Auth handles authentication, Firestore stores user data with security rules
+- **v0.5.6+:** Demo users removed; all users must authenticate via Firebase Auth (Google Sign-In)
+- Role-based access control enforced via Firestore Security Rules (server-side)
+- Admin role field stored in Firestore `/users/{userId}` documents
+- See SRS_DB.md for complete Firestore schema and security rules
+
+**Pre-v0.5.6 (Deprecated):**
+- Role checks were client-side only (easily bypassed via browser dev tools)
+- localStorage data was fully accessible and modifiable by any user
 - Not suitable for production use
 
-Real security will be implemented in v0.5.1 with Firebase Authentication and Firestore Security Rules.
+## Change History
+
+- **2025-12-27** — Updated code references and Firebase Auth migration notes
+- Updated CC-REQ-ADMIN-002 to reflect demo users removal (v0.5.6)
+- Added code references with line numbers to all TBD entries
+- Updated Security Notes section to document Firebase Auth transition
+- Added references to SRS_DB.md for Firestore schema
+
+- **2025-10-XX** — Initial SRS creation (v0.4.4)
+- Defined admin panel structure with 3 main sections
+- Created 20+ requirements across 6 categories
+- Added E2E test coverage mapping
+- Defined AdminActivityLog data model

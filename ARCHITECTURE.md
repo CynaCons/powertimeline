@@ -1,5 +1,8 @@
 # PowerTimeline Architecture (Half-Column System v5)
 
+**Last Updated:** 2025-12-27
+**Version:** v0.7.14
+
 ## Overview
 
 PowerTimeline renders a horizontal timeline with event cards positioned in independent half-column systems above and below the timeline. The system uses alternating placement (Event 1 above, Event 2 below) with spatial-based clustering and 2-slot half-columns to ensure optimal distribution and zero overlaps.
@@ -27,7 +30,7 @@ PowerTimeline renders a horizontal timeline with event cards positioned in indep
 
 - Overlays and panels
  - `src/app/OverlayShell.tsx` Overlay container and focus handling.
- - `src/app/panels/*` Editor/Outline/Dev panels (MUI-based).
+ - `src/app/panels/*` Editor/Outline/Chat panels (MUI-based).
 
 - Utilities and libs
  - `src/lib/time.ts`, `text.ts`, `storage.ts` Time mapping, measurements, persistence.
@@ -790,3 +793,123 @@ For non-canvas UI elements (Home page card grids, etc.), use Tailwind breakpoint
 | 4xl | 2560px | 7+ | 2K/4K monitors |
 
 Note: 3xl and 4xl are custom breakpoints added to tailwind.config.js.
+
+---
+
+## AI Integration Architecture
+
+PowerTimeline includes AI-powered timeline creation and editing capabilities through integration with OpenAI's GPT models.
+
+### Components
+
+**ChatPanel (`src/app/panels/ChatPanel.tsx`)**
+- AI assistant interface in timeline editor
+- Conversation history with markdown rendering
+- Timeline context injection for AI awareness
+- Event creation/editing suggestions
+
+**aiService (`src/services/aiService.ts`)**
+- OpenAI API integration layer
+- Conversation management and persistence
+- Structured output parsing for event data
+- API key storage and validation
+
+**useAISession hook (`src/hooks/useAISession.ts`)**
+- React hook for AI session state management
+- Message handling and streaming
+- Integration with timeline event mutations
+- Error handling and retry logic
+
+### AI Capabilities
+
+- Timeline generation from natural language descriptions
+- Event suggestions based on historical context
+- Date inference and temporal reasoning
+- Batch event creation with proper formatting
+
+**Security:** API keys stored in Firebase user documents, never in localStorage or public code.
+
+---
+
+## Stream View Architecture
+
+Mobile-optimized timeline viewing experience with card-based navigation.
+
+### Components
+
+**StreamViewer (`src/components/StreamViewer.tsx`)**
+- Vertical card list displaying events chronologically
+- Expandable card details with full descriptions
+- Search functionality integrated in header
+- Synchronized navigation with timeline minimap
+
+**StreamViewerOverlay (`src/components/StreamViewerOverlay.tsx`)`
+- Full-screen overlay container for mobile/tablet
+- Minimap for timeline context and navigation
+- Breadcrumb navigation showing current position
+- Touch-optimized gestures (swipe, tap, scroll)
+
+### Features
+
+- Real-time search filtering across event titles and descriptions
+- Minimap synchronization with scroll position
+- Expandable/collapsible card states
+- Keyboard navigation support (arrow keys, Enter, Escape)
+- Responsive breakpoints (mobile → tablet → desktop)
+
+### Navigation Patterns
+
+- **Minimap click:** Jump to specific timeline position
+- **Card expansion:** Toggle between summary and full content
+- **Search:** Filter events in real-time without losing position
+- **Breadcrumbs:** Visual indicator of current zoom/position
+
+---
+
+## Import/Export System
+
+Timeline data portability using YAML format for human-readable sharing.
+
+### Components
+
+**timelineImportExport (`src/services/timelineImportExport.ts`)**
+- YAML serialization/deserialization
+- Timeline metadata preservation
+- Event validation and sanitization
+- Format version compatibility
+
+**ImportTimelineDialog**
+- File upload interface with drag-and-drop
+- YAML validation and preview
+- Conflict resolution for duplicate timelines
+- Error reporting with actionable messages
+
+**Export Menu Integration**
+- Timeline context menu with export option
+- YAML file generation with metadata
+- Filename formatting (username-timeline-title.yml)
+- Browser download trigger
+
+### YAML Schema
+
+```yaml
+timeline:
+  title: "Timeline Title"
+  description: "Timeline description"
+  createdAt: ISO8601 timestamp
+  updatedAt: ISO8601 timestamp
+  owner: "username"
+  visibility: "public" | "unlisted" | "private"
+
+events:
+  - id: "unique-event-id"
+    title: "Event Title"
+    description: "Event description"
+    date: ISO8601 timestamp
+    endDate: ISO8601 timestamp (optional)
+    icon: "icon-name"
+```
+
+**Use Cases:** Timeline backup, sharing between users, version control, template distribution.
+
+---

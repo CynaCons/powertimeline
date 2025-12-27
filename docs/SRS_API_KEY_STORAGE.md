@@ -1,14 +1,20 @@
 # API Key Storage Requirements
 
+**Status:** Proposed (Not Yet Implemented)
+**Version:** v0.8.x
+**Last Updated:** 2025-12-27
+
 This document specifies requirements for storing and managing user-provided API keys for AI integration features. The system prioritizes user security and transparency while providing convenience options.
 
 ## Overview
 
-PowerTimeline's AI features require API keys from external providers (currently Gemini). The storage system provides:
-- **Session-only storage**: Default secure mode where keys are never persisted
-- **Optional local storage**: User opt-in to remember keys on their device
+**NOTE: This is a DESIGN PROPOSAL for future implementation. Current implementation (v0.8.x) uses sessionStorage only with no persistence options.**
+
+PowerTimeline's AI features require API keys from external providers (currently Gemini). The proposed storage system provides:
+- **Session-only storage**: Default secure mode where keys are never persisted (CURRENTLY IMPLEMENTED)
+- **Optional local storage**: User opt-in to remember keys on their device (PROPOSED, not yet implemented)
 - **Transparency**: Clear communication about where keys are stored
-- **Settings integration**: Key management in the Settings page
+- **Settings integration**: Key management in the Settings page (PROPOSED, not yet implemented)
 
 ## Design Principles
 

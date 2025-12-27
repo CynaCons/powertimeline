@@ -9,7 +9,7 @@ This fragment expands on Sections 3 and 4 of the primary `SRS.md`. It captures d
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
 | CC-REQ-CARD-FULL-001 | Full cards are ~169px tall and show multi-line body without clipping | Full cards have width=260px, height=169px<br> Display title (multi-line), full description, and date<br> No text clipping or truncation in description area<br> Used for low-density timelines (<=2 events per half-column) | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03 |
-| CC-REQ-CARD-COMPACT-001 | Compact cards have same width as full (260px), ~92px tall, and show 1-2 description lines | Compact cards have width=260px, height=92px<br> Display title (up to 2 lines), partial description (1 line), and date<br> Description truncated with ellipsis if needed<br> Used for medium-density timelines (3-4 events per half-column) | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/47 |
+| CC-REQ-CARD-COMPACT-001 | Compact cards have same width as full (260px), ~82px tall, and show 1-2 description lines | Compact cards have width=260px, height=82px<br> Display title (up to 2 lines), partial description (1 line), and date<br> Description truncated with ellipsis if needed<br> Used for medium-density timelines (3-4 events per half-column) | `src/layout/config.ts`, `src/layout/DeterministicLayoutComponent.tsx` | v5/03, v5/47 |
 | CC-REQ-CARD-TITLE-ONLY-001 | Title-only cards appear when cluster density exceeds compact capacity, with no overlaps | Title-only cards have width=260px, height=32px<br> Display only title and icon (no date, no description)<br> Title displayed in single line with ellipsis truncation<br> Used for high-density timelines (>4 events per half-column)<br> No visual overlaps occur even at maximum density | `src/layout/LayoutEngine.ts`, `src/layout/CardRenderer.tsx` | v5/48 |
 
 ### Card Degradation Requirements
@@ -48,7 +48,7 @@ This fragment expands on Sections 3 and 4 of the primary `SRS.md`. It captures d
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
 | CC-REQ-CAPACITY-001 | System reports total/used cells and utilization metrics for monitoring | Capacity model tracks slot usage per half-column and per side<br> Metrics include: total slots, used slots, utilization percentage<br> Separate tracking for above/below timeline sections<br> Real-time capacity reporting for developer tools | `src/layout/LayoutEngine.ts`, `src/layout/CapacityModel.ts` | v5/05 |
-| CC-REQ-CAPACITY-SLOTS-001 | Slot allocation follows fixed rules based on card type | Full cards: 2 slots per half-column<br> Compact cards: 4 slots per half-column<br> Title-only cards: 8 slots per half-column<br> Slot counts are deterministic and consistent across all timelines | `src/layout/engine/DegradationEngine.ts` | v5/03, v5/48 |
+| CC-REQ-CAPACITY-SLOTS-001 | Slot allocation follows fixed rules based on card type | Full cards: 4 cells per half-column<br> Compact cards: 4 cells per half-column<br> Title-only cards: 8 cells per half-column<br> Cell counts are deterministic and consistent across all timelines | `src/layout/engine/DegradationEngine.ts` | v5/03, v5/48 |
 | CC-REQ-CAPACITY-INDEPENDENT-001 | Above and below timeline sections have independent capacity tracking | Above section capacity calculated independently from below section<br> Different card types can be used simultaneously (above=compact, below=full)<br> Capacity exhaustion in one section doesn't affect the other<br> Each section optimizes space usage independently<br> **Exception**: Degradation decisions coordinate at spatial cluster level per CC-REQ-CLUSTER-COORD-001 | `src/layout/LayoutEngine.ts` | v5/12 |
 
 ## Implementation Notes
@@ -70,11 +70,9 @@ if (eventCount <= 2) {
 
 ### Mixed Card Type Scenarios
 
-**Current Implementation**: Uniform degradation (all cards in a half-column use the same card type)
+**Current Implementation**: Mixed card types are now implemented via `FEATURE_FLAGS.ENABLE_MIXED_CARD_TYPES` (see `src/config/featureFlags.ts`). When enabled, cards within spatial clusters can use different card types based on chronological priority.
 
-**Future Enhancement**: Mixed card types within spatial clusters when certain conditions are met
-
-#### When Mixed Types Are Allowed (Future)
+#### When Mixed Types Are Allowed
 
 Mixed card types can be used ONLY when a spatial cluster meets ALL these conditions:
 
@@ -160,7 +158,8 @@ This prevents visual clutter when multiple half-columns have overflow in close p
 ## Notes & Change History
 
 - 2025-10-01 Initial extraction from `docs/SRS.md` and consolidation of card-related requirements
-- 2025-10-01 Documented current implementation: Compact cards are 92px (updated from 78px in v0.2.5.1)
+- 2025-10-01 Documented current implementation: Compact cards are 82px
 - 2025-10-01 Added CC-REQ-CAPACITY-SLOTS-001 and CC-REQ-CAPACITY-INDEPENDENT-001 for slot allocation rules
 - 2025-10-01 Added CC-REQ-DEGRADATION-METRICS-001 for telemetry tracking
 - 2025-10-01 Documented overflow badge merging strategy from DeterministicLayoutComponent.tsx
+- 2025-12-27 Updated compact card height from 92px to 82px; updated capacity slots terminology to "cells"; noted FEATURE_FLAGS.ENABLE_MIXED_CARD_TYPES implementation

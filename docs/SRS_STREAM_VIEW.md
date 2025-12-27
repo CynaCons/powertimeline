@@ -1,5 +1,7 @@
 # Stream View Requirements (v1.1)
 
+**Last Updated:** 2025-12-27
+
 This document defines requirements for the Stream View feature - a mobile-friendly, vertical timeline viewer that provides an alternative reading experience to the canvas-based timeline editor.
 
 ## Overview
@@ -68,35 +70,43 @@ Stream View presents timeline events in a scrollable, git-style vertical layout 
 
 ### Event Editing (v0.5.33)
 
+**Status:** Planned (not yet implemented)
+
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-STREAM-EDIT-001 | Slide-up edit panel opens on event tap | • Tap event card opens bottom sheet panel<br>• Panel slides up from bottom<br>• Shows edit form with Title, Date, Time, Description<br>• Cancel and Save buttons | - | - |
-| CC-REQ-STREAM-EDIT-002 | Edit form validates input | • Title required, max 100 chars<br>• Date required, valid format<br>• Time optional, HH:MM format<br>• Description optional, max 500 chars<br>• Validation errors shown inline | - | - |
-| CC-REQ-STREAM-EDIT-003 | Save updates event in Firestore | • Save button disabled until valid<br>• Shows loading state during save<br>• Panel closes on success<br>• Event list updates immediately | - | - |
-| CC-REQ-STREAM-EDIT-004 | Cancel discards changes | • Cancel button closes panel<br>• No changes saved<br>• Confirmation if unsaved changes | - | - |
+| CC-REQ-STREAM-EDIT-001 | Slide-up edit panel opens on event tap | • Tap event card opens bottom sheet panel<br>• Panel slides up from bottom<br>• Shows edit form with Title, Date, Time, Description<br>• Cancel and Save buttons | Planned | Planned |
+| CC-REQ-STREAM-EDIT-002 | Edit form validates input | • Title required, max 100 chars<br>• Date required, valid format<br>• Time optional, HH:MM format<br>• Description optional, max 500 chars<br>• Validation errors shown inline | Planned | Planned |
+| CC-REQ-STREAM-EDIT-003 | Save updates event in Firestore | • Save button disabled until valid<br>• Shows loading state during save<br>• Panel closes on success<br>• Event list updates immediately | Planned | Planned |
+| CC-REQ-STREAM-EDIT-004 | Cancel discards changes | • Cancel button closes panel<br>• No changes saved<br>• Confirmation if unsaved changes | Planned | Planned |
 
 ### Quick Add Event (v0.5.33)
 
+**Status:** Planned (not yet implemented)
+
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-STREAM-ADD-001 | Add button in header | • [+] button visible in Stream View header<br>• Only visible if user is timeline owner<br>• Tapping opens empty edit panel | - | - |
-| CC-REQ-STREAM-ADD-002 | New event defaults | • Date defaults to today<br>• Title and description empty<br>• Time empty (optional) | - | - |
-| CC-REQ-STREAM-ADD-003 | New event appears in list | • After save, event appears in correct chronological position<br>• Event selected/highlighted<br>• Scroll to new event | - | - |
+| CC-REQ-STREAM-ADD-001 | Add button in header | • [+] button visible in Stream View header<br>• Only visible if user is timeline owner<br>• Tapping opens empty edit panel | Planned | Planned |
+| CC-REQ-STREAM-ADD-002 | New event defaults | • Date defaults to today<br>• Title and description empty<br>• Time empty (optional) | Planned | Planned |
+| CC-REQ-STREAM-ADD-003 | New event appears in list | • After save, event appears in correct chronological position<br>• Event selected/highlighted<br>• Scroll to new event | Planned | Planned |
 
 ### Swipe Actions (v0.5.33)
 
+**Status:** Planned (not yet implemented)
+
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-STREAM-SWIPE-001 | Swipe left reveals delete | • Swipe left on event card reveals red delete button<br>• Only for timeline owner<br>• Swipe threshold: 80px | - | - |
-| CC-REQ-STREAM-SWIPE-002 | Swipe right reveals edit | • Swipe right reveals blue edit button<br>• Tapping opens edit panel<br>• Same as tap-to-edit | - | - |
-| CC-REQ-STREAM-SWIPE-003 | Delete confirmation | • Delete button shows confirmation dialog<br>• "Delete [event title]?" message<br>• Cancel and Delete buttons<br>• Event removed from list on confirm | - | - |
-| CC-REQ-STREAM-SWIPE-004 | Swipe auto-closes | • If no action taken, card snaps back after 3s<br>• Swiping another card closes previous | - | - |
+| CC-REQ-STREAM-SWIPE-001 | Swipe left reveals delete | • Swipe left on event card reveals red delete button<br>• Only for timeline owner<br>• Swipe threshold: 80px | Planned | Planned |
+| CC-REQ-STREAM-SWIPE-002 | Swipe right reveals edit | • Swipe right reveals blue edit button<br>• Tapping opens edit panel<br>• Same as tap-to-edit | Planned | Planned |
+| CC-REQ-STREAM-SWIPE-003 | Delete confirmation | • Delete button shows confirmation dialog<br>• "Delete [event title]?" message<br>• Cancel and Delete buttons<br>• Event removed from list on confirm | Planned | Planned |
+| CC-REQ-STREAM-SWIPE-004 | Swipe auto-closes | • If no action taken, card snaps back after 3s<br>• Swiping another card closes previous | Planned | Planned |
 
 ### Owner-Only Features (v0.5.33)
 
+**Status:** Planned (not yet implemented)
+
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-STREAM-OWNER-001 | Editing only for owners | • Add button hidden for non-owners<br>• Swipe actions disabled for non-owners<br>• Tap-to-edit disabled for non-owners<br>• View-only mode for visitors | - | - |
+| CC-REQ-STREAM-OWNER-001 | Editing only for owners | • Add button hidden for non-owners<br>• Swipe actions disabled for non-owners<br>• Tap-to-edit disabled for non-owners<br>• View-only mode for visitors | Planned | Planned |
 
 ## Implementation Notes
 

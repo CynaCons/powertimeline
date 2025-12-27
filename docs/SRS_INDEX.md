@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-12-10
-**Version:** v0.7.13
+**Last Updated:** 2025-12-27
+**Version:** v0.8.0
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| **Total Requirements** | ~340 | 100% |
-| **Implemented** | ~200 | 59% |
-| **Verified (with tests)** | ~119 | 35% |
+| **Total Requirements** | ~352 | 100% |
+| **Implemented** | ~200 | 57% |
+| **Verified (with tests)** | ~119 | 34% |
 | **In Progress** | ~10 | 3% |
-| **Planned (TBD)** | ~140 | 41% |
+| **Planned (TBD)** | ~152 | 43% |
 
 ### By Feature Area
 
@@ -41,8 +41,9 @@
 | Landing Page | 15 | [SRS_LANDING_PAGE.md](SRS_LANDING_PAGE.md) | 15 (100%) | 5 (33%) |
 | Event Sources | 37 | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) | 37 (100%) | 10 (27%) |
 | AI Integration | 98 | [SRS_AI_INTEGRATION.md](SRS_AI_INTEGRATION.md) | 50 (51%) | 15 (15%) |
+| API Key Storage | 12 | [SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md) | 0 (0%) | 0 (0%) |
 | Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 25 (100%) | 8 (32%) |
-| **TOTAL** | **~340** | Multiple files | **~200 (59%)** | **~119 (35%)** |
+| **TOTAL** | **~352** | Multiple files | **~200 (57%)** | **~119 (34%)** |
 
 ---
 
@@ -259,6 +260,7 @@ Platform administration interface:
 | CC-REQ-HELP-* | NavRail Help | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) |
 | CC-REQ-ADMIN-* | Admin Panel | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) |
 | CC-REQ-SOURCES-* | Event Sources | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) |
+| CC-REQ-APIKEY-* | API Key Storage | [SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md) |
 
 ---
 
@@ -282,6 +284,7 @@ Platform administration interface:
 - **[SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md)** - Admin interface (25+ requirements)
 - **[SRS_ONBOARDING.md](SRS_ONBOARDING.md)** - Onboarding & guided tours (25 requirements)
 - **[SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md)** - Event sources & citations (37 requirements)
+- **[SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md)** - API key storage for AI features (12 requirements)
 - **[SRS_UI_AUDIT.md](SRS_UI_AUDIT.md)** - UI requirements audit and fixes
 
 ### Design Documents
@@ -333,6 +336,26 @@ Event sources allow users to cite references, links, or notes that support timel
 
 **In Progress:**
 - All 33 requirements pending implementation
+- Test coverage needed for all areas
+
+---
+
+### 13. API Key Storage
+**Status:** 🔵 Proposed (0% implemented, 0% verified)
+**Documentation:** [SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md)
+
+Secure API key handling for AI features with multiple storage modes:
+- 12 requirements covering storage modes (localStorage, user-provided, server-side), security/trust guarantees, ChatPanel integration, Settings UI
+- Tests: Planned (TBD)
+
+**Feature Areas:**
+- **Storage Modes** (4 requirements): CC-REQ-APIKEY-001 to 004
+- **Security & Trust** (3 requirements): CC-REQ-APIKEY-010 to 012
+- **ChatPanel Integration** (3 requirements): CC-REQ-APIKEY-020 to 022
+- **Settings UI** (2 requirements): CC-REQ-APIKEY-030 to 031
+
+**In Progress:**
+- All 12 requirements pending implementation
 - Test coverage needed for all areas
 
 ---
@@ -396,8 +419,8 @@ This index should be updated when:
 - Implementation status changes significantly
 - Test coverage improves
 
-**Last audit:** 2025-11-27 (v0.5.7)
-**Next audit:** After v0.5.9 completion
+**Last audit:** 2025-12-27 (v0.8.0)
+**Next audit:** After v0.8.1 completion
 
 ---
 
