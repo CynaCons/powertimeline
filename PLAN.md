@@ -856,9 +856,11 @@ See [docs/UI_AUDIT_CHECKLIST.md](docs/UI_AUDIT_CHECKLIST.md) for audit criteria.
 - Critical: 7 | High: 13 | Medium: 24 | Low: 15
 
 ### v0.8.2 - UI Visual Bug Fixes ✅
-**Goal:** Fix all issues identified in v0.8.1 audit
+**Goal:** Fix all issues identified in v0.8.1 audit (code-based)
 
 See [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md) for detailed fix instructions per batch.
+
+**Limitation Discovered:** Code-based audits cannot detect runtime visual issues (overlaps, z-index conflicts). See v0.8.2.1 for visual audit approach.
 
 **Batch A: Node/Card Theme System** (3 issues)
 - [x] A1: Node.tsx - Replace Tailwind colors with CSS variables
@@ -909,6 +911,40 @@ See [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md) for detailed fix inst
 - [x] L2: Icon sizing consistency
 - [x] L3: TimelineIcon hardcoded purple
 - [x] L4: LandingPage roadmap line visibility
+
+### v0.8.2.1 - Visual Audit & Z-Index Fixes
+**Goal:** Automated detection and fix of runtime visual issues (overlaps, z-index conflicts)
+**Status:** Pending
+
+See [docs/VISUAL_AUDIT_DESIGN.md](docs/VISUAL_AUDIT_DESIGN.md) for technical design.
+
+**Known Issues (User-Reported):**
+- [ ] Zoom control bar hidden behind cards at bottom of canvas
+- [ ] Zoom controls don't come to foreground on hover
+- [ ] Breadcrumbs still overlapping with event cards
+
+**Phase 1: Test Infrastructure**
+- [ ] Create `tests/visual-audit/` directory structure
+- [ ] Implement DOM overlap detection script (`overlap-detection.spec.ts`)
+- [ ] Implement screenshot capture script (`screenshot-capture.spec.ts`)
+- [ ] Create test timeline fixture with edge-case card positions
+
+**Phase 2: Automated Detection**
+- [ ] Run overlap detection, generate structured report
+- [ ] Capture screenshots at key states (zoom levels, card positions)
+- [ ] Analyze screenshots with Claude Vision for visual issues
+- [ ] Document all findings in `UI_AUDIT_FINDINGS.md`
+
+**Phase 3: Fix Implementation**
+- [ ] Apply `--z-*` variables from tokens.css to zoom controls
+- [ ] Fix breadcrumb z-index and positioning
+- [ ] Add hover z-index boost to controls (`:hover { z-index: var(--z-*) }`)
+- [ ] Fix any other detected overlaps
+
+**Phase 4: Verification**
+- [ ] Re-run overlap detection (expect 0 critical conflicts)
+- [ ] Re-capture screenshots for before/after comparison
+- [ ] User verification of known problem areas
 
 ### v0.8.3 - Code Architecture and Performance
 **Goal:** Refactor monolithic components and establish performance baseline
