@@ -218,7 +218,7 @@ export function EditorPage() {
         {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
         {/* z-[1400] when stream view open to appear above overlay (z-1300) */}
         {timeline && user && (
-          <div className={`absolute top-11 left-20 pointer-events-none ${streamViewerOpen ? 'z-[1400]' : 'z-[100]'}`}>
+          <div className={`absolute top-11 left-20 pointer-events-none ${streamViewerOpen ? 'z-[1400]' : 'z-[60]'}`}>
             <div
               className="backdrop-blur-sm rounded px-3 py-0.5 pointer-events-auto inline-flex items-center gap-2"
               style={{

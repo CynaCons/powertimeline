@@ -331,7 +331,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
   }, [isEditMode]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center overlay" aria-hidden={false}>
+    <div className="fixed inset-0 z-[500] flex items-center justify-center overlay" aria-hidden={false}>
       {/* Scrim */}
       <div
         data-testid="authoring-backdrop"

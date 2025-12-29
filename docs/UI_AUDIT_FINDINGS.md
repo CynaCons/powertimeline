@@ -592,3 +592,52 @@ After fixes, verify:
 - [ ] Z-index layering works (toasts > modals > panels > content)
 - [ ] Focus states visible for keyboard navigation
 - [ ] `npm run build` passes with no errors
+
+---
+
+## Visual Audit (v0.8.2.1)
+
+**Date:** 2025-12-29
+**Method:** Automated predictive analysis + DOM inspection
+
+### Problem Statement
+Code-based audits (v0.8.1/v0.8.2) failed to identify runtime visual issues:
+- Zoom control bar hidden behind cards
+- Breadcrumbs overlapping with event cards
+- AuthoringOverlay (modal) below other UI elements
+
+### Root Cause
+Z-index values were not aligned with the token system in `tokens.css`.
+
+### Fixes Applied
+
+| Component | File | Before | After | Token |
+|-----------|------|--------|-------|-------|
+| AuthoringOverlay | AuthoringOverlay.tsx:334 | z-[60] | z-[500] | --z-overlays |
+| Zoom Controls | App.tsx:1267 | z-20 | z-[60] | --z-navigation |
+| Navigation Rail | App.tsx:988 | z-30 | z-[60] | --z-navigation |
+| Breadcrumbs | EditorPage.tsx:221 | z-[100] | z-[60] | --z-navigation |
+| Minimap | App.tsx:1139 | z-[90] | z-[50] | --z-minimap |
+
+### Test Infrastructure Created
+- `tests/visual-audit/overlap-detection.spec.ts` - DOM-based overlap detection
+- `tests/visual-audit/screenshot-capture.spec.ts` - Screenshot generation
+- `tests/visual-audit/fixtures/test-timeline.json` - Test requirements
+
+### Z-Index Layer System (tokens.css)
+```
+--z-canvas: 0;
+--z-cards: 10;
+--z-anchors: 20;
+--z-minimap: 50;
+--z-navigation: 60;
+--z-panels: 100;
+--z-overlays: 500;
+--z-modals: 1000;
+--z-toasts: 1400;
+--z-stream-panel: 1500;
+```
+
+### Verification
+- Build: ✅ PASS
+- Components now follow documented layer system

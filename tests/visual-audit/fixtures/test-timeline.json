@@ -1,0 +1,30 @@
+{
+  "description": "Visual audit test requirements",
+  "requirements": {
+    "timeline_with_events": "Tests require at least one timeline with multiple events",
+    "edge_positions": "Events should be positioned at various vertical positions",
+    "zoom_controls": "Timeline editor must have zoom controls visible",
+    "breadcrumbs": "Navigation breadcrumbs should be present",
+    "minimap": "Minimap component should be visible"
+  },
+  "known_issues": [
+    {
+      "id": "ZOOM-001",
+      "description": "Zoom control bar hidden behind cards at bottom of canvas",
+      "component": "ZoomControls",
+      "expected_z_index": "var(--z-navigation) = 60"
+    },
+    {
+      "id": "BREAD-001",
+      "description": "Breadcrumbs overlapping with event cards",
+      "component": "Breadcrumb",
+      "expected_z_index": "var(--z-navigation) = 60"
+    },
+    {
+      "id": "MINI-001",
+      "description": "Minimap may overlap with cards at certain zoom levels",
+      "component": "TimelineMinimap",
+      "expected_z_index": "var(--z-minimap) = 50"
+    }
+  ]
+}
