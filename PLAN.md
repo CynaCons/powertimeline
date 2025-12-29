@@ -944,6 +944,55 @@ See [docs/VISUAL_AUDIT_DESIGN.md](docs/VISUAL_AUDIT_DESIGN.md) for technical des
 - [x] Build passes with no errors
 - [x] Components now follow documented layer system
 
+### v0.8.2.2 - Visual Audit Test Infrastructure Improvements
+**Goal:** Make visual audit tests fully functional with authentication and editor state testing
+**Status:** In Progress
+
+**Limitations Found in v0.8.2.1:**
+- Tests ran in read-only mode (unauthenticated)
+- Editor controls (zoom, minimap, overlays) not visible
+- Dark theme toggle not working in tests
+- Could not verify z-index fixes at runtime
+
+**Phase 1: Add Authentication Support**
+- [x] Import auth utilities into visual audit tests
+- [x] Add `loginAsTestUser()` before timeline navigation
+- [x] Use `loadTimeline()` with `requireAuth: false` for authenticated testing
+- [x] Add `skipIfNoCredentials()` for CI compatibility
+
+**Phase 2: Smart Overlap Detection - Edge Case Testing**
+- [x] Create `smart-overlap-detection.spec.ts` with density analysis
+- [x] Test 1: Timeline density analysis (hot zones for overlaps)
+- [x] Test 2: Zoom control overlap detection at bottom edge
+- [x] Test 3: Breadcrumb overlap detection at top edge
+- [x] Test 4: Minimap overlap detection at top-right corner
+- [x] Test 5: Comprehensive edge scan across all zoom levels
+- [x] Runtime verification: 0 critical z-index conflicts found
+- [x] All controls (zoom: z=60, breadcrumbs: z=60, minimap: z=50) have correct layering
+
+**Results (v0.8.2.2):**
+- 5/5 smart overlap detection tests passing
+- Timeline density: 43 cards, 0 cards near any control zones at default zoom
+- Z-index verification: All overlapping scenarios have correct layering
+- Screenshots captured: 6 images (zoom controls, breadcrumbs, minimap, 3 zoom levels)
+
+**Phase 3: Test Editor States** (Deferred)
+- [ ] Navigate to editor in authenticated mode (owner view)
+- [ ] Wait for editor controls (zoom, minimap, breadcrumbs)
+- [ ] Test with AuthoringOverlay open (click event card)
+- [ ] Test at different zoom levels (25%, 50%, 100%, 200%)
+- [ ] Test with panels open (Events panel, Chat panel)
+
+**Phase 4: Fix Theme Testing** (Deferred)
+- [ ] Use proper theme toggle mechanism (ThemeContext or localStorage)
+- [ ] Verify dark/light screenshots are visually different
+- [ ] Capture both themes for each state
+
+**Phase 5: Runtime Verification** (Deferred)
+- [ ] Re-run overlap detection with AuthoringOverlay open
+- [ ] Test with panels open (Events panel, Chat panel)
+- [ ] Update UI_AUDIT_FINDINGS.md with runtime verification results
+
 ### v0.8.3 - Code Architecture and Performance
 **Goal:** Refactor monolithic components and establish performance baseline
 

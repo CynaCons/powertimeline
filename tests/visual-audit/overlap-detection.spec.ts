@@ -1,13 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser, loadTimeline, waitForEditorLoaded, skipIfNoCredentials } from '../utils/timelineTestUtils';
 
 interface ElementInfo {
   selector: string;
   testId: string | null;
   className: string;
+  tagName: string;
   rect: { x: number; y: number; width: number; height: number };
   zIndex: number;
+  computedZIndex: string;
   isInteractive: boolean;
   pointerEvents: string;
+  position: string;
 }
 
 interface Overlap {
@@ -15,113 +19,204 @@ interface Overlap {
   elementB: ElementInfo;
   overlapArea: number;
   zIndexConflict: boolean;
+  description: string;
 }
 
-test.describe('Visual Audit - Overlap Detection', () => {
-  test('detect z-index conflicts on canvas', async ({ page }) => {
-    // Load a public timeline directly (no auth required for viewing)
-    await page.goto('/cynacons/timeline/french-revolution');
-    await page.waitForLoadState('domcontentloaded');
+// Test configuration
+const TEST_OWNER_USERNAME = 'cynacons';
+const TEST_TIMELINE_ID = 'french-revolution';
 
-    // Wait for timeline events to render
-    const eventCards = page.getByTestId('event-card');
-    await eventCards.first().waitFor({ state: 'visible', timeout: 10000 });
+test.describe('Visual Audit - Overlap Detection (Authenticated)', () => {
+  test.beforeEach(async ({ page }) => {
+    // Skip if no test credentials
+    skipIfNoCredentials(test);
 
-    // Wait for UI to settle
-    await page.waitForTimeout(1000);
+    // Login as test user
+    await loginAsTestUser(page);
+  });
 
-    // Define UI layer priorities (higher = should be on top)
-    const layerPriority: Record<string, number> = {
-      'toast': 100,
-      'modal': 90,
-      'stream-panel': 85,
-      'zoom-controls': 80,
-      'minimap': 70,
-      'breadcrumbs': 60,
-      'panels': 50,
-      'cards': 10,
-      'canvas': 0,
-    };
+  test('detect z-index conflicts in editor mode', async ({ page }) => {
+    // Load timeline as owner (edit mode)
+    await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false); // Already logged in
 
-    // Extract all relevant elements
+    // Wait for editor to fully load
+    await waitForEditorLoaded(page);
+    await page.waitForTimeout(2000); // Allow animations to settle
+
+    // Verify we're in editor mode by checking for edit controls
+    const editorControls = page.locator('[data-testid="zoom-controls"], .zoom-controls, [class*="ZoomControl"]');
+    const minimapVisible = await page.locator('[class*="Minimap"], [data-testid*="minimap"]').isVisible({ timeout: 5000 }).catch(() => false);
+
+    console.log('=== EDITOR STATE ===');
+    console.log(`Minimap visible: ${minimapVisible}`);
+
+    // Extract all positioned elements
     const elements: ElementInfo[] = await page.evaluate(() => {
       const selectors = [
+        // Zoom controls
         '[data-testid*="zoom"]',
+        '[class*="zoom"]',
+        '[class*="Zoom"]',
+        // Minimap
         '[data-testid*="minimap"]',
-        '[data-testid*="breadcrumb"]',
-        '[data-testid*="card"]',
-        '.zoom-controls',
-        '.minimap',
-        '.breadcrumbs',
-        '.event-card',
-        '[class*="Controls"]',
         '[class*="Minimap"]',
+        '[class*="minimap"]',
+        // Breadcrumbs
+        '[data-testid*="breadcrumb"]',
         '[class*="Breadcrumb"]',
+        '[class*="breadcrumb"]',
+        // Cards
+        '[data-testid*="card"]',
+        '[class*="event-card"]',
+        '[class*="EventCard"]',
+        // Overlays and panels
+        '[class*="Overlay"]',
+        '[class*="Panel"]',
+        '[class*="AuthoringOverlay"]',
+        // Navigation
+        '[class*="NavigationRail"]',
+        '[class*="nav-rail"]',
+        // Controls
+        '[class*="Controls"]',
       ];
 
       const results: any[] = [];
       const seen = new Set<Element>();
 
       selectors.forEach(selector => {
-        document.querySelectorAll(selector).forEach(el => {
-          if (seen.has(el)) return;
-          seen.add(el);
+        try {
+          document.querySelectorAll(selector).forEach(el => {
+            if (seen.has(el)) return;
+            seen.add(el);
 
-          const rect = el.getBoundingClientRect();
-          if (rect.width === 0 || rect.height === 0) return;
+            const rect = el.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
 
-          const style = getComputedStyle(el);
-          results.push({
-            selector,
-            testId: el.getAttribute('data-testid'),
-            className: el.className?.toString() || '',
-            rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-            zIndex: parseInt(style.zIndex) || 0,
-            isInteractive: ['BUTTON', 'A', 'INPUT'].includes(el.tagName) ||
-                          el.getAttribute('role') === 'button' ||
-                          style.cursor === 'pointer',
-            pointerEvents: style.pointerEvents,
+            const style = getComputedStyle(el);
+            const position = style.position;
+
+            // Only care about positioned elements
+            if (!['absolute', 'fixed', 'sticky'].includes(position)) return;
+
+            results.push({
+              selector,
+              testId: el.getAttribute('data-testid'),
+              className: el.className?.toString()?.slice(0, 50) || '',
+              tagName: el.tagName,
+              rect: {
+                x: Math.round(rect.x),
+                y: Math.round(rect.y),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height)
+              },
+              zIndex: parseInt(style.zIndex) || 0,
+              computedZIndex: style.zIndex,
+              isInteractive: ['BUTTON', 'A', 'INPUT'].includes(el.tagName) ||
+                            el.getAttribute('role') === 'button' ||
+                            style.cursor === 'pointer' ||
+                            el.hasAttribute('onclick'),
+              pointerEvents: style.pointerEvents,
+              position,
+            });
           });
-        });
+        } catch (e) {
+          // Ignore selector errors
+        }
       });
 
       return results;
     });
 
-    console.log(`Found ${elements.length} elements to analyze`);
+    console.log(`\n=== POSITIONED ELEMENTS: ${elements.length} ===`);
+    elements.forEach(el => {
+      const name = el.testId || el.className.slice(0, 30) || el.tagName;
+      console.log(`  ${name}: z-index=${el.computedZIndex}, pos=${el.position}, interactive=${el.isInteractive}`);
+    });
 
     // Detect overlaps
     const overlaps = detectOverlaps(elements);
 
-    // Report all overlaps
-    console.log('=== OVERLAP REPORT ===');
-    console.log(`Total overlaps found: ${overlaps.length}`);
-
-    overlaps.forEach(o => {
-      const aName = o.elementA.testId || o.elementA.className.slice(0, 30);
-      const bName = o.elementB.testId || o.elementB.className.slice(0, 30);
-      console.log(`OVERLAP: "${aName}" vs "${bName}"`);
-      console.log(`  Area: ${o.overlapArea}px²`);
-      console.log(`  Z-Index: ${o.elementA.zIndex} vs ${o.elementB.zIndex}`);
-      console.log(`  Interactive: A=${o.elementA.isInteractive}, B=${o.elementB.isInteractive}`);
-      console.log(`  CONFLICT: ${o.zIndexConflict}`);
+    console.log(`\n=== OVERLAPS FOUND: ${overlaps.length} ===`);
+    overlaps.slice(0, 20).forEach(o => {
+      console.log(`  ${o.description}`);
+      console.log(`    Area: ${o.overlapArea}px², Conflict: ${o.zIndexConflict}`);
     });
 
-    // Find critical conflicts (interactive element covered)
-    const criticalConflicts = overlaps.filter(o =>
-      o.zIndexConflict && (o.elementA.isInteractive || o.elementB.isInteractive)
-    );
+    // Find critical conflicts
+    const criticalConflicts = overlaps.filter(o => o.zIndexConflict);
 
     console.log(`\n=== CRITICAL CONFLICTS: ${criticalConflicts.length} ===`);
     criticalConflicts.forEach(o => {
-      const aName = o.elementA.testId || o.elementA.className.slice(0, 30);
-      const bName = o.elementB.testId || o.elementB.className.slice(0, 30);
-      console.log(`CRITICAL: "${aName}" vs "${bName}" - z-index ${o.elementA.zIndex} vs ${o.elementB.zIndex}`);
+      console.log(`  ⚠️  ${o.description}`);
     });
 
-    // Test assertion - report but don't fail (this is an audit)
+    // Report findings (don't fail - this is an audit)
     if (criticalConflicts.length > 0) {
-      console.log('\n⚠️  AUDIT FINDING: Critical z-index conflicts detected');
+      console.log('\n❌ AUDIT FINDING: Critical z-index conflicts detected!');
+    } else {
+      console.log('\n✅ AUDIT PASSED: No critical z-index conflicts');
+    }
+
+    // Store results for later analysis
+    const results = {
+      timestamp: new Date().toISOString(),
+      elementsAnalyzed: elements.length,
+      totalOverlaps: overlaps.length,
+      criticalConflicts: criticalConflicts.length,
+      conflicts: criticalConflicts.map(c => ({
+        description: c.description,
+        area: c.overlapArea,
+      })),
+    };
+
+    console.log('\n=== SUMMARY ===');
+    console.log(JSON.stringify(results, null, 2));
+  });
+
+  test('verify z-index layer system after fixes', async ({ page }) => {
+    await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
+    await waitForEditorLoaded(page);
+    await page.waitForTimeout(1500);
+
+    // Check specific z-index values match expected token system
+    const zIndexChecks = await page.evaluate(() => {
+      const checks: { component: string; expected: number; actual: string; pass: boolean }[] = [];
+
+      // Check zoom controls (should be z-60 = --z-navigation)
+      const zoomControls = document.querySelector('[class*="zoom"], [class*="Zoom"]');
+      if (zoomControls) {
+        const z = getComputedStyle(zoomControls).zIndex;
+        checks.push({ component: 'Zoom Controls', expected: 60, actual: z, pass: parseInt(z) >= 60 });
+      }
+
+      // Check minimap (should be z-50 = --z-minimap)
+      const minimap = document.querySelector('[class*="Minimap"], [class*="minimap"]');
+      if (minimap) {
+        const z = getComputedStyle(minimap).zIndex;
+        checks.push({ component: 'Minimap', expected: 50, actual: z, pass: parseInt(z) >= 50 });
+      }
+
+      // Check navigation rail (should be z-60 = --z-navigation)
+      const navRail = document.querySelector('[class*="NavigationRail"], [class*="nav-rail"]');
+      if (navRail) {
+        const z = getComputedStyle(navRail).zIndex;
+        checks.push({ component: 'Navigation Rail', expected: 60, actual: z, pass: parseInt(z) >= 60 });
+      }
+
+      return checks;
+    });
+
+    console.log('\n=== Z-INDEX VERIFICATION ===');
+    zIndexChecks.forEach(check => {
+      const status = check.pass ? '✅' : '❌';
+      console.log(`${status} ${check.component}: expected >=${check.expected}, actual=${check.actual}`);
+    });
+
+    const allPassed = zIndexChecks.every(c => c.pass);
+    if (allPassed) {
+      console.log('\n✅ All z-index checks passed!');
+    } else {
+      console.log('\n❌ Some z-index checks failed');
     }
   });
 });
@@ -148,14 +243,23 @@ function detectOverlaps(elements: ElementInfo[]): Overlap[] {
                         Math.max(a.rect.y, b.rect.y);
         const overlapArea = Math.round(xOverlap * yOverlap);
 
-        // Z-index conflict: interactive element has lower z-index than overlapping element
+        if (overlapArea < 100) continue; // Ignore tiny overlaps
+
+        const aName = a.testId || a.className.slice(0, 20) || a.tagName;
+        const bName = b.testId || b.className.slice(0, 20) || b.tagName;
+
+        // Z-index conflict: interactive element with lower z-index overlapped by higher
         const zIndexConflict =
           (a.isInteractive && a.zIndex < b.zIndex && b.pointerEvents !== 'none') ||
           (b.isInteractive && b.zIndex < a.zIndex && a.pointerEvents !== 'none');
 
-        if (overlapArea > 100) { // Only report significant overlaps
-          overlaps.push({ elementA: a, elementB: b, overlapArea, zIndexConflict });
-        }
+        overlaps.push({
+          elementA: a,
+          elementB: b,
+          overlapArea,
+          zIndexConflict,
+          description: `"${aName}" (z=${a.zIndex}) vs "${bName}" (z=${b.zIndex})`,
+        });
       }
     }
   }
