@@ -4,14 +4,8 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 test.describe('Maximum Zoom Sliding Tests', () => {
   test('View window should not slide when at maximum zoom level', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -63,14 +57,8 @@ test.describe('Maximum Zoom Sliding Tests', () => {
 
   test('Max zoom maintains cursor position under different cursor locations', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -81,7 +69,7 @@ test.describe('Maximum Zoom Sliding Tests', () => {
     
     for (const position of testPositions) {
       // Reset zoom
-      await page.getByRole('button', { name: 'Fit All' }).click();
+      await page.locator('[data-testid="btn-fit-all"]').click();
       await page.waitForTimeout(300);
       
       const cursorX = timelineBox!.x + timelineBox!.width * position;
@@ -132,14 +120,8 @@ test.describe('Maximum Zoom Sliding Tests', () => {
 
   test('Minimum zoom window width is enforced and stable', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();

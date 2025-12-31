@@ -46,7 +46,7 @@ test.describe('Zoom Edge Cases Tests', () => {
     expect(minZoomCards).toBeLessThan(50); // Should not show unlimited cards
     
     // Test recovery functionality
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
     const recoveredCards = await page.locator('[data-testid="event-card"]').count();
     console.log(`Recovery (Fit All): ${recoveredCards} cards`);
@@ -167,7 +167,7 @@ test.describe('Zoom Edge Cases Tests', () => {
       if (step.wheel) {
         await page.mouse.wheel(0, step.wheel);
       } else {
-        await page.getByRole('button', { name: 'Fit All' }).click();
+        await page.locator('[data-testid="btn-fit-all"]').click();
       }
       
       await page.waitForTimeout(300);

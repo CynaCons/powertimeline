@@ -299,7 +299,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
         cursor: onTimelineClick ? 'crosshair' : 'default',
         backgroundColor: 'transparent'
       }}
-      data-testid="enhanced-timeline-axis"
+      data-testid="timeline-axis"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -318,7 +318,6 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
           width={viewportSize.width}
           height={3}
           fill="var(--page-text-primary)"
-          data-testid="timeline-axis"
           rx={1.5}
         />
 

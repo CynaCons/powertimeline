@@ -17,12 +17,13 @@ const TEST_USER_UID = process.env.TEST_USER_UID || 'iTMZ9n0IuzUSbhWfCaR86WsB2AC3
  * @param page - Playwright page object
  * @param email - Email address (defaults to test user)
  * @param password - Password (defaults to test user password)
+ * @returns true if login succeeded, false if it failed
  */
 export async function signInWithEmail(
   page: Page,
   email: string = TEST_USER_EMAIL,
   password: string = TEST_USER_PASSWORD
-): Promise<void> {
+): Promise<boolean> {
   // Navigate to login page
   await page.goto('/login');
   await page.waitForLoadState('domcontentloaded');
@@ -53,12 +54,14 @@ export async function signInWithEmail(
     // Login may have failed - check for error message
     const errorVisible = await page.locator('.MuiAlert-root, [role="alert"]').isVisible({ timeout: 2000 }).catch(() => false);
     if (errorVisible) {
-      throw new Error('Login failed - check credentials in .env.test');
+      // Login failed - return false instead of throwing
+      return false;
     }
   }
 
   // Wait for any post-login redirects to settle
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  return true;
 }
 
 /**

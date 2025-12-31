@@ -2,15 +2,15 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.2.1 - Visual Audit & Z-Index Fixes (Complete)
-**Next Milestone:** v0.8.3 Code Architecture and Performance
+**Current Version:** v0.8.3.2 - Test Suite Stabilization ✅
+**Next Milestone:** v0.8.4 Mobile and Responsive Testing
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
 - **Requirements:** ~352 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~200 requirements (57%)
 - **Test Coverage:** ~119 requirements verified (34%)
-- **Test Suite:** 415 Playwright E2E + 58 unit = 473 automated tests ([Test Status](#test-status))
+- **Test Suite:** 450 Playwright E2E + 58 unit = 508 automated tests ([Test Status](#test-status))
 - **Production Tests:** 22/22 passing (v0.5.15)
 
 ### Recent Achievements (v0.5.x)
@@ -71,6 +71,19 @@
 - ✅ Documentation: Fixed consistency and updated metrics (v0.7.13)
 - ✅ YAML Schema API: JSON Schema endpoint for AI discovery (v0.7.14)
 - ✅ Documentation & SRS Cleanup: Format standardization, code refs, metrics update (v0.8.0)
+- ✅ Visual Audit & Z-Index Fixes: Automated overlap detection, layer system standardization (v0.8.2.1)
+- ✅ Visual Audit Test Infrastructure: 46 tests (T87-T96) in 10 files, dense area testing, theme validation (v0.8.2.2)
+- ✅ Visual Audit Test Coherency: Eliminated audit theater, 39 tests with real assertions, new T97 high-density tests (v0.8.2.3)
+- ✅ AuthoringOverlay Z-Index Fix: Moved z-[500] to dialog element for T96 test detection (v0.8.2.4)
+- ✅ T97 Dense Spot Algorithm: Telemetry-based detection using `window.__ccTelemetry`, breadcrumb overlap test (T97.6) (v0.8.2.5)
+- ✅ T97 Mathematical Capacity Algorithm: Complete rewrite with `calculateViewportCapacity()`, 8 tests (T97.1-T97.8), 195.5% density ratio achieved (v0.8.2.6)
+- ✅ T97 Temporal Density: Added `eventDates` and `timelineRange` to telemetry, finds 1793-1794 (The Terror) as densest period (v0.8.2.7)
+- ✅ T97 Visual Fill Algorithm: Bucket-based density scoring, optimizes for horizontal card spread, screenshots now show properly filled screens (v0.8.2.8)
+- ✅ Rubber-band Panning: Drag-to-pan mode with elastic boundaries, snap-back animation, cursor states (grab/grabbing) (v0.8.3.0)
+- ✅ Layout Performance: Spatial hashing O(n) collisions, Map lookup, virtualization, layout caching (v0.8.3)
+- ✅ UX Polish: Hover lift effect, zoom toward cursor, hover card preview for degraded cards (v0.8.3)
+- ✅ Interaction Keybind Swap: Default click+drag = selection zoom (crosshair), Space+drag = pan (grab) (v0.8.3.1)
+- ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug, migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
 
 ### Next Up
 - **v0.8.1**: UI Audit and Visual Bug Fixes
@@ -78,11 +91,12 @@
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
-- **Playwright E2E:** 415 tests in 112 spec files
+- **Playwright E2E:** ~450 tests in ~120 spec files
 - **Vitest Unit:** 58 tests
-- **Total:** 473 automated tests
-- **Production Tests:** 22/22 passing
-- **Dev Tests:** Running (requires .env.test credentials)
+- **Total:** ~508 automated tests
+- **Production Tests:** 24/27 passing (3 app-level issues)
+- **Editor/Visual Tests:** 129+ passing, ~25 skipped (auth-required features)
+- **Test Infrastructure:** Tests use public timelines (no auth needed), documented in `docs/TESTS.md`
 
 ### Quick Links
 - [Implementation History](docs/PLAN_HISTORY.md) - Completed iterations (v0.0.x - v0.4.x)
@@ -796,225 +810,95 @@
 ---
 
 ## Phase 5: Production Polish & Stability (v0.8.x)
-> **Vision:** Make PowerTimeline production-ready for social media publishing - clean, fast, and reliable on both desktop and mobile
+> **Vision:** Make PowerTimeline production-ready - clean, fast, and reliable
 
 ### v0.8.0 - Documentation and SRS Cleanup ✅
-**Goal:** Ensure all documentation is accurate, consistent, and up-to-date before implementation work
-
-**SRS Audit:**
-- [x] Review all SRS files for accuracy against current implementation
-- [x] Update requirement status (Implemented/Verified) in each SRS
-- [x] Remove deprecated requirements or mark as deprecated
-- [x] Ensure consistent format across all SRS files (5-column: ID | Requirement | Acceptance Criteria | Code | Tests)
-- [x] Add SRS_API_KEY_STORAGE.md to SRS_INDEX.md
-
-**Documentation Updates:**
-- [x] Update SRS_INDEX.md metrics and requirement counts (~352 requirements)
-- [x] Review ARCHITECTURE.md against current codebase (added AI, Stream View, Import/Export sections)
-- [x] Update README.md with current features and setup (473 tests, tech stack)
-- [x] Verify all internal doc links are valid
-- [x] Remove or update stale information in docs/
-
-**Critical Fixes Applied:**
-- [x] SRS_CARDS_SYSTEM.md: Fixed compact card height (92px → 82px), capacity cells (2 → 4)
-- [x] SRS_API_KEY_STORAGE.md: Added "Status: Proposed" header
-- [x] SRS.md: Removed deprecated CC-REQ-PANELS-DEV-001
-- [x] SRS_ADMIN_PANEL.md: Updated for Firebase Auth (v0.5.6+)
-
-**Test Coverage Tables:**
-- [x] Update test coverage percentages in each SRS
-- [x] Map new tests to requirement IDs
-- [x] Identify requirements lacking test coverage
-
-**Gaps Identified (to address in later iterations):**
-
-| Gap Type | Area | SRS File | Target Iteration |
-|----------|------|----------|------------------|
-| Not Implemented | API Key localStorage + Settings UI | SRS_API_KEY_STORAGE.md | v0.8.7 |
-| Not Implemented | Stream View editing (swipe, quick add) | SRS_STREAM_VIEW.md | v0.8.5 |
-| Not Implemented | Account Deletion (GDPR) | SRS_USER_SETTINGS_PAGE.md | v0.8.7 |
-| Not Implemented | Default Visibility Setting | SRS_USER_SETTINGS_PAGE.md | v0.8.7 |
-| Not Implemented | Onboarding Tours (0%) | SRS_ONBOARDING.md | v0.8.7 |
-| No Tests | User Profile Page | SRS_USER_PAGE.md | v0.8.6 |
-| No Tests | Settings Page | SRS_USER_SETTINGS_PAGE.md | v0.8.6 |
-| Failing Tests | Admin Panel (T83, T84, T86) | SRS_ADMIN_PANEL.md | v0.8.6 |
-| Low Coverage | AI Integration (~15%) | SRS_AI_INTEGRATION.md | v0.8.6 |
-| Low Coverage | Stream View (~27%) | SRS_STREAM_VIEW.md | v0.8.6 |
+- [x] SRS audit and format standardization
+- [x] Update metrics in SRS_INDEX.md, README.md, ARCHITECTURE.md
+- [x] Fix SRS_CARDS_SYSTEM.md compact card height (92px → 82px)
 
 ### v0.8.1 - UI Audit ✅
-**Goal:** Systematic review of all UI elements to identify visual bugs and inconsistencies
-
-See [docs/UI_AUDIT_CHECKLIST.md](docs/UI_AUDIT_CHECKLIST.md) for audit criteria.
-
-**Audit Completed:**
-- [x] Canvas/Editor audit (cards, axis, anchors, minimap, panels, breadcrumbs)
-- [x] Navigation audit (NavRail, TopNavBar, User menu)
-- [x] Pages audit (HomePage, UserProfilePage, SettingsPage, LandingPage, AdminPage)
-- [x] Cross-cutting audit (theme, z-index, loading/error states, toasts)
-
-**Findings:** 59 issues documented in [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md)
-- Critical: 7 | High: 13 | Medium: 24 | Low: 15
+- [x] Canvas/Editor, Navigation, Pages audit
+- [x] 59 issues documented in UI_AUDIT_FINDINGS.md
 
 ### v0.8.2 - UI Visual Bug Fixes ✅
-**Goal:** Fix all issues identified in v0.8.1 audit (code-based)
-
-See [docs/UI_AUDIT_FINDINGS.md](docs/UI_AUDIT_FINDINGS.md) for detailed fix instructions per batch.
-
-**Limitation Discovered:** Code-based audits cannot detect runtime visual issues (overlaps, z-index conflicts). See v0.8.2.1 for visual audit approach.
-
-**Batch A: Node/Card Theme System** (3 issues)
-- [x] A1: Node.tsx - Replace Tailwind colors with CSS variables
-- [x] A2: TimelineMarkers.tsx - Fix dark mode visibility
-- [x] A3-A4: TimelineMinimap.tsx, CreateAffordance.tsx - Theme consistency
-
-**Batch B: Badge Dark Mode** (3 issues)
-- [x] B1: Owner badges - Add dark mode styles (HomePage, UserProfilePage)
-- [x] B2: Visibility badges - Add `dark:` Tailwind variants
-- [x] B3: Statistics cards - Add icon indicators for accessibility
-
-**Batch C: Navigation Theme** (5 issues)
-- [x] C1: TopNavBar.tsx - Replace all hardcoded hex colors with CSS variables
-- [x] C2: UserProfileMenu.tsx - Fix undefined CSS variables
-- [x] C3-C5: NavigationRail.tsx - Separator, hover states, theme toggle
-
-**Batch D: App.tsx Theme Fixes** (2 issues)
-- [x] D1: AI preview glow - Use theme accent instead of hardcoded blue
-- [x] D2: Chat FAB - Use CSS variables for colors
-
-**Batch E: Error/Offline States** (3 issues)
-- [x] E1: EditorPage.tsx - Fix "No timeline" modal for light theme
-- [x] E2: ErrorState.tsx - Use semantic error color variables
-- [x] E3: OfflineIndicator.tsx - Use warning color variable
-
-**Batch F: Z-Index Standardization** (1 systematic issue)
-- [x] F1: Add z-index layer system to tokens.css (10 variables documented)
-
-**Batch G: Settings & Danger Zone** (1 issue)
-- [x] G1: SettingsPage.tsx - Add semantic danger color variables
-
-**Batch H: Card Layout Consistency** (2 issues)
-- [x] H1: Timeline cards - Use flexbox for consistent height
-- [x] H2: Webkit scrollbar styling (already present globally)
-
-**Batch I: LoginPage Dark Mode** (1 issue)
-- [x] I1: LoginPage.tsx - Replace all hardcoded colors with CSS variables
-
-**Batch J: SVG and Shadow Colors** (2 systematic issues)
-- [x] J2: Add shadow CSS variables to tokens.css (light/dark themes)
-- [ ] J1: SVG hardcoded colors (deferred - low priority, many files)
-
-**Batch K: Focus States & Accessibility** (1 systematic issue)
-- [x] K1: Add global focus-visible styles for buttons and interactive elements
-
-**Batch L: Minor Polish** (4 issues)
-- [x] L1: Breadcrumb truncation
-- [x] L2: Icon sizing consistency
-- [x] L3: TimelineIcon hardcoded purple
-- [x] L4: LandingPage roadmap line visibility
+- [x] Theme system fixes (Node, Minimap, TopNavBar, LoginPage)
+- [x] Z-index standardization (tokens.css layer system)
+- [x] Focus states and accessibility improvements
 
 ### v0.8.2.1 - Visual Audit & Z-Index Fixes ✅
-**Goal:** Automated detection and fix of runtime visual issues (overlaps, z-index conflicts)
+- [x] Automated overlap detection tests
+- [x] Fix zoom controls, breadcrumbs, AuthoringOverlay z-index
+- [x] Navigation Rail and Minimap z-index fixes
 
-See [docs/VISUAL_AUDIT_DESIGN.md](docs/VISUAL_AUDIT_DESIGN.md) for technical design.
+### v0.8.2.2 - Visual Audit Test Infrastructure ✅
+- [x] Authentication support in visual tests
+- [x] Smart overlap detection (T87-T93)
+- [x] Boundary and coherency tests
 
-**Known Issues (User-Reported) - RESOLVED:**
-- [x] Zoom control bar hidden behind cards at bottom of canvas
-- [x] Breadcrumbs overlapping with event cards
-- [x] AuthoringOverlay (modal) below other UI elements
+### v0.8.2.3 - Test Coherency Analysis ✅
+- [x] Eliminate audit theater (89% fake assertions → 100% real)
+- [x] Create T97 high-density stress tests
+- [x] Fix pan tests (wheel → drag)
 
-**Phase 1: Test Infrastructure**
-- [x] Create `tests/visual-audit/` directory structure
-- [x] Implement DOM overlap detection script (`overlap-detection.spec.ts`)
-- [x] Implement screenshot capture script (`screenshot-capture.spec.ts`)
-- [x] Create test timeline fixture with edge-case card positions
+### v0.8.2.4-v0.8.2.8 - T97 Algorithm Iterations ✅
+- [x] Dense spot detection via telemetry
+- [x] Mathematical capacity algorithm
+- [x] Temporal density (finds 1793-1794 as densest)
+- [x] Visual fill algorithm (bucket-based scoring)
 
-**Phase 2: Automated Detection**
-- [x] Run overlap detection in read-only mode (predictive analysis)
-- [x] Analyze z-index values against token system
-- [x] Document all findings in `UI_AUDIT_FINDINGS.md`
+### v0.8.2.9 - Safe Zones & Breadcrumb UX ✅
+**Goal:** Fix card/minimap/breadcrumb overlap with unified safe zones
 
-**Phase 3: Fix Implementation**
-- [x] Apply `--z-*` variables from tokens.css to zoom controls (z-20 → z-[60])
-- [x] Fix breadcrumb z-index (z-[100] → z-[60])
-- [x] Fix AuthoringOverlay z-index (z-[60] → z-[500])
-- [x] Fix Navigation Rail z-index (z-30 → z-[60])
-- [x] Fix Minimap z-index (z-[90] → z-[50])
+- [x] Add HEADER_SAFE_ZONE (100px) to config.ts
+- [x] Shift timelineY down to clear minimap/breadcrumb
+- [x] Add left safe zone (200px) for breadcrumb protection
+- [x] Transparent breadcrumb (visible text, card on hover)
+- [x] Breadcrumb z-index: behind cards normally, above on hover
+- [x] Increase card-to-axis spacing (40→48px above, 20→28px below)
 
-**Phase 4: Verification**
-- [x] Build passes with no errors
-- [x] Components now follow documented layer system
+### v0.8.3 - Layout Performance & UX Polish
+**Goal:** Performance optimizations and UX micro-interactions
 
-### v0.8.2.2 - Visual Audit Test Infrastructure Improvements
-**Goal:** Make visual audit tests fully functional with authentication and editor state testing
-**Status:** In Progress
+**Performance:**
+- [x] Spatial hashing for O(n) collision detection (PositioningEngine.ts)
+- [x] Virtualization - render only visible cards with 200px buffer
+- [x] Map lookup for O(1) anchor→card association (cardsByEventId)
+- [x] Layout caching across pan/zoom when events unchanged
+- [x] Fix layout cache invalidation to track viewStart/viewEnd changes
+- [x] Remove dead connector code from CardRenderer.tsx
 
-**Limitations Found in v0.8.2.1:**
-- Tests ran in read-only mode (unauthenticated)
-- Editor controls (zoom, minimap, overlays) not visible
-- Dark theme toggle not working in tests
-- Could not verify z-index fixes at runtime
+**UX:**
+- [x] Hover card preview for degraded cards (CardHoverPreview.tsx)
+- [x] Hover lift effect (scale 1.02, shadow elevation)
+- [x] Zoom toward cursor position (Google Maps style)
+- [x] New interaction model: Click+drag=pan, Ctrl+click=selection zoom, Shift+scroll=horizontal pan
 
-**Phase 1: Add Authentication Support**
-- [x] Import auth utilities into visual audit tests
-- [x] Add `loginAsTestUser()` before timeline navigation
-- [x] Use `loadTimeline()` with `requireAuth: false` for authenticated testing
-- [x] Add `skipIfNoCredentials()` for CI compatibility
+**Documentation:**
+- [x] Update SRS_CARDS_SYSTEM.md with v0.8.3 performance & UX requirements (6 new requirements)
 
-**Phase 2: Smart Overlap Detection - Edge Case Testing**
-- [x] Create `smart-overlap-detection.spec.ts` with density analysis
-- [x] Test 1: Timeline density analysis (hot zones for overlaps)
-- [x] Test 2: Zoom control overlap detection at bottom edge
-- [x] Test 3: Breadcrumb overlap detection at top edge
-- [x] Test 4: Minimap overlap detection at top-right corner
-- [x] Test 5: Comprehensive edge scan across all zoom levels
-- [x] Runtime verification: 0 critical z-index conflicts found
-- [x] All controls (zoom: z=60, breadcrumbs: z=60, minimap: z=50) have correct layering
+**Backlog (deferred):**
+- [ ] Mobile bottom sheet for event details
 
-**Results (v0.8.2.2):**
-- 5/5 smart overlap detection tests passing
-- Timeline density: 43 cards, 0 cards near any control zones at default zoom
-- Z-index verification: All overlapping scenarios have correct layering
-- Screenshots captured: 6 images (zoom controls, breadcrumbs, minimap, 3 zoom levels)
+### v0.8.3.1 - Interaction Keybind Swap ✅
+**Goal:** Swap keybinds to make selection zoom the default interaction
 
-**Phase 3: Test Editor States** (Deferred)
-- [ ] Navigate to editor in authenticated mode (owner view)
-- [ ] Wait for editor controls (zoom, minimap, breadcrumbs)
-- [ ] Test with AuthoringOverlay open (click event card)
-- [ ] Test at different zoom levels (25%, 50%, 100%, 200%)
-- [ ] Test with panels open (Events panel, Chat panel)
+**Interaction Model:**
+- [x] Swap click+drag = selection zoom (default, crosshair cursor)
+- [x] Swap Space+drag = pan (grab/grabbing cursor)
+- [x] Keep Shift+scroll = horizontal pan
+- [x] Keep plain wheel = zoom toward cursor
+- [x] Update SRS_ZOOM.md with new keybind model
 
-**Phase 4: Fix Theme Testing** (Deferred)
-- [ ] Use proper theme toggle mechanism (ThemeContext or localStorage)
-- [ ] Verify dark/light screenshots are visually different
-- [ ] Capture both themes for each state
-
-**Phase 5: Runtime Verification** (Deferred)
-- [ ] Re-run overlap detection with AuthoringOverlay open
-- [ ] Test with panels open (Events panel, Chat panel)
-- [ ] Update UI_AUDIT_FINDINGS.md with runtime verification results
-
-### v0.8.3 - Code Architecture and Performance
-**Goal:** Refactor monolithic components and establish performance baseline
-
-**App.tsx Refactor:**
-- [ ] Extract `useEditorState` hook (events, selection, edit fields)
-- [ ] Extract `useEditorActions` hook (CRUD operations, handlers)
-- [ ] Extract `useAIChat` hook (AI session, preview events, actions)
-- [ ] Reduce App.tsx from 1400+ lines to under 400
-
-**Performance Foundations:**
-- [ ] Add React.memo to CardRenderer, StreamViewer, EventCard
-- [ ] Create `src/layout/constants.ts` for magic numbers
-- [ ] Add useCallback to inline event handlers in render
-- [ ] Benchmark 100/500/1000 event timelines (document results)
-
-**Large Screen Support:**
-See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewport-responsive-layout-design) for design rationale.
-- [ ] Audit LayoutEngine viewport width handling (ensure dynamic horizontal distribution)
-- [ ] Verify half-column count scales with viewport width
-- [ ] Add Tailwind 3xl (1920px) and 4xl (2560px) breakpoints to tailwind.config
-- [ ] Update Home/Profile card grids: 3xl:grid-cols-6, 4xl:grid-cols-7
-- [ ] Test timeline canvas at 2560px and 3840px widths
+**Testing:**
+- [x] Create T98 test file (tests/editor/98-interaction-model-v083.spec.ts)
+- [x] T98.1: Selection zoom (click+drag creates blue overlay, zooms on release)
+- [x] T98.2: Space+drag pan (grab/grabbing cursors)
+- [x] T98.3: Shift+scroll horizontal pan
+- [x] T98.4: Plain wheel zoom toward cursor
+- [x] T98.5: Boundary constraints (pan stops at 0 and 1)
+- [x] T98.6: Small selection (<20px) does not trigger zoom
+- [x] T98.7: Cursor styles update correctly for each mode
 
 ### v0.8.4 - Mobile and Responsive Testing Infrastructure
 **Goal:** Establish multi-viewport testing and ensure mobile reliability
@@ -1196,6 +1080,12 @@ See [ARCHITECTURE.md - Viewport-Responsive Layout Design](ARCHITECTURE.md#viewpo
 ---
 
 ## Backlog (Deferred)
+
+### Layout Engine Enhancements
+- [ ] Web Worker for layout computation (offload heavy calculation)
+- [ ] Swim lanes for concurrent events (horizontal card layout)
+- [ ] Two-pass bin packing with lookahead (better space utilization)
+- [ ] Global card type optimization (coordinate neighboring groups)
 
 ### Requirements Standardization & Traceability
 **Goal:** Standardize SRS format and create automated traceability tooling

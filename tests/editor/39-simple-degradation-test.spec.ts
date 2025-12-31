@@ -13,7 +13,7 @@ test('Degradation system basic functionality', async ({ page }) => {
     await page.goto('/');
 
   // Wait for timeline to load
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
 
   console.log('\n🔍 BASIC DEGRADATION SYSTEM TEST');
   
@@ -66,7 +66,7 @@ test('Degradation system basic functionality', async ({ page }) => {
   expect('degradation' in initialTelemetry).toBe(true);
   
   // Get timeline center for zoom operations
-  const timelineArea = page.locator('.absolute.inset-0.ml-14');
+  const timelineArea = page.locator('[data-testid="timeline-container"]');
   const timelineBox = await timelineArea.boundingBox();
   const centerX = timelineBox!.x + timelineBox!.width * 0.5;
   const centerY = timelineBox!.y + timelineBox!.height * 0.5;
@@ -161,7 +161,7 @@ test('Degradation system basic functionality', async ({ page }) => {
 test('Degradation telemetry consistency check', async ({ page }) => {
     await loginAsTestUser(page);
     await page.goto('/');
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
 
   console.log('\n📊 DEGRADATION TELEMETRY CONSISTENCY CHECK');
   
@@ -205,7 +205,7 @@ test('Degradation telemetry consistency check', async ({ page }) => {
 test('Degradation system mathematical accuracy', async ({ page }) => {
     await loginAsTestUser(page);
     await page.goto('/');
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
 
   console.log('\n🧮 DEGRADATION MATHEMATICAL ACCURACY TEST');
   
@@ -213,7 +213,7 @@ test('Degradation system mathematical accuracy', async ({ page }) => {
   await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry), { timeout: 5000 });
 
   // Zoom to potentially trigger degradation
-  const timelineArea = page.locator('.absolute.inset-0.ml-14');
+  const timelineArea = page.locator('[data-testid="timeline-container"]');
   const timelineBox = await timelineArea.boundingBox();
   const centerX = timelineBox!.x + timelineBox!.width * 0.5;
   const centerY = timelineBox!.y + timelineBox!.height * 0.5;

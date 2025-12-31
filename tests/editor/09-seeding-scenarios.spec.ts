@@ -5,7 +5,7 @@ import { loadTestTimeline } from '../utils/timelineTestUtils';
 // Dev Panel removed in v0.5.24 - use direct navigation to Firestore timelines
 
 async function fitAll(page: any) {
-  const fit = page.getByRole('button', { name: 'Fit All' });
+  const fit = page.locator('[data-testid="btn-fit-all"]');
   if (await fit.count()) {
     await fit.click();
   }

@@ -89,7 +89,7 @@ test.describe('Zoom Stability Tests', () => {
       { name: 'zoom-in-3x', action: () => page.mouse.wheel(0, -100) },
       { name: 'zoom-out-1x', action: () => page.mouse.wheel(0, 100) },
       { name: 'zoom-out-2x', action: () => page.mouse.wheel(0, 100) },
-      { name: 'fit-all', action: () => page.getByRole('button', { name: 'Fit All' }).click() }
+      { name: 'fit-all', action: () => page.locator('[data-testid="btn-fit-all"]').click() }
     ];
     
     for (const level of zoomLevels) {
@@ -182,7 +182,7 @@ test.describe('Zoom Stability Tests', () => {
     expect(minZoomCards).toBeGreaterThan(0);
     
     // Test recovery with Fit All
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
     const recoveredCards = await page.locator('[data-testid="event-card"]').count();
     console.log(`After Fit All recovery: ${recoveredCards} cards visible`);
@@ -225,7 +225,7 @@ test.describe('Zoom Stability Tests', () => {
       await page.screenshot({ path: `test-results/zoom-consistency-${timeline.name.toLowerCase().replace(/\s+/g, '-')}-zoomed.png` });
       
       // Zoom out (return to fit all)
-      await page.getByRole('button', { name: 'Fit All' }).click();
+      await page.locator('[data-testid="btn-fit-all"]').click();
       await page.waitForTimeout(500);
       
       const zoomedOutCards = await page.locator('[data-testid="event-card"]').count();

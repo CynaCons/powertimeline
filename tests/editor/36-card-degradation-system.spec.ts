@@ -130,7 +130,7 @@ test('Card degradation system - space efficiency validation', async ({ page }) =
   await page.goto('/');
   
   // Wait for timeline to load
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+  await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
   await page.waitForTimeout(2000);
   
   // Create a scenario with many events to trigger degradation

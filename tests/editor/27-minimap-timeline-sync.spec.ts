@@ -4,14 +4,8 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 test.describe('Minimap Timeline Synchronization Tests', () => {
   test('Timeline events update when minimap view window is dragged', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -73,17 +67,11 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
 
   test('Overflow indicators update when zooming via minimap click', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
     
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
-    
     // Start with full timeline view
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(300);
     
     // Count initial overflow indicators
@@ -118,14 +106,8 @@ test.describe('Minimap Timeline Synchronization Tests', () => {
 
   test('Blue event indicators respond to minimap navigation', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     // Zoom in to make a focused view
     const timelineArea = page.locator('.absolute.inset-0.ml-14');

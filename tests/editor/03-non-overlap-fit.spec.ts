@@ -48,7 +48,7 @@ test.describe('v5/03 Non-overlap fit', () => {
     await loadTestTimeline(page, 'timeline-napoleon');
     await page.waitForTimeout(500);
 
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
 
     const cards = await page.locator('[data-testid="event-card"]').elementHandles();

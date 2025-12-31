@@ -9,7 +9,7 @@ test.describe('Timeline Cursor Zoom Tests', () => {
     // Load Napoleon timeline and establish baseline
     await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForTimeout(1000);
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
     
     // Understand the actual timeline range
@@ -47,7 +47,7 @@ test.describe('Timeline Cursor Zoom Tests', () => {
       console.log(`\n📍 Testing cursor at ${pos.name} (${pos.ratio * 100}%) - expect ${pos.expectedPeriod}`);
       
       // Reset to fit all first
-      await page.getByRole('button', { name: 'Fit All' }).click();
+      await page.locator('[data-testid="btn-fit-all"]').click();
       await page.waitForTimeout(300);
       
       // Position cursor at test location
@@ -112,7 +112,7 @@ test.describe('Timeline Cursor Zoom Tests', () => {
     await page.waitForTimeout(1000);
     
     // Start from fit all
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
     
     const initialCards = await page.locator('[data-testid="event-card"]').count();

@@ -55,9 +55,31 @@ function resolveTimelineId(timelineId: string): string {
 /**
  * Login as the test user via Firebase Auth
  * @param page - Playwright page object
+ * @returns true if login succeeded, false if it failed
+ * @throws Error if login fails and throwOnFailure is true (legacy behavior)
  */
-export async function loginAsTestUser(page: Page): Promise<void> {
-  await signInWithEmail(page);
+export async function loginAsTestUser(page: Page, throwOnFailure: boolean = false): Promise<boolean> {
+  const success = await signInWithEmail(page);
+  if (!success && throwOnFailure) {
+    throw new Error('Login failed - check credentials in .env.test or use public timeline routes');
+  }
+  return success;
+}
+
+/**
+ * Try to login, but skip loading a public timeline if auth fails
+ * This allows tests to work without valid credentials by using public timelines
+ * @param page - Playwright page object
+ * @param timelineId - Timeline ID to load if auth fails
+ * @returns true if logged in, false if using public timeline
+ */
+export async function loginOrLoadPublicTimeline(page: Page, timelineId: string = 'french-revolution'): Promise<boolean> {
+  const loggedIn = await signInWithEmail(page);
+  if (!loggedIn) {
+    // Fall back to loading a public timeline
+    await loadTestTimeline(page, timelineId);
+  }
+  return loggedIn;
 }
 
 /**

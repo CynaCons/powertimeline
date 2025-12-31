@@ -1,29 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Anchor Persistence - French Revolution', () => {
   test('Anchors remain visible at all zoom levels (CC-REQ-ANCHOR-004)', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ANCHOR-004' });
 
-    // Navigate to the application
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
-    // Wait for app to load
-    await expect(page.locator('[data-testid="timeline-axis"]')).toBeVisible({ timeout: 10000 });
-    await page.waitForTimeout(1000);
-
-    // Open dev panel and load French Revolution timeline
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(500);
-
-    const frenchRevButton = page.getByRole('button', { name: 'French Revolution' });
-    await frenchRevButton.click();
-    await page.waitForTimeout(3000); // Allow time for all 250+ events to load
-
-    // Close dev panel
-    await page.keyboard.press('Alt+d');
-    await page.waitForTimeout(500);
+    // Navigate directly to French Revolution timeline (using username-based URL)
+    await page.goto('/cynacons/timeline/french-revolution');
+    await page.waitForSelector('[data-testid="event-card"]', { timeout: 10000 });
+    await page.waitForTimeout(1000); // Allow time for all events to load and render
 
     console.log('🔍 Testing anchor persistence across zoom levels...');
 

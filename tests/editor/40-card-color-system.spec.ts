@@ -9,7 +9,7 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 test('card color system reflects card types', async ({ page }) => {
     await loginAsTestUser(page);
     await page.goto('/');
-  await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10_000 });
 
   const cards = await page.locator('[data-testid="event-card"]').all();
   expect(cards.length).toBeGreaterThan(0);

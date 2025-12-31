@@ -1,16 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
+import { loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/53 Inline "+" affordances open Create overlay', () => {
   test('top and bottom add buttons open Create', async ({ page }) => {
-    await loginAsTestUser(page);
-    await page.goto('/');
-
-    // Seed a few events so list exists
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: '+5' }).click();
-    // Close Dev to avoid overlay intercepts
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
+    // Load timeline with events so list exists
+    await loadTestTimeline(page, 'napoleon-bonaparte');
 
     // Open Events panel
     await page.getByRole('button', { name: 'Events' }).click();

@@ -194,14 +194,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
   });
   
   test.skip('Verify connectors update correctly when view changes', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await page.goto('/cynacons/timeline/napoleon');
     await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -336,14 +331,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
   });
 
   test.skip('Detect leftover anchor connectors that persist when navigating to empty regions', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await page.goto('/cynacons/timeline/napoleon');
     await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -453,14 +443,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
   });
 
   test.skip('Verify connectors cleanup correctly during zoom transitions', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await page.goto('/cynacons/timeline/napoleon');
     await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -540,14 +525,9 @@ test.describe('Timeline Anchor Directional Connectors', () => {
   });
 
   test.skip('Detect leftover connectors through realistic zoom/navigate cycles', async ({ page }) => {
-    await page.goto('/');
+    await loginAsTestUser(page);
+    await page.goto('/cynacons/timeline/napoleon');
     await page.waitForTimeout(1000);
-    
-    // Load Napoleon timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Napoleon 1769-1821' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();

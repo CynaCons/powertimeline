@@ -1,5 +1,4 @@
 import { test, expect, type Page as PlaywrightPage } from '@playwright/test';
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { zoomAndSwipe, type ZoomSwipePosition } from '../helpers/zoom-and-swipe';
 
 /**
@@ -76,22 +75,11 @@ const X_ALIGNMENT_TOLERANCE = 10; // Max X-variation allowed in px
 test.describe('Mixed Card Types Overlap Detection', () => {
   test('Comprehensive zoom-and-swipe validation', async ({ page }) => {
     test.setTimeout(600000); // 10 minutes for comprehensive analysis (15 zoom levels with deep zoom)
-    await page.goto('http://localhost:5173');
-    await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 10000 });
 
-    // Open dev panel and load French Revolution timeline
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.waitForTimeout(500);
-
-    const frenchRevButton = page.getByRole('button', { name: 'French Revolution' });
-    await frenchRevButton.click();
-    await page.waitForTimeout(1000);
-
-    // Close dev panel
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.waitForTimeout(500);
-
-    await page.waitForSelector('[data-testid="event-card"]');
+    // Navigate directly to French Revolution timeline (using username-based URL)
+    await page.goto('/cynacons/timeline/french-revolution');
+    await page.waitForSelector('[data-testid="event-card"]', { timeout: 10000 });
+    await page.waitForTimeout(1000); // Allow time for all events to load and render
 
     // Dynamically detect timeline Y position from DOM
     const timelineAxis = await page.locator('[data-testid="timeline-axis"]');
@@ -525,13 +513,11 @@ test.describe('Mixed Card Types Overlap Detection', () => {
         // NEW: Collect degradation rule violations
         if (aboveAnalysis) {
           aboveAnalysis.degradationViolations.forEach(violation => {
-            degradationViolationCount++;
             issues.push(`Cluster ${i + 1} ABOVE: DEGRADATION RULE: ${violation}`);
           });
         }
         if (belowAnalysis) {
           belowAnalysis.degradationViolations.forEach(violation => {
-            degradationViolationCount++;
             issues.push(`Cluster ${i + 1} BELOW: DEGRADATION RULE: ${violation}`);
           });
         }
@@ -539,13 +525,11 @@ test.describe('Mixed Card Types Overlap Detection', () => {
         // NEW: Collect X-alignment issues for mixed columns
         if (aboveAnalysis && aboveAnalysis.isMixed) {
           aboveAnalysis.xAlignmentIssues.forEach(issue => {
-            xAlignmentIssueCount++;
             issues.push(`Cluster ${i + 1} ABOVE: X-ALIGNMENT: ${issue}`);
           });
         }
         if (belowAnalysis && belowAnalysis.isMixed) {
           belowAnalysis.xAlignmentIssues.forEach(issue => {
-            xAlignmentIssueCount++;
             issues.push(`Cluster ${i + 1} BELOW: X-ALIGNMENT: ${issue}`);
           });
         }

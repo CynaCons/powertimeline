@@ -34,6 +34,12 @@ npm test             # Run all Playwright tests
 npm run test:prod    # Run production smoke tests only
 ```
 
+### Testing Notes
+See `docs/TESTS.md` for:
+- Test environment setup and available test timelines
+- How to run specific test suites
+- Common issues and solutions (auth failures, missing testids)
+
 ### Rules for All Agents
 1. **Read before edit** - Always read files before modifying them
 2. **Build verification** - Run `npm run build` after significant changes

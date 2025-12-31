@@ -9,8 +9,8 @@ test.describe('JFK Fit-All overflow vs full-cards (semi-column)', () => {
     await loadTestTimeline(page, 'jfk-presidency');
     await page.waitForTimeout(600);
 
-    // Fit All view
-    await page.getByRole('button', { name: 'Fit All' }).click();
+  // Fit All view
+  await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(800);
 
     // Save a screenshot for analysis

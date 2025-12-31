@@ -190,11 +190,63 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   const [editDescription, setEditDescription] = useState('');
 
   // View window controls via hook
-  const { viewStart, viewEnd, setWindow, nudge, zoom, zoomAtCursor, animateTo } = useViewWindow(0,1);
+  const { viewStart, viewEnd, setWindow, snapBackToBounds, nudge, zoom, animateTo } = useViewWindow(0,1);
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+  const lastCursorRef = useRef<{ cursorX: number; containerLeft: number; containerWidth: number } | null>(null);
+
+  const applyZoomWithAnchor = useCallback((zoomFactor: number, cursorX?: number, containerLeft?: number, containerWidth?: number) => {
+    const rect = timelineContainerRef.current?.getBoundingClientRect();
+
+    const resolvedCursorX = cursorX ?? lastCursorRef.current?.cursorX;
+    const resolvedContainerLeft = containerLeft ?? rect?.left ?? lastCursorRef.current?.containerLeft;
+    const resolvedContainerWidth = containerWidth ?? rect?.width ?? lastCursorRef.current?.containerWidth;
+
+    if (
+      resolvedCursorX === undefined ||
+      resolvedContainerLeft === undefined ||
+      resolvedContainerWidth === undefined ||
+      resolvedContainerWidth <= 0
+    ) {
+      zoom(zoomFactor);
+      return;
+    }
+
+    lastCursorRef.current = {
+      cursorX: resolvedCursorX,
+      containerLeft: resolvedContainerLeft,
+      containerWidth: resolvedContainerWidth,
+    };
+
+    const usableWidth = Math.max(1, resolvedContainerWidth);
+    const mouseX = resolvedCursorX - resolvedContainerLeft;
+    const cursorRatio = Math.max(0, Math.min(1, mouseX / usableWidth));
+    const currentRange = viewEnd - viewStart;
+    const cursorTime = viewStart + cursorRatio * currentRange;
+
+    const minRange = 0.00002;
+    const newRange = Math.max(minRange, Math.min(1, currentRange * zoomFactor));
+    let newStart = cursorTime - (cursorRatio * newRange);
+    let newEnd = newStart + newRange;
+
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = newRange;
+    }
+    if (newEnd > 1) {
+      newEnd = 1;
+      newStart = 1 - newRange;
+    }
+
+    setWindow(newStart, newEnd);
+  }, [viewStart, viewEnd, zoom, setWindow]);
+
+  const handleZoomAtCursor = useCallback((zoomFactor: number, cursorX: number, _windowWidth: number, containerLeft?: number, containerWidth?: number) => {
+    applyZoomWithAnchor(zoomFactor, cursorX, containerLeft, containerWidth);
+  }, [applyZoomWithAnchor]);
 
   // Timeline interaction hooks
-  useTimelineZoom({ zoomAtCursor, hoveredEventId });
-  const { timelineSelection, handleTimelineMouseDown } = useTimelineSelection({ viewStart, viewEnd, setWindow });
+  useTimelineZoom({ zoomAtCursor: handleZoomAtCursor, hoveredEventId, viewStart, viewEnd, setWindow });
+  const { timelineSelection, handleTimelineMouseDown, spaceKeyHeld } = useTimelineSelection({ viewStart, viewEnd, setWindow, snapBackToBounds });
 
   const handleTimelineMouseDownWithSelection = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as Element | null;
@@ -207,6 +259,25 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
     handleTimelineMouseDown(e);
   }, [handleTimelineMouseDown, setSelectedId]);
+
+  const handleTimelineMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = timelineContainerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    lastCursorRef.current = {
+      cursorX: e.clientX,
+      containerLeft: rect.left,
+      containerWidth: rect.width,
+    };
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    applyZoomWithAnchor(0.8);
+  }, [applyZoomWithAnchor]);
+
+  const handleZoomOut = useCallback(() => {
+    applyZoomWithAnchor(1.25);
+  }, [applyZoomWithAnchor]);
 
   // Panels & overlays
   // Left sidebar overlays (permanent sidebar width = 56px)
@@ -305,8 +376,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     function onKeyDown(e: KeyboardEvent) {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      if (e.key === '+' || e.key === '=') { zoom(0.8); }
-      else if (e.key === '-' || e.key === '_') { zoom(1.25); }
+      if (e.key === '+' || e.key === '=') { handleZoomIn(); }
+      else if (e.key === '-' || e.key === '_') { handleZoomOut(); }
       else if (e.key === 'ArrowLeft') { nudge(-0.05); }
       else if (e.key === 'ArrowRight') { nudge(0.05); }
       else if (e.key === 'Home') { const w = Math.max(viewEnd - viewStart, 0.1); setWindow(0, w); }
@@ -314,7 +385,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [viewStart, viewEnd, zoom, nudge, setWindow]);
+  }, [viewStart, viewEnd, handleZoomIn, handleZoomOut, nudge, setWindow]);
 
 
 
@@ -1151,7 +1222,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
         )}
 
         {/* Main timeline area shifts right to avoid sidebar overlap */}
-        <div className="absolute inset-0 ml-14">
+        <div className="absolute inset-0 ml-14" data-testid="timeline-container">
           {loadError ? (
             <div className="w-full h-full flex items-center justify-center px-4">
               <ErrorState
@@ -1162,9 +1233,20 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             </div>
           ) : (
             <div
+              ref={timelineContainerRef}
               className="w-full h-full relative"
               onMouseDown={handleTimelineMouseDownWithSelection}
-              style={{ cursor: timelineSelection?.isSelecting ? 'crosshair' : 'default' }}
+              onMouseMove={handleTimelineMouseMove}
+              data-testid="timeline-canvas"
+              style={{
+                cursor: timelineSelection?.isPanning
+                  ? 'grabbing'
+                  : timelineSelection?.isSelecting
+                    ? 'crosshair'
+                    : spaceKeyHeld
+                      ? 'grab'
+                      : 'crosshair'
+              }}
             >
               <ErrorBoundary>
                 <DeterministicLayoutComponent
@@ -1190,6 +1272,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               {timelineSelection?.isSelecting && (
                 <div
                   className="absolute pointer-events-none z-30 transition-all duration-75 ease-out"
+                  data-testid="selection-overlay"
                   style={{
                     left: Math.min(timelineSelection.startX, timelineSelection.currentX),
                     top: 0,
@@ -1236,8 +1319,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                         backgroundColor: 'var(--color-surface)',
                         border: '1px solid var(--color-border-primary)',
                         backdropFilter: 'blur(8px)',
-                        width: '36px',
-                        height: '36px',
+                        width: '44px',
+                        height: '44px',
                         padding: '8px',
                         borderRadius: '50%',
                         flexShrink: 0,
@@ -1246,6 +1329,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                         },
                       }}
                       aria-label="Share timeline"
+                      data-testid="btn-share"
                     >
                       <span className="material-symbols-rounded" aria-hidden="true">share</span>
                     </IconButton>
@@ -1264,15 +1348,15 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               )}
 
               {/* Icon-based control bar */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[60] transition-opacity duration-200 opacity-20 hover:opacity-95" data-tour="zoom-controls">
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[60] transition-opacity duration-200 opacity-20 hover:opacity-95" data-tour="zoom-controls" data-testid="zoom-controls">
                 <div className="backdrop-blur-sm border rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)', opacity: 0.95 }}>
                   <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Pan left"><span className="material-symbols-rounded" aria-hidden="true">chevron_left</span></IconButton></Tooltip>
                   <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Pan right"><span className="material-symbols-rounded" aria-hidden="true">chevron_right</span></IconButton></Tooltip>
                   <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
-                  <Tooltip title="Zoom in" placement="top"><IconButton size="small" color="primary" onClick={() => zoom(0.8)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Zoom in"><AddIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
-                  <Tooltip title="Zoom out" placement="top"><IconButton size="small" color="default" onClick={() => zoom(1.25)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Zoom out"><RemoveIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
+                  <Tooltip title="Zoom in" placement="top"><IconButton data-testid="btn-zoom-in" size="small" color="primary" onClick={handleZoomIn} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Zoom in"><AddIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
+                  <Tooltip title="Zoom out" placement="top"><IconButton data-testid="btn-zoom-out" size="small" color="default" onClick={handleZoomOut} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Zoom out"><RemoveIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
                   <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
-                  <Tooltip title="Fit all" placement="top"><IconButton size="small" color="info" onClick={() => { animateTo(0, 1); }} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Fit all"><FitScreenIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
+                  <Tooltip title="Fit all" placement="top"><IconButton data-testid="btn-fit-all" size="small" color="info" onClick={() => { animateTo(0, 1); }} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Fit all"><FitScreenIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
                 </div>
               </div>
             </div>

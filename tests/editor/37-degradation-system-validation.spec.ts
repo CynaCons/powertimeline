@@ -27,7 +27,7 @@ test.describe('Degradation System Validation', () => {
       await page.goto('/');
 
       // Wait for timeline to load
-      await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
 
       console.log(`\n🔍 TESTING DEGRADATION SYSTEM WITH ${dataset.name.toUpperCase()}`);
       
@@ -58,7 +58,7 @@ test.describe('Degradation System Validation', () => {
       console.log(`🔎 Testing zoom levels for ${dataset.name}...`);
       
       // Get timeline center for zoom operations
-      const timelineArea = page.locator('.absolute.inset-0.ml-14');
+      const timelineArea = page.locator('[data-testid="timeline-container"]');
       const timelineBox = await timelineArea.boundingBox();
       const centerX = timelineBox!.x + timelineBox!.width * 0.5;
       const centerY = timelineBox!.y + timelineBox!.height * 0.5;
@@ -143,7 +143,7 @@ test.describe('Degradation System Validation', () => {
   
   test('Degradation system stress test - Dense regions', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
     
     console.log('\n🔥 DEGRADATION STRESS TEST - Dense Timeline Regions');
     
@@ -158,7 +158,7 @@ test.describe('Degradation System Validation', () => {
     await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
     
     // Find dense regions by zooming in aggressively
-    const timelineArea = page.locator('.absolute.inset-0.ml-14');
+    const timelineArea = page.locator('[data-testid="timeline-container"]');
     const timelineBox = await timelineArea.boundingBox();
     const centerX = timelineBox!.x + timelineBox!.width * 0.5;
     const centerY = timelineBox!.y + timelineBox!.height * 0.5;
@@ -220,7 +220,7 @@ test.describe('Degradation System Validation', () => {
   
   test('Degradation system telemetry accuracy', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.absolute.inset-0.ml-14', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
     
     console.log('\n📊 TELEMETRY ACCURACY TEST');
     

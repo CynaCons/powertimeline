@@ -1,17 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
+import { loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/52 Side panel scroll behavior', () => {
   test('scroll wheel over Events panel scrolls the panel (not the canvas)', async ({ page }) => {
-    await loginAsTestUser(page);
-    await page.goto('/');
-
-    // Seed many events so the Events list overflows
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    for (let i = 0; i < 4; i++) {
-      await page.getByRole('button', { name: '+5' }).click();
-    }
-    // Leave Dev open or close; it shouldn't matter for the test
+    // Load timeline with many events so the Events list overflows
+    await loadTestTimeline(page, 'napoleon-bonaparte');
 
     // Open Events panel
     await page.locator('button[aria-label="Events"]').click();

@@ -180,9 +180,51 @@ node scripts/generate-test-doc.js --write-doc
 
 This uses the cached results from `tmp/test-docs/test-results.json` and completes instantly.
 
+## Test Environment Setup
+
+### Authentication
+
+Most tests use **public timeline routes** that don't require authentication. Tests navigate to:
+- `/:username/timeline/:timelineId` - e.g., `/cynacons/timeline/french-revolution`
+
+This allows tests to run without valid Firebase credentials.
+
+### Available Test Timelines
+
+| Timeline ID | Owner | Description |
+|-------------|-------|-------------|
+| `french-revolution` | cynacons | French Revolution (150+ events) |
+| `napoleon-bonaparte` | cynacons | Napoleon's life and campaigns |
+| `rfk-1968` | cynacons | RFK assassination timeline |
+| `jfk-presidency` | cynacons | JFK presidency timeline |
+| `charles-de-gaulle` | cynacons | De Gaulle timeline |
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npx playwright test tests/editor/50-panels-visibility.spec.ts
+
+# Run with headed browser (visible)
+npx playwright test tests/editor/50*.spec.ts --headed
+
+# Run production smoke tests only
+npm run test:prod
+```
+
+### Common Issues
+
+1. **"Login failed - check credentials"**: Tests should use `loadTestTimeline()` instead of `loginAsTestUser()` for read-only tests
+2. **"timeline-axis not found"**: Ensure dev server is running on port 5175
+3. **"event-card not found"**: Timeline may not have loaded - check network and route
+
 ## Version History
 
-- **v0.5.7** (current): Production tests passing (11/11). Auth deployment complete.
+- **v0.8.3** (current): Migrated tests to use public timeline routes, fixed auth failures
+- **v0.5.7**: Production tests passing (11/11). Auth deployment complete.
 - **v0.5.6**: Landing page polish and mobile responsiveness.
 - **v0.3.1**: Automated Playwright run on 2025-09-26 (v1.54.2). 8 / 65 spec files passing.
 - **Historical status:** No earlier recorded runs.

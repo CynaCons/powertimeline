@@ -1,11 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface UseTimelineZoomProps {
   zoomAtCursor: (zoomFactor: number, cursorX: number, windowWidth: number, containerLeft?: number, containerWidth?: number) => void;
   hoveredEventId?: string;
+  viewStart?: number;
+  viewEnd?: number;
+  setWindow?: (start: number, end: number) => void;
 }
 
-export function useTimelineZoom({ zoomAtCursor, hoveredEventId }: UseTimelineZoomProps) {
+export function useTimelineZoom({ zoomAtCursor, hoveredEventId, viewStart, viewEnd, setWindow }: UseTimelineZoomProps) {
+  // Use refs to avoid stale closure values during rapid scroll events
+  const viewStartRef = useRef(viewStart);
+  const viewEndRef = useRef(viewEnd);
+  const setWindowRef = useRef(setWindow);
+
+  // Keep refs in sync with props
+  useEffect(() => {
+    viewStartRef.current = viewStart;
+    viewEndRef.current = viewEnd;
+    setWindowRef.current = setWindow;
+  }, [viewStart, viewEnd, setWindow]);
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       // Skip if user is scrolling in input fields or panels
@@ -15,6 +30,22 @@ export function useTimelineZoom({ zoomAtCursor, hoveredEventId }: UseTimelineZoo
       }
 
       e.preventDefault();
+
+      // If Shift is held during scroll, pan horizontally instead of zoom
+      // Use refs for current values to avoid stale closure during rapid scrolling
+      const currentViewStart = viewStartRef.current;
+      const currentViewEnd = viewEndRef.current;
+      const currentSetWindow = setWindowRef.current;
+
+      if (e.shiftKey && currentViewStart !== undefined && currentViewEnd !== undefined && currentSetWindow) {
+        const currentWidth = currentViewEnd - currentViewStart;
+        // Scale factor to match drag-pan feel (~50px drag equivalent per scroll tick)
+        const panAmount = (e.deltaY / 2000) * currentWidth;
+        const newStart = Math.max(0, Math.min(1 - currentWidth, currentViewStart + panAmount));
+        const newEnd = newStart + currentWidth;
+        currentSetWindow(newStart, newEnd);
+        return;
+      }
 
       // Get cursor position
       const cursorX = e.clientX;
@@ -54,5 +85,5 @@ export function useTimelineZoom({ zoomAtCursor, hoveredEventId }: UseTimelineZoo
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [zoomAtCursor, hoveredEventId]);
+  }, [zoomAtCursor, hoveredEventId]); // viewStart, viewEnd, setWindow are accessed via refs
 }

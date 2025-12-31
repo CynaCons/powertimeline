@@ -35,13 +35,24 @@ test.describe('Visual Audit - Overlap Detection (Authenticated)', () => {
     await loginAsTestUser(page);
   });
 
-  test('detect z-index conflicts in editor mode', async ({ page }) => {
+  test('T87.1: detect z-index conflicts in editor mode', async ({ page }) => {
     // Load timeline as owner (edit mode)
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false); // Already logged in
 
     // Wait for editor to fully load
     await waitForEditorLoaded(page);
     await page.waitForTimeout(2000); // Allow animations to settle
+
+    // VERIFY CORRECT TIMELINE IS LOADED
+    const url = page.url();
+    console.log(`=== TIMELINE VERIFICATION ===`);
+    console.log(`URL: ${url}`);
+    expect(url, 'Should be on French Revolution timeline').toContain('french-revolution');
+
+    // VERIFY CARDS ARE LOADED (need cards to test overlaps)
+    const cardCount = await page.locator('[data-testid*="event-card"], [class*="event-card"]').count();
+    console.log(`Cards loaded: ${cardCount}`);
+    expect(cardCount, 'Should have cards to test overlaps').toBeGreaterThan(20);
 
     // Verify we're in editor mode by checking for edit controls
     const editorControls = page.locator('[data-testid="zoom-controls"], .zoom-controls, [class*="ZoomControl"]');
@@ -173,10 +184,16 @@ test.describe('Visual Audit - Overlap Detection (Authenticated)', () => {
     console.log(JSON.stringify(results, null, 2));
   });
 
-  test('verify z-index layer system after fixes', async ({ page }) => {
+  test('T87.2: verify z-index layer system after fixes', async ({ page }) => {
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page);
     await page.waitForTimeout(1500);
+
+    // VERIFY CORRECT TIMELINE IS LOADED
+    const url = page.url();
+    console.log(`=== TIMELINE VERIFICATION ===`);
+    console.log(`URL: ${url}`);
+    expect(url, 'Should be on French Revolution timeline').toContain('french-revolution');
 
     // Check specific z-index values match expected token system
     const zIndexChecks = await page.evaluate(() => {

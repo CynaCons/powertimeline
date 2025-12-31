@@ -50,10 +50,7 @@ test.describe('v5/10 Space optimization (horizontal & vertical)', () => {
 
   test('validates screen real estate usage with actual card positions', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
-
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'Long-range' }).click();
+    await page.goto('/cynacons/timeline/long-range');
 
     // Wait for cards to be rendered
     await page.waitForFunction(() => Boolean((window as any).__ccTelemetry && (window as any).__ccTelemetry.groups?.count >= 0));

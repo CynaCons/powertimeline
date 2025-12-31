@@ -37,7 +37,7 @@ test.describe('Timeline Minimap Tests', () => {
     await page.waitForTimeout(500);
 
     // Start from fit all (should show full window)
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
     
     // Check minimap view window at full zoom out
@@ -52,7 +52,7 @@ test.describe('Timeline Minimap Tests', () => {
     console.log(`Initial view window: width=${initialBox?.width}`);
 
     // Use zoom button to zoom in
-    await page.getByRole('button', { name: 'Zoom in' }).click();
+    await page.locator('[data-testid="btn-zoom-in"]').click();
     await page.waitForTimeout(500);
 
     // Check that view window got smaller
@@ -98,7 +98,7 @@ test.describe('Timeline Minimap Tests', () => {
     await page.waitForTimeout(500);
 
     // Start from fit all
-    await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(500);
     
     // Get initial timeline state

@@ -58,10 +58,7 @@ test.describe('v5/35 Adaptive Scale Visibility Tests', () => {
       console.log(`\n=== TESTING: ${testCase.name} ===`);
       
       // Reset to full timeline view first
-      await page.goto('/?dev=1');
-      await page.waitForTimeout(2000);
-      await page.click('button[aria-label="Developer Panel"]');
-      await page.click('button:has-text("Napoleon 1769-1821")');
+      await loadTestTimeline(page, 'timeline-napoleon');
       await page.waitForTimeout(2000);
       
       // Get timeline coordinates for this test case

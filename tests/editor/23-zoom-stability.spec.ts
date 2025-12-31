@@ -4,14 +4,8 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 test.describe('Timeline Zoom Stability Tests', () => {
   test('Cursor position remains stable during repeated zoom cycles', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     // Position cursor at fixed location (50% across timeline)
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
@@ -58,14 +52,8 @@ test.describe('Timeline Zoom Stability Tests', () => {
 
   test('Zoom behavior at timeline boundaries', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -91,7 +79,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     expect(leftPosition).toBeGreaterThan(0.05); // Should not stick to absolute left
     
     // Reset and test right boundary
-    await page.getByRole('button', { name: 'Fit All' }).click();
+  await page.locator('[data-testid="btn-fit-all"]').click();
     await page.waitForTimeout(300);
     
     // Test zoom at right boundary (90% from left edge)
@@ -117,14 +105,8 @@ test.describe('Timeline Zoom Stability Tests', () => {
 
   test('Zoom reversibility test', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -179,14 +161,8 @@ test.describe('Timeline Zoom Stability Tests', () => {
 
   test('Rapid zoom changes do not cause view window corruption', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -223,14 +199,8 @@ test.describe('Timeline Zoom Stability Tests', () => {
 
   test('Zoom with cursor at different screen positions', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/');
+    await loadTestTimeline(page, 'timeline-jfk');
     await page.waitForTimeout(1000);
-    
-    // Enable dev mode and load test events
-    await page.getByRole('button', { name: 'Developer Panel' }).click();
-    await page.getByRole('button', { name: 'JFK 1961-63' }).click();
-    await page.keyboard.press('Escape'); // Close dev panel
-    await page.waitForTimeout(500);
     
     const timelineArea = page.locator('.absolute.inset-0.ml-14');
     const timelineBox = await timelineArea.boundingBox();
@@ -241,7 +211,7 @@ test.describe('Timeline Zoom Stability Tests', () => {
     
     for (const position of testPositions) {
       // Reset zoom
-      await page.getByRole('button', { name: 'Fit All' }).click();
+    await page.locator('[data-testid="btn-fit-all"]').click();
       await page.waitForTimeout(300);
       
       const cursorX = timelineBox!.x + timelineBox!.width * position;
