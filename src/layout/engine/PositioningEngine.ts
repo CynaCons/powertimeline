@@ -11,7 +11,7 @@
 import type { Event } from '../../types';
 import type { LayoutConfig, PositionedCard, LayoutResult, Anchor, EventCluster } from '../types';
 import type { ColumnGroup } from '../LayoutEngine';
-import { CapacityModel } from '../CapacityModel';
+import { CapacityModel, CARD_FOOTPRINTS } from '../CapacityModel';
 import { getEventTimestamp } from '../../lib/time';
 
 export class PositioningEngine {
@@ -55,7 +55,13 @@ export class PositioningEngine {
 
     // Calculate vertical space reserved for margins and anchors
     // NOTE: We don't calculate available space here anymore - DegradationEngine handles capacity
-    const timelineMargin = 40; // spacing between cards and timeline axis (restored from 24px to prevent label overlap)
+    //
+    // ASYMMETRIC MARGIN APPROACH (v0.8.2 fix):
+    // - We don't have dates below the timeline axis, so we can use a smaller margin there
+    // - This gives more vertical space for cards above the timeline
+    // - Safe zones (minimap/breadcrumb) are handled at source in config.ts via HEADER_SAFE_ZONE
+    const aboveTimelineMargin = 48; // spacing between above-cards and timeline axis (increased for breathing room)
+    const belowTimelineMargin = 28; // reduced spacing below (no dates there, just cards)
     // Note: Anchor spacing constants are defined in createEventAnchors() where they're used
 
     for (const group of groups) {
@@ -109,15 +115,15 @@ export class PositioningEngine {
         const belowCards = isBelowHalfColumn ? actualCards : [];
 
         // Position above cards with mixed heights and proper spacing
-        // Start from timeline and stack upward (decreasing Y)
-        let aboveY = this.timelineY - timelineMargin;
+        // Start from timeline (already positioned with safe zone in config.ts) and stack upward (decreasing Y)
+        let aboveY = this.timelineY - aboveTimelineMargin;
         aboveCards.forEach((card) => {
           // Use the card's pre-set height from DegradationEngine (don't overwrite!)
           // card.height is already set correctly for mixed card types
           card.y = aboveY - card.height;
           card.x = group.centerX - (card.width / 2);
 
-          aboveY -= (card.height + cardSpacing);
+          aboveY = card.y - cardSpacing; // Next card starts above this one
 
           positionedCards.push(card);
           this.capacityModel.allocate(group.id, 'above', card.cardType);
@@ -125,7 +131,8 @@ export class PositioningEngine {
 
         // Position below cards with mixed heights and proper spacing
         // Start from timeline and stack downward (increasing Y)
-        let belowY = this.timelineY + timelineMargin;
+        // Using reduced belowTimelineMargin since there are no dates below
+        let belowY = this.timelineY + belowTimelineMargin;
         belowCards.forEach((card) => {
           // Use the card's pre-set height from DegradationEngine (don't overwrite!)
           // card.height is already set correctly for mixed card types
@@ -158,27 +165,96 @@ export class PositioningEngine {
     this.resolveCollisions(positionedCards);
 
     const capacityMetrics = this.capacityModel.getGlobalMetrics();
+    const derivedUsedSlots = positionedCards.reduce((sum, card) => {
+      const footprint = CARD_FOOTPRINTS[card.cardType] ?? 0;
+      return sum + footprint;
+    }, 0);
+
+    const derivedTotalSlots = clusters.length > 0
+      ? clusters.length * capacityMetrics.cellsPerSide * 2
+      : 0;
+
+    const totalSlots = capacityMetrics.totalCells || derivedTotalSlots;
+    const usedSlots = Math.min(totalSlots || derivedTotalSlots, capacityMetrics.usedCells || derivedUsedSlots);
+    const percentage = totalSlots > 0 ? Math.min(100, (usedSlots / totalSlots) * 100) : 0;
 
     return {
       positionedCards,
       anchors,
       clusters,
       utilization: {
-        totalSlots: capacityMetrics.totalCells,
-        usedSlots: capacityMetrics.usedCells,
-        percentage: capacityMetrics.utilization
+        totalSlots,
+        usedSlots,
+        percentage
       }
     };
   }
 
   /**
-   * Resolve collisions between positioned cards
+   * Build spatial hash for efficient collision detection
+   * Grid cell size: 100px
+   */
+  private buildSpatialHash(items: PositionedCard[]): Map<string, PositionedCard[]> {
+    const cellSize = 100;
+    const hash = new Map<string, PositionedCard[]>();
+
+    for (const card of items) {
+      // Calculate bounding box in world coordinates
+      const left = card.x - card.width / 2;
+      const right = card.x + card.width / 2;
+      const top = card.y;
+      const bottom = card.y + card.height;
+
+      // Find all cells this card overlaps
+      const minCellX = Math.floor(left / cellSize);
+      const maxCellX = Math.floor(right / cellSize);
+      const minCellY = Math.floor(top / cellSize);
+      const maxCellY = Math.floor(bottom / cellSize);
+
+      // Register card in all overlapping cells
+      for (let cx = minCellX; cx <= maxCellX; cx++) {
+        for (let cy = minCellY; cy <= maxCellY; cy++) {
+          const key = `${cx},${cy}`;
+          if (!hash.has(key)) {
+            hash.set(key, []);
+          }
+          hash.get(key)!.push(card);
+        }
+      }
+    }
+
+    return hash;
+  }
+
+  /**
+   * Get nearby cell keys (3x3 grid) around a card's position
+   */
+  private getNearbyCells(card: PositionedCard): string[] {
+    const cellSize = 100;
+    const centerX = Math.floor(card.x / cellSize);
+    const centerY = Math.floor(card.y / cellSize);
+
+    const cells: string[] = [];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        cells.push(`${centerX + dx},${centerY + dy}`);
+      }
+    }
+    return cells;
+  }
+
+  /**
+   * Resolve collisions between positioned cards using spatial hashing
    * CC-REQ-LAYOUT-XALIGN-001: Cards within same half-column must maintain X-alignment
    */
   private resolveCollisions(positionedCards: PositionedCard[]): void {
+    // Safe zone boundaries to prevent overlap with UI elements
+    const SCREEN_TOP_BOUNDARY = 10; // Absolute minimum - just off-screen prevention
+    const LEFT_SAFE_ZONE = 200; // Breadcrumb area protection (left nav 56px + breadcrumb area 144px)
+    const TOP_BREADCRUMB_ZONE = 120; // Only protect breadcrumb area in top region
     const resolveOverlaps = (items: PositionedCard[], preferRight = true) => {
       const within = (x: number, y: number, w: number, h: number) =>
-        x >= 0 && (x + w) <= this.config.viewportWidth && y >= 0 && (y + h) <= this.config.viewportHeight;
+        x >= 0 && (x + w) <= this.config.viewportWidth && y >= SCREEN_TOP_BOUNDARY && (y + h) <= this.config.viewportHeight;
       // FIXED: Collision detection using TOP coordinates (card.y is top, not center)
       // Cards collide if their bounding boxes overlap
       const collide = (a: PositionedCard, b: PositionedCard) => (
@@ -186,18 +262,40 @@ export class PositioningEngine {
         a.y < b.y + b.height && a.y + a.height > b.y
       );
       const spacing = 8; // minimal gap
-      const maxPasses = 6;
+      const maxPasses = 4; // Reduced from 6 due to spatial hashing efficiency
       for (let pass = 0; pass < maxPasses; pass++) {
         let changed = false;
+
+        // Build spatial hash at start of each pass (cards may have moved)
+        const spatialHash = this.buildSpatialHash(items);
+
         // Sort deterministically by area desc then x asc to move smaller ones first
         const ordered = items.slice().sort((a, b) => (b.width * b.height) - (a.width * a.height) || a.x - b.x);
-        for (let i = 0; i < ordered.length; i++) {
-          for (let j = i + 1; j < ordered.length; j++) {
-            const A = ordered[i], B = ordered[j];
+
+        for (const A of ordered) {
+          // Get nearby cells for this card
+          const nearbyCellKeys = this.getNearbyCells(A);
+          const candidates = new Set<PositionedCard>();
+
+          // Collect all cards from nearby cells
+          for (const cellKey of nearbyCellKeys) {
+            const cellCards = spatialHash.get(cellKey);
+            if (cellCards) {
+              for (const card of cellCards) {
+                if (card !== A) {
+                  candidates.add(card);
+                }
+              }
+            }
+          }
+
+          // Check collisions only with nearby candidates
+          for (const B of candidates) {
             // Only handle pairs on the same side to preserve above/below bands
             const aAbove = A.y < this.timelineY, bAbove = B.y < this.timelineY;
             if (aAbove !== bAbove) continue;
             if (!collide(A, B)) continue;
+
             const target = preferRight ? B : A;
             const other = preferRight ? A : B;
 
@@ -211,6 +309,13 @@ export class PositioningEngine {
               const required = other.x + Math.sign(target.x - other.x || 1) * (other.width / 2 + target.width / 2 + spacing);
               nx = required;
               const ny = target.y;
+
+              // Prevent nudging into breadcrumb safe zone (top-left corner)
+              if (ny < TOP_BREADCRUMB_ZONE && nx - target.width / 2 < LEFT_SAFE_ZONE) {
+                // Card would overlap breadcrumb area - skip horizontal nudge
+                continue;
+              }
+
               // FIXED: Use TOP coordinates - target.y is already the top, nx is the center
               if (within(nx - target.width / 2, ny, target.width, target.height)) {
                 target.x = Math.max(target.width / 2, Math.min(this.config.viewportWidth - target.width / 2, nx));
@@ -223,7 +328,7 @@ export class PositioningEngine {
             // Use consistent 12px spacing to maintain proper gaps between cards
             const step = 12; // Maintain consistent card spacing instead of target.height + 12
             let newY = target.y;
-            if (aAbove) newY = Math.max(0, target.y - step); // Move up (decrease Y)
+            if (aAbove) newY = Math.max(SCREEN_TOP_BOUNDARY, target.y - step); // Move up (decrease Y)
             else newY = Math.min(this.config.viewportHeight - target.height, target.y + step); // Move down (increase Y)
             // FIXED: Use TOP coordinates - newY and target.y are already top positions
             if (within(target.x - target.width / 2, newY, target.width, target.height)) {

@@ -6,11 +6,116 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
   const [viewEnd, setViewEnd] = useState(initialEnd);
   const animRef = useRef<number | null>(null);
   const cancelAnimationRef = useRef<(() => void) | null>(null);
+  const snapBackRef = useRef<number | null>(null);
 
   const setWindow = useCallback((start: number, end: number) => {
     setViewStart(Math.max(0, Math.min(1, start)));
     setViewEnd(Math.max(0, Math.min(1, end)));
   }, []);
+
+  // Rubber-band effect: Allow temporary over-panning with resistance
+  const setWindowWithRubberBand = useCallback((start: number, end: number) => {
+    const width = end - start;
+
+    // Check if we're out of bounds
+    const isOutOfBounds = start < 0 || end > 1;
+
+    if (!isOutOfBounds) {
+      // Normal case - just clamp to bounds
+      setViewStart(Math.max(0, Math.min(1, start)));
+      setViewEnd(Math.max(0, Math.min(1, end)));
+      return;
+    }
+
+    // Apply rubber-band effect when out of bounds
+    let finalStart = start;
+    let finalEnd = end;
+
+    if (start < 0) {
+      // Over-panning left
+      const overDrag = Math.abs(start);
+      const maxOverDrag = 0.15; // Maximum 15% of timeline over-drag
+      const resistance = Math.max(0.2, 1 - (overDrag / maxOverDrag));
+      finalStart = start * resistance;
+      finalEnd = finalStart + width;
+    } else if (end > 1) {
+      // Over-panning right
+      const overDrag = end - 1;
+      const maxOverDrag = 0.15;
+      const resistance = Math.max(0.2, 1 - (overDrag / maxOverDrag));
+      const overshoot = (end - 1) * resistance;
+      finalEnd = 1 + overshoot;
+      finalStart = finalEnd - width;
+    }
+
+    // Allow temporary out-of-bounds state for rubber-band effect
+    setViewStart(finalStart);
+    setViewEnd(finalEnd);
+  }, []);
+
+  // Snap back to valid bounds when out of bounds
+  const snapBackToBounds = useCallback(() => {
+    const width = viewEnd - viewStart;
+
+    // Check if we need to snap back
+    if (viewStart >= 0 && viewEnd <= 1) {
+      return; // Already in bounds
+    }
+
+    // Cancel any existing snap-back animation
+    if (snapBackRef.current !== null) {
+      cancelAnimationFrame(snapBackRef.current);
+      snapBackRef.current = null;
+    }
+
+    // Calculate target bounds
+    let targetStart = viewStart;
+    let targetEnd = viewEnd;
+
+    if (viewStart < 0) {
+      targetStart = 0;
+      targetEnd = width;
+    }
+    if (viewEnd > 1) {
+      targetEnd = 1;
+      targetStart = 1 - width;
+    }
+
+    // Ensure final bounds are valid
+    targetStart = Math.max(0, targetStart);
+    targetEnd = Math.min(1, targetEnd);
+
+    // Animate snap-back with ease-out
+    const startStart = viewStart;
+    const startEnd = viewEnd;
+    const startTime = performance.now();
+    const duration = 200; // 200ms snap-back duration
+
+    const ease = (t: number) => {
+      // Ease-out cubic
+      return 1 - Math.pow(1 - t, 3);
+    };
+
+    const step = () => {
+      const elapsed = performance.now() - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const eased = ease(progress);
+
+      const currentStart = startStart + (targetStart - startStart) * eased;
+      const currentEnd = startEnd + (targetEnd - startEnd) * eased;
+
+      setViewStart(currentStart);
+      setViewEnd(currentEnd);
+
+      if (progress < 1) {
+        snapBackRef.current = requestAnimationFrame(step);
+      } else {
+        snapBackRef.current = null;
+      }
+    };
+
+    snapBackRef.current = requestAnimationFrame(step);
+  }, [viewStart, viewEnd]);
 
   const animateToWindow = useCallback((targetStart: number, targetEnd: number, duration = 400) => {
     // Cancel any existing animation
@@ -37,14 +142,22 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     });
   }, [viewStart, viewEnd, setWindow]);
 
-  const nudge = useCallback((delta: number) => {
+  const nudge = useCallback((delta: number, withRubberBand = false) => {
     const width = Math.max(viewEnd - viewStart, 0.00002);
-    let start = viewStart + delta; let end = viewEnd + delta;
-    if (start < 0) { end -= start; start = 0; }
-    if (end > 1) { start -= end - 1; end = 1; }
-    if (end - start < width) end = start + width;
-    setWindow(start, end);
-  }, [viewStart, viewEnd, setWindow]);
+    let start = viewStart + delta;
+    let end = viewEnd + delta;
+
+    if (withRubberBand) {
+      // Use rubber-band effect when panning past boundaries
+      setWindowWithRubberBand(start, end);
+    } else {
+      // Original behavior: hard clamp at boundaries
+      if (start < 0) { end -= start; start = 0; }
+      if (end > 1) { start -= end - 1; end = 1; }
+      if (end - start < width) end = start + width;
+      setWindow(start, end);
+    }
+  }, [viewStart, viewEnd, setWindow, setWindowWithRubberBand]);
 
   const zoom = useCallback((factor: number) => {
     const center = (viewStart + viewEnd) / 2;
@@ -221,6 +334,8 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     viewStart,
     viewEnd,
     setWindow,
+    setWindowWithRubberBand,
+    snapBackToBounds,
     nudge,
     zoom,
     zoomAtCursor,

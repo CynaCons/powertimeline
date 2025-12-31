@@ -43,6 +43,10 @@ interface Window {
 		capacity?: {
 			totalCells?: number;
 		};
+		/** Event dates for temporal density analysis (T97) */
+		eventDates?: Array<{ id: string; date: string }>;
+		/** Timeline date range for temporal analysis */
+		timelineRange?: { minDate: string; maxDate: string };
 		[key: string]: unknown;
 	};
 

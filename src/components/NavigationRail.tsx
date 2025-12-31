@@ -228,6 +228,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         className="flex flex-col items-center gap-2 navigation-rail"
         role="navigation"
         aria-label="Main navigation"
+        data-testid="navigation-rail"
       >
         {mainSections.map((section, sectionIndex) =>
           renderSection(section, sectionIndex, mainSections.length)
@@ -315,6 +316,7 @@ export const ThemeToggleButton: React.FC = () => {
           e.currentTarget.style.color = 'var(--page-text-secondary)';
         }}
         aria-label="Toggle theme"
+        data-testid="btn-theme-toggle"
       >
         <span aria-hidden="true">{getThemeIcon()}</span>
       </button>

@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-12-27
-**Version:** v0.8.0
+**Last Updated:** 2025-12-31
+**Version:** v0.8.3.1
 
 ---
 
@@ -419,8 +419,8 @@ This index should be updated when:
 - Implementation status changes significantly
 - Test coverage improves
 
-**Last audit:** 2025-12-27 (v0.8.0)
-**Next audit:** After v0.8.1 completion
+**Last audit:** 2025-12-31 (v0.8.3.1)
+**Next audit:** After v0.9.0 completion
 
 ---
 

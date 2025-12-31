@@ -342,7 +342,7 @@ export const AuthoringOverlay: React.FC<AuthoringOverlayProps> = ({
 
       {/* Three-panel overlay container */}
       <div
-        className="relative rounded-2xl shadow-2xl max-w-[1080px] w-[90vw] h-[80vh] overflow-hidden flex"
+        className="relative rounded-2xl shadow-2xl max-w-[1080px] w-[90vw] h-[80vh] overflow-hidden flex z-[500]"
         ref={rootRef}
         role="dialog"
         aria-modal="true"

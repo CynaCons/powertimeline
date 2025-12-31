@@ -4,6 +4,7 @@ import type { Event } from '../types';
 import type { LayoutConfig, PositionedCard, Anchor, EventCluster } from './types';
 
 // Telemetry types now defined in vite-env.d.ts Window interface
+import { CARD_FOOTPRINTS, LAYOUT_CONSTANTS } from './CapacityModel';
 import { createLayoutConfig } from './config';
 import { DeterministicLayoutV5, type DispatchMetrics } from './LayoutEngine';
 import { useAxisTicks, type Tick } from '../timeline/hooks/useAxisTicks';
@@ -11,6 +12,7 @@ import { EnhancedTimelineAxis } from '../components/EnhancedTimelineAxis';
 import { getEventTimestamp, formatEventDateTime } from '../lib/time';
 import { environment } from '../config/environment';
 import { performanceMonitor } from '../utils/performanceMonitor';
+import CardHoverPreview from '../components/CardHoverPreview';
 
 const monitoringEnabled = environment.flags.enableTelemetry || environment.isDevelopment;
 
@@ -43,8 +45,32 @@ export function DeterministicLayoutComponent({
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
 
+  // Layout cache to avoid recalculating when only view window changes
+  const layoutCacheRef = useRef<{
+    events: Event[];
+    config: LayoutConfig;
+    result: {
+      positionedCards: PositionedCard[];
+      anchors: Anchor[];
+      clusters: EventCluster[];
+      utilization: { totalSlots: number; usedSlots: number; percentage: number };
+      telemetryMetrics?: any;
+    };
+    viewWindow: { viewStart: number; viewEnd: number };
+  } | null>(null);
+
   // State for anchor-card pair highlighting
   const [hoveredPairEventId, setHoveredPairEventId] = useState<string | null>(null);
+
+  // State for card hover preview
+  const [previewCard, setPreviewCard] = useState<{
+    event: Event;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // Timer for preview delay
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const updateSize = useCallback(() => {
     if (containerRef.current) {
@@ -55,22 +81,54 @@ export function DeterministicLayoutComponent({
       });
     }
   }, []);
+
+  // Card hover handlers for preview
+  const handleCardMouseEnter = useCallback((card: PositionedCard, e: React.MouseEvent) => {
+    // Only show for degraded cards (compact or title-only)
+    if (card.cardType === 'full') return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    previewTimerRef.current = setTimeout(() => {
+      setPreviewCard({
+        event: card.event,
+        x: rect.right,
+        y: rect.top
+      });
+    }, 300); // 300ms delay to avoid flashing on quick hovers
+  }, []);
+
+  const handleCardMouseLeave = useCallback(() => {
+    if (previewTimerRef.current) {
+      clearTimeout(previewTimerRef.current);
+      previewTimerRef.current = null;
+    }
+    setPreviewCard(null);
+  }, []);
   
   useEffect(() => {
     updateSize();
-    
+
     const resizeObserver = new ResizeObserver(() => {
       updateSize();
     });
-    
+
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-    
+
     return () => {
       resizeObserver.disconnect();
     };
   }, [updateSize]);
+
+  // Cleanup preview timer on unmount
+  useEffect(() => {
+    return () => {
+      if (previewTimerRef.current) {
+        clearTimeout(previewTimerRef.current);
+      }
+    };
+  }, []);
 
   // Calculate timeline date range for axis ticks
   const timelineRange = useMemo(() => {
@@ -298,6 +356,18 @@ export function DeterministicLayoutComponent({
       };
     }
 
+    // Check cache: reuse layout if events, viewport, AND view window are unchanged
+    const eventsUnchanged = layoutCacheRef.current?.events === events;
+    const configUnchanged = layoutCacheRef.current?.config.viewportWidth === config.viewportWidth
+      && layoutCacheRef.current?.config.viewportHeight === config.viewportHeight;
+    const viewWindowUnchanged = layoutCacheRef.current?.viewWindow?.viewStart === viewStart
+      && layoutCacheRef.current?.viewWindow?.viewEnd === viewEnd;
+
+    if (eventsUnchanged && configUnchanged && viewWindowUnchanged && layoutCacheRef.current) {
+      return layoutCacheRef.current.result;
+    }
+
+    // Cache miss - recalculate layout
     const deterministicLayout = new DeterministicLayoutV5(config);
 
     const shouldMeasureLayout = monitoringEnabled && typeof performance !== 'undefined';
@@ -306,16 +376,36 @@ export function DeterministicLayoutComponent({
       performanceMonitor.startLayoutMeasurement();
     }
 
+    let layoutResult;
     try {
       // Pass view window to layout algorithm for proper filtering with overflow context
       const viewWindow = viewTimeWindow ? { viewStart, viewEnd } : undefined;
-      return deterministicLayout.layout(events, viewWindow);
+      layoutResult = deterministicLayout.layout(events, viewWindow);
     } finally {
       if (shouldMeasureLayout) {
         performanceMonitor.endLayoutMeasurement();
       }
     }
+
+    // Update cache
+    layoutCacheRef.current = {
+      events,
+      config,
+      result: layoutResult,
+      viewWindow: { viewStart, viewEnd }
+    };
+
+    return layoutResult;
   }, [events, config, viewStart, viewEnd, viewTimeWindow]);
+
+  const cardsByEventId = useMemo(() => {
+    const map = new Map<string, PositionedCard[]>();
+    layoutResult.positionedCards.forEach(card => {
+      const existing = map.get(card.event.id) || [];
+      map.set(card.event.id, [...existing, card]);
+    });
+    return map;
+  }, [layoutResult.positionedCards]);
 
   // Always show all anchors - they should persist even during card degradation
   const filteredAnchors = useMemo(() => {
@@ -378,23 +468,19 @@ export function DeterministicLayoutComponent({
   // Telemetry: expose dispatch/capacity/placements for tests and overlays
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Only set telemetry when there are actual events to avoid setting empty/zero telemetry
+    if (events.length === 0) return;
     const { positionedCards, anchors, clusters, utilization } = layoutResult;
 
-    // Use telemetry from layout engine if available, fallback to manual calculation
-    const engineMetrics = layoutResult.telemetryMetrics;
-    let dispatchMetrics: DispatchMetrics | undefined;
-
-    if (engineMetrics) {
-      dispatchMetrics = engineMetrics.dispatch;
-    } else {
-      // Fallback: calculate manually if engine metrics not available
+    const calculateDispatchFallback = (): DispatchMetrics => {
       const groupsCount = clusters.length;
       const clusterSizes = clusters.map((c: EventCluster) => c.events.length || 0);
       const avgEventsPerCluster = groupsCount > 0 ? (clusterSizes.reduce((a: number, b: number) => a + b, 0) / groupsCount) : 0;
       const largestCluster = Math.max(0, ...clusterSizes);
       const xs = anchors.map((a: Anchor) => a.x).sort((a: number, b: number) => a - b);
       const pitches = xs.length > 1 ? xs.slice(1).map((x: number, i: number) => Math.abs(x - xs[i])) : [];
-      dispatchMetrics = {
+
+      return {
         groupCount: groupsCount,
         avgEventsPerCluster,
         largestCluster,
@@ -405,12 +491,32 @@ export function DeterministicLayoutComponent({
         },
         horizontalSpaceUsage: 0 // Placeholder
       };
-    }
+    };
 
-    // Capacity model from layoutResult.utilization
-    const totalCells = Math.max(0, utilization.totalSlots || 0);
-    const usedCells = Math.max(0, utilization.usedSlots || 0);
-    const utilPct = Math.max(0, Math.min(100, utilization.percentage || 0));
+    // Use telemetry from layout engine if available, fallback to manual calculation
+    const engineMetrics = layoutResult.telemetryMetrics;
+    const dispatchMetrics: DispatchMetrics = engineMetrics?.dispatch
+      ? engineMetrics.dispatch
+      : calculateDispatchFallback();
+
+    // Capacity model from layoutResult.utilization with fallback to actual allocations
+    const availableHeight = (viewportSize.height / 2) - LAYOUT_CONSTANTS.TIMELINE_MARGIN;
+    const cellUnit = LAYOUT_CONSTANTS.TITLE_ONLY_CARD_HEIGHT + LAYOUT_CONSTANTS.CARD_VERTICAL_SPACING;
+    const rawCellsPerSide = Math.floor(availableHeight / cellUnit);
+    const cellsPerSide = Math.min(
+      LAYOUT_CONSTANTS.MAX_CELLS_PER_SIDE,
+      Math.max(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE, rawCellsPerSide)
+    );
+
+    const derivedTotalCells = clusters.length > 0 ? clusters.length * cellsPerSide * 2 : 0;
+    const derivedUsedCells = positionedCards.reduce((sum: number, card: PositionedCard) => {
+      const footprint = CARD_FOOTPRINTS[card.cardType] ?? 0;
+      return sum + footprint;
+    }, 0);
+
+    const totalCells = Math.max(0, utilization.totalSlots || 0, derivedTotalCells, derivedUsedCells);
+    const usedCells = Math.min(totalCells || derivedTotalCells, Math.max(0, utilization.usedSlots || derivedUsedCells));
+    const utilPct = totalCells > 0 ? Math.max(0, Math.min(100, (usedCells / totalCells) * 100)) : 0;
 
     // Placements for stability
     const placements = positionedCards.map((p: PositionedCard) => ({
@@ -573,7 +679,20 @@ export function DeterministicLayoutComponent({
         timelineY: config?.timelineY ?? viewportSize.height / 2
       },
       adaptive: layoutResult.telemetryMetrics?.adaptive,
-      degradation: layoutResult.telemetryMetrics?.degradation
+      degradation: layoutResult.telemetryMetrics?.degradation,
+      // Event dates for temporal density analysis (T97)
+      eventDates: events.map(event => ({
+        id: event.id,
+        date: event.date,  // ISO date string YYYY-MM-DD
+      })),
+      // Timeline date range for temporal analysis
+      timelineRange: events.length > 0 ? (() => {
+        const dates = events.map(e => e.date).filter(Boolean).sort();
+        return {
+          minDate: dates[0] || '',
+          maxDate: dates[dates.length - 1] || '',
+        };
+      })() : { minDate: '', maxDate: '' }
     };
 
     window.__ccTelemetry = telemetry;
@@ -641,17 +760,14 @@ export function DeterministicLayoutComponent({
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
 
         // Determine if anchor's events are above or below timeline
-        const anchorCards = layoutResult.positionedCards.filter(card => {
-          const cardEventIds = [card.event.id];
-          return cardEventIds.some(id => anchor.eventIds?.includes(id));
-        });
-        // If no matching cards, suppress this anchor entirely (belt-and-suspenders)
-        if (anchorCards.length === 0) return null;
-
         const anchorEventIds = [
           ...(anchor.eventIds ?? []),
           ...(anchor.eventId ? [anchor.eventId] : [])
         ];
+        const anchorCards = anchorEventIds.flatMap(eventId => cardsByEventId.get(eventId) || []);
+        // If no matching cards, suppress this anchor entirely (belt-and-suspenders)
+        if (anchorCards.length === 0) return null;
+
         const primaryAnchorEventId = anchor.eventId ?? anchor.eventIds?.[0] ?? null;
         const isAnchorHovered = (hoveredEventId && anchorEventIds.includes(hoveredEventId)) ||
                                 (hoveredPairEventId && anchorEventIds.includes(hoveredPairEventId));
@@ -762,9 +878,21 @@ export function DeterministicLayoutComponent({
           +{badge.totalOverflow}
         </div>
       ))}
-      
-      {/* Cards */}
-      {layoutResult.positionedCards.map((card, cardIndex) => {
+
+      {/* Cards - virtualized to only render visible cards */}
+      {(() => {
+        // Viewport bounds for card virtualization
+        const BUFFER = 200; // pixels outside viewport to pre-render
+        const viewportLeft = 0;
+        const viewportRight = viewportSize.width;
+
+        // Filter cards to only those within or near viewport
+        const visibleCards = layoutResult.positionedCards.filter(card =>
+          card.x + card.width > viewportLeft - BUFFER &&
+          card.x < viewportRight + BUFFER
+        );
+
+        return visibleCards.map((card, cardIndex) => {
         const primaryCardEventId = card.event?.id ?? card.id;
         const isCardSelected = selectedEventId ? primaryCardEventId === selectedEventId : false;
         const isCardHovered = hoveredEventId ? primaryCardEventId === hoveredEventId : false;
@@ -842,25 +970,28 @@ export function DeterministicLayoutComponent({
                 onCardDoubleClick(primaryCardEventId);
               }
             }}
-            onMouseEnter={() => {
+            onMouseEnter={(e) => {
               if (primaryCardEventId) {
                 setHoveredPairEventId(primaryCardEventId);
               }
               if (primaryCardEventId && onCardMouseEnter) {
                 onCardMouseEnter(primaryCardEventId);
               }
+              handleCardMouseEnter(card, e);
             }}
             onMouseLeave={() => {
               setHoveredPairEventId(null);
               if (onCardMouseLeave) {
                 onCardMouseLeave();
               }
+              handleCardMouseLeave();
             }}
           >
             {content}
           </div>
         );
-      })}
+      });
+      })()}
 
       {/* Info Panels - Only show when enabled */}
       {showInfoPanels && (
@@ -873,6 +1004,15 @@ export function DeterministicLayoutComponent({
           <p className="text-xs text-gray-600">{layoutResult.clusters.length} column groups</p>
           <p className="text-xs text-gray-600">Slot utilisation {layoutResult.utilization.percentage.toFixed(1)}%</p>
         </div>
+      )}
+
+      {/* Card Hover Preview */}
+      {previewCard && (
+        <CardHoverPreview
+          event={previewCard.event}
+          position={{ x: previewCard.x, y: previewCard.y }}
+          onClose={() => setPreviewCard(null)}
+        />
       )}
     </div>
   );

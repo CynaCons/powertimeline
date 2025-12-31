@@ -168,7 +168,7 @@ export function TimelineMinimap({
 
   return (
     <div
-      data-testid="timeline-minimap"
+      data-testid="minimap-container"
       className={`relative rounded px-2 py-1 transition-all duration-300 ease-out shadow-sm hover:shadow-md ${className}`}
       style={{ backgroundColor: 'var(--page-bg-elevated)', border: '1px solid var(--page-border)' }}
       onMouseEnter={() => setIsHovering(true)}

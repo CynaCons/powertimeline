@@ -51,6 +51,22 @@ This fragment expands on Sections 3 and 4 of the primary `SRS.md`. It captures d
 | CC-REQ-CAPACITY-SLOTS-001 | Slot allocation follows fixed rules based on card type | Full cards: 4 cells per half-column<br> Compact cards: 4 cells per half-column<br> Title-only cards: 8 cells per half-column<br> Cell counts are deterministic and consistent across all timelines | `src/layout/engine/DegradationEngine.ts` | v5/03, v5/48 |
 | CC-REQ-CAPACITY-INDEPENDENT-001 | Above and below timeline sections have independent capacity tracking | Above section capacity calculated independently from below section<br> Different card types can be used simultaneously (above=compact, below=full)<br> Capacity exhaustion in one section doesn't affect the other<br> Each section optimizes space usage independently<br> **Exception**: Degradation decisions coordinate at spatial cluster level per CC-REQ-CLUSTER-COORD-001 | `src/layout/LayoutEngine.ts` | v5/12 |
 
+### Performance Optimizations (v0.8.3)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests | Status |
+|---|---|---|---|---|---|
+| CC-REQ-PERF-SPATIAL-001 | Spatial hashing for collision detection reduces O(n²) complexity to O(n) | Collision detection uses spatial hashing with 100px grid cells<br> Cards register in all grid cells they overlap<br> Collision checks only compare cards within same or adjacent cells<br> Average complexity O(n) instead of O(n²)<br> Implementation handles edge cases (cards spanning multiple cells) | `src/layout/engine/PositioningEngine.ts:buildSpatialHash()` | 97-high-density-stress.spec.ts, 98-interaction-model-v083.spec.ts | Implemented |
+| CC-REQ-PERF-VIRTUAL-001 | Card virtualization keeps DOM size constant regardless of event count | Only render cards within viewport bounds (±200px buffer)<br> DOM stays at ~20-40 nodes regardless of total events<br> Full card list maintained for anchor positioning and telemetry<br> Scroll performance remains smooth with 1000+ events | `src/layout/DeterministicLayoutComponent.tsx` | 97-high-density-stress.spec.ts | Implemented |
+| CC-REQ-PERF-CACHE-001 | Layout caching prevents redundant recalculations during pan/zoom | Cache layout results when events unchanged<br> Invalidate cache on: events change, viewport resize, viewStart/viewEnd change<br> Pan operations reuse cached layout (no recalculation)<br> Zoom operations trigger recalculation only when necessary | `src/layout/DeterministicLayoutComponent.tsx:layoutCacheRef` | 98-interaction-model-v083.spec.ts | Implemented |
+| CC-REQ-PERF-MAP-001 | Anchor-card map provides O(1) lookup for event-to-card associations | O(1) anchor-to-card lookup via Map<eventId, PositionedCard[]><br> Replaces O(n²) filter operations for card queries<br> Map updated whenever layout recalculates<br> Supports multiple cards per event (stacking scenarios) | `src/layout/DeterministicLayoutComponent.tsx:cardsByEventId` | 98-interaction-model-v083.spec.ts | Implemented |
+
+### Hover Effects (v0.8.3)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests | Status |
+|---|---|---|---|---|---|
+| CC-REQ-CARD-HOVER-001 | Cards elevate on hover with subtle lift effect | Cards scale to 1.02x on hover<br> Shadow elevation changes to shadow-lg<br> Z-index increases above adjacent cards (prevents shadow clipping)<br> Transition duration 200ms ease-out<br> Effect applies to all card types (full, compact, title-only) | `src/styles/index.css:.card-hover-scale` | 98-interaction-model-v083.spec.ts | Implemented |
+| CC-REQ-CARD-PREVIEW-001 | Hover preview displays full content for degraded cards | Floating preview appears after 300ms hover delay<br> Shows full title, date, description, and sources for compact/title-only cards<br> Positioned to right of card (or left if near viewport edge)<br> Preview dismissed on mouse leave<br> Z-index ensures preview appears above all cards<br> Only shown for cards with truncated content | `src/components/CardHoverPreview.tsx` | 98-interaction-model-v083.spec.ts | Implemented |
+
 ## Implementation Notes
 
 ### Card Type Selection Logic
@@ -163,3 +179,5 @@ This prevents visual clutter when multiple half-columns have overflow in close p
 - 2025-10-01 Added CC-REQ-DEGRADATION-METRICS-001 for telemetry tracking
 - 2025-10-01 Documented overflow badge merging strategy from DeterministicLayoutComponent.tsx
 - 2025-12-27 Updated compact card height from 92px to 82px; updated capacity slots terminology to "cells"; noted FEATURE_FLAGS.ENABLE_MIXED_CARD_TYPES implementation
+- 2025-12-31 Added v0.8.3 Performance Optimizations requirements (CC-REQ-PERF-SPATIAL-001, CC-REQ-PERF-VIRTUAL-001, CC-REQ-PERF-CACHE-001, CC-REQ-PERF-MAP-001)
+- 2025-12-31 Added v0.8.3 Hover Effects requirements (CC-REQ-CARD-HOVER-001, CC-REQ-CARD-PREVIEW-001)

@@ -30,12 +30,17 @@ export const CARD_HEIGHT_CELLS: Record<CardType, number> = {
 // Timeline margin constant (used in capacity calculations)
 const TIMELINE_MARGIN = 80; // pixels reserved for timeline axis and spacing
 
+// Safe zone at top of screen to prevent overlap with minimap and breadcrumbs
+const HEADER_SAFE_ZONE = 100; // minimap (50px) + breadcrumb (40px) + padding (10px)
+
 export function createLayoutConfig(
   viewportWidth: number,
   viewportHeight: number,
   customConfig?: Partial<LayoutConfig>
 ): LayoutConfig {
-  const timelineY = viewportHeight / 2; // Center timeline vertically
+  // Calculate timeline Y with safe zone at top
+  const availableHeight = viewportHeight - HEADER_SAFE_ZONE;
+  const timelineY = HEADER_SAFE_ZONE + (availableHeight / 2);
 
   return {
     viewportWidth,
@@ -50,15 +55,19 @@ export function createLayoutConfig(
 }
 
 export function updateLayoutConfigForViewport(
-  config: LayoutConfig, 
-  newWidth: number, 
+  config: LayoutConfig,
+  newWidth: number,
   newHeight: number
 ): LayoutConfig {
+  // Recalculate timeline Y with safe zone
+  const availableHeight = newHeight - HEADER_SAFE_ZONE;
+  const timelineY = HEADER_SAFE_ZONE + (availableHeight / 2);
+
   return {
     ...config,
     viewportWidth: newWidth,
     viewportHeight: newHeight,
-    timelineY: newHeight / 2
+    timelineY
   };
 }
 

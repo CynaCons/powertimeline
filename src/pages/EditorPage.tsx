@@ -216,16 +216,30 @@ export function EditorPage() {
 
       <div className="relative">
         {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
+        {/* Transparent by default (behind cards), visible on hover (above cards) */}
         {/* z-[1400] when stream view open to appear above overlay (z-1300) */}
         {timeline && user && (
-          <div className={`absolute top-11 left-20 pointer-events-none ${streamViewerOpen ? 'z-[1400]' : 'z-[60]'}`}>
+          <div
+            className={`absolute top-11 left-20 group ${streamViewerOpen ? 'z-[1400]' : 'z-[5] hover:z-[70]'}`}
+          >
             <div
-              className="backdrop-blur-sm rounded px-3 py-0.5 pointer-events-auto inline-flex items-center gap-2"
+              className="rounded px-3 py-0.5 inline-flex items-center gap-2 transition-all duration-200"
               style={{
-                backgroundColor: 'var(--page-bg-elevated)',
+                // Transparent by default, visible on hover
+                backgroundColor: 'transparent',
                 borderWidth: '1px',
                 borderStyle: 'solid',
-                borderColor: 'var(--page-border)'
+                borderColor: 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--page-bg-elevated)';
+                e.currentTarget.style.borderColor = 'var(--page-border)';
+                e.currentTarget.classList.add('backdrop-blur-sm');
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = 'transparent';
+                e.currentTarget.classList.remove('backdrop-blur-sm');
               }}
             >
               <Breadcrumb items={[

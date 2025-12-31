@@ -9,8 +9,44 @@ This fragment expands on Section 6 of the primary `SRS.md`. It captures detailed
 | CC-REQ-ZOOM-001 | Zoom filters visible events; cursor-anchored zoom keeps time under cursor stable; boundaries clamp | • Zooming in reduces the visible time range and filters events<br>• Zooming centers on the cursor position and keeps the time under cursor stable<br>• Zoom boundaries clamp to prevent zooming beyond min/max limits<br>• Fit All button resets view to show all events | `src/App.tsx`, `src/app/hooks/useViewWindow.ts` | v5/17, v5/20, v5/24 |
 | CC-REQ-ZOOM-002 | Zoom operations maintain event positions relative to cursor and handle edge cases gracefully | • Events remain positioned correctly after zoom operations<br>• Extreme zoom levels (very zoomed in or out) maintain system stability<br>• Card count may reach 0 at extreme zoom when all cards are pushed outside view<br>• No visual artifacts or overlaps occur during zoom transitions | `src/app/hooks/useViewWindow.ts` | v5/18, v5/19, v5/23 |
 | CC-REQ-ZOOM-003 | System supports maximum zoom down to minute-level precision with appropriate scaling | • Timeline supports zooming down to minute-level granularity<br>• Axis labels adapt appropriately at deep zoom (decades→years→months→days→hours)<br>• View window can be navigated across full timeline range at maximum zoom<br>• Content distribution remains functional during deep zoom navigation | `src/app/hooks/useViewWindow.ts` | v5/25, v5/29 |
+| CC-REQ-ZOOM-WHEEL-001 | Mouse wheel zoom toward cursor position | • Mouse wheel scroll zooms timeline toward cursor position<br>• Zoom factor: 0.8 (zoom in) / 1.25 (zoom out) per tick<br>• Cursor position remains stable during zoom<br>• Zooming respects timeline boundaries (0-1 range) | `src/app/hooks/useTimelineZoom.ts` | 98-interaction-model-v083.spec.ts |
+| CC-REQ-ZOOM-SELECT-001 | Selection zoom (double-cursor) | • Default click+drag on canvas creates blue selection rectangle<br>• Visual: Blue gradient overlay with vertical edge cursors<br>• Label: "Select to Zoom" shown during selection<br>• On release: Zoom to selected time range (min 20px threshold)<br>• Cursor: Crosshair during selection | `src/app/hooks/useTimelineSelection.ts` | 98-interaction-model-v083.spec.ts |
+| CC-REQ-PAN-SPACE-001 | Space+drag pan mode | • Space key + click+drag pans timeline horizontally<br>• Cursor: grab (ready) / grabbing (active)<br>• Hard clamp at timeline boundaries (0-1)<br>• Visual feedback through cursor state changes | `src/app/hooks/useTimelineSelection.ts` | 98-interaction-model-v083.spec.ts |
+| CC-REQ-PAN-SHIFT-001 | Shift+scroll horizontal pan | • Shift + mouse wheel scrolls timeline horizontally<br>• Pan amount proportional to current view width<br>• Same resolution feel as Space+drag pan<br>• Respects timeline boundaries (0-1 range) | `src/app/hooks/useTimelineZoom.ts` | 98-interaction-model-v083.spec.ts |
 
 ## Implementation Details
+
+### Interaction Model (v0.8.3)
+
+The v0.8.3 release introduced a comprehensive interaction model with four primary navigation modes:
+
+1. **Mouse Wheel Zoom (CC-REQ-ZOOM-WHEEL-001)**
+   - Implemented in `useTimelineZoom.ts`
+   - Zooms toward cursor position with zoom factors: 0.8 (in) / 1.25 (out)
+   - Cursor position remains stable during zoom operations
+   - Respects timeline boundaries (0-1 range)
+
+2. **Selection Zoom (CC-REQ-ZOOM-SELECT-001)**
+   - Implemented in `useTimelineSelection.ts`
+   - Default click+drag on canvas creates selection rectangle
+   - Visual: Blue gradient overlay with vertical edge cursors
+   - "Select to Zoom" label displayed during selection
+   - On release: Zooms to selected time range (minimum 20px threshold)
+   - Cursor: Crosshair during selection
+
+3. **Space+Drag Pan (CC-REQ-PAN-SPACE-001)**
+   - Implemented in `useTimelineSelection.ts`
+   - Space key + click+drag pans timeline horizontally
+   - Cursor states: grab (ready) / grabbing (active)
+   - Hard clamp at timeline boundaries (0-1)
+   - Visual feedback through cursor state changes
+
+4. **Shift+Scroll Pan (CC-REQ-PAN-SHIFT-001)**
+   - Implemented in `useTimelineZoom.ts`
+   - Shift + mouse wheel scrolls timeline horizontally
+   - Pan amount proportional to current view width
+   - Same resolution feel as Space+drag pan
+   - Respects timeline boundaries (0-1 range)
 
 ### Zoom Behavior
 
@@ -56,3 +92,4 @@ The zoom system is implemented in `useViewWindow.ts` and provides:
 
 - 2025-10-01 — Initial extraction from `docs/SRS.md` following the pattern established by SRS_FOUNDATION.md and SRS_LAYOUT.md. Added detailed acceptance criteria and implementation notes based on test suite validation work.
 - 2025-10-01 — Documented edge case behavior: extreme zoom can result in 0 visible cards (expected behavior validated in v5/18).
+- 2025-12-31 — Added v0.8.3 interaction model requirements: mouse wheel zoom (CC-REQ-ZOOM-WHEEL-001), selection zoom (CC-REQ-ZOOM-SELECT-001), space+drag pan (CC-REQ-PAN-SPACE-001), and shift+scroll pan (CC-REQ-PAN-SHIFT-001).

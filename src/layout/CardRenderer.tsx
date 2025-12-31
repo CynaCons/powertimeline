@@ -66,46 +66,6 @@ export function CardRenderer({
       onDoubleClick={handleDoubleClick}
     >
       {renderCardContent(card)}
-      
-      {/* Curved connector line to anchor */}
-      <svg
-        className="absolute pointer-events-none"
-        style={{
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: '100px',
-          transform: `translate(0, ${card.height}px)`,
-          overflow: 'visible'
-        }}
-      >
-        <defs>
-          <linearGradient id={`connector-gradient-${card.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="var(--color-primary-400)" stopOpacity="0.8" />
-            <stop offset="50%" stopColor="var(--color-primary-500)" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="var(--color-primary-600)" stopOpacity="0.3" />
-          </linearGradient>
-          {isSelected && (
-            <filter id={`connector-glow-${card.id}`}>
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          )}
-        </defs>
-        <path
-          d={generateConnectorPath(card)}
-          stroke={`url(#connector-gradient-${card.id})`}
-          strokeWidth={isSelected ? 2.5 : 1.5}
-          fill="none"
-          opacity={isSelected ? 0.9 : 0.6}
-          filter={isSelected ? `url(#connector-glow-${card.id})` : undefined}
-          className="transition-all duration-300 ease-out"
-          strokeDasharray={isHovered ? "5,3" : undefined}
-        />
-      </svg>
     </div>
   );
 }
@@ -144,24 +104,6 @@ function getElevationClass(cardType: CardType, isSelected: boolean, isHovered: b
     default:
       return 'card-elevation-1';
   }
-}
-
-function generateConnectorPath(card: PositionedCard): string {
-  const startX = card.width / 2;
-  const startY = 0;
-  const endX = startX;
-  const endY = 80; // Reduced distance to match smaller timeline axis
-
-  // Calculate control points for bezier curve
-  const controlDistance = 30; // Reduced for smaller curve
-  const horizontalOffset = Math.max(-20, Math.min(20, (card.x - 400) * 0.03)); // Subtle curve based on position
-
-  const control1X = startX + horizontalOffset;
-  const control1Y = startY + controlDistance;
-  const control2X = endX - horizontalOffset;
-  const control2Y = endY - controlDistance;
-
-  return `M ${startX} ${startY} C ${control1X} ${control1Y}, ${control2X} ${control2Y}, ${endX} ${endY}`;
 }
 
 function renderCardContent(card: PositionedCard): React.ReactNode {
@@ -261,31 +203,4 @@ function formatDate(dateString: string): string {
     month: 'short',
     day: 'numeric'
   });
-}
-
-// Connector component for drawing lines from cards to anchors
-export function CardConnector({ card, anchorX, anchorY }: { card: PositionedCard; anchorX: number; anchorY: number }) {
-  return (
-    <svg
-      className="absolute pointer-events-none"
-      style={{
-        left: 0,
-        top: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 5
-      }}
-    >
-      <line
-        x1={card.x}
-        y1={card.y}
-        x2={anchorX}
-        y2={anchorY}
-        stroke="#9ca3af"
-        strokeWidth={1}
-        opacity={0.4}
-        className="drop-shadow-sm"
-      />
-    </svg>
-  );
 }

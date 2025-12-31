@@ -9,17 +9,27 @@ interface UseTimelineZoomProps {
 }
 
 export function useTimelineZoom({ zoomAtCursor, hoveredEventId, viewStart, viewEnd, setWindow }: UseTimelineZoomProps) {
-  // Use refs to avoid stale closure values during rapid scroll events
-  const viewStartRef = useRef(viewStart);
-  const viewEndRef = useRef(viewEnd);
+  // Pan accumulator for smooth Shift+scroll panning
+  const panAccumulatorRef = useRef(0);
+  const panBaselineStartRef = useRef(viewStart);
+  const panBaselineEndRef = useRef(viewEnd);
+  const rafIdRef = useRef<number | null>(null);
   const setWindowRef = useRef(setWindow);
 
-  // Keep refs in sync with props
+  // Keep setWindow ref in sync
   useEffect(() => {
-    viewStartRef.current = viewStart;
-    viewEndRef.current = viewEnd;
     setWindowRef.current = setWindow;
-  }, [viewStart, viewEnd, setWindow]);
+  }, [setWindow]);
+
+  // Sync baseline when view window changes externally (e.g., from other interactions)
+  useEffect(() => {
+    // Only update baseline if we're not in the middle of a pan operation
+    if (rafIdRef.current === null) {
+      panBaselineStartRef.current = viewStart;
+      panBaselineEndRef.current = viewEnd;
+      panAccumulatorRef.current = 0;
+    }
+  }, [viewStart, viewEnd]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -32,18 +42,39 @@ export function useTimelineZoom({ zoomAtCursor, hoveredEventId, viewStart, viewE
       e.preventDefault();
 
       // If Shift is held during scroll, pan horizontally instead of zoom
-      // Use refs for current values to avoid stale closure during rapid scrolling
-      const currentViewStart = viewStartRef.current;
-      const currentViewEnd = viewEndRef.current;
-      const currentSetWindow = setWindowRef.current;
-
-      if (e.shiftKey && currentViewStart !== undefined && currentViewEnd !== undefined && currentSetWindow) {
-        const currentWidth = currentViewEnd - currentViewStart;
+      if (e.shiftKey && viewStart !== undefined && viewEnd !== undefined && setWindow &&
+          panBaselineStartRef.current !== undefined && panBaselineEndRef.current !== undefined) {
+        const currentWidth = panBaselineEndRef.current - panBaselineStartRef.current;
         // Scale factor to match drag-pan feel (~50px drag equivalent per scroll tick)
-        const panAmount = (e.deltaY / 2000) * currentWidth;
-        const newStart = Math.max(0, Math.min(1 - currentWidth, currentViewStart + panAmount));
-        const newEnd = newStart + currentWidth;
-        currentSetWindow(newStart, newEnd);
+        const panDelta = (e.deltaY / 2000) * currentWidth;
+
+        // Accumulate the delta instead of applying immediately
+        panAccumulatorRef.current += panDelta;
+
+        // Cancel any pending animation frame
+        if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+        }
+
+        // Capture baseline for closure
+        const baselineStart = panBaselineStartRef.current;
+
+        // Schedule update on next frame to batch rapid scroll events
+        rafIdRef.current = requestAnimationFrame(() => {
+          rafIdRef.current = null;
+
+          // Apply accumulated delta to baseline
+          const totalDelta = panAccumulatorRef.current;
+          const newStart = Math.max(0, Math.min(1 - currentWidth, baselineStart + totalDelta));
+          const newEnd = newStart + currentWidth;
+
+          // Update baseline for next batch of events
+          panBaselineStartRef.current = newStart;
+          panBaselineEndRef.current = newEnd;
+          panAccumulatorRef.current = 0;
+
+          setWindowRef.current?.(newStart, newEnd);
+        });
         return;
       }
 

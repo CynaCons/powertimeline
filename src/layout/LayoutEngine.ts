@@ -273,11 +273,14 @@ export class DeterministicLayoutV5 {
       this.timeRange
     );
 
-    // Add metrics to result for downstream telemetry consumers
-    (result as LayoutResult & { telemetryMetrics: typeof metrics }).telemetryMetrics = metrics;
-
     this.dlog('Layout completed successfully');
-    return result;
+    // Add metrics to result for downstream telemetry consumers
+    const resultWithTelemetry: LayoutResult = {
+      ...result,
+      telemetryMetrics: metrics
+    };
+
+    return resultWithTelemetry;
   }
 
   /**

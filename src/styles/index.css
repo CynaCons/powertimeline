@@ -285,7 +285,7 @@
 
 /* Elevation System */
 .card-elevation-1 {
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .card-elevation-2 {
@@ -300,19 +300,27 @@
   box-shadow: var(--shadow-xl);
 }
 
+[data-theme="dark"] .card-elevation-1 {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 /* Card Hover Animations */
 .card-hover-scale {
   transform: scale(1);
   transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
+    transform 200ms ease-out,
+    box-shadow 200ms ease-out,
     z-index 0ms;
 }
 
 .card-hover-scale:hover {
   transform: scale(1.02);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
   z-index: 15;
+}
+
+[data-theme="dark"] .card-hover-scale:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .card-hover-scale.card-selected {

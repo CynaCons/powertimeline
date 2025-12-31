@@ -1,21 +1,51 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface TimelineSelection {
   isSelecting: boolean;
+  isPanning: boolean;
   startX: number;
   currentX: number;
   containerLeft: number;
   containerWidth: number;
+  initialViewStart: number;
+  initialViewEnd: number;
 }
 
 interface UseTimelineSelectionProps {
   viewStart: number;
   viewEnd: number;
   setWindow: (start: number, end: number) => void;
+  snapBackToBounds: () => void;
 }
 
-export function useTimelineSelection({ viewStart, viewEnd, setWindow }: UseTimelineSelectionProps) {
+export function useTimelineSelection({ viewStart, viewEnd, setWindow, snapBackToBounds }: UseTimelineSelectionProps) {
   const [timelineSelection, setTimelineSelection] = useState<TimelineSelection | null>(null);
+  const spaceKeyHeldRef = useRef(false);
+  const [spaceKeyHeld, setSpaceKeyHeld] = useState(false);
+
+  // Track Space key state
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        spaceKeyHeldRef.current = true;
+        setSpaceKeyHeld(true);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        spaceKeyHeldRef.current = false;
+        setSpaceKeyHeld(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   const handleTimelineMouseDown = useCallback((e: React.MouseEvent) => {
     // Only start selection on the timeline area, not on cards or other elements
@@ -35,30 +65,76 @@ export function useTimelineSelection({ viewStart, viewEnd, setWindow }: UseTimel
     const rect = container.getBoundingClientRect();
     const startX = e.clientX - rect.left;
 
+    // Default is selection-zoom mode (double-cursor zoom)
+    // Space+Click enables pan mode
+    const isSelectionMode = !spaceKeyHeldRef.current;
+
     setTimelineSelection({
-      isSelecting: true,
+      isSelecting: isSelectionMode,
+      isPanning: !isSelectionMode,
       startX,
       currentX: startX,
       containerLeft: rect.left,
-      containerWidth: rect.width
+      containerWidth: rect.width,
+      initialViewStart: viewStart,
+      initialViewEnd: viewEnd,
     });
 
     e.preventDefault();
-  }, []);
+  }, [viewStart, viewEnd]);
 
   const handleTimelineMouseMove = useCallback((e: MouseEvent) => {
-    if (!timelineSelection?.isSelecting) return;
+    if (!timelineSelection || (!timelineSelection.isSelecting && !timelineSelection.isPanning)) return;
 
     const currentX = e.clientX - timelineSelection.containerLeft;
-    setTimelineSelection(prev => prev ? {
-      ...prev,
-      currentX: Math.max(0, Math.min(timelineSelection.containerWidth, currentX))
-    } : null);
-  }, [timelineSelection]);
+
+    if (timelineSelection.isPanning) {
+      // Calculate pan delta
+      const leftMargin = 96;
+      const rightMargin = 40;
+      const usableWidth = timelineSelection.containerWidth - leftMargin - rightMargin;
+
+      const deltaX = currentX - timelineSelection.startX;
+      const timelineDelta = -(deltaX / usableWidth) * (timelineSelection.initialViewEnd - timelineSelection.initialViewStart);
+
+      const newStart = timelineSelection.initialViewStart + timelineDelta;
+      const newEnd = timelineSelection.initialViewEnd + timelineDelta;
+
+      // Clamp panning to valid bounds
+      const width = newEnd - newStart;
+      let clampedStart = newStart;
+      let clampedEnd = newEnd;
+
+      if (clampedStart < 0) {
+        clampedStart = 0;
+        clampedEnd = width;
+      }
+      if (clampedEnd > 1) {
+        clampedEnd = 1;
+        clampedStart = 1 - width;
+      }
+
+      setWindow(clampedStart, clampedEnd);
+    } else {
+      // Selection mode - just track cursor
+      setTimelineSelection(prev => prev ? {
+        ...prev,
+        currentX: Math.max(0, Math.min(timelineSelection.containerWidth, currentX))
+      } : null);
+    }
+  }, [timelineSelection, setWindow]);
 
   const handleTimelineMouseUp = useCallback(() => {
-    if (!timelineSelection?.isSelecting) return;
+    if (!timelineSelection || (!timelineSelection.isSelecting && !timelineSelection.isPanning)) return;
 
+    if (timelineSelection.isPanning) {
+      // Snap back to valid bounds if out of bounds
+      snapBackToBounds();
+      setTimelineSelection(null);
+      return;
+    }
+
+    // Selection mode - zoom to selection
     const { startX, currentX, containerWidth } = timelineSelection;
 
     // Calculate timeline positions (0-1) for the selection
@@ -87,11 +163,12 @@ export function useTimelineSelection({ viewStart, viewEnd, setWindow }: UseTimel
     }
 
     setTimelineSelection(null);
-  }, [timelineSelection, viewStart, viewEnd, setWindow]);
+  }, [timelineSelection, viewStart, viewEnd, setWindow, snapBackToBounds]);
 
   // Add global mouse listeners for drag
   useEffect(() => {
-    if (!timelineSelection?.isSelecting) return;
+    const isActive = timelineSelection?.isSelecting || timelineSelection?.isPanning;
+    if (!isActive) return;
 
     document.addEventListener('mousemove', handleTimelineMouseMove);
     document.addEventListener('mouseup', handleTimelineMouseUp);
@@ -100,10 +177,11 @@ export function useTimelineSelection({ viewStart, viewEnd, setWindow }: UseTimel
       document.removeEventListener('mousemove', handleTimelineMouseMove);
       document.removeEventListener('mouseup', handleTimelineMouseUp);
     };
-  }, [handleTimelineMouseMove, handleTimelineMouseUp, timelineSelection?.isSelecting]);
+  }, [handleTimelineMouseMove, handleTimelineMouseUp, timelineSelection?.isSelecting, timelineSelection?.isPanning]);
 
   return {
     timelineSelection,
-    handleTimelineMouseDown
+    handleTimelineMouseDown,
+    spaceKeyHeld
   };
 }

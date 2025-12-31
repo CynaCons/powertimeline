@@ -155,7 +155,7 @@ export async function zoomAndSwipe<T>(
       console.log(`\n  🔍 Zooming in to level ${zoomLevel + 1}...`);
 
       if (finalConfig.useZoomButtons) {
-        await page.getByRole('button', { name: 'Zoom in' }).click();
+        await page.locator('[data-testid="btn-zoom-in"]').click();
       } else {
         await page.keyboard.press('Equal'); // '+' key for zoom in
       }

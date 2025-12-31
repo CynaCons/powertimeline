@@ -2,11 +2,12 @@
 
 This SRS is the single source of truth for PowerTimeline requirements. Each requirement has a stable ID and a table entry with acceptance, status, primary code references, and linked tests. Status lifecycle: Proposed → Approved → Implemented → Verified.
 
-> **📊 [View Requirements Dashboard & Index](SRS_INDEX.md)** - Complete overview of all ~155 requirements with status tracking, quick lookup, and feature area breakdown.
+> **📊 [View Requirements Dashboard & Index](SRS_INDEX.md)** - Complete overview of all ~352 requirements with status tracking, quick lookup, and feature area breakdown.
 
 ## Overview
 - Product: PowerTimeline — interactive historical timeline explorer.
 - Scope: Timeline rendering, card layout and overflow, anchors, zoom/pan, minimap, and axis scales. Out of scope: accounts, collaboration, media.
+- Version: v0.8.3.1
 
 ## Functional Requirements by Feature Area
 

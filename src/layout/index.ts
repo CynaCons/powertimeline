@@ -15,7 +15,7 @@ export {
 } from './config';
 
 // React components
-export { CardRenderer, CardConnector } from './CardRenderer';
+export { CardRenderer } from './CardRenderer';
 export { AnchorBadge, AnchorBadgeHtml } from './AnchorBadge';
 
 // React hooks
