@@ -692,11 +692,13 @@ export function DeterministicLayoutComponent({
           minDate: dates[0] || '',
           maxDate: dates[dates.length - 1] || '',
         };
-      })() : { minDate: '', maxDate: '' }
+      })() : { minDate: '', maxDate: '' },
+      // View window for interaction testing (pan/zoom verification)
+      viewWindow: { viewStart, viewEnd }
     };
 
     window.__ccTelemetry = telemetry;
-  }, [layoutResult, events, viewportSize.width, viewportSize.height, config]);
+  }, [layoutResult, events, viewportSize.width, viewportSize.height, config, viewStart, viewEnd]);
 
 
   return (

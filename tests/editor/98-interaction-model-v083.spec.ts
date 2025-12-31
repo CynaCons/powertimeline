@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('v0.8.3 Interaction Model Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/timeline/french-revolution');
+    await page.goto('/cynacons/timeline/french-revolution');
     await page.waitForSelector('[data-testid="timeline-canvas"]', { timeout: 10000 });
 
     // Wait for layout to stabilize

@@ -47,6 +47,8 @@ interface Window {
 		eventDates?: Array<{ id: string; date: string }>;
 		/** Timeline date range for temporal analysis */
 		timelineRange?: { minDate: string; maxDate: string };
+		/** View window for interaction testing (pan/zoom state) */
+		viewWindow?: { viewStart: number; viewEnd: number };
 		[key: string]: unknown;
 	};
 
