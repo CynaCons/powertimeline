@@ -245,7 +245,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   }, [applyZoomWithAnchor]);
 
   // Timeline interaction hooks
-  useTimelineZoom({ zoomAtCursor: handleZoomAtCursor, hoveredEventId, viewStart, viewEnd, setWindow });
+  const { isPanning } = useTimelineZoom({ zoomAtCursor: handleZoomAtCursor, hoveredEventId, viewStart, viewEnd, setWindow });
   const { timelineSelection, handleTimelineMouseDown, spaceKeyHeld } = useTimelineSelection({ viewStart, viewEnd, setWindow, snapBackToBounds });
 
   const handleTimelineMouseDownWithSelection = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -1255,6 +1255,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   viewStart={viewStart}
                   viewEnd={viewEnd}
                   hoveredEventId={hoveredEventId}
+                  isPanning={isPanning}
                   onCardDoubleClick={(id) => {
                     // Allow ALL users to open overlay - AuthoringOverlay handles view vs edit mode
                     // Use pending pattern to ensure selectedWithPreviews is ready before overlay opens

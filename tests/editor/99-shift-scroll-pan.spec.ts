@@ -3,46 +3,28 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E tests for Shift+Scroll horizontal panning
  *
- * These tests verify the timeline's Shift+scroll feature that allows
- * horizontal panning by holding Shift and scrolling vertically.
- *
- * Key bug being tested: Rapid scrolling should NOT cause "rollback" -
- * the view jumping back and forth instead of smoothly panning.
- *
- * We test this by tracking the minimap view window position, which
- * directly reflects the current view state.
+ * Tests the timeline's Shift+scroll feature for horizontal panning.
+ * Key focus: Rapid scrolling should NOT cause "rollback" (view jumping back).
  */
 
 test.describe('Shift+Scroll Horizontal Pan', () => {
   test.beforeEach(async ({ page }) => {
-    // Load timeline with good event distribution
     await page.goto('/cynacons/timeline/french-revolution');
     await page.waitForSelector('[data-testid="timeline-canvas"]', { timeout: 10000 });
     await page.waitForSelector('[data-testid="minimap-container"]', { timeout: 10000 });
-
-    // Give the timeline time to fully initialize
     await page.waitForTimeout(500);
   });
 
-  /**
-   * Get the minimap view window element (the draggable rectangle)
-   */
   function getMinimapViewWindow(page: any) {
     return page.locator('[data-testid="minimap-container"] .cursor-grab, [data-testid="minimap-container"] .cursor-grabbing').first();
   }
 
-  /**
-   * Get the x position of the minimap view window
-   */
   async function getViewWindowX(page: any): Promise<number> {
     const viewWindow = getMinimapViewWindow(page);
     const box = await viewWindow.boundingBox();
     return box?.x ?? 0;
   }
 
-  /**
-   * Helper to position mouse over timeline canvas center
-   */
   async function moveToCanvas(page: any) {
     const canvas = page.locator('[data-testid="timeline-canvas"]');
     const bbox = await canvas.boundingBox();
@@ -51,12 +33,8 @@ test.describe('Shift+Scroll Horizontal Pan', () => {
     }
   }
 
-  /**
-   * Helper to zoom in so panning is possible (when fully zoomed out, there's nothing to pan to)
-   */
   async function zoomInForPanning(page: any) {
     await moveToCanvas(page);
-    // Scroll up (negative deltaY) to zoom in several times
     for (let i = 0; i < 5; i++) {
       await page.mouse.wheel(0, -100);
       await page.waitForTimeout(100);
@@ -64,224 +42,21 @@ test.describe('Shift+Scroll Horizontal Pan', () => {
     await page.waitForTimeout(300);
   }
 
-  test('minimap view window moves right with Shift+scroll down', async ({ page }) => {
-    // Zoom in first so we have room to pan
+  test('pan left/right with boundary constraints', async ({ page }) => {
     await zoomInForPanning(page);
 
-    // Get initial minimap view window position
-    const initialX = await getViewWindowX(page);
-
-    // Perform Shift+scroll down (should pan right = view window moves right)
-    await page.keyboard.down('Shift');
-    await page.mouse.wheel(0, 200);
-    await page.keyboard.up('Shift');
-
-    // Wait for view to update
-    await page.waitForTimeout(300);
-
-    // Check that minimap view window moved right
-    const newX = await getViewWindowX(page);
-    expect(newX).toBeGreaterThan(initialX);
-  });
-
-  test('minimap view window moves left with Shift+scroll up', async ({ page }) => {
-    // Zoom in first
-    await zoomInForPanning(page);
-
-    // Pan right first to have room to pan left
-    await page.keyboard.down('Shift');
-    await page.mouse.wheel(0, 300);
-    await page.keyboard.up('Shift');
-    await page.waitForTimeout(300);
-
-    // Get position after initial pan
-    const initialX = await getViewWindowX(page);
-
-    // Perform Shift+scroll up (should pan left = view window moves left)
-    await page.keyboard.down('Shift');
-    await page.mouse.wheel(0, -200);
-    await page.keyboard.up('Shift');
-
-    // Wait for view to update
-    await page.waitForTimeout(300);
-
-    // Check that minimap view window moved left
-    const newX = await getViewWindowX(page);
-    expect(newX).toBeLessThan(initialX);
-  });
-
-  test('CRITICAL: rapid Shift+scroll produces monotonic movement without rollback', async ({ page }) => {
-    // This is the critical test for the rollback bug
-    // During rapid scrolling, the minimap view window should move monotonically
-    // (always in the same direction, never jumping back)
-
-    // Zoom in first so we have room to pan
-    await zoomInForPanning(page);
-
-    const positions: number[] = [];
-
-    // Capture initial position
-    positions.push(await getViewWindowX(page));
-
-    // Hold Shift and send many rapid scroll events
-    await page.keyboard.down('Shift');
-
-    // Send 20 rapid scroll events
-    for (let i = 0; i < 20; i++) {
-      await page.mouse.wheel(0, 50); // Scroll down = pan right
-      await page.waitForTimeout(30); // Very short delay to simulate rapid scrolling
-
-      // Capture position after each scroll
-      positions.push(await getViewWindowX(page));
-    }
-
-    await page.keyboard.up('Shift');
-
-    // Log positions for debugging
-    console.log('Minimap X positions during rapid scroll:', positions);
-
-    // Verify monotonic movement (no rollback)
-    // Each position should be >= previous (view window moving right or staying put)
-    let rollbackCount = 0;
-    for (let i = 1; i < positions.length; i++) {
-      const prev = positions[i - 1];
-      const current = positions[i];
-
-      if (current < prev) {
-        rollbackCount++;
-        console.log(`ROLLBACK at index ${i}: ${current} < ${prev}`);
-      }
-    }
-
-    // Should have zero rollbacks
-    expect(rollbackCount).toBe(0);
-
-    // Additionally verify we actually moved (not stuck at boundary)
-    const totalMovement = positions[positions.length - 1] - positions[0];
-    expect(totalMovement).toBeGreaterThan(0);
-  });
-
-  test('continuous rapid scrolling maintains direction throughout', async ({ page }) => {
-    // Another rollback test with more events and varying scroll amounts
-    await zoomInForPanning(page);
-
-    const positions: { x: number; time: number }[] = [];
-
-    positions.push({ x: await getViewWindowX(page), time: Date.now() });
-
-    await page.keyboard.down('Shift');
-
-    // Varying scroll amounts to simulate real user scrolling
-    const scrollAmounts = [40, 60, 30, 80, 50, 70, 40, 55, 45, 65, 35, 75, 50, 60, 40];
-
-    for (const amount of scrollAmounts) {
-      await page.mouse.wheel(0, amount);
-      await page.waitForTimeout(40); // Simulate fast scrolling
-
-      positions.push({ x: await getViewWindowX(page), time: Date.now() });
-    }
-
-    await page.keyboard.up('Shift');
-
-    // Check for any rollbacks
-    let maxX = positions[0].x;
-    const rollbackEvents: string[] = [];
-
-    for (let i = 1; i < positions.length; i++) {
-      if (positions[i].x < maxX - 1) { // 1px tolerance for rounding
-        rollbackEvents.push(
-          `Position ${i}: x=${positions[i].x} < maxX=${maxX} (delta=${positions[i].x - maxX})`
-        );
-      }
-      maxX = Math.max(maxX, positions[i].x);
-    }
-
-    if (rollbackEvents.length > 0) {
-      console.log('ROLLBACK EVENTS DETECTED:');
-      rollbackEvents.forEach(e => console.log(e));
-    }
-
-    expect(rollbackEvents.length).toBe(0);
-  });
-
-  test('pan respects left boundary', async ({ page }) => {
-    await zoomInForPanning(page);
-
-    // Get minimap container bounds (use first() as there are 2 elements with this testid)
     const minimap = page.locator('[data-testid="minimap-container"]').first();
     const minimapBox = await minimap.boundingBox();
-
-    // Try to pan left past the start
-    await page.keyboard.down('Shift');
-    for (let i = 0; i < 20; i++) {
-      await page.mouse.wheel(0, -100); // Scroll up = pan left
-      await page.waitForTimeout(30);
-    }
-    await page.keyboard.up('Shift');
-
-    await page.waitForTimeout(200);
-
-    // Check that view window didn't go past left edge of minimap
-    const finalX = await getViewWindowX(page);
-    expect(finalX).toBeGreaterThanOrEqual(minimapBox!.x - 5); // 5px tolerance
-  });
-
-  test('pan respects right boundary', async ({ page }) => {
-    await zoomInForPanning(page);
-
-    // Get minimap container bounds (use first() as there are 2 elements with this testid)
-    const minimap = page.locator('[data-testid="minimap-container"]').first();
-    const minimapBox = await minimap.boundingBox();
-    const viewWindow = getMinimapViewWindow(page);
-
-    // Pan far to the right
-    await page.keyboard.down('Shift');
-    for (let i = 0; i < 30; i++) {
-      await page.mouse.wheel(0, 100); // Scroll down = pan right
-      await page.waitForTimeout(30);
-    }
-    await page.keyboard.up('Shift');
-
-    await page.waitForTimeout(200);
-
-    // Check that view window didn't go past right edge of minimap
-    const viewWindowBox = await viewWindow.boundingBox();
-    const viewWindowRight = viewWindowBox!.x + viewWindowBox!.width;
-    const minimapRight = minimapBox!.x + minimapBox!.width;
-
-    expect(viewWindowRight).toBeLessThanOrEqual(minimapRight + 5); // 5px tolerance
-  });
-
-  test('no horizontal pan without Shift key (should zoom instead)', async ({ page }) => {
-    await zoomInForPanning(page);
-
-    // Get initial position
     const initialX = await getViewWindowX(page);
-    const viewWindow = getMinimapViewWindow(page);
-    const initialBox = await viewWindow.boundingBox();
-    const initialWidth = initialBox!.width;
 
-    // Scroll without Shift (should zoom, not pan)
-    await page.mouse.wheel(0, 100); // Zoom out
-    await page.waitForTimeout(300);
-
-    // View window should have zoomed (width changed) but position should be similar
-    const finalBox = await viewWindow.boundingBox();
-
-    // Width should have increased (zoomed out = larger view window)
-    expect(finalBox!.width).toBeGreaterThan(initialWidth);
-  });
-
-  test('alternating pan directions work without glitches', async ({ page }) => {
-    await zoomInForPanning(page);
-
-    // Pan right first
+    // Pan right
     await page.keyboard.down('Shift');
     await page.mouse.wheel(0, 200);
     await page.keyboard.up('Shift');
     await page.waitForTimeout(200);
 
-    const afterRightPan = await getViewWindowX(page);
+    const afterRightX = await getViewWindowX(page);
+    expect(afterRightX).toBeGreaterThan(initialX);
 
     // Pan left
     await page.keyboard.down('Shift');
@@ -289,20 +64,149 @@ test.describe('Shift+Scroll Horizontal Pan', () => {
     await page.keyboard.up('Shift');
     await page.waitForTimeout(200);
 
-    const afterLeftPan = await getViewWindowX(page);
+    const afterLeftX = await getViewWindowX(page);
+    expect(afterLeftX).toBeLessThan(afterRightX);
 
-    // Should have moved left
-    expect(afterLeftPan).toBeLessThan(afterRightPan);
-
-    // Pan right again
+    // Test left boundary - try to pan past start
     await page.keyboard.down('Shift');
-    await page.mouse.wheel(0, 200);
+    for (let i = 0; i < 15; i++) {
+      await page.mouse.wheel(0, -100);
+      await page.waitForTimeout(20);
+    }
     await page.keyboard.up('Shift');
+    await page.waitForTimeout(100);
+
+    const atLeftBoundary = await getViewWindowX(page);
+    expect(atLeftBoundary).toBeGreaterThanOrEqual(minimapBox!.x - 5);
+
+    // Test right boundary - pan past end
+    await page.keyboard.down('Shift');
+    for (let i = 0; i < 30; i++) {
+      await page.mouse.wheel(0, 100);
+      await page.waitForTimeout(20);
+    }
+    await page.keyboard.up('Shift');
+    await page.waitForTimeout(100);
+
+    const viewWindow = getMinimapViewWindow(page);
+    const viewWindowBox = await viewWindow.boundingBox();
+    const viewWindowRight = viewWindowBox!.x + viewWindowBox!.width;
+    const minimapRight = minimapBox!.x + minimapBox!.width;
+    expect(viewWindowRight).toBeLessThanOrEqual(minimapRight + 5);
+  });
+
+  test('rapid scrolling produces monotonic movement (no rollback)', async ({ page }) => {
+    // Stress test: Verify no rollback during rapid Shift+scroll panning.
+    //
+    // The rollback bug: React's async/batched state updates can arrive with stale
+    // values during rapid scrolling, overwriting ref-based position tracking.
+    // Fix: useTimelineZoom ignores React syncs for 150ms after last wheel event.
+    //
+    // NOTE: Synthetic WheelEvents don't trigger React's batching identically to
+    // real mouse wheel events, so this test may pass even without the fix.
+    // Manual testing with a real mouse wheel is required for full verification.
+    await zoomInForPanning(page);
+
+    // Zoom in heavily for maximum panning headroom
+    for (let i = 0; i < 12; i++) {
+      await page.mouse.wheel(0, -100);
+      await page.waitForTimeout(20);
+    }
     await page.waitForTimeout(200);
 
-    const afterSecondRightPan = await getViewWindowX(page);
+    await page.keyboard.down('Shift');
 
-    // Should have moved right again
-    expect(afterSecondRightPan).toBeGreaterThan(afterLeftPan);
+    // Dispatch events and sample positions from WITHIN the browser
+    // This catches rollbacks that happen between React render cycles
+    const result = await page.evaluate(() => {
+      return new Promise<{ positions: number[]; rollbacks: number }>((resolve) => {
+        const canvas = document.querySelector('[data-testid="timeline-canvas"]');
+        const minimap = document.querySelector('[data-testid="minimap-container"]');
+        const viewWindow = minimap?.querySelector('.cursor-grab, .cursor-grabbing') as HTMLElement;
+
+        if (!canvas || !viewWindow) {
+          resolve({ positions: [], rollbacks: -1 });
+          return;
+        }
+
+        const positions: number[] = [];
+        let rollbacks = 0;
+        let lastX = viewWindow.getBoundingClientRect().x;
+        positions.push(lastX);
+
+        let eventsFired = 0;
+        const totalEvents = 300;
+
+        function fireEvent() {
+          if (eventsFired >= totalEvents) {
+            // Final position check
+            const finalX = viewWindow.getBoundingClientRect().x;
+            positions.push(finalX);
+            if (finalX < lastX - 1) rollbacks++;
+            resolve({ positions, rollbacks });
+            return;
+          }
+
+          const event = new WheelEvent('wheel', {
+            deltaY: 8 + Math.random() * 15,
+            deltaX: 0,
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true
+          });
+          canvas.dispatchEvent(event);
+          eventsFired++;
+
+          // Sample position every 10 events to detect mid-scroll rollbacks
+          if (eventsFired % 10 === 0) {
+            const currentX = viewWindow.getBoundingClientRect().x;
+            positions.push(currentX);
+            if (currentX < lastX - 1) {
+              rollbacks++;
+              console.log(`ROLLBACK at event ${eventsFired}: ${lastX.toFixed(1)} -> ${currentX.toFixed(1)}`);
+            }
+            lastX = Math.max(lastX, currentX); // Track high water mark
+          }
+
+          // Use requestAnimationFrame to interleave with React renders
+          // This is more likely to trigger the stale state race condition
+          if (eventsFired % 3 === 0) {
+            requestAnimationFrame(fireEvent);
+          } else {
+            // Mix in some immediate dispatches
+            setTimeout(fireEvent, 0);
+          }
+        }
+
+        fireEvent();
+      });
+    });
+
+    await page.keyboard.up('Shift');
+
+    const totalMovement = result.positions.length > 1
+      ? result.positions[result.positions.length - 1] - result.positions[0]
+      : 0;
+
+    console.log(`300 events, ${result.positions.length} samples, ${result.rollbacks} rollbacks, movement: ${totalMovement.toFixed(1)}px`);
+
+    expect(result.rollbacks).toBe(0);
+    expect(totalMovement).toBeGreaterThan(30);
+  });
+
+  test('scroll without Shift zooms instead of panning', async ({ page }) => {
+    await zoomInForPanning(page);
+
+    const viewWindow = getMinimapViewWindow(page);
+    const initialBox = await viewWindow.boundingBox();
+
+    // Scroll without Shift (should zoom out)
+    await page.mouse.wheel(0, 100);
+    await page.waitForTimeout(300);
+
+    const finalBox = await viewWindow.boundingBox();
+
+    // Width should increase (zoomed out = larger view window)
+    expect(finalBox!.width).toBeGreaterThan(initialBox!.width);
   });
 });

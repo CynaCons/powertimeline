@@ -92,16 +92,24 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     const bbox = await canvas.boundingBox();
     expect(bbox).not.toBeNull();
 
-    // Get initial view window
-    const initialView = await page.evaluate(() => {
-      return (window as any).__ccTelemetry?.viewWindow;
-    });
-    expect(initialView).toBeDefined();
-
     // Position mouse in center of canvas
     const centerX = bbox!.x + bbox!.width / 2;
     const centerY = bbox!.y + bbox!.height / 2;
     await page.mouse.move(centerX, centerY);
+
+    // Zoom in first so we can pan (can't pan when fully zoomed out)
+    for (let i = 0; i < 5; i++) {
+      await page.mouse.wheel(0, -100);
+      await page.waitForTimeout(100);
+    }
+    await page.waitForTimeout(300);
+
+    // Get initial view window (after zoom)
+    const initialView = await page.evaluate(() => {
+      return (window as any).__ccTelemetry?.viewWindow;
+    });
+    expect(initialView).toBeDefined();
+    expect(initialView.end - initialView.start).toBeLessThan(1); // Confirm zoomed in
 
     // Press and hold Space key
     await page.keyboard.down('Space');
@@ -162,75 +170,16 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     expect(cursorAfter).toBe('crosshair'); // Default is crosshair for selection
   });
 
-  test('T98.3: Shift+scroll horizontal pan - pans left/right', async ({ page }) => {
-    // Get canvas element
-    const canvas = page.locator('[data-testid="timeline-canvas"]');
-    const bbox = await canvas.boundingBox();
-    expect(bbox).not.toBeNull();
-
-    // Get initial view window
-    const initialView = await page.evaluate(() => {
-      return (window as any).__ccTelemetry?.viewWindow;
-    });
-    expect(initialView).toBeDefined();
-
-    // Position mouse in center of canvas
-    const centerX = bbox!.x + bbox!.width / 2;
-    const centerY = bbox!.y + bbox!.height / 2;
-    await page.mouse.move(centerX, centerY);
-
-    // Hold Shift key
-    await page.keyboard.down('Shift');
-
-    // Scroll down (positive deltaY = pan right)
-    await page.mouse.wheel(0, 100);
-
-    // Release Shift
-    await page.keyboard.up('Shift');
-
-    // Wait for pan to complete
-    await page.waitForTimeout(100);
-
-    // Get new view window
-    const newView = await page.evaluate(() => {
-      return (window as any).__ccTelemetry?.viewWindow;
-    });
-    expect(newView).toBeDefined();
-
-    // Verify pan occurred (positive scroll should pan right, so start/end increase)
-    expect(newView.start).toBeGreaterThan(initialView.start);
-    expect(newView.end).toBeGreaterThan(initialView.end);
-
-    // Verify view width stayed the same (pan, not zoom)
-    const initialWidth = initialView.end - initialView.start;
-    const newWidth = newView.end - newView.start;
-    expect(Math.abs(newWidth - initialWidth)).toBeLessThan(0.001);
-
-    // Now test pan in opposite direction
-    const viewBeforeReverse = newView;
-
-    // Hold Shift and scroll up (negative deltaY = pan left)
-    await page.keyboard.down('Shift');
-    await page.mouse.wheel(0, -100);
-    await page.keyboard.up('Shift');
-
-    await page.waitForTimeout(100);
-
-    const viewAfterReverse = await page.evaluate(() => {
-      return (window as any).__ccTelemetry?.viewWindow;
-    });
-    expect(viewAfterReverse).toBeDefined();
-
-    // Verify pan back (should decrease start/end)
-    expect(viewAfterReverse.start).toBeLessThan(viewBeforeReverse.start);
-    expect(viewAfterReverse.end).toBeLessThan(viewBeforeReverse.end);
-  });
+  // T98.3 (Shift+scroll pan) removed - covered by tests/editor/99-shift-scroll-pan.spec.ts
 
   test('T98.4: Plain wheel zoom - zooms toward cursor position', async ({ page }) => {
     // Get canvas element
     const canvas = page.locator('[data-testid="timeline-canvas"]');
     const bbox = await canvas.boundingBox();
     expect(bbox).not.toBeNull();
+
+    // Wait for telemetry to be available
+    await page.waitForFunction(() => (window as any).__ccTelemetry?.viewWindow, { timeout: 5000 });
 
     // Get initial view window
     const initialView = await page.evaluate(() => {

@@ -22,6 +22,7 @@ interface DeterministicLayoutProps {
   viewStart?: number;
   viewEnd?: number;
   hoveredEventId?: string;
+  isPanning?: boolean;
   onCardDoubleClick?: (id: string) => void;
   onCardMouseEnter?: (id: string) => void;
   onCardMouseLeave?: () => void;
@@ -35,6 +36,7 @@ export function DeterministicLayoutComponent({
   viewStart = 0,
   viewEnd = 1,
   hoveredEventId,
+  isPanning = false,
   onCardDoubleClick,
   onCardMouseEnter,
   onCardMouseLeave,
@@ -694,7 +696,7 @@ export function DeterministicLayoutComponent({
         };
       })() : { minDate: '', maxDate: '' },
       // View window for interaction testing (pan/zoom verification)
-      viewWindow: { viewStart, viewEnd }
+      viewWindow: { start: viewStart, end: viewEnd }
     };
 
     window.__ccTelemetry = telemetry;
@@ -1008,8 +1010,8 @@ export function DeterministicLayoutComponent({
         </div>
       )}
 
-      {/* Card Hover Preview */}
-      {previewCard && (
+      {/* Card Hover Preview - hidden during Shift+scroll panning */}
+      {previewCard && !isPanning && (
         <CardHoverPreview
           event={previewCard.event}
           position={{ x: previewCard.x, y: previewCard.y }}
