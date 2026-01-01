@@ -699,7 +699,7 @@ export function DeterministicLayoutComponent({
       viewWindow: { start: viewStart, end: viewEnd }
     };
 
-    window.__ccTelemetry = telemetry as typeof window.__ccTelemetry;
+    window.__ccTelemetry = telemetry as unknown as typeof window.__ccTelemetry;
   }, [layoutResult, events, viewportSize.width, viewportSize.height, config, viewStart, viewEnd]);
 
 
