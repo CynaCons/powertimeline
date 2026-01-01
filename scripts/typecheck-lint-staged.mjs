@@ -7,7 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const tscExecutable = resolve(__dirname, '../node_modules/.bin', process.platform === 'win32' ? 'tsc.cmd' : 'tsc');
 
-const result = spawnSync(tscExecutable, ['--noEmit', '--skipLibCheck', '--project', 'tsconfig.app.json'], {
+// Use 'tsc -b' to match CI behavior (checks all project references)
+// This ensures pre-commit catches the same errors as CI build
+const result = spawnSync(tscExecutable, ['-b', '--force'], {
   stdio: 'inherit',
   shell: process.platform === 'win32',
 });

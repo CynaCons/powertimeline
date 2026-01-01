@@ -9,7 +9,7 @@
     "build:analyze": "tsc -b && vite build --mode analyze",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b",
     "preview": "vite preview",
     "optimize:images": "node scripts/optimize-images.mjs",
     "test": "playwright test",
