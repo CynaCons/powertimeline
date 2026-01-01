@@ -2,18 +2,18 @@ import { test, expect } from '@playwright/test';
 import { loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
-  test('opens centered and large from Events selection', async ({ page }) => {
+  test('opens centered and large from Stream View selection', async ({ page }) => {
     // Load a public timeline - no auth required for read-only access
     await loadTestTimeline(page, 'rfk-1968');
 
     // Wait for timeline to load
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
-    // Open Events and select the first item
-    await page.locator('button[aria-label="Events"]').click();
-    await expect(page.getByPlaceholder('Filter...')).toBeVisible();
-    // Click first list item button
-    const firstItem = page.locator('li >> role=button').first();
+    // Open Stream View and select the first item
+    await page.locator('button[aria-label="Stream View"]').click();
+    await page.waitForTimeout(500);
+    // Click first stream item
+    const firstItem = page.locator('[data-testid^="stream-item-"]').first();
     await firstItem.click();
 
     const overlay = page.locator('[data-testid="authoring-overlay"]');
@@ -54,10 +54,10 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     // Wait for timeline to load
     await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
 
-    // Open Events and select the first item
-    await page.locator('button[aria-label="Events"]').click();
-    await expect(page.getByPlaceholder('Filter...')).toBeVisible();
-    const firstItem = page.locator('li >> role=button').first();
+    // Open Stream View and select the first item
+    await page.locator('button[aria-label="Stream View"]').click();
+    await page.waitForTimeout(500);
+    const firstItem = page.locator('[data-testid^="stream-item-"]').first();
     await firstItem.click();
 
     const overlay = page.locator('[data-testid="authoring-overlay"]');

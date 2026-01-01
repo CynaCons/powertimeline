@@ -32,6 +32,10 @@ interface StreamViewerProps {
   onViewOnCanvas?: (event: Event) => void;
   /** Called when user clicks "edit in editor" icon (desktop hover action) */
   onEditInEditor?: (event: Event) => void;
+  /** Called when mouse enters an event card (for minimap highlighting) */
+  onEventMouseEnter?: (eventId: string) => void;
+  /** Called when mouse leaves an event card (for minimap highlighting) */
+  onEventMouseLeave?: () => void;
 }
 
 /**
@@ -94,6 +98,8 @@ function StreamEventCard({
   onEdit,
   onViewOnCanvas,
   onEditInEditor,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   event: Event;
   index: number;
@@ -113,6 +119,8 @@ function StreamEventCard({
   onEdit?: (event: Event) => void;
   onViewOnCanvas?: (event: Event) => void;
   onEditInEditor?: (event: Event) => void;
+  onMouseEnter?: (eventId: string) => void;
+  onMouseLeave?: () => void;
 }) {
   const { line1, line2 } = formatEventDate(event.date);
   const dotColor = getEventColor(event, index);
@@ -237,6 +245,8 @@ function StreamEventCard({
         onTouchStart={isOwner ? (e) => onTouchStart(e, event.id) : undefined}
         onTouchMove={isOwner ? onTouchMove : undefined}
         onTouchEnd={isOwner ? onTouchEnd : undefined}
+        onMouseEnter={() => onMouseEnter?.(event.id)}
+        onMouseLeave={() => onMouseLeave?.()}
         sx={{
           position: 'relative',
           flex: 1,
@@ -514,6 +524,8 @@ export function StreamViewer({
   isOwner = false,
   onViewOnCanvas,
   onEditInEditor,
+  onEventMouseEnter,
+  onEventMouseLeave,
 }: StreamViewerProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -662,6 +674,8 @@ export function StreamViewer({
                 onEdit={onEdit}
                 onViewOnCanvas={onViewOnCanvas}
                 onEditInEditor={onEditInEditor}
+                onMouseEnter={onEventMouseEnter}
+                onMouseLeave={onEventMouseLeave}
               />
             ))}
           </Stack>

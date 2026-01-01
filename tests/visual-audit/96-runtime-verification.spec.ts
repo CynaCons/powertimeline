@@ -24,7 +24,6 @@ interface LayerSnapshot {
 interface UiLayers {
   cards: LayerSnapshot[];
   overlay?: LayerSnapshot | null;
-  eventsPanel?: LayerSnapshot | null;
   minimap?: LayerSnapshot | null;
   zoomControls?: LayerSnapshot | null;
   breadcrumbs?: LayerSnapshot | null;
@@ -37,8 +36,6 @@ interface ScenarioMetrics {
   overlapsDetected: number;
   zIndexConflicts: number;
   overlayZ?: number;
-  eventsPanelZ?: number;
-  panelCardOverlaps?: number;
   notes: string[];
 }
 
@@ -128,117 +125,57 @@ test.describe('Runtime Verification Audit', () => {
     }
   });
 
-  test('T96.2: Re-run overlap detection with Events panel open', async ({ page }) => {
-    const panelOpened = await openEventsPanel(page);
-    await page.waitForTimeout(800);
-
-    // Capture screenshot of panel state
-    await page.screenshot({
-      path: path.join(screenshotsDir, 't96-2-runtime-events-panel.png'),
-      fullPage: false
-    });
-
-    const layers = await collectUiLayers(page);
-    const cardOverlaps = detectCardOverlaps(layers.cards);
-    const panelCardOverlaps = layers.eventsPanel ? countPanelCardOverlaps(layers.eventsPanel, layers.cards) : 0;
-    const zConflicts = computeZConflicts(layers, { expectPanelAboveCards: true });
-
-    console.log('\n=== T96.2 Events Panel Overlap Audit ===');
-    console.log(`Events panel opened: ${panelOpened}`);
-    if (layers.eventsPanel) {
-      console.log(`Events panel z-index: ${layers.eventsPanel.zIndex}`);
-    }
-    console.log(`Cards total: ${layers.cards.length} | visible: ${layers.cards.filter(c => c.visible).length}`);
-    console.log(`Card overlaps detected: ${cardOverlaps.length}`);
-    console.log(`Cards intersecting panel: ${panelCardOverlaps}`);
-
-    if (zConflicts.length > 0) {
-      console.log('Z-index issues:');
-      zConflicts.forEach(issue => console.log(` - ${issue}`));
-    } else {
-      console.log('No z-index issues detected with panel open');
-    }
-
-    const metrics: ScenarioMetrics = {
-      scenario: 'T96.2 events panel',
-      totalCards: layers.cards.length,
-      visibleCards: layers.cards.filter(c => c.visible).length,
-      overlapsDetected: cardOverlaps.length,
-      zIndexConflicts: zConflicts.length,
-      eventsPanelZ: layers.eventsPanel?.zIndex,
-      panelCardOverlaps,
-      notes: panelOpened ? [] : ['Events panel button not found or did not open']
-    };
-
-    scenarioMetrics.push(metrics);
-    maybeRecordCritical('T96.2 panel', metrics, zConflicts, { panelCardOverlaps, panelOpened });
-
-    if (layers.eventsPanel) {
-      const panelZ = layers.eventsPanel.zIndex;
-      const cardsOverlappingPanel = layers.cards.filter(card =>
-        card.visible && rectsOverlap(layers.eventsPanel!.rect, card.rect)
-      );
-      expect(cardsOverlappingPanel.every(c => c.zIndex < panelZ), 'All cards below panel').toBe(true);
-    }
+  test.skip('T96.2: DEPRECATED - Events panel removed', async ({ page }) => {
+    // This test is deprecated - Events panel (OutlinePanel) has been replaced by Stream View
+    // Stream View uses a floating overlay, not a side panel, so panel overlap testing is not applicable
+    console.log('T96.2 skipped - Events panel removed in favor of Stream View');
   });
 
   test('T96.3: Verify no new z-index conflicts from overlays', async ({ page }) => {
-    const panelOpened = await openEventsPanel(page);
     const overlayOpened = await openAuthoringOverlay(page);
     await page.waitForTimeout(800);
 
-    // Capture screenshot of combined state
+    // Capture screenshot of overlay state
     await page.screenshot({
-      path: path.join(screenshotsDir, 't96-3-runtime-combined-layers.png'),
+      path: path.join(screenshotsDir, 't96-3-runtime-overlay-layers.png'),
       fullPage: false
     });
 
     const layers = await collectUiLayers(page);
     const cardOverlaps = detectCardOverlaps(layers.cards);
-    const panelCardOverlaps = layers.eventsPanel ? countPanelCardOverlaps(layers.eventsPanel, layers.cards) : 0;
-    const zConflicts = computeZConflicts(layers, { overlayRequired: true, expectPanelAboveCards: true });
+    const zConflicts = computeZConflicts(layers, { overlayRequired: true });
 
-    console.log('\n=== T96.3 Combined Overlay + Panel Stacking Audit ===');
-    console.log(`Overlay opened: ${overlayOpened} | Events panel opened: ${panelOpened}`);
+    console.log('\n=== T96.3 Overlay Stacking Audit ===');
+    console.log(`Overlay opened: ${overlayOpened}`);
     console.log(`Overlay z-index: ${layers.overlay?.zIndex ?? 0}`);
-    console.log(`Events panel z-index: ${layers.eventsPanel?.zIndex ?? 0}`);
     console.log(`Visible cards: ${layers.cards.filter(c => c.visible).length}`);
     console.log(`Card overlaps detected: ${cardOverlaps.length}`);
-    console.log(`Cards intersecting panel: ${panelCardOverlaps}`);
 
     if (zConflicts.length > 0) {
       console.log('Z-index conflicts detected:');
       zConflicts.forEach(issue => console.log(` - ${issue}`));
     } else {
-      console.log('Stacking order appears correct for combined state');
+      console.log('Stacking order appears correct');
     }
 
     const metrics: ScenarioMetrics = {
-      scenario: 'T96.3 overlay + panel',
+      scenario: 'T96.3 overlay',
       totalCards: layers.cards.length,
       visibleCards: layers.cards.filter(c => c.visible).length,
       overlapsDetected: cardOverlaps.length,
       zIndexConflicts: zConflicts.length,
       overlayZ: layers.overlay?.zIndex,
-      eventsPanelZ: layers.eventsPanel?.zIndex,
-      panelCardOverlaps,
       notes: [
-        overlayOpened ? '' : 'Overlay not visible with dense area',
-        panelOpened ? '' : 'Events panel not visible'
+        overlayOpened ? '' : 'Overlay not visible with dense area'
       ].filter(Boolean)
     };
 
     scenarioMetrics.push(metrics);
-    maybeRecordCritical('T96.3 combined', metrics, zConflicts, { overlayOpened, panelCardOverlaps });
+    maybeRecordCritical('T96.3 overlay', metrics, zConflicts, { overlayOpened });
 
     expect(layers.overlay?.zIndex).toBeGreaterThanOrEqual(500);
     const maxCardZ = layers.cards.reduce((max, card) => Math.max(max, card.zIndex), 0);
-    // Only assert panel z-index if the panel was successfully opened
-    if (panelOpened && layers.eventsPanel?.zIndex !== undefined) {
-      expect(layers.eventsPanel.zIndex).toBeGreaterThan(maxCardZ);
-    } else {
-      console.log('⚠️ Events panel not opened - skipping panel z-index assertion');
-    }
+    expect(layers.overlay?.zIndex).toBeGreaterThan(maxCardZ);
   });
 });
 
@@ -261,20 +198,6 @@ async function openAuthoringOverlay(page: Page): Promise<boolean> {
   return overlayLocator.isVisible({ timeout: 2000 }).catch(() => false);
 }
 
-async function openEventsPanel(page: Page): Promise<boolean> {
-  const button = page.getByRole('button', { name: /Events/i }).first();
-  const buttonVisible = await button.isVisible({ timeout: 3000 }).catch(() => false);
-
-  if (!buttonVisible) {
-    console.log('Events panel button not found');
-    return false;
-  }
-
-  await button.click({ delay: 50 });
-  await page.waitForTimeout(400);
-  const panel = page.locator('aside[role="dialog"][aria-labelledby="dialog-title-events"], [data-testid*="events-panel"]').first();
-  return panel.isVisible({ timeout: 1500 }).catch(() => false);
-}
 
 async function focusDenseArea(page: Page): Promise<void> {
   const minimap = page.locator('[data-testid="minimap-container"], [class*="Minimap"]').first();
@@ -364,10 +287,6 @@ async function collectUiLayers(page: Page): Promise<UiLayers> {
     return {
       cards,
       overlay: pickOverlay(),
-      eventsPanel: pick([
-        'aside[role="dialog"][aria-labelledby="dialog-title-events"]',
-        '[data-testid*="events-panel"]'
-      ], 'panel'),
       minimap: pick([
         '[data-testid="minimap-container"]',
         '[class*="Minimap"]'
@@ -409,19 +328,15 @@ function detectCardOverlaps(cards: LayerSnapshot[]): Array<{ a: string; b: strin
   return overlaps;
 }
 
-function countPanelCardOverlaps(panel: LayerSnapshot, cards: LayerSnapshot[]): number {
-  return cards.filter(card => card.visible && rectsOverlap(panel.rect, card.rect)).length;
-}
 
 function computeZConflicts(
   layers: UiLayers,
-  options?: { overlayRequired?: boolean; expectPanelAboveCards?: boolean }
+  options?: { overlayRequired?: boolean }
 ): string[] {
   const issues: string[] = [];
   const cardMaxZ = layers.cards.reduce((max, card) => Math.max(max, card.zIndex), 0);
   const otherMax = Math.max(
     cardMaxZ,
-    layers.eventsPanel?.zIndex ?? 0,
     layers.minimap?.zIndex ?? 0,
     layers.zoomControls?.zIndex ?? 0,
     layers.breadcrumbs?.zIndex ?? 0
@@ -437,12 +352,6 @@ function computeZConflicts(
     }
     if (layers.overlay.zIndex <= otherMax) {
       issues.push(`Overlay z-index ${layers.overlay.zIndex} not above other layers (max ${otherMax})`);
-    }
-  }
-
-  if (options?.expectPanelAboveCards && layers.eventsPanel) {
-    if (layers.eventsPanel.zIndex <= cardMaxZ) {
-      issues.push(`Events panel z-index ${layers.eventsPanel.zIndex} below card max ${cardMaxZ}`);
     }
   }
 
@@ -472,7 +381,7 @@ function maybeRecordCritical(
   scenario: string,
   metrics: ScenarioMetrics,
   zConflicts: string[],
-  extras?: { overlayOpened?: boolean; panelCardOverlaps?: number; panelOpened?: boolean }
+  extras?: { overlayOpened?: boolean }
 ): void {
   const reasons: string[] = [];
 
@@ -482,14 +391,8 @@ function maybeRecordCritical(
   if (metrics.overlapsDetected > 3) {
     reasons.push(`${metrics.overlapsDetected} card overlaps detected`);
   }
-  if (extras?.panelCardOverlaps && extras.panelCardOverlaps > 0) {
-    reasons.push(`${extras.panelCardOverlaps} cards overlap the Events panel`);
-  }
   if (extras?.overlayOpened === false) {
     reasons.push('Overlay did not open when requested');
-  }
-  if (extras?.panelOpened === false) {
-    reasons.push('Events panel did not open');
   }
 
   if (reasons.length > 0) {

@@ -20,7 +20,6 @@ import type { Event, Timeline } from './types';
 import type { Command } from './components/CommandPalette';
 
 // Lazy load panels, overlays and heavy components for better bundle splitting
-const OutlinePanel = lazy(() => import('./app/panels/OutlinePanel').then(m => ({ default: m.OutlinePanel })));
 const AuthoringOverlay = lazy(() => import('./app/overlays/AuthoringOverlay').then(m => ({ default: m.AuthoringOverlay })));
 const ImportExportOverlay = lazy(() => import('./app/overlays/ImportExportOverlay').then(m => ({ default: m.ImportExportOverlay })));
 const CommandPalette = lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
@@ -281,9 +280,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
   // Panels & overlays
   // Left sidebar overlays (permanent sidebar width = 56px)
-  const [overlay, setOverlay] = useState<null | 'events' | 'editor' | 'import-export'>(null);
+  const [overlay, setOverlay] = useState<null | 'editor' | 'import-export'>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
-  const [outlineFilter, setOutlineFilter] = useState('');
   const [chatPanelOpen, setChatPanelOpen] = useState(false);
 
   // Info panels toggle
@@ -782,19 +780,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     animateTo(start, end);
   }, [events, previewEvents, animateTo]);
 
-  const sortedForList = useMemo(() => [...events].sort((a, b) => a.date.localeCompare(b.date)), [events]);
-  const filteredForList = useMemo(() => {
-    const q = outlineFilter.trim().toLowerCase();
-    if (!q) return sortedForList;
-    return sortedForList.filter((e) => (e.title || '').toLowerCase().includes(q) || e.date.includes(q));
-  }, [sortedForList, outlineFilter]);
-
   // Navigation actions
-  const openEvents = useCallback(() => {
-    setOverlay(overlay === 'events' ? null : 'events');
-    setActiveNavItem('events');
-  }, [overlay]);
-
   const openCreate = useCallback(() => {
     setSelectedId(undefined);
     setEditDate('');
@@ -874,18 +860,9 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   }, [events, animateTo]);
 
   // Editor-specific navigation items (context section)
-  // v0.5.6 - Simplified: Events toggle, Create (owner only), Lock indicator (read-only)
+  // v0.5.6 - Simplified: Create (owner only), Lock indicator (read-only)
   const editorItems: NavigationItem[] = useMemo(() => {
-    const items: NavigationItem[] = [
-      {
-        id: 'events',
-        label: 'Events',
-        icon: 'list',
-        shortcut: 'Alt+E',
-        onClick: openEvents,
-        isActive: overlay === 'events',
-      },
-    ];
+    const items: NavigationItem[] = [];
 
     // Only show Create button if not in read-only mode
     if (!isReadOnly) {
@@ -936,7 +913,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     }
 
     return items;
-  }, [overlay, openEvents, openCreate, isReadOnly, openStreamView, streamViewerOpen, openImportExport, firebaseUser, chatPanelOpen]);
+  }, [overlay, openCreate, isReadOnly, openStreamView, streamViewerOpen, openImportExport, firebaseUser, chatPanelOpen]);
 
   // Current user profile from Firestore (firebaseUser already declared above)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -980,16 +957,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   // Command palette commands
   const commands: Command[] = useMemo(() => [
     {
-      id: 'open-events',
-      title: 'Open Events Panel',
-      description: 'Browse and manage all events',
-      icon: 'list',
-      shortcut: 'Alt+E',
-      category: 'navigation',
-      action: openEvents,
-      aliases: ['events', 'list', 'browse'],
-    },
-    {
       id: 'create-event',
       title: 'Create New Event',
       description: 'Add a new event to the timeline',
@@ -1019,11 +986,10 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       action: closeOverlay,
       aliases: ['close', 'hide', 'dismiss'],
     },
-  ], [openEvents, openCreate, toggleTheme, closeOverlay]);
+  ], [openCreate, toggleTheme, closeOverlay]);
 
   // Keyboard shortcuts
   useNavigationShortcuts({
-    openEvents,
     openCreate,
     toggleTheme,
     closeOverlay,
@@ -1035,9 +1001,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   // Update active nav item based on overlay
   useEffect(() => {
     switch (overlay) {
-      case 'events':
-        setActiveNavItem('events');
-        break;
       case 'editor':
         setActiveNavItem('create');
         break;
@@ -1104,31 +1067,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
         {overlay && !loadError && (
           <div ref={overlayRef} className="absolute top-0 right-0 bottom-0 left-14 z-[80]" onClick={(e) => { if (e.target === e.currentTarget) setOverlay(null); }}>
             <div className="absolute top-0 right-0 bottom-0 left-14 z-10 pointer-events-none" aria-hidden="true" />
-            {overlay === 'events' && (
-              <ErrorBoundary>
-                <Suspense fallback={<div className="fixed left-14 top-0 bottom-0 w-80 border-r flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
-                  <OutlinePanel
-                    filtered={filteredForList}
-                    selectedId={selectedId}
-                    onSelect={(id) => { setSelectedId(id); setOverlay('editor'); }}
-                    onCreate={() => { setSelectedId(undefined); setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription(''); setOverlay('editor'); }}
-                    filter={outlineFilter}
-                    setFilter={setOutlineFilter}
-                    dragging={dragging}
-                    onClose={() => setOverlay(null)}
-                    onHover={(id) => setHoveredEventId(id)}
-                    onHoverEnd={() => setHoveredEventId(undefined)}
-                    onNavigateToEvent={(id) => {
-                      const event = events.find(e => e.id === id);
-                      if (event) {
-                        handleStreamEventClick(event);
-                        setOverlay(null);
-                      }
-                    }}
-                  />
-                </Suspense>
-              </ErrorBoundary>
-            )}
             {overlay === 'editor' && (
               <ErrorBoundary>
                 <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 border-l flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
@@ -1391,6 +1329,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               setOverlay('editor');
             }}
             initialEventId={selectedId}
+            onEventMouseEnter={(eventId) => setHoveredEventId(eventId)}
+            onEventMouseLeave={() => setHoveredEventId(undefined)}
           />
         </Suspense>
 

@@ -1,6 +1,6 @@
 # Stream View Requirements (v1.1)
 
-**Last Updated:** 2025-12-27
+**Last Updated:** 2026-01-02
 
 This document defines requirements for the Stream View feature - a mobile-friendly, vertical timeline viewer that provides an alternative reading experience to the canvas-based timeline editor.
 
@@ -11,6 +11,8 @@ Stream View presents timeline events in a scrollable, git-style vertical layout 
 - Quick event scanning (chronological list)
 - Event search and filtering
 - Minimap navigation
+
+Stream View is now the primary event browsing interface in the editor, replacing the former Events/Outline panel. The NavRail Stream control opens this overlay; the Alt+E panel shortcut has been removed.
 
 ## Requirement Table
 
@@ -45,6 +47,7 @@ Stream View presents timeline events in a scrollable, git-style vertical layout 
 |---|---|---|---|---|
 | CC-REQ-STREAM-MINIMAP-001 | Existing timeline minimap visible above overlay | • TimelineMinimap lifted to z-index 1400 when stream view open<br>• Minimap remains functional above the overlay backdrop<br>• Shows full timeline event distribution | `src/App.tsx:646`, `src/components/TimelineMinimap.tsx` | 82-stream-viewer.spec.ts |
 | CC-REQ-STREAM-MINIMAP-002 | Stream event selection syncs with timeline | • Clicking event in stream view selects on main timeline<br>• Timeline zooms to selected event via onEventClick callback | `src/App.tsx:382-398` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-MINIMAP-003 | Stream event hover highlights in minimap | - Hovering over event card in Stream View highlights the corresponding minimap marker and canvas card/anchor<br>- Uses same highlighting as normal canvas card hovers<br>- Highlight clears when mouse leaves event card or when Stream View closes | `src/components/StreamViewer.tsx:248-249`, `src/components/StreamViewerOverlay.tsx:528-529`, `src/App.tsx:1394-1395` | 82-stream-viewer.spec.ts (T82.13) |
 
 ### Search & Filter
 
@@ -59,7 +62,7 @@ Stream View presents timeline events in a scrollable, git-style vertical layout 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
 | CC-REQ-STREAM-SELECT-001 | Clicking event card selects it | • Selected event has highlighted border<br>• Selected event has background color<br>• Selected event dot larger with glow | `src/components/StreamViewer.tsx:86, 144-154, 172-173` | 82-stream-viewer.spec.ts |
-| CC-REQ-STREAM-SELECT-002 | Event click triggers callback | • onEventClick called with event object<br>• Can be used to sync with main timeline<br>• Can be used to zoom canvas to event date | `src/components/StreamViewerOverlay.tsx:153-155` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-SELECT-002 | Event click or view-on-canvas action triggers canvas sync | - onEventClick called with event object<br>- Desktop: Stream View closes after the click/action and recenters canvas on the event<br>- Mobile: overlay stays open and scrolls to the selected event | `src/components/StreamViewerOverlay.tsx:153-155` | 82-stream-viewer.spec.ts |
 
 ### Theme & Styling
 
@@ -172,6 +175,7 @@ The scroll implementation uses native browser scrolling:
 | T82.10 | Escape key closes | CC-REQ-STREAM-OVERLAY-003 |
 | T82.11 | Backdrop click closes | CC-REQ-STREAM-OVERLAY-004 |
 | T82.12 | Search filters events | CC-REQ-STREAM-SEARCH-001 |
+| T82.13 | Hover event highlights in minimap | CC-REQ-STREAM-MINIMAP-003 |
 
 ### Mobile-Specific Tests
 
@@ -195,7 +199,8 @@ The scroll implementation uses native browser scrolling:
 
 ## Change History
 
-- 2025-12-04 — Initial version (v0.5.26.3)
+- 2026-01-02 - Stream View promoted to primary event browsing surface (replaces Events/Outline panel); documented view-on-canvas closure and hover highlighting.
+- 2025-12-04 - Initial version (v0.5.26.3)
 - 2025-12-04 — Added minimap, breadcrumbs, fixed scrolling
 - 2025-12-04 — Removed hover effects for performance
 - 2025-12-04 — Created SRS document with 17 requirements

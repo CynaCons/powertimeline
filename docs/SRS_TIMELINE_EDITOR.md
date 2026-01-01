@@ -1,6 +1,6 @@
 # SRS: Timeline Editor Page
 
-**Last Updated:** 2025-12-27
+**Last Updated:** 2026-01-02
 
 ## Overview
 
@@ -49,26 +49,27 @@ The editor has floating action buttons in the top-right corner for quick actions
 
 ---
 
-## 2. Events Panel (Outline Panel)
+## 2. Event Browsing (Stream View)
 
-### 2.1 Panel Behavior
+**Note:** The Events/Outline panel has been removed. Event browsing now happens through Stream View (see `docs/SRS_STREAM_VIEW.md`). The Alt+E shortcut is retired; use the NavRail Stream control instead.
 
-| ID | Requirement | Acceptance Criteria | Code | Tests |
-|----|-------------|---------------------|------|-------|
-| CC-REQ-EDITOR-EVENTS-001 | Events panel shall be accessible via NavRail "Events" button or Alt+E shortcut | Panel opens via button or Alt+E | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-002 | Events panel shall display a filterable list of all timeline events | All events shown; filter works | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-003 | Events panel shall close when clicking outside on the timeline canvas | Panel closes on outside click | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-004 | Events panel shall close when pressing Escape key | Panel closes on Escape key | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-
-### 2.2 Event List Items
+### 2.1 Stream View Access & Behavior
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |----|-------------|---------------------|------|-------|
-| CC-REQ-EDITOR-EVENTS-010 | Each event item shall display title and date | Title and date visible for each item | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-011 | Event items shall show edit and view action buttons on hover | Edit/view buttons appear on hover | `src/app/panels/OutlinePanel.tsx` | `tests/editor/66-panel-hover-highlighting.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-012 | Edit button (pencil icon) shall open the event in the editor panel | Edit button opens editor panel | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-013 | View button (eye icon) shall zoom/navigate to the event on canvas and close the panel | View button zooms to event and closes panel | `src/app/panels/OutlinePanel.tsx` | `tests/editor/50-panels-visibility.spec.ts` |
-| CC-REQ-EDITOR-EVENTS-014 | Hovering an event item shall highlight the corresponding event card, anchor, and minimap marker | Card, anchor, and minimap marker highlighted on hover | `src/app/panels/OutlinePanel.tsx` | `tests/editor/66-panel-hover-highlighting.spec.ts` |
+| CC-REQ-EDITOR-EVENTS-001 | Event browsing shall open Stream View from the NavRail; the legacy Events/Outline panel and Alt+E shortcut are removed | Stream View overlay opens from NavRail; no Alt+E binding exists; no Outline panel UI is rendered | `src/App.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
+| CC-REQ-EDITOR-EVENTS-002 | Stream View shall provide a chronological, filterable list of all timeline events (replacing the panel list) | Events sorted chronologically; search filters list and updates counts; all events visible when search is cleared | `src/components/StreamViewerOverlay.tsx`, `src/components/StreamViewer.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
+| CC-REQ-EDITOR-EVENTS-003 | Stream View shall close via Escape key or backdrop click when opened from the editor | Escape and backdrop click close the overlay; focus returns to the editor surface | `src/components/StreamViewerOverlay.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
+
+### 2.2 Stream Event Cards & Canvas Sync
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|----|-------------|---------------------|------|-------|
+| CC-REQ-EDITOR-EVENTS-010 | Each stream event card shall display title, two-line date, and a truncated description | Title and date visible; description truncated with expand control where needed | `src/components/StreamViewer.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
+| CC-REQ-EDITOR-EVENTS-011 | Desktop hover shall reveal "view on canvas" and "edit in editor" actions for stream event cards | Hover icons appear; view action recenters timeline and closes Stream View; edit action opens the editor panel | `src/components/StreamViewer.tsx`, `src/components/StreamViewerOverlay.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
+| CC-REQ-EDITOR-EVENTS-012 | Clicking a stream event card shall center/zoom to that event on the canvas and close Stream View on desktop | onEventClick is fired; canvas centers/zooms to the event; desktop overlay closes after navigation | `src/components/StreamViewerOverlay.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
+| CC-REQ-EDITOR-EVENTS-013 | Hovering a stream event card shall highlight the corresponding canvas event card, anchor, and minimap marker | Hover highlight propagates to canvas card/anchor and minimap marker; highlight clears on mouse leave | `src/components/StreamViewer.tsx`, `src/components/StreamViewerOverlay.tsx`, `src/App.tsx` | `tests/editor/82-stream-viewer.spec.ts (T82.13)` |
+| CC-REQ-EDITOR-EVENTS-014 | All event scanning for the editor shall be performed within Stream View (no separate panel) | No separate Events/Outline panel appears; NavRail routes event browsing to Stream View on desktop and mobile | `src/App.tsx`, `src/components/StreamViewerOverlay.tsx` | `tests/editor/82-stream-viewer.spec.ts` |
 
 ---
 
@@ -105,5 +106,6 @@ The editor has floating action buttons in the top-right corner for quick actions
 
 ## Notes & Change History
 
-- 2025-12-27 — Converted to standardized 5-column format (ID | Requirement | Acceptance Criteria | Code | Tests); added code references and acceptance criteria.
+- 2026-01-02 - Events/Outline panel removed; Stream View documented as the event browsing surface; Alt+E shortcut retired.
+- 2025-12-27 - Converted to standardized 5-column format (ID | Requirement | Acceptance Criteria | Code | Tests); added code references and acceptance criteria.
 - 2025-12-07 — Initial version - Share button, profile button, events panel requirements.

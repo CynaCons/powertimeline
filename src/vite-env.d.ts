@@ -48,7 +48,7 @@ interface Window {
 		/** Timeline date range for temporal analysis */
 		timelineRange?: { minDate: string; maxDate: string };
 		/** View window for interaction testing (pan/zoom state) */
-		viewWindow?: { viewStart: number; viewEnd: number };
+		viewWindow?: { start: number; end: number };
 		[key: string]: unknown;
 	};
 

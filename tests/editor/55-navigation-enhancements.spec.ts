@@ -5,14 +5,6 @@ test.describe('v5/55 Enhanced Navigation & Interaction', () => {
   test('keyboard shortcuts work for navigation', async ({ page }) => {
     await loadTestTimeline(page, 'french-revolution');
 
-    // Test Alt+E for Events panel
-    await page.keyboard.press('Alt+e');
-    await expect(page.getByPlaceholder('Filter...')).toBeVisible({ timeout: 2000 });
-
-    // Test Escape to close
-    await page.keyboard.press('Escape');
-    await expect(page.getByPlaceholder('Filter...')).not.toBeVisible();
-
     // Test Alt+C for Create
     await page.keyboard.press('Alt+c');
     const authoringOverlay = page.locator('[data-testid="authoring-overlay"]');
@@ -35,62 +27,18 @@ test.describe('v5/55 Enhanced Navigation & Interaction', () => {
     const commandPaletteInput = page.getByPlaceholder('Type a command or search...');
     await expect(commandPaletteInput).toBeVisible({ timeout: 2000 });
 
-    // Search for "events"
-    await commandPaletteInput.fill('events');
+    // Search for a command
+    await commandPaletteInput.fill('create');
 
-    // Look for Events-related command
-    const eventsCommand = page.locator('text=/Events/i').first();
-    await expect(eventsCommand).toBeVisible({ timeout: 2000 });
+    // Look for command
+    const createCommand = page.locator('text=/Create/i').first();
+    await expect(createCommand).toBeVisible({ timeout: 2000 });
 
     // Press Enter to execute
     await page.keyboard.press('Enter');
 
-    // Events panel should open - look for the panel
-    await expect(page.locator('aside[role="dialog"]')).toBeVisible({ timeout: 2000 });
-  });
-
-  test('enhanced tooltips show keyboard shortcuts', async ({ page }) => {
-    await loadTestTimeline(page, 'french-revolution');
-
-    // Hover over Events button
-    const eventsButton = page.getByRole('button', { name: 'Events' });
-    await eventsButton.hover();
-
-    // Tooltip should show keyboard shortcut
-    await expect(page.locator('text="Alt+E"')).toBeVisible({ timeout: 2000 });
-  });
-
-  test.skip('breadcrumb navigation shows when panel is open', async ({ page }) => {
-    // TODO: Verify breadcrumb is rendered in editor - component exists at src/components/Breadcrumb.tsx
-    await loadTestTimeline(page, 'french-revolution');
-
-    // Open Events panel
-    await page.getByRole('button', { name: 'Events' }).click();
-
-    // Breadcrumb should be visible
-    const breadcrumb = page.locator('text="Timeline"');
-    await expect(breadcrumb).toBeVisible({ timeout: 2000 });
-
-    const eventsBreadcrumb = page.locator('text="Events"');
-    await expect(eventsBreadcrumb).toBeVisible({ timeout: 2000 });
-  });
-
-  test('navigation rail shows active states', async ({ page }) => {
-    await loadTestTimeline(page, 'french-revolution');
-
-    // Events button should not be active initially
-    const eventsButton = page.getByRole('button', { name: 'Events' });
-
-    // Click Events button
-    await eventsButton.click();
-
-    // Button should show active state (background color change)
-    const buttonStyles = await eventsButton.evaluate((el) => {
-      return window.getComputedStyle(el).backgroundColor;
-    });
-
-    // Should have a darker background when active
-    expect(buttonStyles).not.toBe('rgba(0, 0, 0, 0)'); // Not transparent
+    // Authoring overlay should open
+    await expect(page.locator('[data-testid="authoring-overlay"]')).toBeVisible({ timeout: 2000 });
   });
 
   test('theme toggle works with Alt+T shortcut', async ({ page }) => {

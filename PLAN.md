@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.3.2 - Test Suite Stabilization ✅
+**Current Version:** v0.8.3.4 - Events Panel Removal (in progress)
 **Next Milestone:** v0.8.4 Mobile and Responsive Testing
 
 ### Key Metrics
@@ -48,6 +48,7 @@
 - ✅ Full-Width Layout Trial: HomePage, SettingsPage, UserProfilePage (v0.5.36)
 - ✅ Dark Mode Season Background Colors: Fixed timeline axis season colors for dark mode (v0.5.36.1)
 - ✅ Dashed Connector Line Fix: Fixed SVG width (1px → 10px), replaced CSS vars with hex colors (v0.5.36.2)
+- ✅ Stream View Minimap Hover: Added hover effect to Stream View events that highlights them in minimap (v0.8.3.3)
 - ✅ Timeline Axis Visual Redesign: 20% thinner axis (3px), removed dashed lines, triangle anchors (v0.5.37)
 - ✅ Timeline Visual Polish: Reverted anchor shape to diamond/milestone (rotated square) with rounded edges (v0.5.37)
 - ✅ User Onboarding: Empty State CTA, React Joyride tours (Editor 8-step, Home 5-step), NavRail Help button (v0.5.38)
@@ -83,7 +84,7 @@
 - ✅ Layout Performance: Spatial hashing O(n) collisions, Map lookup, virtualization, layout caching (v0.8.3)
 - ✅ UX Polish: Hover lift effect, zoom toward cursor, hover card preview for degraded cards (v0.8.3)
 - ✅ Interaction Keybind Swap: Default click+drag = selection zoom (crosshair), Space+drag = pan (grab) (v0.8.3.1)
-- ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug, migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
+- ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug (race-free immediate ref updates), migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
 
 ### Next Up
 - **v0.8.1**: UI Audit and Visual Bug Fixes
@@ -899,6 +900,35 @@
 - [x] T98.5: Boundary constraints (pan stops at 0 and 1)
 - [x] T98.6: Small selection (<20px) does not trigger zoom
 - [x] T98.7: Cursor styles update correctly for each mode
+
+### v0.8.3.4 - Events Panel Removal
+**Goal:** Remove OutlinePanel (Events Panel) - functionality consolidated into Stream View
+
+**Code Removal:**
+- [ ] Remove OutlinePanel lazy import and rendering from App.tsx
+- [ ] Remove 'events' from overlay state handling in App.tsx
+- [ ] Remove openEvents/closeEvents functions from App.tsx
+- [ ] Remove Events button from NavRail configuration in App.tsx
+- [ ] Remove Events Panel command from Command Palette in App.tsx
+- [ ] Delete src/app/panels/OutlinePanel.tsx
+- [ ] Check if src/app/OverlayShell.tsx is used elsewhere; delete if not
+
+**Documentation Updates:**
+- [ ] Update docs/SRS_TIMELINE_EDITOR.md - remove Events Panel section
+- [ ] Update docs/SRS_STREAM_VIEW.md - note it replaces Events Panel
+- [ ] Update any keyboard shortcut references (Alt+E no longer needed)
+
+**Test Updates:**
+- [ ] Delete tests/editor/66-panel-hover-highlighting.spec.ts (covered by T82.13)
+- [ ] Update tests/editor/50-panels-visibility.spec.ts - remove Events Panel tests
+- [ ] Update tests/editor/55-navigation-enhancements.spec.ts if it tests Alt+E
+- [ ] Verify remaining tests pass
+
+**Verification:**
+- [ ] Run npm run build - no errors
+- [ ] Run npm run lint - no errors
+- [ ] Run npm test - all tests pass
+- [ ] Manual verification: Stream View has all needed functionality
 
 ### v0.8.4 - Mobile and Responsive Testing Infrastructure
 **Goal:** Establish multi-viewport testing and ensure mobile reliability

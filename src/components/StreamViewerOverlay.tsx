@@ -40,6 +40,10 @@ interface StreamViewerOverlayProps {
   onEditInEditor?: (event: Event) => void;
   /** Initial event ID to select and scroll to when overlay opens */
   initialEventId?: string;
+  /** Called when mouse enters an event card (for minimap highlighting) */
+  onEventMouseEnter?: (eventId: string) => void;
+  /** Called when mouse leaves an event card (for minimap highlighting) */
+  onEventMouseLeave?: () => void;
 }
 
 export function StreamViewerOverlay({
@@ -52,6 +56,8 @@ export function StreamViewerOverlay({
   onEventDelete,
   onEditInEditor,
   initialEventId,
+  onEventMouseEnter,
+  onEventMouseLeave,
 }: StreamViewerOverlayProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -519,6 +525,8 @@ export function StreamViewerOverlay({
             isOwner={isOwner}
             onViewOnCanvas={handleViewOnCanvas}
             onEditInEditor={handleEditInEditorAction}
+            onEventMouseEnter={onEventMouseEnter}
+            onEventMouseLeave={onEventMouseLeave}
           />
         </Box>
       </Box>

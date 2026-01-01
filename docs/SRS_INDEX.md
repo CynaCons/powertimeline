@@ -45,6 +45,8 @@
 | Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 25 (100%) | 8 (32%) |
 | **TOTAL** | **~352** | Multiple files | **~200 (57%)** | **~119 (34%)** |
 
+Note: Stream View now replaces the deprecated Events/Outline panel for event browsing (Alt+E shortcut removed); see `docs/SRS_TIMELINE_EDITOR.md` and `docs/SRS_STREAM_VIEW.md`.
+
 ---
 
 ## 🗂️ Requirements by Feature Area

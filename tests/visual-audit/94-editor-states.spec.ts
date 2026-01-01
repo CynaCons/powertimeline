@@ -182,87 +182,10 @@ test.describe('Editor State Visual Audit', () => {
     expect(true).toBe(true);
   });
 
-  test('T94.3: Events panel open without improper card overlap', async ({ page }) => {
-    console.log('=== T94.3 Events Panel Overlap Audit ===');
-
-    const eventsButton = page.locator('[data-testid="nav-events"], [aria-label*="Events" i], button:has-text("Events")').first();
-    const eventsButtonVisible = await eventsButton.isVisible({ timeout: 4000 }).catch(() => false);
-
-    if (!eventsButtonVisible) {
-      console.log('!! Events nav button not found');
-      expect(true).toBe(true);
-      return;
-    }
-
-    await eventsButton.click();
-    await page.waitForTimeout(800);
-
-    // Capture screenshot showing panel state
-    await page.screenshot({
-      path: path.join(screenshotsDir, 't94-3-editor-events-panel.png'),
-      fullPage: false
-    });
-
-    const panelReport = await page.evaluate(() => {
-      const panel = document.querySelector('[aria-labelledby="dialog-title-events"]') as HTMLElement | null;
-      if (!panel) {
-        return { found: false };
-      }
-
-      const panelRect = panel.getBoundingClientRect();
-      const panelZ = parseInt(window.getComputedStyle(panel).zIndex || '0', 10) || 0;
-      const cards = Array.from(document.querySelectorAll('[data-testid*="event-card"]')) as HTMLElement[];
-
-      const overlappingCards = cards
-        .map((card) => {
-          const rect = card.getBoundingClientRect();
-          const z = parseInt(window.getComputedStyle(card).zIndex || '0', 10) || 0;
-          const overlap = !(rect.right < panelRect.left || rect.left > panelRect.right || rect.bottom < panelRect.top || rect.top > panelRect.bottom);
-          return { id: card.dataset.eventId || card.textContent || 'card', z, overlap, rect };
-        })
-        .filter((entry) => entry.overlap);
-
-      const maxOverlapZ = overlappingCards.reduce((max, card) => Math.max(max, card.z), -1);
-
-      return {
-        found: true,
-        panelZ,
-        overlapCount: overlappingCards.length,
-        maxOverlapZ,
-        sample: overlappingCards.slice(0, 3).map((card) => ({
-          id: card.id.slice(0, 30),
-          z: card.z,
-          left: Math.round(card.rect.left),
-          width: Math.round(card.rect.width)
-        }))
-      };
-    });
-
-    if (!panelReport.found) {
-      console.log('!! Events panel did not appear after click');
-      expect(true).toBe(true);
-      return;
-    }
-
-    console.log(`Panel z-index: ${panelReport.panelZ}`);
-    console.log(`Cards intersecting panel region: ${panelReport.overlapCount}`);
-
-    if (panelReport.overlapCount > 0) {
-      console.log(`Highest overlapping card z-index: ${panelReport.maxOverlapZ}`);
-      console.log(`Sample overlaps: ${JSON.stringify(panelReport.sample, null, 2)}`);
-      if (panelReport.maxOverlapZ >= panelReport.panelZ) {
-        console.log('!! A card has z-index >= panel; potential layering issue');
-      } else {
-        console.log('Cards stay beneath the panel as expected');
-      }
-    } else {
-      console.log('No cards intersect the events panel region');
-    }
-
-    if (panelReport.found) {
-      expect(panelReport.maxOverlapZ, 'Cards should have lower z-index than panel')
-        .toBeLessThan(panelReport.panelZ);
-    }
+  test.skip('T94.3: DEPRECATED - Events panel removed', async ({ page }) => {
+    // This test is deprecated - Events panel (OutlinePanel) has been replaced by Stream View
+    // Stream View uses a floating overlay, not a side panel, so panel overlap testing is not applicable
+    console.log('T94.3 skipped - Events panel removed in favor of Stream View');
   });
 
   test('T94.4: Layering with multiple UI elements open', async ({ page }) => {

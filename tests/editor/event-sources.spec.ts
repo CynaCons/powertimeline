@@ -23,13 +23,13 @@ const TEST_TIMELINE = 'french-revolution';
  * Helper: Open the authoring overlay for an event
  */
 async function openEventEditor(page: Page): Promise<void> {
-  // Open Events panel
-  await page.locator('button[aria-label="Events"]').click();
-  await expect(page.getByPlaceholder('Filter...')).toBeVisible({ timeout: 5000 });
+  // Open Stream View (replaces Events panel)
+  await page.locator('button[aria-label="Stream View"]').click();
+  await expect(page.getByTestId('stream-viewer')).toBeVisible({ timeout: 5000 });
 
   // Click first event in list
-  const firstItem = page.locator('li >> role=button').first();
-  await firstItem.click();
+  const firstEvent = page.locator('[data-testid^="stream-event-"]').first();
+  await firstEvent.click();
 
   // Wait for overlay
   const overlay = page.locator('[data-testid="authoring-overlay"]');

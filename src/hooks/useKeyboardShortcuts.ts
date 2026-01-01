@@ -124,7 +124,6 @@ export const useCommandPaletteShortcuts = (onOpenPalette: () => void, disabled =
 // Hook for navigation specific shortcuts
 export const useNavigationShortcuts = (
   actions: {
-    openEvents: () => void;
     openCreate: () => void;
     toggleTheme: () => void;
     closeOverlay: () => void;
@@ -133,12 +132,6 @@ export const useNavigationShortcuts = (
   disabled = false
 ) => {
   const shortcuts = [
-    {
-      key: 'e',
-      altKey: true,
-      action: actions.openEvents,
-      description: 'Open Events panel',
-    },
     {
       key: 'c',
       altKey: true,
