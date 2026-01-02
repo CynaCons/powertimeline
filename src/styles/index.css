@@ -1095,3 +1095,62 @@ kbd {
   transform: translateX(80px);
   transition: transform 200ms ease-out;
 }
+
+/* Minimap marker styles - Direct DOM class manipulation for O(1) performance
+   When hoveredEventId changes, useEffect toggles .is-hovered class directly */
+.minimap-markers-container {
+  position: absolute;
+  inset: 0;
+}
+
+.minimap-marker {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 8px;
+  background-color: #3b82f6; /* blue-500 */
+  transform: translateX(-50%);
+  transition: all 200ms ease-out;
+  z-index: 2;
+}
+
+/* Hovered marker - class toggled via direct DOM manipulation in useEffect */
+.minimap-marker.is-hovered {
+  width: 6px;
+  height: 10px;
+  background-color: #38bdf8; /* sky-400 */
+  border: 1px solid white;
+  border-radius: 2px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.45), 0 2px 6px rgba(56, 189, 248, 0.25);
+  z-index: 3;
+}
+
+/* Selected marker - class toggled via direct DOM manipulation in useEffect */
+.minimap-marker.is-selected {
+  width: 6px;
+  height: 12px;
+  background-color: #fbbf24; /* amber-400 */
+  border: 1px solid white;
+  border-radius: 2px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.55), 0 2px 6px rgba(251, 191, 36, 0.35);
+  z-index: 4;
+}
+
+/* Card hover via direct DOM manipulation - bypasses React reconciliation for O(1) performance
+   When hoveredEventId changes, useEffect toggles .card-hovered class directly */
+[data-testid="event-card"].card-hovered {
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+  z-index: 22 !important;
+}
+
+/* Anchor hover via direct DOM manipulation - same O(1) pattern as cards */
+.anchor-wrapper.anchor-hovered .anchor-diamond {
+  background: linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%) !important;
+  border-color: var(--color-primary-400) !important;
+  box-shadow: 0 0 8px rgba(66, 165, 245, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transform: rotate(45deg) scale(1.1) !important;
+}

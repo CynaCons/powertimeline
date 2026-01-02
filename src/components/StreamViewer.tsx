@@ -8,7 +8,7 @@
  * - Chronologically sorted events
  */
 
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, memo, useCallback } from 'react';
 import { Box, Typography, Stack, useMediaQuery, useTheme } from '@mui/material';
 import type { Event } from '../types';
 
@@ -79,7 +79,30 @@ function getEventColor(_event: Event, index: number): string {
 /**
  * Single event card in the stream
  */
-function StreamEventCard({
+interface StreamEventCardProps {
+  event: Event;
+  index: number;
+  isLast: boolean;
+  isSelected: boolean;
+  isExpanded: boolean;
+  lineClamp: number;
+  onClick: (event: Event) => void;  // Changed: accepts event for stable callback
+  onToggleExpand: (eventId: string) => void;  // Changed: accepts eventId for stable callback
+  isOwner: boolean;
+  swipedEventId: string | null;
+  swipeDirection: 'left' | 'right' | null;
+  onTouchStart: (e: React.TouchEvent, eventId: string) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
+  onTouchEnd: () => void;
+  onDelete?: (eventId: string) => void;
+  onEdit?: (event: Event) => void;
+  onViewOnCanvas?: (event: Event) => void;
+  onEditInEditor?: (event: Event) => void;
+  onMouseEnter?: (eventId: string) => void;
+  onMouseLeave?: () => void;
+}
+
+const StreamEventCard = memo(function StreamEventCard({
   event,
   index,
   isLast,
@@ -98,30 +121,11 @@ function StreamEventCard({
   onEdit,
   onViewOnCanvas,
   onEditInEditor,
-  onMouseEnter,
-  onMouseLeave,
-}: {
-  event: Event;
-  index: number;
-  isLast: boolean;
-  isSelected: boolean;
-  isExpanded: boolean;
-  lineClamp: number;
-  onClick: () => void;
-  onToggleExpand: () => void;
-  isOwner: boolean;
-  swipedEventId: string | null;
-  swipeDirection: 'left' | 'right' | null;
-  onTouchStart: (e: React.TouchEvent, eventId: string) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
-  onDelete?: (eventId: string) => void;
-  onEdit?: (event: Event) => void;
-  onViewOnCanvas?: (event: Event) => void;
-  onEditInEditor?: (event: Event) => void;
-  onMouseEnter?: (eventId: string) => void;
-  onMouseLeave?: () => void;
-}) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onMouseEnter: _onMouseEnter,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onMouseLeave: _onMouseLeave,
+}: StreamEventCardProps) {
   const { line1, line2 } = formatEventDate(event.date);
   const dotColor = getEventColor(event, index);
   const descriptionRef = useRef<HTMLSpanElement>(null);
@@ -138,7 +142,7 @@ function StreamEventCard({
     }
   }, [event.description, isExpanded, lineClamp]);
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
     // If clicking the expand button, don't trigger the main onClick
     if ((e.target as HTMLElement).closest('[data-expand-button]')) {
       return;
@@ -146,13 +150,29 @@ function StreamEventCard({
     if (isSwiped && swipeDirection) {
       return;
     }
-    onClick();
-  };
+    onClick(event);  // Pass event to callback
+  }, [onClick, event, isSwiped, swipeDirection]);
 
-  const handleExpandClick = (e: React.MouseEvent) => {
+  const handleExpandClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    onToggleExpand();
-  };
+    onToggleExpand(event.id);  // Pass eventId to callback
+  }, [onToggleExpand, event.id]);
+
+  // Stable callbacks for mouse events - dispatch custom events for instant DOM updates
+  // Completely bypasses React state for O(1) hover response time
+  const handleMouseEnter = useCallback(() => {
+    // Dispatch custom event for instant minimap/canvas highlight (bypasses React entirely)
+    document.dispatchEvent(new CustomEvent('timeline:hover', { detail: { eventId: event.id } }));
+  }, [event.id]);
+
+  const handleMouseLeave = useCallback(() => {
+    // Dispatch custom event to clear hover (bypasses React entirely)
+    document.dispatchEvent(new CustomEvent('timeline:hover', { detail: { eventId: null } }));
+  }, []);
+
+  const handleTouchStartWrapper = useCallback((e: React.TouchEvent) => {
+    onTouchStart(e, event.id);
+  }, [onTouchStart, event.id]);
 
   return (
     <Box
@@ -242,11 +262,11 @@ function StreamEventCard({
       {/* Event content card */}
       <Box
         className={`stream-event-card${swipeClass}`}
-        onTouchStart={isOwner ? (e) => onTouchStart(e, event.id) : undefined}
+        onTouchStart={isOwner ? handleTouchStartWrapper : undefined}
         onTouchMove={isOwner ? onTouchMove : undefined}
         onTouchEnd={isOwner ? onTouchEnd : undefined}
-        onMouseEnter={() => onMouseEnter?.(event.id)}
-        onMouseLeave={() => onMouseLeave?.()}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         sx={{
           position: 'relative',
           flex: 1,
@@ -508,7 +528,7 @@ function StreamEventCard({
       </Box>
     </Box>
   );
-}
+});
 
 /**
  * StreamViewer - Main component
@@ -536,8 +556,8 @@ export function StreamViewer({
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const touchStartX = useRef<number | null>(null);
 
-  // Responsive line clamp: 3 on mobile, 5 on desktop
-  const lineClamp = isMobile ? 3 : 5;
+  // Responsive line clamp: 3 on mobile, 5 on desktop - memoized to prevent re-renders
+  const lineClamp = useMemo(() => isMobile ? 3 : 5, [isMobile]);
 
   // Sort events chronologically
   const sortedEvents = useMemo(() => {
@@ -549,14 +569,14 @@ export function StreamViewer({
   }, [events]);
 
   // Handle click - just call the callback
-  const handleClick = (event: Event) => {
+  const handleClick = useCallback((event: Event) => {
     setSwipedEventId(null);
     setSwipeDirection(null);
     onEventClick?.(event);
-  };
+  }, [onEventClick]);
 
   // Toggle expand state for an event
-  const toggleExpand = (eventId: string) => {
+  const toggleExpand = useCallback((eventId: string) => {
     setExpandedEvents(prev => {
       const next = new Set(prev);
       if (next.has(eventId)) {
@@ -566,16 +586,16 @@ export function StreamViewer({
       }
       return next;
     });
-  };
+  }, []);
 
-  const handleTouchStart = (e: React.TouchEvent, eventId: string) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent, eventId: string) => {
     if (!isOwner) return;
     touchStartX.current = e.touches[0].clientX;
     setSwipedEventId(eventId);
     setSwipeDirection(null);
-  };
+  }, [isOwner]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isOwner || touchStartX.current === null || !swipedEventId) return;
     const deltaX = e.touches[0].clientX - touchStartX.current;
     if (deltaX < -50) {
@@ -585,9 +605,9 @@ export function StreamViewer({
     } else {
       setSwipeDirection(null);
     }
-  };
+  }, [isOwner, swipedEventId]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     if (!isOwner) return;
     if (!swipeDirection) {
       setSwipedEventId(null);
@@ -600,7 +620,7 @@ export function StreamViewer({
       setSwipeDirection(null);
     }, 3000);
     touchStartX.current = null;
-  };
+  }, [isOwner, swipeDirection]);
 
   useEffect(() => {
     if (!isOwner) {
@@ -662,8 +682,8 @@ export function StreamViewer({
                 isSelected={selectedEventId === event.id}
                 isExpanded={expandedEvents.has(event.id)}
                 lineClamp={lineClamp}
-                onClick={() => handleClick(event)}
-                onToggleExpand={() => toggleExpand(event.id)}
+                onClick={handleClick}
+                onToggleExpand={toggleExpand}
                 isOwner={isOwner}
                 swipedEventId={swipedEventId}
                 swipeDirection={swipeDirection}

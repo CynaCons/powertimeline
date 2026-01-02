@@ -278,6 +278,15 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     applyZoomWithAnchor(1.25);
   }, [applyZoomWithAnchor]);
 
+  // Stable callbacks for StreamViewerOverlay hover events
+  const handleStreamEventMouseEnter = useCallback((eventId: string) => {
+    setHoveredEventId(eventId);
+  }, []);
+
+  const handleStreamEventMouseLeave = useCallback(() => {
+    setHoveredEventId(undefined);
+  }, []);
+
   // Panels & overlays
   // Left sidebar overlays (permanent sidebar width = 56px)
   const [overlay, setOverlay] = useState<null | 'editor' | 'import-export'>(null);
@@ -1200,8 +1209,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     setSelectedId(id);
                     setPendingOverlayId(id);
                   }}
-                  onCardMouseEnter={(id) => setHoveredEventId(id)}
-                  onCardMouseLeave={() => setHoveredEventId(undefined)}
+                  onCardMouseEnter={handleStreamEventMouseEnter}
+                  onCardMouseLeave={handleStreamEventMouseLeave}
                   selectedEventId={selectedId}
                   onEventSelect={setSelectedId}
                 />
@@ -1329,8 +1338,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               setOverlay('editor');
             }}
             initialEventId={selectedId}
-            onEventMouseEnter={(eventId) => setHoveredEventId(eventId)}
-            onEventMouseLeave={() => setHoveredEventId(undefined)}
+            onEventMouseEnter={handleStreamEventMouseEnter}
+            onEventMouseLeave={handleStreamEventMouseLeave}
           />
         </Suspense>
 

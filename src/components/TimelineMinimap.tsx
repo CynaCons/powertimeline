@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useRef, useCallback, memo, useEffect } from 'react';
 import type { Event } from '../types';
 
 interface TimelineMinimapProps {
@@ -10,6 +10,36 @@ interface TimelineMinimapProps {
   highlightedEventId?: string;
   hoveredEventId?: string;
 }
+
+interface EventMarkerProps {
+  position: number;
+  eventId: string;
+  eventTitle: string;
+  eventYear: number;
+}
+
+/**
+ * Memoized event marker component - uses CSS data attributes for hover/selection state
+ * to avoid re-renders when hoveredEventId changes. The parent sets data-hovered-id and
+ * data-selected-id attributes, and CSS handles the styling.
+ */
+const EventMarker = memo(function EventMarker({
+  position,
+  eventId,
+  eventTitle,
+  eventYear
+}: EventMarkerProps) {
+  return (
+    <div
+      className="minimap-marker"
+      data-event-id={eventId}
+      style={{
+        left: `${position * 100}%`,
+      }}
+      title={`${eventTitle} (${eventYear})`}
+    />
+  );
+});
 
 export function TimelineMinimap({
   events,
@@ -42,21 +72,95 @@ export function TimelineMinimap({
     return { startDate, endDate, totalDuration };
   }, [events]);
 
-  // Calculate event density markers
+  // Calculate event density markers with pre-computed data for efficient rendering
   const eventMarkers = useMemo(() => {
     if (events.length === 0 || timelineRange.totalDuration === 0) return [];
-    
+
     const markers = events.map(event => {
       const eventTime = new Date(event.date).getTime();
       const position = (eventTime - timelineRange.startDate.getTime()) / timelineRange.totalDuration;
       return {
         position: Math.max(0, Math.min(1, position)),
-        event
+        eventId: event.id,
+        eventTitle: event.title,
+        eventYear: new Date(event.date).getFullYear()
       };
     });
-    
+
     return markers;
   }, [events, timelineRange]);
+
+  // Ref for markers container - used for direct DOM updates to avoid React re-renders
+  const markersContainerRef = useRef<HTMLDivElement>(null);
+
+  // Listen for custom timeline:hover events for instant DOM updates (bypasses React)
+  // This enables O(1) hover response time regardless of component tree size
+  useEffect(() => {
+    const container = markersContainerRef.current;
+    if (!container) return;
+
+    const handleHoverEvent = (evt: globalThis.Event) => {
+      const customEvent = evt as CustomEvent<{ eventId: string | null }>;
+      const eventId = customEvent.detail?.eventId;
+
+      // Remove previous hover class
+      const prevHovered = container.querySelector('.minimap-marker.is-hovered');
+      if (prevHovered) {
+        prevHovered.classList.remove('is-hovered');
+      }
+
+      // Add hover class to new marker
+      if (eventId) {
+        const newHovered = container.querySelector(`.minimap-marker[data-event-id="${eventId}"]`);
+        if (newHovered) {
+          newHovered.classList.add('is-hovered');
+        }
+      }
+    };
+
+    document.addEventListener('timeline:hover', handleHoverEvent);
+    return () => document.removeEventListener('timeline:hover', handleHoverEvent);
+  }, []);
+
+  // Direct DOM manipulation for hover/selection state changes via React props (fallback)
+  // This handles hoveredEventId prop changes from canvas card hovers
+  useEffect(() => {
+    const container = markersContainerRef.current;
+    if (!container) return;
+
+    // Remove previous hover class
+    const prevHovered = container.querySelector('.minimap-marker.is-hovered');
+    if (prevHovered) {
+      prevHovered.classList.remove('is-hovered');
+    }
+
+    // Add hover class to new marker
+    if (hoveredEventId) {
+      const newHovered = container.querySelector(`.minimap-marker[data-event-id="${hoveredEventId}"]`);
+      if (newHovered) {
+        newHovered.classList.add('is-hovered');
+      }
+    }
+  }, [hoveredEventId]);
+
+  useEffect(() => {
+    const container = markersContainerRef.current;
+    if (!container) return;
+
+    // Remove previous selected class
+    const prevSelected = container.querySelector('.minimap-marker.is-selected');
+    if (prevSelected) {
+      prevSelected.classList.remove('is-selected');
+    }
+
+    // Add selected class to new marker
+    if (highlightedEventId) {
+      const newSelected = container.querySelector(`.minimap-marker[data-event-id="${highlightedEventId}"]`);
+      if (newSelected) {
+        newSelected.classList.add('is-selected');
+      }
+    }
+  }, [highlightedEventId]);
 
   // Handle view window dragging
   const handleViewWindowMouseDown = useCallback((e: React.MouseEvent) => {
@@ -128,7 +232,7 @@ export function TimelineMinimap({
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   // Generate density heatmap gradient
-  const generateDensityGradient = useCallback((markers: { position: number; event: Event }[]) => {
+  const generateDensityGradient = useCallback((markers: { position: number }[]) => {
     if (markers.length === 0) return 'transparent';
 
     // Create density buckets across the timeline
@@ -196,38 +300,22 @@ export function TimelineMinimap({
               background: generateDensityGradient(eventMarkers)
             }}
           />
-          {/* Enhanced event density markers - blue for events */}
-          {eventMarkers.map((marker, index) => {
-            // Explicit undefined checks to prevent undefined === undefined matching all markers
-            const isSelected = highlightedEventId !== undefined && highlightedEventId === marker.event.id;
-            const isHovered = hoveredEventId !== undefined && hoveredEventId === marker.event.id && !isSelected;
-            return (
-              <div
-                key={index}
-                className={`absolute transition-all duration-200 ease-out transform ${
-                  isSelected
-                    ? 'w-1.5 h-3 bg-amber-400 border border-white rounded-sm'
-                    : isHovered
-                      ? 'w-1.5 h-2.5 bg-sky-400 border border-white rounded-sm'
-                      : 'top-0 w-0.5 h-2 bg-blue-500'
-                }`}
-                style={{
-                  left: `${marker.position * 100}%`,
-                  top: isSelected || isHovered ? '50%' : 0,
-                  transform: isSelected || isHovered
-                    ? 'translate(-50%, -50%)'
-                    : 'translateX(-50%)',
-                  boxShadow: isSelected
-                    ? '0 0 8px rgba(251, 191, 36, 0.55), 0 2px 6px rgba(251, 191, 36, 0.35)'
-                    : isHovered
-                      ? '0 0 8px rgba(56, 189, 248, 0.45), 0 2px 6px rgba(56, 189, 248, 0.25)'
-                      : 'none', // Removed default shadow to prevent glow in dense areas
-                  zIndex: isSelected ? 4 : isHovered ? 3 : 2
-                }}
-                title={`${marker.event.title} (${new Date(marker.event.date).getFullYear()})`}
+          {/* Enhanced event density markers - blue for events (memoized for performance)
+              CSS handles hover/selection styling via direct DOM class updates for O(1) performance */}
+          <div
+            ref={markersContainerRef}
+            className="minimap-markers-container"
+          >
+            {eventMarkers.map((marker) => (
+              <EventMarker
+                key={marker.eventId}
+                position={marker.position}
+                eventId={marker.eventId}
+                eventTitle={marker.eventTitle}
+                eventYear={marker.eventYear}
               />
-            );
-          })}
+            ))}
+          </div>
           
           {/* Enhanced current view window indicator - grey overlay */}
           <div

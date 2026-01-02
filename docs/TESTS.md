@@ -17,6 +17,25 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 | User Tests | `tests/user/` | User profile and editing (2 files) |
 | Production Tests | `tests/production/` | Production smoke tests (5 files) |
 | E2E Tests | `tests/e2e/` | End-to-end user journeys |
+| Stream Tests | `tests/stream/` | Stream View functionality |
+
+## Test Naming Convention
+
+**IMPORTANT:** All test files MUST use a numbered prefix in the format `NN-description.spec.ts`:
+
+```
+01-foundation.smoke.spec.ts      # Basic smoke tests
+82-stream-viewer.spec.ts         # Stream viewer tests
+100-hover-performance.spec.ts    # Performance tests
+```
+
+**Rules:**
+- Number prefix must be 2-3 digits (e.g., `01`, `82`, `100`)
+- Use the next available number in sequence for new tests
+- Descriptive kebab-case name after the number
+- End with `.spec.ts` (or `.smoke.spec.ts` for smoke tests)
+
+**Current highest number:** Check `tests/editor/` and `tests/stream/` directories before creating new tests.
 
 ## Production Tests (Latest)
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import type { CSSProperties } from 'react';
 import type { Event } from '../types';
 import type { LayoutConfig, PositionedCard, Anchor, EventCluster } from './types';
@@ -30,7 +30,29 @@ interface DeterministicLayoutProps {
   onEventSelect?: (eventId: string) => void;
 }
 
-export function DeterministicLayoutComponent({
+// Custom comparison function for React.memo - ignore hoveredEventId since we handle it via DOM
+function arePropsEqual(
+  prevProps: DeterministicLayoutProps,
+  nextProps: DeterministicLayoutProps
+): boolean {
+  // If hoveredEventId changed, we DON'T want to re-render (handled via DOM)
+  // Compare all other props
+  return (
+    prevProps.events === nextProps.events &&
+    prevProps.showInfoPanels === nextProps.showInfoPanels &&
+    prevProps.viewStart === nextProps.viewStart &&
+    prevProps.viewEnd === nextProps.viewEnd &&
+    prevProps.isPanning === nextProps.isPanning &&
+    prevProps.onCardDoubleClick === nextProps.onCardDoubleClick &&
+    prevProps.onCardMouseEnter === nextProps.onCardMouseEnter &&
+    prevProps.onCardMouseLeave === nextProps.onCardMouseLeave &&
+    prevProps.selectedEventId === nextProps.selectedEventId &&
+    prevProps.onEventSelect === nextProps.onEventSelect
+    // Explicitly NOT comparing hoveredEventId - handled via useEffect + DOM
+  );
+}
+
+export const DeterministicLayoutComponent = memo(function DeterministicLayoutComponent({
   events,
   showInfoPanels = false,
   viewStart = 0,
@@ -46,6 +68,10 @@ export function DeterministicLayoutComponent({
   // Container ref for proper sizing
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 1200, height: 600 });
+
+  // Refs for direct DOM updates to avoid React re-renders on hover
+  const cardsContainerRef = useRef<HTMLDivElement>(null);
+  const anchorsContainerRef = useRef<HTMLDivElement>(null);
 
   // Layout cache to avoid recalculating when only view window changes
   const layoutCacheRef = useRef<{
@@ -131,6 +157,58 @@ export function DeterministicLayoutComponent({
       }
     };
   }, []);
+
+  // Helper function for direct DOM hover updates - shared between event listener and React effect
+  const updateHoverDOM = useCallback((eventId: string | null) => {
+    // Update cards
+    const cardsContainer = cardsContainerRef.current;
+    if (cardsContainer) {
+      const prevHovered = cardsContainer.querySelector('[data-event-id].card-hovered');
+      if (prevHovered) {
+        prevHovered.classList.remove('card-hovered');
+      }
+      if (eventId) {
+        const newHovered = cardsContainer.querySelector(`[data-event-id="${eventId}"]`);
+        if (newHovered) {
+          newHovered.classList.add('card-hovered');
+        }
+      }
+    }
+
+    // Update anchors
+    const anchorsContainer = anchorsContainerRef.current;
+    if (anchorsContainer) {
+      const prevHovered = anchorsContainer.querySelectorAll('.anchor-hovered');
+      prevHovered.forEach(el => el.classList.remove('anchor-hovered'));
+      if (eventId) {
+        const anchors = anchorsContainer.querySelectorAll(`[data-anchor-event-ids]`);
+        anchors.forEach(anchor => {
+          const eventIds = anchor.getAttribute('data-anchor-event-ids')?.split(',') || [];
+          if (eventIds.includes(eventId)) {
+            anchor.classList.add('anchor-hovered');
+          }
+        });
+      }
+    }
+  }, []);
+
+  // Listen for custom timeline:hover events for instant DOM updates (bypasses React)
+  useEffect(() => {
+    const handleHoverEvent = (evt: globalThis.Event) => {
+      const customEvent = evt as CustomEvent<{ eventId: string | null }>;
+      const eventId = customEvent.detail?.eventId;
+      updateHoverDOM(eventId);
+    };
+
+    document.addEventListener('timeline:hover', handleHoverEvent);
+    return () => document.removeEventListener('timeline:hover', handleHoverEvent);
+  }, [updateHoverDOM]);
+
+  // Direct DOM manipulation for card/anchor hover via React props (fallback)
+  // This handles hoveredEventId prop changes from canvas card hovers
+  useEffect(() => {
+    updateHoverDOM(hoveredEventId || null);
+  }, [hoveredEventId, updateHoverDOM]);
 
   // Calculate timeline date range for axis ticks
   const timelineRange = useMemo(() => {
@@ -759,6 +837,7 @@ export function DeterministicLayoutComponent({
       )}
 
       {/* Anchors - filtered by view window to prevent leftover overflow badges */}
+      <div ref={anchorsContainerRef}>
       {filteredAnchors.map((anchor) => {
         // Check if this anchor is part of a merged badge group
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
@@ -773,8 +852,8 @@ export function DeterministicLayoutComponent({
         if (anchorCards.length === 0) return null;
 
         const primaryAnchorEventId = anchor.eventId ?? anchor.eventIds?.[0] ?? null;
-        const isAnchorHovered = (hoveredEventId && anchorEventIds.includes(hoveredEventId)) ||
-                                (hoveredPairEventId && anchorEventIds.includes(hoveredPairEventId));
+        // Only check hoveredPairEventId (internal state) - external hover handled via DOM/CSS
+        const isAnchorPairHovered = hoveredPairEventId ? anchorEventIds.includes(hoveredPairEventId) : false;
         const isAnchorSelected = selectedEventId ? anchorEventIds.includes(selectedEventId) : false;
 
         // Calculate connector line positions
@@ -793,13 +872,14 @@ export function DeterministicLayoutComponent({
         const lineStartY = anchorCenterY;
         const lineEndY = timelineAxisY;
 
+        // Base visual style - selected and pair-hovered handled here, external hover via CSS
         const anchorVisualStyle: CSSProperties = isAnchorSelected
           ? {
               background: 'linear-gradient(135deg, #fcd34d 0%, #d97706 100%)',
               borderColor: '#fbbf24',
               boxShadow: '0 0 10px rgba(251, 191, 36, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.35)'
             }
-          : isAnchorHovered
+          : isAnchorPairHovered
             ? {
                 background: 'linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%)',
                 borderColor: 'var(--color-primary-400)',
@@ -819,7 +899,8 @@ export function DeterministicLayoutComponent({
           <div
             key={anchor.id}
             data-testid={anchor.id}
-            className="absolute"
+            data-anchor-event-ids={anchorEventIds.join(',')}
+            className="absolute anchor-wrapper"
             style={{ left: anchor.x - 5, top: outerContainerTop }}
           >
             <div
@@ -845,10 +926,10 @@ export function DeterministicLayoutComponent({
                 }
               }}
             >
-              {/* Diamond/Milestone anchor shape */}
+              {/* Diamond/Milestone anchor shape - external hover styling via .anchor-hovered CSS class */}
               <div
-                className={`w-3 h-3 border-2 shadow-md z-20 transition-all duration-200 transform rotate-45 rounded-sm ${
-                  isAnchorSelected ? 'scale-125' : isAnchorHovered ? 'scale-110' : ''
+                className={`anchor-diamond w-3 h-3 border-2 shadow-md z-20 transition-all duration-200 transform rotate-45 rounded-sm ${
+                  isAnchorSelected ? 'scale-125' : isAnchorPairHovered ? 'scale-110' : ''
                 }`}
                 style={anchorVisualStyle}
               />
@@ -867,7 +948,8 @@ export function DeterministicLayoutComponent({
           </div>
         );
       })}
-      
+      </div>
+
       {/* Render merged overflow badges at centroids - centered on timeline axis */}
       {mergedOverflowBadges.map((badge, index) => (
         <div
@@ -884,6 +966,7 @@ export function DeterministicLayoutComponent({
       ))}
 
       {/* Cards - virtualized to only render visible cards */}
+      <div ref={cardsContainerRef}>
       {(() => {
         // Viewport bounds for card virtualization
         const BUFFER = 200; // pixels outside viewport to pre-render
@@ -899,7 +982,6 @@ export function DeterministicLayoutComponent({
         return visibleCards.map((card, cardIndex) => {
         const primaryCardEventId = card.event?.id ?? card.id;
         const isCardSelected = selectedEventId ? primaryCardEventId === selectedEventId : false;
-        const isCardHovered = hoveredEventId ? primaryCardEventId === hoveredEventId : false;
         const isCardPairHovered = hoveredPairEventId ? primaryCardEventId === hoveredPairEventId : false;
         const isFirstCard = cardIndex === 0;
 
@@ -912,8 +994,6 @@ export function DeterministicLayoutComponent({
 
         const cardHighlightClasses = isCardSelected
           ? 'ring-2 ring-amber-400 ring-opacity-80 outline outline-2 outline-offset-2 outline-amber-300 shadow-xl'
-          : isCardHovered
-          ? 'ring-1 ring-blue-300 ring-opacity-30 shadow-lg'
           : isCardPairHovered
           ? 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg'
           : '';
@@ -926,7 +1006,7 @@ export function DeterministicLayoutComponent({
           top: card.y,
           width: card.width,
           height: card.height,
-          zIndex: isCardSelected ? 25 : isCardHovered ? 22 : isCardPairHovered ? 21 : 10,
+          zIndex: isCardSelected ? 25 : isCardPairHovered ? 21 : 10,
           backgroundColor: isPreviewEvent
             ? 'var(--preview-bg)'
             : isCardSelected
@@ -996,6 +1076,7 @@ export function DeterministicLayoutComponent({
         );
       });
       })()}
+      </div>
 
       {/* Info Panels - Only show when enabled */}
       {showInfoPanels && (
@@ -1020,7 +1101,7 @@ export function DeterministicLayoutComponent({
       )}
     </div>
   );
-}
+}, arePropsEqual);
 
 function FullCardContent({ event }: { event: Event }) {
   return (
