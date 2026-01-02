@@ -1,6 +1,7 @@
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { registerSW } from 'virtual:pwa-register'
 import './index.css'
 import './styles/index.css'
 import './styles/stream-edit-panel.css'
@@ -108,6 +109,15 @@ if (typeof document !== 'undefined') {
 logger.initialize();
 
 const monitoringEnabled = environment.flags.enableTelemetry || environment.isDevelopment;
+
+if (import.meta.env.PROD && typeof window !== 'undefined') {
+  registerSW({
+    immediate: true,
+    onRegisterError(error) {
+      logger.error('Service worker registration failed', { error });
+    }
+  });
+}
 
 if (monitoringEnabled && typeof window !== 'undefined') {
   window.addEventListener('load', () => performanceMonitor.recordBundleLoadTime(), { once: true });
