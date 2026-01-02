@@ -68,7 +68,8 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
     });
 
     // Secondary ticks (months) - shown when zoomed to < 12 years
-    if (spanDays < 365 * 12 && !baseHasMonthScale) {
+    // BUT skip if baseTicks already has day-level labels (would cause duplicate/overlapping labels)
+    if (spanDays < 365 * 12 && !baseHasMonthScale && !baseHasDayScale) {
       const approxMonths = Math.max(1, Math.floor(spanDays / 30));
       const monthStep = Math.max(1, Math.ceil(approxMonths / 16));
       const startDate = new Date(minDate);
@@ -333,15 +334,15 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
           const tickY = 40 - tickHeight / 2;
           let labelY: number;
           if (isHourLabel || isMinuteLabel) {
-            labelY = 70;
+            labelY = 78; // Pushed down to avoid anchor overlap
           } else if (isDayLabel && axisSpanDays <= 14) {
             labelY = 18;
           } else if (isPrimary) {
             labelY = 15;
           } else if (isSecondary) {
-            labelY = 65;
+            labelY = 75; // Pushed down to avoid anchor overlap (was 65)
           } else {
-            labelY = 70;
+            labelY = 78; // Pushed down (was 70)
           }
 
           const fontSize = isPrimary ? 14 : isSecondary ? 12 : 10;

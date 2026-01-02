@@ -61,7 +61,7 @@ export class PositioningEngine {
     // - This gives more vertical space for cards above the timeline
     // - Safe zones (minimap/breadcrumb) are handled at source in config.ts via HEADER_SAFE_ZONE
     const aboveTimelineMargin = 48; // spacing between above-cards and timeline axis (increased for breathing room)
-    const belowTimelineMargin = 28; // reduced spacing below (no dates there, just cards)
+    const belowTimelineMargin = 55; // spacing below for timeline axis labels (month/year labels render at ~65px from axis top)
     // Note: Anchor spacing constants are defined in createEventAnchors() where they're used
 
     for (const group of groups) {
