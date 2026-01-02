@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,7 +16,7 @@ const reuse = true;
 
 export default defineConfig({
   testDir: 'tests',
-  testMatch: /(editor|home|user|admin|production|auth|e2e|db|onboarding|stream|visual-audit)\/.+\.spec\.ts$/,
+  testMatch: /(editor|home|user|admin|production|auth|e2e|db|onboarding|stream|visual-audit|mobile|responsive)\/.+\.spec\.ts$/,
   // Increased timeouts for stability - complex layout calculations need more time
   timeout: 45_000,
   expect: {
@@ -40,12 +40,36 @@ export default defineConfig({
     headless: true,
     // Enable visual comparisons
     screenshot: 'only-on-failure',
-    // Use larger viewport for better screenshots
-    viewport: { width: 1920, height: 1080 },
     // Improve test stability
     actionTimeout: 10_000,
     navigationTimeout: 30_000,
     // Add trace for debugging failures
     trace: 'retain-on-failure',
   },
+  projects: [
+    {
+      name: 'desktop',
+      use: {
+        viewport: { width: 1920, height: 1080 },
+      },
+    },
+    {
+      name: 'desktop-xl',
+      use: {
+        viewport: { width: 2560, height: 1440 },
+      },
+    },
+    {
+      name: 'tablet',
+      use: {
+        ...devices['iPad Mini'],
+      },
+    },
+    {
+      name: 'mobile',
+      use: {
+        ...devices['iPhone 14'],
+      },
+    },
+  ],
 });

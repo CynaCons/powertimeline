@@ -1,12 +1,14 @@
 # Test Suite Organization
 
-**Last Updated:** 2025-11-27
-**Version:** v0.5.9
+**Last Updated:** 2026-01-02
+**Version:** v0.8.3.4
 
 ## Directory Structure
 
 ```
 tests/
+├── mobile/       # Mobile-specific tests (5 files)
+├── responsive/   # Cross-viewport tests (6 files)
 ├── editor/       # Timeline editor functionality (66 files)
 ├── home/         # Home page and navigation (8 files)
 ├── admin/        # Admin panel functionality (5 files)
@@ -23,6 +25,8 @@ tests/
 
 | Suite | Purpose | Runs Against |
 |-------|---------|--------------|
+| `mobile/` | Mobile-specific functionality | iPhone 14 viewport |
+| `responsive/` | Cross-viewport layout tests | All viewports |
 | `editor/` | Timeline rendering, zoom, layout, cards | localhost:5175 |
 | `home/` | HomePage, navigation, search | localhost:5175 |
 | `admin/` | Admin panel, user management | localhost:5175 |
@@ -34,13 +38,41 @@ tests/
 
 ### All Tests (Local)
 ```bash
+# Run all tests across all viewports (default)
+npm test
+
+# Or using Playwright directly
 npx playwright test
+```
+
+### Multi-Viewport Testing
+```bash
+# Mobile tests (iPhone 14)
+npm run test:mobile
+
+# Tablet tests (iPad Mini)
+npm run test:tablet
+
+# Desktop tests (1920x1080)
+npm run test:desktop
+
+# Responsive tests (all viewports)
+npm run test:responsive
+
+# All viewports (comprehensive)
+npm run test:all-viewports
 ```
 
 ### Specific Suite
 ```bash
 # Editor tests only
 npx playwright test tests/editor/
+
+# Mobile tests only
+npx playwright test tests/mobile/
+
+# Responsive tests only
+npx playwright test tests/responsive/
 
 # Production smoke tests
 npx playwright test tests/production/
@@ -63,6 +95,22 @@ npx playwright test --ui
 # Run tests and update docs/TESTS.md
 npm run test:update-doc
 ```
+
+## Mobile Tests (tests/mobile/)
+
+Mobile-specific functionality tests (iPhone 14 viewport):
+
+| Range | Category | Examples |
+|-------|----------|----------|
+| 01-05 | Mobile UX | Stream auto-open, swipe gestures, touch targets |
+
+## Responsive Tests (tests/responsive/)
+
+Cross-viewport layout tests (all viewports):
+
+| Range | Category | Examples |
+|-------|----------|----------|
+| 01-06 | Responsive Layout | Home page layout, card grid, breakpoints, navigation |
 
 ## Editor Tests (tests/editor/)
 
@@ -123,9 +171,15 @@ test('feature works', async ({ page }) => {
 ## Configuration
 
 See `playwright.config.ts` for:
-- Test matching pattern: `/(editor|home|user|admin|production|auth|e2e)/.+\.spec\.ts$/`
+- Test matching pattern: `/(mobile|responsive|editor|home|user|admin|production|auth|e2e)/.+\.spec\.ts$/`
 - Timeouts: 45s test, 10s expect
-- Viewport: 1920x1080
+- Default behavior: `npm test` runs ALL viewport projects
+- **Viewport Projects:**
+  - `desktop` - 1920x1080 (default)
+  - `desktop-xl` - 2560x1440
+  - `tablet` - iPad Mini (1024x768)
+  - `mobile` - iPhone 14 (390x844)
+- Device emulation: Tests use Playwright device descriptors for accurate mobile/tablet testing
 - Screenshots: on-failure only
 
 ## CI/CD
