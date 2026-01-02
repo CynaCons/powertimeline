@@ -17,7 +17,7 @@ const homeSteps: Step[] = [
   },
   {
     target: '[data-tour="my-timelines"]',
-    content: 'This is your personal workspace. All the timelines you create will appear here.',
+    content: '**At the top of the page**, this is your personal workspace. All the timelines you create will appear here.',
     placement: 'bottom',
     title: '📚 My Timelines',
   },
@@ -29,13 +29,13 @@ const homeSteps: Step[] = [
   },
   {
     target: '[data-tour="browse-public"]',
-    content: 'Discover timelines created by other users. Find inspiration or fork one to create your own version.',
-    placement: 'top',
+    content: '**Scroll down to find** public timelines created by other users. Find inspiration or fork one to create your own version.',
+    placement: 'bottom',
     title: '🌍 Explore Public Timelines',
   },
   {
     target: '[data-tour="nav-rail"]',
-    content: 'Quick navigation lives here. Browse timelines, access your collection, adjust settings, or start a tour anytime.',
+    content: 'Use this **left sidebar** for quick navigation. Browse timelines, access your collection, adjust settings, or start a tour anytime.',
     placement: 'right',
     title: '🧭 Navigation',
   },
