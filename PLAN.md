@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.3.4 - Events Panel Removal ✅
-**Next Milestone:** v0.8.4 Mobile and Responsive Testing
+**Current Version:** v0.8.4 - Mobile and Responsive Testing Infrastructure ✅
+**Next Milestone:** v0.9.0 Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -50,6 +50,7 @@
 - ✅ Dashed Connector Line Fix: Fixed SVG width (1px → 10px), replaced CSS vars with hex colors (v0.5.36.2)
 - ✅ Stream View Minimap Hover: Added hover effect to Stream View events that highlights them in minimap (v0.8.3.3)
 - ✅ Events Panel Removal: Removed OutlinePanel, consolidated functionality into Stream View (v0.8.3.4)
+- ✅ Mobile/Responsive Testing Infrastructure: 4 viewport projects (desktop/desktop-xl/tablet/mobile), 11 test files, SRS_RESPONSIVE_TESTING.md (v0.8.4)
 - ✅ Timeline Axis Visual Redesign: 20% thinner axis (3px), removed dashed lines, triangle anchors (v0.5.37)
 - ✅ Timeline Visual Polish: Reverted anchor shape to diamond/milestone (rotated square) with rounded edges (v0.5.37)
 - ✅ User Onboarding: Empty State CTA, React Joyride tours (Editor 8-step, Home 5-step), NavRail Help button (v0.5.38)
@@ -88,7 +89,6 @@
 - ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug (race-free immediate ref updates), migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
 
 ### Next Up
-- **v0.8.1**: UI Audit and Visual Bug Fixes
 - **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
