@@ -24,6 +24,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { OfflineIndicator } from './components/OfflineIndicator'
+import { HelmetProvider } from 'react-helmet-async'
 
 // DEPRECATED (v0.5.6): localStorage initialization disabled
 // App now uses Firebase Auth + Firestore exclusively
@@ -126,13 +127,15 @@ if (monitoringEnabled && typeof window !== 'undefined') {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ChronoThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <AppWithTheme />
-        </ToastProvider>
-      </AuthProvider>
-    </ChronoThemeProvider>
+    <HelmetProvider>
+      <ChronoThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <AppWithTheme />
+          </ToastProvider>
+        </AuthProvider>
+      </ChronoThemeProvider>
+    </HelmetProvider>
   </StrictMode>,
 )
 
