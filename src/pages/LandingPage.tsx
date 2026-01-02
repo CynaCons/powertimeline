@@ -19,6 +19,7 @@ import { TopNavBar } from '../components/TopNavBar';
 import { useAuth } from '../contexts/AuthContext';
 import { getTimelineMetadata, getUser } from '../services/firestore';
 import type { TimelineMetadata, User } from '../types';
+import { Helmet } from 'react-helmet-async';
 
 // Example timeline IDs to display on landing page
 const EXAMPLE_TIMELINE_IDS = [
@@ -91,6 +92,26 @@ export function LandingPage() {
   };
 
   return (
+    <>
+      <Helmet>
+        <title>PowerTimeline - Visualize History</title>
+        <meta name="description" content="Where events become understanding. Create, explore, and visualize timelines. Transform scattered information into shareable, explorable knowledge." />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://powertimeline.com" />
+        <meta property="og:title" content="PowerTimeline - Visualize History" />
+        <meta property="og:description" content="Where events become understanding. Create, explore, and visualize timelines." />
+        <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://powertimeline.com" />
+        <meta name="twitter:title" content="PowerTimeline - Visualize History" />
+        <meta name="twitter:description" content="Where events become understanding. Create, explore, and visualize timelines." />
+        <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+      </Helmet>
+
     <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#e6edf3', position: 'relative' }}>
       {/* Fixed Background - stays while content scrolls */}
       <Box
@@ -844,5 +865,6 @@ export function LandingPage() {
         </Container>
       </Box>
     </Box>
+    </>
   );
 }

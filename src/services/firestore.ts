@@ -15,7 +15,9 @@ import {
   serverTimestamp,
   collectionGroup,
   writeBatch,
+  startAfter,
   type QueryConstraint,
+  type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -221,6 +223,52 @@ export async function getTimelines(options?: {
     }) as TimelineMetadata[];
   } catch (error) {
     console.error('Error fetching timelines:', error);
+    throw error;
+  }
+}
+
+export type TimelinePageCursor = QueryDocumentSnapshot;
+
+/**
+ * Get a single page of timelines for a specific user using startAfter for pagination
+ */
+export async function getUserTimelinesPage(options: {
+  ownerId: string;
+  limitCount: number;
+  orderByField?: 'createdAt' | 'updatedAt' | 'viewCount';
+  orderDirection?: 'asc' | 'desc';
+  startAfterDoc?: TimelinePageCursor | null;
+}): Promise<{ timelines: TimelineMetadata[]; cursor: TimelinePageCursor | null }> {
+  try {
+    const constraints: QueryConstraint[] = [
+      orderBy(options.orderByField || 'updatedAt', options.orderDirection || 'desc'),
+      limit(options.limitCount),
+    ];
+
+    if (options.startAfterDoc) {
+      constraints.push(startAfter(options.startAfterDoc));
+    }
+
+    const timelinesCollectionRef = collection(
+      db,
+      COLLECTIONS.USERS,
+      options.ownerId,
+      COLLECTIONS.TIMELINES
+    );
+    const q = query(timelinesCollectionRef, ...constraints);
+    const querySnapshot = await getDocs(q);
+
+    const timelines = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      ownerId: options.ownerId,
+    })) as TimelineMetadata[];
+
+    const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+
+    return { timelines, cursor: lastDoc };
+  } catch (error) {
+    console.error('Error fetching paginated timelines:', error);
     throw error;
   }
 }
@@ -699,6 +747,58 @@ export async function deleteUser(userId: string): Promise<void> {
     await deleteDoc(userRef);
   } catch (error) {
     console.error('Error deleting user:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete all user data (GDPR compliance)
+ * Deletes:
+ * - All user's timelines (and their events subcollections)
+ * - User document from /users/{uid}
+ * Note: Firebase Auth account must be deleted separately by the caller
+ * v0.9.0 - Account deletion feature
+ */
+export async function deleteUserData(userId: string): Promise<void> {
+  try {
+    // Get all timelines owned by the user
+    const timelinesRef = collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.TIMELINES);
+    const timelinesSnapshot = await getDocs(timelinesRef);
+
+    // Delete each timeline and its events subcollection
+    for (const timelineDoc of timelinesSnapshot.docs) {
+      const timelineId = timelineDoc.id;
+
+      // Delete all events in this timeline
+      const eventsRef = collection(
+        db,
+        COLLECTIONS.USERS,
+        userId,
+        COLLECTIONS.TIMELINES,
+        timelineId,
+        COLLECTIONS.EVENTS
+      );
+      const eventsSnapshot = await getDocs(eventsRef);
+
+      // Use batch delete for events
+      const batch = writeBatch(db);
+      eventsSnapshot.docs.forEach(eventDoc => {
+        batch.delete(eventDoc.ref);
+      });
+      await batch.commit();
+
+      // Delete the timeline document
+      await deleteDoc(timelineDoc.ref);
+    }
+
+    // Delete the user document
+    const userRef = doc(db, COLLECTIONS.USERS, userId);
+    await deleteDoc(userRef);
+
+    // Invalidate stats cache
+    invalidateStatsCache();
+  } catch (error) {
+    console.error('Error deleting user data:', error);
     throw error;
   }
 }

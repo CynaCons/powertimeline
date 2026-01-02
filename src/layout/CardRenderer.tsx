@@ -47,6 +47,15 @@ export function CardRenderer({
       data-density={card.cardType}
       data-tour={isFirstCard ? 'event-card' : undefined}
       data-preview={isPreview || undefined}
+      role="button"
+      aria-label={`Event: ${card.event.title} on ${eventDate}`}
+      tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick(e as unknown as React.MouseEvent);
+        }
+      }}
       className={`
         absolute cursor-pointer card-hover-scale card-enter
         ${getCardTypeStyles(card.cardType)}

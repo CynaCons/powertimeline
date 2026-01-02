@@ -24,6 +24,7 @@ import { useToast } from '../contexts/ToastContext';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import { Helmet } from 'react-helmet-async';
 
 export function UserProfilePage() {
   // Support both /@:username (preferred) and /user/:userId (legacy) routes
@@ -258,8 +259,36 @@ export function UserProfilePage() {
     }
   };
 
+  // Dynamic page title and meta tags
+  const pageTitle = user ? `@${user.username}'s Timelines | PowerTimeline` : 'PowerTimeline';
+  const pageDescription = user ? `Explore timelines by @${user.username}. ${timelines.length} timeline${timelines.length !== 1 ? 's' : ''} with ${timelines.reduce((sum, t) => sum + (t.eventCount || 0), 0)} total events.` : 'Explore timelines on PowerTimeline';
+  const pageUrl = user ? `https://powertimeline.com/${user.username}` : 'https://powertimeline.com';
+
   return (
-    <div data-testid="user-profile-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
+    <>
+      {user && (
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+
+          {/* Open Graph */}
+          <meta property="og:type" content="profile" />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:title" content={pageTitle} />
+          <meta property="og:description" content={pageDescription} />
+          <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+          <meta property="profile:username" content={user.username} />
+
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:url" content={pageUrl} />
+          <meta name="twitter:title" content={pageTitle} />
+          <meta name="twitter:description" content={pageDescription} />
+          <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+        </Helmet>
+      )}
+
+      <div data-testid="user-profile-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
       {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
       <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" role="navigation" aria-label="Main navigation" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
         {/* PowerTimeline logo at top - clickable to go home */}
@@ -576,5 +605,6 @@ export function UserProfilePage() {
         onSuccess={handleCreateTimelineSuccess}
       />
     </div>
+    </>
   );
 }

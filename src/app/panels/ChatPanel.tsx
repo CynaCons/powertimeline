@@ -3,7 +3,7 @@
  * v0.7.0 - Chat panel for AI assistant integration
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   TextField,
   Button,
@@ -14,8 +14,12 @@ import {
   Box,
   Typography,
   Divider,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import type { AIMessage, AIAction, AIUsageStats } from '../../types/ai';
+
+const LOCAL_STORAGE_KEY = 'powertimeline_gemini_api_key';
 
 interface ChatPanelProps {
   // Session state
@@ -44,7 +48,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({
-  apiKey: _apiKey, // eslint-disable-line @typescript-eslint/no-unused-vars
+  apiKey,
   isKeyValid,
   messages,
   isLoading,
@@ -66,9 +70,31 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState('');
   const [keyInput, setKeyInput] = useState('');
+  const [rememberKey, setRememberKey] = useState(false);
+  const [storedKey, setStoredKey] = useState<string | null>(null);
   const [isValidatingKey, setIsValidatingKey] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const storageCheckedRef = useRef(false);
+
+  const persistStoredKey = useCallback((key: string) => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, key);
+      setStoredKey(key);
+    } catch (storageError) {
+      console.warn('Failed to persist API key to localStorage:', storageError);
+    }
+  }, []);
+
+  const clearStoredKey = useCallback(() => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch (storageError) {
+      console.warn('Failed to clear stored API key from localStorage:', storageError);
+    }
+    setStoredKey(null);
+    setRememberKey(false);
+  }, []);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -82,18 +108,73 @@ export function ChatPanel({
     }
   }, [isKeyValid]);
 
+  // Preload stored key from localStorage
+  useEffect(() => {
+    if (storageCheckedRef.current) return;
+    storageCheckedRef.current = true;
+
+    try {
+      const savedKey = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedKey) {
+        const trimmedKey = savedKey.trim();
+        setRememberKey(true);
+        setStoredKey(trimmedKey);
+        setKeyInput(trimmedKey);
+        if (!isKeyValid) {
+          setIsValidatingKey(true);
+          onSetApiKey(trimmedKey)
+            .then(valid => {
+              if (!valid) {
+                clearStoredKey();
+                setKeyInput('');
+              }
+            })
+            .finally(() => setIsValidatingKey(false));
+        }
+      }
+    } catch (storageError) {
+      console.warn('Failed to read stored API key from localStorage:', storageError);
+    }
+  }, [onSetApiKey, clearStoredKey, isKeyValid]);
+
   // Handle API key submission
   const handleKeySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!keyInput.trim()) return;
+    const trimmedKey = keyInput.trim();
+    if (!trimmedKey) return;
 
     setIsValidatingKey(true);
-    const valid = await onSetApiKey(keyInput.trim());
+    const valid = await onSetApiKey(trimmedKey);
     setIsValidatingKey(false);
 
     if (valid) {
+      if (rememberKey) {
+        persistStoredKey(trimmedKey);
+      } else if (storedKey) {
+        clearStoredKey();
+      }
       setKeyInput('');
     }
+  };
+
+  const handleRememberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const shouldRemember = event.target.checked;
+    setRememberKey(shouldRemember);
+
+    if (!shouldRemember) {
+      clearStoredKey();
+      return;
+    }
+
+    const candidateKey = keyInput.trim() || apiKey?.trim() || '';
+    if (candidateKey) {
+      persistStoredKey(candidateKey);
+    }
+  };
+
+  const handleClearStoredKey = () => {
+    clearStoredKey();
+    setKeyInput('');
   };
 
   // Handle message send
@@ -147,6 +228,46 @@ export function ChatPanel({
           disabled={isValidatingKey}
           sx={{ mb: 1 }}
         />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={rememberKey}
+                onChange={handleRememberChange}
+                disabled={isValidatingKey}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'var(--page-text-secondary)' }}>
+                Remember on this device
+              </Typography>
+            }
+            sx={{ m: 0, flex: 1 }}
+          />
+          {storedKey && (
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleClearStoredKey}
+              disabled={isValidatingKey}
+              sx={{ textTransform: 'none', whiteSpace: 'nowrap', color: 'var(--page-text-secondary)' }}
+            >
+              Clear stored key
+            </Button>
+          )}
+        </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            display: 'block',
+            color: 'var(--page-text-tertiary)',
+            fontSize: '0.75rem',
+            mb: 1
+          }}
+        >
+          Your API key will be stored locally on this device. It is never sent to PowerTimeline servers.
+        </Typography>
         <Button
           type="submit"
           variant="contained"
@@ -160,18 +281,6 @@ export function ChatPanel({
           {isValidatingKey ? <CircularProgress size={20} /> : 'Connect'}
         </Button>
       </form>
-      <Typography
-        variant="caption"
-        sx={{
-          mt: 1,
-          display: 'block',
-          color: 'var(--page-text-tertiary)',
-          fontSize: '0.7rem',
-          fontStyle: 'italic'
-        }}
-      >
-        💡 API keys are not stored for security. You'll need to enter it each session.
-      </Typography>
       {error && (
         <Alert severity="error" sx={{ mt: 1 }}>
           {error}
@@ -451,10 +560,20 @@ export function ChatPanel({
           )}
         </Box>
         <Box>
-          <IconButton size="small" onClick={onClearHistory} title="Clear history" aria-label="Clear history" sx={{ minWidth: '44px', minHeight: '44px' }}>
+          <IconButton
+            size="small"
+            onClick={onClearHistory}
+            aria-label="Clear chat history"
+            sx={{ minWidth: '44px', minHeight: '44px' }}
+          >
             <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">delete</span>
           </IconButton>
-          <IconButton size="small" onClick={onClearApiKey} title="Disconnect" aria-label="Disconnect" sx={{ minWidth: '44px', minHeight: '44px' }}>
+          <IconButton
+            size="small"
+            onClick={onClearApiKey}
+            aria-label="Disconnect API key"
+            sx={{ minWidth: '44px', minHeight: '44px' }}
+          >
             <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">logout</span>
           </IconButton>
         </Box>
@@ -555,6 +674,8 @@ export function ChatPanel({
     <div
       data-testid="chat-panel"
       className="h-full flex flex-col"
+      role="region"
+      aria-label="AI Assistant Chat Panel"
       style={{
         backgroundColor: 'var(--color-surface)',
         color: 'var(--color-text-primary)'
@@ -570,8 +691,8 @@ export function ChatPanel({
           <span className="text-sm font-semibold">AI Assistant</span>
         </div>
         {onClose && (
-          <IconButton size="small" onClick={onClose}>
-            <span className="material-symbols-rounded" style={{ fontSize: 18 }}>close</span>
+          <IconButton size="small" onClick={onClose} aria-label="Close AI Assistant panel">
+            <span className="material-symbols-rounded" style={{ fontSize: 18 }} aria-hidden="true">close</span>
           </IconButton>
         )}
       </div>

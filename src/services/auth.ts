@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  deleteUser as deleteFirebaseUser,
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { app } from '../lib/firebase';
@@ -128,4 +129,17 @@ export function onAuthStateChange(callback: (user: FirebaseUser | null) => void)
  */
 export function getCurrentUser(): FirebaseUser | null {
   return auth.currentUser;
+}
+
+/**
+ * Delete the current user's Firebase Auth account
+ * v0.9.0 - Account deletion feature (GDPR compliance)
+ * Note: User must be recently authenticated for this to succeed
+ */
+export async function deleteCurrentUserAccount(): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('No user is currently signed in');
+  }
+  await deleteFirebaseUser(user);
 }

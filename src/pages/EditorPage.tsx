@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Snackbar, Alert, useMediaQuery, useTheme } from '@mui/material';
+import { Helmet } from 'react-helmet-async';
 import { getTimeline, getUser, getUserByUsername, incrementTimelineViewCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
@@ -177,6 +178,15 @@ export function EditorPage() {
   const isOwner = timeline && firebaseUser && firebaseUser.uid === timeline.ownerId;
   const isReadOnly = !isOwner;
 
+  // Dynamic page title and meta tags
+  const pageTitle = timeline ? `${timeline.title} | PowerTimeline` : 'PowerTimeline';
+  const pageDescription = timeline
+    ? `Explore ${timeline.title} timeline. ${timeline.eventCount || 0} events${timeline.description ? ` - ${timeline.description.substring(0, 100)}` : ''}`
+    : 'Explore and create timelines on PowerTimeline';
+  const pageUrl = timeline && user
+    ? `https://powertimeline.com/${user.username}/timeline/${timeline.id}`
+    : 'https://powertimeline.com';
+
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
@@ -202,6 +212,31 @@ export function EditorPage() {
 
   // Render the editor/viewer with breadcrumbs
   return (
+    <>
+      {timeline && (
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+
+          {/* Open Graph */}
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:title" content={pageTitle} />
+          <meta property="og:description" content={pageDescription} />
+          <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+          {timeline.createdAt && <meta property="article:published_time" content={new Date(timeline.createdAt).toISOString()} />}
+          {timeline.updatedAt && <meta property="article:modified_time" content={new Date(timeline.updatedAt).toISOString()} />}
+          {user && <meta property="article:author" content={`https://powertimeline.com/${user.username}`} />}
+
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:url" content={pageUrl} />
+          <meta name="twitter:title" content={pageTitle} />
+          <meta name="twitter:description" content={pageDescription} />
+          <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+        </Helmet>
+      )}
+
     <Box component="main" sx={{ minHeight: '100vh' }}>
       {/* Mobile notice - show on small screens, offer Stream View */}
       {isMobile && !mobileNoticeDismissed && timeline && (
@@ -270,5 +305,6 @@ export function EditorPage() {
       </Snackbar>
       {/* Stream Viewer is now handled by App.tsx for proper sync with minimap/timeline */}
     </Box>
+    </>
   );
 }

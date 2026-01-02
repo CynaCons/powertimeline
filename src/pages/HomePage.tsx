@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import type { TimelineMetadata, User } from '../types';
 import {
   getTimeline,
@@ -13,6 +14,8 @@ import {
   getUsers,
   getUser,
   getPlatformStats,
+  getUserTimelinesPage,
+  type TimelinePageCursor,
 } from '../services/firestore';
 import { signOutUser } from '../services/auth';
 import { downloadTimelineAsYaml } from '../services/timelineImportExport';
@@ -32,6 +35,8 @@ import { ErrorState } from '../components/ErrorState';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { TourProvider, HomePageTour, useTour } from '../components/tours';
 
+const MY_TIMELINES_PAGE_SIZE = 12;
+
 // Inner component that uses the tour context
 function HomePageContent() {
   const navigate = useNavigate();
@@ -40,6 +45,9 @@ function HomePageContent() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]); // Cache all users for lookups
   const [myTimelines, setMyTimelines] = useState<TimelineMetadata[]>([]);
+  const [myTimelinesCursor, setMyTimelinesCursor] = useState<TimelinePageCursor | null>(null);
+  const [myTimelinesHasMore, setMyTimelinesHasMore] = useState(false);
+  const [loadingMoreMyTimelines, setLoadingMoreMyTimelines] = useState(false);
   const [recentlyEdited, setRecentlyEdited] = useState<TimelineMetadata[]>([]);
   const [popular, setPopular] = useState<TimelineMetadata[]>([]);
   const [featured, setFeatured] = useState<TimelineMetadata[]>([]);
@@ -143,6 +151,26 @@ function HomePageContent() {
     '--pt-button-shadow-active': 'none',
   } as CSSProperties;
 
+  const refreshMyTimelines = useCallback(async () => {
+    if (!firebaseUser) {
+      setMyTimelines([]);
+      setMyTimelinesCursor(null);
+      setMyTimelinesHasMore(false);
+      return;
+    }
+
+    const { timelines, cursor } = await getUserTimelinesPage({
+      ownerId: firebaseUser.uid,
+      orderByField: 'updatedAt',
+      orderDirection: 'desc',
+      limitCount: MY_TIMELINES_PAGE_SIZE,
+    });
+
+    setMyTimelines(timelines);
+    setMyTimelinesCursor(cursor);
+    setMyTimelinesHasMore(timelines.length === MY_TIMELINES_PAGE_SIZE);
+  }, [firebaseUser]);
+
   const loadData = useCallback(async () => {
     setLoadingTimelines(true);
     setError(null);
@@ -169,16 +197,7 @@ function HomePageContent() {
       });
 
       // Load user's timelines (only if authenticated)
-      if (firebaseUser) {
-        const userTimelines = await getTimelines({
-          ownerId: firebaseUser.uid,
-          orderByField: 'updatedAt',
-          orderDirection: 'desc',
-        });
-        setMyTimelines(userTimelines);
-      } else {
-        setMyTimelines([]);
-      }
+      await refreshMyTimelines();
 
       // Load recently edited timelines for discovery (public only)
       const recentTimelines = await getTimelines({
@@ -205,12 +224,38 @@ function HomePageContent() {
     } finally {
       setLoadingTimelines(false);
     }
-  }, [firebaseUser, filterPublicTimelines, showError]);
+  }, [firebaseUser, filterPublicTimelines, refreshMyTimelines, showError]);
 
   // Load data on mount and when firebaseUser changes
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const handleLoadMoreMyTimelines = useCallback(async () => {
+    if (!firebaseUser || loadingMoreMyTimelines || !myTimelinesHasMore) {
+      return;
+    }
+
+    setLoadingMoreMyTimelines(true);
+    try {
+      const { timelines, cursor } = await getUserTimelinesPage({
+        ownerId: firebaseUser.uid,
+        orderByField: 'updatedAt',
+        orderDirection: 'desc',
+        limitCount: MY_TIMELINES_PAGE_SIZE,
+        startAfterDoc: myTimelinesCursor,
+      });
+
+      setMyTimelines(prev => [...prev, ...timelines]);
+      setMyTimelinesCursor(cursor);
+      setMyTimelinesHasMore(timelines.length === MY_TIMELINES_PAGE_SIZE);
+    } catch (error) {
+      console.error('Error loading more timelines:', error);
+      showError('Error loading more timelines');
+    } finally {
+      setLoadingMoreMyTimelines(false);
+    }
+  }, [firebaseUser, loadingMoreMyTimelines, myTimelinesCursor, myTimelinesHasMore, showError]);
 
   const handleCreateTimeline = () => {
     setCreateDialogOpen(true);
@@ -225,12 +270,12 @@ function HomePageContent() {
 
     // Refresh timeline lists
     if (firebaseUser) {
-      const userTimelines = await getTimelines({
-        ownerId: firebaseUser.uid,
-        orderByField: 'updatedAt',
-        orderDirection: 'desc',
-      });
-      setMyTimelines(userTimelines);
+      try {
+        await refreshMyTimelines();
+      } catch (error) {
+        console.error('Error refreshing timelines after create:', error);
+        showError('Error refreshing timelines');
+      }
     }
 
     const recentTimelines = await getTimelines({
@@ -258,12 +303,12 @@ function HomePageContent() {
 
     // Refresh timeline lists
     if (firebaseUser) {
-      const userTimelines = await getTimelines({
-        ownerId: firebaseUser.uid,
-        orderByField: 'updatedAt',
-        orderDirection: 'desc',
-      });
-      setMyTimelines(userTimelines);
+      try {
+        await refreshMyTimelines();
+      } catch (error) {
+        console.error('Error refreshing timelines after edit:', error);
+        showError('Error refreshing timelines');
+      }
     }
 
     const recentTimelines = await getTimelines({
@@ -300,12 +345,12 @@ function HomePageContent() {
 
     // Refresh timeline lists
     if (firebaseUser) {
-      const userTimelines = await getTimelines({
-        ownerId: firebaseUser.uid,
-        orderByField: 'updatedAt',
-        orderDirection: 'desc',
-      });
-      setMyTimelines(userTimelines);
+      try {
+        await refreshMyTimelines();
+      } catch (error) {
+        console.error('Error refreshing timelines after delete:', error);
+        showError('Error refreshing timelines');
+      }
     }
 
     const recentTimelines = await getTimelines({
@@ -381,6 +426,26 @@ function HomePageContent() {
   };
 
   return (
+    <>
+      <Helmet>
+        <title>Browse Timelines | PowerTimeline</title>
+        <meta name="description" content="Explore public timelines, discover historical events, and find timelines created by the PowerTimeline community." />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://powertimeline.com/browse" />
+        <meta property="og:title" content="Browse Timelines | PowerTimeline" />
+        <meta property="og:description" content="Explore public timelines and discover historical events." />
+        <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://powertimeline.com/browse" />
+        <meta name="twitter:title" content="Browse Timelines | PowerTimeline" />
+        <meta name="twitter:description" content="Explore public timelines and discover historical events." />
+        <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+      </Helmet>
+
     <div data-testid="browse-page" className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
         <div className="flex">
       {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
@@ -457,19 +522,23 @@ function HomePageContent() {
 
         {/* Main Content */}
         <main className="px-4 md:px-8 py-6 md:py-8">
+        <h1 className="sr-only">Browse and Search Timelines</h1>
         {/* Search Bar */}
         <div className="mb-8 relative">
           <div className="relative">
-            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 material-symbols-rounded" style={{ color: 'var(--page-text-secondary)' }}>
+            <label htmlFor="timeline-search" className="sr-only">Search timelines and users</label>
+            <span className="absolute left-5 top-1/2 transform -translate-y-1/2 material-symbols-rounded" aria-hidden="true" style={{ color: 'var(--page-text-secondary)' }}>
               search
             </span>
             <input
+              id="timeline-search"
               ref={searchInputRef}
               data-testid="browse-search-input"
-              type="text"
+              type="search"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search timelines and users..."
+              aria-label="Search timelines and users"
               className="w-full pl-14 pr-20 py-4 text-lg border-2 rounded-xl outline-none transition-all"
               style={{
                 backgroundColor: 'var(--input-bg)',
@@ -688,6 +757,7 @@ function HomePageContent() {
               </div>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
               {myTimelines.map((timeline, index) => (
                 <div
@@ -735,7 +805,24 @@ function HomePageContent() {
                   </div>
                 </div>
               ))}
-            </div>
+              {loadingMoreMyTimelines && Array.from({ length: 3 }).map((_, index) => (
+                <SkeletonCard key={`my-timelines-loadmore-skeleton-${index}`} />
+              ))}
+              </div>
+              {myTimelinesHasMore && !loadingTimelines && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    data-testid="my-timelines-load-more"
+                    onClick={handleLoadMoreMyTimelines}
+                    disabled={loadingMoreMyTimelines}
+                    className="pt-button px-4 py-2 rounded-lg font-medium border"
+                    style={secondaryButtonStyle}
+                  >
+                    {loadingMoreMyTimelines ? 'Loading...' : 'Load More'}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
         )}
@@ -1037,6 +1124,7 @@ function HomePageContent() {
 
       </div>
     </div>
+    </>
   );
 }
 

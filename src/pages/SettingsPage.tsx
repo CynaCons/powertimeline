@@ -7,8 +7,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { getUser, getTimelines } from '../services/firestore';
-import { auth } from '../services/auth';
+import { getUser, getTimelines, deleteUserData } from '../services/firestore';
+import { auth, deleteCurrentUserAccount } from '../services/auth';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { ThemeToggleButton } from '../components/NavigationRail';
 import type { User } from '../types';
@@ -20,6 +20,9 @@ export function SettingsPage() {
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [timelineCount, setTimelineCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch user profile and timeline count
   useEffect(() => {
@@ -70,9 +73,47 @@ export function SettingsPage() {
   };
 
   const handleDeleteAccount = () => {
-    // TODO: Implement account deletion with confirmation dialog and re-authentication
-    // This will be implemented in a future iteration per SRS requirements
-    showError('Account deletion not yet implemented');
+    setShowDeleteDialog(true);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+    setDeleteConfirmEmail('');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!firebaseUser || !userProfile) return;
+
+    // Validate email confirmation
+    if (deleteConfirmEmail !== userProfile.email) {
+      showError('Email does not match');
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+
+      // 1. Delete all user data from Firestore (timelines and events)
+      await deleteUserData(firebaseUser.uid);
+
+      // 2. Delete Firebase Auth account
+      await deleteCurrentUserAccount();
+
+      // 3. Show success message and redirect
+      showSuccess('Account deleted successfully');
+      navigate('/');
+    } catch (error) {
+      console.error('Account deletion error:', error);
+      // Check if re-authentication is required
+      if (error instanceof Error && error.message.includes('requires-recent-login')) {
+        showError('For security, please log out and log back in before deleting your account');
+      } else {
+        showError('Failed to delete account. Please try again or contact support.');
+      }
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+      setDeleteConfirmEmail('');
+    }
   };
 
   const formatDate = (isoDate: string | undefined): string => {
@@ -267,6 +308,102 @@ export function SettingsPage() {
           </section>
         </div>
       </main>
+
+      {/* Delete Account Confirmation Dialog */}
+      {showDeleteDialog && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          onClick={handleCancelDelete}
+        >
+          <div
+            className="border rounded-lg p-6 max-w-md w-full"
+            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--color-danger)' }}>
+              Delete Account
+            </h2>
+
+            <div className="space-y-4 mb-6">
+              <p className="text-sm" style={{ color: 'var(--page-text-primary)' }}>
+                This action will permanently delete:
+              </p>
+              <ul className="list-disc list-inside text-sm space-y-1" style={{ color: 'var(--page-text-secondary)' }}>
+                <li>Your user profile</li>
+                <li>All {timelineCount} of your timeline{timelineCount === 1 ? '' : 's'}</li>
+                <li>All events in those timelines</li>
+                <li>Your authentication account</li>
+              </ul>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-danger)' }}>
+                This action cannot be undone.
+              </p>
+
+              <div className="pt-4">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--page-text-primary)' }}>
+                  To confirm, type your email address: <span className="font-mono">{userProfile?.email}</span>
+                </label>
+                <input
+                  type="email"
+                  value={deleteConfirmEmail}
+                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  style={{
+                    backgroundColor: 'var(--page-bg)',
+                    borderColor: 'var(--card-border)',
+                    color: 'var(--page-text-primary)',
+                  }}
+                  disabled={isDeleting}
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-lg font-medium border transition-colors"
+                style={{
+                  backgroundColor: 'var(--card-bg)',
+                  borderColor: 'var(--card-border)',
+                  color: 'var(--page-text-primary)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.backgroundColor = 'var(--page-bg)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--card-bg)';
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleteConfirmEmail !== userProfile?.email || isDeleting}
+                className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'var(--color-danger)',
+                  color: '#ffffff',
+                }}
+                onMouseEnter={(e) => {
+                  if (deleteConfirmEmail === userProfile?.email && !isDeleting) {
+                    e.currentTarget.style.backgroundColor = 'var(--color-danger-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-danger)';
+                }}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
