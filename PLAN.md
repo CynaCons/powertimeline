@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.7 - UX Polish & Final Touches ✅
-**Next Milestone:** v0.9.0 Claude Code Integration
+**Current Version:** v0.8.8 - Safari/Mobile Fixes ✅
+**Next Milestone:** v0.8.9 Performance Optimization
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -90,8 +90,10 @@
 - ✅ UX Polish: Hover lift effect, zoom toward cursor, hover card preview for degraded cards (v0.8.3)
 - ✅ Interaction Keybind Swap: Default click+drag = selection zoom (crosshair), Space+drag = pan (grab) (v0.8.3.1)
 - ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug (race-free immediate ref updates), migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
+- ✅ Safari/WebKit Firebase Fix: Long-polling + memoryLocalCache to avoid IndexedDB hangs, mobile overflow fixes, Stream View auto-open fix (v0.8.8)
 
 ### Next Up
+- **v0.8.9**: Performance Optimization (load times, bundle size, rendering)
 - **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
@@ -988,6 +990,47 @@
 - [x] Accessibility audit (WCAG AA compliance verification)
 - [x] SEO meta tags on all public pages (react-helmet-async)
 
+### v0.8.8 - Safari/WebKit & Mobile Fixes ✅
+**Goal:** Fix critical Safari/WebKit loading issues and mobile test infrastructure
+
+**Safari/WebKit:**
+- [x] Firebase IndexedDB persistence fix (use long-polling + memoryLocalCache)
+- [x] Safari browser detection in firebase.ts
+- [x] WebKit Firebase diagnostics test
+
+**Mobile Fixes:**
+- [x] LandingPage horizontal overflow (overflowX: hidden)
+- [x] EditorPage horizontal overflow (overflowX: hidden)
+- [x] Stream View auto-open blocking MobileNotice fix
+- [x] Mobile test selectors and assertions updated
+
+**Documentation:**
+- [x] SRS_PWA_OFFLINE.md (14 requirements)
+- [x] SRS_SEO.md (12 requirements)
+- [x] SRS_HOME_PAGE.md pagination requirements
+
+### v0.8.9 - Performance Optimization
+**Goal:** Improve load times, reduce bundle size, optimize rendering
+
+**Analysis:**
+- [ ] Profile initial load time (target: <3s on 3G)
+- [ ] Analyze bundle size (current: 1.5MB main chunk)
+- [ ] Identify render bottlenecks in timeline canvas
+
+**Bundle Size:**
+- [ ] Code splitting for routes (lazy load pages)
+- [ ] Tree-shake unused MUI components
+- [ ] Analyze and reduce Firebase SDK footprint
+
+**Load Time:**
+- [ ] Optimize Firestore queries (pagination, field selection)
+- [ ] Implement skeleton loading for timeline data
+- [ ] Preload critical assets
+
+**Rendering:**
+- [ ] Profile DeterministicLayoutComponent render time
+- [ ] Optimize card virtualization thresholds
+- [ ] Reduce unnecessary re-renders (React.memo audit)
 
 
 ---
