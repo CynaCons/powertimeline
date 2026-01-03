@@ -2,6 +2,10 @@
 import { test, expect } from '@playwright/test';
 import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
+// Skip mobile and tablet - zoom controls are for canvas view only
+// Mobile/tablet auto-open Stream View which has different UX
+test.skip(({ viewport }) => (viewport?.width ?? 1920) < 900, 'Canvas zoom tests require desktop viewport');
+
 test.describe('Zoom Functionality Tests', () => {
   test('Zoom controls should filter visible events', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-ZOOM-001' });

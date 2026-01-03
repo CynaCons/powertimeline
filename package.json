@@ -34,6 +34,7 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.11.3",
+    "@types/react-window": "^1.8.8",
     "dayjs": "^1.11.18",
     "firebase": "^12.4.0",
     "firebase-admin": "^13.6.0",
@@ -43,6 +44,8 @@
     "react-helmet-async": "^2.0.5",
     "react-joyride": "^2.9.3",
     "react-router-dom": "^7.9.4",
+    "react-virtualized-auto-sizer": "^1.0.24",
+    "react-window": "^1.8.10",
     "recharts": "^3.3.0"
   },
   "devDependencies": {

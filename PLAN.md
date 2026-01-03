@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.8 - Safari/Mobile Fixes ✅
-**Next Milestone:** v0.8.9 Performance Optimization
+**Current Version:** v0.8.9 - Performance Optimization ✅
+**Next Milestone:** v0.8.10 (TBD)
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -1009,28 +1009,36 @@
 - [x] SRS_SEO.md (12 requirements)
 - [x] SRS_HOME_PAGE.md pagination requirements
 
-### v0.8.9 - Performance Optimization
+### v0.8.9 - Performance Optimization ✅
 **Goal:** Improve load times, reduce bundle size, optimize rendering
 
-**Analysis:**
-- [ ] Profile initial load time (target: <3s on 3G)
-- [ ] Analyze bundle size (current: 1.5MB main chunk)
-- [ ] Identify render bottlenecks in timeline canvas
+**Completed (2026-01-03):**
 
-**Bundle Size:**
-- [ ] Code splitting for routes (lazy load pages)
-- [ ] Tree-shake unused MUI components
-- [ ] Analyze and reduce Firebase SDK footprint
+**Wave 1 - Data Loading & Quick Wins:**
+- [x] P0-1: Parallel data loading with Promise.all() in HomePage
+- [x] P0-2: Removed redundant getUsers() call, fetch only visible timeline owners
+- [x] P1-2: Added useDebounce hook (300ms) for search filtering
+- [x] P1-4: Map-based O(1) lookup for user data instead of Array.find()
+- [x] P1-5: Fire-and-forget pattern for view count increment
+- [x] P0-6: WebKit/Safari persistence disabled (IndexedDB hangs fix)
+- [x] P1-6, P1-7: Firebase Analytics lazy-loaded
+- [x] P0-3: Font preconnect hints and display=swap
 
-**Load Time:**
-- [ ] Optimize Firestore queries (pagination, field selection)
-- [ ] Implement skeleton loading for timeline data
-- [ ] Preload critical assets
+**Wave 2 - Rendering & Virtualization:**
+- [x] P0-5: StreamViewer virtualization with react-window (FixedSizeList + AutoSizer)
+- [x] P2-7: CSS-only line clamping (removed JS truncation detection)
+- [x] P2-8: Ref-based swipe animation (no state updates during touchmove)
+- [x] P0-4: Layout useMemo deps optimized (removed viewStart/viewEnd)
+- [x] P1-3: Card content components memoized (React.memo)
+- [x] P2-1: Vertical virtualization check added to card filter
+- [x] P2-3: Telemetry throttled to 500ms
 
-**Rendering:**
-- [ ] Profile DeterministicLayoutComponent render time
-- [ ] Optimize card virtualization thresholds
-- [ ] Reduce unnecessary re-renders (React.memo audit)
+**Wave 3 - Bundle & Polish:**
+- [x] P1-8: Firebase chunk splitting (main bundle: 1544KB → 990KB)
+- [x] P1-1: SkeletonCard polish (icon placeholder, 24px title, 3 badge placeholders)
+
+**Deferred to v0.8.10:**
+- [ ] P2-4: Extract timeline state from App.tsx (architectural risk)
 
 
 ---

@@ -249,8 +249,16 @@ App
 - [ ] v0.4.0/15-view-count-increment.spec.ts - View counts increment
 - [ ] v0.4.0/16-responsive-layout.spec.ts - Mobile/tablet layouts work
 
+## Performance Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-HOME-PERF-001 | HomePage SHALL load data in parallel | • Initial data fetches (timelines, platform stats) execute concurrently using Promise.all()<br>• No sequential blocking between independent data sources<br>• Loading skeleton shown until all data ready | `src/pages/HomePage.tsx:loadData()` | home/01-smoke.spec.ts |
+| CC-REQ-HOME-PERF-002 | Search filtering SHALL be debounced | • Search input debounced with 300ms delay<br>• Prevents excessive re-renders during typing<br>• Uses useDebounce hook | `src/pages/HomePage.tsx`, `src/hooks/useDebounce.ts` | TBD |
+
 ## Change History
 
+- **2026-01-03** - Added performance requirements (v0.8.9): parallel data loading, debounced search
 - **2026-01-02** - Added My Timelines pagination requirements (configurable page size, Load More button, pagination loading states) and removed legacy demo-only references; refreshed code pointers to Firestore-backed flows.
 - **2025-12-27** - Updated code references from audit findings (pre-Firestore migration)
 - **2025-10-26** - Updated Timeline data model with visibility controls (v0.4.2)

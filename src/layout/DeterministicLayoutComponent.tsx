@@ -99,6 +99,9 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
 
   // Timer for preview delay
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // P2-3: Timer for throttled telemetry updates
+  const telemetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const updateSize = useCallback(() => {
     if (containerRef.current) {
@@ -389,43 +392,11 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return baseConfig;
   }, [viewportSize.width, viewportSize.height, events]);
 
-  // Calculate view window time range for later card filtering
-  const viewTimeWindow = useMemo(() => {
-    if (events.length === 0 || (viewStart === 0 && viewEnd === 1)) {
-      return null; // No filtering when showing full timeline
-    }
-
-    // Calculate time range with same 2% padding as LayoutEngine and timelineRange
-    const dates = events.map(e => getEventTimestamp(e));
-    const rawMinDate = Math.min(...dates);
-    const rawMaxDate = Math.max(...dates);
-    let rawDateRange = rawMaxDate - rawMinDate;
-
-    // For single-event timelines, apply a minimum duration to ensure
-    // proper positioning during zoom operations
-    const MIN_DURATION_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
-    if (rawDateRange < MIN_DURATION_MS) {
-      rawDateRange = MIN_DURATION_MS;
-    }
-
-    // Add 2% padding to match other time range calculations
-    const padding = rawDateRange * 0.02;
-
-    // Only center for single-event timelines; multi-event timelines use natural range
-    const isSingleEvent = events.length === 1;
-    const paddedMinDate = isSingleEvent
-      ? rawMinDate - (rawDateRange / 2) - padding  // Center single event
-      : rawMinDate - padding;                      // Natural range for multi-event
-    const paddedDateRange = rawDateRange + (padding * 2);
-
-    // Calculate visible time window using padded dates
-    const visibleStartTime = paddedMinDate + (paddedDateRange * viewStart);
-    const visibleEndTime = paddedMinDate + (paddedDateRange * viewEnd);
-
-    return { visibleStartTime, visibleEndTime };
-  }, [events, viewStart, viewEnd]);
-
-  // Apply deterministic layout algorithm with view window context
+  // P0-4: Apply deterministic layout algorithm - DECOUPLED from view window
+  // NOTE: Removed viewTimeWindow useMemo - layout now calculates all cards once,
+  // and viewport filtering is done separately in the render phase
+  // Layout is calculated once for all events, then filtered by viewport separately
+  // This prevents expensive O(n) recalculation on every pan/zoom
   const layoutResult = useMemo(() => {
     if (events.length === 0) {
       return {
@@ -437,6 +408,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     }
 
     // Check cache: reuse layout if events, viewport, AND view window are unchanged
+    // viewStart/viewEnd must be checked - cards need recalculation when zooming
     const eventsUnchanged = layoutCacheRef.current?.events === events;
     const configUnchanged = layoutCacheRef.current?.config.viewportWidth === config.viewportWidth
       && layoutCacheRef.current?.config.viewportHeight === config.viewportHeight;
@@ -447,7 +419,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       return layoutCacheRef.current.result;
     }
 
-    // Cache miss - recalculate layout
+    // Cache miss - recalculate layout for ALL events (not filtered by view window)
     const deterministicLayout = new DeterministicLayoutV5(config);
 
     const shouldMeasureLayout = monitoringEnabled && typeof performance !== 'undefined';
@@ -458,16 +430,16 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
 
     let layoutResult;
     try {
-      // Pass view window to layout algorithm for proper filtering with overflow context
-      const viewWindow = viewTimeWindow ? { viewStart, viewEnd } : undefined;
-      layoutResult = deterministicLayout.layout(events, viewWindow);
+      // Pass viewWindow for zoom-aware card positioning
+      // Cards need viewStart/viewEnd to calculate correct X positions when zoomed
+      layoutResult = deterministicLayout.layout(events, { viewStart, viewEnd });
     } finally {
       if (shouldMeasureLayout) {
         performanceMonitor.endLayoutMeasurement();
       }
     }
 
-    // Update cache
+    // Update cache with current view window
     layoutCacheRef.current = {
       events,
       config,
@@ -476,7 +448,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     };
 
     return layoutResult;
-  }, [events, config, viewStart, viewEnd, viewTimeWindow]);
+  }, [events, config, viewStart, viewEnd]); // Restored viewStart/viewEnd for zoom-aware positioning
 
   const cardsByEventId = useMemo(() => {
     const map = new Map<string, PositionedCard[]>();
@@ -546,10 +518,19 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
   }, [filteredAnchors, config.timelineY]);
 
   // Telemetry: expose dispatch/capacity/placements for tests and overlays
+  // P2-3: Throttled to max once per 500ms to avoid wasted CPU during pan/zoom
   useEffect(() => {
     if (typeof window === 'undefined') return;
     // Only set telemetry when there are actual events to avoid setting empty/zero telemetry
     if (events.length === 0) return;
+
+    // Clear previous timeout to debounce rapid updates
+    if (telemetryTimeoutRef.current) {
+      clearTimeout(telemetryTimeoutRef.current);
+    }
+
+    // Throttle telemetry calculation with 500ms delay
+    telemetryTimeoutRef.current = setTimeout(() => {
     const { positionedCards, anchors, clusters, utilization } = layoutResult;
 
     const calculateDispatchFallback = (): DispatchMetrics => {
@@ -778,6 +759,14 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     };
 
     window.__ccTelemetry = telemetry as unknown as typeof window.__ccTelemetry;
+    }, 500); // 500ms throttle delay
+
+    // Cleanup timeout on unmount or dependency change
+    return () => {
+      if (telemetryTimeoutRef.current) {
+        clearTimeout(telemetryTimeoutRef.current);
+      }
+    };
   }, [layoutResult, events, viewportSize.width, viewportSize.height, config, viewStart, viewEnd]);
 
 
@@ -968,15 +957,19 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       {/* Cards - virtualized to only render visible cards */}
       <div ref={cardsContainerRef}>
       {(() => {
-        // Viewport bounds for card virtualization
+        // Viewport bounds for card virtualization (P2-1: Added vertical virtualization)
         const BUFFER = 200; // pixels outside viewport to pre-render
         const viewportLeft = 0;
         const viewportRight = viewportSize.width;
+        const viewportTop = 0;
+        const viewportBottom = viewportSize.height;
 
-        // Filter cards to only those within or near viewport
+        // Filter cards to only those within or near viewport (horizontal + vertical)
         const visibleCards = layoutResult.positionedCards.filter(card =>
           card.x + card.width > viewportLeft - BUFFER &&
-          card.x < viewportRight + BUFFER
+          card.x < viewportRight + BUFFER &&
+          card.y + card.height > viewportTop - BUFFER &&
+          card.y < viewportBottom + BUFFER
         );
 
         return visibleCards.map((card, cardIndex) => {
@@ -1103,7 +1096,8 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
   );
 }, arePropsEqual);
 
-function FullCardContent({ event }: { event: Event }) {
+// P1-3: Memoized card content components to prevent unnecessary re-renders
+const FullCardContent = memo(function FullCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
       <h3
@@ -1121,9 +1115,9 @@ function FullCardContent({ event }: { event: Event }) {
       <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
     </div>
   );
-}
+});
 
-function CompactCardContent({ event }: { event: Event }) {
+const CompactCardContent = memo(function CompactCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
       <h3
@@ -1141,9 +1135,9 @@ function CompactCardContent({ event }: { event: Event }) {
       <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
     </div>
   );
-}
+});
 
-function TitleOnlyCardContent({ event }: { event: Event }) {
+const TitleOnlyCardContent = memo(function TitleOnlyCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex items-center">
       <h3
@@ -1155,4 +1149,4 @@ function TitleOnlyCardContent({ event }: { event: Event }) {
       </h3>
     </div>
   );
-}
+});

@@ -29,8 +29,24 @@
 }
 
 .skeleton-title {
-  height: 20px;
+  height: 24px;
   width: 70%;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.skeleton-header .skeleton-title {
+  flex: 1;
+}
+
+.skeleton-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
 }
 
 .skeleton-line {
@@ -49,6 +65,10 @@
   height: 12px;
   width: 30%;
   border-radius: 9999px;
+}
+
+.skeleton-badge {
+  width: 20%;
 }
 
 .skeleton-circle {

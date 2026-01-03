@@ -195,11 +195,19 @@ The scroll implementation uses native browser scrolling:
 
 1. No keyboard navigation within event list (tab through events)
 2. No drag-to-scroll on minimap (click only)
-3. No infinite scroll / virtualization for large event lists
+3. ~~No infinite scroll / virtualization for large event lists~~ **RESOLVED in v0.8.9** - react-window virtualization implemented
 4. Swipe gestures may conflict with horizontal scroll on some devices
+
+## Performance Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-STREAM-PERF-001 | StreamViewer SHALL virtualize long event lists | • Uses react-window FixedSizeList for rendering<br>• Only visible items + overscan (5) rendered in DOM<br>• Smooth scrolling at 60fps for lists with 100+ events | `src/components/StreamViewer.tsx` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-PERF-002 | Swipe animations SHALL use direct DOM manipulation | • Touch move handlers update transform via ref<br>• No React state updates during touch move<br>• Prevents re-renders during animation | `src/components/StreamViewer.tsx:handleTouchMove` | TBD |
 
 ## Change History
 
+- 2026-01-03 - Added performance requirements (v0.8.9): virtualization, ref-based swipe animations
 - 2026-01-02 - Stream View promoted to primary event browsing surface (replaces Events/Outline panel); documented view-on-canvas closure and hover highlighting.
 - 2025-12-04 - Initial version (v0.5.26.3)
 - 2025-12-04 — Added minimap, breadcrumbs, fixed scrolling

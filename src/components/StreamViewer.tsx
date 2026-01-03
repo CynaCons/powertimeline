@@ -1,15 +1,22 @@
 /**
  * StreamViewer - Mobile-friendly timeline viewer with git-style vertical layout
- * v0.5.26.1 - Enhanced with search, hover sync, and click-to-navigate
+ * v0.8.9 - Performance optimized with react-window virtualization
  *
  * Design inspiration: Landing page roadmap component
  * - Vertical line with dots (git commit style)
  * - Dates on left, content on right
  * - Chronologically sorted events
+ *
+ * Performance optimizations (v0.8.9):
+ * - P0-5: react-window virtualization for large event lists
+ * - P2-7: CSS-only line clamping (removed JS truncation detection)
+ * - P2-8: Ref-based swipe animation (no state updates during touchmove)
  */
 
 import { useMemo, useState, useRef, useEffect, memo, useCallback } from 'react';
-import { Box, Typography, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { FixedSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import type { Event } from '../types';
 
 interface StreamViewerProps {
@@ -86,20 +93,19 @@ interface StreamEventCardProps {
   isSelected: boolean;
   isExpanded: boolean;
   lineClamp: number;
-  onClick: (event: Event) => void;  // Changed: accepts event for stable callback
-  onToggleExpand: (eventId: string) => void;  // Changed: accepts eventId for stable callback
+  onClick: (event: Event) => void;
+  onToggleExpand: (eventId: string) => void;
   isOwner: boolean;
   swipedEventId: string | null;
   swipeDirection: 'left' | 'right' | null;
-  onTouchStart: (e: React.TouchEvent, eventId: string) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
+  onSwipeAction: (eventId: string, direction: 'left' | 'right' | null) => void;  // P2-8: Simplified callback
   onDelete?: (eventId: string) => void;
   onEdit?: (event: Event) => void;
   onViewOnCanvas?: (event: Event) => void;
   onEditInEditor?: (event: Event) => void;
   onMouseEnter?: (eventId: string) => void;
   onMouseLeave?: () => void;
+  style?: React.CSSProperties;  // P0-5: For react-window positioning
 }
 
 const StreamEventCard = memo(function StreamEventCard({
@@ -114,9 +120,7 @@ const StreamEventCard = memo(function StreamEventCard({
   isOwner,
   swipedEventId,
   swipeDirection,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
+  onSwipeAction,
   onDelete,
   onEdit,
   onViewOnCanvas,
@@ -125,22 +129,21 @@ const StreamEventCard = memo(function StreamEventCard({
   onMouseEnter: _onMouseEnter,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMouseLeave: _onMouseLeave,
+  style,
 }: StreamEventCardProps) {
   const { line1, line2 } = formatEventDate(event.date);
   const dotColor = getEventColor(event, index);
-  const descriptionRef = useRef<HTMLSpanElement>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
   const isSwiped = swipedEventId === event.id;
   const swipeClass = isSwiped && swipeDirection ? ` swiped-${swipeDirection}` : '';
 
-  // Check if description is truncated (needs "show more")
-  useEffect(() => {
-    if (descriptionRef.current && event.description) {
-      const el = descriptionRef.current;
-      // Compare scrollHeight to clientHeight to detect truncation
-      setIsTruncated(el.scrollHeight > el.clientHeight + 2);
-    }
-  }, [event.description, isExpanded, lineClamp]);
+  // P2-8: Refs for swipe animation - no state updates during touchmove
+  const cardRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const currentSwipeDirection = useRef<'left' | 'right' | null>(null);
+
+  // P2-7: Removed JS truncation detection - now using CSS-only line clamping
+  // Show "expand" button based on description length heuristic (> ~150 chars suggests truncation)
+  const showExpandButton = event.description && (isExpanded || event.description.length > 150);
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // If clicking the expand button, don't trigger the main onClick
@@ -170,11 +173,54 @@ const StreamEventCard = memo(function StreamEventCard({
     document.dispatchEvent(new CustomEvent('timeline:hover', { detail: { eventId: null } }));
   }, []);
 
-  const handleTouchStartWrapper = useCallback((e: React.TouchEvent) => {
-    onTouchStart(e, event.id);
-  }, [onTouchStart, event.id]);
+  // P2-8: Optimized swipe handlers using refs and direct DOM manipulation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!isOwner) return;
+    touchStartX.current = e.touches[0].clientX;
+    currentSwipeDirection.current = null;
+  }, [isOwner]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isOwner || touchStartX.current === null || !cardRef.current) return;
+
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+
+    // Direct DOM manipulation - no React state updates during animation
+    if (cardRef.current) {
+      // Clamp the transform to avoid over-swiping
+      const clampedDelta = Math.max(-100, Math.min(100, deltaX));
+      cardRef.current.style.transform = `translateX(${clampedDelta}px)`;
+      cardRef.current.style.transition = 'none';
+    }
+
+    // Track direction in ref, not state
+    if (deltaX < -50) {
+      currentSwipeDirection.current = 'left';
+    } else if (deltaX > 50) {
+      currentSwipeDirection.current = 'right';
+    } else {
+      currentSwipeDirection.current = null;
+    }
+  }, [isOwner]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isOwner || !cardRef.current) return;
+
+    // Reset transform with animation
+    cardRef.current.style.transition = 'transform 200ms ease-out';
+    cardRef.current.style.transform = 'translateX(0)';
+
+    // Only update React state on touchEnd with final direction
+    if (currentSwipeDirection.current) {
+      onSwipeAction(event.id, currentSwipeDirection.current);
+    }
+
+    touchStartX.current = null;
+    currentSwipeDirection.current = null;
+  }, [isOwner, event.id, onSwipeAction]);
 
   return (
+    <div style={style}>
     <Box
       data-event-id={event.id}
       onClick={handleCardClick}
@@ -261,12 +307,14 @@ const StreamEventCard = memo(function StreamEventCard({
 
       {/* Event content card */}
       <Box
+        ref={cardRef}
         className={`stream-event-card${swipeClass}`}
-        onTouchStart={isOwner ? handleTouchStartWrapper : undefined}
-        onTouchMove={isOwner ? onTouchMove : undefined}
-        onTouchEnd={isOwner ? onTouchEnd : undefined}
+        onTouchStart={isOwner ? handleTouchStart : undefined}
+        onTouchMove={isOwner ? handleTouchMove : undefined}
+        onTouchEnd={isOwner ? handleTouchEnd : undefined}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        data-testid="stream-event-card"
         sx={{
           position: 'relative',
           flex: 1,
@@ -276,7 +324,8 @@ const StreamEventCard = memo(function StreamEventCard({
           p: 1.5,
           mb: isLast ? 0 : 'var(--stream-card-gap)',
           overflow: 'visible',
-          transition: 'transform 200ms ease-out, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease',
+          // Note: transform transition handled by JS in handleTouchEnd for swipe
+          transition: 'border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease',
           // Desktop hover effect
           '@media (hover: hover)': {
             '&:hover': {
@@ -460,7 +509,6 @@ const StreamEventCard = memo(function StreamEventCard({
           {event.description && (
             <>
               <Typography
-                ref={descriptionRef}
                 component="span"
                 variant="body2"
                 sx={{
@@ -475,8 +523,8 @@ const StreamEventCard = memo(function StreamEventCard({
               >
                 {event.description}
               </Typography>
-              {/* Show more/less button */}
-              {(isTruncated || isExpanded) && (
+              {/* Show more/less button - P2-7: Uses length heuristic instead of JS measurement */}
+              {showExpandButton && (
                 <Typography
                   component="button"
                   data-expand-button
@@ -495,7 +543,7 @@ const StreamEventCard = memo(function StreamEventCard({
                     },
                   }}
                 >
-                  {isExpanded ? '? Show less' : 'Show more ?'}
+                  {isExpanded ? 'Show less' : 'Show more'}
                 </Typography>
               )}
             </>
@@ -527,6 +575,7 @@ const StreamEventCard = memo(function StreamEventCard({
         )}
       </Box>
     </Box>
+    </div>
   );
 });
 
@@ -552,9 +601,9 @@ export function StreamViewer({
 
   // Track which events are expanded
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
+  // P2-8: Simplified swipe state - only updated on touchEnd, not during animation
   const [swipedEventId, setSwipedEventId] = useState<string | null>(null);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const touchStartX = useRef<number | null>(null);
 
   // Responsive line clamp: 3 on mobile, 5 on desktop - memoized to prevent re-renders
   const lineClamp = useMemo(() => isMobile ? 3 : 5, [isMobile]);
@@ -588,45 +637,29 @@ export function StreamViewer({
     });
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent, eventId: string) => {
+  // P2-8: Simplified swipe action handler - only called on touchEnd
+  const handleSwipeAction = useCallback((eventId: string, direction: 'left' | 'right' | null) => {
     if (!isOwner) return;
-    touchStartX.current = e.touches[0].clientX;
-    setSwipedEventId(eventId);
-    setSwipeDirection(null);
-  }, [isOwner]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isOwner || touchStartX.current === null || !swipedEventId) return;
-    const deltaX = e.touches[0].clientX - touchStartX.current;
-    if (deltaX < -50) {
-      setSwipeDirection('left');
-    } else if (deltaX > 50) {
-      setSwipeDirection('right');
+    if (direction) {
+      setSwipedEventId(eventId);
+      setSwipeDirection(direction);
+
+      // Auto-dismiss after 3 seconds
+      setTimeout(() => {
+        setSwipedEventId(null);
+        setSwipeDirection(null);
+      }, 3000);
     } else {
-      setSwipeDirection(null);
-    }
-  }, [isOwner, swipedEventId]);
-
-  const handleTouchEnd = useCallback(() => {
-    if (!isOwner) return;
-    if (!swipeDirection) {
-      setSwipedEventId(null);
-      touchStartX.current = null;
-      return;
-    }
-
-    setTimeout(() => {
       setSwipedEventId(null);
       setSwipeDirection(null);
-    }, 3000);
-    touchStartX.current = null;
-  }, [isOwner, swipeDirection]);
+    }
+  }, [isOwner]);
 
   useEffect(() => {
     if (!isOwner) {
       setSwipedEventId(null);
       setSwipeDirection(null);
-      touchStartX.current = null;
     }
   }, [isOwner]);
 
@@ -639,6 +672,43 @@ export function StreamViewer({
 
   const total = totalEvents ?? events.length;
   const isFiltered = searchQuery && searchQuery.trim().length > 0;
+
+  // P0-5: Item size for virtualized list - adjusted based on typical card height
+  const ITEM_SIZE = 120;
+
+  // P0-5: Row renderer for react-window virtualization
+  // Note: Must be defined before early returns to comply with Rules of Hooks
+  const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const event = sortedEvents[index];
+    return (
+      <StreamEventCard
+        key={event.id}
+        event={event}
+        index={index}
+        isLast={index === sortedEvents.length - 1}
+        isSelected={selectedEventId === event.id}
+        isExpanded={expandedEvents.has(event.id)}
+        lineClamp={lineClamp}
+        onClick={handleClick}
+        onToggleExpand={toggleExpand}
+        isOwner={isOwner}
+        swipedEventId={swipedEventId}
+        swipeDirection={swipeDirection}
+        onSwipeAction={handleSwipeAction}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        onViewOnCanvas={onViewOnCanvas}
+        onEditInEditor={onEditInEditor}
+        onMouseEnter={onEventMouseEnter}
+        onMouseLeave={onEventMouseLeave}
+        style={style}
+      />
+    );
+  }, [
+    sortedEvents, selectedEventId, expandedEvents, lineClamp, handleClick,
+    toggleExpand, isOwner, swipedEventId, swipeDirection, handleSwipeAction,
+    onDelete, onEdit, onViewOnCanvas, onEditInEditor, onEventMouseEnter, onEventMouseLeave
+  ]);
 
   if (total === 0) {
     return (
@@ -660,10 +730,13 @@ export function StreamViewer({
     <Box
       sx={{
         bgcolor: 'var(--stream-bg)',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       {/* Event list */}
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, flex: 1, minHeight: 0 }} data-testid="stream-scroll-container">
         {/* Events */}
         {sortedEvents.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -672,54 +745,42 @@ export function StreamViewer({
             </Typography>
           </Box>
         ) : (
-          <Stack spacing={0}>
-            {sortedEvents.map((event, index) => (
-              <StreamEventCard
-                key={event.id}
-                event={event}
-                index={index}
-                isLast={index === sortedEvents.length - 1}
-                isSelected={selectedEventId === event.id}
-                isExpanded={expandedEvents.has(event.id)}
-                lineClamp={lineClamp}
-                onClick={handleClick}
-                onToggleExpand={toggleExpand}
-                isOwner={isOwner}
-                swipedEventId={swipedEventId}
-                swipeDirection={swipeDirection}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onDelete={onDelete}
-                onEdit={onEdit}
-                onViewOnCanvas={onViewOnCanvas}
-                onEditInEditor={onEditInEditor}
-                onMouseEnter={onEventMouseEnter}
-                onMouseLeave={onEventMouseLeave}
-              />
-            ))}
-          </Stack>
+          /* P0-5: Virtualized list for performance with large event lists */
+          <AutoSizer>
+            {({ height, width }: { height: number; width: number }) => (
+              <List
+                height={height - 60} /* Account for footer */
+                width={width}
+                itemCount={sortedEvents.length}
+                itemSize={ITEM_SIZE}
+                overscanCount={5}
+              >
+                {Row}
+              </List>
+            )}
+          </AutoSizer>
         )}
+      </Box>
 
-        {/* Event count footer */}
-        <Box
+      {/* Event count footer */}
+      <Box
+        sx={{
+          py: 2,
+          px: 2,
+          borderTop: '1px solid var(--stream-rail-color)',
+          textAlign: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Typography
           sx={{
-            mt: 3,
-            pt: 2,
-            borderTop: '1px solid var(--stream-rail-color)',
-            textAlign: 'center',
+            color: 'var(--stream-text-muted)',
+            fontSize: '0.85rem',
           }}
         >
-          <Typography
-            sx={{
-              color: 'var(--stream-text-muted)',
-              fontSize: '0.85rem',
-            }}
-          >
-            {sortedEvents.length} event{sortedEvents.length !== 1 ? 's' : ''}
-            {isFiltered && ` (filtered)`}
-          </Typography>
-        </Box>
+          {sortedEvents.length} event{sortedEvents.length !== 1 ? 's' : ''}
+          {isFiltered && ` (filtered)`}
+        </Typography>
       </Box>
     </Box>
   );

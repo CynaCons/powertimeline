@@ -153,7 +153,10 @@ export function EditorPage() {
         setUser(usr);
 
         // Increment view count for the timeline (only if viewer is not the owner)
-        await incrementTimelineViewCount(timelineId, firebaseUser?.uid);
+        // Fire-and-forget pattern - don't block page render (P1-5)
+        incrementTimelineViewCount(timelineId, firebaseUser?.uid).catch(err =>
+          console.error('Failed to increment view count:', err)
+        );
         setLoading(false);
 
         // Show read-only toast if user is not the owner

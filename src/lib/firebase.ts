@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import type { FirebaseApp } from 'firebase/app';
 import { initializeFirestore, enableIndexedDbPersistence, memoryLocalCache } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
-import { getAnalytics } from 'firebase/analytics';
+// Analytics is lazy-loaded to reduce initial bundle size (P1-7)
 import type { Analytics } from 'firebase/analytics';
 
 // Firebase configuration from environment variables
@@ -65,13 +65,24 @@ if (isSafariOrWebKit) {
   }
 }
 
-// Initialize Analytics (only in browser environment)
+// Lazy-load Analytics to reduce initial bundle size (P1-7)
+// Analytics is only initialized on first use, not on app load
 let analytics: Analytics | null = null;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
-}
+
+export const getAnalyticsInstance = async (): Promise<Analytics | null> => {
+  if (!analytics && typeof window !== 'undefined') {
+    try {
+      const { getAnalytics } = await import('firebase/analytics');
+      analytics = getAnalytics(app);
+    } catch (err) {
+      console.error('Failed to load Firebase Analytics:', err);
+    }
+  }
+  return analytics;
+};
 
 // Connection status utility
 export const getOnlineStatus = () => navigator.onLine;
 
+// Export analytics as null initially - use getAnalyticsInstance() for lazy access
 export { app, db, analytics };

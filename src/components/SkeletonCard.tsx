@@ -3,6 +3,7 @@ import './SkeletonCard.css';
 interface SkeletonCardProps {
   lines?: number;
   showFooter?: boolean;
+  showIcon?: boolean;
   minHeight?: number;
   className?: string;
 }
@@ -10,6 +11,7 @@ interface SkeletonCardProps {
 export function SkeletonCard({
   lines = 3,
   showFooter = true,
+  showIcon = false,
   minHeight = 160,
   className = '',
 }: SkeletonCardProps) {
@@ -26,7 +28,13 @@ export function SkeletonCard({
       aria-live="polite"
       aria-label="Loading timeline card"
     >
-      <div className="skeleton-block skeleton-title" />
+      {showIcon && (
+        <div className="skeleton-header">
+          <div className="skeleton-circle skeleton-icon" />
+          <div className="skeleton-block skeleton-title" />
+        </div>
+      )}
+      {!showIcon && <div className="skeleton-block skeleton-title" />}
       {lineWidths.map((width, index) => (
         <div
           key={`skeleton-line-${index}`}
@@ -36,8 +44,9 @@ export function SkeletonCard({
       ))}
       {showFooter && (
         <div className="skeleton-footer">
-          <span className="skeleton-pill" />
-          <span className="skeleton-pill" />
+          <span className="skeleton-pill skeleton-badge" />
+          <span className="skeleton-pill skeleton-badge" />
+          <span className="skeleton-pill skeleton-badge" />
         </div>
       )}
     </div>

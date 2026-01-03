@@ -22,42 +22,62 @@ const TEST_TIMELINE = 'french-revolution';
 
 /**
  * Helper: Wait for events to load in Stream View
+ *
+ * Note: With react-window virtualization, only visible items + overscan (5) are rendered.
+ * The DOM may only contain ~9-12 items at a time even if there are more events.
+ * Set minEvents carefully - values > 10 may fail due to virtualization.
  */
 async function waitForEventsLoaded(page: Page, minEvents = 1): Promise<number> {
-  const scrollContainer = page.getByTestId('stream-scroll-container');
+  // Use .first() to handle case where multiple stream-scroll-container exist (e.g., during overlay transition)
+  const scrollContainer = page.getByTestId('stream-scroll-container').first();
   await expect(scrollContainer).toBeVisible({ timeout: 10000 });
 
-  // Wait for at least one event card
+  // Wait for at least one event card (virtualized list may only show visible items)
   const eventCards = scrollContainer.locator('[data-event-id]');
   await expect(eventCards.first()).toBeVisible({ timeout: 10000 });
 
   const count = await eventCards.count();
-  expect(count).toBeGreaterThanOrEqual(minEvents);
+  // With virtualization, cap the expected minimum to what's typically visible
+  const effectiveMin = Math.min(minEvents, 9);
+  expect(count).toBeGreaterThanOrEqual(effectiveMin);
   return count;
 }
 
 /**
  * Helper: Get scroll position of container
+ * Note: With react-window, the scroll is on the inner List element, not the outer container
  */
 async function getScrollPosition(page: Page): Promise<number> {
-  const container = page.getByTestId('stream-scroll-container');
+  const container = page.getByTestId('stream-scroll-container').first();
+  // Try to get scroll from the react-window inner div which handles the actual scroll
+  const innerScroller = container.locator('div[style*="overflow"]').first();
+  const hasInner = await innerScroller.count() > 0;
+  if (hasInner) {
+    return await innerScroller.evaluate((el) => el.scrollTop);
+  }
   return await container.evaluate((el) => el.scrollTop);
 }
 
 /**
  * Helper: Scroll container programmatically
+ * Note: With react-window, the scroll is on the inner List element
  */
 async function scrollContainer(page: Page, deltaY: number): Promise<{ before: number; after: number }> {
-  const container = page.getByTestId('stream-scroll-container');
-  const before = await container.evaluate((el) => el.scrollTop);
+  const container = page.getByTestId('stream-scroll-container').first();
+  // react-window creates an inner div that handles scrolling
+  const innerScroller = container.locator('div[style*="overflow"]').first();
+  const hasInner = await innerScroller.count() > 0;
+  const scrollTarget = hasInner ? innerScroller : container;
 
-  await container.evaluate((el, delta) => {
+  const before = await scrollTarget.evaluate((el) => el.scrollTop);
+
+  await scrollTarget.evaluate((el, delta) => {
     el.scrollBy({ top: delta, behavior: 'instant' });
   }, deltaY);
 
   await page.waitForTimeout(100);
 
-  const after = await container.evaluate((el) => el.scrollTop);
+  const after = await scrollTarget.evaluate((el) => el.scrollTop);
   return { before, after };
 }
 

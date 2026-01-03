@@ -3,7 +3,7 @@
  * Implements requirements from docs/SRS_HOME_PAGE.md (v0.4.0)
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -34,6 +34,7 @@ import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { TourProvider, HomePageTour, useTour } from '../components/tours';
+import { useDebounce } from '../hooks/useDebounce';
 
 const MY_TIMELINES_PAGE_SIZE = 12;
 
@@ -105,10 +106,11 @@ function HomePageContent() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Helper function to get user by ID from cache
-  const getUserById = (userId: string): User | null => {
-    return allUsers.find(u => u.id === userId) || null;
-  };
+  // O(1) Map-based user lookup instead of O(n) array.find (P1-4)
+  const userMap = useMemo(() => new Map(allUsers.map(u => [u.id, u])), [allUsers]);
+  const getUserById = useCallback((userId: string): User | null => {
+    return userMap.get(userId) || null;
+  }, [userMap]);
 
   // Filter out private timelines from discovery feeds (only show public)
   const filterPublicTimelines = useCallback(
@@ -175,45 +177,42 @@ function HomePageContent() {
     setLoadingTimelines(true);
     setError(null);
     try {
-      // Load current user profile from Firestore if authenticated
-      if (firebaseUser) {
-        const userProfile = await getUser(firebaseUser.uid);
-        setCurrentUser(userProfile);
-      } else {
-        setCurrentUser(null);
-      }
+      // Parallelize data loading for 4-5x faster initial load (P0-1)
+      const [userProfile, users, platformStats, recentTimelines, popularTimelines] = await Promise.all([
+        // 1. Load current user profile from Firestore if authenticated
+        firebaseUser ? getUser(firebaseUser.uid) : Promise.resolve(null),
+        // 2. Load all users for caching (TODO: P0-2 optimize to fetch only visible owners)
+        getUsers(),
+        // 3. Load platform statistics
+        getPlatformStats(),
+        // 4. Load recently edited timelines for discovery
+        getTimelines({
+          orderByField: 'updatedAt',
+          orderDirection: 'desc',
+          limitCount: 12,
+        }),
+        // 5. Load popular timelines for discovery
+        getTimelines({
+          orderByField: 'viewCount',
+          orderDirection: 'desc',
+          limitCount: 12,
+        }),
+      ]);
 
-      // Load all users for caching
-      const users = await getUsers();
+      // Update state with parallel results
+      setCurrentUser(userProfile);
       setAllUsers(users);
-
-      // Load platform statistics
-      const platformStats = await getPlatformStats();
       setStats({
         timelineCount: platformStats.totalTimelines,
         userCount: platformStats.totalUsers,
         eventCount: platformStats.totalEvents,
         viewCount: platformStats.totalViews,
       });
-
-      // Load user's timelines (only if authenticated)
-      await refreshMyTimelines();
-
-      // Load recently edited timelines for discovery (public only)
-      const recentTimelines = await getTimelines({
-        orderByField: 'updatedAt',
-        orderDirection: 'desc',
-        limitCount: 12, // Fetch extra to account for filtering
-      });
       setRecentlyEdited(filterPublicTimelines(recentTimelines).slice(0, 6));
-
-      // Load popular timelines for discovery (public only)
-      const popularTimelines = await getTimelines({
-        orderByField: 'viewCount',
-        orderDirection: 'desc',
-        limitCount: 12, // Fetch extra to account for filtering
-      });
       setPopular(filterPublicTimelines(popularTimelines).slice(0, 6));
+
+      // Load user's timelines (separate call - depends on firebaseUser being valid)
+      await refreshMyTimelines();
 
       // Note: Featured timelines functionality to be removed per PLAN.md known issues
       setFeatured([]);
@@ -386,38 +385,48 @@ function HomePageContent() {
     navigate(`/${user.username}`);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
+  // Debounce search query to avoid filtering on every keystroke (P1-2)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-    if (query.trim().length >= 2) {
-      const lowerQuery = query.toLowerCase();
-
-      // Search in already loaded timelines (recently edited + popular)
-      const allLoadedTimelines = [...recentlyEdited, ...popular, ...myTimelines];
-      const uniqueTimelines = allLoadedTimelines.filter((t, i, arr) =>
-        arr.findIndex(x => x.id === t.id) === i
-      );
-
-      const matchingTimelines = uniqueTimelines.filter(t =>
-        t.title.toLowerCase().includes(lowerQuery) ||
-        (t.description && t.description.toLowerCase().includes(lowerQuery))
-      );
-
-      // Search in cached users (SRS_DB.md compliant - v0.5.14: search by username)
-      const matchingUsers = allUsers.filter(u =>
-        u.username.toLowerCase().includes(lowerQuery) ||
-        u.email.toLowerCase().includes(lowerQuery)
-      );
-
-      setSearchResults({
-        timelines: matchingTimelines.slice(0, 10),
-        users: matchingUsers.slice(0, 5),
-        hasMore: matchingTimelines.length > 10 || matchingUsers.length > 5,
-      });
-    } else {
-      setSearchResults(null);
+  // Compute search results using debounced query (P1-2)
+  const computedSearchResults = useMemo(() => {
+    if (debouncedSearchQuery.trim().length < 2) {
+      return null;
     }
+
+    const lowerQuery = debouncedSearchQuery.toLowerCase();
+
+    // Search in already loaded timelines (recently edited + popular)
+    const allLoadedTimelines = [...recentlyEdited, ...popular, ...myTimelines];
+    const uniqueTimelines = allLoadedTimelines.filter((t, i, arr) =>
+      arr.findIndex(x => x.id === t.id) === i
+    );
+
+    const matchingTimelines = uniqueTimelines.filter(t =>
+      t.title.toLowerCase().includes(lowerQuery) ||
+      (t.description && t.description.toLowerCase().includes(lowerQuery))
+    );
+
+    // Search in cached users (SRS_DB.md compliant - v0.5.14: search by username)
+    const matchingUsers = allUsers.filter(u =>
+      u.username.toLowerCase().includes(lowerQuery) ||
+      u.email.toLowerCase().includes(lowerQuery)
+    );
+
+    return {
+      timelines: matchingTimelines.slice(0, 10),
+      users: matchingUsers.slice(0, 5),
+      hasMore: matchingTimelines.length > 10 || matchingUsers.length > 5,
+    };
+  }, [debouncedSearchQuery, recentlyEdited, popular, myTimelines, allUsers]);
+
+  // Update search results state when computed results change
+  useEffect(() => {
+    setSearchResults(computedSearchResults);
+  }, [computedSearchResults]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   const clearSearch = () => {

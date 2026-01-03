@@ -118,9 +118,15 @@ You are the coordinator if:
 - Ask clarifying questions before large changes
 - Don't overwhelm with details - be concise
 
-#### 6. Reviewing subagents work
-- Be critical of subagents work
-- Review yourself of using the built-in Claude tools (e.g. Exlore tool)
+#### 6. Verifying Agent Work (CRITICAL)
+
+**Build passing ≠ feature working.** Always verify agent work actually functions:
+
+1. **Analyze** - Read the changes, check implementation matches requirements
+2. **Test** - Run tests for modified features (`npm test -- tests/feature/`)
+3. **Smoke test** - Run `npm test -- tests/smoke/` before reporting complete
+
+When spawning implementation agents, include: "Create tests and run them to verify"
 
 ### Example Coordination Session
 
@@ -147,64 +153,23 @@ Coordinator actions:
 ### Anti-Patterns to Avoid
 - ❌ Spawning agents for trivial single-line fixes
 - ❌ Forgetting to update TodoWrite when agents complete
-- ❌ Not verifying agent work when user reports issues
 - ❌ Leaving PLAN.md version header stale
 - ❌ Spawning dependent tasks in parallel (they need sequential execution)
+- ❌ Marking complete without running tests - build passing ≠ working
 
 ### Proven Multi-Phase Coordination Pattern
 
-When tackling large features, use this phased approach:
-
 ```
-Phase 1: Specs First
-├── Spawn agents to create/update SRS documents
-├── Use Claude (sonnet) for spec writing
-├── Wait for all specs to complete
-└── Review specs match requirements
-
-Phase 2: Implementation
-├── Spawn agents for independent implementation tasks
-├── Mix Codex + Claude 50:50 to balance rate limits
-├── Use good prompts with clear requirements
-├── Wait for batch completion
-└── Verify build passes
-
-Phase 3: Testing
-├── Spawn agents to write E2E tests
-├── Map tests to SRS requirements
-└── Update test coverage tables
-```
-
-**Batch Coordination Example (v0.5.32-33):**
-```
-# Phase 1: Spawn 3 spec agents
-spawn_claude("Create SRS_USER_PAGE.md...")     → 0b8c3310
-spawn_claude("Create SRS_USER_SETTINGS_PAGE.md...") → 89d19a60
-spawn_claude("Update SRS_STREAM_VIEW.md...")   → 3a6a8cc0
-wait_for_agents(timeout=300)
-→ All 3 complete with 30+23+13 = 66 requirements
-
-# Phase 2: Spawn 6 implementation agents
-spawn_codex("Public profile access...")        → 0b7f863e
-spawn_codex("Nav icon fix...")                 → c9ff4fae
-spawn_claude("Settings page...")               → 95d8a245
-spawn_claude("Stream edit panel...")           → 2fbb5a16
-spawn_codex("Quick add button...")             → 43437d7a
-spawn_codex("Swipe actions...")                → 7a9092f9
-wait_for_agents(timeout=600)
-→ Verify npm run build passes
-→ Commit all changes
-
-# Report to user with summary table
+Phase 1: Specs     → Spawn agents for SRS docs, review before proceeding
+Phase 2: Implement → Include "create and run tests" in prompts, verify build
+Phase 3: Verify    → Run all tests, fix failures, smoke test before commit
 ```
 
 **Key Success Factors:**
-- Start with specs to clarify requirements before coding
-- Spawn independent tasks in parallel to maximize throughput
-- Use `wait_for_agents()` instead of polling `list()` repeatedly
-- Verify build after each phase
-- Commit incrementally (don't wait until everything is done)
-- Report progress to user with clear status tables
+- Spawn independent tasks in parallel, use `wait_for_agents()`
+- Verify build AND run tests after each phase
+- Run smoke tests before reporting complete
+- When tests fail, fix before moving on
 
 ### Large-Scale Audit Pattern
 
