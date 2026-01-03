@@ -10,26 +10,25 @@ test.describe('Mobile - Navigation Rail', () => {
   test('Navigation Rail is present and functional on mobile', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-MOBILE-005' });
 
-    // Navigate to a timeline
-    await loadTestTimeline(page, 'french-revolution');
+    // Navigate to browse page (where header nav is visible)
+    await page.goto('/browse');
     await page.waitForLoadState('domcontentloaded');
 
-    // Verify NavRail is present (may be collapsed or bottom nav on mobile)
-    const navRail = page.locator('[data-testid="nav-rail"]').or(page.locator('nav'));
-    await expect(navRail.first()).toBeVisible({ timeout: 5000 });
+    // On mobile, the sidebar nav rail is hidden (class: hidden md:flex)
+    // Instead, navigation is via the header with logo button
+    const header = page.locator('header');
+    await expect(header).toBeVisible({ timeout: 5000 });
 
-    // Verify navigation buttons are present and accessible
-    const homeButton = page.locator('[data-testid="nav-home"]').or(
-      page.locator('nav').locator('button, a').filter({ hasText: /home/i })
-    );
-    await expect(homeButton.first()).toBeVisible({ timeout: 3000 });
+    // Verify logo/home button in header is accessible
+    const logoButton = page.locator('[data-testid="logo-button"]');
+    await expect(logoButton).toBeVisible({ timeout: 3000 });
 
-    // Test navigation functionality
-    await homeButton.first().click();
+    // Test navigation by clicking logo - should go to landing page
+    await logoButton.click();
     await page.waitForLoadState('domcontentloaded');
 
-    // Verify navigation worked (should be on home page)
-    expect(page.url()).toMatch(/\/(home)?$/);
+    // Verify we're now on landing page
+    await expect(page.locator('[data-testid="landing-page"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('Navigation Rail does not block timeline content', async ({ page }) => {
@@ -39,13 +38,19 @@ test.describe('Mobile - Navigation Rail', () => {
     await loadTestTimeline(page, 'french-revolution');
     await page.waitForLoadState('domcontentloaded');
 
+    // Mobile shows a notice first - dismiss it to see the timeline
+    const continueButton = page.getByRole('button', { name: /continue to canvas/i });
+    if (await continueButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await continueButton.click();
+    }
+
     // Wait for timeline to render
     const axis = page.locator('[data-testid="timeline-axis"]');
     await expect(axis).toBeVisible({ timeout: 10000 });
 
     // Verify timeline axis is not obscured by nav rail
     const axisBox = await axis.boundingBox();
-    const navRail = page.locator('[data-testid="nav-rail"]').or(page.locator('nav'));
+    const navRail = page.locator('[data-testid="navigation-rail"]').or(page.locator('nav'));
     const navBox = await navRail.first().boundingBox();
 
     if (axisBox && navBox) {

@@ -237,9 +237,10 @@ export function EditorPage() {
         </Helmet>
       )}
 
-    <Box component="main" sx={{ minHeight: '100vh' }}>
+    <Box component="main" sx={{ minHeight: '100vh', overflowX: 'hidden' }}>
       {/* Mobile notice - show on small screens, offer Stream View */}
-      {isMobile && !mobileNoticeDismissed && timeline && (
+      {/* Don't show if Stream View is already open (auto-opened by useEffect) */}
+      {isMobile && !mobileNoticeDismissed && !streamViewerOpen && timeline && (
         <MobileNotice
           onDismiss={() => setMobileNoticeDismissed(true)}
           onOpenStreamView={() => {

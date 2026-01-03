@@ -29,6 +29,12 @@ test.describe('Mobile - No Horizontal Overflow', () => {
     await loadTestTimeline(page, 'french-revolution');
     await page.waitForLoadState('domcontentloaded');
 
+    // Mobile shows a notice first - dismiss it to see the timeline
+    const continueButton = page.getByRole('button', { name: /continue to canvas/i });
+    if (await continueButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await continueButton.click();
+    }
+
     // Wait for timeline to render
     const axis = page.locator('[data-testid="timeline-axis"]');
     await expect(axis).toBeVisible({ timeout: 10000 });

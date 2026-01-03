@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import type { FirebaseApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { initializeFirestore, enableIndexedDbPersistence, memoryLocalCache } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import type { Analytics } from 'firebase/analytics';
@@ -24,22 +24,45 @@ if (!firebaseConfig.projectId) {
 // Initialize Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);
 
-// Initialize Firestore
-const db: Firestore = getFirestore(app);
+// Detect Safari/WebKit browser (has known issues with IndexedDB persistence in Firebase v12.x)
+// See: Firebase JS SDK issue #8860, WebKit bug 273827
+const isSafariOrWebKit = typeof window !== 'undefined' &&
+  /WebKit/.test(navigator.userAgent) &&
+  !/Chrome/.test(navigator.userAgent);
 
-// Enable offline persistence
-if (typeof window !== 'undefined') {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time
-      console.warn('Firebase persistence unavailable: multiple tabs open');
-    } else if (err.code === 'unimplemented') {
-      // Browser doesn't support persistence
-      console.warn('Firebase persistence unavailable: browser not supported');
-    } else {
-      console.error('Firebase persistence error:', err);
-    }
+// Initialize Firestore with browser-specific settings
+// Safari/WebKit: Use long-polling and memory cache to avoid IndexedDB hangs
+// Other browsers: Standard initialization with IndexedDB persistence
+let db: Firestore;
+
+if (isSafariOrWebKit) {
+  // Safari/WebKit: Use long-polling to avoid WebSocket issues and memory cache
+  // to avoid IndexedDB persistence hangs (known Firebase v12.x + WebKit issue)
+  db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+    localCache: memoryLocalCache(),
   });
+  if (typeof window !== 'undefined') {
+    console.info('Firebase: Using long-polling mode for Safari/WebKit compatibility');
+  }
+} else {
+  // Standard initialization for Chromium-based browsers
+  db = initializeFirestore(app, {});
+
+  // Enable offline persistence (only for non-Safari browsers)
+  if (typeof window !== 'undefined') {
+    enableIndexedDbPersistence(db).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        // Multiple tabs open, persistence can only be enabled in one tab at a time
+        console.warn('Firebase persistence unavailable: multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        // Browser doesn't support persistence
+        console.warn('Firebase persistence unavailable: browser not supported');
+      } else {
+        console.error('Firebase persistence error:', err);
+      }
+    });
+  }
 }
 
 // Initialize Analytics (only in browser environment)

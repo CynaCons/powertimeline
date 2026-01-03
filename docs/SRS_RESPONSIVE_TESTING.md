@@ -44,11 +44,11 @@ The testing framework runs all tests across all viewports by default (`npm test`
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-MOBILE-001 | Stream View auto-opens on mobile viewport | • When viewport width <768px, Stream View overlay opens automatically on timeline load<br>• Desktop viewport (≥768px) does NOT auto-open<br>• Auto-open behavior configurable via query param `?streamView=true`<br>• User can close and reopen manually | `src/components/StreamViewerOverlay.tsx`, `src/App.tsx` | `tests/mobile/stream-auto-open.spec.ts` (planned) |
-| CC-REQ-MOBILE-002 | Swipe gestures work on Stream View event cards | • Swipe left (≥80px threshold) reveals delete action (red background)<br>• Swipe right (≥80px threshold) reveals edit action (blue background)<br>• Swipe auto-closes after 3s if no action taken<br>• Only enabled for timeline owners<br>• Touch events don't interfere with vertical scrolling | `src/components/StreamViewer.tsx` (planned) | `tests/mobile/stream-swipe-actions.spec.ts` (planned) |
-| CC-REQ-MOBILE-003 | All interactive elements have minimum 44px touch target | • Buttons, links, menu items ≥44px height<br>• Horizontal spacing allows 44px clickable area<br>• Tested via bounding box measurement in Playwright<br>• Includes: NavRail icons, card kebab menus, search clear button, timeline cards | All interactive components | `tests/mobile/touch-targets.spec.ts` (planned) |
-| CC-REQ-MOBILE-004 | No horizontal overflow on any page at mobile width | • `document.documentElement.scrollWidth ≤ viewport.width`<br>• Tested on: Home page, Timeline editor, User profile, Admin panel<br>• All content fits within 390px (iPhone 14 width)<br>• Cards, buttons, text wrap appropriately | All pages | `tests/mobile/no-horizontal-overflow.spec.ts` (planned) |
-| CC-REQ-MOBILE-005 | Navigation rail adapts appropriately on mobile | • NavRail remains visible and functional at mobile width<br>• Icon size minimum 40px touch target<br>• Rail does not obstruct main content<br>• Tooltips positioned correctly (no overflow) | `src/components/NavRail.tsx` | `tests/mobile/nav-rail.spec.ts` (planned) |
+| CC-REQ-MOBILE-001 | Stream View auto-opens on mobile viewport | • When viewport width <768px, Stream View overlay opens automatically on timeline load<br>• Desktop viewport (≥768px) does NOT auto-open<br>• Auto-open behavior configurable via query param `?streamView=true`<br>• User can close and reopen manually | `src/components/StreamViewerOverlay.tsx`, `src/App.tsx` | `tests/mobile/01-stream-view-auto-open.spec.ts` |
+| CC-REQ-MOBILE-002 | Swipe gestures work on Stream View event cards | • Swipe left (≥80px threshold) reveals delete action (red background)<br>• Swipe right (≥80px threshold) reveals edit action (blue background)<br>• Swipe auto-closes after 3s if no action taken<br>• Only enabled for timeline owners<br>• Touch events don't interfere with vertical scrolling | `src/components/StreamViewer.tsx` | `tests/mobile/02-swipe-gestures.spec.ts` |
+| CC-REQ-MOBILE-003 | All interactive elements have minimum 44px touch target | • Buttons, links, menu items ≥44px height<br>• Horizontal spacing allows 44px clickable area<br>• Tested via bounding box measurement in Playwright<br>• Includes: NavRail icons, card kebab menus, search clear button, timeline cards | All interactive components | `tests/mobile/03-touch-targets.spec.ts` |
+| CC-REQ-MOBILE-004 | No horizontal overflow on any page at mobile width | • `document.documentElement.scrollWidth ≤ viewport.width`<br>• Tested on: Home page, Timeline editor, User profile, Admin panel<br>• All content fits within 390px (iPhone 14 width)<br>• Cards, buttons, text wrap appropriately | All pages | `tests/mobile/04-no-horizontal-overflow.spec.ts` |
+| CC-REQ-MOBILE-005 | Navigation rail adapts appropriately on mobile | • NavRail remains visible and functional at mobile width<br>• Icon size minimum 40px touch target<br>• Rail does not obstruct main content<br>• Tooltips positioned correctly (no overflow) | `src/components/NavRail.tsx` | `tests/mobile/05-navigation-rail-mobile.spec.ts` |
 
 ### Responsive Layout Tests
 
@@ -195,11 +195,11 @@ PowerTimeline optimizes for ultra-wide displays (2560px+):
 #### Mobile Tests (tests/mobile/)
 | Test File | Description | Requirements Covered |
 |---|---|---|
-| `stream-auto-open.spec.ts` | Stream View auto-opens on mobile | CC-REQ-MOBILE-001 |
-| `stream-swipe-actions.spec.ts` | Swipe gestures for edit/delete | CC-REQ-MOBILE-002 |
-| `touch-targets.spec.ts` | Minimum 44px touch targets | CC-REQ-MOBILE-003 |
-| `no-horizontal-overflow.spec.ts` | No horizontal scroll on any page | CC-REQ-MOBILE-004 |
-| `nav-rail.spec.ts` | Navigation rail mobile adaptation | CC-REQ-MOBILE-005 |
+| `01-stream-view-auto-open.spec.ts` | Stream View auto-opens on mobile | CC-REQ-MOBILE-001 |
+| `02-swipe-gestures.spec.ts` | Swipe gestures for edit/delete | CC-REQ-MOBILE-002 |
+| `03-touch-targets.spec.ts` | Minimum 44px touch targets | CC-REQ-MOBILE-003 |
+| `04-no-horizontal-overflow.spec.ts` | No horizontal scroll on any page | CC-REQ-MOBILE-004 |
+| `05-navigation-rail-mobile.spec.ts` | Navigation rail mobile adaptation | CC-REQ-MOBILE-005 |
 
 #### Responsive Tests (tests/responsive/)
 | Test File | Description | Requirements Covered |

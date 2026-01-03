@@ -13,15 +13,17 @@ test.describe('Mobile - Stream View Auto-Open', () => {
     // Navigate to a timeline
     await loadTestTimeline(page, 'french-revolution');
 
-    // Wait for page to load
-    await page.waitForLoadState('domcontentloaded');
-
-    // Verify Stream View overlay is visible on mobile
-    const streamView = page.locator('[data-testid="stream-view-overlay"]');
-    await expect(streamView).toBeVisible({ timeout: 5000 });
+    // Stream View should auto-open on mobile viewport
+    // Wait for the overlay to become visible
+    const streamView = page.locator('[data-testid="stream-viewer-overlay"]');
+    await expect(streamView).toBeVisible({ timeout: 20000 });
 
     // Verify Stream View header is present
-    const streamHeader = page.locator('[data-testid="stream-view-header"]');
-    await expect(streamHeader).toBeVisible({ timeout: 3000 });
+    const streamHeader = page.locator('[data-testid="stream-viewer-header"]');
+    await expect(streamHeader).toBeVisible({ timeout: 5000 });
+
+    // Verify at least one event card is visible (timeline data loaded)
+    const eventCard = page.locator('[data-testid="stream-event-card"]').first();
+    await expect(eventCard).toBeVisible({ timeout: 5000 });
   });
 });

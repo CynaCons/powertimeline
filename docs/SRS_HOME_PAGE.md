@@ -1,25 +1,23 @@
 # Home Page & Timeline Discovery Requirements
 
-This document specifies requirements for the landing page and timeline discovery features (v0.4.0). The home page follows a modern, search-first design with the user's personal workspace prioritized, followed by discovery feeds.
+This document specifies requirements for the landing page and timeline discovery features (v0.5.29). The home page follows a modern, search-first design with the authenticated user's personal workspace prioritized, followed by discovery feeds backed by Firestore.
 
 ## Scope
 
 **In Scope:**
 - Search-first home page layout with unified search (timelines + users)
-- User personal section ("My Timelines") with create functionality
-- Platform statistics dashboard
+- User personal section ("My Timelines") with create functionality and pagination
+- Platform statistics dashboard backed by platform stats documents
 - Activity feeds (Recently Edited, Popular, Featured)
 - User profile pages
 - URL routing structure
-- Local-first data storage (localStorage)
-- Demo user system (no authentication)
+- Firebase-authenticated user experience (My Timelines only when signed in)
 
 **Out of Scope (Deferred):**
-- User authentication (v0.5.1)
-- Backend/cloud storage (v0.5.0)
+- Guest/demo user workflows
 - Real-time collaboration (v0.6.x)
 - Forking/merging workflows (v0.6.x)
-- Advanced analytics/metrics (v0.5.x+)
+- Advanced analytics/metrics beyond platform aggregates
 
 ## Page Layout Hierarchy
 
@@ -48,46 +46,49 @@ The home page sections appear in this order (top to bottom):
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-MYTIMELINES-001 | "My Timelines" section appears directly below search bar | • Section header shows "My Timelines" or current user name<br>• Section displayed before all other content<br>• Collapsed/expanded state persisted to localStorage<br>• Shows timeline count: "3 timelines" | `src/pages/HomePage.tsx:599-741` | TBD |
-| CC-REQ-MYTIMELINES-002 | Create Timeline button placed within My Timelines section | • "+ Create New" or "+ New Timeline" button in section header (top-right)<br>• Button styled as primary CTA<br>• Clicking opens timeline creation flow<br>• Button always visible in My Timelines section | `src/pages/HomePage.tsx:599-741` | TBD |
-| CC-REQ-MYTIMELINES-003 | User's timelines displayed as cards in horizontal scrollable row | • Timeline cards show title, event count, last modified date<br>• Horizontal scroll if more than 3-4 timelines<br>• Responsive: 1 column mobile, 2-3 visible desktop<br>• Click card navigates to /user/:userId/timeline/:timelineId | `src/pages/HomePage.tsx:599-741` | TBD |
-| CC-REQ-MYTIMELINES-004 | Empty state when user has no timelines | • "You haven't created any timelines yet" message<br>• Prominent "+ Create Your First Timeline" button<br>• Helpful description: "Start documenting history"<br>• Optional: Show example/template timelines | `src/pages/HomePage.tsx:599-741` | TBD |
-| CC-REQ-MYTIMELINES-005 | Quick actions on timeline cards via kebab menu | • Always-visible kebab menu (⋮) button in top-right of each card<br>• Menu shows: View, Edit (owner only), Delete (owner only)<br>• View navigates to timeline<br>• Edit opens timeline metadata editor<br>• Delete shows confirmation dialog<br>• Works on desktop and touch devices<br>• Keyboard accessible (Tab, Enter, Escape) | `src/components/TimelineCardMenu.tsx`, `src/pages/HomePage.tsx:599-741` | TBD |
+| CC-REQ-MYTIMELINES-001 | "My Timelines" section appears directly below search bar | - Section header shows "My Timelines" with total count<br>- Section displayed before all other content<br>- Hidden when user is signed out; loads authenticated user's timelines<br>- Timeline count reflects loaded results | `src/pages/HomePage.tsx:38-262`, `src/pages/HomePage.tsx:667-759` | TBD |
+| CC-REQ-MYTIMELINES-002 | Create Timeline button placed within My Timelines section | - "+ Create New" or "+ New Timeline" button in section header (top-right)<br>- Button styled as primary CTA<br>- Clicking opens timeline creation flow<br>- Button always visible in My Timelines section | `src/pages/HomePage.tsx:667-707` | TBD |
+| CC-REQ-MYTIMELINES-003 | User's timelines displayed as cards in horizontal scrollable row | - Timeline cards show title, event count, last modified date<br>- Horizontal scroll if more than 3-4 timelines<br>- Responsive: 1 column mobile, 2-3 visible desktop<br>- Click card navigates to /user/:userId/timeline/:timelineId | `src/pages/HomePage.tsx:684-759` | TBD |
+| CC-REQ-MYTIMELINES-004 | Empty state when user has no timelines | - "You haven't created any timelines yet" message<br>- Prominent "+ Create Your First Timeline" button<br>- Helpful description: "Start documenting history"<br>- Optional: Show example/template timelines | `src/pages/HomePage.tsx:684-759` | TBD |
+| CC-REQ-MYTIMELINES-005 | Quick actions on timeline cards via kebab menu | - Always-visible kebab menu button in top-right of each card<br>- Menu shows: View, Edit (owner only), Delete (owner only)<br>- View navigates to timeline<br>- Edit opens timeline metadata editor<br>- Delete shows confirmation dialog<br>- Works on desktop and touch devices<br>- Keyboard accessible (Tab, Enter, Escape) | `src/components/TimelineCardMenu.tsx`, `src/pages/HomePage.tsx:684-759` | TBD |
+| CC-REQ-MYTIMELINES-006 | Paginated My Timelines list uses configurable page size | - Page size controlled by `MY_TIMELINES_PAGE_SIZE` constant for initial and subsequent queries<br>- Queries ordered by `updatedAt` descending for consistent pagination<br>- Changing page size updates both initial load and "Load More" queries<br>- Pagination uses Firestore cursor (`startAfter`) to avoid duplicates | `src/pages/HomePage.tsx:38-262`, `src/services/firestore.ts:235-280` | TBD |
+| CC-REQ-MYTIMELINES-007 | "Load More" button fetches additional timeline pages | - Button renders only when `myTimelinesHasMore` is true<br>- Clicking calls `handleLoadMoreMyTimelines` and appends the next page<br>- Button disables during fetch to prevent duplicate requests<br>- Cursor updates after each page to continue pagination | `src/pages/HomePage.tsx:234-262`, `src/pages/HomePage.tsx:801-833` | TBD |
+| CC-REQ-MYTIMELINES-008 | Loading states shown during pagination | - "Load More" button text switches to "Loading..." while fetching<br>- Additional skeleton cards render while loading more pages<br>- `loadingMoreMyTimelines` guard blocks concurrent pagination calls | `src/pages/HomePage.tsx:211-262`, `src/pages/HomePage.tsx:787-834` | TBD |
 
 ### Platform Statistics Dashboard
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-STATS-001 | Statistics section displays platform-wide metrics | • Section header: "Platform Statistics" or similar<br>• Metrics displayed in card/grid layout<br>• Responsive: 4 columns desktop, 2 columns tablet, 1 column mobile<br>• Icons for each metric for visual clarity | `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677` | TBD |
-| CC-REQ-STATS-002 | Display total timeline count | • Metric label: "Timelines"<br>• Value: count of all timelines in localStorage<br>• Updates reactively when timelines added/deleted<br>• Icon: 📅 or timeline icon | `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677` | TBD |
-| CC-REQ-STATS-003 | Display total user count | • Metric label: "Users"<br>• Value: count of all users<br>• Updates when users added (future)<br>• Icon: 👥 or user icon | `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677` | TBD |
-| CC-REQ-STATS-004 | Display total events across all timelines | • Metric label: "Events Documented"<br>• Value: sum of event counts across all timelines<br>• Updates when events added/removed<br>• Icon: 📌 or event icon | `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677` | TBD |
-| CC-REQ-STATS-005 | Display total views/engagement metric | • Metric label: "Total Views"<br>• Value: sum of view counts (localStorage counter for now)<br>• Increments when timeline opened<br>• Icon: 👁️ or view icon<br>• Note: Placeholder for v0.5.x analytics | `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677` | TBD |
-| CC-REQ-STATS-006 | Highlight most active timeline | • Small card highlighting timeline with most recent activity<br>• Shows timeline title, last editor, time since edit<br>• Clickable to navigate to timeline<br>• Refreshes when any timeline edited | `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677` | TBD |
+| CC-REQ-STATS-001 | Statistics section displays platform-wide metrics | - Section header: "Platform Statistics" or similar<br>- Metrics displayed in card/grid layout<br>- Responsive: 4 columns desktop, 2 columns tablet, 1 column mobile<br>- Icons for each metric for visual clarity | `src/pages/HomePage.tsx:904-944` | TBD |
+| CC-REQ-STATS-002 | Display total timeline count | - Metric label: "Timelines"<br>- Value: count of all timelines from platform stats document<br>- Updates when Cloud Functions refresh stats<br>- Icon: timeline icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
+| CC-REQ-STATS-003 | Display total user count | - Metric label: "Users"<br>- Value: count of all users from platform stats document<br>- Updates when Cloud Functions refresh stats<br>- Icon: user icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
+| CC-REQ-STATS-004 | Display total events across all timelines | - Metric label: "Events Documented"<br>- Value: sum of event counts across all timelines<br>- Updates when events added/removed<br>- Icon: event icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
+| CC-REQ-STATS-005 | Display total views/engagement metric | - Metric label: "Total Views"<br>- Value: sum of view counts from platform stats document<br>- Increments when timelines are opened (tracked in Firestore)<br>- Icon: view icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
+| CC-REQ-STATS-006 | Highlight most active timeline (deferred) | - Highlight card deferred to discovery refresh; not rendered in v0.5.29<br>- When implemented, shows title, last editor, time since edit<br>- Clickable to navigate to timeline<br>- Refreshes when any timeline edited | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
 
 ### Recently Edited Feed
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-RECENT-001 | Recently Edited section shows timelines sorted by modification date | • Section header: "🔥 Recently Edited" or similar<br>• Timelines sorted by `updatedAt` field (descending)<br>• Shows up to 6 timelines initially<br>• "Load More" or "View All" button if >6 timelines | `src/pages/HomePage.tsx:834-898`, `src/lib/homePageStorage.ts:573-579` | TBD |
-| CC-REQ-RECENT-002 | Timeline cards show recency indicator | • Relative time displayed: "2 hours ago", "3 days ago"<br>• Exact timestamp on hover<br>• Badge or indicator for "edited today"<br>• Owner name and avatar shown | `src/pages/HomePage.tsx:834-898`, `src/lib/homePageStorage.ts:573-579` | TBD |
-| CC-REQ-RECENT-003 | Empty state when no recently edited timelines | • "No recent activity" message<br>• Suggestion to create or edit a timeline<br>• Links to Featured or Popular sections | `src/pages/HomePage.tsx:834-898`, `src/lib/homePageStorage.ts:573-579` | TBD |
+| CC-REQ-RECENT-001 | Recently Edited section shows timelines sorted by modification date | - Section header: "Recently Edited" or similar<br>- Timelines sorted by `updatedAt` field (descending)<br>- Shows up to 6 timelines initially<br>- "Load More" or "View All" button if >6 timelines | `src/pages/HomePage.tsx:110-150`, `src/pages/HomePage.tsx:954-1038`, `src/services/firestore.ts:103-200` | TBD |
+| CC-REQ-RECENT-002 | Timeline cards show recency indicator | - Relative time displayed: "2 hours ago", "3 days ago"<br>- Exact timestamp on hover<br>- Badge or indicator for "edited today"<br>- Owner name and avatar shown | `src/pages/HomePage.tsx:954-1038`, `src/services/firestore.ts:103-200` | TBD |
+| CC-REQ-RECENT-003 | Empty state when no recently edited timelines | - "No recent activity" message<br>- Suggestion to create or edit a timeline<br>- Links to Featured or Popular sections | `src/pages/HomePage.tsx:954-1038` | TBD |
 
 ### Popular Timelines Feed
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-POPULAR-001 | Popular section shows timelines sorted by view count | • Section header: "⭐ Popular Timelines" or similar<br>• Timelines sorted by view count (descending)<br>• View count displayed on each card<br>• Shows up to 6 timelines initially | `src/pages/HomePage.tsx:744-808`, `src/lib/homePageStorage.ts:586-603` | TBD |
-| CC-REQ-POPULAR-002 | View count tracked per timeline | • Each timeline has `viewCount` field in localStorage<br>• Incremented when timeline opened/viewed<br>• Persisted across sessions<br>• Note: Placeholder for v0.5.x server-side analytics | `src/pages/HomePage.tsx:744-808`, `src/lib/homePageStorage.ts:586-603` | TBD |
-| CC-REQ-POPULAR-003 | Fallback when insufficient view data | • If all timelines have 0 views, sort by event count instead<br>• Show "Most Detailed" instead of "Most Popular"<br>• Clear messaging about sorting criteria | `src/pages/HomePage.tsx:744-808`, `src/lib/homePageStorage.ts:586-603` | TBD |
+| CC-REQ-POPULAR-001 | Popular section shows timelines sorted by view count | - Section header: "Popular Timelines" or similar<br>- Timelines sorted by view count (descending)<br>- View count displayed on each card<br>- Shows up to 6 timelines initially | `src/pages/HomePage.tsx:110-150`, `src/pages/HomePage.tsx:744-808`, `src/services/firestore.ts:103-200` | TBD |
+| CC-REQ-POPULAR-002 | View count tracked per timeline | - Each timeline has `viewCount` field stored in Firestore<br>- Incremented when timeline opened/viewed<br>- Persisted across sessions via backend storage<br>- Supports analytics using backend persistence only | `src/services/firestore.ts:465-580`, `src/pages/HomePage.tsx:744-808` | TBD |
+| CC-REQ-POPULAR-003 | Fallback when insufficient view data (deferred) | - Fallback sorting strategy deferred; current implementation relies on `viewCount`<br>- Future: if all timelines have 0 views, sort by alternate metric (event count)<br>- Clear messaging about sorting criteria once implemented | `src/pages/HomePage.tsx:744-808` | TBD |
 
 ### Featured Timelines Feed
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-FEATURED-001 | Featured section shows curated timelines | • Section header: "✨ Featured" or similar<br>• Timelines with `featured: true` flag displayed<br>• Manual curation (set via Dev Panel for now)<br>• Shows up to 6 featured timelines<br>• **Note:** May be deprecated per PLAN.md | `src/pages/HomePage.tsx:901-966`, `src/lib/homePageStorage.ts:609-614` | TBD |
-| CC-REQ-FEATURED-002 | Featured badge displayed on timeline cards | • Visual indicator (star icon, badge) on featured cards<br>• "Featured" label or tooltip<br>• Distinguishes featured cards from regular ones | `src/pages/HomePage.tsx:901-966`, `src/lib/homePageStorage.ts:609-614` | TBD |
-| CC-REQ-FEATURED-003 | Empty state when no featured timelines | • "No featured timelines yet" message<br>• Admin note: "Set featured flag in Dev Panel"<br>• Fallback: Show recently edited instead | `src/pages/HomePage.tsx:901-966`, `src/lib/homePageStorage.ts:609-614` | TBD |
+| CC-REQ-FEATURED-001 | Featured section shows curated timelines | - Section header: "Featured" or similar<br>- Timelines with `featured: true` flag displayed<br>- Manual curation (set via Dev Panel/admin tools)<br>- Shows up to 6 featured timelines<br>- Section may be hidden when no featured timelines are available | `src/pages/HomePage.tsx:966-1038` | TBD |
+| CC-REQ-FEATURED-002 | Featured badge displayed on timeline cards | - Visual indicator (star icon, badge) on featured cards<br>- "Featured" label or tooltip<br>- Distinguishes featured cards from regular ones | `src/pages/HomePage.tsx:966-1038` | TBD |
+| CC-REQ-FEATURED-003 | Empty state when no featured timelines | - "No featured timelines yet" message<br>- Admin note: "Set featured flag in Dev Panel"<br>- Fallback: Show recently edited instead | `src/pages/HomePage.tsx:966-1038` | TBD |
 
 ### User Profile System
 
@@ -126,39 +127,43 @@ The home page sections appear in this order (top to bottom):
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-HOME-DATA-001 | Timeline objects include ownership and engagement metadata | • Timeline has: id, title, description, events, ownerId<br>• New fields: viewCount (number), featured (boolean)<br>• Timestamps: createdAt, updatedAt (ISO strings)<br>• Existing timelines migrated with default values | `src/lib/homePageStorage.ts` | TBD |
-| CC-REQ-HOME-DATA-002 | localStorage schema supports multi-user timelines and stats | • Timelines: 'powertimeline_timelines'<br>• Users: 'powertimeline_users'<br>• Stats: 'powertimeline_stats' (optional cache)<br>• View preferences: 'powertimeline_prefs' | `src/lib/homePageStorage.ts` | TBD |
-| CC-REQ-DATA-003 | Demo users pre-populated on first load | • Check if users exist in localStorage<br>• If empty, create Alice, Bob, Charlie with bios/avatars<br>• Assign sample timelines to demo users<br>• Idempotent initialization (safe to run multiple times) | `src/lib/homePageStorage.ts` | TBD |
-| CC-REQ-DATA-004 | View count increments on timeline access | • When timeline editor opens, increment viewCount<br>• Debounced: max 1 increment per session per timeline<br>• Persist to localStorage immediately<br>• Handle concurrent tab scenarios gracefully | `src/lib/homePageStorage.ts` | TBD |
+| CC-REQ-HOME-DATA-001 | Timeline objects include ownership and engagement metadata | - Timeline metadata has: id, title, description, ownerId, createdAt, updatedAt, viewCount, featured, visibility, eventCount<br>- Event collections stored separately from metadata<br>- Defaults applied for missing fields when created | `src/types.ts:24-71`, `src/services/firestore.ts:235-310` | TBD |
+| CC-REQ-HOME-DATA-002 | Firestore schema supports multi-user timelines and stats | - Timelines stored under `/users/{userId}/timelines` with collection group queries for discovery<br>- Pagination uses `startAfter` cursor to fetch additional pages<br>- Platform stats read from `stats/platform` document with Cloud Functions upkeep | `src/services/firestore.ts:103-320`, `src/services/firestore.ts:1068-1150` | TBD |
+| CC-REQ-HOME-DATA-003 | Authenticated user data drives My Timelines | - Current user fetched from Firebase Auth and Firestore profile<br>- My Timelines clears when signed out and reloads when signed in<br>- No reliance on client-side seeds or demo users for workspace data | `src/pages/HomePage.tsx:24-210`, `src/services/firestore.ts:103-190` | TBD |
+| CC-REQ-HOME-DATA-004 | View count persists in Firestore | - Timelines include `viewCount` field persisted in Firestore<br>- View increments handled server-side or via Firestore updates<br>- Popular feed sorts by stored `viewCount` values | `src/services/firestore.ts:465-580`, `src/pages/HomePage.tsx:110-150`, `src/pages/HomePage.tsx:744-808` | TBD |
 
 ## Implementation Notes
 
-### Updated Timeline Type
+### Timeline Types
 
 ```typescript
-interface Timeline {
+interface TimelineMetadata {
   id: string;
   title: string;
   description?: string;
-  events: Event[];
-  ownerId: string;           // References User.id
+  ownerId: string;           // Firebase Auth UID
   createdAt: string;         // ISO date
   updatedAt: string;         // ISO date
-  viewCount: number;         // NEW: Number of views
-  featured: boolean;         // NEW: Featured flag (manual curation)
-  visibility: 'public' | 'unlisted' | 'private';  // v0.4.2
+  viewCount: number;         // Number of views
+  featured: boolean;         // Featured flag (manual curation)
+  visibility: 'public' | 'unlisted' | 'private';
+  eventCount: number;        // Stored event count for cards
+}
+
+interface Timeline extends TimelineMetadata {
+  events: Event[];
 }
 ```
 
-### User Type (unchanged)
+### User Type
 
 ```typescript
 interface User {
-  id: string;           // e.g., "alice", "bob", "charlie"
-  name: string;         // Display name
-  avatar: string;       // Emoji or image URL
-  bio?: string;         // Optional biography (max 280 chars)
+  id: string;           // Firebase Auth UID
+  email: string;        // User's email address
+  username: string;     // URL-safe username
   createdAt: string;    // ISO date
+  role?: 'user' | 'admin';
 }
 ```
 
@@ -188,46 +193,34 @@ function searchTimelinesAndUsers(query: string): SearchResults {
 }
 ```
 
-### localStorage Keys
-
-```typescript
-const STORAGE_KEYS = {
-  USERS: 'powertimeline_users',
-  TIMELINES: 'powertimeline_timelines',
-  CURRENT_USER: 'powertimeline_current_user',
-  VIEW_PREFERENCES: 'powertimeline_view_prefs',
-  STATS_CACHE: 'powertimeline_stats'  // Optional cache
-} as const;
-```
-
 ### Component Hierarchy
 
 ```
 App
-├── Router
-│   ├── HomePage
-│   │   ├── Header (logo, user profile link)
-│   │   ├── SearchBar (unified search)
-│   │   ├── MyTimelinesSection
-│   │   │   ├── SectionHeader (+ Create button)
-│   │   │   └── TimelineCard[] (horizontal scroll)
-│   │   ├── StatisticsSection
-│   │   │   └── MetricCard[] (grid)
-│   │   ├── RecentlyEditedSection
-│   │   │   └── TimelineCard[] (grid)
-│   │   ├── PopularTimelinesSection
-│   │   │   └── TimelineCard[] (grid)
-│   │   └── FeaturedTimelinesSection
-│   │       └── TimelineCard[] (grid)
-│   ├── UserProfilePage
-│   │   ├── Header
-│   │   ├── UserProfileHeader (avatar, name, bio)
-│   │   ├── UserTimelinesSection
-│   │   │   └── TimelineCard[] (grid)
-│   │   └── Footer
-│   └── TimelineEditorPage (existing)
-│       └── DeterministicLayoutComponent
-└── Breadcrumbs (global)
+- Router
+  - HomePage
+    - Header (logo, user profile link)
+    - SearchBar (unified search)
+    - MyTimelinesSection
+      - SectionHeader (+ Create button)
+      - TimelineCard[] (horizontal scroll)
+    - StatisticsSection
+      - MetricCard[] (grid)
+    - RecentlyEditedSection
+      - TimelineCard[] (grid)
+    - PopularTimelinesSection
+      - TimelineCard[] (grid)
+    - FeaturedTimelinesSection
+      - TimelineCard[] (grid)
+  - UserProfilePage
+    - Header
+    - UserProfileHeader (avatar, name, bio)
+    - UserTimelinesSection
+      - TimelineCard[] (grid)
+    - Footer
+  - TimelineEditorPage (existing)
+    - DeterministicLayoutComponent
+- Breadcrumbs (global)
 ```
 
 ## Test Coverage Plan
@@ -258,24 +251,14 @@ App
 
 ## Change History
 
-- **2025-12-27** — Updated code references from audit findings
-- Added implementation file references to all requirement tables
-- All Code columns updated with actual implementation locations
-- Search: `src/pages/HomePage.tsx:344-376`
-- My Timelines: `src/pages/HomePage.tsx:599-741`, `src/components/TimelineCardMenu.tsx`
-- Statistics: `src/pages/HomePage.tsx:811-831`, `src/lib/homePageStorage.ts:656-677`
-- Recently Edited: `src/pages/HomePage.tsx:834-898`, `src/lib/homePageStorage.ts:573-579`
-- Popular: `src/pages/HomePage.tsx:744-808`, `src/lib/homePageStorage.ts:586-603`
-- Featured: `src/pages/HomePage.tsx:901-966`, `src/lib/homePageStorage.ts:609-614`
-- Routing: `src/main.tsx`
-- Data Management: `src/lib/homePageStorage.ts`
-
-- **2025-10-26** — Updated Timeline data model with visibility controls (v0.4.2)
+- **2026-01-02** - Added My Timelines pagination requirements (configurable page size, Load More button, pagination loading states) and removed legacy demo-only references; refreshed code pointers to Firestore-backed flows.
+- **2025-12-27** - Updated code references from audit findings (pre-Firestore migration)
+- **2025-10-26** - Updated Timeline data model with visibility controls (v0.4.2)
 - Added 'unlisted' visibility level to Timeline interface
 - Updated visibility from optional to required field
 - See SRS_TIMELINE_CREATION.md for detailed visibility requirements
 
-- **2025-01-XX** — Revised SRS with search-first, user-section-first design
+- **2025-01-XX** - Revised SRS with search-first, user-section-first design
 - Unified search for timelines and users
 - "My Timelines" section prioritized below search
 - Create button nested in user section

@@ -112,7 +112,7 @@ export function LandingPage() {
         <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
       </Helmet>
 
-    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#e6edf3', position: 'relative' }}>
+    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#e6edf3', position: 'relative', overflowX: 'hidden' }}>
       {/* Fixed Background - stays while content scrolls */}
       <Box
         sx={{
