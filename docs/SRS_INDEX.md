@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
-**Last Updated:** 2025-12-31
-**Version:** v0.8.3.1
+**Last Updated:** 2026-01-04
+**Version:** v0.8.10
 
 ---
 
@@ -43,7 +43,8 @@
 | AI Integration | 98 | [SRS_AI_INTEGRATION.md](SRS_AI_INTEGRATION.md) | 50 (51%) | 15 (15%) |
 | API Key Storage | 12 | [SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md) | 0 (0%) | 0 (0%) |
 | Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 25 (100%) | 8 (32%) |
-| **TOTAL** | **~352** | Multiple files | **~200 (57%)** | **~119 (34%)** |
+| State Management | 4 | [SRS_STATE_MANAGEMENT.md](SRS_STATE_MANAGEMENT.md) | 4 (100%) | 51 (unit) |
+| **TOTAL** | **~356** | Multiple files | **~204 (57%)** | **~170 (48%)** |
 
 Note: Stream View now replaces the deprecated Events/Outline panel for event browsing (Alt+E shortcut removed); see `docs/SRS_TIMELINE_EDITOR.md` and `docs/SRS_STREAM_VIEW.md`.
 

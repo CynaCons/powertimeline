@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.9 - Performance Optimization ✅
-**Next Milestone:** v0.8.10 (TBD)
+**Current Version:** v0.8.10 - State Architecture Refactor
+**Next Milestone:** v0.9.0 - Claude Code Integration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -91,9 +91,10 @@
 - ✅ Interaction Keybind Swap: Default click+drag = selection zoom (crosshair), Space+drag = pan (grab) (v0.8.3.1)
 - ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug (race-free immediate ref updates), migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
 - ✅ Safari/WebKit Firebase Fix: Long-polling + memoryLocalCache to avoid IndexedDB hangs, mobile overflow fixes, Stream View auto-open fix (v0.8.8)
+- ✅ Performance Optimization: StreamViewer virtualization, parallel data loading, Firebase chunking, zoom fix (v0.8.9)
 
 ### Next Up
-- **v0.8.9**: Performance Optimization (load times, bundle size, rendering)
+- **v0.8.10**: State Architecture Refactor (extract timeline state from App.tsx)
 - **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
@@ -1037,9 +1038,31 @@
 - [x] P1-8: Firebase chunk splitting (main bundle: 1544KB → 990KB)
 - [x] P1-1: SkeletonCard polish (icon placeholder, 24px title, 3 badge placeholders)
 
-**Deferred to v0.8.10:**
-- [ ] P2-4: Extract timeline state from App.tsx (architectural risk)
+**Bug Fixes (2026-01-03):**
+- [x] Fixed zoom cache invalidation (restored viewWindowUnchanged check)
+- [x] Fixed React hook order violation in StreamViewer.tsx
+- [x] Skip zoom tests on mobile/tablet (uses Stream View)
 
+### v0.8.10 - State Architecture Refactor
+**Goal:** Extract timeline state from App.tsx (~1430 lines) into 4 custom hooks
+**Status:** In Progress (Phases 1-3 Complete, Phase 4 Deferred)
+
+**Phases:**
+- [x] Phase 1: `useEventEditForm` - Form state for event editing (editDate, editTime, editTitle, editDescription)
+- [x] Phase 2: `useTimelineUI` - Overlay and panel visibility state
+- [x] Phase 3: `useEventSelection` - Selection state and navigation
+- [ ] Phase 4: `useTimelineEvents` - Core events data layer with Firestore sync (DEFERRED - highest risk)
+
+**Completed:**
+- Created `src/app/hooks/useEventEditForm.ts` with form state extraction (18 tests)
+- Created `src/app/hooks/useTimelineUI.ts` with overlay/panel state extraction (18 tests)
+- Created `src/app/hooks/useEventSelection.ts` with selection/navigation (15 tests)
+- Integrated hooks into App.tsx, removed duplicate effects
+- Build passes, 109 unit tests pass, E2E tests pass
+
+**Deferred:**
+- Phase 4 deferred as it involves complex Firestore sync, optimistic updates, and rollback logic
+- Current refactoring already achieves significant organization improvement
 
 ---
 

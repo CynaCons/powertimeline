@@ -13,7 +13,7 @@ test.describe('v5/51 Authoring overlay (centered, material-like)', () => {
     await page.locator('button[aria-label="Stream View"]').click();
     await page.waitForTimeout(500);
     // Click first stream item
-    const firstItem = page.locator('[data-testid^="stream-item-"]').first();
+    const firstItem = page.locator('[data-testid="stream-event-card"]').first();
     await firstItem.click();
 
     const overlay = page.locator('[data-testid="authoring-overlay"]');

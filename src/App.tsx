@@ -36,6 +36,9 @@ import { useViewWindow } from './app/hooks/useViewWindow';
 import { useAnnouncer } from './app/hooks/useAnnouncer';
 import { useTimelineZoom } from './app/hooks/useTimelineZoom';
 import { useTimelineSelection } from './app/hooks/useTimelineSelection';
+import { useEventEditForm } from './app/hooks/useEventEditForm';
+import { useTimelineUI } from './app/hooks/useTimelineUI';
+import { useEventSelection } from './app/hooks/useEventSelection';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePerformanceMonitoring } from './app/hooks/usePerformanceMonitoring';
 import { ErrorState } from './components/ErrorState';
@@ -96,25 +99,21 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     eventsRef.current = events;
   }, [events]);
 
-  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [streamViewerOpen, setStreamViewerOpen] = useState(initialStreamViewOpen);
+  // Event selection state (extracted to custom hook)
+  const {
+    selectedId,
+    setSelectedId,
+    hoveredEventId,
+    setHoveredEventId,
+    selectedEvent: selected,
+    selectEvent,
+    navigateToPreviousEvent,
+    navigateToNextEvent,
+  } = useEventSelection({ events });
+
   const [loadError, setLoadError] = useState<Error | null>(null);
   // Pending overlay ID - used to defer overlay opening until event data is ready
   const [pendingOverlayId, setPendingOverlayId] = useState<string | null>(null);
-
-  // Respond to external trigger to open stream view (e.g., from MobileNotice)
-  useEffect(() => {
-    if (initialStreamViewOpen) {
-      setStreamViewerOpen(true);
-    }
-  }, [initialStreamViewOpen]);
-
-  // Notify parent when stream view state changes
-  useEffect(() => {
-    onStreamViewChange?.(streamViewerOpen);
-  }, [streamViewerOpen, onStreamViewChange]);
 
   // Use readOnly prop from EditorPage (which determines ownership via Firebase Auth)
   const isReadOnly = readOnly;
@@ -170,11 +169,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   }, [loadTimelineEvents]);
 
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
-  // Selected regular event (used for AI context)
-  const selected = useMemo(
-    () => events.find((e) => e.id === selectedId),
-    [events, selectedId]
-  );
+  // selected comes from useEventSelection hook
 
   // AI Context for chat
   const aiContext = useMemo<AIContext>(() => buildAIContext({
@@ -183,10 +178,17 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     selectedEvent: selected,
   }), [currentTimeline, events, selected]);
 
-  const [editDate, setEditDate] = useState('');
-  const [editTime, setEditTime] = useState('');
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  // Form state for event editing (extracted to custom hook)
+  const {
+    editDate,
+    editTime,
+    editTitle,
+    editDescription,
+    setEditDate,
+    setEditTime,
+    setEditTitle,
+    setEditDescription,
+  } = useEventEditForm({ selectedEvent: selected, selectedId });
 
   // View window controls via hook
   const { viewStart, viewEnd, setWindow, snapBackToBounds, nudge, zoom, animateTo } = useViewWindow(0,1);
@@ -287,14 +289,21 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     setHoveredEventId(undefined);
   }, []);
 
-  // Panels & overlays
-  // Left sidebar overlays (permanent sidebar width = 56px)
-  const [overlay, setOverlay] = useState<null | 'editor' | 'import-export'>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const [chatPanelOpen, setChatPanelOpen] = useState(false);
+  // UI state for overlays and panels (extracted to custom hook)
+  const {
+    overlay,
+    setOverlay,
+    streamViewerOpen,
+    setStreamViewerOpen,
+    commandPaletteOpen,
+    setCommandPaletteOpen,
+    chatPanelOpen,
+    setChatPanelOpen,
+    showInfoPanels,
+    setShowInfoPanels,
+  } = useTimelineUI({ initialStreamViewOpen, onStreamViewChange });
 
-  // Info panels toggle
-  const [showInfoPanels, setShowInfoPanels] = useState(false);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   // Dragging state (for disabling overlay pointer events)
   const [dragging] = useState(false);
@@ -316,14 +325,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     }
   }, []);
 
-  // Add Esc to close overlays
-  useEffect(() => {
-    function onEsc(e: KeyboardEvent) {
-      if (e.key === 'Escape' && overlay) setOverlay(null);
-    }
-    window.addEventListener('keydown', onEsc);
-    return () => window.removeEventListener('keydown', onEsc);
-  }, [overlay]);
+  // Escape key handling is now in useTimelineUI hook
 
   // If opening Editor with exactly one event and nothing selected, auto-select it
   useEffect(() => {
@@ -363,20 +365,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     }
   }, [events, timelineId]);
 
-  // Sync edit fields when selection changes
-  // IMPORTANT: Only depend on selectedId, NOT on 'selected' object
-  // If 'selected' is in deps, form fields reset whenever events array changes
-  // (because selected reference changes), causing user to lose their edits
-  useEffect(() => {
-    if (selected) {
-      setEditDate(selected.date);
-      setEditTime(selected.time ?? '');
-      setEditTitle(selected.title);
-      setEditDescription(selected.description ?? '');
-    } else {
-      setEditDate(''); setEditTime(''); setEditTitle(''); setEditDescription('');
-    }
-  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Form sync with selection is now handled by useEventEditForm hook
 
   // Keyboard shortcuts (ignore when typing in inputs)
   useEffect(() => {
@@ -799,30 +788,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     setActiveNavItem('create');
   }, []);
 
-  // Event navigation functions
-  const navigateToPreviousEvent = useCallback(() => {
-    const sortedEvents = [...events].sort((a, b) =>
-      new Date(a.date + (a.time || '00:00')).getTime() - new Date(b.date + (b.time || '00:00')).getTime()
-    );
-    const currentIndex = sortedEvents.findIndex(e => e.id === selectedId);
-    if (currentIndex > 0) {
-      setSelectedId(sortedEvents[currentIndex - 1].id);
-    }
-  }, [events, selectedId]);
-
-  const navigateToNextEvent = useCallback(() => {
-    const sortedEvents = [...events].sort((a, b) =>
-      new Date(a.date + (a.time || '00:00')).getTime() - new Date(b.date + (b.time || '00:00')).getTime()
-    );
-    const currentIndex = sortedEvents.findIndex(e => e.id === selectedId);
-    if (currentIndex >= 0 && currentIndex < sortedEvents.length - 1) {
-      setSelectedId(sortedEvents[currentIndex + 1].id);
-    }
-  }, [events, selectedId]);
-
-  const selectEvent = useCallback((eventId: string) => {
-    setSelectedId(eventId);
-  }, []);
+  // Event navigation functions are now in useEventSelection hook
 
   const createNewEvent = useCallback(() => {
     setSelectedId(undefined);
