@@ -3,7 +3,7 @@
  * Implements requirements from docs/SRS_USER_SETTINGS_PAGE.md
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -11,6 +11,7 @@ import { getUser, getTimelines, deleteUserData } from '../services/firestore';
 import { auth, deleteCurrentUserAccount } from '../services/auth';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { ThemeToggleButton } from '../components/NavigationRail';
+import { BottomNavigation } from '../components/BottomNavigation';
 import type { User } from '../types';
 
 export function SettingsPage() {
@@ -23,6 +24,9 @@ export function SettingsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Fetch user profile and timeline count
   useEffect(() => {
@@ -57,6 +61,25 @@ export function SettingsPage() {
     loadData();
   }, [firebaseUser, navigate, showError]);
 
+  // Dialog focus management - focus first button when dialog opens
+  useEffect(() => {
+    if (showDeleteDialog && dialogRef.current) {
+      const cancelButton = dialogRef.current.querySelector('button');
+      cancelButton?.focus();
+    }
+  }, [showDeleteDialog]);
+
+  // Handle Escape key to close dialog
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showDeleteDialog) {
+        handleCancelDelete();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showDeleteDialog]);
+
   const handlePasswordReset = async () => {
     if (!userProfile?.email) {
       showError('Email address not found');
@@ -64,11 +87,14 @@ export function SettingsPage() {
     }
 
     try {
+      setIsResettingPassword(true);
       await sendPasswordResetEmail(auth, userProfile.email);
       showSuccess('Password reset email sent! Check your inbox.');
     } catch (error) {
       console.error('Password reset error:', error);
       showError('Failed to send password reset email');
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -79,6 +105,8 @@ export function SettingsPage() {
   const handleCancelDelete = () => {
     setShowDeleteDialog(false);
     setDeleteConfirmEmail('');
+    // Return focus to the delete button
+    deleteButtonRef.current?.focus();
   };
 
   const handleConfirmDelete = async () => {
@@ -156,14 +184,8 @@ export function SettingsPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(-1)}
-              className="material-symbols-rounded p-2 rounded-lg transition-colors"
+              className="material-symbols-rounded p-2 rounded-lg transition-colors hover:bg-[var(--card-bg)]"
               style={{ color: 'var(--page-text-secondary)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--card-bg)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
               aria-label="Go back"
             >
               arrow_back
@@ -175,43 +197,43 @@ export function SettingsPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="px-4 md:px-8 py-8 max-w-5xl">
+      {/* Main Content - has-bottom-nav adds padding for mobile bottom navigation */}
+      <main className="px-4 md:px-8 py-8 max-w-5xl mx-auto has-bottom-nav">
         <div className="space-y-6">
           {/* Profile Section */}
-          <section className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <section className="border rounded-xl p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>
               Profile
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
+                <div className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
                   Username
-                </label>
+                </div>
                 <div className="text-base" style={{ color: 'var(--page-text-primary)' }}>
                   @{userProfile.username}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
+                <div className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
                   Email
-                </label>
+                </div>
                 <div className="text-base" style={{ color: 'var(--page-text-primary)' }}>
                   {userProfile.email}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
+                <div className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
                   Member Since
-                </label>
+                </div>
                 <div className="text-base" style={{ color: 'var(--page-text-primary)' }}>
                   {formatDate(userProfile.createdAt)}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
+                <div className="block text-sm font-medium mb-1" style={{ color: 'var(--page-text-secondary)' }}>
                   Timelines
-                </label>
+                </div>
                 <div className="text-base" style={{ color: 'var(--page-text-primary)' }}>
                   {timelineCount} {timelineCount === 1 ? 'timeline' : 'timelines'}
                 </div>
@@ -220,7 +242,7 @@ export function SettingsPage() {
           </section>
 
           {/* Security Section */}
-          <section className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <section className="border rounded-xl p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>
               Security
             </h2>
@@ -231,31 +253,17 @@ export function SettingsPage() {
                 </p>
                 <button
                   onClick={handlePasswordReset}
-                  className="px-4 py-2 rounded-lg font-medium border transition-colors"
-                  style={{
-                    backgroundColor: 'var(--card-bg)',
-                    borderColor: 'var(--card-border)',
-                    color: 'var(--page-text-primary)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--page-bg)';
-                    e.currentTarget.style.borderColor = 'var(--page-accent)';
-                    e.currentTarget.style.color = 'var(--page-accent)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--card-bg)';
-                    e.currentTarget.style.borderColor = 'var(--card-border)';
-                    e.currentTarget.style.color = 'var(--page-text-primary)';
-                  }}
+                  disabled={isResettingPassword}
+                  className="px-4 py-2 rounded-lg font-medium border transition-colors bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--page-text-primary)] hover:bg-[var(--page-bg)] hover:border-[var(--page-accent)] hover:text-[var(--page-accent)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Change Password
+                  {isResettingPassword ? 'Sending...' : 'Change Password'}
                 </button>
               </div>
             </div>
           </section>
 
           {/* Preferences Section */}
-          <section className="border rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <section className="border rounded-xl p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>
               Preferences
             </h2>
@@ -275,7 +283,7 @@ export function SettingsPage() {
           </section>
 
           {/* Danger Zone */}
-          <section className="border-2 rounded-lg p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--color-danger)' }}>
+          <section className="border rounded-xl p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--color-danger)' }}>
             <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-danger)' }}>
               Danger Zone
             </h2>
@@ -288,18 +296,9 @@ export function SettingsPage() {
                   Permanently delete your account and all associated data. This action cannot be undone.
                 </p>
                 <button
+                  ref={deleteButtonRef}
                   onClick={handleDeleteAccount}
-                  className="px-4 py-2 rounded-lg font-medium transition-colors"
-                  style={{
-                    backgroundColor: 'var(--color-danger)',
-                    color: '#ffffff',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-danger-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-danger)';
-                  }}
+                  className="px-4 py-2 rounded-lg font-medium transition-colors bg-[var(--color-danger)] text-white hover:bg-[var(--color-danger-hover)]"
                 >
                   Delete Account
                 </button>
@@ -317,11 +316,15 @@ export function SettingsPage() {
           onClick={handleCancelDelete}
         >
           <div
-            className="border rounded-lg p-6 max-w-md w-full"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            className="border rounded-xl p-6 max-w-md w-full"
             style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--color-danger)' }}>
+            <h2 id="delete-dialog-title" className="text-xl font-semibold mb-4" style={{ color: 'var(--color-danger)' }}>
               Delete Account
             </h2>
 
@@ -340,10 +343,11 @@ export function SettingsPage() {
               </p>
 
               <div className="pt-4">
-                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--page-text-primary)' }}>
+                <label htmlFor="delete-confirm-email" className="block text-sm font-medium mb-2" style={{ color: 'var(--page-text-primary)' }}>
                   To confirm, type your email address: <span className="font-mono">{userProfile?.email}</span>
                 </label>
                 <input
+                  id="delete-confirm-email"
                   type="email"
                   value={deleteConfirmEmail}
                   onChange={(e) => setDeleteConfirmEmail(e.target.value)}
@@ -364,39 +368,14 @@ export function SettingsPage() {
               <button
                 onClick={handleCancelDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-lg font-medium border transition-colors"
-                style={{
-                  backgroundColor: 'var(--card-bg)',
-                  borderColor: 'var(--card-border)',
-                  color: 'var(--page-text-primary)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isDeleting) {
-                    e.currentTarget.style.backgroundColor = 'var(--page-bg)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--card-bg)';
-                }}
+                className="px-4 py-2 rounded-lg font-medium border transition-colors bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--page-text-primary)] hover:bg-[var(--page-bg)]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
                 disabled={deleteConfirmEmail !== userProfile?.email || isDeleting}
-                className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: 'var(--color-danger)',
-                  color: '#ffffff',
-                }}
-                onMouseEnter={(e) => {
-                  if (deleteConfirmEmail === userProfile?.email && !isDeleting) {
-                    e.currentTarget.style.backgroundColor = 'var(--color-danger-hover)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-danger)';
-                }}
+                className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-danger)] text-white hover:bg-[var(--color-danger-hover)]"
               >
                 {isDeleting ? 'Deleting...' : 'Delete Account'}
               </button>
@@ -404,6 +383,9 @@ export function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation - hidden on md+ screens */}
+      <BottomNavigation />
     </div>
   );
 }

@@ -57,7 +57,7 @@ function ReadOnlyEventView({ event }: ReadOnlyEventViewProps) {
       </div>
 
       {/* Date display with enhanced styling */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ backgroundColor: 'var(--page-bg)', border: '1px solid var(--page-border)' }}>
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ backgroundColor: 'var(--page-bg)', border: '1px solid var(--page-border)' }}>
         <span className="material-symbols-rounded text-xl" style={{ color: 'var(--page-accent)' }}>calendar_today</span>
         <time dateTime={event.date} className="text-base font-medium" style={{ color: 'var(--page-text-primary)' }}>
           {formatDateTime(event)}

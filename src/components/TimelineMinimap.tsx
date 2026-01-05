@@ -269,7 +269,7 @@ export function TimelineMinimap({
   // Don't render if no events
   if (events.length === 0) {
     return (
-      <div className={`relative rounded-lg p-3 ${className}`} style={{ backgroundColor: 'var(--page-bg-elevated)', border: '1px solid var(--page-border)' }}>
+      <div className={`relative rounded-xl p-3 ${className}`} style={{ backgroundColor: 'var(--page-bg-elevated)', border: '1px solid var(--page-border)' }}>
         <div className="flex items-center justify-center text-sm" style={{ color: 'var(--page-text-secondary)' }}>
           No events to display
         </div>

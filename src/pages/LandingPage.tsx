@@ -112,6 +112,32 @@ export function LandingPage() {
         <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
       </Helmet>
 
+    {/* Skip to main content link for keyboard accessibility */}
+    <a
+      href="#main-content"
+      style={{
+        position: 'absolute',
+        left: '-9999px',
+        zIndex: 9999,
+        padding: '1rem',
+        backgroundColor: 'var(--page-bg)',
+        color: 'var(--page-accent)',
+        textDecoration: 'none',
+        borderRadius: '0.5rem',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.left = '1rem';
+        e.currentTarget.style.top = '1rem';
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.left = '-9999px';
+        e.currentTarget.style.top = 'auto';
+      }}
+    >
+      Skip to main content
+    </a>
+
     <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#e6edf3', position: 'relative', overflowX: 'hidden' }}>
       {/* Fixed Background - stays while content scrolls */}
       <Box
@@ -146,6 +172,7 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <Box
+        id="main-content"
         component="main"
         sx={{
           position: 'relative',
@@ -196,7 +223,7 @@ export function LandingPage() {
             component="h2"
             sx={{
               mb: 5,
-              color: '#8d96a0',
+              color: '#9ca3af',
               fontSize: { xs: '1rem', md: '1.15rem' },
               maxWidth: 750,
               mx: 'auto',
@@ -208,7 +235,7 @@ export function LandingPage() {
             that anyone can verify and build upon.
           </Typography>
 
-          {/* CTA Buttons - Explore primary (orange), Sign In secondary */}
+          {/* CTA Buttons - Explore primary (filled), Sign In secondary (ghost) */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
@@ -216,25 +243,23 @@ export function LandingPage() {
             sx={{ mb: 6 }}
           >
             <Button
-              variant="outlined"
+              variant="contained"
               size="large"
               onClick={handleBrowseTimelines}
               data-testid="cta-explore-examples"
               sx={{
-                bgcolor: 'transparent',
-                borderColor: '#f97316',
-                border: '2px solid #f97316',
-                color: '#f97316',
+                bgcolor: '#f97316',
+                color: '#fff',
                 fontSize: '1.1rem',
                 px: 5,
                 py: 1.75,
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
-                backdropFilter: 'blur(4px)',
+                boxShadow: '0 4px 14px rgba(249, 115, 22, 0.4)',
                 '&:hover': {
-                  bgcolor: 'rgba(249, 115, 22, 0.15)',
-                  borderColor: '#f97316',
+                  bgcolor: '#ea580c',
+                  boxShadow: '0 6px 20px rgba(249, 115, 22, 0.5)',
                 },
               }}
             >
@@ -312,7 +337,7 @@ export function LandingPage() {
             textAlign="center"
             sx={{
               mb: 6,
-              color: '#8d96a0',
+              color: '#9ca3af',
               fontSize: '1.1rem',
               maxWidth: 700,
               mx: 'auto',
@@ -357,7 +382,7 @@ export function LandingPage() {
           textAlign="center"
           sx={{
             mb: 8,
-            color: '#8d96a0',
+            color: '#9ca3af',
             fontSize: '1.1rem',
             maxWidth: 600,
             mx: 'auto',
@@ -393,7 +418,7 @@ export function LandingPage() {
                 <Typography variant="h6" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, fontSize: '1rem' }}>
                   {item.title}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#8d96a0', lineHeight: 1.6, fontSize: '0.9rem' }}>
+                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   {item.desc}
                 </Typography>
               </CardContent>
@@ -423,7 +448,7 @@ export function LandingPage() {
             textAlign="center"
             sx={{
               mb: 8,
-              color: '#8d96a0',
+              color: '#9ca3af',
               fontSize: '1.1rem',
               maxWidth: 600,
               mx: 'auto',
@@ -454,7 +479,7 @@ export function LandingPage() {
                 <Typography variant="h5" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, mb: 2 }}>
                   Infinite Zoom
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#8d96a0', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.7, fontSize: '0.95rem' }}>
                   Navigate from centuries to minutes. Smart layout prevents overlap
                   at any scale. See the big picture and the details in one place.
                 </Typography>
@@ -482,7 +507,7 @@ export function LandingPage() {
                 <Typography variant="h5" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, mb: 2 }}>
                   Fork & Improve
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#8d96a0', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.7, fontSize: '0.95rem' }}>
                   Build on others' work. Fork any public timeline, add your perspective,
                   and contribute back. Collective knowledge grows together.
                 </Typography>
@@ -510,7 +535,7 @@ export function LandingPage() {
                 <Typography variant="h5" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, mb: 2 }}>
                   Share & Verify
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#8d96a0', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.7, fontSize: '0.95rem' }}>
                   Every event can link to sources. Make your research transparent
                   and let others verify and expand on your work.
                 </Typography>
@@ -540,7 +565,7 @@ export function LandingPage() {
           textAlign="center"
           sx={{
             mb: 6,
-            color: '#8d96a0',
+            color: '#9ca3af',
             fontSize: '1.1rem',
             maxWidth: 600,
             mx: 'auto',
@@ -600,7 +625,7 @@ export function LandingPage() {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#8d96a0',
+                      color: '#9ca3af',
                       fontSize: '0.9rem',
                     }}
                   >
@@ -623,6 +648,9 @@ export function LandingPage() {
                   '@keyframes pulse': {
                     '0%, 100%': { opacity: 1 },
                     '50%': { opacity: 0.5 },
+                  },
+                  '@media (prefers-reduced-motion: reduce)': {
+                    animation: 'none',
                   },
                 }}
               />
@@ -649,7 +677,7 @@ export function LandingPage() {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#8d96a0',
+                    color: '#9ca3af',
                     fontSize: '0.9rem',
                   }}
                 >
@@ -680,7 +708,7 @@ export function LandingPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                      color: '#8d96a0',
+                      color: '#9ca3af',
                       fontWeight: 600,
                       fontSize: '1rem',
                       mb: 0.5,
@@ -691,7 +719,7 @@ export function LandingPage() {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#6e7681',
+                      color: '#71717a',
                       fontSize: '0.9rem',
                     }}
                   >
@@ -721,7 +749,7 @@ export function LandingPage() {
           variant="body1"
           sx={{
             mb: 5,
-            color: '#8d96a0',
+            color: '#9ca3af',
             fontSize: '1.1rem',
             maxWidth: 550,
             mx: 'auto',
@@ -764,12 +792,12 @@ export function LandingPage() {
               <Typography variant="h6" gutterBottom sx={{ color: '#e6edf3', fontSize: '1rem', fontWeight: 600 }}>
                 PowerTimeline
               </Typography>
-              <Typography variant="body2" sx={{ color: '#8d96a0', fontSize: '0.9rem' }}>
+              <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.9rem' }}>
                 Where events become understanding
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ color: '#8d96a0', fontSize: '0.85rem', mb: 1.5 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ color: '#9ca3af', fontSize: '0.85rem', mb: 1.5 }}>
                 Product
               </Typography>
               <Stack spacing={0.5}>
@@ -777,7 +805,7 @@ export function LandingPage() {
                   size="small"
                   onClick={handleBrowseTimelines}
                   sx={{
-                    color: '#8d96a0',
+                    color: '#9ca3af',
                     justifyContent: 'flex-start',
                     textTransform: 'none',
                     fontSize: '0.85rem',
@@ -789,7 +817,7 @@ export function LandingPage() {
               </Stack>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ color: '#8d96a0', fontSize: '0.85rem', mb: 1.5 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ color: '#9ca3af', fontSize: '0.85rem', mb: 1.5 }}>
                 Contact
               </Typography>
               <Stack spacing={1}>
@@ -800,7 +828,7 @@ export function LandingPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: '#8d96a0',
+                    color: '#9ca3af',
                     fontSize: '0.85rem',
                     '&:hover': { color: '#e6edf3' },
                   }}
@@ -817,7 +845,7 @@ export function LandingPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: '#8d96a0',
+                    color: '#9ca3af',
                     fontSize: '0.85rem',
                     '&:hover': { color: '#e6edf3' },
                   }}
@@ -831,7 +859,7 @@ export function LandingPage() {
           <Typography
             variant="caption"
             sx={{
-              color: '#6e7681',
+              color: '#71717a',
               textAlign: 'center',
               display: 'block',
               fontSize: '0.8rem',
@@ -856,7 +884,7 @@ export function LandingPage() {
               href="https://github.com/CynaCons/PowerSpawn"
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ color: '#6e7681', '&:hover': { color: '#8b5cf6' } }}
+              sx={{ color: '#71717a', '&:hover': { color: '#8b5cf6' } }}
             >
               PowerSpawn
             </Link>

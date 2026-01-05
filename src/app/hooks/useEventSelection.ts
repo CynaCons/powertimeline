@@ -37,6 +37,15 @@ export function useEventSelection({
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredEventId, setHoveredEventId] = useState<string | undefined>(undefined);
 
+  // Memoize sorted events to avoid re-sorting on every navigation call
+  const sortedEvents = useMemo(
+    () => [...events].sort((a, b) =>
+      new Date(a.date + (a.time || '00:00')).getTime() -
+      new Date(b.date + (b.time || '00:00')).getTime()
+    ),
+    [events]
+  );
+
   // Derived: selected event object
   const selectedEvent = useMemo(
     () => events.find((e) => e.id === selectedId),
@@ -55,27 +64,19 @@ export function useEventSelection({
 
   // Navigate to previous event (chronologically)
   const navigateToPreviousEvent = useCallback(() => {
-    const sortedEvents = [...events].sort((a, b) =>
-      new Date(a.date + (a.time || '00:00')).getTime() -
-      new Date(b.date + (b.time || '00:00')).getTime()
-    );
     const currentIndex = sortedEvents.findIndex((e) => e.id === selectedId);
     if (currentIndex > 0) {
       setSelectedId(sortedEvents[currentIndex - 1].id);
     }
-  }, [events, selectedId]);
+  }, [sortedEvents, selectedId, setSelectedId]);
 
   // Navigate to next event (chronologically)
   const navigateToNextEvent = useCallback(() => {
-    const sortedEvents = [...events].sort((a, b) =>
-      new Date(a.date + (a.time || '00:00')).getTime() -
-      new Date(b.date + (b.time || '00:00')).getTime()
-    );
     const currentIndex = sortedEvents.findIndex((e) => e.id === selectedId);
     if (currentIndex >= 0 && currentIndex < sortedEvents.length - 1) {
       setSelectedId(sortedEvents[currentIndex + 1].id);
     }
-  }, [events, selectedId]);
+  }, [sortedEvents, selectedId, setSelectedId]);
 
   return {
     selectedId,

@@ -47,6 +47,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Validation states
@@ -192,6 +193,7 @@ export default function LoginPage() {
     }
 
     try {
+      setIsSubmitting(true);
       if (isSignUp) {
         await signUpWithEmailAndCreateProfile(email, password, username);
       } else {
@@ -202,15 +204,20 @@ export default function LoginPage() {
       setUsername('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsSubmitting(true);
       setError(null);
       await signInWithGoogle();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google sign in failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -245,13 +252,14 @@ export default function LoginPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          px: 2,
           bgcolor: 'var(--page-bg)',
         }}
       >
         <Box
           sx={{
             width: '100%',
-            maxWidth: 340,
+            maxWidth: 400,
             p: 3,
             bgcolor: 'var(--card-bg)',
             border: '1px solid var(--card-border)',
@@ -294,10 +302,11 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        px: 2,
         bgcolor: 'var(--page-bg)',
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 340 }}>
+      <Box sx={{ maxWidth: 400, width: '100%' }}>
         {/* Logo/Title */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 400, color: 'var(--page-text-primary)' }}>
@@ -328,12 +337,15 @@ export default function LoginPage() {
             {/* Email field */}
             <Box sx={{ mb: 2 }}>
               <Typography
+                component="label"
+                htmlFor="email-input"
                 variant="body2"
                 sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: 'var(--page-text-primary)' }}
               >
                 Email address
               </Typography>
               <TextField
+                id="email-input"
                 type="email"
                 value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
@@ -372,12 +384,15 @@ export default function LoginPage() {
             {isSignUp && (
               <Box sx={{ mb: 2 }}>
                 <Typography
+                  component="label"
+                  htmlFor="username-input"
                   variant="body2"
                   sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: 'var(--page-text-primary)' }}
                 >
                   Username
                 </Typography>
                 <TextField
+                  id="username-input"
                   type="text"
                   value={username}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -421,12 +436,15 @@ export default function LoginPage() {
             {/* Password field */}
             <Box sx={{ mb: 2 }}>
               <Typography
+                component="label"
+                htmlFor="password-input"
                 variant="body2"
                 sx={{ mb: 0.5, fontWeight: 600, fontSize: '14px', color: 'var(--page-text-primary)' }}
               >
                 Password
               </Typography>
               <TextField
+                id="password-input"
                 type="password"
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
@@ -495,7 +513,7 @@ export default function LoginPage() {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={isSignUp && !canSubmit()}
+              disabled={isSubmitting || (isSignUp && !canSubmit())}
               data-testid={isSignUp ? 'create-account-submit-button' : 'sign-in-submit-button'}
               sx={{
                 bgcolor: 'var(--color-success)',
@@ -514,7 +532,13 @@ export default function LoginPage() {
                 },
               }}
             >
-              {isSignUp ? 'Create account' : 'Sign in'}
+              {isSubmitting ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : isSignUp ? (
+                'Create account'
+              ) : (
+                'Sign in'
+              )}
             </Button>
           </form>
 
@@ -528,6 +552,7 @@ export default function LoginPage() {
             fullWidth
             variant="outlined"
             onClick={handleGoogleSignIn}
+            disabled={isSubmitting}
             data-testid="sign-in-google-button"
             sx={{
               borderColor: 'var(--card-border)',
@@ -541,9 +566,18 @@ export default function LoginPage() {
                 bgcolor: 'var(--page-bg-elevated)',
                 borderColor: 'var(--card-border)',
               },
+              '&:disabled': {
+                bgcolor: 'var(--page-border)',
+                color: 'var(--page-text-secondary)',
+                borderColor: 'var(--page-border)',
+              },
             }}
           >
-            Sign in with Google
+            {isSubmitting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              'Sign in with Google'
+            )}
           </Button>
         </Box>
 

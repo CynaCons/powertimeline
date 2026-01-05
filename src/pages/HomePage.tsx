@@ -11,15 +11,16 @@ import type { TimelineMetadata, User } from '../types';
 import {
   getTimeline,
   getTimelines,
-  getUsers,
   getUser,
   getPlatformStats,
   getUserTimelinesPage,
+  searchUsersByUsername,
   type TimelinePageCursor,
 } from '../services/firestore';
 import { signOutUser } from '../services/auth';
 import { downloadTimelineAsYaml } from '../services/timelineImportExport';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
+import { BottomNavigation } from '../components/BottomNavigation';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,7 +33,6 @@ import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../contexts/ToastContext';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
-import TimelineIcon from '@mui/icons-material/Timeline';
 import { TourProvider, HomePageTour, useTour } from '../components/tours';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -44,7 +44,6 @@ function HomePageContent() {
   const { user: firebaseUser } = useAuth();
   const { startTour } = useTour();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [allUsers, setAllUsers] = useState<User[]>([]); // Cache all users for lookups
   const [myTimelines, setMyTimelines] = useState<TimelineMetadata[]>([]);
   const [myTimelinesCursor, setMyTimelinesCursor] = useState<TimelinePageCursor | null>(null);
   const [myTimelinesHasMore, setMyTimelinesHasMore] = useState(false);
@@ -105,12 +104,6 @@ function HomePageContent() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  // O(1) Map-based user lookup instead of O(n) array.find (P1-4)
-  const userMap = useMemo(() => new Map(allUsers.map(u => [u.id, u])), [allUsers]);
-  const getUserById = useCallback((userId: string): User | null => {
-    return userMap.get(userId) || null;
-  }, [userMap]);
 
   // Filter out private timelines from discovery feeds (only show public)
   const filterPublicTimelines = useCallback(
@@ -177,21 +170,24 @@ function HomePageContent() {
     setLoadingTimelines(true);
     setError(null);
     try {
-      // Parallelize data loading for 4-5x faster initial load (P0-1)
-      const [userProfile, users, platformStats, recentTimelines, popularTimelines] = await Promise.all([
+      // v0.8.12 - Two-batch loading pattern for mobile network reliability
+      // Batch 1: Critical user data (fast, low bandwidth)
+      const [userProfile, platformStats] = await Promise.all([
         // 1. Load current user profile from Firestore if authenticated
         firebaseUser ? getUser(firebaseUser.uid) : Promise.resolve(null),
-        // 2. Load all users for caching (TODO: P0-2 optimize to fetch only visible owners)
-        getUsers(),
-        // 3. Load platform statistics
+        // 2. Load platform statistics (cached, fast)
         getPlatformStats(),
-        // 4. Load recently edited timelines for discovery
+      ]);
+
+      // Batch 2: Discovery feeds (can wait, reduces connection pressure on mobile)
+      const [recentTimelines, popularTimelines] = await Promise.all([
+        // 3. Load recently edited timelines for discovery
         getTimelines({
           orderByField: 'updatedAt',
           orderDirection: 'desc',
           limitCount: 12,
         }),
-        // 5. Load popular timelines for discovery
+        // 4. Load popular timelines for discovery
         getTimelines({
           orderByField: 'viewCount',
           orderDirection: 'desc',
@@ -201,7 +197,6 @@ function HomePageContent() {
 
       // Update state with parallel results
       setCurrentUser(userProfile);
-      setAllUsers(users);
       setStats({
         timelineCount: platformStats.totalTimelines,
         userCount: platformStats.totalUsers,
@@ -369,13 +364,13 @@ function HomePageContent() {
 
   const handleTimelineClick = (timeline: TimelineMetadata) => {
     // v0.5.14: Use username-based URL with fallback to legacy URL
+    // v0.8.11: Use denormalized ownerUsername from timeline
     // Note: URL pattern is /:username/timeline/:id (no @ prefix - React Router v7 bug)
-    const owner = getUserById(timeline.ownerId);
-    if (owner?.username) {
-      navigate(`/${owner.username}/timeline/${timeline.id}`);
+    if (timeline.ownerUsername) {
+      navigate(`/${timeline.ownerUsername}/timeline/${timeline.id}`);
     } else {
       // Fallback: use legacy URL pattern (EditorPage will handle redirect)
-      console.warn(`Owner not cached for timeline ${timeline.id}, using legacy URL`);
+      console.warn(`Owner username not set for timeline ${timeline.id}, using legacy URL`);
       navigate(`/user/${timeline.ownerId}/timeline/${timeline.id}`);
     }
   };
@@ -388,7 +383,8 @@ function HomePageContent() {
   // Debounce search query to avoid filtering on every keystroke (P1-2)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // Compute search results using debounced query (P1-2)
+  // Compute timeline search results using debounced query (P1-2)
+  // v0.8.11 - User search moved to async Firestore query
   const computedSearchResults = useMemo(() => {
     if (debouncedSearchQuery.trim().length < 2) {
       return null;
@@ -407,23 +403,29 @@ function HomePageContent() {
       (t.description && t.description.toLowerCase().includes(lowerQuery))
     );
 
-    // Search in cached users (SRS_DB.md compliant - v0.5.14: search by username)
-    const matchingUsers = allUsers.filter(u =>
-      u.username.toLowerCase().includes(lowerQuery) ||
-      u.email.toLowerCase().includes(lowerQuery)
-    );
-
     return {
       timelines: matchingTimelines.slice(0, 10),
-      users: matchingUsers.slice(0, 5),
-      hasMore: matchingTimelines.length > 10 || matchingUsers.length > 5,
+      users: [] as User[],  // Populated by async Firestore search
+      hasMore: matchingTimelines.length > 10,
     };
-  }, [debouncedSearchQuery, recentlyEdited, popular, myTimelines, allUsers]);
+  }, [debouncedSearchQuery, recentlyEdited, popular, myTimelines]);
 
   // Update search results state when computed results change
   useEffect(() => {
     setSearchResults(computedSearchResults);
   }, [computedSearchResults]);
+
+  // v0.8.11 - Async user search via Firestore (replaces loading all users)
+  // This is how major platforms like GitHub/X handle user search
+  useEffect(() => {
+    if (debouncedSearchQuery.trim().length >= 2) {
+      searchUsersByUsername(debouncedSearchQuery, 5).then(users => {
+        setSearchResults(prev => prev ? { ...prev, users, hasMore: prev.hasMore || users.length >= 5 } : null);
+      }).catch(err => {
+        console.error('Error searching users:', err);
+      });
+    }
+  }, [debouncedSearchQuery]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -465,7 +467,7 @@ function HomePageContent() {
           className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
           title="Go to Home"
         >
-          <TimelineIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
+          <span className="material-symbols-rounded" style={{ fontSize: '28px', color: '#8b5cf6' }}>timeline</span>
         </button>
 
         {/* Navigation sections */}
@@ -491,7 +493,7 @@ function HomePageContent() {
                   title="Go to Landing Page"
                   data-testid="logo-button"
                 >
-                  <TimelineIcon sx={{ fontSize: 24, color: '#8b5cf6' }} />
+                  <span className="material-symbols-rounded" style={{ fontSize: '24px', color: '#8b5cf6' }}>timeline</span>
                   <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
                     PowerTimeline
                   </span>
@@ -529,8 +531,8 @@ function HomePageContent() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="px-4 md:px-8 py-6 md:py-8">
+        {/* Main Content - has-bottom-nav adds padding for mobile bottom navigation */}
+        <main className="px-4 md:px-8 py-6 md:py-8 has-bottom-nav">
         <h1 className="sr-only">Browse and Search Timelines</h1>
         {/* Search Bar */}
         <div className="mb-8 relative">
@@ -548,19 +550,20 @@ function HomePageContent() {
               onChange={handleSearchChange}
               placeholder="Search timelines and users..."
               aria-label="Search timelines and users"
-              className="w-full pl-14 pr-20 py-4 text-lg border-2 rounded-xl outline-none transition-all"
+              className="w-full pl-14 pr-20 py-4 text-lg border rounded-xl outline-none transition-all shadow-inner"
               style={{
                 backgroundColor: 'var(--input-bg)',
                 borderColor: 'var(--input-border)',
-                color: 'var(--page-text-primary)'
+                color: 'var(--page-text-primary)',
+                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)'
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--input-focus-border)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--input-focus-shadow)';
+                e.currentTarget.style.borderColor = 'var(--page-accent)';
+                e.currentTarget.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 0 0 3px var(--input-focus-shadow)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'var(--input-border)';
-                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.06)';
               }}
             />
             {/* Keyboard shortcut hint - hidden on mobile */}
@@ -675,7 +678,7 @@ function HomePageContent() {
         <>
         {/* My Timelines Section - Only show when authenticated */}
         {firebaseUser && (
-        <section data-testid="my-timelines-section" className="mb-12">
+        <section data-testid="my-timelines-section" className="mb-16">
           <div data-tour="my-timelines" className="flex items-center justify-between mb-4">
             <h2 data-testid="my-timelines-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>
               My Timelines ({loadingTimelines ? '...' : myTimelines.length})
@@ -702,7 +705,7 @@ function HomePageContent() {
           </div>
 
           {loadingTimelines ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:justify-items-start">
               {Array.from({ length: 6 }).map((_, index) => (
                 <SkeletonCard key={`my-timelines-skeleton-${index}`} />
               ))}
@@ -726,7 +729,7 @@ function HomePageContent() {
                     background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)'
                   }}
                 >
-                  <TimelineIcon sx={{ fontSize: 40, color: '#ffffff' }} />
+                  <span className="material-symbols-rounded" style={{ fontSize: '40px', color: '#ffffff' }}>timeline</span>
                 </div>
               </div>
 
@@ -767,12 +770,12 @@ function HomePageContent() {
             </div>
           ) : (
             <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:justify-items-start">
               {myTimelines.map((timeline, index) => (
                 <div
                   key={`my-${timeline.id}`}
                   data-tour={index === 0 ? 'timeline-card' : undefined}
-                  className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
+                  className="timeline-card card-animate p-5 relative w-full max-w-sm"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 >
                   {/* Kebab menu - always visible */}
@@ -789,7 +792,18 @@ function HomePageContent() {
                   </div>
 
                   {/* Card content - clickable to navigate */}
-                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
+                  <div
+                    onClick={() => handleTimelineClick(timeline)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleTimelineClick(timeline);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    className="cursor-pointer relative flex flex-col h-full min-h-[140px] focus:outline-none focus:ring-2 focus:ring-[var(--page-accent)] focus:ring-offset-2"
+                  >
                     <h3 className="font-semibold mb-2 pr-10" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
                     <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                       {timeline.description || 'No description'}
@@ -837,9 +851,9 @@ function HomePageContent() {
         )}
 
         {/* Popular Timelines Section - First for engagement */}
-        <section data-tour="browse-public" data-testid="popular-timelines-section" className="mb-12">
+        <section data-tour="browse-public" data-testid="popular-timelines-section" className="mb-16">
           <h2 data-testid="popular-timelines-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>⭐ Popular Timelines</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:justify-items-start">
             {loadingTimelines ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <SkeletonCard key={`skeleton-popular-${index}`} />
@@ -847,7 +861,7 @@ function HomePageContent() {
             ) : popular.map(timeline => (
               <div
                 key={`popular-${timeline.id}`}
-                className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
+                className="timeline-card card-animate p-5 relative w-full max-w-sm"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
               >
                 {/* Kebab menu */}
@@ -855,7 +869,7 @@ function HomePageContent() {
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
-                    ownerUsername={getUserById(timeline.ownerId)?.username || ''}
+                    ownerUsername={timeline.ownerUsername || ''}
                     currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
@@ -864,7 +878,18 @@ function HomePageContent() {
                 </div>
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
+                <div
+                  onClick={() => handleTimelineClick(timeline)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleTimelineClick(timeline);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="link"
+                  className="cursor-pointer relative flex flex-col h-full min-h-[140px] focus:outline-none focus:ring-2 focus:ring-[var(--page-accent)] focus:ring-offset-2"
+                >
                   <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
                   <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
@@ -874,10 +899,8 @@ function HomePageContent() {
                     <span>{timeline.eventCount} events</span>
                   </div>
                   {/* Owner badge - absolutely positioned at bottom-left */}
-                  {(() => {
-                    const owner = getUserById(timeline.ownerId);
-                    return owner ? (
-                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
+                  {timeline.ownerUsername ? (
+                      <div className="absolute bottom-2 left-2" title={`Owner: @${timeline.ownerUsername}`}>
                         <span
                           className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                           style={{
@@ -886,11 +909,10 @@ function HomePageContent() {
                             border: '1px solid var(--card-border)',
                           }}
                         >
-                          @{owner.username}
+                          @{timeline.ownerUsername}
                         </span>
                       </div>
-                    ) : null;
-                  })()}
+                    ) : null}
                   {/* Visibility badge - absolutely positioned at bottom-right */}
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
@@ -911,31 +933,31 @@ function HomePageContent() {
         </section>
 
         {/* Statistics Section - Second for credibility */}
-        <section data-testid="platform-stats-section" className="mb-12">
+        <section data-testid="platform-stats-section" className="mb-16">
           <h2 data-testid="platform-stats-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>Platform Statistics</h2>
-          <div className="flex flex-wrap gap-4">
-            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <div className="flex flex-wrap gap-6">
+            <div className="border rounded-xl p-5 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-rounded text-lg" style={{ color: '#06b6d4' }}>timeline</span>
                 <div className="text-2xl md:text-3xl font-bold" style={{ color: '#06b6d4' }}>{stats.timelineCount}</div>
               </div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Timelines</div>
             </div>
-            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <div className="border rounded-xl p-5 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-rounded text-lg" style={{ color: '#8b5cf6' }}>event</span>
                 <div className="text-2xl md:text-3xl font-bold" style={{ color: '#8b5cf6' }}>{stats.eventCount}</div>
               </div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Events</div>
             </div>
-            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <div className="border rounded-xl p-5 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-rounded text-lg" style={{ color: '#10b981' }}>group</span>
                 <div className="text-2xl md:text-3xl font-bold" style={{ color: '#10b981' }}>{stats.userCount}</div>
               </div>
               <div className="text-sm" style={{ color: 'var(--page-text-secondary)' }}>Users</div>
             </div>
-            <div className="border rounded-lg p-4 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+            <div className="border rounded-xl p-5 md:p-6 w-40 md:w-48" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-rounded text-lg" style={{ color: '#f59e0b' }}>visibility</span>
                 <div className="text-2xl md:text-3xl font-bold" style={{ color: '#f59e0b' }}>{stats.viewCount}</div>
@@ -946,9 +968,9 @@ function HomePageContent() {
         </section>
 
         {/* Recently Edited Section - Third for freshness */}
-        <section data-testid="recently-edited-section" className="mb-12">
+        <section data-testid="recently-edited-section" className="mb-16">
           <h2 data-testid="recently-edited-heading" className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>🔥 Recently Edited</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:justify-items-start">
             {loadingTimelines ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <SkeletonCard key={`skeleton-recent-${index}`} />
@@ -956,7 +978,7 @@ function HomePageContent() {
             ) : recentlyEdited.map(timeline => (
               <div
                 key={`recent-${timeline.id}`}
-                className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
+                className="timeline-card card-animate p-5 relative w-full max-w-sm"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
               >
                 {/* Kebab menu */}
@@ -964,7 +986,7 @@ function HomePageContent() {
                   <TimelineCardMenu
                     timelineId={timeline.id}
                     ownerId={timeline.ownerId}
-                    ownerUsername={getUserById(timeline.ownerId)?.username || ''}
+                    ownerUsername={timeline.ownerUsername || ''}
                     currentUserId={firebaseUser?.uid}
                     onEdit={handleEditTimeline}
                     onDelete={handleDeleteTimeline}
@@ -973,7 +995,18 @@ function HomePageContent() {
                 </div>
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
+                <div
+                  onClick={() => handleTimelineClick(timeline)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleTimelineClick(timeline);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="link"
+                  className="cursor-pointer relative flex flex-col h-full min-h-[140px] focus:outline-none focus:ring-2 focus:ring-[var(--page-accent)] focus:ring-offset-2"
+                >
                   <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
                   <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
@@ -983,10 +1016,8 @@ function HomePageContent() {
                     <span>{new Date(timeline.updatedAt).toLocaleDateString()}</span>
                   </div>
                   {/* Owner badge - absolutely positioned at bottom-left */}
-                  {(() => {
-                    const owner = getUserById(timeline.ownerId);
-                    return owner ? (
-                      <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
+                  {timeline.ownerUsername ? (
+                      <div className="absolute bottom-2 left-2" title={`Owner: @${timeline.ownerUsername}`}>
                         <span
                           className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                           style={{
@@ -995,11 +1026,10 @@ function HomePageContent() {
                             border: '1px solid var(--card-border)',
                           }}
                         >
-                          @{owner.username}
+                          @{timeline.ownerUsername}
                         </span>
                       </div>
-                    ) : null;
-                  })()}
+                    ) : null}
                   {/* Visibility badge - absolutely positioned at bottom-right */}
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
@@ -1021,13 +1051,13 @@ function HomePageContent() {
 
         {/* Featured Timelines Section */}
         {featured.length > 0 && (
-          <section className="mb-12">
+          <section className="mb-16">
             <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--page-text-primary)' }}>✨ Featured</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:justify-items-start">
               {featured.map(timeline => (
                 <div
                   key={`featured-${timeline.id}`}
-                  className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
+                  className="timeline-card card-animate p-5 relative w-full max-w-sm"
                   style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 >
                   {/* Kebab menu */}
@@ -1035,7 +1065,7 @@ function HomePageContent() {
                     <TimelineCardMenu
                       timelineId={timeline.id}
                       ownerId={timeline.ownerId}
-                      ownerUsername={getUserById(timeline.ownerId)?.username || ''}
+                      ownerUsername={timeline.ownerUsername || ''}
                       currentUserId={firebaseUser?.uid}
                       onEdit={handleEditTimeline}
                       onDelete={handleDeleteTimeline}
@@ -1044,7 +1074,18 @@ function HomePageContent() {
                   </div>
 
                   {/* Card content - clickable to navigate */}
-                  <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
+                  <div
+                    onClick={() => handleTimelineClick(timeline)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleTimelineClick(timeline);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    className="cursor-pointer relative flex flex-col h-full min-h-[140px] focus:outline-none focus:ring-2 focus:ring-[var(--page-accent)] focus:ring-offset-2"
+                  >
                     <div className="flex items-center gap-2 mb-2 pr-8">
                       <span className="text-yellow-500">⭐</span>
                       <h3 className="font-semibold flex-1" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
@@ -1057,10 +1098,8 @@ function HomePageContent() {
                       <span>{timeline.viewCount} views</span>
                     </div>
                     {/* Owner badge - absolutely positioned at bottom-left */}
-                    {(() => {
-                      const owner = getUserById(timeline.ownerId);
-                      return owner ? (
-                        <div className="absolute bottom-2 left-2" title={`Owner: @${owner.username}`}>
+                    {timeline.ownerUsername ? (
+                        <div className="absolute bottom-2 left-2" title={`Owner: @${timeline.ownerUsername}`}>
                           <span
                             className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                             style={{
@@ -1069,11 +1108,10 @@ function HomePageContent() {
                               border: '1px solid var(--card-border)',
                             }}
                           >
-                            @{owner.username}
+                            @{timeline.ownerUsername}
                           </span>
                         </div>
-                      ) : null;
-                    })()}
+                      ) : null}
                     {/* Visibility badge - absolutely positioned at bottom-right */}
                     <div className="absolute bottom-2 right-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
@@ -1130,6 +1168,9 @@ function HomePageContent() {
         }}
         onSuccess={handleDeleteSuccess}
       />
+
+      {/* Mobile Bottom Navigation - hidden on md+ screens */}
+      <BottomNavigation />
 
       </div>
     </div>

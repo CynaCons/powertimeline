@@ -111,6 +111,8 @@ The home page sections appear in this order (top to bottom):
 | CC-REQ-CARD-002 | Timeline cards provide visual feedback on hover | • Elevation/shadow increases on hover<br>• Border color changes (optional)<br>• Cursor changes to pointer<br>• Smooth transition (200ms) | `src/pages/HomePage.tsx:599-966` | TBD |
 | CC-REQ-CARD-003 | Timeline cards show minimap preview on hover (optional) | • After 500ms hover delay, show minimap thumbnail<br>• Preview positioned to not obscure card<br>• Preview shows event distribution visualization<br>• Dismisses on mouse leave | `src/pages/HomePage.tsx:599-966` | TBD |
 | CC-REQ-CARD-004 | Timeline cards responsive design | • Desktop: 3 columns, card width ~300px<br>• Tablet: 2 columns<br>• Mobile: 1 column, full width<br>• Grid gap: 16-24px | `src/pages/HomePage.tsx:599-966` | TBD |
+| CC-REQ-CARD-005 | Timeline cards keyboard accessible | • Card wrapper focusable via Tab<br>• Enter/Space activates navigation<br>• Role announced as link<br>• No keyboard trap inside card | `src/pages/HomePage.tsx:782-1078` | TBD |
+| CC-REQ-CARD-006 | Timeline cards show focus-visible styling | • Focus ring visible against card background<br>• Uses page accent color for ring<br>• Offset ensures ring not clipped by card | `src/pages/HomePage.tsx:782-1078` | TBD |
 
 ### Page Layout & Design
 
@@ -127,7 +129,7 @@ The home page sections appear in this order (top to bottom):
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-HOME-DATA-001 | Timeline objects include ownership and engagement metadata | - Timeline metadata has: id, title, description, ownerId, createdAt, updatedAt, viewCount, featured, visibility, eventCount<br>- Event collections stored separately from metadata<br>- Defaults applied for missing fields when created | `src/types.ts:24-71`, `src/services/firestore.ts:235-310` | TBD |
+| CC-REQ-HOME-DATA-001 | Timeline objects include ownership and engagement metadata | - Timeline metadata has: id, title, description, ownerId, ownerUsername, createdAt, updatedAt, viewCount, featured, visibility, eventCount<br>- Event collections stored separately from metadata<br>- Defaults applied for missing fields when created | `src/types.ts:24-71`, `src/services/firestore.ts:235-310` | TBD |
 | CC-REQ-HOME-DATA-002 | Firestore schema supports multi-user timelines and stats | - Timelines stored under `/users/{userId}/timelines` with collection group queries for discovery<br>- Pagination uses `startAfter` cursor to fetch additional pages<br>- Platform stats read from `stats/platform` document with Cloud Functions upkeep | `src/services/firestore.ts:103-320`, `src/services/firestore.ts:1068-1150` | TBD |
 | CC-REQ-HOME-DATA-003 | Authenticated user data drives My Timelines | - Current user fetched from Firebase Auth and Firestore profile<br>- My Timelines clears when signed out and reloads when signed in<br>- No reliance on client-side seeds or demo users for workspace data | `src/pages/HomePage.tsx:24-210`, `src/services/firestore.ts:103-190` | TBD |
 | CC-REQ-HOME-DATA-004 | View count persists in Firestore | - Timelines include `viewCount` field persisted in Firestore<br>- View increments handled server-side or via Firestore updates<br>- Popular feed sorts by stored `viewCount` values | `src/services/firestore.ts:465-580`, `src/pages/HomePage.tsx:110-150`, `src/pages/HomePage.tsx:744-808` | TBD |
@@ -142,6 +144,7 @@ interface TimelineMetadata {
   title: string;
   description?: string;
   ownerId: string;           // Firebase Auth UID
+  ownerUsername: string;     // Denormalized from User.username (v0.8.11)
   createdAt: string;         // ISO date
   updatedAt: string;         // ISO date
   viewCount: number;         // Number of views
@@ -253,11 +256,46 @@ App
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-HOME-PERF-001 | HomePage SHALL load data in parallel | • Initial data fetches (timelines, platform stats) execute concurrently using Promise.all()<br>• No sequential blocking between independent data sources<br>• Loading skeleton shown until all data ready | `src/pages/HomePage.tsx:loadData()` | home/01-smoke.spec.ts |
+| CC-REQ-HOME-PERF-001 | HomePage SHALL load data in controlled batches | • Batch 1: User profile + platform stats (critical, fast)<br>• Batch 2: Recent + popular timelines (discovery feeds)<br>• Two-batch pattern reduces mobile connection pressure<br>• Loading skeleton shown until all data ready | `src/pages/HomePage.tsx:loadData()` | home/01-smoke.spec.ts |
 | CC-REQ-HOME-PERF-002 | Search filtering SHALL be debounced | • Search input debounced with 300ms delay<br>• Prevents excessive re-renders during typing<br>• Uses useDebounce hook | `src/pages/HomePage.tsx`, `src/hooks/useDebounce.ts` | TBD |
+
+## Visual Design & Accessibility
+
+### Visual Design Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-HOME-VIS-001 | Timeline cards SHALL use consistent styling with depth | • Cards use `.timeline-card` CSS class or equivalent<br>• Resting state: `box-shadow: 0 1px 3px rgba(0,0,0,0.08)`<br>• Border: 1px solid with theme-aware color<br>• Border radius: 12px (`rounded-xl`)<br>• Padding: 20-24px (`p-5` or `p-6`) | HomePage.tsx:599-966 | TBD |
+| CC-REQ-HOME-VIS-002 | Timeline cards SHALL provide satisfying hover feedback | • Hover: `transform: translateY(-2px)`<br>• Hover shadow: `0 10px 30px -10px rgba(0,0,0,0.15)`<br>• Transition: 200ms ease<br>• Cursor: pointer | HomePage.tsx:599-966 | TBD |
+| CC-REQ-HOME-VIS-003 | Section spacing SHALL provide visual breathing room | • Section gaps: 64-80px (`mb-16` or `mb-20`)<br>• Card grid gap: 24px (`gap-6`)<br>• Page padding: 24-48px on sides (`px-6` or `px-12`) | HomePage.tsx | TBD |
+| CC-REQ-HOME-VIS-004 | Typography SHALL establish clear hierarchy | • Section headings: 24-30px (`text-2xl` or `text-3xl`)<br>• Heading letter-spacing: -0.02em<br>• Body line-height: 1.6<br>• Use design tokens from `tokens.css` | HomePage.tsx | TBD |
+| CC-REQ-HOME-VIS-005 | Search bar SHALL have refined styling | • Border: 1px solid (not 2px)<br>• Inset shadow: `inset 0 2px 4px rgba(0,0,0,0.06)`<br>• Focus ring visible and accessible | HomePage.tsx:344-376 | TBD |
+
+### Accessibility Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-HOME-ACC-001 | Timeline cards SHALL be keyboard accessible | • Cards focusable via Tab (`tabIndex={0}`)<br>• Enter/Space keys activate navigation (`onKeyDown`)<br>• Role announced as link (`role="link"`)<br>• No keyboard trap inside card | HomePage.tsx:782-1078 | TBD |
+| CC-REQ-HOME-ACC-002 | Timeline cards SHALL show visible focus styling | • Focus ring visible against card background<br>• Uses page accent color (`var(--page-accent)`)<br>• Ring offset prevents clipping (`outline-offset: 2px`)<br>• Meets WCAG 2.1 AA contrast requirements | HomePage.tsx:782-1078 | TBD |
+| CC-REQ-HOME-ACC-003 | Icon buttons SHALL have ARIA labels | • All icon-only buttons include `aria-label`<br>• Labels describe action (e.g., "Edit timeline", "Delete timeline")<br>• Apply to kebab menus and toolbar buttons | HomePage.tsx | TBD |
+| CC-REQ-HOME-ACC-004 | Skip-to-content link SHALL be available | • Tab key on page load focuses skip link<br>• Enter key navigates to main content (`#main-content`)<br>• Link visually hidden until focused<br>• Positioned at top of page DOM | HomePage.tsx | TBD |
+| CC-REQ-HOME-ACC-005 | Grid layout SHALL not center cards incorrectly | • Use `justify-items-start` only (not `justify-items-center`)<br>• Cards align to grid start consistently<br>• No layout jumps on different card counts | HomePage.tsx:707, UserProfilePage.tsx:478 | TBD |
+
+### Responsive Design Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-HOME-RESP-001 | Mobile navigation SHALL be available | • Bottom navigation visible on mobile (`<768px`)<br>• Access to Browse, My Timelines, Settings<br>• See [`SRS_MOBILE_NAVIGATION.md`](SRS_MOBILE_NAVIGATION.md) for detailed requirements | BottomNavigation.tsx | TBD |
+| CC-REQ-HOME-RESP-002 | Stats section SHALL use responsive grid | • Desktop: 4 columns<br>• Tablet: 2 columns<br>• Mobile: 1 column<br>• Fixed widths converted to `grid-cols-*` | HomePage.tsx:916 | TBD |
 
 ## Change History
 
+- **2026-01-05** - Added visual design and accessibility requirements from visual audit (Phase 10)
+  - Added CC-REQ-HOME-VIS-001 to 005: Card styling, hover effects, spacing, typography, search bar
+  - Added CC-REQ-HOME-ACC-001 to 005: Keyboard accessibility, focus states, ARIA labels, skip link, grid layout
+  - Added CC-REQ-HOME-RESP-001 to 002: Mobile navigation, responsive stats grid
+  - References VISUAL_AUDIT_REPORT.md findings
+- **2026-01-04** - Updated CC-REQ-HOME-PERF-001 (v0.8.12): Two-batch loading pattern for mobile reliability
 - **2026-01-03** - Added performance requirements (v0.8.9): parallel data loading, debounced search
 - **2026-01-02** - Added My Timelines pagination requirements (configurable page size, Load More button, pagination loading states) and removed legacy demo-only references; refreshed code pointers to Firestore-backed flows.
 - **2025-12-27** - Updated code references from audit findings (pre-Firestore migration)

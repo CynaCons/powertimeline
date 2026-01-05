@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
+        <div className="p-4 border border-red-200 bg-red-50 rounded-xl">
           <h2 className="text-lg font-semibold text-red-800 mb-2">Something went wrong</h2>
           <p className="text-red-700 mb-3">
             An error occurred in this component. The application will continue to work,

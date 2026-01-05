@@ -1032,7 +1032,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
             data-cluster-id={card.clusterId}
             data-tour={isFirstCard ? 'event-card' : undefined}
             data-preview={isPreviewEvent || undefined}
-            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} text-sm`}
+            className={`absolute rounded-xl shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}
@@ -1074,7 +1074,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       {/* Info Panels - Only show when enabled */}
       {showInfoPanels && (
         <div
-          className="absolute top-4 left-4 backdrop-blur-sm p-3 rounded-lg shadow-md max-w-sm transition-all duration-200 z-[5] pointer-events-auto"
+          className="absolute top-4 left-4 backdrop-blur-sm p-3 rounded-xl shadow-md max-w-sm transition-all duration-200 z-[5] pointer-events-auto"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
         >
           <h2 className="font-bold text-sm mb-1">Layout Summary</h2>

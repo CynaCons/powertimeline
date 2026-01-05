@@ -90,3 +90,13 @@
     background-position: -200% 0;
   }
 }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block,
+  .skeleton-pill,
+  .skeleton-circle {
+    animation: none;
+    background: var(--card-bg);
+  }
+}

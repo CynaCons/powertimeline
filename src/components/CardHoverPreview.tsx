@@ -167,6 +167,13 @@ export default function CardHoverPreview({ event, position }: CardHoverPreviewPr
               opacity: 1;
             }
           }
+
+          @media (prefers-reduced-motion: reduce) {
+            div[style*="animation: 'fadeIn"] {
+              animation: none !important;
+              opacity: 1 !important;
+            }
+          }
         `}
       </style>
     </div>

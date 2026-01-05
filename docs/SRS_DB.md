@@ -70,6 +70,7 @@ This document specifies the database schema requirements for PowerTimeline using
 | DB-TL-008 | `featured` | boolean | Yes | Default: false | Admin-set flag for featured timelines. |
 | DB-TL-009 | `visibility` | string | Yes | Enum: `public`, `unlisted`, `private` | Access control level. |
 | DB-TL-010 | `eventCount` | number | No | Integer >= 0 | Denormalized event count for display. |
+| DB-TL-011 | `ownerUsername` | string | Yes | Denormalized | Owner's username at creation time (v0.8.11). |
 
 **Visibility Levels**:
 | Value | Discovery | Direct URL | Owner |
@@ -192,6 +193,7 @@ timeline, timelines, undefined, user, users, view, www
 | Field | Source | Purpose | Update Strategy |
 |-------|--------|---------|-----------------|
 | `Timeline.eventCount` | Count of events subcollection | Display without loading events | Update on event add/delete |
+| `Timeline.ownerUsername` | User.username | Display owner without join | Set at creation, update if username changes |
 | `ActivityLog.adminUserName` | User.username | Display without join | Set at creation, not updated |
 | `ActivityLog.targetName` | Various | Display without join | Set at creation, not updated |
 
@@ -214,3 +216,4 @@ timeline, timelines, undefined, user, users, view, www
 |---------|------|--------|---------|
 | 1.0 | 2024-11-29 | Claude | Initial specification |
 | 1.1 | 2024-11-29 | Claude | Removed deprecated fields: avatar, bio, name (User); order, priority, category, excerpt (Event). Removed Migration Notes section. |
+| 1.2 | 2026-01-04 | Claude | Added DB-TL-011 ownerUsername denormalized field (v0.8.11 performance optimization). |

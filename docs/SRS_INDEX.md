@@ -11,11 +11,11 @@
 
 | Metric | Count | Percentage |
 |--------|-------|------------|
-| **Total Requirements** | ~352 | 100% |
-| **Implemented** | ~200 | 57% |
-| **Verified (with tests)** | ~119 | 34% |
-| **In Progress** | ~10 | 3% |
-| **Planned (TBD)** | ~152 | 43% |
+| **Total Requirements** | ~407 | 100% |
+| **Implemented** | ~222 | 55% |
+| **Verified (with tests)** | ~170 | 42% |
+| **In Progress** | ~37 | 9% |
+| **Planned (TBD)** | ~185 | 45% |
 
 ### By Feature Area
 
@@ -31,20 +31,22 @@
 | Data Management & Export | 15 | [SRS_EDITOR_IMPORT_EXPORT.md](SRS_EDITOR_IMPORT_EXPORT.md) | 15 (100%) | 15 (100%) |
 | Visual Design & Theming | 3 | [SRS.md](SRS.md#11-visual-design--theming) | 3 (100%) | 2 (67%) |
 | Event Interaction | 5 | [SRS.md](SRS.md#15-event-interaction) | 5 (100%) | 3 (60%) |
-| Home Page & Discovery | 35+ | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) | 30 (86%) | 15 (43%) |
+| Home Page & Discovery | 47 | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) | 30 (64%) | 15 (32%) |
 | Timeline Creation & Management | 18 | [SRS_TIMELINE_CREATION.md](SRS_TIMELINE_CREATION.md) | 18 (100%) | 16 (89%) |
 | Admin Panel | 25+ | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) | 25 (100%) | 13 (52%) |
 | Timeline Editor Page | 28 | [SRS_TIMELINE_EDITOR.md](SRS_TIMELINE_EDITOR.md) | 28 (100%) | 6 (21%) |
-| User Profile Page | 30 | [SRS_USER_PAGE.md](SRS_USER_PAGE.md) | 30 (100%) | 10 (33%) |
+| User Profile Page | 42 | [SRS_USER_PAGE.md](SRS_USER_PAGE.md) | 30 (71%) | 10 (24%) |
 | User Settings Page | 23 | [SRS_USER_SETTINGS_PAGE.md](SRS_USER_SETTINGS_PAGE.md) | 23 (100%) | 8 (35%) |
 | Stream View | 45 | [SRS_STREAM_VIEW.md](SRS_STREAM_VIEW.md) | 45 (100%) | 12 (27%) |
-| Landing Page | 15 | [SRS_LANDING_PAGE.md](SRS_LANDING_PAGE.md) | 15 (100%) | 5 (33%) |
+| Landing Page | 21 | [SRS_LANDING_PAGE.md](SRS_LANDING_PAGE.md) | 21 (100%) | 5 (24%) |
 | Event Sources | 37 | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) | 37 (100%) | 10 (27%) |
 | AI Integration | 98 | [SRS_AI_INTEGRATION.md](SRS_AI_INTEGRATION.md) | 50 (51%) | 15 (15%) |
 | API Key Storage | 12 | [SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md) | 0 (0%) | 0 (0%) |
 | Onboarding & Tours | 25 | [SRS_ONBOARDING.md](SRS_ONBOARDING.md) | 25 (100%) | 8 (32%) |
 | State Management | 4 | [SRS_STATE_MANAGEMENT.md](SRS_STATE_MANAGEMENT.md) | 4 (100%) | 51 (unit) |
-| **TOTAL** | **~356** | Multiple files | **~204 (57%)** | **~170 (48%)** |
+| Design Tokens | 6 | [SRS_DESIGN_TOKENS.md](SRS_DESIGN_TOKENS.md) | 6 (100%) | 0 (0%) |
+| Mobile Navigation | 8 | [SRS_MOBILE_NAVIGATION.md](SRS_MOBILE_NAVIGATION.md) | 0 (0%) | 0 (0%) |
+| **TOTAL** | **~407** | Multiple files | **~222 (55%)** | **~170 (42%)** |
 
 Note: Stream View now replaces the deprecated Events/Outline panel for event browsing (Alt+E shortcut removed); see `docs/SRS_TIMELINE_EDITOR.md` and `docs/SRS_STREAM_VIEW.md`.
 
@@ -161,24 +163,31 @@ Navigation rail, panels, and overlay system:
 ---
 
 ### 8. Home Page & Discovery
-**Status:** 🟡 In Progress (86% implemented, 43% verified)
+**Status:** 🟡 In Progress (64% implemented, 32% verified)
 **Documentation:** [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md)
 
 Landing page, user directory, timeline browsing:
-- 35+ requirements covering search, user workspace, statistics, activity feeds, routing
+- 47 requirements covering search, user workspace, statistics, activity feeds, routing, visual design, accessibility
 - Tests: v5/71-73, tests/home/01-smoke.spec.ts
 
 **Feature Areas:**
 - **Search & Discovery** (4 requirements): CC-REQ-SEARCH-001 to 004
-- **My Timelines Section** (5 requirements): CC-REQ-MYTIMELINES-001 to 005
+- **My Timelines Section** (8 requirements): CC-REQ-MYTIMELINES-001 to 008
 - **Platform Statistics** (6 requirements): CC-REQ-STATS-001 to 006
 - **Recently Edited Feed** (3 requirements): CC-REQ-RECENT-001 to 003
 - **Popular Timelines** (3 requirements): CC-REQ-POPULAR-001 to 003
 - **Featured Timelines** (3 requirements): CC-REQ-FEATURED-001 to 003
-- **User Profiles** (5 requirements): CC-REQ-PROFILE-001 to 005
-- **URL Routing** (6 requirements): CC-REQ-ROUTING-001 to 006
+- **Timeline Cards** (6 requirements): CC-REQ-CARD-001 to 006
+- **Page Layout** (4 requirements): CC-REQ-PAGE-LAYOUT-001 to 004
+- **Data Management** (4 requirements): CC-REQ-HOME-DATA-001 to 004
+- **Performance** (2 requirements): CC-REQ-HOME-PERF-001 to 002
+- **Visual Design** (5 requirements): CC-REQ-HOME-VIS-001 to 005
+- **Accessibility** (5 requirements): CC-REQ-HOME-ACC-001 to 005
+- **Responsive Design** (2 requirements): CC-REQ-HOME-RESP-001 to 002
 
 **In Progress:**
+- Visual design requirements (VIS-001 to 005) pending implementation
+- Accessibility requirements (ACC-001 to 005) pending implementation
 - Many requirements have "TBD" for test coverage
 - Admin tests failing (tests/admin/*.spec.ts)
 - Authentication integration incomplete
@@ -264,6 +273,16 @@ Platform administration interface:
 | CC-REQ-ADMIN-* | Admin Panel | [SRS_ADMIN_PANEL.md](SRS_ADMIN_PANEL.md) |
 | CC-REQ-SOURCES-* | Event Sources | [SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md) |
 | CC-REQ-APIKEY-* | API Key Storage | [SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md) |
+| CC-REQ-TOKENS-* | Design Tokens | [SRS_DESIGN_TOKENS.md](SRS_DESIGN_TOKENS.md) |
+| CC-REQ-MOB-* | Mobile Navigation | [SRS_MOBILE_NAVIGATION.md](SRS_MOBILE_NAVIGATION.md) |
+| CC-REQ-HOME-VIS-* | Home Page Visual Design | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) |
+| CC-REQ-HOME-ACC-* | Home Page Accessibility | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) |
+| CC-REQ-HOME-RESP-* | Home Page Responsive | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) |
+| CC-REQ-HOME-PERF-* | Home Page Performance | [SRS_HOME_PAGE.md](SRS_HOME_PAGE.md) |
+| CC-REQ-USER-VIS-* | User Page Visual Design | [SRS_USER_PAGE.md](SRS_USER_PAGE.md) |
+| CC-REQ-USER-ACC-* | User Page Accessibility | [SRS_USER_PAGE.md](SRS_USER_PAGE.md) |
+| CC-REQ-USER-RESP-* | User Page Responsive | [SRS_USER_PAGE.md](SRS_USER_PAGE.md) |
+| CC-REQ-LAND-* | Landing Page | [SRS_LANDING_PAGE.md](SRS_LANDING_PAGE.md) |
 
 ---
 
@@ -288,6 +307,8 @@ Platform administration interface:
 - **[SRS_ONBOARDING.md](SRS_ONBOARDING.md)** - Onboarding & guided tours (25 requirements)
 - **[SRS_EVENT_SOURCES.md](SRS_EVENT_SOURCES.md)** - Event sources & citations (37 requirements)
 - **[SRS_API_KEY_STORAGE.md](SRS_API_KEY_STORAGE.md)** - API key storage for AI features (12 requirements)
+- **[SRS_DESIGN_TOKENS.md](SRS_DESIGN_TOKENS.md)** - Design token system (6 requirements)
+- **[SRS_MOBILE_NAVIGATION.md](SRS_MOBILE_NAVIGATION.md)** - Mobile navigation (8 requirements)
 - **[SRS_UI_AUDIT.md](SRS_UI_AUDIT.md)** - UI requirements audit and fixes
 
 ### Design Documents
@@ -363,6 +384,49 @@ Secure API key handling for AI features with multiple storage modes:
 
 ---
 
+### 14. Design Tokens
+**Status:** ✅ Complete (100% implemented, 0% verified)
+**Documentation:** [SRS_DESIGN_TOKENS.md](SRS_DESIGN_TOKENS.md)
+
+Centralized design token system for consistent typography, spacing, elevation, and theming:
+- 6 requirements covering token definition, CSS variable usage, typography scale, spacing scale, elevation scale, theme support
+- Tests: None (documentation-focused)
+
+**Feature Areas:**
+- **Token Management** (6 requirements): CC-REQ-TOKENS-001 to 006
+
+**Implementation Notes:**
+- All tokens defined in `src/styles/tokens.css`
+- Typography scale: `--text-xs` through `--text-3xl`
+- Spacing scale: `--space-1` through `--space-20`
+- Shadow elevation: `--shadow-xs` through `--shadow-card-hover`
+- Transitions: `--duration-*` and `--easing-*`
+- Brand colors: `--color-beta-orange`, `--gradient-brand`
+
+---
+
+### 15. Mobile Navigation
+**Status:** 🔵 Proposed (0% implemented, 0% verified)
+**Documentation:** [SRS_MOBILE_NAVIGATION.md](SRS_MOBILE_NAVIGATION.md)
+
+Bottom navigation bar for mobile accessibility when NavigationRail is hidden:
+- 8 requirements covering visibility, navigation items, active state, safe area support, accessibility
+- Tests: Planned (tests/mobile/bottom-navigation.spec.ts)
+
+**Feature Areas:**
+- **Visibility & Layout** (2 requirements): CC-REQ-MOB-001 to 002
+- **Active State** (1 requirement): CC-REQ-MOB-003
+- **Safe Area Support** (2 requirements): CC-REQ-MOB-004 to 005
+- **Accessibility** (1 requirement): CC-REQ-MOB-006
+- **Theme & Z-Index** (2 requirements): CC-REQ-MOB-007 to 008
+
+**In Progress:**
+- All 8 requirements pending implementation
+- Component: `src/components/BottomNavigation.tsx` (created but not integrated)
+- Integration needed in: HomePage, UserProfilePage, SettingsPage
+
+---
+
 ## ⚠️ Known Issues & Gaps
 
 ### High Priority
@@ -422,8 +486,8 @@ This index should be updated when:
 - Implementation status changes significantly
 - Test coverage improves
 
-**Last audit:** 2025-12-31 (v0.8.3.1)
-**Next audit:** After v0.9.0 completion
+**Last audit:** 2026-01-05 (v0.8.15 - Visual Audit Phase 10)
+**Next audit:** After visual audit implementation complete
 
 ---
 

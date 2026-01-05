@@ -434,13 +434,19 @@ export async function deleteEvent(
  * v0.5.0.1 - Event Persistence Optimization - Now stores events in subcollection
  */
 export async function createTimeline(
-  timeline: Omit<Timeline, 'id' | 'createdAt' | 'updatedAt'> | Omit<TimelineMetadata, 'id' | 'createdAt' | 'updatedAt'>,
+  timeline: Omit<Timeline, 'id' | 'createdAt' | 'updatedAt' | 'ownerUsername'> | Omit<TimelineMetadata, 'id' | 'createdAt' | 'updatedAt' | 'ownerUsername'>,
   customId?: string
 ): Promise<string> {
   try {
     // Timeline must have an ownerId
     if (!timeline.ownerId) {
       throw new Error('Timeline must have an ownerId');
+    }
+
+    // v0.8.11 - Get owner's username for denormalization
+    const owner = await getUser(timeline.ownerId);
+    if (!owner) {
+      throw new Error('Owner not found');
     }
 
     // Get reference to user's timelines subcollection
@@ -460,6 +466,7 @@ export async function createTimeline(
     const newTimeline: TimelineMetadata = {
       ...timelineData,
       id: timelineId,
+      ownerUsername: owner.username,  // v0.8.11 - Denormalized username
       createdAt: now,
       updatedAt: now,
       viewCount: timeline.viewCount || 0,
@@ -1152,6 +1159,84 @@ export async function resetAllStatistics(): Promise<void> {
     }
   } catch (error) {
     console.error('Error resetting statistics:', error);
+    throw error;
+  }
+}
+
+/**
+ * Migration: Backfill ownerUsername on all timelines
+ * v0.8.11 - Run once via admin panel to populate denormalized field
+ * @returns Object with count of updated timelines and list of failed timeline IDs
+ */
+export async function migrateTimelineOwnerUsernames(): Promise<{
+  updated: number;
+  failed: string[];
+}> {
+  try {
+    // Get all users and create lookup map
+    const users = await getUsers();
+    const userMap = new Map(users.map(u => [u.id, u.username]));
+
+    // Query all timelines across all users using collection group
+    const timelinesRef = collectionGroup(db, COLLECTIONS.TIMELINES);
+    const snapshot = await getDocs(timelinesRef);
+
+    let updated = 0;
+    const failed: string[] = [];
+
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data();
+      // Only update if ownerUsername is missing and ownerId exists
+      if (!data.ownerUsername && data.ownerId) {
+        const username = userMap.get(data.ownerId);
+        if (username) {
+          await updateDoc(docSnapshot.ref, { ownerUsername: username });
+          updated++;
+        } else {
+          failed.push(docSnapshot.id);
+        }
+      }
+    }
+
+    return { updated, failed };
+  } catch (error) {
+    console.error('Error migrating timeline owner usernames:', error);
+    throw error;
+  }
+}
+
+/**
+ * Search users by username prefix
+ * v0.8.11 - On-demand search for HomePage (replaces loading all users)
+ * Uses Firestore range query for prefix matching
+ * @param searchQuery - Username prefix to search for
+ * @param maxResults - Maximum number of results to return (default 5)
+ */
+export async function searchUsersByUsername(
+  searchQuery: string,
+  maxResults: number = 5
+): Promise<User[]> {
+  try {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      return [];
+    }
+
+    const normalizedQuery = searchQuery.toLowerCase().trim();
+    const usersRef = collection(db, COLLECTIONS.USERS);
+
+    // Firestore doesn't support LIKE, so use range query for prefix matching
+    // The \uf8ff character is a high code point that comes after most characters
+    const q = query(
+      usersRef,
+      where('username', '>=', normalizedQuery),
+      where('username', '<=', normalizedQuery + '\uf8ff'),
+      limit(maxResults)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+  } catch (error) {
+    console.error('Error searching users by username:', error);
     throw error;
   }
 }

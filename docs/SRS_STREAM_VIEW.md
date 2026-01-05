@@ -202,11 +202,14 @@ The scroll implementation uses native browser scrolling:
 
 | ID | Requirement | Acceptance Criteria | Code | Tests |
 |---|---|---|---|---|
-| CC-REQ-STREAM-PERF-001 | StreamViewer SHALL virtualize long event lists | • Uses react-window FixedSizeList for rendering<br>• Only visible items + overscan (5) rendered in DOM<br>• Smooth scrolling at 60fps for lists with 100+ events | `src/components/StreamViewer.tsx` | 82-stream-viewer.spec.ts |
+| CC-REQ-STREAM-PERF-001 | StreamViewer SHALL virtualize long event lists | • Uses react-window VariableSizeList for rendering (v0.8.13)<br>• Dynamic heights for collapsed (120px) and expanded (200px) cards<br>• Only visible items + overscan (5) rendered in DOM<br>• Smooth scrolling at 60fps for lists with 100+ events | `src/components/StreamViewer.tsx` | 82-stream-viewer.spec.ts |
 | CC-REQ-STREAM-PERF-002 | Swipe animations SHALL use direct DOM manipulation | • Touch move handlers update transform via ref<br>• No React state updates during touch move<br>• Prevents re-renders during animation | `src/components/StreamViewer.tsx:handleTouchMove` | TBD |
+| CC-REQ-STREAM-PERF-003 | Navigation callbacks SHALL use memoized sorted events | • useMemo caches sorted events array<br>• Navigation callbacks reference cached array<br>• Prevents re-sorting on every navigation call | `src/app/hooks/useEventSelection.ts:41-47,67-79` | T82.K1, T82.K2 |
+| CC-REQ-STREAM-PERF-004 | Virtualized Row callbacks SHALL use stable context props | • StreamViewerContext provides stable callback references<br>• Row component dependencies reduced from 16 to ~5<br>• Prevents re-render cascade when parent state changes | `src/components/StreamViewer.tsx:22-40,699-713,718-749,787-801` | T82.6-T82.7, T82.13 |
 
 ## Change History
 
+- 2026-01-04 - Updated CC-REQ-STREAM-PERF-001 to reflect VariableSizeList for dynamic card heights (v0.8.13)
 - 2026-01-03 - Added performance requirements (v0.8.9): virtualization, ref-based swipe animations
 - 2026-01-02 - Stream View promoted to primary event browsing surface (replaces Events/Outline panel); documented view-on-canvas closure and hover highlighting.
 - 2025-12-04 - Initial version (v0.5.26.3)

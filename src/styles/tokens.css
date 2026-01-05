@@ -18,6 +18,63 @@
   --input-focus-border: #8b5cf6;
   --input-focus-shadow: rgba(139, 92, 246, 0.1);
 
+  /* Typography Scale */
+  --text-xs: 0.75rem;
+  --text-xs-lh: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm-lh: 1.25rem;
+  --text-base: 1rem;
+  --text-base-lh: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg-lh: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl-lh: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl-lh: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl-lh: 2.25rem;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+
+  /* Shadows - Elevation Scale */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+  --shadow-accent-glow: 0 4px 12px rgba(139, 92, 246, 0.3);
+
+  /* Transitions */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Brand */
+  --color-beta-orange: #f97316;
+  --gradient-brand: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+
+  /* Navigation */
+  --nav-hover-bg: color-mix(in srgb, var(--page-accent) 16%, var(--nav-bg, transparent));
+  --nav-active-bg: color-mix(in srgb, var(--page-accent) 22%, var(--nav-bg, transparent));
+
   /* === Editor/Canvas Theme Variables (Dark) === */
   /* Palette */
   --cc-bg-steel-0: #0f1418;
@@ -78,12 +135,6 @@
   /* Effects */
   --cc-focus-ring-width: 0.6;
   --cc-shadow-card: 0 2px 4px -2px #00000080, 0 4px 16px -4px #00000066;
-
-  /* Shadow System (Batch J) - Dark Theme */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
 
   /* Z-index conventions */
   --cc-z-hud: 1000;
@@ -159,6 +210,9 @@
   --scrollbar-thumb: #4a5568;
   --scrollbar-thumb-hover: #718096;
 
+  /* Animation durations */
+  --animation-stagger-delay: 50ms;
+
   /* Stream Viewer (v0.5.26) */
   --stream-rail-color: #30363d;
   --stream-dot-size: 14px;
@@ -230,12 +284,6 @@
   --cc-color-card-body: #656d76;
   --cc-bg-gradient: linear-gradient(180deg, #f6f8fa 0%, #ffffff 100%);
 
-  /* Shadow System (Batch J) - Light Theme */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
-
   /* Scrollbar styling (light theme) */
   --scrollbar-track: #f0f0f0;
   --scrollbar-thumb: #888888;
@@ -256,6 +304,36 @@
   --preview-bg: rgba(251, 191, 36, 0.2); /* amber-400 with transparency for light mode */
   --preview-border: #f59e0b; /* amber-500 */
   --preview-glow: rgba(245, 158, 11, 0.4);
+}
+
+/* === Timeline Card Component Styles === */
+/* Premium card styling with depth and hover lift */
+.timeline-card {
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
+  transition: all var(--duration-normal) var(--easing-ease-out);
+  background: var(--card-bg);
+}
+
+.timeline-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--card-border-hover);
+}
+
+.timeline-card:focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 2px;
+}
+
+/* Dark mode adjustments for enhanced shadow visibility */
+[data-theme="dark"] .timeline-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .timeline-card:hover {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
 }
 
 /* High contrast mode adjustments (Phase F) */
@@ -301,4 +379,52 @@
 
 ::-webkit-scrollbar-corner {
   background: var(--scrollbar-track);
+}
+
+/* === Card Grid Animations === */
+/* Stagger animation for card grids */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-animate {
+  animation: fadeInUp 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+/* Stagger delays for up to 20 cards (4 rows of 5) */
+.card-animate:nth-child(1) { animation-delay: 0ms; }
+.card-animate:nth-child(2) { animation-delay: 50ms; }
+.card-animate:nth-child(3) { animation-delay: 100ms; }
+.card-animate:nth-child(4) { animation-delay: 150ms; }
+.card-animate:nth-child(5) { animation-delay: 200ms; }
+.card-animate:nth-child(6) { animation-delay: 250ms; }
+.card-animate:nth-child(7) { animation-delay: 300ms; }
+.card-animate:nth-child(8) { animation-delay: 350ms; }
+.card-animate:nth-child(9) { animation-delay: 400ms; }
+.card-animate:nth-child(10) { animation-delay: 450ms; }
+.card-animate:nth-child(11) { animation-delay: 500ms; }
+.card-animate:nth-child(12) { animation-delay: 550ms; }
+.card-animate:nth-child(13) { animation-delay: 600ms; }
+.card-animate:nth-child(14) { animation-delay: 650ms; }
+.card-animate:nth-child(15) { animation-delay: 700ms; }
+.card-animate:nth-child(16) { animation-delay: 750ms; }
+.card-animate:nth-child(17) { animation-delay: 800ms; }
+.card-animate:nth-child(18) { animation-delay: 850ms; }
+.card-animate:nth-child(19) { animation-delay: 900ms; }
+.card-animate:nth-child(20) { animation-delay: 950ms; }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .card-animate {
+    animation: none;
+    opacity: 1;
+  }
 }

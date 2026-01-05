@@ -52,8 +52,25 @@ export function AdminPage() {
     }
   }, [currentUser, navigate]);
 
-  // Don't render anything if user isn't an admin (during redirect)
-  if (!firebaseUser || !canAccessAdmin(currentUser)) {
+  // Show loading while checking auth
+  if (!firebaseUser) {
+    return null; // Not logged in - redirect will happen
+  }
+
+  // Still loading user profile
+  if (currentUser === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--page-bg)' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--page-accent)]"></div>
+          <span style={{ color: 'var(--page-text-secondary)' }}>Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Not admin - redirect in progress
+  if (!canAccessAdmin(currentUser)) {
     return null;
   }
 
@@ -70,6 +87,7 @@ export function AdminPage() {
           onClick={() => navigate('/browse')}
           className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
           title="Go to Home"
+          aria-label="Go to Home"
         >
           <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
         </button>
@@ -95,6 +113,7 @@ export function AdminPage() {
                   onClick={() => navigate('/')}
                   className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
                   title="Go to Landing Page"
+                  aria-label="Go to Landing Page"
                   data-testid="logo-button"
                 >
                   <TimelineIcon sx={{ fontSize: 24, color: 'var(--page-accent)' }} />

@@ -62,17 +62,7 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-2 px-4 py-2 rounded-lg font-medium transition-colors"
-          style={{
-            backgroundColor: 'var(--page-accent)',
-            color: '#fff',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--page-accent-hover)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--page-accent)';
-          }}
+          className="mt-2 px-4 py-2 rounded-lg font-medium transition-colors bg-[var(--page-accent)] text-white hover:bg-[var(--page-accent-hover)]"
         >
           {actionLabel}
         </button>

@@ -39,6 +39,36 @@ Public user profile pages displaying user information and their timeline collect
 | CC-REQ-USER-029 | Timeline grid scrollable with max-height of 600px | Grid container max-h-[600px] with overflow-y-auto | UserProfilePage.tsx | — |
 | CC-REQ-USER-030 | Responsive layout: 1 column (mobile), 2 columns (md), 3 columns (lg+) | Grid cols change with breakpoints: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 | UserProfilePage.tsx | — |
 
+| CC-REQ-USER-031 | Timeline cards keyboard accessible | Cards focusable via Tab with Enter/Space activation | UserProfilePage.tsx | — |
+| CC-REQ-USER-032 | Timeline cards show visible focus styling | Focus ring visible with page accent color | UserProfilePage.tsx | — |
+
+## Visual Design & Accessibility
+
+### Visual Design Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|----|-------------|---------------------|------|-------|
+| CC-REQ-USER-VIS-001 | Timeline cards SHALL use consistent styling with depth | • Cards use `.timeline-card` CSS class or equivalent<br>• Resting state: `box-shadow: 0 1px 3px rgba(0,0,0,0.08)`<br>• Border: 1px solid with theme-aware color<br>• Border radius: 12px (`rounded-xl`)<br>• Padding: 20-24px (`p-5` or `p-6`) | UserProfilePage.tsx | — |
+| CC-REQ-USER-VIS-002 | Timeline cards SHALL provide satisfying hover feedback | • Hover: `transform: translateY(-2px)`<br>• Hover shadow: `0 10px 30px -10px rgba(0,0,0,0.15)`<br>• Transition: 200ms ease<br>• Cursor: pointer | UserProfilePage.tsx | — |
+| CC-REQ-USER-VIS-003 | Profile header SHALL stack vertically on mobile | • Profile avatar, username, stats stack in single column<br>• Mobile breakpoint: < 768px (`md:flex-row`)<br>• Desktop: horizontal layout with avatar left-aligned | UserProfilePage.tsx | — |
+| CC-REQ-USER-VIS-004 | Profile form SHALL have maximum width constraint | • Form container: `max-w-2xl` (672px)<br>• Prevents form from stretching too wide<br>• Centered on page (`mx-auto`) | UserProfilePage.tsx | — |
+
+### Accessibility Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|----|-------------|---------------------|------|-------|
+| CC-REQ-USER-ACC-001 | Timeline cards SHALL be keyboard accessible (duplicate of USER-031) | • Cards focusable via Tab (`tabIndex={0}`)<br>• Enter/Space keys activate navigation (`onKeyDown`)<br>• Role announced as link (`role="link"`)<br>• No keyboard trap inside card | UserProfilePage.tsx | — |
+| CC-REQ-USER-ACC-002 | Timeline cards SHALL show visible focus styling (duplicate of USER-032) | • Focus ring visible against card background<br>• Uses page accent color (`var(--page-accent)`)<br>• Ring offset prevents clipping (`outline-offset: 2px`)<br>• Meets WCAG 2.1 AA contrast requirements | UserProfilePage.tsx | — |
+| CC-REQ-USER-ACC-003 | Icon buttons SHALL have ARIA labels | • All icon-only buttons include `aria-label`<br>• Labels describe action (e.g., "Edit timeline", "Delete timeline")<br>• Apply to kebab menus and toolbar buttons | UserProfilePage.tsx | — |
+| CC-REQ-USER-ACC-004 | Skip-to-content link SHALL be available | • Tab key on page load focuses skip link<br>• Enter key navigates to main content (`#main-content`)<br>• Link visually hidden until focused<br>• Positioned at top of page DOM | UserProfilePage.tsx | — |
+
+### Responsive Design Requirements
+
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|----|-------------|---------------------|------|-------|
+| CC-REQ-USER-RESP-001 | Timeline grid SHALL NOT have nested scroll container | • Remove `max-h-[600px] overflow-y-auto` from grid<br>• Allow natural page scrolling<br>• Prevents nested scroll UX issue | UserProfilePage.tsx:492 | — |
+| CC-REQ-USER-RESP-002 | Timeline grid SHALL use responsive columns | • Mobile: 1 column (`grid-cols-1`)<br>• Tablet: 2 columns (`md:grid-cols-2`)<br>• Desktop: 3 columns (`lg:grid-cols-3`)<br>• Grid gap: 24px (`gap-6`) | UserProfilePage.tsx | — |
+
 ## Test Coverage
 | Requirement | Test File | Test Case |
 |-------------|-----------|-----------|
@@ -72,6 +102,15 @@ Public user profile pages displaying user information and their timeline collect
 | CC-REQ-USER-028 | — | — |
 | CC-REQ-USER-029 | — | — |
 | CC-REQ-USER-030 | — | — |
+
+## Change History
+
+- **2026-01-05** - Added visual design and accessibility requirements from visual audit
+  - Added CC-REQ-USER-VIS-001 to 004: Card styling, hover effects, profile header stacking, form width
+  - Added CC-REQ-USER-ACC-001 to 004: Keyboard accessibility, focus states, ARIA labels, skip link
+  - Added CC-REQ-USER-RESP-001 to 002: Remove nested scroll, responsive grid columns
+  - References VISUAL_AUDIT_REPORT.md findings
+  - Note: USER-ACC-001 and USER-ACC-002 are duplicates of USER-031 and USER-032 (consolidated for clarity)
 
 ## Notes
 

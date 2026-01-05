@@ -1,10 +1,14 @@
 # SRS: Landing Page
-Version: 1.1 | Date: 2025-12-27
+Version: 1.2 | Date: 2026-01-05
 
 ## Overview
 Public landing experience for PowerTimeline showcasing hero messaging, search, discovery CTAs, and simplified navigation for unauthenticated visitors.
 
 ## Changelog
+- **v1.2 (2026-01-05):** Added accessibility requirements
+  - Added WCAG 2.1 AA contrast requirements (4.5:1 minimum)
+  - Added skip-to-content link requirement
+  - Updated color values to meet contrast standards
 - **v1.1 (2025-11-30):** Simplified landing page per v0.5.18 requirements
   - Changed "Explore Examples" → "Explore Public Timelines"
   - Changed "Go to My Timelines" → "Create Timeline"
@@ -35,6 +39,8 @@ Public landing experience for PowerTimeline showcasing hero messaging, search, d
 | CC-REQ-LAND-017 | Secondary hero CTA text is "Create Timeline" when authenticated. | Button text = "Create Timeline" when user !== null | LandingPage.tsx | — |
 | CC-REQ-LAND-018 | Secondary hero CTA text is "Sign In" when not authenticated. | Button text = "Sign In" when user === null | LandingPage.tsx | — |
 | CC-REQ-LAND-019 | Final CTA section contains single "View All Timelines" button. | Button visible, links to /browse | LandingPage.tsx | — |
+| CC-REQ-LAND-020 | All text meets WCAG 2.1 AA contrast ratio (4.5:1 minimum). | Secondary text uses #9ca3af (gray-400) or darker; tertiary text uses #71717a (zinc-500) or darker | LandingPage.tsx | — |
+| CC-REQ-LAND-021 | Skip-to-content link available for keyboard navigation. | Tab key on page load focuses skip link; Enter key navigates to #main-content | LandingPage.tsx | — |
 
 ## Test Coverage
 | Requirement | Test File | Test Case |

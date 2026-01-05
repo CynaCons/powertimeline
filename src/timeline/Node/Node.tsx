@@ -91,7 +91,7 @@ export const Node: React.FC<NodeProps> = ({
   data-density={contentDensity}
   data-cluster-id={clusterId}
       className={`
-  absolute rounded-lg shadow-md cursor-pointer
+  absolute rounded-xl shadow-md cursor-pointer
   hover:shadow-lg
         ${isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''}
         ${styles.padding}

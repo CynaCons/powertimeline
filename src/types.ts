@@ -37,6 +37,7 @@ export interface TimelineMetadata {
   title: string;
   description?: string;
   ownerId: string;           // References User.id
+  ownerUsername?: string;    // Denormalized from User.username (v0.8.11) - optional during migration
   createdAt: string;         // ISO date
   updatedAt: string;         // ISO date
   viewCount: number;         // Number of views

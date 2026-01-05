@@ -2,15 +2,16 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.15 - UX Polish (Breadcrumbs, Stream View, Test Fixes)
-**Next Milestone:** v0.9.0 - Claude Code Integration
+**Current Version:** v0.5.29
+**Last Completed:** v0.5.28 - Test Sweep Corrective Actions
+**Current Work:** v0.5.29 - Technical Debt & Codebase Hygiene (in progress)
 
 ### Key Metrics
-- **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
-- **Requirements:** ~352 total ([SRS Index](docs/SRS_INDEX.md))
-- **Implementation:** ~200 requirements (57%)
-- **Test Coverage:** ~119 requirements verified (34%)
-- **Test Suite:** 450 Playwright E2E + 58 unit = 508 automated tests ([Test Status](#test-status))
+- **Total Iterations:** 200+ completed (v0.2.0 → v0.5.21)
+- **Requirements:** ~155 total ([SRS Index](docs/SRS_INDEX.md))
+- **Implementation:** ~150 requirements (97%)
+- **Test Coverage:** ~113 requirements verified (73%)
+- **Test Suite:** 320 Playwright tests ([Test Status](#test-status))
 - **Production Tests:** 22/22 passing (v0.5.15)
 
 ### Recent Achievements (v0.5.x)
@@ -38,75 +39,18 @@
 - ✅ Home Page: Reordered sections (Popular → Stats → Recent) (v0.5.26.4)
 - ✅ Stream Viewer: Visual polish, softer edges, backdrop blur (v0.5.26.5)
 - ✅ Import/Export: YAML format, ImportTimelineDialog, Export menu (v0.5.27)
-- ✅ PowerSpawn Copilot CLI fix with `-p` flag (v0.5.27.1)
-- ✅ Test Sweep: Env config, anchor alignment fixes (v0.5.28)
-- ✅ Technical Debt: Version sync script, docs drift fixes (v0.5.29)
-- ✅ PowerSpawn Test Suite: 22+ pytest tests (v0.5.30)
-- ✅ UX Polish: Skeletons, Toasts, Error Recovery, Accessibility (v0.5.31)
-- ✅ Navigation Icons: Stream View hover icons, Event Editor navigation (v0.5.34)
-- ✅ Bug Fixes + Settings NavRail: Fixed event editor, added Settings to NavRail (v0.5.35)
-- ✅ Full-Width Layout Trial: HomePage, SettingsPage, UserProfilePage (v0.5.36)
-- ✅ Dark Mode Season Background Colors: Fixed timeline axis season colors for dark mode (v0.5.36.1)
-- ✅ Dashed Connector Line Fix: Fixed SVG width (1px → 10px), replaced CSS vars with hex colors (v0.5.36.2)
-- ✅ Stream View Minimap Hover: Added hover effect to Stream View events that highlights them in minimap (v0.8.3.3)
-- ✅ Events Panel Removal: Removed OutlinePanel, consolidated functionality into Stream View (v0.8.3.4)
-- ✅ Mobile/Responsive Testing Infrastructure: 4 viewport projects (desktop/desktop-xl/tablet/mobile), 11 test files, SRS_RESPONSIVE_TESTING.md (v0.8.4)
-- ✅ PWA & Offline Support: vite-plugin-pwa, service worker, offline indicator with retry (v0.8.5)
-- ✅ Test Stability: Admin panel test fixes, selector updates (v0.8.6)
-- ✅ UX Polish: Home pagination, API key storage, account deletion (GDPR), accessibility fixes, SEO meta tags (v0.8.7)
-- ✅ Timeline Axis Visual Redesign: 20% thinner axis (3px), removed dashed lines, triangle anchors (v0.5.37)
-- ✅ Timeline Visual Polish: Reverted anchor shape to diamond/milestone (rotated square) with rounded edges (v0.5.37)
-- ✅ User Onboarding: Empty State CTA, React Joyride tours (Editor 8-step, Home 5-step), NavRail Help button (v0.5.38)
-- ✅ Share Links: Copy Link menu in timeline cards, toast feedback (v0.6.0)
-- ✅ Editor UX Polish: Navigation fixes, compact hover-expandable profile button, event panel improvements (v0.6.1)
-- ✅ Error Handling: GitHub issues link in ErrorState, ErrorBoundary, Toast; SRS_TIMELINE_EDITOR.md (v0.6.2)
-- ✅ Event Sources: sources field on events, SourcesEditor component, Stream View indicator, drag-and-drop reordering, E2E tests (v0.6.3)
-- ✅ Bug Fixes: Editor panel click, view on canvas zoom, Editor-to-Stream navigation (v0.6.4)
-- ✅ AI Chat Assistant: Gemini 2.5 Flash integration with Google Search (v0.7.0)
-- ✅ AI UX Polish: Cost tracking, preview events, editor behavior fixes (v0.7.1-v0.7.2)
-- ✅ Event Persistence & Cleanup: Fixed AI events saving to Firestore subcollection, console cleanup, overflow indicator polish, rejected events restore (v0.7.3)
-- ✅ Production Bug Fixes: Firestore event ID fix, minimap glow fix, overlay view mode (v0.7.4)
-- ✅ Default Light Theme: Changed default theme to light with fixed component styles (v0.7.5)
-- ✅ Critical Accessibility Fixes: Focus traps, keyboard navigation, ARIA labels (v0.7.6)
-- ✅ Firebase Data Consistency: Optional chaining, safe fallbacks, timeline loading fixes (v0.7.7)
-- ✅ Offline Support: Connection monitoring, retry logic, error recovery (v0.7.8)
-- ✅ AI Metadata Preview: Diff view for title/description changes in ChatPanel (v0.7.9)
-- ✅ AI Partial Import: Preview and review mode with selective confirmation (v0.7.10)
-- ✅ Code Quality: Removed `any` types, TypeScript strict checks (v0.7.11)
-- ✅ Unit Testing: Set up Vitest with 58 unit tests (v0.7.12)
-- ✅ Documentation: Fixed consistency and updated metrics (v0.7.13)
-- ✅ YAML Schema API: JSON Schema endpoint for AI discovery (v0.7.14)
-- ✅ Documentation & SRS Cleanup: Format standardization, code refs, metrics update (v0.8.0)
-- ✅ Visual Audit & Z-Index Fixes: Automated overlap detection, layer system standardization (v0.8.2.1)
-- ✅ Visual Audit Test Infrastructure: 46 tests (T87-T96) in 10 files, dense area testing, theme validation (v0.8.2.2)
-- ✅ Visual Audit Test Coherency: Eliminated audit theater, 39 tests with real assertions, new T97 high-density tests (v0.8.2.3)
-- ✅ AuthoringOverlay Z-Index Fix: Moved z-[500] to dialog element for T96 test detection (v0.8.2.4)
-- ✅ T97 Dense Spot Algorithm: Telemetry-based detection using `window.__ccTelemetry`, breadcrumb overlap test (T97.6) (v0.8.2.5)
-- ✅ T97 Mathematical Capacity Algorithm: Complete rewrite with `calculateViewportCapacity()`, 8 tests (T97.1-T97.8), 195.5% density ratio achieved (v0.8.2.6)
-- ✅ T97 Temporal Density: Added `eventDates` and `timelineRange` to telemetry, finds 1793-1794 (The Terror) as densest period (v0.8.2.7)
-- ✅ T97 Visual Fill Algorithm: Bucket-based density scoring, optimizes for horizontal card spread, screenshots now show properly filled screens (v0.8.2.8)
-- ✅ Rubber-band Panning: Drag-to-pan mode with elastic boundaries, snap-back animation, cursor states (grab/grabbing) (v0.8.3.0)
-- ✅ Layout Performance: Spatial hashing O(n) collisions, Map lookup, virtualization, layout caching (v0.8.3)
-- ✅ UX Polish: Hover lift effect, zoom toward cursor, hover card preview for degraded cards (v0.8.3)
-- ✅ Interaction Keybind Swap: Default click+drag = selection zoom (crosshair), Space+drag = pan (grab) (v0.8.3.1)
-- ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug (race-free immediate ref updates), migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
-- ✅ Safari/WebKit Firebase Fix: Long-polling + memoryLocalCache to avoid IndexedDB hangs, mobile overflow fixes, Stream View auto-open fix (v0.8.8)
-- ✅ Performance Optimization: StreamViewer virtualization, parallel data loading, Firebase chunking, zoom fix (v0.8.9)
-- ✅ ownerUsername Denormalization: Eliminated getUsers() fetch, O(users)→O(timelines) improvement (v0.8.11)
-- ✅ Performance Optimization: Collision resolution caching, minimap/axis rect caching, spatial hash optimization (v0.8.14)
-- ✅ UX Polish: Breadcrumb z-index fix, Stream View hover buttons, show more calculation, mobile tap behavior (v0.8.15)
 
 ### Next Up
-- **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
-- **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
+- **v0.5.27**: Tests & documentation for Import/Export (implementation done)
+- **v0.5.28**: Test Sweep Corrective Actions (env config, anchor alignment)
+- **v0.5.29**: Technical Debt & Codebase Hygiene (consolidated)
+- **v0.5.30**: PowerSpawn Test Suite
+- **v0.5.31**: UX Polish & Resilience
 
 ### Test Status
-- **Playwright E2E:** ~450 tests in ~120 spec files
-- **Vitest Unit:** 109 tests
-- **Total:** ~559 automated tests
-- **Production Tests:** 24/27 passing (3 app-level issues)
-- **Editor/Visual Tests:** 129+ passing, ~25 skipped (auth-required features)
-- **Test Infrastructure:** Tests use public timelines (no auth needed), documented in `docs/TESTS.md`
+- **Suite:** 320 tests in 92 files
+- **Production Tests:** 22/22 passing
+- **Dev Tests:** Running (requires .env.test credentials)
 
 ### Quick Links
 - [Implementation History](docs/PLAN_HISTORY.md) - Completed iterations (v0.0.x - v0.4.x)
@@ -273,1041 +217,1029 @@
 - [x] Create custom 404 page
 
 ### v0.5.11 - Test Stabilization & Legacy Code Cleanup
-- [x] Create Firebase Auth test utilities
+**Goal:** Fix broken tests and remove legacy localStorage code
+**Status:** Complete
+
+- [x] Create Firebase Auth test utilities (authTestUtils.ts)
 - [x] Update all admin/home test files with Firebase Auth
-- [x] Remove legacy getCurrentUser() calls and UserSwitcherModal
-- [x] Migrate dialogs and panels to useAuth hook
-- [x] Fix admin tests (82-86) and home tests (T71-T73)
+- [x] Remove legacy getCurrentUser() calls from application
+- [x] Remove UserSwitcherModal (demo user feature)
+- [x] Migrate CreateTimelineDialog to useAuth hook
+- [x] Migrate UserManagementPanel to useAuth hook
+- [x] Update activityLog to accept user params
+- [x] Reset test user credentials
+
+**Codex Tasks (Delegated) - COMPLETED:**
+- [x] Fix admin tests (82-86) selector/role issues
+- [x] Fix home tests (T71-T73) selector issues
+- [x] Expand production tests (browse, auth, security, a11y) - 22/22 passing
 
 ### v0.5.11.1 - UI Polish & Theme Defaults
-- [x] Add "PowerTimeline BETA" branding
-- [x] Set dark mode as default theme with localStorage persistence
+**Goal:** Consistent branding and dark theme as default
+
+- [x] Add "PowerTimeline BETA" branding to HomePage, UserProfilePage, AdminPage headers
+- [x] Set dark mode as default theme (was 'system')
+- [x] Theme preference persists in localStorage
+- [x] Theme toggle remembers user choice
 
 ### v0.5.12 - Firestore Schema Cleanup
-- [x] Remove unused fields from User type (avatar, bio, name)
-- [x] Remove unused fields from Event type (order, priority, category, excerpt)
-- [x] Run migration on dev and production databases
-- [x] Create SRS_DB.md schema validation tests
+**Goal:** Simplify database schema by removing unused fields and making Firestore compliant with SRS_DB.md
+**Status:** Complete
+
+**Database Requirements (SRS_DB.md) - COMPLETED:**
+- [x] Remove `avatar` field from User type (unused)
+- [x] Remove `bio` field from User type (unused)
+- [x] Remove `name` field from User type (unused, username is sufficient)
+- [x] Remove `order` field from Event type (date/time used for ordering)
+- [x] Remove `priority` field from Event type (unused)
+- [x] Remove `category` field from Event type (unused)
+- [x] Remove `excerpt` field from Event type (unused)
+- [x] Remove Migration Notes section from SRS_DB.md
+
+**Claude Tasks (Firestore Migration Scripts) - COMPLETED:**
+- [x] Create script to clean User documents (remove avatar, bio, name fields)
+- [x] Create script to clean Event documents (remove order, priority, category, excerpt)
+- [x] Run migration on DEVELOPMENT database (6 users updated)
+- [x] Run migration on PRODUCTION database (3 users updated)
+- [x] Verify data integrity after migration (dry-run shows 0 updates needed)
+
+**Codex Tasks - COMPLETED:**
+- [x] Clean up IAC.md (remove verbose/corrupted entries)
+- [x] Create test suite for SRS_DB.md schema validation (tests/db/)
 
 ### v0.5.13 - Multi-Agent Orchestration Tooling
-- [x] Create agents/ module with spawner, logger, context_loader
-- [x] Implement MCP server with spawn_claude, spawn_codex tools
-- [x] Auto-logging to IAC.md and CONTEXT.md
-- [x] Create .mcp.json configuration for Claude Code
+**Goal:** Enable Claude to spawn, supervise, and coordinate sub-agents programmatically
+**Status:** Complete
+
+- [x] Investigate Codex CLI and Claude CLI invocation options
+- [x] Design deterministic orchestration architecture (Python handles all bookkeeping)
+- [x] Create agents/ module with spawner.py, logger.py, context_loader.py
+- [x] Implement auto-context injection (PRD, PLAN, CLAUDE.md)
+- [x] Implement auto-logging to IAC.md and CONTEXT.md
+- [x] Create agents/DESIGN.md with architecture rationale
+- [x] Update CLAUDE.md and AGENTS.md with orchestration documentation
+- [x] Test spawning sub-agents for simple tasks
+- [x] Repository cleanup (deleted stale debug/temp files)
+- [x] Verify Firebase service account keys never in git history
+- [x] Design MCP server for deterministic agent spawning (agents/MCP_DESIGN.md)
+- [x] Implement MCP server exposing 5 tools (spawn_claude, spawn_codex, list_running, get_result, get_context)
+- [x] Create .mcp.json configuration for Claude Code integration
+- [x] Update documentation for MCP-first usage pattern
+- [x] Fix broken imports in workflow files (run_tests.py, code_review.py)
+- [x] Consolidate logging config (IAC.md as primary log)
 
 ### v0.5.14 - Timeline Navigation & URL Fixes
-- [x] Remove deprecated fields from types and components
-- [x] Implement username-based URLs (/:username/timeline/:id)
-- [x] Create UsernameSelectionDialog for first-time users
+**Goal:** Fix critical production issues with timeline navigation, URL structure, and schema compliance
+**Status:** Complete
+
+**Phase 1: Schema Compliance (Claude)** - COMPLETE
+- [x] Remove deprecated fields from src/types.ts (User: name, avatar, bio; Event: priority, category, excerpt; EventDocument: order)
+- [x] Update avatarUtils.ts to work with username
+- [x] Update UserAvatar to use username instead of name
+- [x] Update remaining UI components to use username (UserManagementPanel now uses userProfile.username)
+- [x] Remove EditUserProfileDialog (already removed - file doesn't exist)
+- [x] Fix remaining deprecated field references (Timeline.tsx, CardRenderer.tsx, cardIcons.ts, firestore.ts, TimelineMarkers.tsx, yamlSerializer.ts)
+- [x] Run SRS_DB compliance tests (found legacy data issues - code is compliant)
+
+**Phase 2: Username System (Claude)** - COMPLETE (already implemented)
+- [x] Create UsernameSelectionDialog component for first-time users
+- [x] Implement username uniqueness check in Firestore (isUsernameAvailable)
+- [x] Add username format validation (3-20 chars, lowercase alphanumeric + hyphen)
+- [x] Block reserved usernames (admin, api, browse, etc.)
+- [x] Integrate username prompt into auth flow (shows after Google sign-in for auto-generated usernames)
+- [x] Dialog is mandatory (no onClose prop)
+
+**Phase 3: URL Structure Refactor (Claude)** - COMPLETE
+- [x] Change URL pattern from `/user/{uid}/timeline/{id}` to `/{username}/timeline/{id}`
+- [x] getUserByUsername() Firestore query already exists
+- [x] Update React Router routes in main.tsx (added `/:username/timeline/:timelineId`)
+- [x] Update EditorPage to handle both username and userId params with redirect
+- [x] Update TimelineCardMenu with ownerUsername prop
+- [x] Update all navigation links (LandingPage, HomePage, UserProfilePage)
 - [x] Legacy UID-based URLs auto-redirect to username URLs
-- [x] Update all test utilities and navigation links
+
+**Note:** Originally planned `/@:username` pattern but React Router v7 has a bug with `@` in paths (GitHub #9779, #12460). Using clean `/:username/timeline/:id` URLs instead - no prefix needed since React Router's route ranking ensures `/browse`, `/login`, `/admin` match before dynamic `/:username`.
+
+**Phase 4: Timeline Navigation Fixes (Claude)** - COMPLETE
+- [x] Update timeline card click handlers for username-based URLs
+- [x] Firestore security rules verified correct for public/unlisted read access
+- [x] Navigation handlers updated in all pages
+
+**Phase 5: Test Updates** - COMPLETE
+- [x] Update test utilities to use `/@{username}` URL pattern (timelineTestUtils.ts, timelineTestHelper.ts)
+- [x] Update test constants: cynacons -> cynako (username, not legacy ID)
+- [x] Fix T72.6 URL pattern regex
+- [x] Update hardcoded URLs in smoke tests (home, user)
+- [x] Production tests: 22/22 passing
+- [x] Home tests: 20/40 passing (6 auth-dependent tests need .env.test credentials)
+
+**Known Test Environment Issues:**
+- Authentication tests require valid credentials in `.env.test`
+- Some timeline content tests require "cynako" user with timelines seeded in dev Firestore
 
 ### v0.5.14.1 - MCP Agent Server Improvements
-- [x] Add threading locks and concurrency safety
-- [x] Redesign IAC.md format with in-place status updates
+**Goal:** Fix logging truncation and add concurrency safety to agent spawner
+
+- [x] Increase task/result summary truncation limits in CONTEXT.md
+- [x] Redesign IAC.md format with unified entries and in-place status updates
+- [x] Add threading locks for concurrent file writes
+- [x] Add collapsible details blocks for prompts and results
 
 ### v0.5.14.2 - Production Bug Fixes
-- [x] Fix timeline navigation fallbacks
-- [x] Add visibility filter to discovery feeds
+**Goal:** Fix timeline navigation fallbacks and test data pollution
+
+- [x] Fix handleTimelineClick fallback to legacy URL when owner not cached
+- [x] Add visibility filter to discovery feeds (public timelines only)
 
 ### v0.5.14.3 - URL Structure & Test Fixes
-- [x] Change route pattern from /@:username to /:username
+**Goal:** Fix React Router v7 @ symbol bug and update tests
+
+- [x] Change route pattern from `/@:username` to `/:username` (React Router v7 bug)
 - [x] Update test files with correct URL patterns
+- [x] Add legacy timeline ID mapping in timelineTestUtils.ts
+- [x] Run full test campaign (DB 8/8, Home 23/0/14, User 3/0/1, Editor foundation 1/1)
 
 ### v0.5.14.4 - Navigation Bug Fix
-- [x] Fix 11 navigate() calls to use /:username pattern
+**Goal:** Fix navigate() calls still using `/@username` pattern
+
+- [x] Fix 11 navigate() calls across 6 files to use `/:username` pattern
+- [x] Verify manual testing confirms fix works
+
+**Known Issues:**
+- Admin tests: 2 failures (breadcrumb selector issues)
+- Editor zoom/minimap tests: Pre-existing failures
+- Test quality: Permissive tests silently pass when events don't load
 
 ---
 
 ### v0.5.15 - Test & Bug Fix Backlog
-- [x] MCP agent server improvements (threading, logging, cost tracking)
-- [x] Fix admin tests (T82-T86) and Codex write access
-- [x] Filter private timelines from discovery feeds
-- [x] Create strict smoke tests requiring event loading
+**Goal:** Fix test infrastructure issues and production bugs
+
+**Completed:**
+- [x] Increase agent history from 10 to 100 runs
+- [x] Add cost tracking for Codex agents
+- [x] Document Codex limitations (not suitable for shell command execution)
+- [x] Test Claude agent spawn and result retrieval (SUCCESS - $0.024, 30s)
+- [x] Fix double logging bug (removed duplicate log_spawn_start from MCP server)
+- [x] Fix task summary (set context_level="none", CLIs auto-load their own context)
+- [x] Fix Codex prompt passing (use stdin with "-" argument)
+- [x] Retest Codex subagent (SUCCESS - test counting, admin tests, MCP review)
+
+**Admin Tests:**
+- [x] Ensure test user has admin role in dev Firestore (ensureAdminRoleForTestUser works with credentials file)
+- [x] Fix T82.4 test - updated to check NavRail instead of breadcrumb
+
+**MCP Agent Server Improvements (from Codex review):**
+- [x] Add threading.Lock around running_agents/completed_agents dict access (prevent RuntimeError on iteration)
+- [x] Clean up background_threads dict after completion (memory leak)
+- [x] Fix Codex success detection (now detects command-only runs as success)
+- [x] Read stderr in _spawn_codex_stream_internal (merged stderr→stdout to avoid deadlock)
+- [x] Fix timestamps to use UTC (now using datetime.utcnow() and timezone.utc)
+- [x] Mark Codex cost as estimate (added comment)
+- [x] Align version numbers (v1.3.0 using SERVER_VERSION constant)
+- [x] Update MCP_DESIGN.md to reflect CLI auto-loading context
+- [x] Sanitize newlines in CONTEXT.md task summaries (added sanitize_for_table helper)
+- [x] Remove .recent_runs.json - CONTEXT.md now shows active agents only (IAC.md is authoritative)
+- [x] Fix IAC.md markdown escaping (use 4 backticks when prompt contains triple backticks)
+
+**Test Infrastructure:**
+- [x] Create strict smoke test requiring event loading (waitForEvents helper)
+- [x] Fix permissive tests to fail when events don't render
+
+**Private Timeline Visibility Bug:**
+- [x] Filter out private timelines from HomePage discovery feeds (Recently Edited, Popular)
+- [x] Filter out private timelines from LandingPage example timelines
+- [x] Ensure "My Timelines" section still shows owner's private timelines (unchanged - no filter)
+- [x] Add E2E test verifying private timelines are hidden from public feeds (moved to v0.5.15.1, 81-private-timeline-filtering.spec.ts)
+
+**Codex Write Access Fix:**
+- [x] Investigate Codex `--sandbox workspace-write` bug (confirmed broken)
+- [x] Update spawner.py to use `--dangerously-bypass-approvals-and-sandbox`
+- [x] Update mcp_server.py to pass `bypass_sandbox=True`
+- [x] Document in MCP_DESIGN.md
+
+---
 
 ### v0.5.15.1 - Stabilization & Test Health
-- [x] Fix admin test suite (T82-T86 selectors and testids)
-- [x] Add E2E tests for search, feeds, and visibility filtering
-- [x] Fix multi-event layout bug in DegradationEngine
-- [x] Create .env.test.example and update CONTRIBUTING.md
+**Goal:** Address documentation drift, fix failing test suites, and close critical test coverage gaps
+
+**Documentation Sync:**
+- [x] Update SRS_INDEX.md version from v0.5.7 to v0.5.15
+- [x] Update AGENTS.md version reference from v0.5.14 to v0.5.15
+- [ ] Audit and sync requirement counts across all SRS documents
+- [x] Remove stale "multi-event" and "infinite card" references from ARCHITECTURE.md
+- [x] Update SRS_INDEX.md "Known Issues" section with current test status
+
+**Admin Test Suite Repair:**
+- [x] Diagnose admin test failures (authentication/routing changes)
+- [x] Fix T82 admin access control test (added admin-heading test ID)
+- [x] Fix T83 user management panel test (added 10+ data-testid hooks to UserManagementPanel)
+- [x] Fix T84 statistics dashboard test (added testids + updated selectors)
+- [x] Fix T85 bulk operations test (fixed dialog selector)
+- [x] Fix T86 activity log test (added search/filter testids to ActivityLogPanel)
+- [x] Update admin test selectors for v0.5.x routing structure
+
+**Home Test Suite Completion:**
+- [x] Add E2E test for search functionality (CC-REQ-SEARCH-001) - 77-search-functionality.spec.ts (14 tests)
+- [x] Add E2E test for Recently Edited feed (CC-REQ-RECENT-001) - 78-recently-edited-feed.spec.ts
+- [x] Add E2E test for Popular timelines feed (CC-REQ-POPULAR-001) - 79-popular-timelines-feed.spec.ts
+- [x] Add E2E test for private timeline visibility filtering - 81-private-timeline-filtering.spec.ts (security tests)
+- [x] Fix permissive tests to fail when events don't render - strict assertions in 02-navigation, 08-readonly-security
+
+**Critical Bug Fixes:**
+- [x] Investigate multi-event layout visibility bug (3 events persist, 1 visible)
+  - Root cause: DegradationEngine mixed-card-type capacity math too restrictive
+  - For 3 events, mixed types [full,compact,compact] but capacity only fits 1 full card
+  - Fix: Skip mixed types for 3-event clusters, use uniform compact cards
+- [x] Fix multi-event layout bug in DegradationEngine.ts (Codex agent, DegradationEngine.ts:391-409)
+- [x] Add strict event loading assertion to smoke tests (02-navigation.spec.ts, 08-readonly-security.spec.ts)
+- [ ] Document or fix single-event zoom positioning edge case
+
+**Test Infrastructure:**
+- [x] Create .env.test.example template for contributors
+- [x] Document test environment setup in CONTRIBUTING.md
+- [ ] Add CI check for test credential availability
+
+---
 
 ### v0.5.15.2 - MCP Server Optimization & Test Fixes
-- [x] Implement compact list() and wait_for_agents() tools
-- [x] Fix test selectors and optimize seeding with Firestore Admin SDK
+**Goal:** Reduce context window usage during agent orchestration and fix new test failures
+**Status:** Complete
+
+**MCP Server v1.4 Improvements:**
+- [x] Implement compact `list()` output (~100 bytes vs ~2KB)
+- [x] Add blocking `wait_for_agents(timeout?)` tool - eliminates polling loops
+- [x] Returns all agent results in single response after completion
+
+**Test Fixes:**
+- [x] **Fix Visibility selector** in tests 79, 81
+  - Changed `getByLabel('Visibility')` to `getByRole('combobox', { name: /public - visible to everyone/i })`
+  - Files: `tests/home/79-popular-timelines-feed.spec.ts`, `tests/home/81-private-timeline-filtering.spec.ts`
+
+- [x] **Optimize test seeding** in tests 78, 79
+  - Replaced UI-based timeline creation with direct Firestore Admin SDK writes
+  - Using `seedTimelinesForTestUser()` from `tests/utils/timelineSeedUtils.ts`
+  - Reduces beforeAll from ~45s to <1s
+
+- [x] **Fix search dropdown tests** in test 77
+  - Added `data-testid="browse-search-dropdown"` to HomePage.tsx search results container
+  - File: `src/pages/HomePage.tsx:452`
+
+- [x] **Fix isFocused API call** in test 77
+  - Replaced `input.isFocused()` with `expect(input).toBeFocused()` assertion
+  - File: `tests/home/77-search-functionality.spec.ts:159`
+
+- [x] **Fix strict mode violation** in test 77
+  - Added `.first()` qualifier to avoid multiple element matches
+  - File: `tests/home/77-search-functionality.spec.ts:211`
+
+**Known Test Data Dependencies (moved to v0.5.16):**
+- T77.9, T77.11 require seeded test data (`French Revolution`, `Napoleon Bonaparte` timelines)
+
+---
 
 ### v0.5.16 - Firestore Data Refinement
-- [x] Clean up deprecated User field references
-- [x] Seed French Revolution and Napoleon timelines
-- [x] Pass SRS_DB.md compliance tests
+**Goal:** Complete Firestore compliance and fix remaining data issues
+**Status:** Complete
+
+- [x] Clean up deprecated User field references in scripts directory (8 files updated)
+- [x] Fix T77 seed script to use existing cynacons user by username query
+- [x] Prevent duplicate user creation (skip if exists by email/username)
+- [x] Assign French Revolution and Napoleon timelines to real cynacons user (UID=HL3gR4MbXKe4gPc4vUwksaoKEn93)
+- [x] Run seed script: 244 French Revolution events + 63 Napoleon events seeded successfully
+- [x] Pass SRS_DB.md compliance tests (4/4 passing: users, timelines, events, activity logs)
+
+**Key Changes:**
+- Modified `scripts/seed-test-77-data.ts` to query existing user by username instead of creating duplicate
+- Timelines now properly assigned to real cynacons Firebase Auth user
+- No more duplicate 'cynacons' user issues in dev database
 
 ### v0.5.17 - Platform Statistics Aggregation
-- [x] Create stats/platform Firestore document with caching
+**Goal:** Move stats calculation from client-side scans to server-side aggregation
+**Status:** Complete
+
+- [x] Create `stats/platform` document in Firestore
+  - Added STATS collection and PlatformStats interface
+- [x] Update getPlatformStats() with caching strategy
+  - Memory cache (5min TTL) → Firestore doc → Full scan fallback
+  - Auto-saves stats to Firestore when recalculated
+- [x] Add client-side caching with TTL (5 minutes)
 - [x] Add cache invalidation on timeline create/delete
+- [x] Add Firestore security rules for stats collection
+- [x] Add refreshPlatformStats() and invalidateStatsCache() helpers
+
+**Note:** Cloud Functions deferred - client-side aggregation approach scales well
 
 ### v0.5.18 - Timeline Card Menu Implementation
-- [x] Add Open, Edit, Delete, Go to Owner menu options
-- [x] Enhance DeleteTimelineDialog with name confirmation
-- [x] Landing page and user page improvements
+**Goal:** Enhance timeline card menus with ownership-based actions and improved delete confirmation
+**Status:** Complete
+
+**Timeline Card Menu Enhancements:**
+- [x] Add "Open" menu option (renamed from "View")
+- [x] Add "Go to Owner" menu option for non-owner users (navigates to owner's profile)
+- [x] Add "Edit" menu option for timeline owner
+- [x] Add "Delete" menu option for timeline owner
+- [x] Enhance DeleteTimelineDialog with name confirmation requirement
+- [x] Require exact timeline name match to enable delete button
+- [x] Verify menu integration on HomePage (My Timelines, Recently Edited, Popular sections)
+- [x] Verify menu integration on UserProfilePage
+- [x] Fix unused imports in LandingPage.tsx
+- [x] Build verification successful
+
+**Files Changed:**
+- src/components/TimelineCardMenu.tsx (menu options updated, "Go to Owner" added)
+- src/components/DeleteTimelineDialog.tsx (name confirmation field added)
+- src/pages/LandingPage.tsx (cleanup unused imports)
+
+**Previous v0.5.18 Work (Landing Page & User Page):**
+- [x] Landing page rework (Explore Public Timelines, Create Timeline button)
+- [x] User page layout improvements (theme-aware CSS, responsive design)
+
+**Deferred to Future Iterations:**
+- [ ] Fix Home page dark mode: scrollbar styling
+- [x] Fix Editor dark mode: wrong colors and bad contrasts (DONE in v0.5.20-v0.5.21)
+- [ ] Home page: My Timelines display on 2 rows instead of 1, vertical scroll
+
+**Incomplete Tasks from Earlier Iterations (for discussion):**
+- v0.4.0: Responsive layout, timeline card redesign, user avatars, empty states
+- v0.4.1: 6 Playwright CRUD tests (v5/74-79)
+- v0.5.15.1: SRS audit, single-event zoom edge case, CI credential check
 
 ### v0.5.19 - Landing Page Roadmap Section
+**Goal:** Add visual roadmap section to landing page
+**Status:** Complete
+
 - [x] Create git-style roadmap visualization with vertical line
-- [x] Show completed and upcoming phases with responsive design
+- [x] Add completed phases (v0.2.x - v0.5.x) with checkmarks
+- [x] Highlight current phase (v0.5.18)
+- [x] Show upcoming phases (v0.6.x - v1.0.0)
+- [x] Match dark theme aesthetic
+- [x] Ensure responsive design
+
+**Implementation:**
+- Added roadmap section after features section, before final CTA
+- Git-style vertical line with commit dots (green checkmarks for completed)
+- Current phase highlighted with orange color and pulsing dot
+- Future phases shown with reduced opacity and empty circle icons
+- Fully responsive with single-column layout
+- Uses existing dark theme CSS variables
 
 ### v0.5.20 - Editor Dark Theme Contrast Fixes
-- [x] Fix Timeline Axis and Breadcrumb dark theme contrast
-- [x] Use CSS variables for theme-aware colors
+**Goal:** Fix dark theme contrast issues in editor components
+**Status:** Complete
 
-### v0.5.21 - Event Editor Dark Mode Fix
-- [x] Fix AuthoringOverlay dark theme (container, panels, inputs, text)
-- [x] Fix EventPreviewList theme colors
+- [x] Fix Timeline Axis dark theme contrast (axis bar, ticks, labels)
+- [x] Fix Breadcrumb dark theme contrast (text visibility)
+- [x] Verify both light and dark themes have proper contrast
+- [x] Run production build to verify no errors
 
-### v0.5.19.1 - Timeline Axis Date Alignment & Labels Fix
-- [x] Fix time range calculation to match LayoutEngine logic
-- [x] Fix axis label colors for dark theme
+**Files Modified:**
+- `src/components/EnhancedTimelineAxis.tsx` - Changed hardcoded #000000 to var(--page-text-primary) for axis bar, tick marks, and labels
+- `src/pages/EditorPage.tsx` - Changed breadcrumb wrapper from bg-white/90 to theme-aware CSS variables (--page-bg-elevated, --page-border)
+
+### v0.5.21 - Event Editor (AuthoringOverlay) Dark Mode Fix
+**Goal:** Fix dark theme contrast in the Event Editor overlay
+**Status:** Complete
+
+- [x] Fix main overlay container background (line 292: currently white, should use theme variables)
+- [x] Fix left/right navigation panel backgrounds (lines 300, 598)
+- [x] Fix form inputs to use theme-aware colors (TextField components)
+- [x] Fix header/footer backgrounds
+- [x] Fix text colors for dark theme contrast
+- [x] Fix border colors to use theme variables
+- [x] Fix EventPreviewList component theme colors
+- [x] Run build verification
+- [x] Test both light and dark modes
+
+**Files Modified:**
+- `src/app/overlays/AuthoringOverlay.tsx` - Replaced all hardcoded Tailwind classes with CSS variable inline styles
+- `src/app/components/EventPreviewList.tsx` - Updated to use theme-aware colors for text, backgrounds, and borders
+
+### v0.5.19 - Timeline Axis Date Alignment Fix
+**Goal:** Fix timeline axis labels misalignment with event anchor positions
+**Status:** Complete
+
+- [x] Fix time range calculation in DeterministicLayoutComponent.tsx (lines 94-104)
+- [x] Match LayoutEngine.ts logic: center single-event, natural range for multi-event
+- [x] Update viewTimeWindow calculation (lines 269-283) for consistency
+- [x] Build verification successful
+- [x] Axis labels now align with event anchor positions
+
+**Root Cause:**
+Time range was ALWAYS centered (subtracting rawDateRange/2), but LayoutEngine only centers for single-event timelines, creating a mismatch.
+
+**Files Modified:**
+- `src/layout/DeterministicLayoutComponent.tsx` - Fixed fullMinDate/fullMaxDate calculations (lines 94-104, 269-283)
+
+### v0.5.19.1 - Timeline Axis Labels Dark Theme Fix
+**Goal:** Fix axis labels invisible in dark theme
+**Status:** Complete
+
+- [x] Fix axis label text colors (lines 404, 430)
+- [x] Use var(--page-text-primary) for primary labels (years)
+- [x] Use var(--page-text-secondary) for secondary/tertiary labels (months, days, hours)
+- [x] Build verification successful
+
+**Files Modified:**
+- `src/components/EnhancedTimelineAxis.tsx` - Updated labelColor to use CSS variables for theme-aware text colors
 
 ### v0.5.21.1 - Modern Rectangle Scrollbar Styling
-- [x] Add scrollbar CSS variables for dark/light themes
-- [x] Implement Webkit and Firefox scrollbar styling
+**Goal:** Implement modern rectangular scrollbar styling with dark red accent for dark theme
+**Status:** Complete
+
+- [x] Add scrollbar CSS variables to tokens.css (dark theme: burgundy #8b2635, light theme: medium gray)
+- [x] Implement Webkit scrollbar styling (Chrome, Safari, Edge)
+- [x] Implement Firefox scrollbar styling
+- [x] 14px width for wider, modern appearance
+- [x] Rectangle shape with 2px border (no rounded corners)
+- [x] Theme-aware colors matching page backgrounds
+- [x] Build verification successful
+
+**Files Modified:**
+- `src/styles/tokens.css` - Added --scrollbar-track, --scrollbar-thumb, --scrollbar-thumb-hover CSS variables for both dark and light themes
+- `src/index.css` - Added ::-webkit-scrollbar styles and Firefox scrollbar-color/scrollbar-width rules
 
 ### v0.5.22 - Cloud Functions for Platform Statistics
-- [x] Set up Firebase Cloud Functions with Blaze plan
-- [x] Implement user/timeline/event triggers for atomic counter updates
-- [x] Simplify client getPlatformStats() with caching
+**Goal:** Replace client-side stats aggregation with server-side Cloud Functions for atomic, real-time counters
+**Status:** Complete
+
+**Infrastructure:**
+- [x] Set up Firebase Cloud Functions in project (functions/ directory)
+- [x] Configure functions deployment pipeline (firebase.json updated)
+- [x] Blaze plan active
+
+**Cloud Functions (functions/src/index.ts):**
+- [x] `onUserCreate` - Increment `stats/platform.totalUsers`
+- [x] `onUserDelete` - Decrement `stats/platform.totalUsers`
+- [x] `onTimelineCreate` - Increment timeline counts (total + visibility type)
+- [x] `onTimelineDelete` - Decrement timeline counts
+- [x] `onTimelineUpdate` - Handle visibility changes (adjust public/unlisted/private counts)
+- [x] `onEventCreate` - Increment `totalEvents` count
+- [x] `onEventDelete` - Decrement `totalEvents` count
+- [x] `initializeStats` - HTTP callable for admin bootstrap
+
+**Database Changes:**
+- [x] Stats doc uses `FieldValue.increment()` for atomic updates
+- [x] Client falls back to full scan only for initial bootstrap
+
+**Client Updates (src/services/firestore.ts):**
+- [x] Simplified `getPlatformStats()` - reads from Firestore stats doc
+- [x] Kept `saveStatsToFirestore()` for bootstrap only
+- [x] Memory cache with 5-min TTL for performance
+
+**Tests:**
+- [ ] Unit tests for Cloud Functions (firebase-functions-test) - deferred
+- [ ] E2E stats tests - deferred to v0.6.x
 
 ### v0.5.23 - Event Editor & Viewer Rework
-- [x] Add isOwner prop for read-only viewing
-- [x] Enhanced visual design and EventPreviewList UX
+**Goal:** Modernize Event Editor panel and enable read-only viewing
+**Status:** Complete
+
+- [x] Add `isOwner` prop to AuthoringOverlay for ownership control
+- [x] Show ReadOnlyEventView for non-owners (no edit/delete buttons)
+- [x] Enhanced visual design (larger titles, accent colors, better spacing)
+- [x] EventPreviewList UX improvements (hover borders, icons, cleaner layout)
+- [x] Update App.tsx to pass isOwner based on timeline ownership
 
 ### v0.5.24 - Dev Panel Removal
-- [x] Migrate 17 test files from Dev Panel to loadTestTimeline()
-- [x] Remove DevPanel.tsx and all 96 references
-- [x] Deprecate CC-REQ-PANELS-DEV-001
-
-### v0.5.25 - PowerSpawn: Universal Multi-Agent MCP Server
-- [x] Create standalone PowerSpawn repository with git submodule
-- [x] Implement spawn_claude, spawn_codex, spawn_copilot tools
-- [x] Create landing page with GitHub Pages deployment
-- [x] New branding: PT logo, hero banner, favicon
-
-### v0.5.26 - Stream Editor: Mobile Timeline Viewer
-- [x] Create StreamViewer with git-style vertical layout
-- [x] StreamViewerOverlay for desktop/mobile
-- [x] Update MobileNotice with Stream View option
-- [x] Add design tokens for stream viewer
-
-### v0.5.26.1 - Stream Viewer Enhancements
-- [x] Fix overlay focus, escape key, and mouse interaction
-- [x] Add search bar, event click zoom, hover sync with minimap
-- [x] Move Stream View button to NavRail with slide-up transition
-
-### v0.5.26.3 - Stream Viewer Polish
-- [x] Add minimap, breadcrumbs, fix mouse wheel scrolling
-- [x] Create SRS_STREAM_VIEW.md and comprehensive E2E tests
-
-### v0.5.26.4 - Stream Viewer UX & Home Reorder
-- [x] Move search to header, add expandable cards, keyboard navigation
-- [x] Reorder Home: Popular → Statistics → Recently Edited
-
-### v0.5.26.5 - Stream Viewer Visual Polish
-- [x] Softer edges, backdrop blur, refined shadows
-
-### v0.5.27 - Timeline Import/Export
-- [x] YAML v1 format with merge-by-ID import
-- [x] ImportExportOverlay in NavRail with validation
-- [x] E2E tests (T-IMEX-01 through T-IMEX-05)
-
-### v0.5.27.1 - PowerSpawn Copilot CLI Fix
-- [x] Fixed Copilot CLI invocation with `-p` flag
-
-### v0.5.28 - Test Sweep Corrective Actions
-- [x] Fix .env.test and CONTRIBUTING.md documentation
-- [x] Fix anchor alignment tests with waitForSelector
-- [x] Add auth-tests CI job
-
-### v0.5.29 - Technical Debt & Codebase Hygiene
-- [x] Create sync-version.cjs script
-- [x] Root directory cleanup and README updates
-- [x] Code cleanup (console checks, dead code, skipped tests)
-
-### v0.5.30 - PowerSpawn Test Suite
-- [x] Copilot CLI permissions work correctly (investigation complete)
-- [x] Unit tests: test_imports.py, test_parser.py, test_logger.py
-- [x] Integration tests: test_mcp_server.py (11 tests)
-
-### v0.5.31 - UX Polish & Resilience
-- [x] Dark mode scrollbar styling
-- [x] My Timelines 2-row layout
-- [x] Code cleanup (console checks, dead code)
-- [x] Test infrastructure (skipIfNoCredentials helper)
-- [x] Loading Skeletons (SkeletonCard component)
-- [x] Micro-interactions: Hover states, transitions, card animations
-- [x] Error Recovery: ErrorState component with retry
-- [x] Toast Notifications: ToastContext, ToastContainer, useToast hook
-- [x] Accessibility: Focus states, ARIA labels, reduced-motion support
-
-### v0.5.32 - User Settings & Public Profiles
-**Goal:** Fix profile access and add user account management
-**Status:** Deferred
-
-**Documentation:**
-- [x] Create `SRS_USER_PAGE.md` - User profile page requirements (30 reqs)
-- [x] Create `SRS_USER_SETTINGS_PAGE.md` - Settings page requirements (23 reqs)
-
-**Implementation:**
-- [x] **Public Profile Access:** Remove ProtectedRoute from `/:username`, allow public viewing
-- [x] **User Settings Page:** Create `/settings` route with profile info, password, preferences
-- [x] **Password Management:** Firebase Auth password reset/change flow
-- [x] **Nav Icon Fix:** Replace nav-rail user icon with standard person icon
-- [ ] **Account Deletion:** Allow users to delete their account (GDPR compliance)
-
-**Testing:**
-- [ ] E2E tests for public profile access (dev + prod)
-- [ ] E2E tests for settings page functionality
-
-### v0.5.33 - Stream Editor Mobile Editing
-**Goal:** Make Stream Editor a full mobile editing experience
-**Status:** Deferred
-
-**Documentation:**
-- [x] Update `SRS_STREAM_VIEW.md` with editing requirements (13 new reqs)
-
-**Implementation:**
-- [x] **Slide-up Edit Panel:** StreamEditPanel component for mobile inline editing
-- [x] **Quick Add Button:** [+] button in header to create new event
-- [x] **Swipe Actions:** Swipe left/right to reveal edit/delete actions
-- [x] **Mobile Event Form:** Simplified form optimized for touch
-- [x] **Mobile Auto-open:** Stream View auto-opens on mobile viewport
-- [x] **Desktop Edit UX:** Click event closes Stream View, navigates to editor
-
-**Testing:**
-- [ ] E2E tests for stream view editing
-- [ ] Mobile viewport tests
-
-### v0.5.34 - Navigation Icons (Stream ↔ Editor ↔ Canvas)
-**Goal:** Add explicit navigation icons for quick switching between views
-
-**Stream View (hover on event card):**
-- [x] Show icons only on hovered event card (upper-right boundary)
-- [x] Eye icon: Close stream view, zoom to event on canvas
-- [x] Edit icon: Close stream view, open event editor panel
-
-**Event Editor Panel (header icons):**
-- [x] Add Eye icon: Close editor, zoom to event on canvas
-- [x] Add Stream icon: Switch to stream view
-- [x] Group 4 icons with modern UI (drawer/menu if space-constrained)
-
-**Error Handling:**
-- [x] Add GitHub Issues link to ErrorBoundary component
-
-### v0.5.35 - Bug Fixes + Settings NavRail
-**Goal:** Fix event editor bug and improve NavRail layout
-
-- [x] BUG FIX: "Add new event" in existing timeline doesn't load existing events in Event Editor navigation panels
-- [x] Change "My Timelines" icon from `person` to `collections` (distinct from Sign In)
-- [x] Move Settings to bottom utilities section (above theme toggle)
-- [x] Create utilities section type in NavigationRail for bottom-positioned items
-- [x] BUG FIX: Settings icon position - pin to bottom instead of floating mid-way
-
-### v0.5.36 - Full-Width Layout Trial
-**Goal:** Experiment with full-width page layouts
-
-- [x] Expand Home, Settings, User pages to full horizontal width
-- [x] Remove max-width constraints from HomePage (header + main content)
-- [x] Remove max-width constraints from SettingsPage (header + main content, keep max-w-5xl for readability)
-- [x] Remove max-width constraints from UserProfilePage (header + profile + timelines)
-- [x] Remove max-width constraints from AdminPage (header + tabs + content)
-- [x] BUG FIX: Dark mode timeline axis "halo" effect - made container transparent
-- [x] FIX: Keep original card sizes but fit more cards per row on wide screens
-- [x] FIX: Statistics section cards now use fixed widths (flex-wrap) instead of stretching
-- [x] BUG FIX: "My Timelines" card size mismatch - now matches Popular/Recent sections
-- [x] Evaluate UX: Compare current centered layout vs full-width expansion (User decided: keep wide layout)
-
-**Known Issues / Feedback:**
-- [x] BUG: Admin page dark mode not actually dark - FIXED
-- [x] Admin page wide layout applied
-- [x] My Timelines card sizing fixed to match other sections
-- [x] BUG: Card menu (sandwich) poor contrast in dark mode - FIXED
-- [x] DESIGN: Timeline axis & event anchors - git-style circular dots with dashed connector lines - FIXED
-- [x] TRIAL: Landing page - use PowerTimeline banner as full-width background
-- [x] Landing page: Increased section/card transparency, glassmorphism orange button
-- [x] Unify logo: Replace custom logo.png with MUI TimelineIcon across NavRail/headers
-- [x] Landing page: Update Product Roadmap section to reflect v0.5.36 progress
-- [x] BUG FIX: Minimap viewport indicator poor contrast in dark mode - now purple accent
-- [x] BUG: Minimap events barely visible in dark mode (blue on dark) - switched to orange
-
-### v0.5.37 - Timeline Visual Polish
-**Goal:** Refine timeline anchor appearance
-
-- [x] **Anchor Shape:** Revert anchors from triangles back to diamond/milestone shape (rotated square)
-- [x] **Keep Size:** Maintain smaller size (w-2.5 h-3) from v0.5.37 changes
-- [x] **Border Radius:** Add rounded-sm for softer edges
-- [x] **Remove clip-path:** Simplify CSS with transform rotate-45deg
-
-### v0.5.38 - User Onboarding Experience
-**Goal:** Guide new users from "blank slate" to their first successful timeline
-
-- [x] **Empty States:** Actionable empty states for "My Timelines" with prompts
-- [x] **Starter Templates:** "Use Template" option (Biography, Project Plan, Historical Era)
-- [x] **Guided Tour:** Interactive walkthrough for the Editor
-- [x] **Contextual Help:** Tooltips for complex features
-
----
-
-## Phase 3: Sharing (v0.6.x)
-
-### v0.6.0 - Share Links
-**Goal:** Allow users to easily share timeline links
-
-- [x] **Editor Share Button:** Add share/copy link button in editor (top-right)
-- [x] **Card Menu Share:** Add "Copy Link" option to timeline card menu (HomePage/UserProfilePage)
-- [x] **Toast Feedback:** Show "Link copied!" toast confirmation
-
-### v0.6.1 - Editor UX Polish
-**Goal:** Fix navigation bugs and improve editor discoverability
-
-**Bug Fixes:**
-- [x] **Breadcrumb Navigation Bug:** Clicking username in breadcrumb goes to landing page instead of user profile (fix: `/@username` → `/${username}`)
-- [x] **Share Button Position:** Move share button lower to avoid minimap overlap
-
-**Editor Enhancements:**
-- [x] **User Profile Icon:** Add profile icon below share button (opens UserProfileMenu dropdown)
-- [x] **Compact User Profile Button:** Hover-expandable profile button (circular → pill with username on hover)
-- [x] **Events Panel Click-Outside:** Collapse panel when clicking outside on timeline
-- [x] **Events Panel Action Buttons:** Add edit (pencil) and view (eye) icons on hover for each event item
-
-### v0.6.2 - Error Handling & Documentation
-**Goal:** Help users report issues and document editor requirements
-
-- [x] **GitHub Issues Link:** Add link to GitHub issues page in error messages (ErrorState, ErrorBoundary, Toast)
-- [x] **SRS_TIMELINE_EDITOR.md:** Created per-page requirements doc (28 requirements for editor controls)
-- [x] **Firebase Error Messages:** Improve Firebase error messages with actionable guidance (deferred)
-
-### v0.6.3 - Event Sources
-**Goal:** Allow users to cite sources for timeline events
-
-**Data Model:**
-- [x] **Event.sources Field:** Add optional `sources: string[]` field to Event type
-- [x] **Firestore Schema:** Update Event document schema to include sources
-- [x] **Migration:** Backward compatible (existing events have no sources)
-
-**Editor View:**
-- [x] **Sources Section:** Collapsible section in AuthoringOverlay for viewing/editing sources
-- [x] **SourcesEditor Component:** New component with add/edit/delete functionality
-- [x] **Add Source:** Button to add new source with Enter to save, icon button for validation
-- [x] **Edit/Delete Source:** Inline editing and removal of individual sources
-- [x] **URL Detection:** Auto-detect URLs (http/https) vs plain text for display styling
-- [x] **Drag-and-Drop Reordering:** HTML5 drag-and-drop for source reordering
-
-**Stream View:**
-- [x] **Sources Indicator:** Badge with source icon + count if event has sources
-- [x] **Navigate to Editor:** Clicking sources badge opens Editor with that event selected
-- [x] **Escape Key Fix:** stopPropagation to prevent overlay closing when canceling source input
-
-**Testing & Documentation:**
-- [x] **SRS Documentation:** docs/SRS_EVENT_SOURCES.md with 37 requirements
-- [x] **E2E Tests:** 4 Stream View tests (indicator visibility, count, no-sources, click-to-edit)
-
-### v0.6.4 - Bug Fixes
-**Goal:** Address reported bugs
-
-- [x] **Editor Panel Click Bug:** Clicking events/edit buttons in Editor panels was closing the overlay (fix: check e.target === e.currentTarget)
-- [x] **View on Canvas Bug:** Eye icon in Editor wasn't zooming to event (fix: call handleStreamEventClick before closing)
-
-## Phase 4: AI Integration & Git-Style Workflows (v0.7.x)
-> **Vision:** AI assistance + review workflows that lay groundwork for future collaboration (fork/merge/diff)
-
-### v0.7.0 - AI Integration (Chat Assistant)
-
-**Status:** ✅ Complete
-
-#### Completed Tasks:
-- [x] SRS_AI_INTEGRATION.md (125 requirements)
-- [x] TypeScript types (`src/types/ai.ts`)
-- [x] AI Service for Gemini API (`src/services/aiService.ts`)
-- [x] useAISession hook (`src/hooks/useAISession.ts`)
-- [x] ChatPanel component (`src/app/panels/ChatPanel.tsx`)
-- [x] Context builder (`src/lib/aiContextBuilder.ts`)
-- [x] Action handlers (`src/lib/aiActionHandlers.ts`)
-- [x] App.tsx integration
-- [x] E2E tests (`tests/ai/chat-panel.spec.ts`)
-- [x] RightPanelShell component for right-side panels (`src/app/RightPanelShell.tsx`)
-
-#### Features:
-- AI chat panel in editor sidebar
-- Google Gemini API integration
-- Session-only API key storage (secure)
-- Create/update/delete events via natural language
-- Action confirmation before applying changes
-- Conversation history (session-only)
-
-#### Files Added:
-- `docs/SRS_AI_INTEGRATION.md` - 125 requirements
-- `src/types/ai.ts` - Type definitions
-- `src/services/aiService.ts` - Gemini API wrapper
-- `src/hooks/useAISession.ts` - Session management
-- `src/app/panels/ChatPanel.tsx` - Chat UI
-- `src/lib/aiContextBuilder.ts` - Context preparation
-- `src/lib/aiActionHandlers.ts` - Action execution
-- `tests/ai/chat-panel.spec.ts` - E2E tests
-
-### v0.7.1 - AI Chat UX & Google Search Integration
-**Goal:** Improve AI chat experience with web search and preview events
-
-**API & Search:**
-- [x] **Two-Step Search Approach:** Separate google_search and function_declarations calls (REST API limitation workaround)
-- [x] **Google Search Grounding:** Gemini 2.5 Flash with google_search tool for researching historical facts
-- [x] **Source URL Filtering:** Filter out invalid sources (googleapis.com, cloud.google.com, etc.)
-- [x] **Model Upgrade:** Using gemini-2.5-flash with google_search capability
-
-**Chat Widget UX:**
-- [x] **Floating Chat Widget:** Intercom-style bottom-right floating button with popup
-- [x] **Enter Key to Send:** Enter sends message, Shift+Enter creates newline
-- [x] **Scroll Containment:** Added `overscrollBehavior: 'contain'` to prevent timeline scroll
-
-**Preview Events System:**
-- [x] **Preview Events:** Show pending AI-created events on timeline before applying
-- [x] **Eye Button (👁):** Click to zoom/navigate to preview event on timeline
-- [x] **Dashed Red Borders:** Preview events styled with dashed red borders and glow effect
-- [x] **Preview Event Editing:** Double-click preview events to open in editor, edits update pending action payload
-
-**AI Reliability:**
-- [x] **Intent Detection:** Added `wantsToCreateEvents()` to detect when user wants to create events vs get information
-- [x] **Dedicated Prompts:** `CREATE_EVENTS_PROMPT` for event creation requests, `GENERAL_ACTION_PROMPT` for informational queries
-- [x] **Function Call Enforcement:** Using Gemini `tool_config.mode: 'ANY'` to force function calls when creating events
-- [x] **Scroll Containment Fix:** Added `onWheel` handler to stop event propagation in chat panel
-
-**Known Limitations:**
-- REST API doesn't support google_search + function_declarations in same request (hence two-step approach)
-- Gemini 3 Pro Preview doesn't support this combination at all
-
-### v0.7.2 - Preview Events UX Polish & Input Refinement
-**Goal:** Fix preview event display and editing behavior, reduce input placeholder font size
-**Status:** ✅ Complete
-
-**Chat Panel:**
-- [x] **Scrollable Content:** Make entire chat content scrollable including pending actions section
-- [x] **Overflow Fix:** Ensure "Approve All" / "Apply" buttons are always visible (moved inside scrollable area)
-
-**Preview Event Styling:**
-- [x] **Consistent Highlighting:** Preview events have distinct body coloring (amber background) + boundary styling (dashed border + glow)
-- [x] **CSS Variables:** Theme-aware colors for preview styling (dark/light mode support)
-- [ ] **Pending vs Approved:** Pending events show preview styling, approved events show normal styling
-
-**Editor Behavior:**
-- [x] **Normal Editor View:** Double-clicking preview event shows normal editor (not "New Event")
-- [x] **Read-only Default:** Preview events open in read-only view, user clicks Edit to modify
-- [x] **Payload Sync:** Edits to preview events update the AI action payload
-- [x] **No Delete Button:** Preview events hide delete button (reject via chat instead)
-
-**Input Refinement:**
-- [x] **Smaller Placeholder Font:** Reduce placeholder text font size (0.75rem) with reduced opacity (0.7) for better visual hierarchy
-
-### v0.7.3 - Bug Fixes & Code Cleanup
-**Goal:** Fix AI event persistence and clean up development artifacts
-**Status:** ✅ Complete
-
-**Critical Bugs:**
-- [x] **AI Event Persistence:** Root cause identified - events stored in subcollection, not field. Fixed to use `addEvent()`, `updateEvent()`, `deleteEvent()` properly
-- [x] **Owner Permission Check:** ChatPanel only shows for owners; AI actions check `isOwner` before saving
-
-**Console Cleanup:**
-- [x] **Console.log Cleanup:** Removed debugging console.log statements (kept logger.ts, migration logs, activity logs)
-- [x] **DegradationEngine Warnings:** Silenced "Card type mismatch" and other verbose warnings
-
-**UX Polish:**
-- [x] **Overflow Indicators:** Restyled to be smaller, centered on axis, with rose outline instead of red fill
-- [x] **Rejected Events Re-enable:** Added `restoreActions` - rejected suggestions show visibility_off icon to restore
-
-### v0.7.4 - Production Bug Fixes
-**Status:** ✅ Complete
-
-- [x] **Firestore Event ID Fix:** Events loaded from Firestore were missing `id` field (doc.data() doesn't include doc.id)
-- [x] **Minimap Glow Fix:** Added undefined check to prevent all markers appearing highlighted
-- [x] **Side Panels Fix:** Fixed undefined === undefined comparison causing all events to show as "current"
-- [x] **Overlay View Mode:** AuthoringOverlay now opens for all users in view-only mode
-- [x] **API Key Hint:** Added security reminder in ChatPanel that API key is session-only
-- [x] **Favicon Cache-Bust:** New favicon with cache-busting query parameter
-
-### v0.7.5 - Default Light Theme & Theme Fixes
-**Goal:** Change default theme to light and fix theme-related issues
-
-- [x] Change default theme from dark to light
-- [x] Update ThemeContext to default `isDarkMode: false`
-- [x] Update localStorage initialization to prefer light mode
-- [x] Update index.html theme-color meta tag to light (#FAFAFA)
-- [x] Verify all pages render correctly in light mode by default
-
-### v0.7.6 - Critical Accessibility Fixes
-**Goal:** Address WCAG compliance gaps identified in codebase audit
-
-- [x] Add landmark regions (`<main>`, `<nav>`, `<aside>`) to key layouts
-- [x] Implement `prefers-reduced-motion` media query support
-- [x] Audit and fix gray-on-gray contrast issues (WCAG AA)
-- [x] Ensure all touch targets are minimum 44px
-- [x] Add `aria-hidden` to decorative Material Symbols icons
-
-### v0.7.7 - Firebase Data Consistency Fixes
-**Goal:** Fix race conditions and N+1 query problems
-
-- [x] Fix race condition in `addEvent()` - use `increment(1)` instead of read-count-write
-- [x] Fix race condition in `deleteEvent()` - use `increment(-1)`
-- [x] Use serverTimestamp() for consistent timestamps
-- [x] Fix N+1 query in `getTimelineMetadata()` - reduce fallback from 500 to 50 docs
-- [x] Fix sequential user fetches in UserProfilePage - use `Promise.all`
-- [x] Consolidate event CRUD patterns (App.tsx now uses atomic operations)
-
-### v0.7.8 - Offline Support & Error Recovery
-**Goal:** Enable Firebase offline persistence and improve error handling
-
-- [x] Enable `enableIndexedDbPersistence()` in Firebase config
-- [x] Add offline status indicator in UI (OfflineIndicator component)
-- [x] Add retry logic with exponential backoff (src/utils/retry.ts)
-- [x] Improve error messages with actionable guidance (getFirestoreErrorMessage)
-- [x] Add connection status monitoring (online/offline event listeners)
-
-### v0.7.9 - AI Metadata Preview ✅
-**Goal:** Allow users to preview and review timeline metadata changes proposed by AI
-
-- [x] **Metadata Preview UI:** Show current vs proposed title/description in ChatPanel
-- [x] **Diff View:** Side-by-side or inline diff for text changes
-- [x] **Approve/Reject Metadata:** Same workflow as events (approve, reject, restore)
-- [x] **Apply Confirmation:** Clear feedback when metadata is updated
-
-### v0.7.10 - Partial Import (Preview & Review)
-**Goal:** Import events with review workflow - foundation for git-style fork/merge/diff
-
-- [x] Preview imported events with per-event status tracking
-- [x] Per-event approve/reject controls with visual feedback
-- [x] Selective apply - approve individual events or all at once
-- [x] Conflict detection for duplicate IDs and overlapping dates
-
-### v0.7.11 - Code Quality & TypeScript Cleanup
-**Goal:** Address code quality issues from codebase audit
-
-- [x] Remove `any` types from critical service files (firestore.ts, AuthoringOverlay, StatisticsDashboard)
-- [x] Audit console.log statements (most are intentionally gated by debug flags)
-- [x] Analyze homePageStorage.ts (still needed for migration support and slug utility)
-- [ ] Split App.tsx into smaller components (deferred - risk of breaking changes)
-- [ ] Split AuthoringOverlay into sub-components (deferred - risk of breaking changes)
-- [ ] Fix axis tick TODO (deferred - enhancement, not bug)
-
-### v0.7.12 - Unit Testing Infrastructure
-**Goal:** Add unit tests for business logic (currently 0 unit tests)
-
-- [x] Set up Vitest for unit testing (vitest.config.ts, npm scripts)
-- [x] Add unit tests for emailValidation.ts (7 tests)
-- [x] Add unit tests for clustering.ts (15 tests)
-- [x] Add unit tests for CapacityModel.ts (36 tests)
-- [x] Total: 58 unit tests passing
-
-### v0.7.13 - Documentation Consistency Fix
-**Goal:** Resolve documentation drift and contradictions
-
-- [x] Deduplicate 25 duplicate requirement IDs across SRS files
-- [x] Update README.md metrics (177 → 340 requirements, 287 → 378 tests)
-- [x] Re-audit SRS_INDEX.md against v0.7.x codebase
-- [x] Update PLAN.md metrics to match SRS_INDEX.md
-- [x] Create DOCUMENTATION_FIXES_v0.7.13.md analysis report
-
-### v0.7.14 - YAML Schema API ✅
-**Goal:** Publish schema for AI agents to discover and use
-
-- [x] Create JSON Schema file at `/schema/timeline.schema.json`
-- [x] Add comprehensive documentation with examples (README.md)
-- [x] Include field descriptions, validation rules, and format requirements
-- [x] Verify schema is served in production build
-
----
-
-## Phase 5: Production Polish & Stability (v0.8.x)
-> **Vision:** Make PowerTimeline production-ready - clean, fast, and reliable
-
-### v0.8.0 - Documentation and SRS Cleanup ✅
-- [x] SRS audit and format standardization
-- [x] Update metrics in SRS_INDEX.md, README.md, ARCHITECTURE.md
-- [x] Fix SRS_CARDS_SYSTEM.md compact card height (92px → 82px)
-
-### v0.8.1 - UI Audit ✅
-- [x] Canvas/Editor, Navigation, Pages audit
-- [x] 59 issues documented in UI_AUDIT_FINDINGS.md
-
-### v0.8.2 - UI Visual Bug Fixes ✅
-- [x] Theme system fixes (Node, Minimap, TopNavBar, LoginPage)
-- [x] Z-index standardization (tokens.css layer system)
-- [x] Focus states and accessibility improvements
-
-### v0.8.2.1 - Visual Audit & Z-Index Fixes ✅
-- [x] Automated overlap detection tests
-- [x] Fix zoom controls, breadcrumbs, AuthoringOverlay z-index
-- [x] Navigation Rail and Minimap z-index fixes
-
-### v0.8.2.2 - Visual Audit Test Infrastructure ✅
-- [x] Authentication support in visual tests
-- [x] Smart overlap detection (T87-T93)
-- [x] Boundary and coherency tests
-
-### v0.8.2.3 - Test Coherency Analysis ✅
-- [x] Eliminate audit theater (89% fake assertions → 100% real)
-- [x] Create T97 high-density stress tests
-- [x] Fix pan tests (wheel → drag)
-
-### v0.8.2.4-v0.8.2.8 - T97 Algorithm Iterations ✅
-- [x] Dense spot detection via telemetry
-- [x] Mathematical capacity algorithm
-- [x] Temporal density (finds 1793-1794 as densest)
-- [x] Visual fill algorithm (bucket-based scoring)
-
-### v0.8.2.9 - Safe Zones & Breadcrumb UX ✅
-**Goal:** Fix card/minimap/breadcrumb overlap with unified safe zones
-
-- [x] Add HEADER_SAFE_ZONE (100px) to config.ts
-- [x] Shift timelineY down to clear minimap/breadcrumb
-- [x] Add left safe zone (200px) for breadcrumb protection
-- [x] Transparent breadcrumb (visible text, card on hover)
-- [x] Breadcrumb z-index: behind cards normally, above on hover
-- [x] Increase card-to-axis spacing (40→48px above, 20→28px below)
-
-### v0.8.3 - Layout Performance & UX Polish
-**Goal:** Performance optimizations and UX micro-interactions
-
-**Performance:**
-- [x] Spatial hashing for O(n) collision detection (PositioningEngine.ts)
-- [x] Virtualization - render only visible cards with 200px buffer
-- [x] Map lookup for O(1) anchor→card association (cardsByEventId)
-- [x] Layout caching across pan/zoom when events unchanged
-- [x] Fix layout cache invalidation to track viewStart/viewEnd changes
-- [x] Remove dead connector code from CardRenderer.tsx
-
-**UX:**
-- [x] Hover card preview for degraded cards (CardHoverPreview.tsx)
-- [x] Hover lift effect (scale 1.02, shadow elevation)
-- [x] Zoom toward cursor position (Google Maps style)
-- [x] New interaction model: Click+drag=pan, Ctrl+click=selection zoom, Shift+scroll=horizontal pan
-
-**Documentation:**
-- [x] Update SRS_CARDS_SYSTEM.md with v0.8.3 performance & UX requirements (6 new requirements)
-
-**Backlog (deferred):**
-- [ ] Mobile bottom sheet for event details
-
-### v0.8.3.1 - Interaction Keybind Swap ✅
-**Goal:** Swap keybinds to make selection zoom the default interaction
-
-**Interaction Model:**
-- [x] Swap click+drag = selection zoom (default, crosshair cursor)
-- [x] Swap Space+drag = pan (grab/grabbing cursor)
-- [x] Keep Shift+scroll = horizontal pan
-- [x] Keep plain wheel = zoom toward cursor
-- [x] Update SRS_ZOOM.md with new keybind model
-
-**Testing:**
-- [x] Create T98 test file (tests/editor/98-interaction-model-v083.spec.ts)
-- [x] T98.1: Selection zoom (click+drag creates blue overlay, zooms on release)
-- [x] T98.2: Space+drag pan (grab/grabbing cursors)
-- [x] T98.3: Shift+scroll horizontal pan
-- [x] T98.4: Plain wheel zoom toward cursor
-- [x] T98.5: Boundary constraints (pan stops at 0 and 1)
-- [x] T98.6: Small selection (<20px) does not trigger zoom
-- [x] T98.7: Cursor styles update correctly for each mode
-
-### v0.8.3.4 - Events Panel Removal ✅
-**Goal:** Remove OutlinePanel (Events Panel) - functionality consolidated into Stream View
+**Goal:** Remove Dev Panel from codebase and migrate dependent tests
+**Status:** Complete
+
+**Audit Results (before migration):**
+- 17 test files with 96 `openDevPanel`/`closeDevPanel` references
+- 1 SRS requirement (CC-REQ-PANELS-DEV-001)
+
+**Test Migration (completed via multi-agent orchestration):**
+- [x] Updated all 17 test files to use direct Firestore timeline navigation
+- [x] Replaced Dev Panel seeding with `loadTestTimeline()` utility
+- [x] Removed all 96 `openDevPanel`/`closeDevPanel` references (down to 0)
+- [x] Tests use existing timelines: french-revolution, napoleon-bonaparte
 
 **Code Removal:**
-- [x] Remove OutlinePanel lazy import and rendering from App.tsx
-- [x] Remove 'events' from overlay state handling in App.tsx
-- [x] Remove openEvents/closeEvents functions from App.tsx
-- [x] Remove Events button from NavRail configuration in App.tsx
-- [x] Remove Events Panel command from Command Palette in App.tsx
-- [x] Delete src/app/panels/OutlinePanel.tsx
-- [x] Check if src/app/OverlayShell.tsx is used elsewhere (kept - used by EditorPanel, ImportExportOverlay)
+- [x] Remove `src/app/panels/DevPanel.tsx`
+- [x] Remove Dev Panel lazy import from `src/App.tsx:22`
+- [x] Remove command palette entry from `src/App.tsx:522-530`
+- [x] Remove overlay state management from `src/App.tsx` (removed 'dev' from overlay type)
+- [x] Remove Alt+D keyboard shortcut handler from `src/hooks/useKeyboardShortcuts.ts`
+- [x] Keep `src/lib/devSeed.ts` (still used by `src/lib/homePageStorage.ts` for seed timelines)
 
 **Documentation Updates:**
-- [x] Update docs/SRS_TIMELINE_EDITOR.md - remove Events Panel section
-- [x] Update docs/SRS_STREAM_VIEW.md - note it replaces Events Panel
-- [x] Update keyboard shortcut references (Alt+E removed)
+- [x] Deprecate CC-REQ-PANELS-DEV-001 in `docs/SRS.md`
+- [x] Update `docs/SRS_UI_AUDIT.md` status to "REMOVED"
 
-**Test Updates:**
-- [x] Delete tests/editor/66-panel-hover-highlighting.spec.ts (covered by T82.13)
-- [x] Update tests/editor/50-panels-visibility.spec.ts - remove Events Panel tests
-- [x] Update tests/editor/55-navigation-enhancements.spec.ts - remove Alt+E tests
-- [x] Update tests/editor/51-authoring-overlay.spec.ts - use Stream View instead
-- [x] Update visual audit tests (94, 96) - deprecate Events Panel tests
+**High-Priority Test Files (16 total):**
+1. `tests/editor/09-seeding-scenarios.spec.ts` - 12 refs
+2. `tests/editor/18-zoom-stability.spec.ts` - 12 refs
+3. `tests/editor/19-zoom-edge-cases.spec.ts` - Multiple refs
+4. `tests/editor/20-timeline-cursor-zoom.spec.ts` - Multiple refs
+5. `tests/editor/21-timeline-minimap.spec.ts` - Multiple refs
+6. Remaining 11 files with simpler migrations
 
-**Verification:**
-- [x] Run npm run build - no errors
-- [x] Run npm run lint - no errors (warnings only)
-- [x] Core tests pass (22/24 in affected files)
+### v0.5.25 - PowerSpawn: Universal Multi-Agent MCP Server
+**Goal:** Extract and productize our MCP agent orchestration into a standalone project compatible with Claude Code AND GitHub Copilot
+**Status:** Complete
 
-### v0.8.4 - Mobile and Responsive Testing Infrastructure ✅
-**Goal:** Establish multi-viewport testing and ensure mobile reliability
+**Phase 1: Repository Creation (Complete):**
+- [x] Create PowerSpawn repository (https://github.com/CynaCons/PowerSpawn)
+- [x] Extract standalone package with all core modules
+- [x] Copy spawner.py, logger.py, context_loader.py, parser.py, mcp_server.py
+- [x] Copy schemas/ directory (JSON output schemas)
+- [x] Copy examples/basic_spawn.py
+- [x] Fix imports for standalone operation (absolute imports)
+- [x] Fix GitHub URL reference (cynako → CynaCons)
+- [x] Add .gitignore (exclude pycache, auto-generated files)
+- [x] Set up git submodule in main PowerTimeline repo
+- [x] Add "Built with PowerSpawn" footer to LandingPage
+- [x] Remove dead code: config.yaml (not used), workflows/ (project-specific)
 
-**Playwright Multi-Viewport Setup:**
-- [x] Add projects to playwright.config.ts (desktop, desktop-xl, tablet, mobile)
-- [x] Configure device emulation (iPhone 14, iPad Mini)
-- [x] Add desktop-xl project (2560x1440) for large screen testing
-- [x] Add npm scripts: test:mobile, test:responsive, test:all
-- [x] Document test categories in tests/README.md
+**Phase 2: Documentation & Distribution:**
+- [x] Fix README.md path references (`agents/` → root paths)
+- [x] Add Installation section with git submodule instructions
+- [x] Update Architecture section to reflect actual file structure
+- [x] Make IAC.md/CONTEXT.md output directory configurable (env var: POWERSPAWN_OUTPUT_DIR)
+- [x] Decision: Use git submodule distribution (not pip) - simpler, project-scoped, MCP-native pattern
 
-**Test Directory Structure:**
-- [x] Create tests/responsive/ for cross-viewport tests
-- [x] Create tests/mobile/ for mobile-only tests
-- [x] Add viewport metadata to test descriptions
+**Novelty Research (via Opus agent):**
+- IAC.md pattern is novel - no equivalent found in 900+ MCP repos
+- Cross-model orchestration (Claude + Codex) is rare - only 19 repos mention both
+- MCP for agent spawning is uncommon - most MCP servers are for external tools
+- Closest competitor: claude-flow (1k stars) - Claude-only, no cross-model support
 
-### v0.8.5 - Mobile Performance and Offline ✅
-**Goal:** Fast loading and offline resilience for mobile users
+**Phase 3: Landing Page (powerspawn.com):** ✅ Complete
+- [x] Scaffold Vite + React + Tailwind + Framer Motion project in `/site`
+- [x] Hero section with animated terminal demo
+- [x] "Why PowerSpawn?" section with 6 animated feature cards
+- [x] "How It Works" diagram (IAC.md pattern visualization)
+- [x] Comparison table vs AutoGen/CrewAI/LangGraph
+- [x] Quick Start code snippets with syntax highlighting
+- [x] Configure GitHub Pages deployment (deploy-site.yml workflow)
+- [x] Fix base path for GitHub Pages (/PowerSpawn/)
+- [ ] Point powerspawn.com DNS to GitHub Pages (pending DNS config)
 
-**Stream View Mobile Editing:**
-- [x] Swipe left/right to reveal edit/delete actions (already implemented)
-- [x] Quick add button in Stream View header (already implemented)
-- [x] Touch gesture refinements
+**Phase 4: GitHub Copilot Integration:** ✅ Core Complete (VS Code testing moved to v0.5.29)
+- [x] Add `spawn_copilot` as third agent provider (alongside Claude/Codex)
+- [x] Implement Copilot CLI spawning in spawner.py (`copilot` command)
+- [x] Add MCP tool: `mcp__agents__spawn_copilot`
+- [x] Update README with Copilot documentation
+- [x] Update landing page with Copilot support
 
-**Offline Support:**
-- [x] Service worker for static asset caching (vite-plugin-pwa)
-- [x] Offline indicator with retry action
-- [x] Workbox configuration for runtime caching
+**Phase 5: Branding & Visual Identity:** ✅ Complete
+- [x] Create new PowerTimeline logo (PT monogram with timeline nodes, purple/violet glow)
+- [x] Create hero banner (timeline with historical era icons: Sparta → Rome → France → USA)
+- [x] Integrate banner into LandingPage hero section (replaced placeholder)
+- [x] Update favicon.png (resized to 64x64 for proper browser rendering)
+- [x] Update og-image.png for social media sharing (uses banner)
+- [x] Update logo.png in assets folder
 
-### v0.8.6 - Test Coverage and Stability ✅
-**Goal:** Fill critical test gaps and fix flaky tests
+**Future Roadmap (moved to v0.5.29-30):**
+- [x] Support for Gemini models (via Copilot CLI)
+- Remaining: MCP Registry, test suite, demo videos
 
-**Admin Panel Fix:**
-- [x] Fix T83, T84, T86 selector issues
-- [x] Verify admin test infrastructure
+### v0.5.25.1 - Codebase Hygiene & Technical Debt
+**Goal:** Address technical debt, security documentation, and code quality issues identified in audit
+**Status:** Moved to v0.5.29 (consolidated Technical Debt iteration)
 
-### v0.8.7 - UX Polish and Final Touches ✅
-**Goal:** Production-ready visual polish and user experience
+### v0.5.26 - Stream Editor: Mobile Timeline Viewer
+**Goal:** Create a mobile-friendly read-only timeline viewer using git-style vertical layout
+**Status:** Complete
 
-**Home Page:**
-- [x] Pagination for My Timelines (load 12, then "Load More")
+**Design Inspiration:** Landing page roadmap component (git-style vertical timeline with dots and lines)
 
-**API Key Storage:**
-- [x] Add "Remember on this device" checkbox to ChatPanel
-- [x] Store key in localStorage when checkbox enabled
-- [x] Add trust disclaimer text below API key input
-- [x] Add "Clear stored key" button
+**Concept Overview:**
+A scrollable vertical timeline viewer optimized for mobile. Events displayed chronologically with git-style commit dots and connecting lines. Dates on the left, content on the right. Read-only in this iteration; editing comes later.
 
-**Settings Page Enhancements:**
-- [x] Account Deletion with confirmation (GDPR compliance)
+**Access Model:**
+- **Desktop**: Overlay popup (80% viewport, max 800px) over the canvas timeline
+- **Mobile**: Full-screen overlay (100vw × 100vh)
+- **Trigger**: "Stream View" button in breadcrumb bar + Mobile Notice dialog
+- **No separate route** - overlay within existing editor page
 
-**Final Checks:**
-- [x] Accessibility audit (WCAG AA compliance verification)
-- [x] SEO meta tags on all public pages (react-helmet-async)
+**Implementation Tasks:**
 
-### v0.8.8 - Safari/WebKit & Mobile Fixes ✅
-**Goal:** Fix critical Safari/WebKit loading issues and mobile test infrastructure
+*Phase 1: Stream Viewer Component* ✅
+- [x] Create `StreamViewer.tsx` component
+- [x] Implement git-style vertical rail (inspired by LandingPage roadmap)
+- [x] Event card with date/title/description/color layout
+- [x] Chronological sorting of events
+- [x] Date formatting (localized: "Jul 14 / 1789")
+- [x] Scroll for long timelines
+- [x] Dark theme support using CSS variables
 
-**Safari/WebKit:**
-- [x] Firebase IndexedDB persistence fix (use long-polling + memoryLocalCache)
-- [x] Safari browser detection in firebase.ts
-- [x] WebKit Firebase diagnostics test
+*Phase 2: Overlay Integration* ✅
+- [x] Create `StreamViewerOverlay.tsx` wrapper (MUI Dialog)
+- [x] Add "Stream View" toggle button to EditorPage breadcrumb bar
+- [x] Desktop: Centered modal (maxWidth: 800px, 80vh height)
+- [x] Mobile: Full-screen overlay (100vw × 100vh)
+- [x] Close button and Escape key handler
+- [x] Responsive breakpoint detection (md: 900px)
 
-**Mobile Fixes:**
-- [x] LandingPage horizontal overflow (overflowX: hidden)
-- [x] EditorPage horizontal overflow (overflowX: hidden)
-- [x] Stream View auto-open blocking MobileNotice fix
-- [x] Mobile test selectors and assertions updated
+*Phase 3: Mobile UX Enhancement* ✅
+- [x] Updated MobileNotice to offer Stream View as primary option
+- [x] Three choices: "Open Stream View" (primary), "Continue to Canvas", "Go Back"
+- [x] Touch-friendly tap targets
+- [x] Safe area handling for mobile devices
+
+**Design Tokens Added (tokens.css):**
+- `--stream-rail-color`, `--stream-dot-size`, `--stream-dot-color`
+- `--stream-date-width`, `--stream-card-gap`
+- `--stream-bg`, `--stream-card-bg`, `--stream-card-border`
+- `--stream-text-primary`, `--stream-text-secondary`, `--stream-text-muted`
+- Light theme variants included
+
+**Files Created:**
+- `src/components/StreamViewer.tsx` - Core viewer component
+- `src/components/StreamViewerOverlay.tsx` - Dialog wrapper
+
+**Files Modified:**
+- `src/pages/EditorPage.tsx` - Integration + MobileNotice update
+- `src/styles/tokens.css` - Design tokens
+
+**Future Iterations (not in scope):**
+- Inline editing (Phase 2 of Stream Editor)
+- Add/delete events
+- Swipe gestures
+- Drag-to-reorder
+
+### v0.5.26.1 - Stream Viewer Enhancements
+**Goal:** Fix focus issues, add search, improve minimap/timeline sync
+**Status:** Complete
+
+**Improvements:**
+
+*Focus & Interaction Fixes:*
+- [x] Fix overlay focus capture (proper MUI Dialog props)
+- [x] Escape key now properly closes overlay
+- [x] Scroll works inside overlay, not on background
+- [x] Mouse interactions blocked from background
+
+*Search & Navigation:*
+- [x] Add search bar to filter events by title/description/date
+- [x] Click event to zoom timeline to that date region
+- [x] Hover sync: hovering Stream View event highlights minimap
+
+*UI/UX Improvements:*
+- [x] Move Stream View button from breadcrumb to NavRail
+- [x] Larger overlay: 85% viewport, max 900px width
+- [x] Larger dots: 18px with glow effect on hover
+- [x] Slide-up transition for smoother appearance
+- [x] Better backdrop with blur effect
+
+**Technical Changes:**
+- `StreamViewer.tsx`: Added search, hover callbacks, click handlers
+- `StreamViewerOverlay.tsx`: Fixed Dialog props, larger size, Slide transition
+- `App.tsx`: Stream View state, NavRail button, timeline sync
+- `EditorPage.tsx`: Removed breadcrumb button, passes initialStreamViewOpen
+
+### v0.5.26.3 - Stream Viewer Polish
+**Goal:** Add minimap, breadcrumbs, fix scrolling, add tests
+**Status:** Complete
+
+**UI Improvements:**
+- [x] Add simplified minimap showing event distribution with year labels
+- [x] Add breadcrumb navigation (Home > Timeline > Stream)
+- [x] Fix mouse wheel scrolling (replaced MUI Dialog with native overlay)
+- [x] Remove hover effects for better performance
+- [x] Backdrop click closes overlay
 
 **Documentation:**
-- [x] SRS_PWA_OFFLINE.md (14 requirements)
-- [x] SRS_SEO.md (12 requirements)
-- [x] SRS_HOME_PAGE.md pagination requirements
-
-### v0.8.9 - Performance Optimization ✅
-**Goal:** Improve load times, reduce bundle size, optimize rendering
-
-**Completed (2026-01-03):**
-
-**Wave 1 - Data Loading & Quick Wins:**
-- [x] P0-1: Parallel data loading with Promise.all() in HomePage
-- [x] P0-2: Removed redundant getUsers() call, fetch only visible timeline owners
-- [x] P1-2: Added useDebounce hook (300ms) for search filtering
-- [x] P1-4: Map-based O(1) lookup for user data instead of Array.find()
-- [x] P1-5: Fire-and-forget pattern for view count increment
-- [x] P0-6: WebKit/Safari persistence disabled (IndexedDB hangs fix)
-- [x] P1-6, P1-7: Firebase Analytics lazy-loaded
-- [x] P0-3: Font preconnect hints and display=swap
-
-**Wave 2 - Rendering & Virtualization:**
-- [x] P0-5: StreamViewer virtualization with react-window (FixedSizeList + AutoSizer)
-- [x] P2-7: CSS-only line clamping (removed JS truncation detection)
-- [x] P2-8: Ref-based swipe animation (no state updates during touchmove)
-- [x] P0-4: Layout useMemo deps optimized (removed viewStart/viewEnd)
-- [x] P1-3: Card content components memoized (React.memo)
-- [x] P2-1: Vertical virtualization check added to card filter
-- [x] P2-3: Telemetry throttled to 500ms
-
-**Wave 3 - Bundle & Polish:**
-- [x] P1-8: Firebase chunk splitting (main bundle: 1544KB → 990KB)
-- [x] P1-1: SkeletonCard polish (icon placeholder, 24px title, 3 badge placeholders)
-
-**Bug Fixes (2026-01-03):**
-- [x] Fixed zoom cache invalidation (restored viewWindowUnchanged check)
-- [x] Fixed React hook order violation in StreamViewer.tsx
-- [x] Skip zoom tests on mobile/tablet (uses Stream View)
-
-### v0.8.10 - State Architecture Refactor
-**Goal:** Extract timeline state from App.tsx (~1430 lines) into 4 custom hooks
-**Status:** In Progress (Phases 1-3 Complete, Phase 4 Deferred)
-
-**Phases:**
-- [x] Phase 1: `useEventEditForm` - Form state for event editing (editDate, editTime, editTitle, editDescription)
-- [x] Phase 2: `useTimelineUI` - Overlay and panel visibility state
-- [x] Phase 3: `useEventSelection` - Selection state and navigation
-- [ ] Phase 4: `useTimelineEvents` - Core events data layer with Firestore sync (DEFERRED - highest risk)
-
-**Completed:**
-- Created `src/app/hooks/useEventEditForm.ts` with form state extraction (18 tests)
-- Created `src/app/hooks/useTimelineUI.ts` with overlay/panel state extraction (18 tests)
-- Created `src/app/hooks/useEventSelection.ts` with selection/navigation (15 tests)
-- Integrated hooks into App.tsx, removed duplicate effects
-- Build passes, 109 unit tests pass, E2E tests pass
-
-**Deferred:**
-- Phase 4 deferred as it involves complex Firestore sync, optimistic updates, and rollback logic
-- Current refactoring already achieves significant organization improvement
-
-### v0.8.11 - ownerUsername Denormalization ✅
-**Goal:** Eliminate expensive `getUsers()` fetch on HomePage by denormalizing username onto timeline documents
-
-**Performance Issue:**
-- HomePage fetched ALL users just to display ~24 owner usernames on timeline cards
-- O(total users) → O(displayed timelines) improvement
-
-**Implementation:**
-- [x] Add optional `ownerUsername` field to `TimelineMetadata` type
-- [x] Update `createTimeline()` to fetch owner and set `ownerUsername`
-- [x] Add `migrateTimelineOwnerUsernames()` for backfilling existing timelines
-- [x] Add `searchUsersByUsername()` for on-demand Firestore prefix queries
-- [x] Remove `getUsers()` call from HomePage data loading
-- [x] Replace in-memory user search with async Firestore query (like GitHub/X)
-- [x] Update SRS_DB.md (DB-TL-011) and SRS_HOME_PAGE.md
+- [x] Create docs/SRS_STREAM_VIEW.md with 17 requirements
 
 **Testing:**
-- [x] Update test schema allowlists (dev-srs-db.spec.ts, prod-srs-db.spec.ts)
-- [x] Build passes, 109 unit tests pass, 20/20 smoke tests pass
+- [x] Update tests/editor/82-stream-viewer.spec.ts with comprehensive tests
+- [x] Desktop tests (12 tests): overlay, events, minimap, scroll, close
+- [x] Mobile tests (2 tests): full-screen mode, header visibility
+- [x] Scroll verification tests (3 tests): programmatic, wheel, up/down
 
-**Migration Complete:**
-- [x] Dev: 259 timelines updated (5 orphaned timelines skipped)
-- [x] Prod: 12 timelines updated
-- [x] Legacy data cleanup: removed `events` field from 1 timeline (both envs), fixed 289 events missing `id` field (prod)
-- [x] Test fix: added `sources` to ALLOWED_EVENT_FIELDS (Event Sources feature from v0.6.3)
+**Files Modified:**
+- `src/components/StreamViewerOverlay.tsx` - Rewritten with native overlay, minimap, breadcrumbs
+- `src/components/StreamViewer.tsx` - Simplified, removed hover state
+- `docs/SRS_STREAM_VIEW.md` - New SRS document
+- `tests/editor/82-stream-viewer.spec.ts` - Comprehensive E2E tests
 
-### v0.8.12 - Performance Improvements ✅
-**Goal:** Targeted performance fixes for Safari memory constraints and data loading patterns
-**Status:** Complete (Phases 1-2 implemented, Phases 3-4 deferred to v0.8.13)
+### v0.5.26.4 - Stream Viewer UX & Home Reorder
+**Goal:** Mobile UX improvements for Stream Viewer and Home page optimization
+**Status:** Complete
 
-**Completed (2026-01-04):**
-- [x] Phase 1.1: Safari memory cache 40MB limit (src/lib/firebase.ts:40-42)
-  - Reduced Firestore memory cache from unlimited to 40MB for Safari/WebKit
-  - Prevents memory crashes on iOS devices with limited cache quota
-- [x] Phase 1.2: Navigation memoization (src/app/hooks/useEventSelection.ts:41-47,67-79)
-  - Added useMemo for sorted events array in useEventSelection hook
-  - Prevents re-sorting on every navigation callback invocation
-- [x] Phase 2: Firebase request batching (src/pages/HomePage.tsx:76-93)
-  - Two-batch data loading: critical data first (timelines, stats), then secondary (featured, popular)
-  - Improves perceived load time with progressive enhancement
+**Stream Viewer:**
+- [x] Move search bar to header (between event count and close button)
+- [x] Block wheel events from leaking to canvas behind overlay
+- [x] Reduce date column width (72px → 56px) for more text space
+- [x] Add expandable event cards with "Show more/less" toggle
+- [x] Responsive line clamp: 3 lines mobile, 5 lines desktop
 
-**Deferred to v0.8.13:**
-- [ ] Phase 3: Callback optimization (StreamViewerContext, Row component memoization)
-  - Caused test failures in 82-stream-viewer.spec.ts (T82.6, T82.7, T82.S1-S3)
-  - Test failures related to scroll functionality and event selection
-  - Reverted to maintain stability
+**Home Page:**
+- [x] Reorder sections: Popular → Statistics → Recently Edited
+- [x] Make statistics grid 2-col on mobile with smaller text
 
-**Impact:**
-- Safari/WebKit: Improved stability with controlled memory usage
-- Navigation: Reduced redundant sorting operations
-- HomePage: Better perceived load time with batched requests
+**Stream Viewer Polish (code review findings):**
+- [x] Add keyboard navigation (arrow keys between events)
+- [x] Add focus trap when overlay opens (auto-focus search input)
+- [x] Add fade animation (150ms) for overlay open/close
+- [x] Add hover effect on desktop event cards
+- [x] Add swipe to close on mobile (swipe down gesture)
+- [x] Add tests for expand/collapse and keyboard navigation (T82.K*, T82.E*, T82.F*)
 
-### v0.8.13 - VariableSizeList Implementation ✅
-**Goal:** Implement dynamic item heights for StreamViewer expandable cards
-**Status:** Complete (2026-01-04)
+### v0.5.26.5 - Stream Viewer Visual Polish
+**Goal:** Refine visual appearance of Stream Viewer modal for better desktop experience
+**Status:** Complete
 
-**Completed:**
-- [x] Phase 4: VariableSizeList for expandable event cards
-  - Changed from FixedSizeList to VariableSizeList (react-window)
-  - Dynamic heights: collapsed (120px) vs expanded (200px)
-  - Added listRef and getItemSize callback
-  - Reset list after index on expandedEvents changes
-  - Updated SRS_STREAM_VIEW.md: CC-REQ-STREAM-PERF-001
+**Visual Improvements:**
+- [x] Increase modal border radius (8px → 12px) for softer edges
+- [x] Add backdrop blur (4px) for visual cohesion with breadcrumbs
+- [x] Refine shadow with layered effect (subtle inner glow + outer shadow)
+- [x] Match header/content border radius to modal corners
+- [x] Polish search bar with subtle dark background and softer borders
+- [x] Increase event card border radius (8px → 10px) with subtle borders
 
-**Impact:**
-- Expanded event cards no longer clip
-- Smooth height transitions when toggling expand/collapse
-- Maintains 17/23 test passing baseline (same test failures as before)
+### v0.5.27 - Timeline Import/Export & AI-Ready Format
+**Goal:** Enable import/export of timelines in a simple format that AI models can generate
+**Status:** Complete
 
-### v0.8.14 - Performance Optimization ✅
-**Goal:** Reduce layout reflows and optimize collision detection
-**Status:** Complete (2026-01-05)
+**Documentation:** See [SRS_EDITOR_IMPORT_EXPORT.md](docs/SRS_EDITOR_IMPORT_EXPORT.md) for full YAML format specification and requirements.
 
-**Completed:**
-- [x] TimelineMinimap.tsx: Cache rect on mousedown, reuse during drag
-- [x] EnhancedTimelineAxis.tsx: Cache axis rect for mouse events
-- [x] PositioningEngine.ts: Build spatial hash ONCE before collision loop, not per pass
-- [x] PositioningEngine.ts: Sort cards ONCE before collision loop, not per pass
-- [x] ~75% reduction in collision resolution overhead (4 rebuilds → 1)
+**Key Features:**
+- YAML v1 format with mandatory event IDs for change tracking
+- Editor overlay with Import/Export tabs (NavRail button, Alt+I shortcut)
+- Merge-by-ID import: matching IDs update, new IDs add
+- File validation: type (.yaml/.yml), size (1MB max), schema validation
+- Preview before import with event list
 
-**Reverted (caused test failures):**
-- useViewWindow.ts batch setState changes
-- useTimelineZoom.ts caching changes
-- useElementSize.ts ResizeObserver changes
-- DeterministicLayoutComponent.tsx changes
+**Implementation Tasks:**
+- [x] Define TypeScript schema (`src/services/timelineImportExport.ts`)
+- [x] YAML parser with validation (js-yaml library)
+- [x] Export function with chronological sorting and ID preservation
+- [x] Import function with merge-by-ID behavior
+- [x] Home page: Export in TimelineCardMenu, Import button in "My Timelines"
+- [x] Editor: ImportExportOverlay in NavRail (signed-in users, Alt+I)
+- [x] Validation error display with field paths
+- [x] SRS document: `docs/SRS_EDITOR_IMPORT_EXPORT.md`
+- [x] E2E tests: `tests/editor/83-import-export-overlay.spec.ts` (T-IMEX-01 through T-IMEX-05)
+- [x] Changed visibility: signed-in users (not owner-only)
+- [x] Empty timeline handling tests
 
-**Impact:**
-- Collision resolution: 75% overhead reduction
-- Max long task: ~8-12% improvement
-- Layout reflows in stress test: Maintained
+### v0.5.27.1 - PowerSpawn Copilot CLI Fix
+**Goal:** Fix Copilot/Gemini agent spawning
+**Status:** Complete
 
-### Performance Test Suite ✅
-**Goal:** Comprehensive performance measurement infrastructure
-**Status:** Complete (2026-01-05)
+- [x] Fixed Copilot CLI invocation: changed from stdin to `-p` flag for prompts
+- [x] Verified all 3 models work: Claude, Codex, Gemini (via Copilot)
+- [x] Updated `powerspawn/MCP_DESIGN.md` to v1.4 with spawn_copilot documentation
+- [x] Updated `powerspawn/spawner.py` with correct `-p` flag usage
 
-**Added:**
-- tests/performance/98-performance-profiling.spec.ts - CDP profiling with .cpuprofile output
-- tests/performance/99-performance-baseline.spec.ts - Pass/fail regression tests
-- tests/performance/100-advanced-metrics.spec.ts - Memory, FPS, layout thrashing, INP, long tasks
-- tests/performance/README.md - Documentation
+### v0.5.28 - Test Sweep Corrective Actions
+**Goal:** Address test failures discovered during Dev Panel removal sweep
+**Status:** Complete
 
-**Fixes (2026-01-05):**
-- T98/T100: Skip on non-Chromium (CDP requires Chromium, was failing on mobile/tablet WebKit)
-- 98-interaction-model-v083.spec.ts: Fixed telemetry wait (500ms throttle required polling instead of fixed waits)
+**Test Sweep Results (2025-12-02):**
+- Total: 20 tests | Passed: 9 | Failed: 6 | Skipped: 5
 
-**Baselines (dev mode):**
-| Metric | Target | Threshold |
-|--------|--------|-----------|
-| Layout Reflows | <20 | Single operation |
-| Long Tasks | <600ms | Max duration |
-| INP | <800ms | Max interaction |
+**Environment Issues (4 failures):**
+- [x] Fix `.env.test` credentials configuration
+  - Tests failing: Necker Compte Rendu date alignment, Anchor alignment, Anchor coordinate system, Hover date accuracy
+  - Root cause: "Login failed - check credentials in .env.test"
+  - Action: ✅ Document required env vars in CONTRIBUTING.md
+  - Action: ✅ Updated `.env.test.example` with all required keys (TEST_USER_*, VITE_FIREBASE_*)
 
-### v0.8.15 - UX Polish ✅
-**Goal:** Fix breadcrumb visibility, Stream View buttons, and mobile interaction
-**Status:** Complete (2026-01-05)
+**Anchor Alignment Issues (2 failures):**
+- [x] Investigate anchor alignment tests returning 0
+  - Tests failing: "Anchors align with corresponding timeline dates at default zoom"
+  - Tests failing: "Anchors align precisely with event dates across multiple timelines"
+  - Root cause: Timing issue - elements not yet rendered when test checks coordinates
+  - Action: ✅ Fixed by replacing timeout with waitForSelector (patience-based waiting)
 
-**Completed:**
-- [x] Breadcrumbs: z-[30] base so hover triggers above cards (was z-[5], below cards)
-- [x] Stream View hover buttons: Added 16px top padding for icon space above cards
-- [x] Stream View "show more": Threshold now `lineClamp * 70` chars (was 150, too aggressive)
-- [x] Mobile tap behavior: Tap selects event, swipe-right to edit (was tap-to-edit)
+**Test Infrastructure:**
+- [x] Add CI check for test credential availability (auth-tests job in tests.yml)
+- [x] Update CONTRIBUTING.md with test setup instructions (includes all env vars and test categories)
+- [x] Create smoke test that validates .env.test is properly configured
 
-**Impact:**
-- Breadcrumbs visible on hover in editor
-- Eye/edit buttons appear on Stream View card hover
-- "Show more" only appears when text is actually truncated
-- Mobile users can browse without accidentally editing
+### v0.5.29 - Technical Debt & Codebase Hygiene
+**Goal:** Consolidate deferred technical debt items from v0.5.15-v0.5.25
+**Status:** In Progress
+
+**Version Synchronization Script:**
+- [x] Create `scripts/sync-version.cjs` Node.js script to update version across all files
+  - Update `package.json` version field
+  - Update `PLAN.md` Quick Summary version
+  - Update `docs/SRS_INDEX.md` version header
+  - Update `AGENTS.md` version reference
+  - Accept version as CLI argument: `node scripts/sync-version.cjs 0.5.29`
+- [x] Add npm script: `"version:sync": "node scripts/sync-version.cjs"`
+
+**Root Directory Cleanup:**
+- [x] Delete Playwright test artifacts from root (none found - already cleaned up)
+- [x] Delete spurious `nul` file from root
+- [x] Verify branding assets not duplicated in root (none found)
+- [x] Verify `.gitignore` patterns for Playwright artifacts (already present at lines 33-39)
+
+**Documentation Drift Fixes:**
+- [ ] Update `README.md`: Remove "Developer Panel" references (removed in v0.5.24)
+- [ ] Sync requirement counts: PLAN.md says "~155", SRS_INDEX.md says "~130"
+
+**Test Environment & CI:**
+- [ ] Add GitHub Actions secrets for test credentials:
+  - `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`, `TEST_USER_UID`
+  - Document in `.github/workflows/tests.yml`
+- [ ] Create CI workflow that runs auth-dependent tests with secrets
+- [ ] Add "skip if no credentials" logic for local contributors without secrets
+
+**From v0.5.25.1 (Codebase Hygiene):**
+- [ ] **Security Documentation:** Add explicit documentation to `powerspawn/spawner.py` explaining `bypass_sandbox=True` design decision
+- [ ] **Global Namespace Cleanup:** Refactor `window.__ccTelemetry` and `window.debugTimelineScales` to use `window.PowerTimeline` namespace or strip in production
+- [ ] **Logging Cleanup:** Remove paranoid `if (console)` checks in `LayoutEngine.ts`
+- [ ] **Dead Code Removal:** Remove commented-out legacy code in `DeterministicLayoutComponent.tsx`
+- [ ] **Test Debt:** Fix or remove skipped tests in `tests/editor/09-seeding-scenarios.spec.ts`
+
+**From v0.5.15.1 (Deferred):**
+- [ ] Audit and sync requirement counts across all SRS documents
+- [ ] Document or fix single-event zoom positioning edge case
+
+**From v0.5.25 Phase 4 (Copilot Testing):**
+- [ ] Test mcp_server.py with VS Code Copilot MCP settings
+- [ ] Create VS Code `.vscode/mcp.json` example config
+- [ ] Test cross-model orchestration: Claude → Copilot → Codex
+
+**From v0.5.18 (UI Deferred):**
+- [ ] Fix Home page dark mode: scrollbar styling
+- [ ] Home page: My Timelines display on 2 rows instead of 1
 
 ---
 
-## Phase 6: Claude Code Integration (v0.9.x)
-> **Vision:** Enable Claude Code to propose timeline events via Firebase, using the existing Review UI
+### v0.5.30 - PowerSpawn Test Suite & Copilot Fix
+**Goal:** Create comprehensive tests and fix Copilot CLI permission issues
+**Status:** Planned
 
-### v0.9.0 - Firebase Proposals Infrastructure
-**Goal:** Set up Firebase schema and listeners for external AI proposals
-- [ ] Firestore Schema: `/users/{uid}/ai_proposals/{id}` with status, events, source, timestamps
-- [ ] Security Rules: Owner-only read/write for proposals collection
-- [ ] App Listener: `onSnapshot` listener for incoming proposals
-- [ ] Proposal Notification: Badge/indicator when new proposals arrive
+**Copilot CLI Permission Fix:**
+- [ ] Investigate why `--allow-tool write` doesn't grant write permissions
+- [ ] Test alternative permission flags or configurations
+- [ ] Document working permission setup for Copilot agents
+- [ ] Update spawner.py if additional flags needed
 
-### v0.9.1 - Claude Token & Settings
-**Goal:** Allow users to generate auth tokens for Claude Code
-- [ ] Token Generation: Settings page to create/revoke Claude API tokens
-- [ ] Firebase Custom Tokens: Cloud Function to issue scoped tokens
-- [ ] Token Storage: Secure storage with expiry and revocation
-- [ ] Connection Status: Show active Claude connections in UI
+**Unit Tests (powerspawn/tests/):**
+- [ ] `test_imports.py` - Verify all modules import correctly
+  - Test: `from spawner import spawn_claude, spawn_codex`
+  - Test: `from logger import log_spawn_start, log_spawn_complete`
+  - Test: `from parser import parse_claude_response, parse_codex_event`
+  - Test: `from context_loader import format_prompt_with_context`
 
-### v0.9.2 - PowerTimeline MCP Server
-**Goal:** Create MCP server for Claude Code integration
-- [ ] MCP Setup: New `powertimeline-mcp/` repo or folder
-- [ ] Firebase Auth: Authenticate with user's Claude token
-- [ ] Core Tools: `get_timeline`, `list_timelines`, `propose_events`
-- [ ] Status Tools: `get_proposal_status`, `get_timeline_schema`
+- [ ] `test_parser.py` - Response parsing tests
+  - Test: Parse valid Claude JSON response
+  - Test: Parse invalid JSON (returns error AgentResult)
+  - Test: Parse Codex JSONL events
+  - Test: Extract final message from Codex events
 
-### v0.9.3 - Review UI Integration
-**Goal:** Route Claude proposals through existing Review UI
-- [ ] Proposal Panel: Show "Claude proposed X events" in ChatPanel or dedicated panel
-- [ ] Reuse Actions: Same approve/reject/restore/apply workflow as Gemini
-- [ ] Source Attribution: Tag applied events with "via Claude Code"
-- [ ] Proposal History: View past proposals and their outcomes
+- [ ] `test_logger.py` - IAC.md logging tests
+  - Test: `generate_spawn_id()` returns 8-char hex
+  - Test: `log_spawn_start()` creates IAC.md entry
+  - Test: `log_spawn_complete()` updates entry in-place
+  - Test: Thread safety with concurrent writes
 
----
+- [ ] `test_context_loader.py` - Context injection tests
+  - Test: Load minimal context
+  - Test: Load full context
+  - Test: Format prompt with context prepended
+  - Test: Handle missing project files gracefully
 
-## Phase 7: Collaboration & Versioning (v1.0.x)
-> **Future:** Git-style workflows for timeline collaboration
+**Integration Tests:**
+- [ ] `test_mcp_server.py` - MCP protocol tests
+  - Test: Server initializes without error
+  - Test: `list_tools()` returns 5 tools
+  - Test: Tool schemas are valid JSON
+  - Test: `list()` returns running/completed agents structure
+  - Test: `wait_for_agents()` with timeout returns correct structure
 
-### v1.0.0 - Version History
-- [ ] Timeline version snapshots on save
-- [ ] Version history browser
-- [ ] Diff viewer for comparing versions
-- [ ] Revert to previous version
+**E2E Tests (require Claude/Codex CLI):**
+- [ ] `test_spawn_claude.py` - Claude agent spawning
+  - Test: Spawn haiku agent with simple prompt
+  - Test: Verify result contains text and cost
+  - Test: IAC.md entry created correctly
 
-### v1.0.1 - Forking System
+- [ ] `test_spawn_codex.py` - Codex agent spawning (optional, skip if no API key)
+  - Test: Spawn Codex with simple prompt
+  - Test: Verify JSONL parsing works
+
+**Test Configuration:**
+```python
+# powerspawn/tests/conftest.py
+import pytest
+import os
+
+@pytest.fixture
+def temp_agents_dir(tmp_path):
+    """Create temp directory for IAC.md/CONTEXT.md"""
+    return tmp_path
+
+@pytest.fixture
+def skip_e2e():
+    """Skip E2E tests if CLI tools not available"""
+    return not (
+        os.system("claude --version") == 0 or
+        os.system("codex --version") == 0
+    )
+```
+
+**CI Integration:**
+- [ ] Add GitHub Actions workflow for PowerSpawn tests
+- [ ] Run unit tests on every push
+- [ ] Run E2E tests only on main branch (requires API keys)
+
+### v0.5.31 - UX Polish & Resilience
+**Goal:** Enhance visual feedback and error handling for a professional-grade experience
+**Status:** Planned
+
+- [ ] **Visual Feedback:** Implement loading skeletons for Dashboard, Timeline List, and Editor
+- [ ] **Micro-interactions:** Add hover states and transitions to all interactive elements (cards, buttons, nav items)
+- [ ] **Error Recovery:** Replace hard redirects with graceful "Retry" UI for timeline loading failures
+- [ ] **Toast Notifications:** Standardize success/error feedback for async actions (save, delete, fork)
+- [ ] **Accessibility:** Audit and fix focus states and ARIA labels for screen readers
+
+### v0.5.32 - User Onboarding Experience
+**Goal:** Guide new users from "blank slate" to their first successful timeline
+**Status:** Planned
+
+- [ ] **Empty States:** Create actionable empty states for "My Timelines" with "Create" or "Fork" prompts
+- [ ] **Starter Templates:** Add "Use Template" option (Biography, Project Plan, Historical Era) to creation flow
+- [ ] **Guided Tour:** Implement interactive walkthrough for the Editor (explaining Zoom, Layout, Events)
+- [ ] **Contextual Help:** Add tooltips to complex features (Layout Engine, Visibility settings)
+
+## Phase 3: Collaboration Features (v0.6.x)
+
+### v0.6.0 - Git-Based Timeline Storage
+- [ ] Set up internal Git repository management system
+- [ ] Convert timeline format to JSON (optimized for Git diffs)
+- [ ] Implement Git commit workflow for saves
+- [ ] Create version history browser
+- [ ] Add diff viewer for comparing versions
+- [ ] Implement revert functionality
+
+### v0.6.1 - Forking System
 - [ ] Fork button and confirmation flow
-- [ ] Fork relationship tracking
-- [ ] Attribution for original authors
-- [ ] Fork network visualization
+- [ ] Git clone operation for forking
+- [ ] Fork relationship tracking and display
+- [ ] Attribution system for original authors
+- [ ] Fork network graph visualization
+- [ ] Fork statistics and analytics
 
-### v1.0.2 - Merge Requests (Optional)
-- [ ] Merge request workflow
-- [ ] Side-by-side diff viewer
+### v0.6.2 - Merge Request System
+- [ ] Create merge request workflow
+- [ ] Side-by-side diff viewer for changes
 - [ ] Comment system for review
-- [ ] Merge conflict resolution
+- [ ] Approve/reject/request changes workflow
+- [ ] Merge conflict detection and resolution UI
+- [ ] Notification system for merge requests
 
----
+## Phase 4: Discovery & Social (v0.7.x)
 
-## Milestone: v1.1.0 - Full Platform Launch
+### v0.7.0 - Enhanced Discovery & Advanced Search
+- [ ] **Global Search:** Unified search for Users and Timelines with type filtering
+- [ ] **Content Search:** Deep search within timeline events (titles, descriptions)
+- [ ] **Advanced Filters:** Filter by date range, tags, category, and popularity
+- [ ] **Timeline Trending:** Algorithm based on views, forks, and recent activity
+- [ ] **Featured Curation:** Admin-curated lists of high-quality timelines
+- [ ] **Recommendations:** "More like this" suggestions based on timeline content
+
+### v0.7.1 - Social Features
+- [ ] Follow users and timelines
+- [ ] Activity feed showing updates
+- [ ] View counts and engagement metrics
+- [ ] Timeline collections/playlists
+- [ ] User notifications
+
+## Phase 5: Rich Media (v0.8.x)
+
+### v0.8.0 - Media Attachments
+- [ ] Image and video uploads for events
+- [ ] Firebase Storage integration
+- [ ] Link previews with automatic metadata
+- [ ] Media gallery view for timelines
+- [ ] Media organization and tagging
+
+### v0.8.1 - Content Archival
+- [ ] Automatic web page snapshots
+- [ ] Social media post archival
+- [ ] PDF and document storage
+- [ ] Link rot prevention and backup
+
+## Phase 6: AI Integration (v0.9.x)
+
+### v0.9.0 - AI Chat Interface
+- [ ] Sidebar chatbot for timeline Q&A
+- [ ] Natural language event creation
+- [ ] Timeline summarization and insights
+- [ ] Event date/time assistance
+
+### v0.9.1 - AI-Powered Automation
+- [ ] Auto-suggest related events from news feeds
+- [ ] Timeline gap detection and suggestions
+- [ ] Fact-checking assistance and source verification
+- [ ] Automated timeline generation from text sources
+
+## Milestone: v1.0.0 - Full Platform Launch
 
 - [ ] All core platform features implemented and tested
 - [ ] Scalable infrastructure supporting thousands of users
 - [ ] Comprehensive documentation and API
-- [ ] Mobile-responsive design verified
+- [ ] Mobile-responsive design
+- [ ] Enterprise features and security
 - [ ] Community moderation tools
 - [ ] Analytics and reporting dashboard
-
----
-
-## Backlog (Deferred)
-
-### Layout Engine Enhancements
-- [ ] Web Worker for layout computation (offload heavy calculation)
-- [ ] Swim lanes for concurrent events (horizontal card layout)
-- [ ] Two-pass bin packing with lookahead (better space utilization)
-- [ ] Global card type optimization (coordinate neighboring groups)
-
-### Requirements Standardization & Traceability
-**Goal:** Standardize SRS format and create automated traceability tooling
-
-**Analysis:**
-- [ ] Audit current SRS formats (compare SRS_STREAM_VIEW vs SRS_USER_SETTINGS_PAGE)
-- [ ] Document pros/cons of each format
-- [ ] Decide on unified format and apply consistently
-
-**Tooling:**
-- [ ] Create `// @req SRS_XXX::CC-REQ-XXX-NNN` comment tag convention
-- [ ] Build npm script to extract requirement tags from code
-- [ ] Auto-generate traceability matrix and append to SRS files
-- [ ] Integrate with CI to ensure requirements are linked
-
-**Migration:**
-- [ ] Update all SRS files to unified format
-- [ ] Add requirement tags to existing implementations
-
-### Test Gap Analysis & E2E Coverage
-**Goal:** Identify and fill testing gaps from recent features
-
-**Analysis:**
-- [ ] Inventory all v0.5.31-33 features lacking tests
-- [ ] Map features to SRS requirements
-- [ ] Prioritize critical paths for testing
-
-**Implementation:**
-- [ ] E2E tests for Settings page (login, display, password reset)
-- [ ] E2E tests for public profile access (non-auth viewing)
-- [ ] E2E tests for Stream View editing (mobile viewport)
-- [ ] E2E tests for Stream View swipe actions
-- [ ] Update test coverage tables in SRS files
-
-### Admin Panel Statistics
-**Goal:** Implement proper statistics dashboard in Admin page
-
-- [ ] Display platform-wide metrics (total users, timelines, events)
-- [ ] Activity charts (signups over time, timeline creation trends)
-- [ ] User engagement metrics
-- [ ] System health indicators
+- [ ] Monetization system implementation

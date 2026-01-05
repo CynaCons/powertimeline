@@ -16,8 +16,8 @@ export function NotFoundPage() {
     <Box
       sx={{
         minHeight: '100vh',
-        bgcolor: '#0d1117',
-        color: '#e6edf3',
+        bgcolor: 'var(--page-bg)',
+        color: 'var(--page-text-primary)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -26,7 +26,7 @@ export function NotFoundPage() {
       <Container maxWidth="sm" sx={{ textAlign: 'center', py: 8 }}>
         {/* Icon */}
         <Box sx={{ mb: 4 }}>
-          <TimelineIcon sx={{ fontSize: 80, color: '#8b5cf6', opacity: 0.6 }} />
+          <TimelineIcon sx={{ fontSize: 80, color: 'var(--page-accent)', opacity: 0.6 }} />
         </Box>
 
         {/* 404 Number */}
@@ -35,7 +35,7 @@ export function NotFoundPage() {
           sx={{
             fontSize: { xs: '6rem', md: '8rem' },
             fontWeight: 800,
-            background: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)',
+            background: 'var(--gradient-brand)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -52,7 +52,7 @@ export function NotFoundPage() {
           sx={{
             mb: 2,
             fontWeight: 600,
-            color: '#e6edf3',
+            color: 'var(--page-text-primary)',
           }}
         >
           Timeline not found
@@ -63,7 +63,7 @@ export function NotFoundPage() {
           variant="body1"
           sx={{
             mb: 5,
-            color: '#8d96a0',
+            color: 'var(--page-text-secondary)',
             fontSize: '1.1rem',
             lineHeight: 1.6,
           }}
@@ -80,15 +80,15 @@ export function NotFoundPage() {
             startIcon={<HomeIcon />}
             onClick={() => navigate('/')}
             sx={{
-              bgcolor: '#f97316',
-              color: '#fff',
+              bgcolor: 'var(--color-beta-orange)',
+              color: '#ffffff',
               px: 4,
               py: 1.5,
               borderRadius: 2,
               textTransform: 'none',
               fontWeight: 600,
               '&:hover': {
-                bgcolor: '#ea580c',
+                bgcolor: '#ea580c', // Darker orange on hover
               },
             }}
           >
@@ -100,16 +100,16 @@ export function NotFoundPage() {
             startIcon={<SearchIcon />}
             onClick={() => navigate('/browse')}
             sx={{
-              borderColor: '#30363d',
-              color: '#e6edf3',
+              borderColor: 'var(--page-border)',
+              color: 'var(--page-text-primary)',
               px: 4,
               py: 1.5,
               borderRadius: 2,
               textTransform: 'none',
               fontWeight: 600,
               '&:hover': {
-                borderColor: '#8b5cf6',
-                bgcolor: 'rgba(139, 92, 246, 0.1)',
+                borderColor: 'var(--page-accent)',
+                bgcolor: 'var(--input-focus-shadow)',
               },
             }}
           >
@@ -123,7 +123,7 @@ export function NotFoundPage() {
           sx={{
             display: 'block',
             mt: 8,
-            color: '#6e7681',
+            color: 'var(--page-text-secondary)',
           }}
         >
           Lost? Try searching for what you're looking for.

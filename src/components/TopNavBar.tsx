@@ -8,8 +8,6 @@
 
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography } from '@mui/material';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
 import { UserProfileMenu } from './UserProfileMenu';
 
@@ -61,7 +59,7 @@ export function TopNavBar() {
             onClick={() => navigate('/')}
             data-testid="logo-button"
           >
-            <TimelineIcon sx={{ color: 'var(--page-accent)', fontSize: 28 }} />
+            <span className="material-symbols-rounded" style={{ color: 'var(--page-accent)', fontSize: '28px' }}>timeline</span>
             <Typography
               variant="h6"
               sx={{
@@ -133,7 +131,7 @@ export function TopNavBar() {
             ) : (
               <Button
                 variant="outlined"
-                startIcon={<LoginIcon />}
+                startIcon={<span className="material-symbols-rounded" style={{ fontSize: '20px' }}>login</span>}
                 onClick={() => navigate('/login')}
                 data-testid="sign-in-button"
                 sx={{

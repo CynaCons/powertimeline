@@ -89,13 +89,6 @@
   --color-border-secondary: var(--color-neutral-300);
   --color-border-strong: var(--color-neutral-400);
 
-  /* Shadows */
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --shadow-sm: 0 1px 3px var(--shadow-color);
-  --shadow-md: 0 4px 6px var(--shadow-color);
-  --shadow-lg: 0 10px 20px var(--shadow-color);
-  --shadow-xl: 0 20px 40px var(--shadow-color);
-
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
   --transition-medium: 300ms ease-in-out;
@@ -137,12 +130,6 @@
   --color-border-secondary: var(--color-neutral-600);
   --color-border-strong: var(--color-neutral-500);
 
-  /* Enhanced shadows for dark mode */
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 1px 3px var(--shadow-color);
-  --shadow-md: 0 4px 6px var(--shadow-color);
-  --shadow-lg: 0 10px 20px var(--shadow-color);
-  --shadow-xl: 0 20px 40px var(--shadow-color);
 }
 
 /* High Contrast Mode Support */
@@ -331,27 +318,8 @@
   z-index: 20;
 }
 
-/* Timeline cards - shared hover polish */
-.timeline-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform var(--pt-hover-duration) var(--pt-hover-ease),
-    box-shadow var(--pt-hover-duration) var(--pt-hover-ease),
-    border-color var(--pt-hover-duration) var(--pt-hover-ease);
-}
-
-.timeline-card:hover {
-  transform: scale(1.02);
-  border-color: var(--card-border-hover);
-  box-shadow: var(--shadow-lg);
-}
-
-.timeline-card:active {
-  transform: scale(0.995);
-  box-shadow: var(--shadow-md);
-}
+/* Timeline cards - now defined in tokens.css (Phase 4A) */
+/* Styles moved to tokens.css for better organization */
 
 .pt-button {
   --pt-button-bg: transparent;
@@ -386,7 +354,12 @@
 .pt-button:active {
   background-color: var(--pt-button-bg-active);
   box-shadow: var(--pt-button-shadow-active);
-  transform: translateY(0);
+  transform: scale(0.98);
+}
+
+.pt-button:focus-visible {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 2px;
 }
 
 .pt-icon-button {
@@ -783,11 +756,16 @@
   }
 
   .card-enter,
-  .card-exit {
+  .card-exit,
+  .card-animate {
     animation: none;
+    opacity: 1;
   }
 
-  .skeleton-shimmer {
+  .skeleton-shimmer,
+  .skeleton-block,
+  .skeleton-pill,
+  .skeleton-circle {
     animation: none;
   }
 
@@ -827,11 +805,6 @@
 /* ================================
  * Navigation & Interaction Styles
  * ================================ */
-
-:root {
-  --nav-hover-bg: color-mix(in srgb, var(--page-accent) 16%, var(--nav-bg, transparent));
-  --nav-active-bg: color-mix(in srgb, var(--page-accent) 22%, var(--nav-bg, transparent));
-}
 
 /* Navigation Rail Styles */
 .navigation-rail {
@@ -1153,4 +1126,26 @@ kbd {
   border-color: var(--color-primary-400) !important;
   box-shadow: 0 0 8px rgba(66, 165, 245, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
   transform: rotate(45deg) scale(1.1) !important;
+}
+
+/* ================================
+ * Mobile Navigation Styles
+ * CC-REQ-MOB-001: Mobile-first navigation accessibility
+ * ================================ */
+
+/* Safe area inset for iOS devices (notch, home indicator) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Content padding when bottom navigation is present */
+.has-bottom-nav {
+  padding-bottom: 5rem; /* 80px - height of bottom nav + breathing room */
+}
+
+@media (min-width: 768px) {
+  /* Remove bottom padding on desktop where NavigationRail is visible */
+  .has-bottom-nav {
+    padding-bottom: 0;
+  }
 }

@@ -12,6 +12,7 @@ import { signOutUser } from '../services/auth';
 import { getUser, getUserByUsername, getTimelines, getTimeline } from '../services/firestore';
 import { downloadTimelineAsYaml } from '../services/timelineImportExport';
 import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
+import { BottomNavigation } from '../components/BottomNavigation';
 import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
 import { UserProfileMenu } from '../components/UserProfileMenu';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
@@ -372,11 +373,11 @@ export function UserProfilePage() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
                 <UserAvatar user={user} size="xlarge" />
-                <div className="flex-1">
+                <div className="flex-1 text-center md:text-left">
                   <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--page-text-primary)' }}>@{user.username}</h1>
-                  <div className="mt-4 flex items-center gap-6 text-sm">
+                  <div className="mt-4 grid grid-cols-3 gap-4 text-sm max-w-md mx-auto md:mx-0 md:flex md:gap-6">
                     <div>
                       <span className="font-semibold" style={{ color: 'var(--page-text-primary)' }}>{timelines.length}</span>
                       <span className="ml-1" style={{ color: 'var(--page-text-secondary)' }}>Timelines</span>
@@ -403,8 +404,8 @@ export function UserProfilePage() {
           </div>
         </div>
 
-        {/* User Timelines */}
-        <main className="px-4 md:px-8 py-6 md:py-8">
+        {/* User Timelines - has-bottom-nav adds padding for mobile bottom navigation */}
+        <main className="px-4 md:px-8 py-6 md:py-8 has-bottom-nav">
         {error ? (
           <div className="py-12">
             <ErrorState
@@ -475,13 +476,13 @@ export function UserProfilePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-center sm:justify-items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:justify-items-start">
             {Array.from({ length: 6 }).map((_, index) => (
               <SkeletonCard key={`user-timeline-skeleton-${index}`} />
             ))}
           </div>
         ) : timelines.length === 0 ? (
-          <div className="border-2 border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <div className="border border-dashed rounded-xl p-12 text-center" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
             <p style={{ color: 'var(--page-text-secondary)' }}>
               {isViewingOwnProfile
                 ? `@${user?.username || 'User'} hasn't created any timelines yet`
@@ -491,7 +492,7 @@ export function UserProfilePage() {
         ) : (
           <div
             data-testid="user-timelines-grid"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[600px] overflow-y-auto pr-2 justify-items-center sm:justify-items-start"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pr-2 sm:justify-items-start"
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--page-border) transparent'
@@ -501,7 +502,7 @@ export function UserProfilePage() {
               <div
                 key={`user-profile-${timeline.id}`}
                 data-testid={`timeline-card-${timeline.id}`}
-                className="timeline-card rounded-lg p-4 relative w-full max-w-sm"
+                className="timeline-card card-animate p-5 relative w-full max-w-sm"
                 style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
               >
                 {/* Kebab menu - only show if current user is the owner */}
@@ -520,7 +521,18 @@ export function UserProfilePage() {
                 )}
 
                 {/* Card content - clickable to navigate */}
-                <div onClick={() => handleTimelineClick(timeline)} className="cursor-pointer relative flex flex-col h-full min-h-[140px]">
+                <div
+                  onClick={() => handleTimelineClick(timeline)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleTimelineClick(timeline);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="link"
+                  className="cursor-pointer relative flex flex-col h-full min-h-[140px] focus:outline-none focus:ring-2 focus:ring-[var(--page-accent)] focus:ring-offset-2"
+                >
                   <h3 className="font-semibold mb-2 pr-8" style={{ color: 'var(--page-text-primary)' }}>{timeline.title}</h3>
                   <p className="text-sm mb-3 line-clamp-2 flex-grow" style={{ color: 'var(--page-text-secondary)' }}>
                     {timeline.description || 'No description'}
@@ -604,6 +616,9 @@ export function UserProfilePage() {
         onClose={() => setImportTimelineDialogOpen(false)}
         onSuccess={handleCreateTimelineSuccess}
       />
+
+      {/* Mobile Bottom Navigation - hidden on md+ screens */}
+      <BottomNavigation />
     </div>
     </>
   );

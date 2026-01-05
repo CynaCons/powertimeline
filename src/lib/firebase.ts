@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import type { FirebaseApp } from 'firebase/app';
-import { initializeFirestore, enableIndexedDbPersistence, memoryLocalCache } from 'firebase/firestore';
+import { initializeFirestore, enableIndexedDbPersistence, memoryLocalCache, memoryLruGarbageCollector } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 // Analytics is lazy-loaded to reduce initial bundle size (P1-7)
 import type { Analytics } from 'firebase/analytics';
@@ -40,7 +40,9 @@ if (isSafariOrWebKit) {
   // to avoid IndexedDB persistence hangs (known Firebase v12.x + WebKit issue)
   db = initializeFirestore(app, {
     experimentalForceLongPolling: true,
-    localCache: memoryLocalCache(),
+    localCache: memoryLocalCache({
+      garbageCollector: memoryLruGarbageCollector({ cacheSizeBytes: 40_000_000 })  // 40MB limit
+    }),
   });
   if (typeof window !== 'undefined') {
     console.info('Firebase: Using long-polling mode for Safari/WebKit compatibility');
