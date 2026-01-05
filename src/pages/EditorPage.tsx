@@ -255,11 +255,11 @@ export function EditorPage() {
 
       <div className="relative">
         {/* Breadcrumb navigation - shown in all modes (owner and read-only) */}
-        {/* Transparent by default (behind cards), visible on hover (above cards) */}
+        {/* Always above cards (z-30 > card z-25) so hover triggers, but visually transparent until hovered */}
         {/* z-[1400] when stream view open to appear above overlay (z-1300) */}
         {timeline && user && (
           <div
-            className={`absolute top-11 left-20 group ${streamViewerOpen ? 'z-[1400]' : 'z-[5] hover:z-[70]'}`}
+            className={`absolute top-11 left-20 group ${streamViewerOpen ? 'z-[1400]' : 'z-[30] hover:z-[70]'}`}
           >
             <div
               className="rounded px-3 py-0.5 inline-flex items-center gap-2 transition-all duration-200"

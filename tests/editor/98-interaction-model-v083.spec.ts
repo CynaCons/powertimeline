@@ -15,8 +15,12 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     await page.goto('/cynacons/timeline/french-revolution');
     await page.waitForSelector('[data-testid="timeline-canvas"]', { timeout: 10000 });
 
-    // Wait for layout to stabilize
-    await page.waitForTimeout(500);
+    // Wait for telemetry to be populated (layout + 500ms throttle)
+    // Poll until viewWindow is available instead of fixed wait
+    await page.waitForFunction(
+      () => (window as any).__ccTelemetry?.viewWindow !== undefined,
+      { timeout: 10000, polling: 100 }
+    );
   });
 
   test('T98.1: Selection zoom - click+drag creates selection and zooms', async ({ page }) => {
@@ -62,8 +66,16 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     // Release mouse to trigger zoom
     await page.mouse.up();
 
-    // Wait for zoom animation
-    await page.waitForTimeout(300);
+    // Wait for telemetry to update (layout + 500ms throttle)
+    // Poll until viewWindow changes from the initial state
+    await page.waitForFunction(
+      (initial: { start: number; end: number }) => {
+        const current = (window as any).__ccTelemetry?.viewWindow;
+        return current && (current.start !== initial.start || current.end !== initial.end);
+      },
+      initialView,
+      { timeout: 5000, polling: 100 }
+    );
 
     // Get new view window
     const newView = await page.evaluate(() => {
@@ -102,7 +114,15 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
       await page.mouse.wheel(0, -100);
       await page.waitForTimeout(100);
     }
-    await page.waitForTimeout(300);
+
+    // Wait for telemetry to show zoomed state (width < 1)
+    await page.waitForFunction(
+      () => {
+        const current = (window as any).__ccTelemetry?.viewWindow;
+        return current && (current.end - current.start) < 1;
+      },
+      { timeout: 5000, polling: 100 }
+    );
 
     // Get initial view window (after zoom)
     const initialView = await page.evaluate(() => {
@@ -145,8 +165,15 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     // Release Space key
     await page.keyboard.up('Space');
 
-    // Wait for pan to complete
-    await page.waitForTimeout(100);
+    // Wait for telemetry to update (layout + 500ms throttle)
+    await page.waitForFunction(
+      (initial: { start: number; end: number }) => {
+        const current = (window as any).__ccTelemetry?.viewWindow;
+        return current && (current.start !== initial.start || current.end !== initial.end);
+      },
+      initialView,
+      { timeout: 5000, polling: 100 }
+    );
 
     // Get new view window
     const newView = await page.evaluate(() => {
@@ -202,8 +229,15 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     // Scroll up to zoom in (negative deltaY)
     await page.mouse.wheel(0, -100);
 
-    // Wait for zoom to complete
-    await page.waitForTimeout(100);
+    // Wait for telemetry to update (layout + 500ms throttle)
+    await page.waitForFunction(
+      (initial: { start: number; end: number }) => {
+        const current = (window as any).__ccTelemetry?.viewWindow;
+        return current && (current.start !== initial.start || current.end !== initial.end);
+      },
+      initialView,
+      { timeout: 5000, polling: 100 }
+    );
 
     // Get new view window
     const newView = await page.evaluate(() => {
@@ -228,7 +262,15 @@ test.describe('v0.8.3 Interaction Model Tests', () => {
     // Scroll down to zoom out (positive deltaY)
     await page.mouse.wheel(0, 100);
 
-    await page.waitForTimeout(100);
+    // Wait for telemetry to update after zoom out
+    await page.waitForFunction(
+      (before: { start: number; end: number }) => {
+        const current = (window as any).__ccTelemetry?.viewWindow;
+        return current && (current.start !== before.start || current.end !== before.end);
+      },
+      viewBeforeZoomOut,
+      { timeout: 5000, polling: 100 }
+    );
 
     const viewAfterZoomOut = await page.evaluate(() => {
       return (window as any).__ccTelemetry?.viewWindow;

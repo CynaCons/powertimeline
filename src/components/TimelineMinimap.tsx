@@ -57,6 +57,7 @@ export function TimelineMinimap({
   const [dragStartViewStart, setDragStartViewStart] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const minimapRef = useRef<HTMLDivElement>(null);
+  const minimapRectRef = useRef<DOMRect | null>(null);
   
   // Calculate timeline date range
   const timelineRange = useMemo(() => {
@@ -165,22 +166,29 @@ export function TimelineMinimap({
   // Handle view window dragging
   const handleViewWindowMouseDown = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Cache minimap dimensions on drag start to avoid layout thrashing
+    if (minimapRef.current) {
+      minimapRectRef.current = minimapRef.current.getBoundingClientRect();
+    }
+
     setIsDragging(true);
     setDragStartX(e.clientX);
     setDragStartViewStart(viewStart);
   }, [viewStart]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !minimapRef.current) return;
-    
-    const rect = minimapRef.current.getBoundingClientRect();
+    if (!isDragging || !minimapRectRef.current) return;
+
+    // Use cached rect to avoid layout thrashing on every mousemove
+    const rect = minimapRectRef.current;
     const deltaX = e.clientX - dragStartX;
     const deltaRatio = deltaX / rect.width;
-    
+
     const currentViewWidth = viewEnd - viewStart;
     let newStart = dragStartViewStart + deltaRatio;
     let newEnd = newStart + currentViewWidth;
-    
+
     // Clamp to boundaries
     if (newStart < 0) {
       newStart = 0;
@@ -189,7 +197,7 @@ export function TimelineMinimap({
       newEnd = 1;
       newStart = 1 - currentViewWidth;
     }
-    
+
     onNavigate(newStart, newEnd);
   }, [isDragging, dragStartX, dragStartViewStart, viewStart, viewEnd, onNavigate]);
 

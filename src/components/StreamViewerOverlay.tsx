@@ -111,25 +111,20 @@ export function StreamViewerOverlay({
   const handleEventClick = (event: Event) => {
     setSelectedEventId(event.id);
 
-    // Mobile: owners get edit panel for quick inline editing
-    // Desktop: navigate to editor view for better editing experience
-    if (isOwner && isMobile) {
-      openEditPanelForEvent(event);
+    // Mobile: tap selects event and scrolls to it (use swipe-right to edit)
+    // Desktop: close Stream View and navigate to event in editor
+    if (isMobile) {
+      // On mobile, just select and scroll - editing via swipe or edit button
+      setTimeout(() => {
+        const eventElement = scrollContainerRef.current?.querySelector(`[data-event-id="${event.id}"]`);
+        if (eventElement) {
+          eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 50);
     } else {
-      // Close Stream View and navigate to event in editor
+      // On desktop, close Stream View and navigate to event in editor
       onEventClick?.(event);
-      if (!isMobile) {
-        // On desktop, close Stream View to show editor
-        onClose();
-      } else {
-        // On mobile for non-owners, scroll to selected event
-        setTimeout(() => {
-          const eventElement = scrollContainerRef.current?.querySelector(`[data-event-id="${event.id}"]`);
-          if (eventElement) {
-            eventElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }, 50);
-      }
+      onClose();
     }
   };
 

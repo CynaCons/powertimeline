@@ -14,7 +14,8 @@
  */
 
 import { useMemo, useState, useRef, useEffect, memo, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { VariableSizeList as List } from 'react-window';
+import type { VariableSizeList } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import type { Event } from '../types';
@@ -141,9 +142,11 @@ const StreamEventCard = memo(function StreamEventCard({
   const touchStartX = useRef<number | null>(null);
   const currentSwipeDirection = useRef<'left' | 'right' | null>(null);
 
-  // P2-7: Removed JS truncation detection - now using CSS-only line clamping
-  // Show "expand" button based on description length heuristic (> ~150 chars suggests truncation)
-  const showExpandButton = event.description && (isExpanded || event.description.length > 150);
+  // P2-7: Show "expand" button based on character-per-line heuristic
+  // Average ~70 chars per line, with lineClamp lines visible, so threshold = lineClamp * 70
+  // Only show if description exceeds what would fit in the clamped area
+  const estimatedVisibleChars = lineClamp * 70;
+  const showExpandButton = event.description && (isExpanded || event.description.length > estimatedVisibleChars);
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // If clicking the expand button, don't trigger the main onClick
@@ -220,7 +223,7 @@ const StreamEventCard = memo(function StreamEventCard({
   }, [isOwner, event.id, onSwipeAction]);
 
   return (
-    <div style={style}>
+    <div style={{ ...style, paddingTop: 16 }}>
     <Box
       data-event-id={event.id}
       onClick={handleCardClick}
@@ -673,42 +676,87 @@ export function StreamViewer({
   const total = totalEvents ?? events.length;
   const isFiltered = searchQuery && searchQuery.trim().length > 0;
 
-  // P0-5: Item size for virtualized list - adjusted based on typical card height
-  const ITEM_SIZE = 120;
+  // P0-5: Dynamic item sizes for VariableSizeList (v0.8.13)
+  // Add 16px for top padding (space for hover icons above cards)
+  const COLLAPSED_HEIGHT = 136; // 120 + 16
+  const EXPANDED_HEIGHT = 216; // 200 + 16
+  const listRef = useRef<VariableSizeList>(null);
+
+  // Calculate dynamic item size based on expanded state
+  const getItemSize = useCallback((index: number) => {
+    const event = sortedEvents[index];
+    return expandedEvents.has(event.id) ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT;
+  }, [sortedEvents, expandedEvents]);
+
+  // Reset list when expandedEvents changes
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.resetAfterIndex(0);
+    }
+  }, [expandedEvents]);
+
+  // P0-5: itemData pattern for react-window - all data passed via itemData prop
+  // This avoids closure issues and allows Row callback to have empty deps
+  const itemData = useMemo(() => ({
+    sortedEvents,
+    selectedEventId,
+    expandedEvents,
+    swipedEventId,
+    swipeDirection,
+    lineClamp,
+    handleClick,
+    toggleExpand,
+    isOwner,
+    handleSwipeAction,
+    onDelete,
+    onEdit,
+    onViewOnCanvas,
+    onEditInEditor,
+    onEventMouseEnter,
+    onEventMouseLeave,
+  }), [
+    sortedEvents, selectedEventId, expandedEvents, swipedEventId, swipeDirection,
+    lineClamp, handleClick, toggleExpand, isOwner, handleSwipeAction,
+    onDelete, onEdit, onViewOnCanvas, onEditInEditor, onEventMouseEnter, onEventMouseLeave
+  ]);
+
+  // Type for itemData to use in Row component
+  type ItemData = typeof itemData;
 
   // P0-5: Row renderer for react-window virtualization
   // Note: Must be defined before early returns to comply with Rules of Hooks
-  const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const event = sortedEvents[index];
+  // All data comes via itemData prop - empty deps array to avoid recreating callback
+  const Row = useCallback(({ index, style, data }: {
+    index: number;
+    style: React.CSSProperties;
+    data: ItemData;
+  }) => {
+    const event = data.sortedEvents[index];
     return (
       <StreamEventCard
         key={event.id}
         event={event}
         index={index}
-        isLast={index === sortedEvents.length - 1}
-        isSelected={selectedEventId === event.id}
-        isExpanded={expandedEvents.has(event.id)}
-        lineClamp={lineClamp}
-        onClick={handleClick}
-        onToggleExpand={toggleExpand}
-        isOwner={isOwner}
-        swipedEventId={swipedEventId}
-        swipeDirection={swipeDirection}
-        onSwipeAction={handleSwipeAction}
-        onDelete={onDelete}
-        onEdit={onEdit}
-        onViewOnCanvas={onViewOnCanvas}
-        onEditInEditor={onEditInEditor}
-        onMouseEnter={onEventMouseEnter}
-        onMouseLeave={onEventMouseLeave}
+        isLast={index === data.sortedEvents.length - 1}
+        isSelected={data.selectedEventId === event.id}
+        isExpanded={data.expandedEvents.has(event.id)}
+        lineClamp={data.lineClamp}
+        onClick={data.handleClick}
+        onToggleExpand={data.toggleExpand}
+        isOwner={data.isOwner}
+        swipedEventId={data.swipedEventId}
+        swipeDirection={data.swipeDirection}
+        onSwipeAction={data.handleSwipeAction}
+        onDelete={data.onDelete}
+        onEdit={data.onEdit}
+        onViewOnCanvas={data.onViewOnCanvas}
+        onEditInEditor={data.onEditInEditor}
+        onMouseEnter={data.onEventMouseEnter}
+        onMouseLeave={data.onEventMouseLeave}
         style={style}
       />
     );
-  }, [
-    sortedEvents, selectedEventId, expandedEvents, lineClamp, handleClick,
-    toggleExpand, isOwner, swipedEventId, swipeDirection, handleSwipeAction,
-    onDelete, onEdit, onViewOnCanvas, onEditInEditor, onEventMouseEnter, onEventMouseLeave
-  ]);
+  }, []);
 
   if (total === 0) {
     return (
@@ -749,10 +797,12 @@ export function StreamViewer({
           <AutoSizer>
             {({ height, width }: { height: number; width: number }) => (
               <List
+                ref={listRef}
                 height={height - 60} /* Account for footer */
                 width={width}
                 itemCount={sortedEvents.length}
-                itemSize={ITEM_SIZE}
+                itemSize={getItemSize}
+                itemData={itemData}
                 overscanCount={5}
               >
                 {Row}

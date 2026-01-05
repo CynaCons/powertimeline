@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.10 - State Architecture Refactor
+**Current Version:** v0.8.15 - UX Polish (Breadcrumbs, Stream View, Test Fixes)
 **Next Milestone:** v0.9.0 - Claude Code Integration
 
 ### Key Metrics
@@ -92,16 +92,18 @@
 - ✅ Test Suite Stabilization: Fixed Shift+scroll stale closure bug (race-free immediate ref updates), migrated tests to public timelines, added data-testid attrs, deleted diagnostic tests, documented in TESTS.md (v0.8.3.2)
 - ✅ Safari/WebKit Firebase Fix: Long-polling + memoryLocalCache to avoid IndexedDB hangs, mobile overflow fixes, Stream View auto-open fix (v0.8.8)
 - ✅ Performance Optimization: StreamViewer virtualization, parallel data loading, Firebase chunking, zoom fix (v0.8.9)
+- ✅ ownerUsername Denormalization: Eliminated getUsers() fetch, O(users)→O(timelines) improvement (v0.8.11)
+- ✅ Performance Optimization: Collision resolution caching, minimap/axis rect caching, spatial hash optimization (v0.8.14)
+- ✅ UX Polish: Breadcrumb z-index fix, Stream View hover buttons, show more calculation, mobile tap behavior (v0.8.15)
 
 ### Next Up
-- **v0.8.10**: State Architecture Refactor (extract timeline state from App.tsx)
 - **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
 - **Playwright E2E:** ~450 tests in ~120 spec files
-- **Vitest Unit:** 58 tests
-- **Total:** ~508 automated tests
+- **Vitest Unit:** 109 tests
+- **Total:** ~559 automated tests
 - **Production Tests:** 24/27 passing (3 app-level issues)
 - **Editor/Visual Tests:** 129+ passing, ~25 skipped (auth-required features)
 - **Test Infrastructure:** Tests use public timelines (no auth needed), documented in `docs/TESTS.md`
@@ -1063,6 +1065,134 @@
 **Deferred:**
 - Phase 4 deferred as it involves complex Firestore sync, optimistic updates, and rollback logic
 - Current refactoring already achieves significant organization improvement
+
+### v0.8.11 - ownerUsername Denormalization ✅
+**Goal:** Eliminate expensive `getUsers()` fetch on HomePage by denormalizing username onto timeline documents
+
+**Performance Issue:**
+- HomePage fetched ALL users just to display ~24 owner usernames on timeline cards
+- O(total users) → O(displayed timelines) improvement
+
+**Implementation:**
+- [x] Add optional `ownerUsername` field to `TimelineMetadata` type
+- [x] Update `createTimeline()` to fetch owner and set `ownerUsername`
+- [x] Add `migrateTimelineOwnerUsernames()` for backfilling existing timelines
+- [x] Add `searchUsersByUsername()` for on-demand Firestore prefix queries
+- [x] Remove `getUsers()` call from HomePage data loading
+- [x] Replace in-memory user search with async Firestore query (like GitHub/X)
+- [x] Update SRS_DB.md (DB-TL-011) and SRS_HOME_PAGE.md
+
+**Testing:**
+- [x] Update test schema allowlists (dev-srs-db.spec.ts, prod-srs-db.spec.ts)
+- [x] Build passes, 109 unit tests pass, 20/20 smoke tests pass
+
+**Migration Complete:**
+- [x] Dev: 259 timelines updated (5 orphaned timelines skipped)
+- [x] Prod: 12 timelines updated
+- [x] Legacy data cleanup: removed `events` field from 1 timeline (both envs), fixed 289 events missing `id` field (prod)
+- [x] Test fix: added `sources` to ALLOWED_EVENT_FIELDS (Event Sources feature from v0.6.3)
+
+### v0.8.12 - Performance Improvements ✅
+**Goal:** Targeted performance fixes for Safari memory constraints and data loading patterns
+**Status:** Complete (Phases 1-2 implemented, Phases 3-4 deferred to v0.8.13)
+
+**Completed (2026-01-04):**
+- [x] Phase 1.1: Safari memory cache 40MB limit (src/lib/firebase.ts:40-42)
+  - Reduced Firestore memory cache from unlimited to 40MB for Safari/WebKit
+  - Prevents memory crashes on iOS devices with limited cache quota
+- [x] Phase 1.2: Navigation memoization (src/app/hooks/useEventSelection.ts:41-47,67-79)
+  - Added useMemo for sorted events array in useEventSelection hook
+  - Prevents re-sorting on every navigation callback invocation
+- [x] Phase 2: Firebase request batching (src/pages/HomePage.tsx:76-93)
+  - Two-batch data loading: critical data first (timelines, stats), then secondary (featured, popular)
+  - Improves perceived load time with progressive enhancement
+
+**Deferred to v0.8.13:**
+- [ ] Phase 3: Callback optimization (StreamViewerContext, Row component memoization)
+  - Caused test failures in 82-stream-viewer.spec.ts (T82.6, T82.7, T82.S1-S3)
+  - Test failures related to scroll functionality and event selection
+  - Reverted to maintain stability
+
+**Impact:**
+- Safari/WebKit: Improved stability with controlled memory usage
+- Navigation: Reduced redundant sorting operations
+- HomePage: Better perceived load time with batched requests
+
+### v0.8.13 - VariableSizeList Implementation ✅
+**Goal:** Implement dynamic item heights for StreamViewer expandable cards
+**Status:** Complete (2026-01-04)
+
+**Completed:**
+- [x] Phase 4: VariableSizeList for expandable event cards
+  - Changed from FixedSizeList to VariableSizeList (react-window)
+  - Dynamic heights: collapsed (120px) vs expanded (200px)
+  - Added listRef and getItemSize callback
+  - Reset list after index on expandedEvents changes
+  - Updated SRS_STREAM_VIEW.md: CC-REQ-STREAM-PERF-001
+
+**Impact:**
+- Expanded event cards no longer clip
+- Smooth height transitions when toggling expand/collapse
+- Maintains 17/23 test passing baseline (same test failures as before)
+
+### v0.8.14 - Performance Optimization ✅
+**Goal:** Reduce layout reflows and optimize collision detection
+**Status:** Complete (2026-01-05)
+
+**Completed:**
+- [x] TimelineMinimap.tsx: Cache rect on mousedown, reuse during drag
+- [x] EnhancedTimelineAxis.tsx: Cache axis rect for mouse events
+- [x] PositioningEngine.ts: Build spatial hash ONCE before collision loop, not per pass
+- [x] PositioningEngine.ts: Sort cards ONCE before collision loop, not per pass
+- [x] ~75% reduction in collision resolution overhead (4 rebuilds → 1)
+
+**Reverted (caused test failures):**
+- useViewWindow.ts batch setState changes
+- useTimelineZoom.ts caching changes
+- useElementSize.ts ResizeObserver changes
+- DeterministicLayoutComponent.tsx changes
+
+**Impact:**
+- Collision resolution: 75% overhead reduction
+- Max long task: ~8-12% improvement
+- Layout reflows in stress test: Maintained
+
+### Performance Test Suite ✅
+**Goal:** Comprehensive performance measurement infrastructure
+**Status:** Complete (2026-01-05)
+
+**Added:**
+- tests/performance/98-performance-profiling.spec.ts - CDP profiling with .cpuprofile output
+- tests/performance/99-performance-baseline.spec.ts - Pass/fail regression tests
+- tests/performance/100-advanced-metrics.spec.ts - Memory, FPS, layout thrashing, INP, long tasks
+- tests/performance/README.md - Documentation
+
+**Fixes (2026-01-05):**
+- T98/T100: Skip on non-Chromium (CDP requires Chromium, was failing on mobile/tablet WebKit)
+- 98-interaction-model-v083.spec.ts: Fixed telemetry wait (500ms throttle required polling instead of fixed waits)
+
+**Baselines (dev mode):**
+| Metric | Target | Threshold |
+|--------|--------|-----------|
+| Layout Reflows | <20 | Single operation |
+| Long Tasks | <600ms | Max duration |
+| INP | <800ms | Max interaction |
+
+### v0.8.15 - UX Polish ✅
+**Goal:** Fix breadcrumb visibility, Stream View buttons, and mobile interaction
+**Status:** Complete (2026-01-05)
+
+**Completed:**
+- [x] Breadcrumbs: z-[30] base so hover triggers above cards (was z-[5], below cards)
+- [x] Stream View hover buttons: Added 16px top padding for icon space above cards
+- [x] Stream View "show more": Threshold now `lineClamp * 70` chars (was 150, too aggressive)
+- [x] Mobile tap behavior: Tap selects event, swipe-right to edit (was tap-to-edit)
+
+**Impact:**
+- Breadcrumbs visible on hover in editor
+- Eye/edit buttons appear on Stream View card hover
+- "Show more" only appears when text is actually truncated
+- Mobile users can browse without accidentally editing
 
 ---
 

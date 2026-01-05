@@ -263,14 +263,15 @@ export class PositioningEngine {
       );
       const spacing = 8; // minimal gap
       const maxPasses = 4; // Reduced from 6 due to spatial hashing efficiency
+
+      // Build spatial hash ONCE before loop (optimization: avoid rebuilding on every pass)
+      const spatialHash = this.buildSpatialHash(items);
+
+      // Sort deterministically by area desc then x asc to move smaller ones first
+      const ordered = items.slice().sort((a, b) => (b.width * b.height) - (a.width * a.height) || a.x - b.x);
+
       for (let pass = 0; pass < maxPasses; pass++) {
         let changed = false;
-
-        // Build spatial hash at start of each pass (cards may have moved)
-        const spatialHash = this.buildSpatialHash(items);
-
-        // Sort deterministically by area desc then x asc to move smaller ones first
-        const ordered = items.slice().sort((a, b) => (b.width * b.height) - (a.width * a.height) || a.x - b.x);
 
         for (const A of ordered) {
           // Get nearby cells for this card

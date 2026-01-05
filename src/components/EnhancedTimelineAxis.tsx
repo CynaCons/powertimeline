@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type { Tick as AxisTick, TickScaleKind } from '../timeline/hooks/useAxisTicks';
 
 type VisualTickType = TickScaleKind | 'minute' | 'quarter';
@@ -37,6 +37,17 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 }) => {
   const [hoverX, setHoverX] = useState<number | null>(null);
   const axisSpanDays = timelineRange.dateRange / (24 * 60 * 60 * 1000);
+
+  // Cache axis rect to prevent layout thrashing on mouse events
+  const axisRectRef = useRef<DOMRect | null>(null);
+  const axisElementRef = useRef<HTMLDivElement | null>(null);
+
+  // Update cached rect when viewport size changes
+  useEffect(() => {
+    if (axisElementRef.current) {
+      axisRectRef.current = axisElementRef.current.getBoundingClientRect();
+    }
+  }, [viewportSize.width, viewportSize.height]);
 
   // Generate enhanced ticks with multiple levels
   const enhancedTicks = useMemo(() => {
@@ -226,7 +237,14 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 
   // Handle mouse interactions
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    // Use cached rect to prevent layout thrashing
+    if (!axisRectRef.current && axisElementRef.current) {
+      axisRectRef.current = axisElementRef.current.getBoundingClientRect();
+    }
+
+    if (!axisRectRef.current) return;
+
+    const rect = axisRectRef.current;
     const x = e.clientX - rect.left;
     setHoverX(x);
 
@@ -253,7 +271,14 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (onTimelineClick) {
-      const rect = e.currentTarget.getBoundingClientRect();
+      // Use cached rect to prevent layout thrashing
+      if (!axisRectRef.current && axisElementRef.current) {
+        axisRectRef.current = axisElementRef.current.getBoundingClientRect();
+      }
+
+      if (!axisRectRef.current) return;
+
+      const rect = axisRectRef.current;
       const x = e.clientX - rect.left;
 
       // Use the same margined coordinate system as hover date calculation
@@ -291,6 +316,7 @@ export const EnhancedTimelineAxis: React.FC<EnhancedTimelineAxisProps> = ({
 
   return (
     <div
+      ref={axisElementRef}
       className="absolute"
       style={{
         left: 0,
