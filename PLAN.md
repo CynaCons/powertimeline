@@ -2,8 +2,8 @@
 
 ## Quick Summary
 
-**Current Version:** v0.8.16 - Visual Audit Implementation (32 Items Complete)
-**Next Milestone:** v0.9.0 - Claude Code Integration
+**Current Version:** v0.9.0 - Unified Import Review System
+**Next Milestone:** v0.9.5 - AI Chat Migration to Unified System
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -98,7 +98,8 @@
 - ✅ Visual Audit Implementation: 32-item comprehensive polish - design tokens, bottom nav, WCAG accessibility, keyboard navigation, ARIA labels, animations (v0.8.16)
 
 ### Next Up
-- **v0.9.x**: Claude Code Integration (Firebase Proposals, PowerTimeline MCP)
+- **v0.9.0-v0.9.4**: Unified Import Review System (session-based YAML import with diff/merge)
+- **v0.9.5**: AI Chat Migration (use unified review system)
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
@@ -1274,36 +1275,76 @@
 
 ---
 
-## Phase 6: Claude Code Integration (v0.9.x)
-> **Vision:** Enable Claude Code to propose timeline events via Firebase, using the existing Review UI
+## Phase 6: Unified Import Review System (v0.9.x)
+> **Vision:** Session-based review for all incoming events (YAML import, AI chat, future PR/merge)
 
-### v0.9.0 - Firebase Proposals Infrastructure
-**Goal:** Set up Firebase schema and listeners for external AI proposals
-- [ ] Firestore Schema: `/users/{uid}/ai_proposals/{id}` with status, events, source, timestamps
-- [ ] Security Rules: Owner-only read/write for proposals collection
-- [ ] App Listener: `onSnapshot` listener for incoming proposals
-- [ ] Proposal Notification: Badge/indicator when new proposals arrive
+### v0.9.0 - Import Session Infrastructure
+**Goal:** Core session management with localStorage persistence
+**Status:** In Progress
 
-### v0.9.1 - Claude Token & Settings
-**Goal:** Allow users to generate auth tokens for Claude Code
-- [ ] Token Generation: Settings page to create/revoke Claude API tokens
-- [ ] Firebase Custom Tokens: Cloud Function to issue scoped tokens
-- [ ] Token Storage: Secure storage with expiry and revocation
-- [ ] Connection Status: Show active Claude connections in UI
+**Files to Create:**
+- `src/types/importSession.ts` - ImportSession, SessionEvent types
+- `src/hooks/useImportSession.ts` - Session management hook
+- `src/contexts/ImportSessionContext.tsx` - React context
 
-### v0.9.2 - PowerTimeline MCP Server
-**Goal:** Create MCP server for Claude Code integration
-- [ ] MCP Setup: New `powertimeline-mcp/` repo or folder
-- [ ] Firebase Auth: Authenticate with user's Claude token
-- [ ] Core Tools: `get_timeline`, `list_timelines`, `propose_events`
-- [ ] Status Tools: `get_proposal_status`, `get_timeline_schema`
+**Tasks:**
+- [ ] Define ImportSession, SessionEvent types
+- [ ] Create useImportSession hook with: startSession, updateDecision, updateEventData, commitSession, discardSession
+- [ ] localStorage persistence (auto-save on change)
+- [ ] Restore session on page reload
+- [ ] Unit tests for hook
 
-### v0.9.3 - Review UI Integration
-**Goal:** Route Claude proposals through existing Review UI
-- [ ] Proposal Panel: Show "Claude proposed X events" in ChatPanel or dedicated panel
-- [ ] Reuse Actions: Same approve/reject/restore/apply workflow as Gemini
-- [ ] Source Attribution: Tag applied events with "via Claude Code"
-- [ ] Proposal History: View past proposals and their outcomes
+### v0.9.1 - Review Panel UI
+**Goal:** Panel to review and manage session events
+
+**Files to Create:**
+- `src/app/panels/ReviewPanel.tsx` - Main review UI
+
+**Tasks:**
+- [ ] Event list with decision indicators (pending/accepted/rejected)
+- [ ] Per-event: Accept / Reject / Edit buttons
+- [ ] Progress indicator: "5 of 12 reviewed"
+- [ ] "Accept All Remaining" / "Commit Session" / "Discard Session" buttons
+- [ ] NavRail button with badge showing pending count
+- [ ] Keyboard shortcut: Alt+R
+
+### v0.9.2 - Timeline Preview
+**Goal:** Show session events on timeline with visual distinction
+
+**Tasks:**
+- [ ] Merge session events with real events for render
+- [ ] Visual distinction CSS (dashed borders, status badges)
+- [ ] Click session event → edit in AuthoringOverlay
+- [ ] Save edits to session (not Firestore)
+
+### v0.9.3 - YAML Import Integration
+**Goal:** Route YAML import through session system
+
+**Tasks:**
+- [ ] Parse YAML → detect CREATE vs UPDATE (by event ID)
+- [ ] Start import session with classified events
+- [ ] Close ImportExportOverlay → open ReviewPanel
+- [ ] Remove direct Firestore write from import
+
+### v0.9.4 - Diff View for Updates
+**Goal:** Side-by-side comparison for UPDATE actions
+
+**Files to Create:**
+- `src/components/EventDiffView.tsx` - Diff component
+
+**Tasks:**
+- [ ] Two-column layout: Existing | Imported
+- [ ] Highlight changed fields
+- [ ] "Keep Existing" / "Take Imported" / "Merge" options
+
+### v0.9.5 - AI Chat Migration
+**Goal:** Migrate AI integration to unified session system
+
+**Tasks:**
+- [ ] AI response → startSession('ai-chat', events)
+- [ ] Remove pendingActions state from useAISession
+- [ ] Keep ChatPanel for chat UI only
+- [ ] Actions appear in ReviewPanel automatically
 
 ---
 
