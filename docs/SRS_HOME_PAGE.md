@@ -1,6 +1,6 @@
 # Home Page & Timeline Discovery Requirements
 
-This document specifies requirements for the landing page and timeline discovery features (v0.5.29). The home page follows a modern, search-first design with the authenticated user's personal workspace prioritized, followed by discovery feeds backed by Firestore.
+This document specifies requirements for the landing page and timeline discovery features (v0.8.16). The home page follows a modern, search-first design with the authenticated user's personal workspace prioritized, followed by discovery feeds backed by Firestore.
 
 ## Scope
 
@@ -64,7 +64,7 @@ The home page sections appear in this order (top to bottom):
 | CC-REQ-STATS-003 | Display total user count | - Metric label: "Users"<br>- Value: count of all users from platform stats document<br>- Updates when Cloud Functions refresh stats<br>- Icon: user icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
 | CC-REQ-STATS-004 | Display total events across all timelines | - Metric label: "Events Documented"<br>- Value: sum of event counts across all timelines<br>- Updates when events added/removed<br>- Icon: event icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
 | CC-REQ-STATS-005 | Display total views/engagement metric | - Metric label: "Total Views"<br>- Value: sum of view counts from platform stats document<br>- Increments when timelines are opened (tracked in Firestore)<br>- Icon: view icon | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
-| CC-REQ-STATS-006 | Highlight most active timeline (deferred) | - Highlight card deferred to discovery refresh; not rendered in v0.5.29<br>- When implemented, shows title, last editor, time since edit<br>- Clickable to navigate to timeline<br>- Refreshes when any timeline edited | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
+| CC-REQ-STATS-006 | Highlight most active timeline (deferred) | - Highlight card deferred to discovery refresh; not yet implemented<br>- When implemented, shows title, last editor, time since edit<br>- Clickable to navigate to timeline<br>- Refreshes when any timeline edited | `src/pages/HomePage.tsx:904-944`, `src/services/firestore.ts:1068-1150` | TBD |
 
 ### Recently Edited Feed
 
