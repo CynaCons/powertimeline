@@ -1,6 +1,6 @@
 # PowerTimeline
 
-**Version:** v0.8.15 | **Status:** Production-Ready Beta
+**Live:** [powertimeline.com](https://powertimeline.com) | **Version:** v0.8.15 | **Status:** Production-Ready Beta
 
 **GitHub for Timelines** - Collaborative historical event visualization and timeline management platform.
 
