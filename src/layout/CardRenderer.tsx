@@ -3,6 +3,8 @@ import type { PositionedCard, CardType } from './types';
 import type { Event } from '../types';
 import { getEventIcon } from './cardIcons';
 
+type SessionDecision = 'pending' | 'accepted' | 'rejected';
+
 interface CardRendererProps {
   card: PositionedCard;
   isSelected?: boolean;
@@ -10,6 +12,7 @@ interface CardRendererProps {
   onClick?: (card: PositionedCard) => void;
   onDoubleClick?: (card: PositionedCard) => void;
   isFirstCard?: boolean;
+  sessionDecision?: SessionDecision;
 }
 
 export function CardRenderer({
@@ -18,11 +21,13 @@ export function CardRenderer({
   isHovered = false,
   onClick,
   onDoubleClick,
-  isFirstCard = false
+  isFirstCard = false,
+  sessionDecision
 }: CardRendererProps) {
   // SRS_DB.md compliant - category field removed, use default gradient
   const gradientClass = getGradientClass(card.cardType);
   const elevationClass = getElevationClass(card.cardType, isSelected, isHovered);
+  const sessionDecisionClass = sessionDecision ? `session-event-${sessionDecision}` : '';
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClick?.(card);
@@ -63,6 +68,7 @@ export function CardRenderer({
         ${elevationClass}
         ${isSelected ? 'card-selected' : ''}
         ${isPreview ? 'card-preview' : ''}
+        ${sessionDecisionClass}
       `}
       style={{
         left: card.x - card.width / 2,
@@ -74,7 +80,7 @@ export function CardRenderer({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
     >
-      {renderCardContent(card)}
+      {renderCardContent(card, sessionDecision)}
     </div>
   );
 }
@@ -115,23 +121,24 @@ function getElevationClass(cardType: CardType, isSelected: boolean, isHovered: b
   }
 }
 
-function renderCardContent(card: PositionedCard): React.ReactNode {
+function renderCardContent(card: PositionedCard, sessionDecision?: SessionDecision): React.ReactNode {
   const event = card.event;
   
   switch (card.cardType) {
     case 'full':
-      return <FullCardContent event={event} />;
+      return <FullCardContent event={event} sessionDecision={sessionDecision} />;
     case 'compact':
-      return <CompactCardContent event={event} />;
+      return <CompactCardContent event={event} sessionDecision={sessionDecision} />;
     case 'title-only':
-      return <TitleOnlyCardContent event={event} />;
+      return <TitleOnlyCardContent event={event} sessionDecision={sessionDecision} />;
     default:
-      return <FullCardContent event={event} />;
+      return <FullCardContent event={event} sessionDecision={sessionDecision} />;
   }
 }
 
-function FullCardContent({ event }: { event: Event }) {
+function FullCardContent({ event, sessionDecision }: { event: Event; sessionDecision?: SessionDecision }) {
   const eventIcon = getEventIcon(event);
+  const sessionBadge = getSessionBadge(sessionDecision);
 
   return (
     <div className="h-full flex flex-col">
@@ -140,6 +147,7 @@ function FullCardContent({ event }: { event: Event }) {
           {event.title}
         </h3>
         <div className="flex items-center gap-1">
+          {sessionBadge}
           <span
             className="card-icon material-symbols-rounded"
             style={{ color: eventIcon.color, fontSize: '0.875rem' }}
@@ -159,8 +167,9 @@ function FullCardContent({ event }: { event: Event }) {
   );
 }
 
-function CompactCardContent({ event }: { event: Event }) {
+function CompactCardContent({ event, sessionDecision }: { event: Event; sessionDecision?: SessionDecision }) {
   const eventIcon = getEventIcon(event);
+  const sessionBadge = getSessionBadge(sessionDecision);
 
   return (
     <div className="h-full flex flex-col">
@@ -168,13 +177,16 @@ function CompactCardContent({ event }: { event: Event }) {
         <h3 className="card-title line-clamp-2 flex-1 pr-2" style={{ color: 'var(--color-text-primary)' }}>
           {event.title}
         </h3>
-        <span
-          className="card-icon material-symbols-rounded flex-shrink-0"
-          style={{ color: eventIcon.color, fontSize: '0.75rem' }}
-          title={eventIcon.description}
-        >
-          {eventIcon.icon}
-        </span>
+        <div className="flex items-center gap-1">
+          {sessionBadge}
+          <span
+            className="card-icon material-symbols-rounded flex-shrink-0"
+            style={{ color: eventIcon.color, fontSize: '0.75rem' }}
+            title={eventIcon.description}
+          >
+            {eventIcon.icon}
+          </span>
+        </div>
       </div>
       <p className="card-description line-clamp-1 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
@@ -186,22 +198,41 @@ function CompactCardContent({ event }: { event: Event }) {
   );
 }
 
-function TitleOnlyCardContent({ event }: { event: Event }) {
+function TitleOnlyCardContent({ event, sessionDecision }: { event: Event; sessionDecision?: SessionDecision }) {
   const eventIcon = getEventIcon(event);
+  const sessionBadge = getSessionBadge(sessionDecision);
 
   return (
     <div className="h-full flex items-center justify-between">
       <h3 className="card-title line-clamp-1 flex-1 pr-2" style={{ color: 'var(--color-text-primary)' }}>
         {event.title}
       </h3>
-      <span
-        className="card-icon material-symbols-rounded flex-shrink-0"
-        style={{ color: eventIcon.color, fontSize: '0.75rem' }}
-        title={eventIcon.description}
-      >
-        {eventIcon.icon}
-      </span>
+      <div className="flex items-center gap-1">
+        {sessionBadge}
+        <span
+          className="card-icon material-symbols-rounded flex-shrink-0"
+          style={{ color: eventIcon.color, fontSize: '0.75rem' }}
+          title={eventIcon.description}
+        >
+          {eventIcon.icon}
+        </span>
+      </div>
     </div>
+  );
+}
+
+function getSessionBadge(sessionDecision?: SessionDecision): React.ReactNode {
+  if (!sessionDecision || sessionDecision === 'rejected') {
+    return null;
+  }
+
+  const label = sessionDecision === 'pending' ? 'Pending' : 'Accepted';
+  const colorClass = sessionDecision === 'pending' ? 'text-orange-400 border-orange-400' : 'text-green-400 border-green-400';
+
+  return (
+    <span className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${colorClass}`}>
+      {label}
+    </span>
   );
 }
 

@@ -322,6 +322,21 @@
   border-color: var(--card-border-hover);
 }
 
+/* Session event styles */
+.session-event-pending {
+  border: 2px dashed #f97316 !important;
+  background-color: rgba(251, 146, 60, 0.1) !important;
+}
+
+.session-event-accepted {
+  border: 2px dashed #22c55e !important;
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.session-event-rejected {
+  opacity: 0.3;
+}
+
 .timeline-card:focus-visible {
   outline: 2px solid var(--page-accent);
   outline-offset: 2px;
