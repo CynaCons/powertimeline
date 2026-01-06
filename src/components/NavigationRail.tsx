@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
+import Badge from '@mui/material/Badge';
 import IconButton from '@mui/material/IconButton';
+import RateReviewOutlined from '@mui/icons-material/RateReviewOutlined';
 import { EnhancedTooltip } from './EnhancedTooltip';
+import { useImportSessionContext } from '../contexts/ImportSessionContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 export interface NavigationItem {
@@ -12,7 +15,8 @@ export interface NavigationItem {
   isActive?: boolean;
   color?: string;
   'data-tour'?: string;
-  badge?: string; // Optional badge (e.g., checkmark for completed tours)
+  badge?: number | string; // Optional badge (e.g., pending count)
+  disabled?: boolean;
 }
 
 export interface NavigationSection {
@@ -28,9 +32,12 @@ interface NavigationRailProps {
   sections?: NavigationSection[];  // New sectioned format
   activeItemId?: string;
   onKeyboardNavigation?: (direction: 'up' | 'down') => void;
+  onReviewClick?: () => void;
 }
 
-export const NavigationRail: React.FC<NavigationRailProps> = ({
+type NavigationRailBaseProps = Omit<NavigationRailProps, 'onReviewClick'>;
+
+const NavigationRailBase: React.FC<NavigationRailBaseProps> = ({
   items,
   sections,
   activeItemId,
@@ -118,6 +125,11 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       '&:active': {
         transform: 'translateY(0)',
       },
+      '&.Mui-disabled': {
+        color: 'var(--page-text-secondary)',
+        backgroundColor: 'transparent',
+        opacity: 0.5,
+      },
       '& .nav-icon': {
         color: 'inherit',
       },
@@ -136,6 +148,42 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         transition: 'opacity 0.3s ease',
       } : {},
     } as const;
+  };
+
+  const renderIcon = (item: NavigationItem) => {
+    const iconNode = typeof item.icon === 'string' ? (
+      <span className="material-symbols-rounded nav-icon" aria-hidden="true" style={{ fontSize: '24px' }}>
+        {item.icon}
+      </span>
+    ) : (
+      item.icon
+    );
+
+    if (item.badge === undefined || item.badge === null) {
+      return iconNode;
+    }
+
+    return (
+      <Badge
+        badgeContent={item.badge}
+        overlap="circular"
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{
+          '& .MuiBadge-badge': {
+            backgroundColor: 'var(--page-accent)',
+            color: 'var(--page-accent-contrast-text, #ffffff)',
+            fontSize: '0.65rem',
+            fontWeight: 600,
+            minWidth: '16px',
+            height: '16px',
+            padding: '0 4px',
+            boxShadow: '0 0 0 2px var(--color-surface-elevated)',
+          },
+        }}
+      >
+        {iconNode}
+      </Badge>
+    );
   };
 
   const renderSection = (section: NavigationSection, sectionIndex: number, totalSections: number) => {
@@ -186,6 +234,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 aria-label={item.label}
                 size="small"
                 onClick={item.onClick}
+                disabled={item.disabled}
                 sx={getButtonStyles(item)}
                 className="nav-button"
                 data-testid={`nav-${item.id}`}
@@ -195,13 +244,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 data-tour={item['data-tour']}
                 tabIndex={0}
               >
-                {typeof item.icon === 'string' ? (
-                  <span className="material-symbols-rounded nav-icon" aria-hidden="true" style={{ fontSize: '24px' }}>
-                    {item.icon}
-                  </span>
-                ) : (
-                  item.icon
-                )}
+                {renderIcon(item)}
               </IconButton>
             </EnhancedTooltip>
           );
@@ -251,6 +294,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   aria-label={item.label}
                   size="small"
                   onClick={item.onClick}
+                  disabled={item.disabled}
                   sx={getButtonStyles(item)}
                   className="nav-button"
                   data-testid={`nav-${item.id}`}
@@ -260,13 +304,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   data-tour={item['data-tour']}
                   tabIndex={0}
                 >
-                  {typeof item.icon === 'string' ? (
-                    <span className="material-symbols-rounded nav-icon" aria-hidden="true" style={{ fontSize: '24px' }}>
-                      {item.icon}
-                    </span>
-                  ) : (
-                    item.icon
-                  )}
+                  {renderIcon(item)}
                 </IconButton>
               </EnhancedTooltip>
             );
@@ -274,6 +312,69 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         </div>
       )}
     </>
+  );
+};
+
+const NavigationRailWithReview: React.FC<NavigationRailProps> = ({
+  items,
+  sections,
+  activeItemId,
+  onKeyboardNavigation,
+  onReviewClick,
+}) => {
+  const { hasActiveSession, getStats } = useImportSessionContext();
+  const stats = getStats();
+
+  const reviewItem: NavigationItem = {
+    id: 'review',
+    label: 'Review',
+    icon: <RateReviewOutlined fontSize="small" />,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onClick: onReviewClick || (() => {}),
+    badge: hasActiveSession && stats.pending > 0 ? stats.pending : undefined,
+    disabled: !hasActiveSession,
+  };
+
+  const displaySections: NavigationSection[] = sections || (items ? [{ type: 'global', items }] : []);
+
+  const sectionsWithReview = displaySections.map((section) => {
+    if (section.type !== 'context') {
+      return section;
+    }
+
+    const itemsWithoutReview = section.items.filter(item => item.id !== 'review');
+    const importIndex = itemsWithoutReview.findIndex(item => item.id === 'import-export');
+    const insertIndex = importIndex >= 0 ? importIndex + 1 : itemsWithoutReview.length;
+    const nextItems = [...itemsWithoutReview];
+    nextItems.splice(insertIndex, 0, reviewItem);
+
+    return {
+      ...section,
+      items: nextItems,
+    };
+  });
+
+  return (
+    <NavigationRailBase
+      sections={sectionsWithReview}
+      activeItemId={activeItemId}
+      onKeyboardNavigation={onKeyboardNavigation}
+    />
+  );
+};
+
+export const NavigationRail: React.FC<NavigationRailProps> = (props) => {
+  if (props.onReviewClick) {
+    return <NavigationRailWithReview {...props} />;
+  }
+
+  return (
+    <NavigationRailBase
+      items={props.items}
+      sections={props.sections}
+      activeItemId={props.activeItemId}
+      onKeyboardNavigation={props.onKeyboardNavigation}
+    />
   );
 };
 

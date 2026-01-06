@@ -83,19 +83,25 @@ export function ReviewPanel({ onClose, onEventClick }: ReviewPanelProps) {
     if (stats.accepted === 0) return;
 
     setIsCommitting(true);
+    let didCommit = false;
     try {
       await commitSession();
-      // Session committed, panel will close automatically
+      didCommit = true;
     } catch (error) {
       console.error('Failed to commit session:', error);
     } finally {
       setIsCommitting(false);
+    }
+
+    if (didCommit) {
+      onClose();
     }
   };
 
   const handleDiscardConfirm = () => {
     discardSession();
     setShowDiscardDialog(false);
+    onClose();
   };
 
   const getSourceLabel = () => {

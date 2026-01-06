@@ -27,6 +27,7 @@ const CommandPalette = lazy(() => import('./components/CommandPalette').then(m =
 const TimelineMinimap = lazy(() => import('./components/TimelineMinimap').then(m => ({ default: m.TimelineMinimap })));
 const StreamViewerOverlay = lazy(() => import('./components/StreamViewerOverlay').then(m => ({ default: m.StreamViewerOverlay })));
 const ChatPanel = lazy(() => import('./app/panels/ChatPanel').then(m => ({ default: m.ChatPanel })));
+const ReviewPanel = lazy(() => import('./app/panels/ReviewPanel').then(m => ({ default: m.ReviewPanel })));
 import { useAISession } from './hooks/useAISession';
 import { buildAIContext } from './lib/aiContextBuilder';
 import { executeActions } from './lib/aiActionHandlers';
@@ -305,6 +306,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     showInfoPanels,
     setShowInfoPanels,
   } = useTimelineUI({ initialStreamViewOpen, onStreamViewChange });
+
+  const [showReviewPanel, setShowReviewPanel] = useState(false);
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -813,6 +816,14 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     setActiveNavItem('import-export');
   }, [overlay]);
 
+  const toggleReviewPanel = useCallback(() => {
+    setShowReviewPanel(prev => !prev);
+  }, []);
+
+  const handleSessionStarted = useCallback(() => {
+    setShowReviewPanel(true);
+  }, []);
+
   // Stream View toggle
   const openStreamView = useCallback(() => {
     setStreamViewerOpen(true);
@@ -978,6 +989,11 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
   // Update active nav item based on overlay
   useEffect(() => {
+    if (showReviewPanel) {
+      setActiveNavItem('review');
+      return;
+    }
+
     switch (overlay) {
       case 'editor':
         setActiveNavItem('create');
@@ -988,7 +1004,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       default:
         setActiveNavItem(null);
     }
-  }, [overlay]);
+  }, [overlay, showReviewPanel]);
 
   return (
     <ImportSessionProvider timelineId={sessionTimelineId} ownerId={sessionOwnerId}>
@@ -1021,6 +1037,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
           <NavigationRail
             sections={sections}
             activeItemId={activeNavItem || undefined}
+            onReviewClick={toggleReviewPanel}
           />
 
           {/* Bottom actions */}
@@ -1093,6 +1110,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     events={events}
                     dragging={dragging}
                     onClose={() => setOverlay(null)}
+                    onSessionStarted={handleSessionStarted}
                     onImport={async (importedEvents) => {
                       // Update local state optimistically
                       setEvents(importedEvents);
@@ -1119,6 +1137,17 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                 </Suspense>
               </ErrorBoundary>
             )}
+          </div>
+        )}
+
+        {showReviewPanel && (
+          <div
+            className="fixed left-14 top-0 bottom-0 w-96 border-r z-[90]"
+            style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}
+          >
+            <Suspense fallback={<div className="h-full flex items-center justify-center">Loading...</div>}>
+              <ReviewPanel onClose={() => setShowReviewPanel(false)} />
+            </Suspense>
           </div>
         )}
 

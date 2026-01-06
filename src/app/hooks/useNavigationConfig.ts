@@ -26,7 +26,8 @@ export interface NavigationItem {
   isActive?: boolean;
   color?: string;
   'data-tour'?: string;
-  badge?: string; // Optional badge (e.g., checkmark for completed tours)
+  badge?: number | string; // Optional badge (e.g., pending count)
+  disabled?: boolean;
 }
 
 export interface NavigationSection {
