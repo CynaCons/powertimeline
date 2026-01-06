@@ -6,6 +6,7 @@ import { UserProfileMenu } from './components/UserProfileMenu';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
 import { useAuth } from './contexts/AuthContext';
+import { ImportSessionProvider } from './contexts/ImportSessionContext';
 import { getTimeline, updateTimeline, getUser, addEvent, updateEvent as updateEventFirestore, deleteEvent as deleteEventFirestore } from './services/firestore';
 import type { User } from './types';
 import Tooltip from '@mui/material/Tooltip';
@@ -123,6 +124,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
   // Current timeline metadata (for import/export)
   const [currentTimeline, setCurrentTimeline] = useState<Timeline | null>(null);
+  const sessionTimelineId = currentTimeline?.id || timelineId || 'local-timeline';
+  const sessionOwnerId = currentTimeline?.ownerId || firebaseUser?.uid || '';
 
   // Reload events when timelineId changes
   const loadTimelineEvents = useCallback(async () => {
@@ -988,8 +991,9 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   }, [overlay]);
 
   return (
-    <>
-      <EditorTour />
+    <ImportSessionProvider timelineId={sessionTimelineId} ownerId={sessionOwnerId}>
+      <>
+        <EditorTour />
       <div className="min-h-screen transition-theme" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
         {/* Full-bleed canvas area - no header, maximum space */}
         <div className="relative h-screen">
@@ -1378,7 +1382,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
         {renderLiveRegion()}
         </div>
       </div>
-    </>
+      </>
+    </ImportSessionProvider>
   );
 }
 

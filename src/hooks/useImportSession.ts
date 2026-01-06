@@ -11,12 +11,28 @@ import { addEvent } from '../services/firestore';
 
 const STORAGE_KEY_PREFIX = 'powertimeline:session:';
 
-export function useImportSession(timelineId: string) {
+export function useImportSession(timelineId?: string) {
   const [session, setSession] = useState<ImportSession | null>(null);
 
   useEffect(() => {
     if (!timelineId) {
-      setSession(null);
+      let foundSession: ImportSession | null = null;
+
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(STORAGE_KEY_PREFIX)) {
+          const data = localStorage.getItem(key);
+          if (data) {
+            const parsed = JSON.parse(data) as ImportSession;
+            if (parsed.status === 'active') {
+              foundSession = parsed;
+              break;
+            }
+          }
+        }
+      }
+
+      setSession(foundSession);
       return;
     }
 
@@ -47,8 +63,8 @@ export function useImportSession(timelineId: string) {
       ownerId: string,
       source: ImportSource,
       events: Partial<Event>[],
-      existingEventIds: string[],
-      existingEvents: Event[]
+      existingEventIds: string[] = [],
+      existingEvents: Event[] = []
     ) => {
       const sessionEvents: SessionEvent[] = events.map(eventData => {
         const existingEvent = eventData.id
@@ -108,17 +124,18 @@ export function useImportSession(timelineId: string) {
     });
   }, []);
 
-  const commitSession = useCallback(async (ownerId: string) => {
+  const commitSession = useCallback(async (ownerId?: string) => {
     if (!session) {
       throw new Error('No active session to commit');
     }
 
+    const resolvedOwnerId = ownerId ?? session.ownerId;
     const accepted = session.events.filter(event => event.decision === 'accepted');
 
     for (const event of accepted) {
       const finalData = { ...event.eventData, ...event.userEdits };
       if (event.action === 'create') {
-        await addEvent(session.timelineId, ownerId, finalData as Event);
+        await addEvent(session.timelineId, resolvedOwnerId, finalData as Event);
       }
     }
 

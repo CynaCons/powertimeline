@@ -44,20 +44,24 @@ export function ImportSessionProvider({
   timelineId,
   ownerId,
 }: ImportSessionProviderProps) {
-  const hookResult = useImportSession(timelineId);
+  const {
+    startSession: hookStartSession,
+    commitSession: hookCommitSession,
+    ...hookState
+  } = useImportSession(timelineId);
 
   // Wrap the hook to adapt the API
   const contextValue: ImportSessionContextType = {
-    ...hookResult,
+    ...hookState,
     timelineId,
     ownerId,
     // Adapt startSession to hide timelineId/ownerId from context consumers
     startSession: (source: ImportSource, events: Partial<Event>[], existingEvents: Event[]) => {
       const existingEventIds = existingEvents.map(e => e.id);
-      hookResult.startSession(timelineId, ownerId, source, events, existingEventIds, existingEvents);
+      hookStartSession(timelineId, ownerId, source, events, existingEventIds, existingEvents);
     },
     // Adapt commitSession to hide ownerId from context consumers
-    commitSession: () => hookResult.commitSession(ownerId),
+    commitSession: () => hookCommitSession(ownerId),
   };
 
   return (
