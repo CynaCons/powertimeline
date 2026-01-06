@@ -60,6 +60,16 @@ export interface ValidationResult {
   data?: YamlDocument;
 }
 
+export class YamlSessionParseError extends Error {
+  errors: ValidationError[];
+
+  constructor(errors: ValidationError[]) {
+    super('YAML validation failed');
+    this.name = 'YamlSessionParseError';
+    this.errors = errors;
+  }
+}
+
 /**
  * Validate a date string is in YYYY-MM-DD format
  */
@@ -333,6 +343,19 @@ export function importTimelineFromYaml(yamlString: string): {
       events: yamlEventsToEvents(events),
     },
   };
+}
+
+/**
+ * Parse YAML and return events for import sessions
+ */
+export function parseYamlForSession(yamlContent: string): Partial<Event>[] {
+  const validation = parseTimelineYaml(yamlContent);
+
+  if (!validation.valid || !validation.data) {
+    throw new YamlSessionParseError(validation.errors);
+  }
+
+  return yamlEventsToEvents(validation.data.events);
 }
 
 // ============================================================================
