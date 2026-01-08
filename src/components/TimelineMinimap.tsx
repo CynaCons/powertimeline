@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useRef, useCallback, memo, useEffect } from 'react';
 import type { Event } from '../types';
+import type { EventDecision } from '../types/importSession';
 
 interface TimelineMinimapProps {
   events: Event[];
@@ -16,6 +17,7 @@ interface EventMarkerProps {
   eventId: string;
   eventTitle: string;
   eventYear: number;
+  sessionDecision?: EventDecision;
 }
 
 /**
@@ -27,11 +29,17 @@ const EventMarker = memo(function EventMarker({
   position,
   eventId,
   eventTitle,
-  eventYear
+  eventYear,
+  sessionDecision
 }: EventMarkerProps) {
+  // Build class name with session decision state for CSS styling
+  const className = sessionDecision
+    ? `minimap-marker session-${sessionDecision}`
+    : 'minimap-marker';
+
   return (
     <div
-      className="minimap-marker"
+      className={className}
       data-event-id={eventId}
       style={{
         left: `${position * 100}%`,
@@ -80,11 +88,14 @@ export function TimelineMinimap({
     const markers = events.map(event => {
       const eventTime = new Date(event.date).getTime();
       const position = (eventTime - timelineRange.startDate.getTime()) / timelineRange.totalDuration;
+      // Extract session decision for styling temporary events
+      const sessionDecision = (event as Event & { _sessionDecision?: EventDecision })._sessionDecision;
       return {
         position: Math.max(0, Math.min(1, position)),
         eventId: event.id,
         eventTitle: event.title,
-        eventYear: new Date(event.date).getFullYear()
+        eventYear: new Date(event.date).getFullYear(),
+        sessionDecision
       };
     });
 
@@ -321,6 +332,7 @@ export function TimelineMinimap({
                 eventId={marker.eventId}
                 eventTitle={marker.eventTitle}
                 eventYear={marker.eventYear}
+                sessionDecision={marker.sessionDecision}
               />
             ))}
           </div>

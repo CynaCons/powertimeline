@@ -21,9 +21,11 @@ import { useImportSessionContext } from '../../contexts/ImportSessionContext';
 interface ReviewPanelProps {
   onClose: () => void;
   onEventClick?: (eventId: string) => void; // Open in AuthoringOverlay
+  onCommit?: () => void; // Called after successful commit to refresh events
+  onFocusEvent?: (eventId: string) => void; // Scroll to event on timeline
 }
 
-export function ReviewPanel({ onClose, onEventClick }: ReviewPanelProps) {
+export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: ReviewPanelProps) {
   const {
     session,
     updateDecision,
@@ -94,6 +96,7 @@ export function ReviewPanel({ onClose, onEventClick }: ReviewPanelProps) {
     }
 
     if (didCommit) {
+      onCommit?.(); // Refresh timeline events from Firebase
       onClose();
     }
   };
@@ -211,7 +214,11 @@ export function ReviewPanel({ onClose, onEventClick }: ReviewPanelProps) {
       </div>
 
       {/* Event List */}
-      <div className="flex-1 overflow-auto px-4 py-2" style={{ overscrollBehavior: 'contain' }}>
+      <div
+        className="flex-1 overflow-auto px-4 py-2"
+        style={{ overscrollBehavior: 'contain' }}
+        onWheel={(e) => e.stopPropagation()}
+      >
         {session.events.map((event) => {
           const decision = event.decision;
           const decisionColor = getDecisionColor(decision);
@@ -296,22 +303,60 @@ export function ReviewPanel({ onClose, onEventClick }: ReviewPanelProps) {
                           edit
                         </span>
                       </IconButton>
+                      {onFocusEvent && (
+                        <IconButton
+                          size="small"
+                          onClick={() => onFocusEvent(event.eventData.id || event.id)}
+                          sx={{
+                            color: 'var(--page-text-secondary)',
+                            p: 0.5,
+                            minWidth: '36px',
+                            minHeight: '36px',
+                          }}
+                          title="Focus on timeline"
+                          aria-label="Focus event on timeline"
+                        >
+                          <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
+                            visibility
+                          </span>
+                        </IconButton>
+                      )}
                     </>
                   )}
                   {!isPending && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={() => handleUndo(event.id)}
-                      sx={{
-                        textTransform: 'none',
-                        minWidth: 'auto',
-                        px: 1,
-                        color: 'var(--page-text-secondary)',
-                      }}
-                    >
-                      Undo
-                    </Button>
+                    <>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => handleUndo(event.id)}
+                        sx={{
+                          textTransform: 'none',
+                          minWidth: 'auto',
+                          px: 1,
+                          color: 'var(--page-text-secondary)',
+                        }}
+                      >
+                        Undo
+                      </Button>
+                      {onFocusEvent && (
+                        <IconButton
+                          size="small"
+                          onClick={() => onFocusEvent(event.eventData.id || event.id)}
+                          sx={{
+                            color: 'var(--page-text-secondary)',
+                            p: 0.5,
+                            minWidth: '36px',
+                            minHeight: '36px',
+                          }}
+                          title="Focus on timeline"
+                          aria-label="Focus event on timeline"
+                        >
+                          <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
+                            visibility
+                          </span>
+                        </IconButton>
+                      )}
+                    </>
                   )}
                 </Box>
               </Box>

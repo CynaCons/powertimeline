@@ -1,0 +1,62 @@
+# Import Review System Software Requirements Specification
+
+**Last Updated:** 2025-01-06
+
+## Overview
+The unified import review system creates a session-based workflow for reviewing YAML-imported events before they are committed to a timeline. A session tracks imported events, decisions, and progress, while the Review Panel and navigation integration expose review controls and status.
+
+## 1. Session Management
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-SESSION-001 | Session data is restored from localStorage | • Session data stored under key prefix `powertimeline:session:`<br>• Only sessions with status `active` are restored<br>• When no `timelineId` is supplied, the first active session is loaded | `src/hooks/useImportSession.ts:12`<br>`src/hooks/useImportSession.ts:17` | TBD |
+| CC-REQ-REVIEW-SESSION-002 | Session updates persist to localStorage | • Session writes to `powertimeline:session:{timelineId}` whenever state changes<br>• No write occurs when session is `null` | `src/hooks/useImportSession.ts:53` | TBD |
+| CC-REQ-REVIEW-SESSION-003 | Session events initialize for review | • Each imported event receives a temporary UUID<br>• Events are marked `pending` on start<br>• Events are marked `update` when matching existing IDs, otherwise `create` | `src/hooks/useImportSession.ts:69` | TBD |
+| CC-REQ-REVIEW-SESSION-004 | New sessions capture lifecycle metadata | • Sessions are created with status `active` and timestamp from `Date.now()`<br>• Sessions store `timelineId`, `ownerId`, `source`, and `existingEventIds` | `src/hooks/useImportSession.ts:85` | TBD |
+| CC-REQ-REVIEW-SESSION-005 | Sessions can be committed or discarded | • Commit removes the localStorage entry and marks session `committed`<br>• Discard removes the localStorage entry and marks session `discarded`<br>• Commit throws an error if no session is active | `src/hooks/useImportSession.ts:127` | TBD |
+
+## 2. ReviewPanel UI
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-PANEL-001 | Panel shows an empty state without a session | • Panel renders "No active import session" messaging<br>• Empty state uses centered layout with surface styling | `src/app/panels/ReviewPanel.tsx:38` | TBD |
+| CC-REQ-REVIEW-PANEL-002 | Panel container is accessible and identifiable | • Container exposes `data-testid="review-panel"`<br>• Uses `role="region"` with `aria-label="Import Session Review Panel"` | `src/app/panels/ReviewPanel.tsx:157` | TBD |
+| CC-REQ-REVIEW-PANEL-003 | Header displays title and close control | • Header shows "Review Import Session" with icon<br>• Close control uses `aria-label="Close review panel"` | `src/app/panels/ReviewPanel.tsx:168` | TBD |
+| CC-REQ-REVIEW-PANEL-004 | Session info shows source label and count | • Source label maps `yaml` to "YAML Import", `ai-chat` to "AI Chat", `pr` to "Pull Request"<br>• Session info row shows total event count | `src/app/panels/ReviewPanel.tsx:107`<br>`src/app/panels/ReviewPanel.tsx:184` | TBD |
+| CC-REQ-REVIEW-PANEL-005 | Progress section summarizes review status | • Reviewed count equals accepted + rejected events<br>• Progress bar uses a determinate percentage of reviewed events | `src/app/panels/ReviewPanel.tsx:52`<br>`src/app/panels/ReviewPanel.tsx:191` | TBD |
+| CC-REQ-REVIEW-PANEL-006 | Event list renders decision-styled cards | • Each session event renders as a bordered card within the scroll region<br>• Card border and title color reflect the decision state<br>• Rejected cards appear with reduced opacity | `src/app/panels/ReviewPanel.tsx:213` | TBD |
+| CC-REQ-REVIEW-PANEL-007 | Event details show metadata and updates | • Event date uses `formatDate` with fallbacks for invalid dates<br>• Action is shown in uppercase with an update indicator when needed<br>• Update actions show a disabled "View Diff (Coming Soon)" button | `src/app/panels/ReviewPanel.tsx:142`<br>`src/app/panels/ReviewPanel.tsx:319` | TBD |
+| CC-REQ-REVIEW-PANEL-008 | Footer actions support bulk controls | • "Accept All Remaining" is disabled when no pending events remain<br>• Commit button shows accepted count and disables when zero or committing<br>• Discard action opens a confirmation dialog with cancel/confirm actions | `src/app/panels/ReviewPanel.tsx:368`<br>`src/app/panels/ReviewPanel.tsx:416` | TBD |
+
+## 3. Event Decisions
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-DECISION-001 | Accept, reject, and undo update event decisions | • Accept sets decision to `accepted`<br>• Reject sets decision to `rejected`<br>• Undo resets decision to `pending` | `src/app/panels/ReviewPanel.tsx:56`<br>`src/hooks/useImportSession.ts:101` | TBD |
+| CC-REQ-REVIEW-DECISION-002 | Edit action opens the event editor | • Edit action invokes `onEventClick` when provided<br>• Edit is only shown for pending events | `src/app/panels/ReviewPanel.tsx:64` | TBD |
+| CC-REQ-REVIEW-DECISION-003 | Bulk accept applies to remaining pending events | • Iterates all session events marked `pending`<br>• Sets remaining events to `accepted` | `src/app/panels/ReviewPanel.tsx:74` | TBD |
+| CC-REQ-REVIEW-DECISION-004 | Commit applies only accepted create events | • Commit filters events to `accepted` only<br>• Final payload merges `eventData` with `userEdits`<br>• Only `create` actions call `addEvent` | `src/hooks/useImportSession.ts:133` | TBD |
+| CC-REQ-REVIEW-DECISION-005 | Edit button opens event in AuthoringOverlay | • Edit button click invokes `onEventClick` with session event ID<br>• AuthoringOverlay opens with the event data pre-populated<br>• User can modify event fields while in review state | `src/App.tsx:TBD`<br>`src/app/panels/ReviewPanel.tsx:64` | TBD |
+| CC-REQ-REVIEW-DECISION-006 | Focus button scrolls timeline to event | • Focus button (eye icon) appears for all events in review panel<br>• Click invokes `onFocusEvent` with event ID<br>• Timeline animates to center event in view window<br>• Event becomes selected for visual highlighting | `src/app/panels/ReviewPanel.tsx:306`<br>`src/App.tsx:handleFocusEvent` | TBD |
+
+## 4. Visual Styling
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-VISUAL-001 | Cards apply session decision classes | • Cards append `session-event-{decision}` when a session decision is provided<br>• No session class is applied when decision is undefined | `src/layout/CardRenderer.tsx:30` | TBD |
+| CC-REQ-REVIEW-VISUAL-002 | Session event classes define status styling | • Pending events use dashed orange borders with light orange background<br>• Accepted events use dashed green borders with light green background<br>• Rejected events reduce card opacity | `src/styles/tokens.css:325` | TBD |
+| CC-REQ-REVIEW-VISUAL-003 | Session badges highlight pending and accepted events | • Pending badge displays "Pending" with orange border styling<br>• Accepted badge displays "Accepted" with green border styling<br>• Rejected events show no badge | `src/layout/CardRenderer.tsx:224` | TBD |
+| CC-REQ-REVIEW-VISUAL-004 | Session events render on timeline during review | • Pending and accepted session events appear in timeline canvas<br>• Session events merge with existing events for layout<br>• Rejected session events are hidden from timeline | `src/App.tsx:MergedEventsProvider` | TBD |
+| CC-REQ-REVIEW-VISUAL-005 | Session events appear in minimap | • Minimap shows session events with appropriate colors<br>• Pending events use orange indicator<br>• Accepted events use green indicator | `src/components/TimelineMinimap.tsx:34`<br>`src/styles/index.css:1116` | TBD |
+| CC-REQ-REVIEW-VISUAL-006 | Session event anchors use decision colors | • Anchor pill for pending session events uses orange gradient and border<br>• Anchor pill for accepted session events uses green gradient and border<br>• Colors match card styling for visual consistency | `src/layout/DeterministicLayoutComponent.tsx:866` | TBD |
+
+## 5. Navigation Integration
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-NAV-001 | Navigation rail defines a review item | • Review item uses label "Review" with the review icon<br>• Review click uses `onReviewClick` when provided | `src/components/NavigationRail.tsx:328` | TBD |
+| CC-REQ-REVIEW-NAV-002 | Review button reflects session status | • Badge displays pending count when an active session exists<br>• Review item is disabled when there is no active session | `src/components/NavigationRail.tsx:325` | TBD |
+| CC-REQ-REVIEW-NAV-003 | Review item is inserted after import-export | • Review item is inserted after `import-export` in context sections<br>• Review item only renders when `onReviewClick` prop is supplied | `src/components/NavigationRail.tsx:340`<br>`src/components/NavigationRail.tsx:366` | TBD |
+
+## 6. YAML Import Integration
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-YAML-001 | YAML imports validate file type and size | • Only `.yaml` or `.yml` file extensions are accepted<br>• Files larger than 1MB surface a size error | `src/app/overlays/ImportExportOverlay.tsx:99` | TBD |
+| CC-REQ-REVIEW-YAML-002 | Successful YAML parse starts a review session | • Parsed YAML events start a session with source `yaml`<br>• `onSessionStarted` is triggered when provided<br>• Import overlay closes after session creation and resets file input | `src/app/overlays/ImportExportOverlay.tsx:112`<br>`src/app/overlays/ImportExportOverlay.tsx:128` | `tests/home/82-yaml-import-export.spec.ts:161` |
+| CC-REQ-REVIEW-YAML-003 | Import tab guides users into review mode | • Drop zone exposes `data-testid="import-dropzone"` and supports click-to-browse<br>• File input accepts `.yaml,.yml` and is hidden behind the drop zone<br>• Helper text clarifies that import starts a review session | `src/app/overlays/ImportExportOverlay.tsx:275`<br>`src/app/overlays/ImportExportOverlay.tsx:316` | `tests/home/82-yaml-import-export.spec.ts:161` |
+| CC-REQ-REVIEW-YAML-004 | Paste YAML content for import | • TextField exposes `data-testid="yaml-paste-input"` with monospace font<br>• Import button exposes `data-testid="yaml-paste-import"` and is disabled when empty<br>• Pasted content validates size (max 1MB) and parses same as file import<br>• Successful parse starts review session identical to file import | `src/app/overlays/ImportExportOverlay.tsx:137`<br>`src/app/overlays/ImportExportOverlay.tsx:362` | TBD |

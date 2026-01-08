@@ -32,10 +32,7 @@ export const OverlayShell: React.FC<OverlayShellProps> = ({ id, title, dragging,
       onClick={(e) => e.stopPropagation()}
     >
       <div
-        className="h-full bg-white text-gray-900 border-r border-gray-200 shadow-md flex flex-col transition-opacity"
-        style={{ opacity: 1 }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = '1'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = '0.1'; }}
+        className="h-full bg-white text-gray-900 border-r border-gray-200 shadow-md flex flex-col"
       >
         <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
           <h2 id={`dialog-title-${id}`} className="text-xs font-semibold tracking-wide">{title}</h2>

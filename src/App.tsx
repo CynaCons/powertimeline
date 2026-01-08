@@ -1,12 +1,13 @@
 ﻿import { useEffect, useMemo, useRef, useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
 import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
 import { UserProfileMenu } from './components/UserProfileMenu';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
 import { useAuth } from './contexts/AuthContext';
-import { ImportSessionProvider } from './contexts/ImportSessionContext';
+import { ImportSessionProvider, useImportSessionContext } from './contexts/ImportSessionContext';
 import { getTimeline, updateTimeline, getUser, addEvent, updateEvent as updateEventFirestore, deleteEvent as deleteEventFirestore } from './services/firestore';
 import type { User } from './types';
 import Tooltip from '@mui/material/Tooltip';
@@ -18,6 +19,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import type { Event, Timeline } from './types';
+import type { EventDecision } from './types/importSession';
 import type { Command } from './components/CommandPalette';
 
 // Lazy load panels, overlays and heavy components for better bundle splitting
@@ -54,6 +56,72 @@ interface AppProps {
   readOnly?: boolean;   // Read-only mode: hide authoring overlay, show lock icon on nav rail
   initialStreamViewOpen?: boolean;  // Open stream view on mount (for mobile first experience)
   onStreamViewChange?: (isOpen: boolean) => void;  // Callback when stream view opens/closes
+}
+
+type EventWithSessionDecision = Event & { _sessionDecision?: EventDecision };
+
+interface SessionEventMergeProps {
+  events: Event[];
+  children: (mergedEvents: EventWithSessionDecision[]) => ReactNode;
+}
+
+function SessionEventMerge({ events, children }: SessionEventMergeProps) {
+  const { session } = useImportSessionContext();
+
+  const sessionEventsForDisplay = useMemo<EventWithSessionDecision[]>(() => {
+    if (!session?.events?.length) {
+      return [];
+    }
+
+    return session.events
+      .filter(sessionEvent => sessionEvent.decision !== 'rejected')
+      .map(sessionEvent => ({
+        ...sessionEvent.eventData,
+        id: sessionEvent.eventData.id || sessionEvent.id,
+        _sessionDecision: sessionEvent.decision,
+      }) as EventWithSessionDecision);
+  }, [session]);
+
+  const mergedEvents = useMemo(
+    () => [...events, ...sessionEventsForDisplay],
+    [events, sessionEventsForDisplay]
+  );
+
+  return <>{children(mergedEvents)}</>;
+}
+
+interface ReviewPanelContainerProps {
+  onClose: () => void;
+  onOpenReviewEvent: (eventData: Event, onSaveEdits: (edits: Partial<Event>) => void) => void;
+  onCommit?: () => void; // Called after successful commit to refresh events
+  onFocusEvent?: (eventId: string) => void; // Scroll to event on timeline
+}
+
+function ReviewPanelContainer({ onClose, onOpenReviewEvent, onCommit, onFocusEvent }: ReviewPanelContainerProps) {
+  const { session, updateEventData } = useImportSessionContext();
+
+  const handleReviewEventClick = useCallback((sessionEventId: string) => {
+    const sessionEvent = session?.events.find(event => event.id === sessionEventId);
+
+    if (!sessionEvent) {
+      return;
+    }
+
+    const mergedEventData = { ...sessionEvent.eventData, ...sessionEvent.userEdits };
+    const reviewEvent: Event = {
+      id: mergedEventData.id ?? `review-${sessionEvent.id}`,
+      date: mergedEventData.date ?? '',
+      time: mergedEventData.time,
+      title: mergedEventData.title ?? '',
+      description: mergedEventData.description,
+      endDate: mergedEventData.endDate,
+      sources: mergedEventData.sources,
+    };
+
+    onOpenReviewEvent(reviewEvent, (edits) => updateEventData(sessionEventId, edits));
+  }, [session, updateEventData, onOpenReviewEvent]);
+
+  return <ReviewPanel onClose={onClose} onEventClick={handleReviewEventClick} onCommit={onCommit} onFocusEvent={onFocusEvent} />;
 }
 
 // Inner component that uses tour context
@@ -308,12 +376,21 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   } = useTimelineUI({ initialStreamViewOpen, onStreamViewChange });
 
   const [showReviewPanel, setShowReviewPanel] = useState(false);
+  const [reviewEvent, setReviewEvent] = useState<Event | null>(null);
+  const [reviewEventSaveHandler, setReviewEventSaveHandler] = useState<((edits: Partial<Event>) => void) | null>(null);
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
   // Dragging state (for disabling overlay pointer events)
   const [dragging] = useState(false);
   // Dev options (removed unused placeholder and force card mode for Stage 1)
+
+  useEffect(() => {
+    if (overlay !== 'editor') {
+      setReviewEvent(null);
+      setReviewEventSaveHandler(null);
+    }
+  }, [overlay]);
 
   // Announcer hook
   const { announce, renderLiveRegion } = useAnnouncer();
@@ -503,6 +580,28 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   }, [selectedId, editDate, editTime, editTitle, editDescription, announce, timelineId, currentTimeline, events, saveEventsToStorage]);
 
   // saveAuthoring handles both edit and create flows
+
+  const handleReviewSave = useCallback((event: React.FormEvent, options?: { sources: string[] }) => {
+    event.preventDefault();
+
+    if (!reviewEventSaveHandler) {
+      return;
+    }
+
+    if (!editDate || !editTitle) {
+      return;
+    }
+
+    reviewEventSaveHandler({
+      date: editDate,
+      time: editTime || undefined,
+      title: editTitle,
+      description: editDescription || undefined,
+      sources: options?.sources,
+    });
+
+    setOverlay(null);
+  }, [reviewEventSaveHandler, editDate, editTime, editTitle, editDescription, setOverlay]);
 
   const deleteSelected = useCallback(async () => {
     if (!selectedId) return;
@@ -731,6 +830,10 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     [eventsWithPreviews, selectedId]
   );
 
+  const authoringSelected = reviewEvent ?? selectedWithPreviews;
+  const isReviewEventActive = Boolean(reviewEvent);
+  const isNewAuthoringEvent = isReviewEventActive ? true : !selectedWithPreviews;
+
   // Open overlay when pending and event data is ready
   // This ensures the overlay only opens after selectedWithPreviews is computed
   useEffect(() => {
@@ -750,6 +853,15 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       setEditDescription(selectedWithPreviews.description ?? '');
     }
   }, [selectedId, selectedWithPreviews]);
+
+  useEffect(() => {
+    if (reviewEvent) {
+      setEditDate(reviewEvent.date ?? '');
+      setEditTime(reviewEvent.time ?? '');
+      setEditTitle(reviewEvent.title ?? '');
+      setEditDescription(reviewEvent.description ?? '');
+    }
+  }, [reviewEvent, setEditDate, setEditTime, setEditTitle, setEditDescription]);
 
   // Handle preview action - zoom to and highlight the preview event
   const handlePreviewAction = useCallback((action: import('./types/ai').AIAction) => {
@@ -816,6 +928,17 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     setActiveNavItem('import-export');
   }, [overlay]);
 
+  const handleReviewEventClick = useCallback(
+    (eventData: Event, onSaveEdits: (edits: Partial<Event>) => void) => {
+      setReviewEvent(eventData);
+      setReviewEventSaveHandler(() => onSaveEdits);
+      setSelectedId(undefined);
+      setPendingOverlayId(null);
+      setOverlay('editor');
+    },
+    [setOverlay, setPendingOverlayId, setSelectedId]
+  );
+
   const toggleReviewPanel = useCallback(() => {
     setShowReviewPanel(prev => !prev);
   }, []);
@@ -846,6 +969,32 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
     // Also select the event
     setSelectedId(event.id);
+  }, [events, animateTo]);
+
+  // Handle focus event from Review Panel - scroll to event on timeline
+  const handleFocusEvent = useCallback((eventId: string) => {
+    // Find the event in existing events or session events
+    const event = events.find(e => e.id === eventId);
+    if (!event) {
+      console.warn('[handleFocusEvent] Event not found:', eventId);
+      return;
+    }
+
+    // Parse the event date and calculate normalized position
+    const eventDate = new Date(event.date);
+    const minDate = Math.min(...events.map(e => new Date(e.date).getTime()));
+    const maxDate = Math.max(...events.map(e => new Date(e.date).getTime()));
+    const range = maxDate - minDate || 1;
+    const normalizedPos = (eventDate.getTime() - minDate) / range;
+
+    // Zoom to a window around the event (20% of timeline centered on event)
+    const windowSize = 0.15;
+    const start = Math.max(0, normalizedPos - windowSize / 2);
+    const end = Math.min(1, start + windowSize);
+    animateTo(start, end);
+
+    // Also select the event to highlight it
+    setSelectedId(eventId);
   }, [events, animateTo]);
 
   // Editor-specific navigation items (context section)
@@ -1067,8 +1216,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               <ErrorBoundary>
                 <Suspense fallback={<div className="fixed right-0 top-0 bottom-0 w-96 border-l flex items-center justify-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}>Loading...</div>}>
                   <AuthoringOverlay
-                    selected={selectedWithPreviews}
-                    isNewEvent={!selectedWithPreviews}
+                    selected={authoringSelected}
+                    isNewEvent={isNewAuthoringEvent}
                     editDate={editDate}
                     editTime={editTime}
                     editTitle={editTitle}
@@ -1077,7 +1226,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     setEditTime={setEditTime}
                     setEditTitle={setEditTitle}
                     setEditDescription={setEditDescription}
-                    onSave={saveAuthoring}
+                    onSave={isReviewEventActive ? handleReviewSave : saveAuthoring}
                     onDelete={deleteSelected}
                     onClose={() => setOverlay(null)}
                     allEvents={events}
@@ -1146,29 +1295,37 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)' }}
           >
             <Suspense fallback={<div className="h-full flex items-center justify-center">Loading...</div>}>
-              <ReviewPanel onClose={() => setShowReviewPanel(false)} />
-            </Suspense>
-          </div>
-        )}
-
-        {/* Timeline minimap positioned fixed to ensure proper z-index layering above overlays */}
-        {!loadError && events.length > 0 && (
-          <div className={`fixed top-1 left-20 right-4 pointer-events-auto ${streamViewerOpen ? 'z-[1400]' : 'z-[50]'}`} data-tour="minimap" data-testid="minimap-container">
-            <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
-              <TimelineMinimap
-                events={events}
-                viewStart={viewStart}
-                viewEnd={viewEnd}
-                onNavigate={setWindow}
-                highlightedEventId={selectedId}
-                hoveredEventId={hoveredEventId}
+              <ReviewPanelContainer
+                onClose={() => setShowReviewPanel(false)}
+                onOpenReviewEvent={handleReviewEventClick}
+                onCommit={loadTimelineEvents}
+                onFocusEvent={handleFocusEvent}
               />
             </Suspense>
           </div>
         )}
 
-        {/* Main timeline area shifts right to avoid sidebar overlap */}
-        <div className="absolute inset-0 ml-14" data-testid="timeline-container">
+        <SessionEventMerge events={eventsWithPreviews}>
+          {(mergedEvents) => (
+            <>
+              {/* Timeline minimap positioned fixed to ensure proper z-index layering above overlays */}
+              {!loadError && mergedEvents.length > 0 && (
+                <div className={`fixed top-1 left-20 right-4 pointer-events-auto ${streamViewerOpen ? 'z-[1400]' : 'z-[50]'}`} data-tour="minimap" data-testid="minimap-container">
+                  <Suspense fallback={<div className="h-8 bg-gray-200 rounded animate-pulse"></div>}>
+                    <TimelineMinimap
+                      events={mergedEvents}
+                      viewStart={viewStart}
+                      viewEnd={viewEnd}
+                      onNavigate={setWindow}
+                      highlightedEventId={selectedId}
+                      hoveredEventId={hoveredEventId}
+                    />
+                  </Suspense>
+                </div>
+              )}
+
+              {/* Main timeline area shifts right to avoid sidebar overlap */}
+              <div className="absolute inset-0 ml-14" data-testid="timeline-container">
           {loadError ? (
             <div className="w-full h-full flex items-center justify-center px-4">
               <ErrorState
@@ -1196,7 +1353,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             >
               <ErrorBoundary>
                 <DeterministicLayoutComponent
-                  events={eventsWithPreviews}
+                  events={mergedEvents}
                   showInfoPanels={showInfoPanels}
                   viewStart={viewStart}
                   viewEnd={viewEnd}
@@ -1308,8 +1465,10 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               </div>
             </div>
           )}
-        </div>
-
+              </div>
+            </>
+          )}
+        </SessionEventMerge>
 
         {/* Command Palette */}
         <Suspense fallback={null}>

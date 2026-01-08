@@ -1113,6 +1113,28 @@ kbd {
   z-index: 4;
 }
 
+/* Session event markers - pending (orange) */
+.minimap-marker.session-pending {
+  background-color: #f97316; /* orange-500 */
+  box-shadow: 0 0 4px rgba(249, 115, 22, 0.5);
+}
+
+.minimap-marker.session-pending.is-hovered {
+  background-color: #fb923c; /* orange-400 */
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.6), 0 2px 6px rgba(249, 115, 22, 0.3);
+}
+
+/* Session event markers - accepted (green) */
+.minimap-marker.session-accepted {
+  background-color: #22c55e; /* green-500 */
+  box-shadow: 0 0 4px rgba(34, 197, 94, 0.5);
+}
+
+.minimap-marker.session-accepted.is-hovered {
+  background-color: #4ade80; /* green-400 */
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6), 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
 /* Card hover via direct DOM manipulation - bypasses React reconciliation for O(1) performance
    When hoveredEventId changes, useEffect toggles .card-hovered class directly */
 [data-testid="event-card"].card-hovered {

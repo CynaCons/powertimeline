@@ -19,6 +19,18 @@ import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
 import { SkeletonCard } from '../components/SkeletonCard';
 
+// Safe ISO date conversion - handles invalid dates gracefully
+const toISOStringSafe = (dateValue: string | undefined): string | null => {
+  if (!dateValue) return null;
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString();
+  } catch {
+    return null;
+  }
+};
+
 // Mobile notice component - now offers Stream View as primary option
 function MobileNotice({ onDismiss, onOpenStreamView }: { onDismiss: () => void; onOpenStreamView: () => void }) {
   return (
@@ -227,8 +239,8 @@ export function EditorPage() {
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={pageDescription} />
           <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
-          {timeline.createdAt && <meta property="article:published_time" content={new Date(timeline.createdAt).toISOString()} />}
-          {timeline.updatedAt && <meta property="article:modified_time" content={new Date(timeline.updatedAt).toISOString()} />}
+          {toISOStringSafe(timeline.createdAt) && <meta property="article:published_time" content={toISOStringSafe(timeline.createdAt)!} />}
+          {toISOStringSafe(timeline.updatedAt) && <meta property="article:modified_time" content={toISOStringSafe(timeline.updatedAt)!} />}
           {user && <meta property="article:author" content={`https://powertimeline.com/${user.username}`} />}
 
           {/* Twitter Card */}

@@ -25,6 +25,8 @@ import {
   ListItemText,
   Tabs,
   Tab,
+  TextField,
+  Divider,
 } from '@mui/material';
 import { OverlayShell } from '../OverlayShell';
 import {
@@ -55,6 +57,7 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [generalError, setGeneralError] = useState('');
   const [exportSuccess, setExportSuccess] = useState(false);
+  const [pastedYaml, setPastedYaml] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle export
@@ -130,6 +133,63 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
       }
     }
   }, [events, onClose, onSessionStarted, startSession]);
+
+  // Dedent: strip common leading whitespace from all lines
+  const dedent = (text: string): string => {
+    const lines = text.split('\n');
+    // Find minimum indentation (ignoring empty lines)
+    const nonEmptyLines = lines.filter(line => line.trim().length > 0);
+    if (nonEmptyLines.length === 0) return text;
+
+    const minIndent = Math.min(
+      ...nonEmptyLines.map(line => {
+        const match = line.match(/^(\s*)/);
+        return match ? match[1].length : 0;
+      })
+    );
+
+    if (minIndent === 0) return text;
+
+    // Remove the common indentation from all lines
+    return lines.map(line => line.slice(minIndent)).join('\n');
+  };
+
+  // Process pasted YAML content
+  const processPastedYaml = useCallback(() => {
+    setGeneralError('');
+    setValidationErrors([]);
+
+    // Dedent and trim to handle copy-paste with extra indentation
+    const content = dedent(pastedYaml).trim();
+    if (!content) {
+      setGeneralError('Please paste YAML content first');
+      return;
+    }
+
+    // Validate content size (max 1MB)
+    if (content.length > 1024 * 1024) {
+      setGeneralError('Content too large. Maximum size is 1MB.');
+      return;
+    }
+
+    try {
+      const parsedEvents = parseYamlForSession(content);
+      if (parsedEvents.length === 0) {
+        setGeneralError('No events found in this YAML content');
+        return;
+      }
+      startSession('yaml', parsedEvents, events);
+      setPastedYaml('');
+      onSessionStarted?.();
+      onClose();
+    } catch (error) {
+      if (error instanceof YamlSessionParseError) {
+        setValidationErrors(error.errors);
+        return;
+      }
+      setGeneralError(error instanceof Error ? error.message : 'Failed to parse YAML');
+    }
+  }, [pastedYaml, events, onClose, onSessionStarted, startSession]);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -312,6 +372,39 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
                 or click to browse
               </Typography>
             </Paper>
+
+            <Divider sx={{ my: 2 }}>
+              <Typography variant="caption" color="text.secondary">
+                OR
+              </Typography>
+            </Divider>
+
+            {/* Paste YAML section */}
+            <TextField
+              multiline
+              rows={6}
+              fullWidth
+              placeholder={`version: 1\ntimeline:\n  title: "My Timeline"\nevents:\n  - id: "event-1"\n    date: "2024-01-01"\n    title: "Event Title"\n    description: "Event description"`}
+              value={pastedYaml}
+              onChange={(e) => setPastedYaml(e.target.value)}
+              sx={{
+                '& .MuiInputBase-input': {
+                  fontFamily: 'monospace',
+                  fontSize: '0.75rem',
+                },
+              }}
+              data-testid="yaml-paste-input"
+            />
+            <Button
+              variant="contained"
+              size="small"
+              onClick={processPastedYaml}
+              disabled={!pastedYaml.trim()}
+              sx={{ mt: 1, textTransform: 'none' }}
+              data-testid="yaml-paste-import"
+            >
+              Import from Pasted YAML
+            </Button>
 
             <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
               Import starts a review session so you can accept changes before saving.

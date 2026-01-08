@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import type { CSSProperties } from 'react';
 import type { Event } from '../types';
+import type { EventDecision } from '../types/importSession';
 import type { LayoutConfig, PositionedCard, Anchor, EventCluster } from './types';
 
 // Telemetry types now defined in vite-env.d.ts Window interface
@@ -861,6 +862,22 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
         const lineStartY = anchorCenterY;
         const lineEndY = timelineAxisY;
 
+        // Check if this anchor belongs to a session event
+        const anchorEvent = anchorCards[0]?.event as Event & { _sessionDecision?: EventDecision };
+        const anchorSessionDecision = anchorEvent?._sessionDecision;
+
+        // Session-aware color styles
+        const sessionPendingStyle = {
+          background: 'linear-gradient(135deg, #fed7aa 0%, #fb923c 100%)',
+          borderColor: '#f97316',
+          boxShadow: '0 0 8px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+        };
+        const sessionAcceptedStyle = {
+          background: 'linear-gradient(135deg, #bbf7d0 0%, #4ade80 100%)',
+          borderColor: '#22c55e',
+          boxShadow: '0 0 8px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+        };
+
         // Base visual style - selected and pair-hovered handled here, external hover via CSS
         const anchorVisualStyle: CSSProperties = isAnchorSelected
           ? {
@@ -874,11 +891,15 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
                 borderColor: 'var(--color-primary-400)',
                 boxShadow: '0 0 8px rgba(66, 165, 245, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
               }
-            : {
-                background: 'linear-gradient(135deg, var(--color-neutral-700) 0%, var(--color-neutral-800) 50%, var(--color-neutral-700) 100%)',
-                borderColor: 'var(--color-neutral-600)',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-              };
+            : anchorSessionDecision === 'pending'
+              ? sessionPendingStyle
+              : anchorSessionDecision === 'accepted'
+                ? sessionAcceptedStyle
+                : {
+                    background: 'linear-gradient(135deg, var(--color-neutral-700) 0%, var(--color-neutral-800) 50%, var(--color-neutral-700) 100%)',
+                    borderColor: 'var(--color-neutral-600)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                  };
 
         // Calculate badge position to center on timeline axis
         const outerContainerTop = Math.min(anchorCenterY, timelineAxisY) - 5;
@@ -991,6 +1012,9 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
           ? 'ring-2 ring-blue-400 ring-opacity-60 shadow-blue-400/30 shadow-lg'
           : '';
 
+        const sessionDecision = (card.event as Event & { _sessionDecision?: EventDecision })._sessionDecision;
+        const sessionDecisionClass = sessionDecision ? `session-event-${sessionDecision}` : '';
+
         // Check if this is a preview event (AI-created temporary event)
         const isPreviewEvent = card.event.isPreview === true;
 
@@ -1032,7 +1056,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
             data-cluster-id={card.clusterId}
             data-tour={isFirstCard ? 'event-card' : undefined}
             data-preview={isPreviewEvent || undefined}
-            className={`absolute rounded-xl shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} text-sm`}
+            className={`absolute rounded-xl shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} ${sessionDecisionClass} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}
