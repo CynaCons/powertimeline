@@ -82,10 +82,14 @@ function SessionEventMerge({ events, children }: SessionEventMergeProps) {
       }) as EventWithSessionDecision);
   }, [session]);
 
-  const mergedEvents = useMemo(
-    () => [...events, ...sessionEventsForDisplay],
-    [events, sessionEventsForDisplay]
-  );
+  const mergedEvents = useMemo(() => {
+    // Deduplicate by ID - session events override existing events (for preview during import)
+    const eventMap = new Map(events.map(e => [e.id, e as EventWithSessionDecision]));
+    sessionEventsForDisplay.forEach(se => {
+      eventMap.set(se.id, se);
+    });
+    return Array.from(eventMap.values());
+  }, [events, sessionEventsForDisplay]);
 
   return <>{children(mergedEvents)}</>;
 }

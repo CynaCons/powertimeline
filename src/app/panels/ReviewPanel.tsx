@@ -388,6 +388,74 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
                 </Typography>
               )}
 
+              {/* Sources display */}
+              {event.eventData.sources && event.eventData.sources.length > 0 && (
+                <Box sx={{ mt: 1, mb: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 500,
+                      color: 'var(--page-text-secondary)',
+                      display: 'block',
+                      mb: 0.5,
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    Sources:
+                  </Typography>
+                  <Box
+                    component="ul"
+                    sx={{
+                      m: 0,
+                      pl: 2,
+                      fontSize: '0.7rem',
+                      color: 'var(--page-text-secondary)',
+                      '& li': { mb: 0.25 },
+                    }}
+                  >
+                    {event.eventData.sources.map((source, idx) => {
+                      const existingSources = new Set(event.existingEvent?.sources || []);
+                      const isNew = event.action === 'update' && !existingSources.has(source);
+                      return (
+                        <li key={idx}>
+                          {isNew && (
+                            <span
+                              style={{
+                                background: 'var(--color-success, #22c55e)',
+                                color: 'white',
+                                borderRadius: '4px',
+                                padding: '0 4px',
+                                fontSize: '9px',
+                                marginRight: '4px',
+                                fontWeight: 600,
+                              }}
+                            >
+                              NEW
+                            </span>
+                          )}
+                          {source.startsWith('http') ? (
+                            <a
+                              href={source}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: 'var(--page-accent)',
+                                textDecoration: 'none',
+                                wordBreak: 'break-all',
+                              }}
+                            >
+                              {source.length > 50 ? `${source.substring(0, 50)}...` : source}
+                            </a>
+                          ) : (
+                            source
+                          )}
+                        </li>
+                      );
+                    })}
+                  </Box>
+                </Box>
+              )}
+
               {/* View Diff button for UPDATE actions */}
               {event.action === 'update' && (
                 <Button

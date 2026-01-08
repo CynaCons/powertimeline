@@ -160,8 +160,17 @@ function FullCardContent({ event, sessionDecision }: { event: Event; sessionDeci
       <p className="card-description mb-2 flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
-      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>
+      <div className="card-date flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
         {formatDate(event.date)}
+        {event.sources && event.sources.length > 0 && (
+          <span
+            className="material-symbols-rounded"
+            style={{ fontSize: '12px', opacity: 0.7 }}
+            title={`${event.sources.length} source${event.sources.length > 1 ? 's' : ''}`}
+          >
+            link
+          </span>
+        )}
       </div>
     </div>
   );
@@ -191,8 +200,17 @@ function CompactCardContent({ event, sessionDecision }: { event: Event; sessionD
       <p className="card-description line-clamp-1 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
-      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>
+      <div className="card-date flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
         {formatDate(event.date)}
+        {event.sources && event.sources.length > 0 && (
+          <span
+            className="material-symbols-rounded"
+            style={{ fontSize: '10px', opacity: 0.7 }}
+            title={`${event.sources.length} source${event.sources.length > 1 ? 's' : ''}`}
+          >
+            link
+          </span>
+        )}
       </div>
     </div>
   );

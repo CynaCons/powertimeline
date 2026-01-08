@@ -7,7 +7,7 @@ import type {
   EventDecision,
 } from '../types/importSession';
 import type { Event } from '../types';
-import { addEvent } from '../services/firestore';
+import { addEvent, updateEvent } from '../services/firestore';
 
 const STORAGE_KEY_PREFIX = 'powertimeline:session:';
 
@@ -136,17 +136,21 @@ export function useImportSession(timelineId?: string) {
       const finalData = { ...event.eventData, ...event.userEdits };
       if (event.action === 'create') {
         await addEvent(session.timelineId, resolvedOwnerId, finalData as Event);
+      } else if (event.action === 'update' && finalData.id) {
+        await updateEvent(session.timelineId, resolvedOwnerId, finalData.id, finalData);
       }
     }
 
     localStorage.removeItem(STORAGE_KEY_PREFIX + session.timelineId);
-    setSession(prev => (prev ? { ...prev, status: 'committed' } : null));
+    // Clear session immediately to avoid visual glitch before panel closes
+    setSession(null);
   }, [session]);
 
   const discardSession = useCallback(() => {
     if (session) {
       localStorage.removeItem(STORAGE_KEY_PREFIX + session.timelineId);
-      setSession(prev => (prev ? { ...prev, status: 'discarded' } : null));
+      // Clear session immediately to avoid visual glitch before panel closes
+      setSession(null);
     }
   }, [session]);
 

@@ -1,0 +1,672 @@
+version: 1
+timeline:
+  title: "Jean-Pierre Petit & The Janus Cosmological Model"
+  description: "Complete timeline of Jean-Pierre Petit's life, scientific career, controversies, and the development of the Janus Cosmological Model"
+events:
+  # ==================== BIRTH & EDUCATION ====================
+  - id: "jpp-1937-04-05-birth"
+    date: "1937-04-05"
+    title: "Birth of Jean-Pierre Petit"
+    description: "Jean-Pierre Petit is born in Choisy-le-Roi, France. He would become a physicist known for MHD research, cosmology, science popularization, and controversial UFO involvement."
+    tags: ["biography", "origins"]
+    sources:
+      - "https://fr.wikipedia.org/wiki/Jean-Pierre_Petit"
+
+  - id: "jpp-1955-prep-classes"
+    date: "1955-09-01"
+    title: "Preparatory Classes Begin"
+    description: "Petit begins preparatory classes at Lycée Carnot and Lycée Condorcet in Paris, preparing for France's elite engineering schools."
+    tags: ["education", "biography"]
+
+  - id: "jpp-1957-supaero"
+    date: "1957-09-01"
+    title: "Enters Supaéro"
+    description: "Petit enters the École Nationale Supérieure de l'Aéronautique et de l'Espace (Supaéro), France's prestigious aerospace engineering school. Specializes in Fluid Mechanics."
+    tags: ["education", "aerospace"]
+
+  - id: "jpp-1961-engineering-degree"
+    date: "1961-06-01"
+    title: "Engineering Degree Obtained"
+    description: "Petit graduates from Supaéro with the title Ingénieur Civil de l'Aéronautique, specializing in fluid mechanics."
+    tags: ["education", "milestone"]
+
+  # ==================== EARLY CAREER ====================
+  - id: "jpp-1961-military-icbm"
+    date: "1961-09-01"
+    title: "Military Service: Ballistic Missile Program"
+    description: "During military service, Petit works on France's early ballistic missile program, specifically designing nozzles for missiles. First exposure to advanced propulsion physics."
+    tags: ["military", "career", "propulsion"]
+
+  - id: "jpp-1965-imfm-mhd"
+    date: "1965-01-01"
+    title: "Joins Institute of Fluid Mechanics"
+    description: "Petit is recruited by the Institute of Fluid Mechanics of Marseille (IMFM) to work on Magnetohydrodynamics (MHD). Begins constructing shock tubes and MHD generators."
+    tags: ["career", "mhd", "research"]
+
+  - id: "jpp-1967-mhd-breakthrough"
+    date: "1967-01-01"
+    title: "First MHD Generator Success"
+    description: "Petit achieves the first successful operation of a two-temperature MHD generator with non-equilibrium ionization. Published in Comptes Rendus de l'Académie des Sciences. A major engineering achievement."
+    tags: ["mhd", "breakthrough", "publication"]
+
+  - id: "jpp-1968-instability-paper"
+    date: "1968-01-01"
+    title: "Electrothermal Instability Paper"
+    description: "Publishes 'Instabilité électrothermique et distribution électronique non-maxwellienne' in CRAS, advancing plasma physics understanding."
+    tags: ["publication", "plasma-physics"]
+
+  - id: "jpp-1971-velikhov-instability"
+    date: "1971-01-01"
+    title: "Velikhov Instability Suppression"
+    description: "Publishes method to suppress the Velikhov instability in MHD generators. This work would later be cited as relevant to Russian hypersonic missile development."
+    tags: ["publication", "mhd", "russia-connection"]
+
+  - id: "jpp-1972-phd"
+    date: "1972-06-01"
+    title: "PhD in Physical Sciences"
+    description: "Petit receives his Docteur ès Sciences Physiques from Université de Provence. Thesis: 'Applications de la théorie cinétique des gaz à la physique des plasmas et à la dynamique des galaxies.' Supervisor: Evry Schatzman."
+    tags: ["education", "phd", "milestone"]
+
+  # ==================== CNRS CAREER ====================
+  - id: "jpp-1974-cnrs-join"
+    date: "1974-01-01"
+    title: "Joins CNRS"
+    description: "Petit joins the Centre National de la Recherche Scientifique (CNRS) as Attaché de recherche. Transfers from IMFM to Observatoire de Marseille. Officially shifts focus to astrophysics."
+    tags: ["career", "cnrs", "milestone"]
+
+  - id: "jpp-1974-coanda-ufo"
+    date: "1974-01-01"
+    title: "Science et Vie: Coanda Effect and Flying Saucers"
+    description: "Publishes 'L'effet Coanda - Des soucoupes volantes au bureau d'étude' in Science et Vie, first linking his fluid dynamics work to UFO propulsion concepts."
+    tags: ["publication", "ufo", "media"]
+
+  - id: "jpp-1976-plasma-ufo"
+    date: "1976-01-01"
+    title: "Science et Vie: Plasma Motor for UFOs"
+    description: "Publishes 'Un moteur à plasma pour ovnis' in Science et Vie, proposing MHD-based propulsion could explain UFO flight characteristics."
+    tags: ["publication", "ufo", "mhd", "media"]
+
+  # ==================== UMMO AFFAIR BEGINS ====================
+  - id: "ummo-1965-letters-begin"
+    date: "1965-01-01"
+    title: "Ummo Letters Begin Circulating"
+    description: "Anonymous letters claiming to be from extraterrestrials on planet Ummo (orbiting Wolf 424) begin arriving to scientists and ufologists in France and Spain. Over 1,000 pages would be sent by 1993."
+    tags: ["ummo", "ufo", "controversy"]
+
+  - id: "jpp-1977-ummo-first-contact"
+    date: "1977-01-01"
+    title: "Petit Discovers Ummo Letters"
+    description: "Petit first encounters the Ummo letters through ufologist friends. As an MHD expert, he is intrigued by their technical content on propulsion systems."
+    tags: ["ummo", "ufo", "turning-point"]
+
+  - id: "jpp-1977-twin-universe-first"
+    date: "1977-05-08"
+    title: "First Twin Universe Publication"
+    description: "Publishes 'Univers en interaction avec leurs images dans le miroir du temps' in CRAS - the first paper proposing twin universes with opposite time arrows. Seeds of the Janus model."
+    tags: ["publication", "jcm", "cosmology", "milestone"]
+
+  - id: "jpp-1977-computer-center"
+    date: "1977-09-01"
+    title: "Co-Director of Computer Center"
+    description: "Petit becomes Co-Director of the Computer Center at Université de Provence. Develops early CAD software for Apple II computers. Position held until 1983."
+    tags: ["career", "computing"]
+
+  - id: "jpp-1979-ummo-letter"
+    date: "1979-01-01"
+    title: "Receives Personal Ummo Letter"
+    description: "Petit receives his first personal letter from the alleged Ummo extraterrestrials, describing MHD-like propulsion systems. He begins actively promoting them as genuine ET communications."
+    tags: ["ummo", "ufo", "controversy"]
+
+  - id: "jpp-1979-sphere-eversion"
+    date: "1979-01-01"
+    title: "Sphere Eversion with Bernard Morin"
+    description: "Collaborates with blind mathematician Bernard Morin on the sphere eversion problem. Publishes 'Retournement de la sphère' in Pour la Science (French Scientific American)."
+    tags: ["publication", "topology", "collaboration"]
+
+  # ==================== 1980s: CONTROVERSY GROWS ====================
+  - id: "jpp-1980-mhd-experiments"
+    date: "1980-01-01"
+    title: "Pour la Science: Amateur MHD Experiments"
+    description: "Publishes 'Expériences d'amateur - Pour construire et comprendre un accélérateur magnétohydrodynamique' in Pour la Science, popularizing MHD for general audiences."
+    tags: ["publication", "popularization", "mhd"]
+
+  - id: "jpp-1981-boy-surface"
+    date: "1981-01-01"
+    title: "Boy's Surface Representation"
+    description: "Publishes parametric representation of Boy's Surface in CRAS. A significant contribution to topology - finding an analytical description of this non-orientable surface."
+    tags: ["publication", "topology", "mathematics"]
+
+  - id: "jpp-1981-gepan"
+    date: "1981-01-01"
+    title: "Involvement with GEPAN"
+    description: "Petit becomes involved with GEPAN (Groupe d'Étude des Phénomènes Aérospatiaux Non-identifiés), France's official government UFO investigation unit founded by CNES in 1977. Contributes scientific expertise on MHD propulsion theories."
+    tags: ["ufo", "gepan", "organization"]
+
+  - id: "jpp-1982-cnrs-seminar-controversy"
+    date: "1982-01-01"
+    title: "CNRS Seminar: Ummo Physics Presentation"
+    description: "Petit presents Ummo-related physics at a CNRS seminar. Colleagues accuse him of wasting institutional resources on pseudoscience. Beginning of professional isolation."
+    tags: ["controversy", "cnrs", "ummo"]
+
+  - id: "jpp-1983-moscow-conference"
+    date: "1983-01-01"
+    title: "Moscow MHD Conference"
+    description: "Petit presents 'Annihilation of the Velikhov instability by magnetic confinement' at the International Conference on MHD Power Generation in Moscow. Key international appearance."
+    tags: ["conference", "russia", "mhd", "international"]
+    sources:
+      - "http://www.jp-petit.org/papers/MHD/1983-Moscow-shockwave.pdf"
+
+  - id: "jpp-1983-ummo-publications"
+    date: "1983-01-01"
+    title: "Publishes Ummo Analyses in Science et Vie"
+    description: "Petit publishes analyses of Ummo letters in Science et Vie (1983-1985), claiming they describe a 'bimodal' universe with positive and negative masses."
+    tags: ["publication", "ummo", "media"]
+
+  - id: "jpp-1984-ummo-analysis"
+    date: "1984-01-01"
+    title: "Laboratory Analysis of Ummo Letters"
+    description: "Petit conducts private laboratory analysis of Ummo letter paper and ink. Claims results show 'no anachronisms' and content 'exceeds human knowledge.' Skeptics dispute methodology."
+    tags: ["ummo", "controversy"]
+
+  - id: "jpp-1985-vandermeersch-dispute"
+    date: "1985-01-01"
+    title: "Dispute with Yves Vandermeersch"
+    description: "CNRS colleague Yves Vandermeersch publicly calls Petit's early Janus concepts 'speculative nonsense' in Pour la Science (1986). First major scientific dismissal."
+    tags: ["controversy", "criticism", "cnrs"]
+
+  - id: "jpp-1986-ummo-symposium"
+    date: "1986-01-01"
+    title: "Organizes Ummo Symposium in Nice"
+    description: "Petit organizes the 'Ummo Symposium' in Nice, France. Attracts 50+ attendees but is boycotted by mainstream scientists. Pierre Guérin publishes: 'Petit's Ummo obsession discredits French astrophysics.'"
+    tags: ["ummo", "conference", "controversy"]
+
+  - id: "afis-1987-critique"
+    date: "1987-01-01"
+    title: "AFIS Labels Petit 'Ummo Apostle'"
+    description: "The Association Française pour l'Information Scientifique (AFIS, French skeptics) publishes bulletin labeling Petit an 'Ummo apostle' who fabricates connections between letters and real science."
+    tags: ["criticism", "skeptics", "ummo"]
+
+  - id: "jpp-1987-science-vie-defamation"
+    date: "1987-06-01"
+    title: "Defamation Dispute with Science et Vie"
+    description: "Petit accuses Science et Vie editors of defamation for mocking his Ummo involvement. Case settled out of court with minor retraction."
+    tags: ["legal", "media", "ummo"]
+
+  - id: "jpp-1988-vsl-cosmology"
+    date: "1988-01-01"
+    title: "Variable Speed of Light Cosmology"
+    description: "Publishes 'Cosmological model with variable light velocity' in Modern Physics Letters A. Proposes VSL as alternative to cosmic inflation for explaining the horizon problem."
+    tags: ["publication", "cosmology", "vsl"]
+    sources:
+      - "https://www.worldscientific.com/doi/abs/10.1142/S0217732388001823"
+
+  - id: "jpp-1989-shock-wave-paper"
+    date: "1989-01-01"
+    title: "Shock Wave Cancellation Paper"
+    description: "Publishes 'Shock wave cancellation by J x B forces' in European Journal of Mechanics with Bertrand Lebrun. Proposes MHD could eliminate sonic booms."
+    tags: ["publication", "mhd", "aerospace"]
+
+  # ==================== 1990s: CAREER CRISIS ====================
+  - id: "jpp-1990-directeur-recherche"
+    date: "1990-01-01"
+    title: "Promoted to Directeur de Recherche"
+    description: "Petit promoted to Directeur de Recherche (Senior Research Director) at CNRS. Despite promotion, denied laboratory director position - alleges retaliation for 'dissident' views."
+    tags: ["career", "cnrs", "controversy"]
+
+  - id: "vallee-1990-critique"
+    date: "1990-01-01"
+    title: "Jacques Vallée: 'Credulity Bordering on Delusion'"
+    description: "UFO researcher Jacques Vallée publishes 'Confrontations', calling Ummo a 'psychological operation' and criticizing Petit for 'credulity bordering on delusion.'"
+    tags: ["criticism", "ummo", "vallee"]
+
+  - id: "jpp-1990-mhd-aerodyne-book"
+    date: "1990-01-01"
+    title: "Book: The MHD Aerodyne"
+    description: "Petit publishes 'The MHD Aerodyne', claiming UFOs use MHD for propulsion. States: 'My MHD models explain their 90-degree turns without inertia.'"
+    tags: ["publication", "book", "ufo", "mhd"]
+
+  - id: "jpp-1990-enquete-ovni"
+    date: "1990-01-01"
+    title: "Book: Enquête sur les OVNI"
+    description: "Publishes 'Enquête sur les OVNI' with co-author Michel Granger. Popular investigation into UFO phenomena from a physicist's perspective."
+    tags: ["publication", "book", "ufo"]
+
+  - id: "jpp-1991-ummo-book"
+    date: "1991-01-01"
+    title: "Book: Le Mystère des Ummites"
+    description: "Publishes 'Enquête sur des extra-terrestres qui sont déjà parmi nous: Le Mystère des Ummites'. Claims Ummo letters are genuine extraterrestrial communications."
+    tags: ["publication", "book", "ummo"]
+
+  - id: "jpp-1992-forced-retirement"
+    date: "1992-01-01"
+    title: "Forced Early Retirement from CNRS"
+    description: "Petit forced into early retirement at age 55. CNRS statement: 'Extracurricular activities compromised institutional credibility.' Petit claims 'blacklisting' for Ummo/UFO advocacy."
+    tags: ["career", "cnrs", "controversy", "milestone"]
+
+  - id: "jpp-1992-ethics-complaint"
+    date: "1992-03-01"
+    title: "Files CNRS Ethics Board Grievance"
+    description: "Petit files formal grievance with CNRS ethics board over 'resource misuse' allegations. Complaint rejected."
+    tags: ["legal", "cnrs", "controversy"]
+
+  - id: "jpp-1992-beijing-conference"
+    date: "1992-06-01"
+    title: "Beijing MHD Conference"
+    description: "Petit presents MHD research at conference in Beijing, China. Often self-funded due to lack of institutional travel grants."
+    tags: ["conference", "china", "international", "mhd"]
+
+  - id: "pena-1993-confession"
+    date: "1993-01-01"
+    title: "Ummo Hoaxer Confession"
+    description: "José Luis Jordán Peña confesses to fabricating many Ummo letters. Mocks Petit as 'gullible scientist who saw aliens where there were none.' Major blow to Petit's credibility."
+    tags: ["ummo", "hoax", "controversy"]
+
+  - id: "lemonde-1993-cnrs"
+    date: "1993-06-01"
+    title: "Le Monde: CNRS Statement on Petit"
+    description: "Le Monde publishes CNRS official statement on Petit's departure, citing 'professional misconduct via public UFO advocacy.'"
+    tags: ["media", "cnrs", "controversy"]
+
+  - id: "jpp-1993-lawsuit-cnrs"
+    date: "1993-09-01"
+    title: "Lawsuit Against CNRS"
+    description: "Petit sues CNRS for wrongful termination, claiming discrimination for scientific views. Case filed at Toulouse Labor Court."
+    tags: ["legal", "cnrs"]
+
+  - id: "jpp-1994-ummo-response"
+    date: "1994-01-01"
+    title: "Petit Responds to Peña Confession"
+    description: "Despite Peña's confession, Petit responds in Science et Inconnu: 'Even if Peña faked some, core physics is extraterrestrial.' Doubles down on Ummo authenticity."
+    tags: ["ummo", "controversy"]
+
+  - id: "jpp-1994-missing-mass"
+    date: "1994-01-01"
+    title: "The Missing Mass Problem Paper"
+    description: "Publishes 'The Missing Mass Problem' in Il Nuovo Cimento B. First formal draft of bimetric model using negative mass to explain dark matter."
+    tags: ["publication", "jcm", "cosmology"]
+    sources:
+      - "https://link.springer.com/content/pdf/10.1007/BF02722527.pdf"
+
+  - id: "jpp-1995-lawsuit-dismissed"
+    date: "1995-01-01"
+    title: "CNRS Lawsuit Dismissed"
+    description: "Toulouse Labor Court dismisses Petit's wrongful termination lawsuit. Court rules 'professional misconduct via public UFO advocacy' justified CNRS action. Le Figaro covers the ruling."
+    tags: ["legal", "cnrs", "media"]
+
+  - id: "jpp-1995-twin-universe"
+    date: "1995-01-01"
+    title: "Twin Universe Cosmology Paper"
+    description: "Publishes 'Twin Universe Cosmology' in Astrophysics and Space Science (Vol. 226, pp. 273-307). Comprehensive paper on positive/negative mass sector interactions."
+    tags: ["publication", "jcm", "cosmology", "milestone"]
+    sources:
+      - "https://link.springer.com/article/10.1007/BF00627375"
+
+  - id: "jpp-1997-half-universe-book"
+    date: "1997-01-01"
+    title: "Book: On a perdu la moitié de l'univers"
+    description: "Publishes popular science book 'On a perdu la moitié de l'univers' (We've Lost Half the Universe), presenting twin universe ideas for general audiences."
+    tags: ["publication", "book", "cosmology"]
+
+  - id: "jpp-1999-scale-invariant"
+    date: "1999-01-01"
+    title: "Scale Invariant Cosmology Paper"
+    description: "Publishes 'Scale Invariant Cosmology' in International Journal of Modern Physics D. Further development of alternative cosmological framework."
+    tags: ["publication", "cosmology"]
+    sources:
+      - "https://www.worldscientific.com/doi/abs/10.1142/S0218271899000213"
+
+  # ==================== 2000s: POST-CNRS ERA ====================
+  - id: "jpp-2002-afis-lawsuit"
+    date: "2002-01-01"
+    title: "Defamation Lawsuit Against AFIS"
+    description: "Petit sues French skeptics group AFIS for libel after 2001 bulletin called him a 'pseudoscientist.' Case goes to Paris Court."
+    tags: ["legal", "skeptics"]
+
+  - id: "jpp-2003-afis-loss"
+    date: "2003-01-01"
+    title: "Loses AFIS Defamation Case"
+    description: "Paris Court rules against Petit in AFIS defamation suit. Judge cites public record of Ummo endorsements as legitimate basis for criticism."
+    tags: ["legal", "skeptics"]
+
+  - id: "jpp-2003-retirement-official"
+    date: "2003-04-01"
+    title: "Official Retirement from CNRS"
+    description: "Petit's official CNRS retirement date. Founds UFO-Science association and LAMBDA Laboratory to continue research independently."
+    tags: ["career", "retirement", "milestone"]
+
+  - id: "jpp-2003-independent-organizations"
+    date: "2003-06-01"
+    title: "Founds UFO-Science and LAMBDA Laboratory"
+    description: "Following retirement from CNRS, Petit establishes two independent research organizations: UFO-Science (dedicated to scientific investigation of UFO phenomena) and LAMBDA Laboratory (Laboratory for Applications of MHD in Bitemperature Discharges to Aerodynamics) for continued research outside institutional constraints."
+    tags: ["organization", "ufo", "mhd", "research", "milestone"]
+    sources:
+      - "https://www.jp-petit.org/"
+      - "https://www.ufo-science.com/"
+
+  - id: "jpp-2003-secret-weapons-book"
+    date: "2003-01-01"
+    title: "Book: OVNIS et armes secrètes américaines"
+    description: "Publishes 'OVNIS et armes secrètes américaines' (UFOs and American Secret Weapons), discussing connections between UFO sightings and classified military projects."
+    tags: ["publication", "book", "ufo"]
+
+  - id: "jpp-2004-marseille-lecture"
+    date: "2004-01-01"
+    title: "Marseille Observatory: MHD-UFO Lecture"
+    description: "Petit gives lecture at Marseille Observatory on MHD-UFO connections. States: 'UFOs are human-like prototypes or alien tech; my MHD models explain their 90-degree turns.'"
+    tags: ["lecture", "ufo", "mhd"]
+
+  - id: "jpp-2005-arxiv-ban"
+    date: "2005-01-01"
+    title: "Alleged arXiv Ban"
+    description: "Petit claims permanent ban from arXiv preprint server for 'repeated violations' after uploading Ummo-linked papers. Moderators cite 'non-scientific content.' No official confirmation."
+    tags: ["controversy", "arxiv", "publication"]
+
+  - id: "jpp-2005-lexpress-ummo"
+    date: "2005-01-01"
+    title: "L'Express Interview on Ummo"
+    description: "Petit tells L'Express: 'The Ummo affair is the most serious case of extraterrestrial contact; skeptics ignore the physics because it challenges their paradigms.'"
+    tags: ["media", "interview", "ummo"]
+
+  - id: "jpp-2006-science-vie-oped"
+    date: "2006-01-01"
+    title: "Science et Vie Op-Ed on arXiv"
+    description: "Petit publishes op-ed in Science et Vie: 'Academic gatekeepers blacklist innovators.' Criticizes arXiv moderation as censorship."
+    tags: ["media", "controversy", "arxiv"]
+
+  - id: "hossenfelder-2008-bimetric"
+    date: "2008-01-01"
+    title: "Hossenfelder Bimetric Theory"
+    description: "Sabina Hossenfelder publishes bimetric theory with exchange symmetry. Petit and d'Agostini later build upon this work for their JCM formalization."
+    tags: ["precursor", "bimetric", "physics"]
+
+  - id: "jpp-2008-aiaa-mhd"
+    date: "2008-01-01"
+    title: "AIAA: MHD Hypersonic Flow Control"
+    description: "Publishes 'MHD hypersonic flow control for aerospace applications' in AIAA Progress in Astronautics and Aeronautics with J. Geffray. Mainstream aerospace publication."
+    tags: ["publication", "mhd", "aerospace"]
+    sources:
+      - "http://przyrbwn.icm.edu.pl/APP/PDF/115/a115z667.pdf"
+
+  - id: "jpp-2010-vallee-dispute"
+    date: "2010-01-01"
+    title: "Dispute with Jacques Vallée Dropped"
+    description: "Petit's counter-suit against Jacques Vallée over Confrontations excerpts is dropped after mediation."
+    tags: ["legal", "vallee"]
+
+  # ==================== 2013-2016: JCM FORMALIZATION ====================
+  - id: "jpp-2013-c-dans-lair"
+    date: "2013-01-01"
+    title: "French TV: 'Aliens Monitoring Since 1950s'"
+    description: "Petit appears on C dans l'air (French TV) stating: 'Extraterrestrials have been monitoring us since the 1950s; their craft use MHD for gravity-defying flight.'"
+    tags: ["media", "tv", "ufo"]
+
+  - id: "jpp-2013-formal-jcm"
+    date: "2013-01-01"
+    title: "Formal JCM Proposal"
+    description: "Petit formally proposes the Janus Cosmological Model in a preprint. Describes bimetric theory with positive mass (ordinary matter) and negative mass (twin matter)."
+    tags: ["jcm", "milestone", "cosmology"]
+
+  - id: "jpp-2013-ufo-science-memoir"
+    date: "2013-01-01"
+    title: "Self-Published Memoir: UFOs and Science"
+    description: "Petit publishes self-funded memoir 'UFOs and Science' documenting his career, UFO research, and institutional conflicts."
+    tags: ["publication", "book", "memoir"]
+
+  - id: "jpp-2014-dagostini-paper"
+    date: "2014-11-01"
+    title: "Key Bimetric Paper with d'Agostini"
+    description: "Petit and Gilles d'Agostini publish 'Cosmological bimetric model with interacting positive and negative masses and two different speeds of light' in Modern Physics Letters A."
+    tags: ["publication", "jcm", "collaboration", "milestone"]
+    sources:
+      - "https://doi.org/10.1142/S0217732314501065"
+
+  - id: "jpp-2015-lagrangian"
+    date: "2015-05-01"
+    title: "Lagrangian Derivation Published"
+    description: "Petit and d'Agostini publish Lagrangian derivation of coupled field equations in Astrophysics and Space Science. Provides mathematical foundation for JCM."
+    tags: ["publication", "jcm", "mathematics"]
+    sources:
+      - "https://link.springer.com/article/10.1007/s10509-015-2250-6"
+
+  - id: "jpp-2016-foundational-paper"
+    date: "2016-06-13"
+    title: "Foundational JCM Paper on Academia.edu"
+    description: "Detailed paper outlining JCM's bimetric field equations uploaded to Academia.edu and ResearchGate. Predicts no need for ΛCDM dark components."
+    tags: ["publication", "jcm"]
+    sources:
+      - "https://www.academia.edu/26110581/The_Janus_Cosmological_Model"
+      - "https://januscosmologicalmodel.com/"
+
+  - id: "jpp-2016-inress-interview"
+    date: "2016-01-01"
+    title: "INRESS Interview: 'We Are Observed and Visited'"
+    description: "Interview with Stéphane Allix for Agoravox TV. Petit states: 'C'est des visites, c'est évident, on est observés et visités' (It's visits, obviously, we are observed and visited)."
+    tags: ["media", "interview", "ufo"]
+
+  - id: "jpp-2016-radiative-era"
+    date: "2016-11-20"
+    title: "Radiative Era Paper"
+    description: "Publishes 'The Janus Cosmological Model: The Radiative Era as Coupled Gauge Processes' on ResearchGate. Exact solution for early universe without inflation."
+    tags: ["publication", "jcm", "cosmology"]
+
+  # ==================== 2017-2019: CONFERENCES & CRITIQUES ====================
+  - id: "jpp-2017-aps-meeting"
+    date: "2017-04-01"
+    title: "APS April Meeting Presentation"
+    description: "Petit presents 'The Janus Cosmological Model: An Answer to the Missing Cosmological Antimatter' at American Physical Society April Meeting. International exposure."
+    tags: ["conference", "usa", "jcm"]
+    sources:
+      - "https://meetings.aps.org/Meeting/APR17/Session/T1.29"
+
+  - id: "jpp-2018-thinkerview"
+    date: "2018-06-07"
+    title: "Thinkerview: 3+ Hour Interview"
+    description: "Petit gives extensive interview to Thinkerview YouTube channel: 'Modèle Janus et Armes russes.' Discusses JCM, Russian military technology, and scientific censorship in France."
+    tags: ["media", "interview", "youtube", "russia"]
+    sources:
+      - "https://www.youtube.com/watch?v=VanOVShKsCM"
+      - "https://www.thinkerview.com/jean-pierre-petit-modele-janus-et-armes-russes/"
+
+  - id: "jpp-2018-12-confirmations"
+    date: "2018-06-01"
+    title: "12 Observational Confirmations Paper"
+    description: "Astrophysics and Space Science publishes article validating twelve observational confirmations of JCM. Significant peer-review milestone."
+    tags: ["publication", "jcm", "validation"]
+    sources:
+      - "https://link.springer.com/article/10.1007/s10509-018-3365-3"
+
+  - id: "jpp-2018-ummo-youtube"
+    date: "2018-01-01"
+    title: "YouTube: 'Ummo: The Evidence Remains'"
+    description: "Petit uploads video 'Ummo: The Evidence Remains' to YouTube. Continues defending Ummo authenticity despite 1993 hoaxer confession."
+    tags: ["media", "youtube", "ummo"]
+
+  - id: "jpp-2018-russia-mhd-claims"
+    date: "2018-01-01"
+    title: "Claims Russia Adopted MHD Research"
+    description: "Petit alleges Russia adopted his MHD research for hypersonic weapons including the Avangard missile. France-Soir publishes sympathetic article quoting him: 'La supériorité militaire de la Russie est bien réelle.' These claims are unverified by independent sources."
+    tags: ["controversy", "russia", "mhd", "media"]
+
+  - id: "jpp-2019-bibliography"
+    date: "2019-01-01"
+    title: "JCM Bibliography Compilation"
+    description: "Collaborator Bruno Paul compiles 21-page comprehensive bibliography of JCM works on Academia.edu, documenting decades of Petit's publications."
+    tags: ["publication", "documentation"]
+
+  # ==================== 2020-2023: COVID ERA ====================
+  - id: "jpp-2020-crisis-paper"
+    date: "2020-01-01"
+    title: "Deep Crisis in Cosmology Paper"
+    description: "Joint paper with d'Agostini and Nathalie Debergh: 'The Janus Cosmological Model, an Answer to the Deep Crisis in Cosmology' published via HAL archive."
+    tags: ["publication", "jcm", "collaboration"]
+
+  - id: "jpp-2020-youtube-growth"
+    date: "2020-06-01"
+    title: "YouTube Channel Expansion"
+    description: "With COVID limiting conferences, Petit expands YouTube presence. Channel reaches 84K+ subscribers. Releases JCM explanation playlist gaining traction among alternative cosmology enthusiasts."
+    tags: ["media", "youtube", "outreach"]
+    sources:
+      - "https://www.youtube.com/@Jean-Pierre-PETIT"
+
+  - id: "odla-2020-interview"
+    date: "2020-06-20"
+    title: "Ôdla: '44 Years of UFO Research'"
+    description: "Documentary-style interview 'Jean Pierre Petit: 44 ans sur le sujet OVNI' covers Petit's life, scientific work, and four decades of UFO research."
+    tags: ["media", "interview", "ufo"]
+    sources:
+      - "https://www.youtube.com/watch?v=V6eU_QkZ5LA"
+
+  - id: "jpp-2020-metaphysicon"
+    date: "2020-01-01"
+    title: "Book: Le Métaphysicon"
+    description: "Petit publishes 'Le Métaphysicon', exploring philosophy of physics and cosmology."
+    tags: ["publication", "book", "philosophy"]
+
+  - id: "francesoir-2021-nuclear"
+    date: "2021-01-01"
+    title: "France-Soir: Nuclear Waste and Censorship"
+    description: "France-Soir article quotes Petit: 'La censure et l'absence de débat scientifique empêchent de trouver une solution au traitement des déchets nucléaires.'"
+    tags: ["media", "controversy"]
+
+  - id: "oberg-2021-critique"
+    date: "2021-01-01"
+    title: "James Oberg: 'MHD Fantasy'"
+    description: "NASA engineer James Oberg in 'UFOs It Never Happened' update calls Petit's claims 'MHD fantasy projected onto blurry videos.' Accuses confirmation bias."
+    tags: ["criticism", "skeptics", "ufo"]
+
+  - id: "reddit-2021-petit"
+    date: "2021-06-08"
+    title: "Reddit: 'You Must See This'"
+    description: "r/ufo thread 'You absolutely must see this... Jean Pierre Petit' gains traction. Users call him 'great French scientist' but skeptics note: 'Ummo was debunked in 1993.'"
+    tags: ["social-media", "reddit"]
+    sources:
+      - "https://www.reddit.com/r/ufo/comments/nvb6jp/you_absolutely_must_see_this_jean_pierre_petit/"
+
+  - id: "jpp-2022-debergh-papers"
+    date: "2022-01-01"
+    title: "Group Theory Collaboration with Debergh"
+    description: "Petit and Nathalie Debergh (University of Liège) publish papers grounding negative mass in Poincaré group extensions. Argues negative energy states mathematically necessary."
+    tags: ["publication", "collaboration", "mathematics"]
+
+  - id: "jpp-2022-european-workshops"
+    date: "2022-06-01"
+    title: "European Workshop Presentations"
+    description: "Petit presents JCM at independent cosmology workshops across Europe, discussing cosmic voids and galaxy rotation curves without dark matter."
+    tags: ["conference", "europe"]
+
+  - id: "reddit-2022-ufo-work"
+    date: "2022-09-02"
+    title: "Reddit: Major UFO Thread"
+    description: "r/UFOs thread 'About Jean-Pierre Petit work on UFO' receives 1,200 upvotes. Debates whether MHD explains UFOs or if Ummo was 'hoax or real.'"
+    tags: ["social-media", "reddit", "ufo"]
+    sources:
+      - "https://www.reddit.com/r/UFOs/comments/x3qchf/about_jeanpierre_petit_work_on_ufo/"
+
+  - id: "nexus-2022-nimitz"
+    date: "2022-01-01"
+    title: "Nexus Magazine: USS Nimitz Connection"
+    description: "Interview in Nexus Magazine where Petit links MHD plasma sheaths to 2004 USS Nimitz UFO incident for stealth capabilities."
+    tags: ["media", "interview", "ufo"]
+
+  - id: "twitter-2022-manipulation"
+    date: "2022-11-18"
+    title: "Twitter: Data Manipulation Accusations"
+    description: "@DebunkerDesEtoiles tweets accusations of data manipulation in Petit's MHD studies. Gains 612 likes. Part of ongoing online skeptic-believer wars."
+    tags: ["social-media", "twitter", "controversy"]
+
+  # ==================== 2023-2024: BREAKTHROUGH ====================
+  - id: "reddit-2023-ufoscience"
+    date: "2023-02-04"
+    title: "Reddit r/UFOscience Thread"
+    description: "'UFOs and Science — Jean-Pierre Petit' thread on r/UFOscience gets 200+ views. Positive reception with skeptic counterarguments."
+    tags: ["social-media", "reddit"]
+
+  - id: "francesoir-2023-interview"
+    date: "2023-11-04"
+    title: "France-Soir: Extensive Interview"
+    description: "Petit gives extensive France-Soir interview calling JCM 'almost fiction' yet viable alternative. Highlights scientific disputes with mainstream cosmology."
+    tags: ["media", "interview"]
+    sources:
+      - "https://www.francesoir.fr/videos-les-debriefings/jean-pierre-petit-la-censure-et-l-absence-de-debat-scientifique-empechent-de"
+
+  - id: "blanchet-2023-critique"
+    date: "2023-01-01"
+    title: "Luc Blanchet Critique"
+    description: "CNRS physicist Luc Blanchet publishes critique arguing bimetric extensions violate equivalence principle. Ongoing scientific debate."
+    tags: ["criticism", "controversy"]
+
+  - id: "jpp-2024-french-conference"
+    date: "2024-03-17"
+    title: "French Science Conference Talk"
+    description: "Petit speaks at French science conference predicting JCM adoption 'outside France due to institutional biases.' Discusses MHD parallels."
+    tags: ["conference", "france"]
+
+  - id: "jpp-2024-funding-rejection"
+    date: "2024-06-01"
+    title: "EU and ANR Grant Rejections"
+    description: "Petit's applications for JCM simulation grants through EU programs and ANR (French National Research Agency) denied. Cited reason: 'insufficient peer-reviewed evidence.'"
+    tags: ["funding", "rejection", "institutional"]
+
+  - id: "twitter-2024-russia"
+    date: "2024-06-08"
+    title: "Twitter: 59K Views on CNRS Claim"
+    description: "@YvesPozzoDiBorgo tweets: 'Jean Pierre Petit... viré du CNRS en 1992! Les russes ont récupéré son travail.' Gains 59K views, 2K likes."
+    tags: ["social-media", "twitter", "russia"]
+
+  - id: "jpp-2024-sakharov-paper"
+    date: "2024-11-26"
+    title: "EPJC: Sakharov Twin Universe Paper"
+    description: "'A Bimetric Cosmological Model Based on Andrei Sakharov's Twin Universe Approach' published in European Physical Journal C. Addresses DESI survey tensions."
+    tags: ["publication", "jcm", "epjc", "milestone"]
+
+  - id: "jpp-2024-12-09-epjc-breakthrough"
+    date: "2024-12-09"
+    title: "EPJC: Major Breakthrough Publication"
+    description: "Full 'Janus Cosmological Model' paper published in European Physical Journal C (DOI: 10.1140/epjc/s10052-024-13569-w). Top-tier peer review acceptance - most significant mainstream validation."
+    tags: ["publication", "jcm", "epjc", "breakthrough", "milestone"]
+    sources:
+      - "https://doi.org/10.1140/epjc/s10052-024-13569-w"
+
+  # ==================== 2025: CURRENT ERA ====================
+  - id: "jpp-2025-book-of-janus"
+    date: "2025-01-01"
+    title: "The Book of Janus Released"
+    description: "Petit releases comprehensive technical book summarizing 40 years of JCM work. Made available for free online."
+    tags: ["publication", "book", "jcm", "milestone"]
+
+  - id: "reddit-2025-attention"
+    date: "2025-02-07"
+    title: "Reddit: 'Pay More Attention to Petit'"
+    description: "r/UFOs thread 'I think this sub should pay more attention to Jean-Pierre Petit' gains 82 upvotes. Discusses 2024 YouTube on UFO physics and CNRS 'suppression.'"
+    tags: ["social-media", "reddit"]
+    sources:
+      - "https://www.reddit.com/r/UFOs/comments/1ijnm2s/i_think_this_sub_should_pay_more_attention_to/"
+
+  - id: "nexus-2025-genius"
+    date: "2025-03-03"
+    title: "Nexus Magazine: 'Genius Hindered'"
+    description: "Nexus Magazine tweets praise for Petit as 'genius hindered by institutions.' Gains 3K views."
+    tags: ["media", "twitter"]
+
+  - id: "jpp-2025-upr-interview"
+    date: "2025-06-08"
+    title: "UPR: 'Explosive Revelations'"
+    description: "Interview with François Asselineau (UPR president): 'Des révélations explosives! avec Jean-Pierre Petit.' Discusses science, politics, UFOs."
+    tags: ["media", "interview", "youtube"]
+    sources:
+      - "https://www.upr.fr/actualites/fatv-entretien-avec-jean-pierre-petit-en-france-a-t-on-le-droit-davoir-40-ans-davance/"
+
+  - id: "jpp-2025-jwst-predictions"
+    date: "2025-06-01"
+    title: "JWST Observation Predictions"
+    description: "JCM predicts no exotic dark energy needed for JWST early massive galaxy observations. Claims partial validation against Hubble tension."
+    tags: ["prediction", "jwst", "validation"]
+
+  - id: "jpp-2025-aberkane-masterclass"
+    date: "2025-06-14"
+    title: "Masterclass with Idriss Aberkane"
+    description: "'Audace Scientifique' masterclass on YouTube with Idriss Aberkane. Discusses scientific audacity, innovation, and institutional challenges."
+    tags: ["media", "youtube", "interview"]
+    sources:
+      - "https://www.youtube.com/watch?v=KO0kGR5dJWg"
+
