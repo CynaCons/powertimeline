@@ -37,11 +37,11 @@ events:
     description: "During military service, Petit works on France's early ballistic missile program, specifically designing nozzles for missiles. First exposure to advanced propulsion physics."
     tags: ["military", "career", "propulsion"]
 
-  - id: "jpp-1965-imfm-mhd"
+  - id: "jpp-1965-cnrs-imfm"
     date: "1965-01-01"
-    title: "Joins Institute of Fluid Mechanics"
-    description: "Petit is recruited by the Institute of Fluid Mechanics of Marseille (IMFM) to work on Magnetohydrodynamics (MHD). Begins constructing shock tubes and MHD generators."
-    tags: ["career", "mhd", "research"]
+    title: "Joins CNRS at Institute of Fluid Mechanics"
+    description: "Petit joins CNRS as research engineer at the Institute of Fluid Mechanics of Marseille (IMFM) to work on Magnetohydrodynamics (MHD). Begins constructing shock tubes and MHD generators."
+    tags: ["career", "cnrs", "mhd", "research", "milestone"]
 
   - id: "jpp-1967-mhd-breakthrough"
     date: "1967-01-01"
@@ -68,10 +68,10 @@ events:
     tags: ["education", "phd", "milestone"]
 
   # ==================== CNRS CAREER ====================
-  - id: "jpp-1974-cnrs-join"
+  - id: "jpp-1974-cnrs-observatory"
     date: "1974-01-01"
-    title: "Joins CNRS"
-    description: "Petit joins the Centre National de la Recherche Scientifique (CNRS) as Attaché de recherche. Transfers from IMFM to Observatoire de Marseille. Officially shifts focus to astrophysics."
+    title: "Transfers to Marseille Observatory"
+    description: "After joining CNRS in 1965 as research engineer and being titularized in 1972, Petit transfers from IMFM to Observatoire de Marseille. Officially shifts focus to theoretical astrophysics and cosmology."
     tags: ["career", "cnrs", "milestone"]
 
   - id: "jpp-1974-coanda-ufo"
@@ -108,7 +108,7 @@ events:
   - id: "jpp-1977-computer-center"
     date: "1977-09-01"
     title: "Co-Director of Computer Center"
-    description: "Petit becomes Co-Director of the Computer Center at Université de Provence. Develops early CAD software for Apple II computers. Position held until 1983."
+    description: "Petit becomes Co-Director of the Computer Center at Université de Provence. Develops early computer graphics and plasma simulation software, later adapting to Apple II hardware. Position held until 1983."
     tags: ["career", "computing"]
 
   - id: "jpp-1979-ummo-letter"
@@ -237,11 +237,11 @@ events:
     description: "Publishes 'Enquête sur des extra-terrestres qui sont déjà parmi nous: Le Mystère des Ummites'. Claims Ummo letters are genuine extraterrestrial communications."
     tags: ["publication", "book", "ummo"]
 
-  - id: "jpp-1992-forced-retirement"
+  - id: "jpp-1992-sidelining"
     date: "1992-01-01"
-    title: "Forced Early Retirement from CNRS"
-    description: "Petit forced into early retirement at age 55. CNRS statement: 'Extracurricular activities compromised institutional credibility.' Petit claims 'blacklisting' for Ummo/UFO advocacy."
-    tags: ["career", "cnrs", "controversy", "milestone"]
+    title: "Sidelined from CNRS Leadership"
+    description: "Petit removed from leadership roles and key research projects at CNRS amid professional disputes. He claims this was 'forced retirement' due to Ummo/UFO advocacy, though he remained employed in diminished capacity until 2003."
+    tags: ["career", "cnrs", "controversy"]
 
   - id: "jpp-1992-ethics-complaint"
     date: "1992-03-01"
@@ -483,8 +483,8 @@ events:
 
   - id: "jpp-2018-russia-mhd-claims"
     date: "2018-01-01"
-    title: "Claims Russia Adopted MHD Research"
-    description: "Petit alleges Russia adopted his MHD research for hypersonic weapons including the Avangard missile. France-Soir publishes sympathetic article quoting him: 'La supériorité militaire de la Russie est bien réelle.' These claims are unverified by independent sources."
+    title: "Claims Russian Hypersonics Use His MHD Principles"
+    description: "Petit claims Russian Avangard hypersonic system incorporates principles from his 1970s-80s MHD research. France-Soir publishes sympathetic article. Claims remain unverified by official sources - Russian MHD research has independent Soviet-era origins."
     tags: ["controversy", "russia", "mhd", "media"]
 
   - id: "jpp-2019-bibliography"
@@ -613,16 +613,10 @@ events:
     description: "@YvesPozzoDiBorgo tweets: 'Jean Pierre Petit... viré du CNRS en 1992! Les russes ont récupéré son travail.' Gains 59K views, 2K likes."
     tags: ["social-media", "twitter", "russia"]
 
-  - id: "jpp-2024-sakharov-paper"
+  - id: "jpp-2024-epjc-breakthrough"
     date: "2024-11-26"
-    title: "EPJC: Sakharov Twin Universe Paper"
-    description: "'A Bimetric Cosmological Model Based on Andrei Sakharov's Twin Universe Approach' published in European Physical Journal C. Addresses DESI survey tensions."
-    tags: ["publication", "jcm", "epjc", "milestone"]
-
-  - id: "jpp-2024-12-09-epjc-breakthrough"
-    date: "2024-12-09"
     title: "EPJC: Major Breakthrough Publication"
-    description: "Full 'Janus Cosmological Model' paper published in European Physical Journal C (DOI: 10.1140/epjc/s10052-024-13569-w). Top-tier peer review acceptance - most significant mainstream validation."
+    description: "'A Bimetric Cosmological Model Based on Andrei Sakharov's Twin Universe Approach' published in European Physical Journal C. Most significant mainstream validation of JCM - addresses DESI survey tensions and provides solutions for galactic rotation curves without dark matter."
     tags: ["publication", "jcm", "epjc", "breakthrough", "milestone"]
     sources:
       - "https://doi.org/10.1140/epjc/s10052-024-13569-w"
