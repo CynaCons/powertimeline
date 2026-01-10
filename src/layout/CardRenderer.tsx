@@ -136,12 +136,20 @@ function renderCardContent(card: PositionedCard, sessionDecision?: SessionDecisi
   }
 }
 
+// Source indicator for events with sources (CC-REQ-CARD-SOURCE-001)
+// Subtle, theme-aware icon that blends with card content
 function SourceIndicator({ sources }: { sources?: string[] }) {
   if (!sources || sources.length === 0) return null;
   return (
     <span
+      data-testid="source-indicator"
+      data-source-count={sources.length}
       className="material-symbols-rounded flex-shrink-0"
-      style={{ fontSize: '10px', opacity: 0.5, color: 'var(--color-text-tertiary)' }}
+      style={{
+        fontSize: '14px',
+        color: 'var(--color-text-tertiary)',
+        opacity: 0.6,
+      }}
       title={`${sources.length} source${sources.length > 1 ? 's' : ''}`}
     >
       link

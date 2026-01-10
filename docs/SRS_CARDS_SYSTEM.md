@@ -67,6 +67,12 @@ This fragment expands on Sections 3 and 4 of the primary `SRS.md`. It captures d
 | CC-REQ-CARD-HOVER-001 | Cards elevate on hover with subtle lift effect | Cards scale to 1.02x on hover<br> Shadow elevation changes to shadow-lg<br> Z-index increases above adjacent cards (prevents shadow clipping)<br> Transition duration 200ms ease-out<br> Effect applies to all card types (full, compact, title-only) | `src/styles/index.css:.card-hover-scale` | 98-interaction-model-v083.spec.ts | Implemented |
 | CC-REQ-CARD-PREVIEW-001 | Hover preview displays full content for degraded cards | Floating preview appears after 300ms hover delay<br> Shows full title, date, description, and sources for compact/title-only cards<br> Positioned to right of card (or left if near viewport edge)<br> Preview dismissed on mouse leave<br> Z-index ensures preview appears above all cards<br> Only shown for cards with truncated content | `src/components/CardHoverPreview.tsx` | 98-interaction-model-v083.spec.ts | Implemented |
 
+### Source Indicator (v0.9.6)
+
+| ID | Requirement | Acceptance Criteria | Code | Tests | Status |
+|---|---|---|---|---|---|
+| CC-REQ-CARD-SOURCE-001 | Cards with sources display a visual indicator icon | Events with non-empty `sources[]` array show a subtle link icon<br> Icon uses theme-aware color (var(--color-text-tertiary)) at 60% opacity<br> Icon positioned in card header area next to title<br> Hover tooltip shows source count (e.g., "2 sources")<br> Icon NOT displayed when sources array is empty or undefined<br> Applies to all card types (full, compact, title-only) | `src/layout/DeterministicLayoutComponent.tsx:SourceIndicator` | tests/editor/102-source-indicator.spec.ts | Implemented |
+
 ## Implementation Notes
 
 ### Card Type Selection Logic

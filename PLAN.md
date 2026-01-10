@@ -97,6 +97,10 @@
 - ✅ Visual Audit Implementation: 32-item comprehensive polish - design tokens, bottom nav, WCAG accessibility, keyboard navigation, ARIA labels, animations (v0.8.16)
 - ✅ Import Review System: Session-based YAML import with ReviewPanel, per-event decisions, localStorage persistence, E2E tests (v0.9.0-v0.9.3)
 - ✅ Import Modes: Merge vs Overwrite mode selection with confirmation dialog, 19 unit tests, 10 E2E tests (v0.9.6)
+- ✅ UX Polish: Import tab default, source indicator icons on cards, YAML paste in Browse page import (v0.9.6.1)
+- ✅ Bug Fix: YAML import/export now preserves event sources field (v0.9.6.2)
+- ✅ Source Indicator: Subtle theme-aware icon on cards with sources, 3-method E2E test (CC-REQ-CARD-SOURCE-001)
+- ✅ Anchor Visibility Fix: All event anchors now visible regardless of zoom/overflow, E2E tests (CC-REQ-ANCHOR-004)
 
 ### Next Up
 - **v0.9.5**: AI Chat Migration to Unified Import Review System

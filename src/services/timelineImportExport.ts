@@ -24,6 +24,7 @@ export interface YamlEvent {
   description?: string;   // Optional
   endDate?: string;       // Optional: YYYY-MM-DD (for date ranges)
   time?: string;          // Optional: HH:MM
+  sources?: string[];     // Optional: array of source URLs/references
 }
 
 /**
@@ -175,6 +176,19 @@ export function validateYamlDocument(doc: unknown): ValidationResult {
           errors.push({ field: `events[${index}].time`, message: `Invalid time format: ${ev.time}. Use HH:MM` });
         }
       }
+
+      // Optional: sources (array of strings)
+      if (ev.sources !== undefined) {
+        if (!Array.isArray(ev.sources)) {
+          errors.push({ field: `events[${index}].sources`, message: 'Event sources must be an array' });
+        } else {
+          ev.sources.forEach((source: unknown, srcIndex: number) => {
+            if (typeof source !== 'string') {
+              errors.push({ field: `events[${index}].sources[${srcIndex}]`, message: 'Each source must be a string' });
+            }
+          });
+        }
+      }
     });
   }
 
@@ -212,6 +226,7 @@ export function exportTimelineToYaml(timeline: Timeline): string {
         ...(event.description && { description: event.description }),
         ...(event.endDate && { endDate: event.endDate }),
         ...(event.time && { time: event.time }),
+        ...(event.sources && event.sources.length > 0 && { sources: event.sources }),
       }))
       // Sort chronologically for readability
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
@@ -229,6 +244,7 @@ export function exportTimelineToYaml(timeline: Timeline): string {
 #   - description: Event description (optional)
 #   - endDate: YYYY-MM-DD for date ranges (optional)
 #   - time: HH:MM (optional)
+#   - sources: Array of source URLs/references (optional)
 
 `;
 
@@ -305,6 +321,7 @@ export function yamlEventsToEvents(yamlEvents: YamlEvent[]): Event[] {
     ...(ye.description && { description: ye.description }),
     ...(ye.endDate && { endDate: ye.endDate }),
     ...(ye.time && { time: ye.time }),
+    ...(ye.sources && ye.sources.length > 0 && { sources: ye.sources }),
   }));
 }
 
@@ -377,16 +394,22 @@ timeline:
   visibility: private  # Options: public, unlisted, private
 
 events:
-  - date: "2024-01-15"
+  - id: "evt-001"
+    date: "2024-01-15"
     title: "First Event"
     description: "Description of what happened"
 
-  - date: "2024-03-20"
+  - id: "evt-002"
+    date: "2024-03-20"
     title: "Second Event"
     description: "Another important event"
     time: "14:30"
+    sources:
+      - "https://example.com/source1"
+      - "https://example.com/source2"
 
-  - date: "2024-06-01"
+  - id: "evt-003"
+    date: "2024-06-01"
     endDate: "2024-06-15"
     title: "Multi-day Event"
     description: "An event spanning multiple days"

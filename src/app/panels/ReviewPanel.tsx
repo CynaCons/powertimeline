@@ -254,6 +254,8 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
           return (
             <Box
               key={event.id}
+              data-testid="review-event-item"
+              data-event-id={event.id}
               sx={{
                 mb: 2,
                 p: 1.5,
@@ -316,6 +318,7 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
                       <IconButton
                         size="small"
                         onClick={() => handleEdit(event.id)}
+                        data-testid="review-event-edit"
                         sx={{
                           color: 'var(--page-text-secondary)',
                           p: 0.5,

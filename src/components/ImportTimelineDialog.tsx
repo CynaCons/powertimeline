@@ -71,6 +71,7 @@ export function ImportTimelineDialog({ open, onClose, onSuccess }: ImportTimelin
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [generalError, setGeneralError] = useState('');
+  const [pastedYaml, setPastedYaml] = useState('');
 
   // Editable fields (can override imported values)
   const [title, setTitle] = useState('');
@@ -114,6 +115,32 @@ export function ImportTimelineDialog({ open, onClose, onSuccess }: ImportTimelin
     setIdError(error);
   };
 
+  // Process YAML content (from file or paste)
+  const processYamlContent = useCallback((content: string) => {
+    setGeneralError('');
+    setValidationErrors([]);
+
+    try {
+      const result = importTimelineFromYaml(content);
+
+      if (!result.success || !result.result) {
+        setValidationErrors(result.errors || []);
+        return;
+      }
+
+      // Import successful - populate form
+      setImportResult(result.result);
+      setTitle(result.result.title);
+      setDescription(result.result.description || '');
+      setVisibility(result.result.visibility);
+      setIsIdManuallyEdited(false);
+      setPastedYaml('');
+      setStep('preview');
+    } catch (error) {
+      setGeneralError(error instanceof Error ? error.message : 'Failed to parse YAML');
+    }
+  }, []);
+
   // Process uploaded file
   const processFile = useCallback(async (file: File) => {
     setGeneralError('');
@@ -133,24 +160,28 @@ export function ImportTimelineDialog({ open, onClose, onSuccess }: ImportTimelin
 
     try {
       const content = await file.text();
-      const result = importTimelineFromYaml(content);
-
-      if (!result.success || !result.result) {
-        setValidationErrors(result.errors || []);
-        return;
-      }
-
-      // Import successful - populate form
-      setImportResult(result.result);
-      setTitle(result.result.title);
-      setDescription(result.result.description || '');
-      setVisibility(result.result.visibility);
-      setIsIdManuallyEdited(false);
-      setStep('preview');
+      processYamlContent(content);
     } catch (error) {
       setGeneralError(error instanceof Error ? error.message : 'Failed to read file');
     }
-  }, []);
+  }, [processYamlContent]);
+
+  // Process pasted YAML
+  const processPastedYaml = useCallback(() => {
+    const content = pastedYaml.trim();
+    if (!content) {
+      setGeneralError('Please paste YAML content first');
+      return;
+    }
+
+    // Validate size (max 1MB)
+    if (content.length > 1024 * 1024) {
+      setGeneralError('Content too large. Maximum size is 1MB.');
+      return;
+    }
+
+    processYamlContent(content);
+  }, [pastedYaml, processYamlContent]);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -232,6 +263,7 @@ export function ImportTimelineDialog({ open, onClose, onSuccess }: ImportTimelin
     setImportResult(null);
     setValidationErrors([]);
     setGeneralError('');
+    setPastedYaml('');
     setTitle('');
     setDescription('');
     setCustomId('');
@@ -341,6 +373,33 @@ export function ImportTimelineDialog({ open, onClose, onSuccess }: ImportTimelin
             <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
               Accepts .yaml or .yml files up to 1MB. The file should follow the PowerTimeline YAML format.
             </Typography>
+
+            <Divider sx={{ my: 2 }}>
+              <Typography variant="caption" color="text.secondary">OR</Typography>
+            </Divider>
+
+            <TextField
+              multiline
+              rows={6}
+              fullWidth
+              placeholder="Paste YAML content here..."
+              value={pastedYaml}
+              onChange={(e) => setPastedYaml(e.target.value)}
+              inputProps={{
+                'data-testid': 'yaml-paste-input',
+                style: { fontFamily: 'monospace', fontSize: '12px' }
+              }}
+              sx={{ mb: 2 }}
+            />
+
+            <Button
+              variant="outlined"
+              onClick={processPastedYaml}
+              disabled={!pastedYaml.trim()}
+              data-testid="yaml-paste-import"
+            >
+              Import from Pasted YAML
+            </Button>
           </>
         )}
 

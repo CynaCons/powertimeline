@@ -460,13 +460,71 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return map;
   }, [layoutResult.positionedCards]);
 
-  // Always show all anchors - they should persist even during card degradation
-  const filteredAnchors = useMemo(() => {
-    // Return all anchors without filtering - anchors should always be visible
-    // even when cards are degraded or hidden. This ensures timeline reference points
-    // remain consistent and anchor-timeline alignment is preserved.
-    return layoutResult.anchors;
-  }, [layoutResult.anchors]);
+  // CC-REQ-ANCHOR-004: Create anchors for ALL events, not just those in view window
+  // This ensures anchors are visible for events outside the current zoom level
+  const allEventsAnchors = useMemo(() => {
+    if (!timelineRange || events.length === 0) return [];
+
+    // Calculate pixel positions using FULL timeline range (not zoomed view)
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const usableWidth = Math.max(1, viewportSize.width - leftMargin - rightMargin);
+    const fullRange = timelineRange.fullDateRange || timelineRange.dateRange;
+    const fullMin = timelineRange.fullMinDate ?? timelineRange.minDate;
+
+    // Create a set of event IDs that have visible cards
+    const visibleEventIds = new Set(layoutResult.positionedCards.map(c => c.event.id));
+
+    // Group events by similar X positions (within 10px = same anchor position)
+    const CLUSTER_THRESHOLD = 10;
+    const anchorGroups: Map<number, { events: Event[], x: number }> = new Map();
+
+    events.forEach(event => {
+      const timestamp = getEventTimestamp(event);
+      const ratio = (timestamp - fullMin) / fullRange;
+      const x = leftMargin + ratio * usableWidth;
+
+      // Find existing group within threshold
+      let foundGroup = false;
+      for (const [groupX, group] of anchorGroups) {
+        if (Math.abs(x - groupX) < CLUSTER_THRESHOLD) {
+          group.events.push(event);
+          foundGroup = true;
+          break;
+        }
+      }
+      if (!foundGroup) {
+        anchorGroups.set(x, { events: [event], x });
+      }
+    });
+
+    // Convert groups to anchors
+    const anchors: Anchor[] = [];
+    anchorGroups.forEach((group) => {
+      const visibleCount = group.events.filter(e => visibleEventIds.has(e.id)).length;
+      const overflowCount = group.events.length - visibleCount;
+      const primaryEvent = group.events[0];
+
+      anchors.push({
+        id: `anchor-${primaryEvent.id}`,
+        x: group.x,
+        y: config?.timelineY ?? viewportSize.height / 2,
+        eventIds: group.events.map(e => e.id),
+        eventCount: group.events.length,
+        visibleCount,
+        overflowCount,
+        eventId: primaryEvent.id,
+        clusterPosition: 'above' // Default, actual position determined during render
+      });
+    });
+
+    return anchors.sort((a, b) => a.x - b.x);
+  }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY]);
+
+  // Use allEventsAnchors instead of layout result anchors
+  const filteredAnchors = allEventsAnchors;
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
@@ -838,8 +896,8 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
           ...(anchor.eventId ? [anchor.eventId] : [])
         ];
         const anchorCards = anchorEventIds.flatMap(eventId => cardsByEventId.get(eventId) || []);
-        // If no matching cards, suppress this anchor entirely (belt-and-suspenders)
-        if (anchorCards.length === 0) return null;
+        // Show anchors for all events, including those with only overflow (no visible cards)
+        // Only the cards are hidden for overflow events - anchors should always be visible
 
         const primaryAnchorEventId = anchor.eventId ?? anchor.eventIds?.[0] ?? null;
         // Only check hoveredPairEventId (internal state) - external hover handled via DOM/CSS
@@ -850,8 +908,11 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
         const timelineAxisY = config?.timelineY ?? viewportSize.height / 2;
         const ANCHOR_GAP = 12; // Gap between anchor dot and axis line
 
-        // Determine if events are above or below (using first card as reference)
-        const isAboveAxis = anchorCards.length > 0 ? anchorCards[0].y < timelineAxisY : true;
+        // Determine if events are above or below
+        // Use card position if available, otherwise use anchor.clusterPosition, default to above
+        const isAboveAxis = anchorCards.length > 0
+          ? anchorCards[0].y < timelineAxisY
+          : anchor.clusterPosition === 'below' ? false : true;
 
         // Position anchor dot away from axis with gap
         const anchorCenterY = isAboveAxis
@@ -1120,17 +1181,41 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
   );
 }, arePropsEqual);
 
+// Source indicator for events with sources (CC-REQ-CARD-SOURCE-001)
+// Subtle, theme-aware icon that blends with card content
+function SourceIndicator({ sources }: { sources?: string[] }) {
+  if (!sources || sources.length === 0) return null;
+  return (
+    <span
+      data-testid="source-indicator"
+      data-source-count={sources.length}
+      className="material-symbols-rounded flex-shrink-0"
+      style={{
+        fontSize: '14px',
+        color: 'var(--color-text-tertiary)',
+        opacity: 0.6,
+      }}
+      title={`${sources.length} source${sources.length > 1 ? 's' : ''}`}
+    >
+      link
+    </span>
+  );
+}
+
 // P1-3: Memoized card content components to prevent unnecessary re-renders
 const FullCardContent = memo(function FullCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
-      <h3
-        className="card-title line-clamp-2 mb-1"
-        style={{ color: 'var(--color-text-primary)' }}
-        title={event.title}
-      >
-        {event.title}
-      </h3>
+      <div className="flex items-start justify-between mb-1">
+        <h3
+          className="card-title line-clamp-2 flex-1 pr-2"
+          style={{ color: 'var(--color-text-primary)' }}
+          title={event.title}
+        >
+          {event.title}
+        </h3>
+        <SourceIndicator sources={event.sources} />
+      </div>
       {event.description ? (
         <p className="card-description flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
@@ -1144,13 +1229,16 @@ const FullCardContent = memo(function FullCardContent({ event }: { event: Event 
 const CompactCardContent = memo(function CompactCardContent({ event }: { event: Event }) {
   return (
     <div className="h-full flex flex-col">
-      <h3
-        className="card-title line-clamp-2 mb-1"
-        style={{ color: 'var(--color-text-primary)' }}
-        title={event.title}
-      >
-        {event.title}
-      </h3>
+      <div className="flex items-start justify-between mb-1">
+        <h3
+          className="card-title line-clamp-2 flex-1 pr-2"
+          style={{ color: 'var(--color-text-primary)' }}
+          title={event.title}
+        >
+          {event.title}
+        </h3>
+        <SourceIndicator sources={event.sources} />
+      </div>
       {event.description ? (
         <p className="card-description line-clamp-1" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
@@ -1163,14 +1251,15 @@ const CompactCardContent = memo(function CompactCardContent({ event }: { event: 
 
 const TitleOnlyCardContent = memo(function TitleOnlyCardContent({ event }: { event: Event }) {
   return (
-    <div className="h-full flex items-center">
+    <div className="h-full flex items-center justify-between">
       <h3
-        className="card-title line-clamp-1"
+        className="card-title line-clamp-1 flex-1 pr-2"
         style={{ color: 'var(--color-text-primary)' }}
         title={event.title}
       >
         {event.title}
       </h3>
+      <SourceIndicator sources={event.sources} />
     </div>
   );
 });
