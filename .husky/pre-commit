@@ -1,1 +1,4 @@
+# Check version consistency across files
+node scripts/check-version.cjs
+
 npx lint-staged

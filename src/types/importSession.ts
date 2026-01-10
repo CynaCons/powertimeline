@@ -29,6 +29,13 @@ export type EventDecision = 'pending' | 'accepted' | 'rejected';
 export type EventAction = 'create' | 'update' | 'delete';
 
 /**
+ * Import mode determines how events are merged with existing timeline
+ * - 'merge': Diff incoming against existing, create/update as needed (default)
+ * - 'overwrite': Replace ALL existing events with imported events
+ */
+export type ImportMode = 'merge' | 'overwrite';
+
+/**
  * A single event being reviewed in the session
  */
 export interface SessionEvent {
@@ -53,6 +60,8 @@ export interface ImportSession {
   events: SessionEvent[];        // Events to review
   createdAt: number;             // Timestamp (Date.now())
   existingEventIds: string[];    // IDs of existing events (for duplicate detection)
+  importMode: ImportMode;        // How to handle existing events
+  eventsToDelete?: string[];     // For overwrite mode: IDs of existing events to delete
 }
 
 /**

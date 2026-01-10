@@ -27,6 +27,13 @@ import {
   Tab,
   TextField,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import { OverlayShell } from '../OverlayShell';
 import {
@@ -36,6 +43,7 @@ import {
   type ValidationError,
 } from '../../services/timelineImportExport';
 import { useImportSessionContext } from '../../contexts/ImportSessionContext';
+import type { ImportMode } from '../../types/importSession';
 import type { Event, Timeline } from '../../types';
 
 interface ImportExportOverlayProps {
@@ -58,6 +66,9 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
   const [generalError, setGeneralError] = useState('');
   const [exportSuccess, setExportSuccess] = useState(false);
   const [pastedYaml, setPastedYaml] = useState('');
+  const [importMode, setImportMode] = useState<ImportMode>('merge');
+  const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
+  const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle export
@@ -94,6 +105,28 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
     }
   }, [timeline]);
 
+  // Execute the import with the current mode
+  const executeImport = useCallback((content: string) => {
+    try {
+      const parsedEvents = parseYamlForSession(content);
+      if (parsedEvents.length === 0) {
+        setGeneralError('No events found in this YAML content');
+        return;
+      }
+      startSession('yaml', parsedEvents, events, importMode);
+      setPastedYaml('');
+      setPendingImportContent(null);
+      onSessionStarted?.();
+      onClose();
+    } catch (error) {
+      if (error instanceof YamlSessionParseError) {
+        setValidationErrors(error.errors);
+        return;
+      }
+      setGeneralError(error instanceof Error ? error.message : 'Failed to parse YAML');
+    }
+  }, [events, importMode, onClose, onSessionStarted, startSession]);
+
   // Process uploaded file
   const processFile = useCallback(async (file: File) => {
     setGeneralError('');
@@ -113,26 +146,23 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
 
     try {
       const content = await file.text();
-      const parsedEvents = parseYamlForSession(content);
-      if (parsedEvents.length === 0) {
-        setGeneralError('No events found in this YAML file');
+
+      // In overwrite mode with existing events, show confirmation
+      if (importMode === 'overwrite' && events.length > 0) {
+        setPendingImportContent(content);
+        setShowOverwriteConfirm(true);
         return;
       }
-      startSession('yaml', parsedEvents, events);
-      onSessionStarted?.();
-      onClose();
+
+      executeImport(content);
     } catch (error) {
-      if (error instanceof YamlSessionParseError) {
-        setValidationErrors(error.errors);
-        return;
-      }
       setGeneralError(error instanceof Error ? error.message : 'Failed to read file');
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
-  }, [events, onClose, onSessionStarted, startSession]);
+  }, [events, importMode, executeImport]);
 
   // Dedent: strip common leading whitespace from all lines
   const dedent = (text: string): string => {
@@ -172,24 +202,29 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
       return;
     }
 
-    try {
-      const parsedEvents = parseYamlForSession(content);
-      if (parsedEvents.length === 0) {
-        setGeneralError('No events found in this YAML content');
-        return;
-      }
-      startSession('yaml', parsedEvents, events);
-      setPastedYaml('');
-      onSessionStarted?.();
-      onClose();
-    } catch (error) {
-      if (error instanceof YamlSessionParseError) {
-        setValidationErrors(error.errors);
-        return;
-      }
-      setGeneralError(error instanceof Error ? error.message : 'Failed to parse YAML');
+    // In overwrite mode with existing events, show confirmation
+    if (importMode === 'overwrite' && events.length > 0) {
+      setPendingImportContent(content);
+      setShowOverwriteConfirm(true);
+      return;
     }
-  }, [pastedYaml, events, onClose, onSessionStarted, startSession]);
+
+    executeImport(content);
+  }, [pastedYaml, events, importMode, executeImport]);
+
+  // Handle confirmation of overwrite import
+  const handleConfirmOverwrite = useCallback(() => {
+    setShowOverwriteConfirm(false);
+    if (pendingImportContent) {
+      executeImport(pendingImportContent);
+    }
+  }, [pendingImportContent, executeImport]);
+
+  // Handle cancellation of overwrite import
+  const handleCancelOverwrite = useCallback(() => {
+    setShowOverwriteConfirm(false);
+    setPendingImportContent(null);
+  }, []);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -305,6 +340,44 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
         {/* Import Tab */}
         {activeTab === 'import' && (
           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Import Mode Toggle */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Import Mode
+              </Typography>
+              <ToggleButtonGroup
+                value={importMode}
+                exclusive
+                onChange={(_, newMode) => newMode && setImportMode(newMode)}
+                size="small"
+                fullWidth
+              >
+                <ToggleButton value="merge" data-testid="import-mode-merge">
+                  <span className="material-symbols-rounded" style={{ fontSize: 18, marginRight: 4 }}>merge</span>
+                  Merge
+                </ToggleButton>
+                <ToggleButton value="overwrite" data-testid="import-mode-overwrite" color="warning">
+                  <span className="material-symbols-rounded" style={{ fontSize: 18, marginRight: 4 }}>sync_alt</span>
+                  Overwrite
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                {importMode === 'merge'
+                  ? 'Add new events, update existing events by ID'
+                  : 'Replace all existing events with imported events'}
+              </Typography>
+            </Box>
+
+            {/* Overwrite warning */}
+            {importMode === 'overwrite' && events.length > 0 && (
+              <Alert severity="warning" sx={{ mb: 2 }} data-testid="overwrite-warning">
+                <Typography variant="body2">
+                  <strong>Warning:</strong> Overwrite mode will delete all {events.length} existing
+                  event{events.length !== 1 ? 's' : ''} and replace them with imported events.
+                </Typography>
+              </Alert>
+            )}
+
             {/* Validation errors */}
             {validationErrors.length > 0 && (
               <Alert severity="error" sx={{ mb: 2 }}>
@@ -393,7 +466,7 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
                   fontSize: '0.75rem',
                 },
               }}
-              data-testid="yaml-paste-input"
+              inputProps={{ 'data-testid': 'yaml-paste-input' }}
             />
             <Button
               variant="contained"
@@ -412,6 +485,35 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
           </Box>
         )}
       </Box>
+
+      {/* Overwrite Confirmation Dialog */}
+      <Dialog
+        open={showOverwriteConfirm}
+        onClose={handleCancelOverwrite}
+        aria-labelledby="overwrite-confirm-title"
+        data-testid="overwrite-confirm-dialog"
+      >
+        <DialogTitle id="overwrite-confirm-title">Confirm Overwrite Import</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will <strong>delete all {events.length} existing event{events.length !== 1 ? 's' : ''}</strong> and
+            replace them with the imported events. This action cannot be undone after you commit the import.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelOverwrite} data-testid="overwrite-cancel">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmOverwrite}
+            color="warning"
+            variant="contained"
+            data-testid="overwrite-confirm"
+          >
+            Proceed with Overwrite
+          </Button>
+        </DialogActions>
+      </Dialog>
     </OverlayShell>
   );
 }

@@ -5,9 +5,10 @@ import type {
   SessionStats,
   ImportSource,
   EventDecision,
+  ImportMode,
 } from '../types/importSession';
 import type { Event } from '../types';
-import { addEvent, updateEvent } from '../services/firestore';
+import { addEvent, updateEvent, deleteEvent } from '../services/firestore';
 
 const STORAGE_KEY_PREFIX = 'powertimeline:session:';
 
@@ -64,23 +65,40 @@ export function useImportSession(timelineId?: string) {
       source: ImportSource,
       events: Partial<Event>[],
       existingEventIds: string[] = [],
-      existingEvents: Event[] = []
+      existingEvents: Event[] = [],
+      importMode: ImportMode = 'merge'
     ) => {
-      const sessionEvents: SessionEvent[] = events.map(eventData => {
-        const existingEvent = eventData.id
-          ? existingEvents.find(existing => existing.id === eventData.id)
-          : undefined;
-        const isUpdate = Boolean(existingEvent)
-          || (eventData.id ? existingEventIds.includes(eventData.id) : false);
+      let sessionEvents: SessionEvent[];
+      let eventsToDelete: string[] | undefined;
 
-        return {
+      if (importMode === 'overwrite') {
+        // Overwrite mode: all events are 'create', track existing events for deletion
+        sessionEvents = events.map(eventData => ({
           id: crypto.randomUUID(),
-          action: isUpdate ? 'update' : 'create',
-          decision: 'pending',
+          action: 'create' as const,
+          decision: 'pending' as const,
           eventData,
-          existingEvent,
-        };
-      });
+          existingEvent: undefined,
+        }));
+        eventsToDelete = existingEventIds;
+      } else {
+        // Merge mode (default): classify as create or update based on ID matching
+        sessionEvents = events.map(eventData => {
+          const existingEvent = eventData.id
+            ? existingEvents.find(existing => existing.id === eventData.id)
+            : undefined;
+          const isUpdate = Boolean(existingEvent)
+            || (eventData.id ? existingEventIds.includes(eventData.id) : false);
+
+          return {
+            id: crypto.randomUUID(),
+            action: isUpdate ? 'update' : 'create',
+            decision: 'pending',
+            eventData,
+            existingEvent,
+          };
+        });
+      }
 
       const newSession: ImportSession = {
         id: crypto.randomUUID(),
@@ -91,6 +109,8 @@ export function useImportSession(timelineId?: string) {
         events: sessionEvents,
         createdAt: Date.now(),
         existingEventIds,
+        importMode,
+        eventsToDelete,
       };
 
       setSession(newSession);
@@ -132,6 +152,14 @@ export function useImportSession(timelineId?: string) {
     const resolvedOwnerId = ownerId ?? session.ownerId;
     const accepted = session.events.filter(event => event.decision === 'accepted');
 
+    // In overwrite mode, delete all existing events first
+    if (session.importMode === 'overwrite' && session.eventsToDelete?.length) {
+      for (const eventId of session.eventsToDelete) {
+        await deleteEvent(session.timelineId, resolvedOwnerId, eventId);
+      }
+    }
+
+    // Then add/update accepted events
     for (const event of accepted) {
       const finalData = { ...event.eventData, ...event.userEdits };
       if (event.action === 'create') {

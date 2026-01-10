@@ -15,6 +15,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Chip,
+  Alert,
 } from '@mui/material';
 import { useImportSessionContext } from '../../contexts/ImportSessionContext';
 
@@ -186,10 +188,34 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
 
       {/* Session Info */}
       <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--page-border)' }}>
-        <Typography variant="caption" sx={{ color: 'var(--page-text-secondary)' }}>
-          Source: {getSourceLabel()} • {stats.total} events
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Typography variant="caption" sx={{ color: 'var(--page-text-secondary)' }}>
+            Source: {getSourceLabel()} • {stats.total} events
+          </Typography>
+          {session.importMode === 'overwrite' && (
+            <Chip
+              label="Overwrite Mode"
+              size="small"
+              color="warning"
+              sx={{ height: 18, fontSize: '0.65rem' }}
+              data-testid="overwrite-mode-indicator"
+            />
+          )}
+        </Box>
       </div>
+
+      {/* Overwrite deletion warning */}
+      {session.importMode === 'overwrite' && session.eventsToDelete && session.eventsToDelete.length > 0 && (
+        <Alert
+          severity="warning"
+          sx={{ mx: 2, mt: 2, py: 0.5 }}
+          data-testid="overwrite-delete-warning"
+        >
+          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+            <strong>{session.eventsToDelete.length} existing event{session.eventsToDelete.length !== 1 ? 's' : ''} will be deleted</strong> when you commit this import.
+          </Typography>
+        </Alert>
+      )}
 
       {/* Progress Bar */}
       <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--page-border)' }}>

@@ -12,13 +12,14 @@ import type {
   ImportSource,
   EventDecision,
   SessionStats,
+  ImportMode,
 } from '../types/importSession';
 import type { Event } from '../types';
 
 interface ImportSessionContextType {
   session: ImportSession | null;
   hasActiveSession: boolean;
-  startSession: (source: ImportSource, events: Partial<Event>[], existingEvents: Event[]) => void;
+  startSession: (source: ImportSource, events: Partial<Event>[], existingEvents: Event[], importMode?: ImportMode) => void;
   updateDecision: (eventId: string, decision: EventDecision) => void;
   updateEventData: (eventId: string, edits: Partial<Event>) => void;
   commitSession: () => Promise<void>;
@@ -56,9 +57,9 @@ export function ImportSessionProvider({
     timelineId,
     ownerId,
     // Adapt startSession to hide timelineId/ownerId from context consumers
-    startSession: (source: ImportSource, events: Partial<Event>[], existingEvents: Event[]) => {
+    startSession: (source: ImportSource, events: Partial<Event>[], existingEvents: Event[], importMode: ImportMode = 'merge') => {
       const existingEventIds = existingEvents.map(e => e.id);
-      hookStartSession(timelineId, ownerId, source, events, existingEventIds, existingEvents);
+      hookStartSession(timelineId, ownerId, source, events, existingEventIds, existingEvents, importMode);
     },
     // Adapt commitSession to hide ownerId from context consumers
     commitSession: () => hookCommitSession(ownerId),

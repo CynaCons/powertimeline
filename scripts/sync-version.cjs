@@ -100,6 +100,30 @@ updateFile(
   `Set agent context version to v${version}`
 );
 
+// Update README.md - version in header line
+updateFile(
+  'README.md',
+  /\*\*Version:\*\*\s*v[\d.]+/,
+  `**Version:** v${version}`,
+  `Set README version to v${version}`
+);
+
+// Update README.md - "Last Updated" footer
+updateFile(
+  'README.md',
+  /\*\*Last Updated:\*\*\s*[\d-]+\s*\|\s*\*\*Version:\*\*\s*v[\d.]+/,
+  `**Last Updated:** ${new Date().toISOString().split('T')[0]} | **Version:** v${version}`,
+  `Set README footer to v${version}`
+);
+
+// Update docs/TESTS.md - version header
+updateFile(
+  'docs/TESTS.md',
+  /\*\*Version:\*\*\s*v[\d.]+/,
+  `**Version:** v${version}`,
+  `Set TESTS.md version to v${version}`
+);
+
 // Summary
 console.log(`\n${'='.repeat(60)}`);
 if (updates.length > 0) {

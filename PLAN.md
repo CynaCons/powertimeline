@@ -2,7 +2,7 @@
 
 ## Quick Summary
 
-**Current Version:** v0.9.0 - Unified Import Review System
+**Current Version:** v0.8.15
 **Next Milestone:** v0.9.5 - AI Chat Migration to Unified System
 
 ### Key Metrics
@@ -10,8 +10,7 @@
 - **Requirements:** ~352 total ([SRS Index](docs/SRS_INDEX.md))
 - **Implementation:** ~200 requirements (57%)
 - **Test Coverage:** ~119 requirements verified (34%)
-- **Test Suite:** 450 Playwright E2E + 58 unit = 508 automated tests ([Test Status](#test-status))
-- **Production Tests:** 22/22 passing (v0.5.15)
+- **Test Suite:** See [docs/TESTS.md](docs/TESTS.md) for current counts
 
 ### Recent Achievements (v0.5.x)
 - ✅ Firebase Authentication & public browsing (v0.5.1-v0.5.7)
@@ -96,19 +95,15 @@
 - ✅ Performance Optimization: Collision resolution caching, minimap/axis rect caching, spatial hash optimization (v0.8.14)
 - ✅ UX Polish: Breadcrumb z-index fix, Stream View hover buttons, show more calculation, mobile tap behavior (v0.8.15)
 - ✅ Visual Audit Implementation: 32-item comprehensive polish - design tokens, bottom nav, WCAG accessibility, keyboard navigation, ARIA labels, animations (v0.8.16)
+- ✅ Import Review System: Session-based YAML import with ReviewPanel, per-event decisions, localStorage persistence, E2E tests (v0.9.0-v0.9.3)
+- ✅ Import Modes: Merge vs Overwrite mode selection with confirmation dialog, 19 unit tests, 10 E2E tests (v0.9.6)
 
 ### Next Up
-- **v0.9.0-v0.9.4**: Unified Import Review System (session-based YAML import with diff/merge)
-- **v0.9.5**: AI Chat Migration (use unified review system)
+- **v0.9.5**: AI Chat Migration to Unified Import Review System
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
-- **Playwright E2E:** ~450 tests in ~120 spec files
-- **Vitest Unit:** 109 tests
-- **Total:** ~559 automated tests
-- **Production Tests:** 24/27 passing (3 app-level issues)
-- **Editor/Visual Tests:** 129+ passing, ~25 skipped (auth-required features)
-- **Test Infrastructure:** Tests use public timelines (no auth needed), documented in `docs/TESTS.md`
+See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and run instructions.
 
 ### Quick Links
 - [Implementation History](docs/PLAN_HISTORY.md) - Completed iterations (v0.0.x - v0.4.x)
@@ -1278,56 +1273,60 @@
 ## Phase 6: Unified Import Review System (v0.9.x)
 > **Vision:** Session-based review for all incoming events (YAML import, AI chat, future PR/merge)
 
-### v0.9.0 - Import Session Infrastructure
+### v0.9.0 - Import Session Infrastructure ✅
 **Goal:** Core session management with localStorage persistence
-**Status:** In Progress
+**Status:** Complete
 
-**Files to Create:**
-- `src/types/importSession.ts` - ImportSession, SessionEvent types
+**Files Created:**
+- `src/types/importSession.ts` - ImportSession, SessionEvent, ImportMode types
 - `src/hooks/useImportSession.ts` - Session management hook
 - `src/contexts/ImportSessionContext.tsx` - React context
 
 **Tasks:**
-- [ ] Define ImportSession, SessionEvent types
-- [ ] Create useImportSession hook with: startSession, updateDecision, updateEventData, commitSession, discardSession
-- [ ] localStorage persistence (auto-save on change)
-- [ ] Restore session on page reload
-- [ ] Unit tests for hook
+- [x] Define ImportSession, SessionEvent types
+- [x] Create useImportSession hook with: startSession, updateDecision, updateEventData, commitSession, discardSession
+- [x] localStorage persistence (auto-save on change)
+- [x] Restore session on page reload
+- [x] Unit tests for hook (19 test cases)
 
-### v0.9.1 - Review Panel UI
+### v0.9.1 - Review Panel UI ✅
 **Goal:** Panel to review and manage session events
+**Status:** Complete
 
-**Files to Create:**
+**Files Created:**
 - `src/app/panels/ReviewPanel.tsx` - Main review UI
 
 **Tasks:**
-- [ ] Event list with decision indicators (pending/accepted/rejected)
-- [ ] Per-event: Accept / Reject / Edit buttons
-- [ ] Progress indicator: "5 of 12 reviewed"
-- [ ] "Accept All Remaining" / "Commit Session" / "Discard Session" buttons
-- [ ] NavRail button with badge showing pending count
-- [ ] Keyboard shortcut: Alt+R
+- [x] Event list with decision indicators (pending/accepted/rejected)
+- [x] Per-event: Accept / Reject / Edit buttons
+- [x] Progress indicator showing review status
+- [x] "Accept All Remaining" / "Commit" / "Discard" buttons
+- [x] NavRail button with badge showing pending count
+- [x] E2E tests (tests/review/98-import-review-demo.spec.ts)
 
 ### v0.9.2 - Timeline Preview
 **Goal:** Show session events on timeline with visual distinction
+**Status:** Partial (CSS exists, layout merge needed)
 
 **Tasks:**
 - [ ] Merge session events with real events for render
-- [ ] Visual distinction CSS (dashed borders, status badges)
+- [x] Visual distinction CSS (dashed borders, status badges)
 - [ ] Click session event → edit in AuthoringOverlay
 - [ ] Save edits to session (not Firestore)
 
-### v0.9.3 - YAML Import Integration
+### v0.9.3 - YAML Import Integration ✅
 **Goal:** Route YAML import through session system
+**Status:** Complete
 
 **Tasks:**
-- [ ] Parse YAML → detect CREATE vs UPDATE (by event ID)
-- [ ] Start import session with classified events
-- [ ] Close ImportExportOverlay → open ReviewPanel
-- [ ] Remove direct Firestore write from import
+- [x] Parse YAML → detect CREATE vs UPDATE (by event ID)
+- [x] Start import session with classified events
+- [x] Close ImportExportOverlay → open ReviewPanel
+- [x] Remove direct Firestore write from import
 
 ### v0.9.4 - Diff View for Updates
 **Goal:** Side-by-side comparison for UPDATE actions
+**Status:** Not Started
 
 **Files to Create:**
 - `src/components/EventDiffView.tsx` - Diff component
@@ -1339,12 +1338,35 @@
 
 ### v0.9.5 - AI Chat Migration
 **Goal:** Migrate AI integration to unified session system
+**Status:** Not Started
 
 **Tasks:**
 - [ ] AI response → startSession('ai-chat', events)
 - [ ] Remove pendingActions state from useAISession
 - [ ] Keep ChatPanel for chat UI only
 - [ ] Actions appear in ReviewPanel automatically
+
+### v0.9.6 - Import Modes (Merge vs Overwrite) ✅
+**Goal:** Allow users to choose between merging imports or fully replacing timeline
+**Status:** Complete
+
+**Files Modified:**
+- `src/types/importSession.ts` - Added ImportMode type
+- `src/hooks/useImportSession.ts` - Mode-aware startSession/commitSession
+- `src/contexts/ImportSessionContext.tsx` - Pass importMode parameter
+- `src/app/overlays/ImportExportOverlay.tsx` - Mode toggle UI, confirmation dialog
+- `src/app/panels/ReviewPanel.tsx` - Mode indicator, deletion warning
+
+**Tasks:**
+- [x] Add `ImportMode` type ('merge' | 'overwrite') to importSession.ts
+- [x] Add mode toggle UI in ImportExportOverlay
+- [x] Modify startSession() to handle overwrite mode (all events = 'create')
+- [x] Update commitSession() to delete existing events in overwrite mode
+- [x] Add confirmation dialog for overwrite mode
+- [x] Show mode indicator and warnings in ReviewPanel
+- [x] Unit tests for both modes (9 new tests in useImportSession.test.ts)
+- [x] E2E tests for mode selection and behavior (10 tests in 100-import-modes.spec.ts)
+- [x] Update SRS_IMPORT_REVIEW.md with new requirements (CC-REQ-REVIEW-MODE-001 to 007)
 
 ---
 

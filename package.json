@@ -25,6 +25,7 @@
     "test:screens": "playwright test tests/seeding-screenshots.spec.ts",
     "test:clustered": "playwright test tests/clustered-count.spec.ts",
     "test:degradation": "playwright test tests/degradation-flow.spec.ts",
+    "version:check": "node scripts/check-version.cjs",
     "version:sync": "node scripts/sync-version.cjs",
     "prepare": "husky"
   },
