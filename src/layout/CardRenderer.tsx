@@ -136,6 +136,19 @@ function renderCardContent(card: PositionedCard, sessionDecision?: SessionDecisi
   }
 }
 
+function SourceIndicator({ sources }: { sources?: string[] }) {
+  if (!sources || sources.length === 0) return null;
+  return (
+    <span
+      className="material-symbols-rounded flex-shrink-0"
+      style={{ fontSize: '10px', opacity: 0.5, color: 'var(--color-text-tertiary)' }}
+      title={`${sources.length} source${sources.length > 1 ? 's' : ''}`}
+    >
+      link
+    </span>
+  );
+}
+
 function FullCardContent({ event, sessionDecision }: { event: Event; sessionDecision?: SessionDecision }) {
   const eventIcon = getEventIcon(event);
   const sessionBadge = getSessionBadge(sessionDecision);
@@ -148,6 +161,7 @@ function FullCardContent({ event, sessionDecision }: { event: Event; sessionDeci
         </h3>
         <div className="flex items-center gap-1">
           {sessionBadge}
+          <SourceIndicator sources={event.sources} />
           <span
             className="card-icon material-symbols-rounded"
             style={{ color: eventIcon.color, fontSize: '0.875rem' }}
@@ -160,17 +174,8 @@ function FullCardContent({ event, sessionDecision }: { event: Event; sessionDeci
       <p className="card-description mb-2 flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
-      <div className="card-date flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
+      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>
         {formatDate(event.date)}
-        {event.sources && event.sources.length > 0 && (
-          <span
-            className="material-symbols-rounded"
-            style={{ fontSize: '12px', opacity: 0.7 }}
-            title={`${event.sources.length} source${event.sources.length > 1 ? 's' : ''}`}
-          >
-            link
-          </span>
-        )}
       </div>
     </div>
   );
@@ -188,6 +193,7 @@ function CompactCardContent({ event, sessionDecision }: { event: Event; sessionD
         </h3>
         <div className="flex items-center gap-1">
           {sessionBadge}
+          <SourceIndicator sources={event.sources} />
           <span
             className="card-icon material-symbols-rounded flex-shrink-0"
             style={{ color: eventIcon.color, fontSize: '0.75rem' }}
@@ -200,17 +206,8 @@ function CompactCardContent({ event, sessionDecision }: { event: Event; sessionD
       <p className="card-description line-clamp-1 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
-      <div className="card-date flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)' }}>
+      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>
         {formatDate(event.date)}
-        {event.sources && event.sources.length > 0 && (
-          <span
-            className="material-symbols-rounded"
-            style={{ fontSize: '10px', opacity: 0.7 }}
-            title={`${event.sources.length} source${event.sources.length > 1 ? 's' : ''}`}
-          >
-            link
-          </span>
-        )}
       </div>
     </div>
   );
@@ -227,6 +224,7 @@ function TitleOnlyCardContent({ event, sessionDecision }: { event: Event; sessio
       </h3>
       <div className="flex items-center gap-1">
         {sessionBadge}
+        <SourceIndicator sources={event.sources} />
         <span
           className="card-icon material-symbols-rounded flex-shrink-0"
           style={{ color: eventIcon.color, fontSize: '0.75rem' }}

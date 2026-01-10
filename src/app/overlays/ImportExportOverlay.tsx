@@ -60,7 +60,7 @@ type TabValue = 'export' | 'import';
 export function ImportExportOverlay(props: ImportExportOverlayProps) {
   const { timeline, events, dragging, onClose, onSessionStarted } = props;
   const { startSession } = useImportSessionContext();
-  const [activeTab, setActiveTab] = useState<TabValue>('export');
+  const [activeTab, setActiveTab] = useState<TabValue>('import');
   const [isDragging, setIsDragging] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [generalError, setGeneralError] = useState('');
@@ -270,8 +270,8 @@ export function ImportExportOverlay(props: ImportExportOverlayProps) {
           onChange={(_, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
         >
-          <Tab label="Export" value="export" data-testid="export-tab" />
           <Tab label="Import" value="import" data-testid="import-tab" />
+          <Tab label="Export" value="export" data-testid="export-tab" />
         </Tabs>
 
         {generalError && (
