@@ -19,6 +19,8 @@ import {
   Alert,
 } from '@mui/material';
 import { useImportSessionContext } from '../../contexts/ImportSessionContext';
+import { EventDiffView } from './EventDiffView';
+import type { SessionEvent } from '../../types/importSession';
 
 interface ReviewPanelProps {
   onClose: () => void;
@@ -38,6 +40,7 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
 
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
+  const [diffEvent, setDiffEvent] = useState<SessionEvent | null>(null);
 
   if (!session) {
     return (
@@ -190,7 +193,10 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
       <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--page-border)' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <Typography variant="caption" sx={{ color: 'var(--page-text-secondary)' }}>
-            Source: {getSourceLabel()} • {stats.total} events
+            Source: {getSourceLabel()} • {stats.total} event{stats.total !== 1 ? 's' : ''}
+            {session.skippedCount && session.skippedCount > 0 && (
+              <span style={{ color: 'var(--page-text-tertiary)' }} data-testid="skipped-count"> • {session.skippedCount} skipped (no changes)</span>
+            )}
           </Typography>
           {session.importMode === 'overwrite' && (
             <Chip
@@ -486,20 +492,25 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
               )}
 
               {/* View Diff button for UPDATE actions */}
-              {event.action === 'update' && (
+              {event.action === 'update' && event.existingEvent && (
                 <Button
                   size="small"
                   variant="outlined"
+                  onClick={() => setDiffEvent(event)}
+                  data-testid="view-diff-button"
                   sx={{
                     textTransform: 'none',
                     mt: 0.5,
                     fontSize: '0.75rem',
-                    color: 'var(--page-text-secondary)',
-                    borderColor: 'var(--page-border)',
+                    color: 'var(--page-accent)',
+                    borderColor: 'var(--page-accent)',
+                    '&:hover': {
+                      borderColor: 'var(--page-accent-hover)',
+                      bgcolor: 'rgba(124, 77, 255, 0.08)',
+                    },
                   }}
-                  disabled
                 >
-                  View Diff (Coming Soon)
+                  View Diff
                 </Button>
               )}
             </Box>
@@ -582,6 +593,23 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Event Diff View Modal */}
+      {diffEvent && (
+        <EventDiffView
+          open={!!diffEvent}
+          sessionEvent={diffEvent}
+          onClose={() => setDiffEvent(null)}
+          onKeepExisting={() => {
+            handleReject(diffEvent.id);
+            setDiffEvent(null);
+          }}
+          onTakeImported={() => {
+            handleAccept(diffEvent.id);
+            setDiffEvent(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useImportSession } from './useImportSession';
+import { useImportSession, areEventsIdentical } from './useImportSession';
 import type { Event } from '../types';
 
 // Mock localStorage
@@ -633,5 +633,370 @@ describe('useImportSession', () => {
         expect(addEvent).toHaveBeenCalledTimes(1);
       });
     });
+  });
+});
+
+describe('areEventsIdentical', () => {
+  const baseEvent: Event = {
+    id: 'event-1',
+    date: '1789-07-14',
+    title: 'The Storming of the Bastille',
+    description: 'A major event in French history',
+    sources: ['https://example.com/source1', 'https://example.com/source2'],
+  };
+
+  it('returns true for identical events', () => {
+    const imported: Partial<Event> = {
+      id: 'event-1',
+      date: '1789-07-14',
+      title: 'The Storming of the Bastille',
+      description: 'A major event in French history',
+      sources: ['https://example.com/source1', 'https://example.com/source2'],
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(true);
+  });
+
+  it('returns false when title differs', () => {
+    const imported: Partial<Event> = {
+      ...baseEvent,
+      title: 'Different Title',
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(false);
+  });
+
+  it('returns false when date differs', () => {
+    const imported: Partial<Event> = {
+      ...baseEvent,
+      date: '1789-07-15',
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(false);
+  });
+
+  it('returns false when description differs', () => {
+    const imported: Partial<Event> = {
+      ...baseEvent,
+      description: 'Different description',
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(false);
+  });
+
+  it('returns false when sources differ', () => {
+    const imported: Partial<Event> = {
+      ...baseEvent,
+      sources: ['https://example.com/different-source'],
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(false);
+  });
+
+  it('returns true when optional fields are undefined in import (no change intended)', () => {
+    const imported: Partial<Event> = {
+      id: 'event-1',
+      date: '1789-07-14',
+      title: 'The Storming of the Bastille',
+      // description and sources undefined - means "no change"
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(true);
+  });
+
+  it('returns false when sources order changes', () => {
+    const imported: Partial<Event> = {
+      ...baseEvent,
+      sources: ['https://example.com/source2', 'https://example.com/source1'], // reversed
+    };
+
+    expect(areEventsIdentical(baseEvent, imported)).toBe(false);
+  });
+
+  it('handles endDate comparison', () => {
+    const eventWithEndDate: Event = {
+      ...baseEvent,
+      endDate: '1789-07-20',
+    };
+
+    // Same endDate
+    expect(areEventsIdentical(eventWithEndDate, { ...baseEvent, endDate: '1789-07-20' })).toBe(true);
+
+    // Different endDate
+    expect(areEventsIdentical(eventWithEndDate, { ...baseEvent, endDate: '1789-07-21' })).toBe(false);
+
+    // Undefined endDate means no change
+    expect(areEventsIdentical(eventWithEndDate, { ...baseEvent })).toBe(true);
+  });
+
+  it('handles time comparison', () => {
+    const eventWithTime: Event = {
+      ...baseEvent,
+      time: '14:30',
+    };
+
+    // Same time
+    expect(areEventsIdentical(eventWithTime, { ...baseEvent, time: '14:30' })).toBe(true);
+
+    // Different time
+    expect(areEventsIdentical(eventWithTime, { ...baseEvent, time: '15:00' })).toBe(false);
+  });
+});
+
+describe('useImportSession - skip identical events', () => {
+  const timelineId = 'test-timeline';
+  const ownerId = 'test-owner';
+
+  beforeEach(() => {
+    localStorageMock.clear();
+    vi.clearAllMocks();
+  });
+
+  it('skips events that are identical to existing events in merge mode', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+      { id: 'event-2', date: '1789-08-04', title: 'Event 2', description: 'Desc 2' },
+    ];
+
+    // Import the same events (no changes)
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+      { id: 'event-2', date: '1789-08-04', title: 'Event 2', description: 'Desc 2' },
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'merge'
+      );
+    });
+
+    // No events should be in the session (all identical)
+    expect(result.current.session?.events.length).toBe(0);
+  });
+
+  it('includes only events with actual changes in merge mode', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+      { id: 'event-2', date: '1789-08-04', title: 'Event 2', description: 'Desc 2' },
+    ];
+
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' }, // Identical - skip
+      { id: 'event-2', date: '1789-08-04', title: 'UPDATED Event 2', description: 'Desc 2' }, // Changed title
+      { id: 'event-3', date: '1789-10-05', title: 'New Event 3' }, // New event
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'merge'
+      );
+    });
+
+    // Should have 2 events: 1 update, 1 create
+    expect(result.current.session?.events.length).toBe(2);
+
+    const updateEvent = result.current.session?.events.find(e => e.eventData.id === 'event-2');
+    const createEvent = result.current.session?.events.find(e => e.eventData.id === 'event-3');
+
+    expect(updateEvent?.action).toBe('update');
+    expect(createEvent?.action).toBe('create');
+
+    // event-1 should NOT be in the session
+    const skippedEvent = result.current.session?.events.find(e => e.eventData.id === 'event-1');
+    expect(skippedEvent).toBeUndefined();
+  });
+
+  it('does not skip identical events in overwrite mode', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+    ];
+
+    // Import identical event
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'overwrite'
+      );
+    });
+
+    // In overwrite mode, all events are included (even identical ones)
+    expect(result.current.session?.events.length).toBe(1);
+    expect(result.current.session?.events[0].action).toBe('create');
+  });
+
+  it('considers description changes when comparing events', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Original description' },
+    ];
+
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Updated description' },
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'merge'
+      );
+    });
+
+    // Should have 1 event (description changed)
+    expect(result.current.session?.events.length).toBe(1);
+    expect(result.current.session?.events[0].action).toBe('update');
+  });
+
+  it('considers sources changes when comparing events', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', sources: ['source1'] },
+    ];
+
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', sources: ['source1', 'source2'] },
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'merge'
+      );
+    });
+
+    // Should have 1 event (sources changed)
+    expect(result.current.session?.events.length).toBe(1);
+    expect(result.current.session?.events[0].action).toBe('update');
+  });
+
+  it('tracks skippedCount for identical events in merge mode', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+      { id: 'event-2', date: '1789-07-15', title: 'Event 2', description: 'Desc 2' },
+      { id: 'event-3', date: '1789-07-16', title: 'Event 3', description: 'Desc 3' },
+    ];
+
+    // Import 3 events: 2 identical, 1 changed
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' }, // Identical
+      { id: 'event-2', date: '1789-07-15', title: 'Event 2', description: 'Desc 2' }, // Identical
+      { id: 'event-3', date: '1789-07-16', title: 'Changed Title', description: 'Desc 3' }, // Changed
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'merge'
+      );
+    });
+
+    // Should have 1 event (the changed one)
+    expect(result.current.session?.events.length).toBe(1);
+    // Should track that 2 events were skipped
+    expect(result.current.session?.skippedCount).toBe(2);
+  });
+
+  it('sets skippedCount to 0 in overwrite mode', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+    ];
+
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' }, // Identical but overwrite mode
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'overwrite'
+      );
+    });
+
+    // In overwrite mode, all events are included and skippedCount should be 0
+    expect(result.current.session?.events.length).toBe(1);
+    expect(result.current.session?.skippedCount).toBe(0);
+  });
+
+  it('sets skippedCount to total when all events are identical', () => {
+    const existingEvents: Event[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+      { id: 'event-2', date: '1789-07-15', title: 'Event 2', description: 'Desc 2' },
+    ];
+
+    // Import all identical events
+    const importedEvents: Partial<Event>[] = [
+      { id: 'event-1', date: '1789-07-14', title: 'Event 1', description: 'Desc 1' },
+      { id: 'event-2', date: '1789-07-15', title: 'Event 2', description: 'Desc 2' },
+    ];
+
+    const { result } = renderHook(() => useImportSession(timelineId));
+
+    act(() => {
+      result.current.startSession(
+        timelineId,
+        ownerId,
+        'yaml',
+        importedEvents,
+        existingEvents.map(e => e.id),
+        existingEvents,
+        'merge'
+      );
+    });
+
+    // All events were identical, session has 0 events but 2 skipped
+    expect(result.current.session?.events.length).toBe(0);
+    expect(result.current.session?.skippedCount).toBe(2);
   });
 });

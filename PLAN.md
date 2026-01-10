@@ -101,6 +101,9 @@
 - ✅ Bug Fix: YAML import/export now preserves event sources field (v0.9.6.2)
 - ✅ Source Indicator: Subtle theme-aware icon on cards with sources, 3-method E2E test (CC-REQ-CARD-SOURCE-001)
 - ✅ Anchor Visibility Fix: All event anchors now visible regardless of zoom/overflow, E2E tests (CC-REQ-ANCHOR-004)
+- ✅ Event Diff View: Word-level diff modal for UPDATE events using react-diff-viewer-continued, E2E tests (v0.9.4)
+- ✅ Skip Identical Events: Import now skips events with matching ID AND identical content, 14 new unit tests (v0.9.4)
+- ✅ Skipped Events Feedback: ReviewPanel shows "X skipped (no changes)" count for user feedback (v0.9.4)
 
 ### Next Up
 - **v0.9.5**: AI Chat Migration to Unified Import Review System
@@ -1328,17 +1331,36 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 - [x] Close ImportExportOverlay → open ReviewPanel
 - [x] Remove direct Firestore write from import
 
-### v0.9.4 - Diff View for Updates
-**Goal:** Side-by-side comparison for UPDATE actions
-**Status:** Not Started
+### v0.9.4 - Diff View for Updates ✅
+**Goal:** Word-level diff comparison for UPDATE actions in ReviewPanel
+**Status:** Complete
 
-**Files to Create:**
-- `src/components/EventDiffView.tsx` - Diff component
+**Libraries Added:**
+- `react-diff-viewer-continued` - GitHub-style diff component with word-level highlighting
+- `diff` - jsdiff for array comparison (sources field)
+
+**Files Created:**
+- `src/app/panels/EventDiffView.tsx` - Diff modal component
+
+**Files Modified:**
+- `src/app/panels/ReviewPanel.tsx` - Wired View Diff button and modal
 
 **Tasks:**
-- [ ] Two-column layout: Existing | Imported
-- [ ] Highlight changed fields
-- [ ] "Keep Existing" / "Take Imported" / "Merge" options
+- [x] Install `react-diff-viewer-continued` and `diff` packages
+- [x] Create EventDiffView component with inline unified diff view
+- [x] Word-level diff highlighting for title/description (green/red)
+- [x] Simple arrow format for date/time changes (old → new)
+- [x] Array diff with +/- indicators for sources field
+- [x] Only show changed fields in diff view
+- [x] "Keep Existing" button (sets decision to rejected)
+- [x] "Take Imported" button (sets decision to accepted)
+- [x] Close button and Escape key dismissal
+- [x] Theme-aware styling (light/dark mode support)
+- [x] E2E tests (tests/review/102-event-diff-view.spec.ts)
+- [x] Update SRS_IMPORT_REVIEW.md Section 8 (9 requirements)
+- [x] Skip identical events in merge mode (areEventsIdentical comparison)
+- [x] Track skippedCount in ImportSession (CC-REQ-REVIEW-SESSION-003b)
+- [x] Display "X skipped (no changes)" in ReviewPanel for user feedback
 
 ### v0.9.5 - AI Chat Migration
 **Goal:** Migrate AI integration to unified session system

@@ -62,6 +62,7 @@ export interface ImportSession {
   existingEventIds: string[];    // IDs of existing events (for duplicate detection)
   importMode: ImportMode;        // How to handle existing events
   eventsToDelete?: string[];     // For overwrite mode: IDs of existing events to delete
+  skippedCount?: number;         // Count of events skipped due to being identical (merge mode)
 }
 
 /**

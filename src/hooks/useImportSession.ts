@@ -12,6 +12,34 @@ import { addEvent, updateEvent, deleteEvent } from '../services/firestore';
 
 const STORAGE_KEY_PREFIX = 'powertimeline:session:';
 
+/**
+ * Compares two events to determine if they have identical content.
+ * Used to skip events that haven't actually changed during import.
+ * Compares: title, date, endDate, time, description, sources
+ */
+export function areEventsIdentical(existing: Event, imported: Partial<Event>): boolean {
+  // Compare title (required field)
+  if (existing.title !== imported.title) return false;
+
+  // Compare date (required field)
+  if (existing.date !== imported.date) return false;
+
+  // Compare optional fields - only if imported has the field defined
+  // If imported field is undefined, it means "no change" so we don't compare
+  if (imported.endDate !== undefined && existing.endDate !== imported.endDate) return false;
+  if (imported.time !== undefined && existing.time !== imported.time) return false;
+  if (imported.description !== undefined && existing.description !== imported.description) return false;
+
+  // Compare sources array (order-sensitive)
+  if (imported.sources !== undefined) {
+    const existingSources = existing.sources || [];
+    const importedSources = imported.sources || [];
+    if (JSON.stringify(existingSources) !== JSON.stringify(importedSources)) return false;
+  }
+
+  return true;
+}
+
 export function useImportSession(timelineId?: string) {
   const [session, setSession] = useState<ImportSession | null>(null);
 
@@ -70,6 +98,7 @@ export function useImportSession(timelineId?: string) {
     ) => {
       let sessionEvents: SessionEvent[];
       let eventsToDelete: string[] | undefined;
+      let skippedCount = 0;
 
       if (importMode === 'overwrite') {
         // Overwrite mode: all events are 'create', track existing events for deletion
@@ -83,21 +112,44 @@ export function useImportSession(timelineId?: string) {
         eventsToDelete = existingEventIds;
       } else {
         // Merge mode (default): classify as create or update based on ID matching
-        sessionEvents = events.map(eventData => {
+        // Skip events that are identical to existing (no actual changes)
+        const mappedEvents: (SessionEvent | null)[] = events.map(eventData => {
           const existingEvent = eventData.id
             ? existingEvents.find(existing => existing.id === eventData.id)
             : undefined;
-          const isUpdate = Boolean(existingEvent)
-            || (eventData.id ? existingEventIds.includes(eventData.id) : false);
+
+          // If we found an existing event, check if content is actually different
+          if (existingEvent) {
+            // Skip identical events - they don't need to be in the review session
+            if (areEventsIdentical(existingEvent, eventData)) {
+              return null; // Will be filtered out
+            }
+            // Content differs - mark as update
+            return {
+              id: crypto.randomUUID(),
+              action: 'update' as const,
+              decision: 'pending' as const,
+              eventData,
+              existingEvent,
+            };
+          }
+
+          // No existing event found - check if ID exists (edge case: ID in list but event not loaded)
+          const idExistsButNotLoaded = eventData.id ? existingEventIds.includes(eventData.id) : false;
+          const action = idExistsButNotLoaded ? 'update' : 'create';
 
           return {
             id: crypto.randomUUID(),
-            action: isUpdate ? 'update' : 'create',
-            decision: 'pending',
+            action: action as 'update' | 'create',
+            decision: 'pending' as const,
             eventData,
-            existingEvent,
+            existingEvent: undefined,
           };
         });
+
+        sessionEvents = mappedEvents.filter((event): event is SessionEvent => event !== null);
+        // Calculate how many events were skipped (identical to existing)
+        skippedCount = mappedEvents.filter(event => event === null).length;
       }
 
       const newSession: ImportSession = {
@@ -111,6 +163,7 @@ export function useImportSession(timelineId?: string) {
         existingEventIds,
         importMode,
         eventsToDelete,
+        skippedCount,
       };
 
       setSession(newSession);
