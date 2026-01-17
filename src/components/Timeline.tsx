@@ -67,12 +67,16 @@ const Timeline: React.FC<Props> = ({
   // Calculate date range for timeline scaling
   let minDate = new Date('2050-01-01').getTime();
   let maxDate = new Date('1900-01-01').getTime();
-  
+
   if (sortedEvents.length > 0) {
     minDate = Math.min(...sortedEvents.map(e => new Date(e.date).getTime()));
     maxDate = Math.max(...sortedEvents.map(e => new Date(e.date).getTime()));
+
+    // Add 10% padding to the right so last events aren't at screen edge
+    const padding = (maxDate - minDate) * 0.10;
+    maxDate = maxDate + padding;
   }
-  
+
   const dateRange = Math.max(1, maxDate - minDate);
   
   // Support external control of view window for tests/dev via custom event
