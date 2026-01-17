@@ -48,6 +48,7 @@
 - ✅ Dark Mode Season Background Colors: Fixed timeline axis season colors for dark mode (v0.5.36.1)
 - ✅ Dashed Connector Line Fix: Fixed SVG width (1px → 10px), replaced CSS vars with hex colors (v0.5.36.2)
 - ✅ Stream View Minimap Hover: Added hover effect to Stream View events that highlights them in minimap (v0.8.3.3)
+- ✅ Test Fixes: Fixed anchor selectors (#57) and scale alignment viewport detection (#62) - all 16 tests PASS (v0.8.15)
 - ✅ Events Panel Removal: Removed OutlinePanel, consolidated functionality into Stream View (v0.8.3.4)
 - ✅ Mobile/Responsive Testing Infrastructure: 4 viewport projects (desktop/desktop-xl/tablet/mobile), 11 test files, SRS_RESPONSIVE_TESTING.md (v0.8.4)
 - ✅ PWA & Offline Support: vite-plugin-pwa, service worker, offline indicator with retry (v0.8.5)
