@@ -98,8 +98,22 @@ export function useTimelineZoom({ zoomAtCursor, hoveredEventId, viewStart, viewE
       // Get cursor position
       const cursorX = e.clientX;
 
-      const container = document.querySelector('.absolute.inset-0.ml-14 > .w-full.h-full.relative') as HTMLElement | null;
+      // Use data-testid for more reliable container selection
+      const container = document.querySelector('[data-testid="timeline-canvas"]') as HTMLElement | null;
       const rect = container?.getBoundingClientRect();
+
+      // Debug logging for zoom investigation
+      try {
+        const w = window;
+        if (w.__CC_DEBUG_LAYOUT) {
+          console.log(`[ZOOM] Wheel event at cursor (${cursorX}, ${e.clientY}), deltaY=${e.deltaY}, container=${!!container}, rect=${!!rect}`);
+          if (rect) {
+            console.log(`[ZOOM] Container bounds: left=${rect.left}, width=${rect.width}`);
+          }
+        }
+      } catch {
+        // Ignore debug errors
+      }
 
       // Determine zoom direction
       const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25;

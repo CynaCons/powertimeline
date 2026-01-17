@@ -224,12 +224,17 @@ export function useViewWindow(initialStart = 0, initialEnd = 1) {
     // Convert cursor X position to timeline ratio within CURRENT view window
     // If a container rect is provided, treat it as the true viewport for the timeline canvas
     const usingContainer = typeof containerLeft === 'number' && typeof containerWidth === 'number' && (containerWidth as number) > 0;
-    const leftMargin = usingContainer ? 0 : 96; // include rail+padding only when no container
-    const rightMargin = usingContainer ? 0 : 40;
+
+    // Timeline has internal padding (~5% on each side)
+    // When using container bounds, account for this padding
+    const timelineSidePadding = usingContainer ? Math.max(16, Math.floor((containerWidth as number) * 0.05)) : 0;
+    const leftMargin = usingContainer ? timelineSidePadding : 96; // rail+padding when no container
+    const rightMargin = usingContainer ? timelineSidePadding : 40;
+
     const availableWidth = usingContainer ? (containerWidth as number) : viewportWidth;
     const usableWidth = Math.max(1, (availableWidth as number) - leftMargin - rightMargin);
     const localX = usingContainer ? (cursorX - (containerLeft as number)) : cursorX;
-    
+
     // Calculate cursor position as ratio of usable timeline width (0-1)
     const cursorRatioInViewport = Math.max(0, Math.min(1, (localX - leftMargin) / usableWidth));
     
