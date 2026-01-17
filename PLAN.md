@@ -3,7 +3,7 @@
 ## Quick Summary
 
 **Current Version:** v0.8.15
-**Next Milestone:** v0.9.5 - AI Chat Migration to Unified System
+**Next Milestone:** v1.0.0 - Version History & Collaboration
 
 ### Key Metrics
 - **Total Iterations:** 200+ completed (v0.2.0 → v0.8.0)
@@ -104,9 +104,9 @@
 - ✅ Event Diff View: Word-level diff modal for UPDATE events using react-diff-viewer-continued, E2E tests (v0.9.4)
 - ✅ Skip Identical Events: Import now skips events with matching ID AND identical content, 14 new unit tests (v0.9.4)
 - ✅ Skipped Events Feedback: ReviewPanel shows "X skipped (no changes)" count for user feedback (v0.9.4)
+- ✅ AI Chat Migration: AI event actions route through ImportSession with ReviewPanel approval, delete action support, 16 new unit tests (v0.9.5)
 
 ### Next Up
-- **v0.9.5**: AI Chat Migration to Unified Import Review System
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
@@ -1362,15 +1362,19 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 - [x] Track skippedCount in ImportSession (CC-REQ-REVIEW-SESSION-003b)
 - [x] Display "X skipped (no changes)" in ReviewPanel for user feedback
 
-### v0.9.5 - AI Chat Migration
+### v0.9.5 - AI Chat Migration ✅
 **Goal:** Migrate AI integration to unified session system
-**Status:** Not Started
+**Status:** Complete
 
 **Tasks:**
-- [ ] AI response → startSession('ai-chat', events)
-- [ ] Remove pendingActions state from useAISession
-- [ ] Keep ChatPanel for chat UI only
-- [ ] Actions appear in ReviewPanel automatically
+- [x] Add delete action support to useImportSession.ts commitSession
+- [x] Create aiActionsToSession.ts converter utility (convertAIActionsToSessionEvents)
+- [x] Refactor useAISession to route event actions via onEventActionsReceived callback
+- [x] Simplify ChatPanel - remove event action UI, add "Review Events" button
+- [x] Wire up AIEventBridge in App.tsx inside ImportSessionProvider
+- [x] Update ReviewPanel for delete actions (trash icon, warning, hide edit)
+- [x] Add 16 unit tests for aiActionsToSession.ts
+- [x] Update SRS_IMPORT_REVIEW.md Section 9 (6 requirements)
 
 ### v0.9.6 - Import Modes (Merge vs Overwrite) ✅
 **Goal:** Allow users to choose between merging imports or fully replacing timeline

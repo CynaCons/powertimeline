@@ -124,19 +124,34 @@ test.describe('Timeline Scale-Date Alignment', () => {
       }
 
       if (!hoverDate) {
-        // Try alternative method: check if there's any text that appeared near the cursor
+        // Try alternative method: find the single closest element with a year
+        // Use viewport-aware proximity threshold to avoid picking up multiple labels
+        const viewportSize = page.viewportSize();
+        const viewportWidth = viewportSize?.width || 1024;
+        const proximityThreshold = viewportWidth < 768 ? 20 : viewportWidth < 1024 ? 30 : 50;
+
         const nearbyText = await page.locator('*').evaluateAll((elements, coords) => {
+          let closestElement = null;
+          let closestDistance = coords.threshold;
+
           for (const el of elements) {
             const rect = el.getBoundingClientRect();
-            if (Math.abs(rect.left - coords.x) < 50 && Math.abs(rect.top - coords.y) < 50) {
+            const distance = Math.sqrt(
+              Math.pow(rect.left - coords.x, 2) + Math.pow(rect.top - coords.y, 2)
+            );
+
+            if (distance < closestDistance) {
               const text = el.textContent || '';
-              if (text.match(/\d{4}/)) {
-                return text;
+              // Only consider elements with exactly 4 digits (a year)
+              const yearMatch = text.match(/^\s*(\d{4})\s*$/);
+              if (yearMatch) {
+                closestElement = yearMatch[1];
+                closestDistance = distance;
               }
             }
           }
-          return null;
-        }, { x: scaleX, y: timelineY });
+          return closestElement;
+        }, { x: scaleX, y: timelineY, threshold: proximityThreshold });
 
         if (nearbyText) {
           hoverDate = nearbyText;

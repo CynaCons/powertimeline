@@ -1,0 +1,459 @@
+version: 1
+timeline:
+  title: "Greenland: A Century of Geopolitical Competition"
+  description: "US strategic positioning in Greenland, with emphasis on military presence, territorial ambitions, and competition with Russia and China (1925-2026)"
+events:
+  # Pre-WWII: Danish Control
+  - id: "greenland-admin-act-1925"
+    date: "1925-01-01"
+    title: "Denmark Closes Greenland"
+    description: |
+      Denmark enacts the **Administration of Greenland Act**, codifying Greenland's status as a closed colony.
+
+      - Restricted foreign access to protect Inuit population
+      - Maintained Danish trade monopolies
+      - Established administrative structure that would later face US wartime challenges
+    sources:
+      - "Danish Greenland Administration Act 1925"
+
+  - id: "denmark-sovereignty-1933"
+    date: "1933-04-05"
+    title: "International Court Confirms Danish Sovereignty"
+    description: |
+      Permanent Court of International Justice rules in favor of **Denmark vs. Norway** dispute over Eastern Greenland.
+
+      **Significance:** Solidified Danish sovereignty over the entire island, legally preventing US, Soviet Union, or other nations from claiming "terra nullius" areas.
+    sources:
+      - "https://en.wikipedia.org/wiki/Legal_status_of_Greenland"
+
+  # WWII: Beginning of US Military Presence
+  - id: "nazi-occupation-denmark-1940"
+    date: "1940-04-09"
+    title: "Nazi Germany Occupies Denmark"
+    description: |
+      Germany invades Denmark; Greenland's governors declare emergency self-rule, cut off from Copenhagen.
+
+      **US Entry:** Greenland turns to the United States for supplies and protection, marking the beginning of the "American Period" and application of the **Monroe Doctrine** to the Arctic.
+    sources:
+      - "https://en.wikipedia.org/wiki/German_occupation_of_Denmark"
+
+  - id: "kauffmann-agreement-1941"
+    date: "1941-04-09"
+    title: "🇺🇸 Kauffmann Agreement: US Military Bases Authorized"
+    description: |
+      **Major US Strategic Milestone**
+
+      Danish Ambassador Henrik Kauffmann (defying occupied Copenhagen) signs agreement with the United States granting:
+      - Rights to build military bases in Greenland
+      - Defense responsibilities during WWII
+
+      **Immediate Impact:**
+      - Construction of **Bluie West One** (Narsarsuaq)
+      - Construction of **Bluie West Eight** (Kangerlussuaq)
+      - Critical airbases for ferrying aircraft to European theater
+
+      This agreement laid the foundation for permanent US military presence.
+    sources:
+      - "https://en.wikipedia.org/wiki/Agreement_relating_to_the_Defense_of_Greenland"
+
+  - id: "german-weather-station-1944"
+    date: "1944-10-04"
+    title: "US Captures German Weather Station"
+    description: |
+      US Coast Guard captures German weather station *Edelweiss II* on Greenland's east coast.
+
+      **Strategic Significance:** Highlighted Greenland's value for weather intelligence and Arctic domain awareness—a precursor to its Cold War role in early warning systems.
+    sources:
+      - "WWII Arctic Operations"
+
+  # Cold War: US Strategic Dominance
+  - id: "us-purchase-offer-1946"
+    date: "1946-12-01"
+    title: "🇺🇸 US Offers $100 Million to Buy Greenland"
+    description: |
+      **First US Attempt to Purchase Greenland**
+
+      US Secretary of State James Byrnes offers Denmark **$100 million in gold** for Greenland.
+
+      **Denmark's Response:** Rejected
+
+      **US Rationale:**
+      - Secure the "unsinkable aircraft carrier" permanently
+      - Prevent Soviet expansion into the Arctic
+      - Control strategic North Atlantic routes
+
+      This offer set a precedent for future US acquisition attempts (2019, 2025-2026).
+    sources:
+      - "https://www.theatlantic.com/ideas/archive/2019/08/trump-greenland/596298/"
+
+  - id: "defense-agreement-1951"
+    date: "1951-04-27"
+    title: "🇺🇸 Defense of Greenland Agreement (NATO Framework)"
+    description: |
+      **Key US-Denmark Military Agreement**
+
+      Denmark and the United States sign the **Defense of Greenland Agreement**, replacing the 1941 treaty.
+
+      **Key Provisions:**
+      - Formally brings Greenland into **NATO defense framework**
+      - Authorizes permanent US military bases
+      - Establishes joint defense command structure
+      - Permits US construction of radar and early warning systems
+
+      **Strategic Impact:** Greenland becomes a cornerstone of NATO's northern flank against the Soviet Union.
+    sources:
+      - "https://en.wikipedia.org/wiki/Greenland_in_World_War_II#Postwar"
+
+  - id: "thule-air-base-1953"
+    date: "1953-06-01"
+    title: "🇺🇸 Thule Air Base Completed (Operation Blue Jay)"
+    description: |
+      **Major US Military Installation**
+
+      **Thule Air Base** (now Pituffik Space Base) construction completed in northwest Greenland.
+
+      **Capabilities:**
+      - Strategic bomber base within striking distance of Moscow
+      - Radar systems for Soviet ICBM early warning
+      - Northernmost US military installation
+
+      **Controversy:** Inuit population forcibly relocated 100km north to Qaanaaq without consent.
+
+      **Strategic Value:** Became linchpin of US nuclear deterrence strategy during Cold War. Remains operational today as critical space surveillance and missile warning facility.
+    sources:
+      - "https://en.wikipedia.org/wiki/Thule_Air_Base"
+
+  - id: "thule-crash-1968"
+    date: "1968-01-21"
+    title: "🇺🇸 B-52 Crash: Nuclear Weapons Contamination"
+    description: |
+      US B-52 bomber carrying **four nuclear bombs** crashes near Thule Air Base.
+
+      **Incident Details:**
+      - Conventional explosives detonated
+      - Plutonium contamination spread over ice
+      - One weapon never recovered (suspected lost in sea)
+
+      **Political Fallout:**
+      - Denmark unaware US had nuclear weapons in Greenland
+      - Sparked debate over secret agreements
+      - Raised questions about US transparency with Denmark
+
+      **Long-term Impact:** Environmental cleanup continued for years; incident remains contentious in Danish-US relations.
+    sources:
+      - "https://en.wikipedia.org/wiki/1968_Thule_Air_Base_B-52_crash"
+
+  - id: "greenland-home-rule-1979"
+    date: "1979-05-01"
+    title: "Greenland Achieves Home Rule"
+    description: |
+      Denmark grants Greenland **Home Rule**, establishing a local parliament and government.
+
+      **Key Powers Transferred:**
+      - Education, health, and social services
+      - Resource management (fishing, mining)
+      - Cultural affairs
+
+      **Powers Retained by Denmark:**
+      - Foreign affairs and defense
+      - Monetary policy
+
+      **US Implication:** All US military agreements remain under Danish control, but Greenlandic opinion becomes more politically relevant.
+    sources:
+      - "https://en.wikipedia.org/wiki/Greenlandic_self-government"
+
+  - id: "cold-war-ends-1991"
+    date: "1991-12-26"
+    title: "Soviet Union Collapses"
+    description: |
+      **End of Cold War**
+
+      Dissolution of the USSR reduces immediate strategic threat to Greenland but US maintains bases.
+
+      **Impact on Greenland:**
+      - Thule Air Base mission shifts from bomber deterrence to space surveillance
+      - Reduced US military presence in 1990s
+      - Growing focus on Arctic resources and climate change opening new shipping routes
+    sources:
+      - "https://en.wikipedia.org/wiki/Dissolution_of_the_Soviet_Union"
+
+  # Post-Cold War: Resource Competition & New Powers
+  - id: "greenland-self-government-2009"
+    date: "2009-06-21"
+    title: "Greenland Achieves Self-Government"
+    description: |
+      Denmark grants expanded **Self-Government Act**, giving Greenland control over:
+
+      **New Powers:**
+      - Natural resources and mineral extraction
+      - Police and justice system
+      - Coast guard operations
+
+      **Path to Independence:** Establishes framework for eventual full independence if Greenlanders choose via referendum.
+
+      **US/China/Russia Significance:** Greenland can now negotiate mining contracts independently, opening door to Chinese investment in rare earth minerals.
+    sources:
+      - "https://en.wikipedia.org/wiki/Greenlandic_self-government"
+
+  - id: "china-mining-interest-2012"
+    date: "2012-01-01"
+    title: "🇨🇳 China Begins Arctic Engagement"
+    description: |
+      **China Enters Greenland Resource Competition**
+
+      Chinese companies express interest in Greenland's rare earth mineral deposits, particularly:
+      - Kvanefjeld (uranium and rare earths)
+      - Iron ore in southern Greenland
+
+      **Strategic Context:**
+      - China controls ~90% of global rare earth production
+      - Greenland's deposits could diversify supply chains
+      - Beijing frames Arctic as part of "Polar Silk Road" (Belt and Road Initiative)
+
+      **US Concern:** Chinese investment could give Beijing leverage over Greenland's political future and infrastructure (airports, ports).
+    sources:
+      - "https://www.brookings.edu/articles/greenland-is-not-for-sale-but-it-is-developing/"
+
+  - id: "russia-arctic-expansion-2014"
+    date: "2014-03-18"
+    title: "🇷🇺 Russia Annexes Crimea, Refocuses on Arctic"
+    description: |
+      Following annexation of Crimea, Russia accelerates Arctic militarization:
+
+      **Russian Arctic Build-Up:**
+      - Reopening Soviet-era bases along Northern Sea Route
+      - New icebreaker fleet construction
+      - Arctic brigade formations
+      - Increased bomber patrols near Greenland airspace
+
+      **Impact on Greenland:** US cites Russian activity as justification to maintain and expand Thule/Pituffik capabilities.
+    sources:
+      - "https://www.fpri.org/article/2020/01/russian-strategic-intentions/"
+
+  - id: "trump-greenland-2019"
+    date: "2019-08-18"
+    title: "🇺🇸 Trump's First Greenland Purchase Proposal"
+    description: |
+      **Trump Administration Explores Buying Greenland (First Attempt)**
+
+      President Donald Trump confirms interest in purchasing Greenland, calling it "strategically interesting."
+
+      **Rationale Cited:**
+      - Counter Chinese and Russian Arctic expansion
+      - Secure critical minerals
+      - Expand US territorial control
+
+      **Reactions:**
+      - **Denmark:** Prime Minister Mette Frederiksen calls idea "absurd"
+      - **Greenland:** Premier Kim Kielsen states "We are not for sale"
+      - **Trump:** Cancels state visit to Denmark in protest
+
+      **Aftermath:** Proposal shelved but signals renewed US focus on Greenland acquisition.
+    sources:
+      - "https://www.bbc.com/news/world-us-canada-49493927"
+
+  - id: "thule-renamed-pituffik-2023"
+    date: "2023-04-06"
+    title: "🇺🇸 Thule Air Base Renamed Pituffik Space Base"
+    description: |
+      US renames **Thule Air Base** to **Pituffik Space Base**, using Greenlandic name.
+
+      **Significance:**
+      - Symbolic gesture toward Greenlandic autonomy
+      - Reflects shift from Cold War bomber base to space surveillance mission
+      - Houses critical components of US Space Force early warning systems
+
+      **Current Mission:**
+      - Ballistic missile early warning
+      - Space surveillance radar
+      - Satellite tracking
+    sources:
+      - "https://www.spaceforce.mil/News/Article/3361841/"
+
+  - id: "denmark-arctic-defense-2024"
+    date: "2024-01-01"
+    title: "🇩🇰 Denmark Announces Arctic Defense Expansion"
+    description: |
+      Denmark unveils **2024-2033 Defence Agreement** with major Arctic focus:
+
+      **Investments:**
+      - New Arctic-capable frigates and patrol vessels
+      - Increased air surveillance
+      - Expanded Greenland garrison
+      - Improved infrastructure at key ports
+
+      **Context:** Response to increased Russian activity and growing US pressure regarding Greenland's status.
+    sources:
+      - "Danish Defence Agreement 2024-2033"
+
+  - id: "china-polar-silk-road-2024"
+    date: "2024-06-01"
+    title: "🇨🇳 China Updates Arctic Policy: Polar Silk Road"
+    description: |
+      **China's Arctic Strategy Formalized**
+
+      Beijing releases updated Arctic policy emphasizing:
+      - Northern Sea Route development (ice-free shipping)
+      - Resource extraction partnerships
+      - Scientific research stations
+      - "Polar Silk Road" as extension of Belt and Road Initiative
+
+      **Greenland Implications:**
+      - Chinese firms seek mining licenses
+      - Potential funding for Greenland airport expansions
+      - US views Chinese Arctic presence as direct challenge
+    sources:
+      - "https://www.state.gov/the-peoples-republic-of-chinas-arctic-activities/"
+
+  # 2025-2026: Current Crisis
+  - id: "trump-reelection-2024"
+    date: "2024-11-05"
+    title: "🇺🇸 Trump Re-elected, Signals Greenland Priority"
+    description: |
+      **Second Trump Term Begins**
+
+      Donald Trump wins 2024 presidential election. Signals that acquiring Greenland will be a **priority in second term**.
+
+      **Rationale:**
+      - "National security necessity"
+      - Counter China's Polar Silk Road
+      - Prevent Russian Arctic dominance
+      - Secure rare earth minerals
+
+      **Shift from 2019:** No longer framed as real estate deal but as existential security imperative.
+    sources:
+      - "2024 US Presidential Election Results"
+
+  - id: "trump-greenland-necessity-2024"
+    date: "2024-12-01"
+    title: "🇺🇸 Trump: Owning Greenland is 'National Security Necessity'"
+    description: |
+      President-elect Trump posts on Truth Social that US ownership of Greenland is an **"absolute necessity"** for national security.
+
+      **New Elements:**
+      - Links to proposed "Golden Dome" missile defense system
+      - Emphasizes resource security (rare earths, oil, gas)
+      - Frames as preventing Chinese/Russian control
+
+      **International Reaction:**
+      - Denmark reiterates Greenland is not for sale
+      - European allies express alarm at aggressive rhetoric
+      - Russia and China condemn US "neo-colonial" ambitions
+    sources:
+      - "Trump Truth Social Posts December 2024"
+
+  - id: "vance-pituffik-visit-2025"
+    date: "2025-03-15"
+    title: "🇺🇸 VP Vance's Controversial Pituffik Visit"
+    description: |
+      **Diplomatic Incident**
+
+      Vice President **J.D. Vance** makes unannounced visit to **Pituffik Space Base**.
+
+      **Controversy:**
+      - Visit reportedly **uninvited** by Greenlandic government
+      - Vance makes statements suggesting US has special claim to Greenland
+      - Base commander who attempted to distance base from political tensions is **dismissed**
+
+      **Greenlandic Response:** Premier condemns visit as "disrespectful" and "undermining our sovereignty."
+
+      **Significance:** Signals US willingness to bypass Danish/Greenlandic protocols in pursuit of territorial objectives.
+    sources:
+      - "Greenlandic Government Press Release March 2025"
+
+  - id: "danish-threat-assessment-2025"
+    date: "2025-05-01"
+    title: "🇩🇰 Denmark Lists US as Security Threat"
+    description: |
+      **Historic Shift in Threat Assessment**
+
+      **Danish Defence Intelligence Service** 2025 annual report lists the **United States** alongside Russia and China as a potential threat to Danish national security.
+
+      **Rationale:**
+      - US "hybrid warfare" tactics (political pressure, uninvited visits)
+      - Coercive diplomacy regarding Greenland
+      - Erosion of trust in NATO alliance
+
+      **Unprecedented:** First time a NATO ally has formally designated the US as a security concern.
+
+      **US Reaction:** White House dismisses report as "overreaction" and insists US actions are defensive.
+    sources:
+      - "Danish Defence Intelligence Service Annual Report 2025"
+
+  - id: "russia-arctic-drills-2025"
+    date: "2025-08-01"
+    title: "🇷🇺 Russia-China Joint Arctic Naval Drills"
+    description: |
+      **First Sino-Russian Arctic Naval Exercise**
+
+      Russia and China conduct joint naval exercises in the Arctic Ocean near Greenland Sea.
+
+      **Participants:**
+      - Russian Northern Fleet destroyers
+      - Chinese People's Liberation Army Navy Type 055 destroyers
+      - Combined submarine operations
+
+      **US Response:** White House cites drills as evidence that "if we don't control Greenland, our adversaries will."
+
+      **Greenlandic Reaction:** Growing frustration that Greenland is being treated as a "pawn" in great power competition without Greenlandic input.
+    sources:
+      - "https://www.reuters.com/world/russia-china-arctic-cooperation/"
+
+  - id: "dc-summit-impasse-2026"
+    date: "2026-01-14"
+    title: "🇺🇸🇩🇰 Washington Summit Ends in Impasse"
+    description: |
+      **Failed Negotiations**
+
+      High-level summit in Washington, D.C. between US, Danish, and Greenlandic officials ends without agreement.
+
+      **Attendees:**
+      - US Secretary of State
+      - Danish Foreign Minister Lars Løkke Rasmussen
+      - Greenlandic Premier
+
+      **Outcome:**
+      - Danish FM states sides have "fundamental disagreement"
+      - Greenland reiterates "not for sale" position
+      - US warns of "consequences" for continued refusal
+
+      **Sticking Points:**
+      - US demands purchase or 99-year lease
+      - Denmark/Greenland insist on full sovereignty
+      - No middle ground on governance structure
+    sources:
+      - "US State Department Press Release January 2026"
+
+  - id: "tariff-threat-2026"
+    date: "2026-01-17"
+    title: "🇺🇸 Trump Announces Tariffs to Punish European Allies"
+    description: |
+      **Major Escalation: Economic Coercion**
+
+      President Trump announces **10% tariff** on imports from eight European nations, effective February 1, 2026:
+
+      **Targeted Countries:**
+      - Denmark
+      - France
+      - Germany
+      - United Kingdom
+      - Netherlands
+      - Belgium
+      - Sweden
+      - Norway
+
+      **Stated Reason:** Punishment for "opposition to American control of Greenland."
+
+      **Threat:** Tariffs could rise to **25% by June** if no deal is reached.
+
+      **Global Reaction:**
+      - EU considers retaliatory tariffs
+      - NATO Secretary General calls for de-escalation
+      - Protests in Copenhagen and Nuuk under slogan "Greenland is not for sale"
+
+      **Strategic Shift:** US moves from diplomatic persuasion to economic warfare against allies.
+
+      **Current Status:** Crisis ongoing as of January 17, 2026.
+    sources:
+      - "White House Press Release January 17, 2026"
+      - "https://www.reuters.com/world/europe/trump-greenland-tariffs-2026/"

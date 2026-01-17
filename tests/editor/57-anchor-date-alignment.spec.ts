@@ -29,7 +29,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     expect(timelineBox).toBeTruthy();
 
     // Get anchors and their positions
-    const anchors = page.locator('[data-testid^="anchor-event-"]');
+    const anchors = page.locator('.anchor-wrapper');
     const anchorCount = await anchors.count();
     console.log(`Found ${anchorCount} anchors`);
 
@@ -81,7 +81,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Record initial anchor positions
-    const anchors = page.locator('[data-testid^="anchor-event-"]');
+    const anchors = page.locator('.anchor-wrapper');
     const initialAnchorCount = await anchors.count();
     const initialPositions: Array<{id: string, x: number}> = [];
 
@@ -110,7 +110,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.screenshot({ path: 'test-results/anchor-alignment-zoomed.png' });
 
     // Check anchor positions after zoom
-    const zoomedAnchors = page.locator('[data-testid^="anchor-event-"]');
+    const zoomedAnchors = page.locator('.anchor-wrapper');
     const zoomedAnchorCount = await zoomedAnchors.count();
 
     console.log(`Anchors after zoom: ${zoomedAnchorCount}`);
@@ -160,7 +160,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     // Get timeline ticks and anchors
     const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
-    const anchors = page.locator('[data-testid^="anchor-event-"]');
+    const anchors = page.locator('.anchor-wrapper');
 
     const anchorCount = await anchors.count();
     console.log(`Minute test anchors: ${anchorCount}`);
@@ -198,7 +198,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Record initial anchor positions
-    const anchors = page.locator('[data-testid^="anchor-event-"]');
+    const anchors = page.locator('.anchor-wrapper');
     const initialPositions: number[] = [];
 
     const initialCount = await anchors.count();
@@ -253,7 +253,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Get anchors and their positions
-    const anchors = page.locator('[data-testid^="anchor-event-"]');
+    const anchors = page.locator('.anchor-wrapper');
     const anchorCount = await anchors.count();
     console.log(`French Revolution anchors: ${anchorCount}`);
 
@@ -335,18 +335,18 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await loadTestTimeline(page, 'french-revolution');
     await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
-    // Find any French Revolution anchor that contains "necker" in the ID (case insensitive)
-    const anchors = page.locator('[data-testid^="anchor-event-fr-"]');
+    // Find any French Revolution anchor that contains "necker" in the event IDs
+    const anchors = page.locator('.anchor-wrapper');
     const anchorCount = await anchors.count();
     console.log(`Found ${anchorCount} French Revolution anchors`);
 
     let neckerAnchor = null;
     for (let i = 0; i < anchorCount; i++) {
       const anchor = anchors.nth(i);
-      const testId = await anchor.getAttribute('data-testid');
-      if (testId && testId.toLowerCase().includes('necker')) {
+      const eventIds = await anchor.getAttribute('data-anchor-event-ids');
+      if (eventIds && eventIds.toLowerCase().includes('necker')) {
         neckerAnchor = anchor;
-        console.log(`Found Necker anchor: ${testId}`);
+        console.log(`Found Necker anchor with events: ${eventIds}`);
         break;
       }
     }

@@ -45,7 +45,7 @@ Once running, you can browse public timelines or create your own. Load sample da
 - **[Software Requirements (docs/SRS.md)](./docs/SRS.md)** - Detailed SRS with traceability
 - **[Architecture (ARCHITECTURE.md)](./ARCHITECTURE.md)** - Technical design decisions
 - **[Implementation Plan (PLAN.md)](./PLAN.md)** - Iteration history (v0.7.14)
-- **[Test Suite (tests/)](./tests)** - 415 Playwright E2E tests + 58 unit tests
+- **[Test Suite (docs/TESTS.md)](./docs/TESTS.md)** - Playwright E2E + Vitest unit tests
 
 ## 📦 Features at a glance
 
@@ -113,7 +113,7 @@ Without these variables, the app will use demo mode for local development.
 
 ## Testing & QA
 
-PowerTimeline has comprehensive test coverage with 415 Playwright E2E tests and 58 Vitest unit tests.
+PowerTimeline has comprehensive test coverage. See [docs/TESTS.md](./docs/TESTS.md) for current counts and details.
 
 ```bash
 # Run all E2E tests
@@ -204,5 +204,5 @@ Have questions? Open an issue with reproduction steps and reference relevant req
 
 ---
 
-**Last Updated:** 2026-01-05 | **Version:** v0.8.15
+**Last Updated:** 2026-01-17 | **Version:** v0.8.15
 
