@@ -107,6 +107,8 @@
 - ✅ Skip Identical Events: Import now skips events with matching ID AND identical content, 14 new unit tests (v0.9.4)
 - ✅ Skipped Events Feedback: ReviewPanel shows "X skipped (no changes)" count for user feedback (v0.9.4)
 - ✅ AI Chat Migration: AI event actions route through ImportSession with ReviewPanel approval, delete action support, 16 new unit tests (v0.9.5)
+- ✅ Critical Test Fixes: Overflow dependencies (viewStart/viewEnd), zoom handler synthetic event fallback, verified with focused tests (2026-01-18)
+- ✅ Viewport Strategy: Timeline editor restricted to desktop-only (mobile/tablet skip editor tests), Stream View is mobile experience (2026-01-18)
 
 ### Next Up
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)

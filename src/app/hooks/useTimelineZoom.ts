@@ -95,8 +95,25 @@ export function useTimelineZoom({ zoomAtCursor, hoveredEventId, viewStart, viewE
         return;
       }
 
-      // Get cursor position
-      const cursorX = e.clientX;
+      // Get cursor position with fallback for synthetic events
+      // Synthetic WheelEvent (created via `new WheelEvent()`) may not properly populate clientX/clientY
+      // even when explicitly set in constructor. This happens because UIEvent coordinate properties
+      // are readonly and some browsers don't initialize them from the constructor's init dict.
+      //
+      // Fallback chain:
+      // 1. Use clientX if non-zero (normal browser events and constructor-initialized synthetic events)
+      // 2. If zero, try to get position from event target's bounding rect (center of target element)
+      // 3. Last resort: use window center
+      const cursorX = e.clientX !== 0 ? e.clientX :
+        (() => {
+          const target = e.target as HTMLElement;
+          if (target && target.getBoundingClientRect) {
+            const rect = target.getBoundingClientRect();
+            return rect.left + rect.width / 2;
+          }
+          // Last resort: use window center
+          return window.innerWidth / 2;
+        })();
 
       // Use data-testid for more reliable container selection
       const container = document.querySelector('[data-testid="timeline-canvas"]') as HTMLElement | null;
@@ -106,7 +123,7 @@ export function useTimelineZoom({ zoomAtCursor, hoveredEventId, viewStart, viewE
       try {
         const w = window;
         if (w.__CC_DEBUG_LAYOUT) {
-          console.log(`[ZOOM] Wheel event at cursor (${cursorX}, ${e.clientY}), deltaY=${e.deltaY}, container=${!!container}, rect=${!!rect}`);
+          console.log(`[ZOOM] Wheel event at cursor (${cursorX}, ${e.clientY}), deltaY=${e.deltaY}, container=${!!container}, rect=${!!rect}, hasView=${!!e.view}`);
           if (rect) {
             console.log(`[ZOOM] Container bounds: left=${rect.left}, width=${rect.width}`);
           }

@@ -16,7 +16,7 @@ const reuse = true;
 
 export default defineConfig({
   testDir: 'tests',
-  testMatch: /(editor|home|user|admin|production|auth|e2e|db|onboarding|stream|visual-audit|mobile|responsive)\/.+\.spec\.ts$/,
+  testMatch: /(editor|home|user|admin|production|auth|e2e|db|onboarding|stream|visual-audit|mobile|responsive|review|ai)\/.+\.spec\.ts$/,
   // Increased timeouts for stability - complex layout calculations need more time
   timeout: 45_000,
   expect: {
@@ -47,6 +47,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
+    // Desktop viewports - run ALL tests (editor requires desktop)
     {
       name: 'desktop',
       use: {
@@ -59,14 +60,19 @@ export default defineConfig({
         viewport: { width: 2560, height: 1440 },
       },
     },
+    // Mobile/tablet viewports - EXCLUDE editor tests (desktop-only feature)
+    // Timeline editor requires mouse wheel zoom, precise cursor positioning, multi-panel layout
+    // Mobile users should use Stream View for timeline browsing
     {
       name: 'tablet',
+      testIgnore: /tests\/editor\/.+\.spec\.ts$/,
       use: {
         ...devices['iPad Mini'],
       },
     },
     {
       name: 'mobile',
+      testIgnore: /tests\/editor\/.+\.spec\.ts$/,
       use: {
         ...devices['iPhone 14'],
       },

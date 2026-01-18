@@ -3,7 +3,7 @@
 This document tracks Playwright regression coverage for PowerTimeline and is updated after every full suite run.
 
 **Last Updated:** 2025-11-27
-**Version:** v0.5.7
+**Version:** v0.8.15
 
 ## Test Suites Overview
 
@@ -18,6 +18,22 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 | Production Tests | `tests/production/` | Production smoke tests (5 files) |
 | E2E Tests | `tests/e2e/` | End-to-end user journeys |
 | Stream Tests | `tests/stream/` | Stream View functionality |
+
+## Viewport Strategy
+
+**Timeline Editor (`tests/editor/`)**: Desktop only (desktop 1920x1080, desktop-xl 2560x1440)
+- Requires mouse wheel zoom, precise cursor positioning, multi-panel layout
+- Mobile/tablet tests are skipped for editor tests
+- Mobile users should use Stream View for timeline browsing
+
+**Stream View (`tests/stream/`)**: All viewports (mobile, tablet, desktop, desktop-xl)
+- Touch-optimized for mobile browsing
+- Expandable cards, search, minimap navigation
+
+**Core Pages (`tests/home/`, `tests/admin/`, `tests/user/`)**: All viewports
+- Public browsing, authentication, profile management, admin panel
+
+**Rationale:** The timeline editor is a complex desktop-only feature (like Figma, Notion rich editing). Mobile users have Stream View as their primary timeline browsing experience.
 
 ## Test Naming Convention
 

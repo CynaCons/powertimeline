@@ -521,7 +521,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     });
 
     return anchors.sort((a, b) => a.x - b.x);
-  }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY]);
+  }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY, viewStart, viewEnd]);
 
   // Use allEventsAnchors instead of layout result anchors
   const filteredAnchors = allEventsAnchors;
