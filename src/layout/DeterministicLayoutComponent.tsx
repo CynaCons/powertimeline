@@ -523,21 +523,28 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return anchors.sort((a, b) => a.x - b.x);
   }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY, viewStart, viewEnd]);
 
-  // CC-REQ-OVERFLOW-001: Filter anchors by view window to prevent leftover overflow badges
-  // Only show anchors for events that are actually within the visible time range
+  // CC-REQ-OVERFLOW-001: Show all anchors, but filter overflow badges by view window
+  // Anchors always visible for navigation, but overflow badges only show for in-view events
   const filteredAnchors = useMemo(() => {
     if (!timelineRange) return allEventsAnchors;
 
     const { minDate, maxDate } = timelineRange;
 
-    return allEventsAnchors.filter(anchor => {
-      const event = events.find(e => e.id === anchor.eventId);
-      if (!event) return false;
+    // Create event lookup map for O(1) performance
+    const eventMap = new Map(events.map(e => [e.id, e]));
+
+    // Filter: hide overflow badges for events outside visible time window
+    return allEventsAnchors.map(anchor => {
+      if (!anchor.eventId) return anchor;
+
+      const event = eventMap.get(anchor.eventId);
+      if (!event) return anchor;
 
       const eventDate = new Date(event.date).getTime();
+      const isInViewWindow = eventDate >= minDate && eventDate <= maxDate;
 
-      // Only show anchor if its event is within the visible time window
-      return eventDate >= minDate && eventDate <= maxDate;
+      // Keep anchor but clear overflow if event is outside view window
+      return isInViewWindow ? anchor : { ...anchor, overflowCount: 0 };
     });
   }, [allEventsAnchors, timelineRange, events]);
 
