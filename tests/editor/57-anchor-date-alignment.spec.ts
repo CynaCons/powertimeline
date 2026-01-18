@@ -3,7 +3,7 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function getTimelineAxisBounds(page: any) {
-  const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
+  const timelineAxis = page.locator('[data-testid="timeline-axis"]').first();
   const timelineBox = await timelineAxis.boundingBox();
   expect(timelineBox).toBeTruthy();
   return timelineBox;
@@ -16,13 +16,13 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'jfk-presidency');
-    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Take screenshot for debugging
     await page.screenshot({ path: 'test-results/anchor-alignment-default.png' });
 
     // Get timeline axis element to understand coordinate system
-    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
+    const timelineAxis = page.locator('[data-testid="timeline-axis"]').first();
     expect(await timelineAxis.count()).toBeGreaterThan(0);
 
     const timelineBox = await timelineAxis.boundingBox();
@@ -78,7 +78,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'napoleon-bonaparte');
-    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Record initial anchor positions
     const anchors = page.locator('.anchor-wrapper');
@@ -117,7 +117,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     // Verify that anchors still align properly with timeline
     // This test should FAIL initially due to coordinate system mismatch
-    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
+    const timelineAxis = page.locator('[data-testid="timeline-axis"]').first();
     const timelineBox = await timelineAxis.boundingBox();
 
     if (timelineBox) {
@@ -147,7 +147,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Zoom in to see minute-level precision
     for (let i = 0; i < 10; i++) {
@@ -159,7 +159,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await page.screenshot({ path: 'test-results/anchor-alignment-precise.png' });
 
     // Get timeline ticks and anchors
-    const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
+    const timelineAxis = page.locator('[data-testid="timeline-axis"]').first();
     const anchors = page.locator('.anchor-wrapper');
 
     const anchorCount = await anchors.count();
@@ -195,7 +195,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'jfk-presidency');
-    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Record initial anchor positions
     const anchors = page.locator('.anchor-wrapper');
@@ -250,7 +250,7 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
 
     await loginAsTestUser(page);
     await loadTestTimeline(page, 'french-revolution');
-    await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
     // Get anchors and their positions
     const anchors = page.locator('.anchor-wrapper');

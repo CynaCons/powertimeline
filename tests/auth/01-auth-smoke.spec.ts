@@ -5,9 +5,6 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:5173';
-const AUTH_TEST_URL = `${BASE_URL}/login`;
-
 // Test email for automated testing
 const TEST_EMAIL = `test-${Date.now()}@powertimeline.test`;
 const TEST_PASSWORD = 'Test123456';
@@ -15,7 +12,7 @@ const TEST_PASSWORD = 'Test123456';
 test.describe('Authentication Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to auth test page before each test
-    await page.goto(AUTH_TEST_URL);
+    await page.goto('/login');
     await page.waitForLoadState('domcontentloaded');
   });
 

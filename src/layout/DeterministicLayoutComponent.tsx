@@ -523,8 +523,23 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return anchors.sort((a, b) => a.x - b.x);
   }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY, viewStart, viewEnd]);
 
-  // Use allEventsAnchors instead of layout result anchors
-  const filteredAnchors = allEventsAnchors;
+  // CC-REQ-OVERFLOW-001: Filter anchors by view window to prevent leftover overflow badges
+  // Only show anchors for events that are actually within the visible time range
+  const filteredAnchors = useMemo(() => {
+    if (!timelineRange) return allEventsAnchors;
+
+    const { minDate, maxDate } = timelineRange;
+
+    return allEventsAnchors.filter(anchor => {
+      const event = events.find(e => e.id === anchor.eventId);
+      if (!event) return false;
+
+      const eventDate = new Date(event.date).getTime();
+
+      // Only show anchor if its event is within the visible time window
+      return eventDate >= minDate && eventDate <= maxDate;
+    });
+  }, [allEventsAnchors, timelineRange, events]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {

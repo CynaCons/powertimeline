@@ -3,14 +3,14 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 import { test, expect } from '@playwright/test';
 
 async function getTimelineAxisBounds(page: any) {
-  const timelineAxis = page.locator('[data-testid="timeline-axis"], [data-testid="enhanced-timeline-axis"]').first();
+  const timelineAxis = page.locator('[data-testid="timeline-axis"]').first();
   const timelineBox = await timelineAxis.boundingBox();
   expect(timelineBox).toBeTruthy();
   return timelineBox;
 }
 
 async function getAnchorPositions(page: any, maxAnchors = 5) {
-  const anchors = page.locator('[data-testid^="anchor-event-"]');
+  const anchors = page.locator('[data-testid^="anchor-"]');
   const anchorCount = await anchors.count();
   const positions: Array<{id: string, x: number, eventId: string}> = [];
 
@@ -48,7 +48,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
       console.log(`Testing anchor alignment for: ${timeline.name}`);
 
       await loadTestTimeline(page, timeline.id);
-      await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+      await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
       const timelineBox = await getTimelineAxisBounds(page);
       const anchorPositions = await getAnchorPositions(page, 3);
@@ -178,7 +178,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
       console.log(`Testing density: ${density.name}`);
 
       await loadTestTimeline(page, density.id);
-      await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+      await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
       const timelineBox = await getTimelineAxisBounds(page);
       const anchorPositions = await getAnchorPositions(page, 5);
@@ -321,7 +321,7 @@ test.describe('Comprehensive Anchor-Timeline Date Alignment Tests', () => {
       console.log(`\n=== TESTING HOVER PRECISION FOR: ${timeline.name} ===`);
 
       await loadTestTimeline(page, timeline.id);
-      await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
+      await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
       const timelineBox = await getTimelineAxisBounds(page);
       const anchorPositions = await getAnchorPositions(page, 4);

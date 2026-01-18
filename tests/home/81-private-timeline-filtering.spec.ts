@@ -61,7 +61,7 @@ test.describe.serial('v5/81 Private Timeline Filtering', () => {
   };
 
   test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext({ baseURL: 'http://localhost:5175' });
+    const context = await browser.newContext();
     const page = await context.newPage();
 
     await signInWithEmail(page);

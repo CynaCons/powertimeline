@@ -15,7 +15,7 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('Cluster Coordination Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173');
+    await page.goto('/');
     await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 10000 });
   });
 

@@ -10,7 +10,7 @@ import { loginAsTestUser, loadTestTimeline } from '../utils/timelineTestUtils';
 
 test.describe('French Revolution Zoom Test', () => {
   test('Zoom at July 15, 1792 hotspot - detect card misalignment', async ({ page }) => {
-    await page.goto('http://localhost:5173');
+    await page.goto('/');
     await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 10000 });
 
     // Load French Revolution timeline

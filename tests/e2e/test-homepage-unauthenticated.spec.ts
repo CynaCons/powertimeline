@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('HomePage should not show "My Timelines" when unauthenticated', async ({ page }) => {
   // Navigate to browse page without authentication
-  await page.goto('http://localhost:5175/browse', { waitUntil: 'load' });
+  await page.goto('/browse', { waitUntil: 'load' });
 
   // Wait a bit for content to render
   await page.waitForTimeout(3000);

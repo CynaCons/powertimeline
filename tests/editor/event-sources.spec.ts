@@ -15,9 +15,10 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { loadTestTimeline } from '../utils/timelineTestUtils';
+import { loginAsTestUser } from '../utils/timelineTestUtils';
 
-const TEST_TIMELINE = 'french-revolution';
+const TEST_TIMELINE_ID = process.env.TEST_USER_TIMELINE_ID || 'zEAJkBfgpYt3YdCLW2tz';
+const TEST_USER_USERNAME = 'testuser';
 
 /**
  * Helper: Open the authoring overlay for an event
@@ -25,11 +26,19 @@ const TEST_TIMELINE = 'french-revolution';
 async function openEventEditor(page: Page): Promise<void> {
   // Open Stream View (replaces Events panel)
   await page.locator('button[aria-label="Stream View"]').click();
-  await expect(page.getByTestId('stream-viewer')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId('stream-viewer-overlay')).toBeVisible({ timeout: 5000 });
 
-  // Click first event in list
+  // Wait for stream events to load
   const firstEvent = page.locator('[data-testid^="stream-event-"]').first();
-  await firstEvent.click();
+  await expect(firstEvent).toBeVisible({ timeout: 5000 });
+
+  // Hover over first event to show edit button (desktop)
+  await firstEvent.hover();
+
+  // Click the "Edit event" button (desktop hover action)
+  const editButton = page.locator('button[title="Edit event"]').first();
+  await expect(editButton).toBeVisible({ timeout: 2000 });
+  await editButton.click();
 
   // Wait for overlay
   const overlay = page.locator('[data-testid="authoring-overlay"]');
@@ -45,7 +54,7 @@ async function ensureEditMode(page: Page): Promise<void> {
 
   if (isEditButtonVisible) {
     await editButton.click();
-    await expect(page.getByText('Edit Event')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit Event' })).toBeVisible();
   }
 }
 
@@ -72,7 +81,8 @@ async function countSources(page: Page): Promise<number> {
 
 test.describe('Event Sources - Section Display', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
   });
 
@@ -148,7 +158,8 @@ test.describe('Event Sources - Section Display', () => {
 
 test.describe('Event Sources - Add Source', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
     await openEventEditor(page);
     await ensureEditMode(page);
@@ -281,7 +292,8 @@ test.describe('Event Sources - Add Source', () => {
 
 test.describe('Event Sources - URL Detection', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
     await openEventEditor(page);
     await ensureEditMode(page);
@@ -391,7 +403,8 @@ test.describe('Event Sources - URL Detection', () => {
 
 test.describe('Event Sources - Delete Source', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
     await openEventEditor(page);
     await ensureEditMode(page);
@@ -461,7 +474,8 @@ test.describe('Event Sources - Delete Source', () => {
 
 test.describe('Event Sources - Reordering', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
     await openEventEditor(page);
     await ensureEditMode(page);
@@ -525,7 +539,8 @@ test.describe('Event Sources - Reordering', () => {
 
 test.describe('Event Sources - Persistence', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
   });
 
@@ -601,7 +616,8 @@ test.describe('Event Sources - Persistence', () => {
 
 test.describe('Event Sources - Read-Only Mode', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
     await openEventEditor(page);
   });
@@ -683,7 +699,8 @@ test.describe('Event Sources - Read-Only Mode', () => {
 
 test.describe('Event Sources - Character Limit', () => {
   test.beforeEach(async ({ page }) => {
-    await loadTestTimeline(page, TEST_TIMELINE);
+    await loginAsTestUser(page);
+    await page.goto(`/${TEST_USER_USERNAME}/timeline/${TEST_TIMELINE_ID}`);
     await page.waitForTimeout(2000);
     await openEventEditor(page);
     await ensureEditMode(page);
