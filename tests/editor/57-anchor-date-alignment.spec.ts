@@ -80,8 +80,11 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await loadTestTimeline(page, 'napoleon-bonaparte');
     await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
-    // Record initial anchor positions
+    // Wait for events to load and anchors to be created
     const anchors = page.locator('.anchor-wrapper');
+    await expect(anchors.first()).toBeVisible({ timeout: 10000 });
+
+    // Record initial anchor positions
     const initialAnchorCount = await anchors.count();
     const initialPositions: Array<{id: string, x: number}> = [];
 
@@ -252,8 +255,11 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await loadTestTimeline(page, 'french-revolution');
     await page.waitForSelector('[data-testid="timeline-axis"]', { timeout: 5000 });
 
-    // Get anchors and their positions
+    // Wait for events to load and anchors to be created
     const anchors = page.locator('.anchor-wrapper');
+    await expect(anchors.first()).toBeVisible({ timeout: 10000 });
+
+    // Get anchors and their positions
     const anchorCount = await anchors.count();
     console.log(`French Revolution anchors: ${anchorCount}`);
 
@@ -335,8 +341,11 @@ test.describe('Anchor-Timeline Date Alignment Tests', () => {
     await loadTestTimeline(page, 'french-revolution');
     await page.waitForSelector('[data-testid="enhanced-timeline-axis"], [data-testid="timeline-axis"]', { timeout: 5000 });
 
-    // Find any French Revolution anchor that contains "necker" in the event IDs
+    // Wait for events to load and anchors to be created
     const anchors = page.locator('.anchor-wrapper');
+    await expect(anchors.first()).toBeVisible({ timeout: 10000 });
+
+    // Find any French Revolution anchor that contains "necker" in the event IDs
     const anchorCount = await anchors.count();
     console.log(`Found ${anchorCount} French Revolution anchors`);
 

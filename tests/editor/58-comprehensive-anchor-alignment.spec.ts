@@ -4,6 +4,7 @@ import { test, expect } from '@playwright/test';
 
 async function getTimelineAxisBounds(page: any) {
   const timelineAxis = page.locator('[data-testid="timeline-axis"]').first();
+  await timelineAxis.waitFor({ state: 'visible', timeout: 10000 });
   const timelineBox = await timelineAxis.boundingBox();
   expect(timelineBox).toBeTruthy();
   return timelineBox;
@@ -11,6 +12,15 @@ async function getTimelineAxisBounds(page: any) {
 
 async function getAnchorPositions(page: any, maxAnchors = 5) {
   const anchors = page.locator('[data-testid^="anchor-"]');
+
+  // Wait for anchors to be created (with timeout to handle empty timelines)
+  try {
+    await anchors.first().waitFor({ state: 'visible', timeout: 10000 });
+  } catch (e) {
+    // If no anchors appear within timeout, return empty array
+    return [];
+  }
+
   const anchorCount = await anchors.count();
   const positions: Array<{id: string, x: number, eventId: string}> = [];
 
