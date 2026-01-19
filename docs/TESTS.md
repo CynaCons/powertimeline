@@ -130,6 +130,7 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 | v5/57-anchor-date-alignment.spec.ts | Checks anchor date alignment across zoom and panning | Anchor & Timeline Alignment Tests | CC-REQ-ANCHOR-002 | ✅ Pass |
 | v5/58-comprehensive-anchor-alignment.spec.ts | Performs comprehensive anchor alignment across datasets and zooms | Anchor & Timeline Alignment Tests | CC-REQ-ANCHOR-002 | ✅ Pass |
 | v5/61-anchor-persistence-french-revolution.spec.ts | Ensures anchor persistence across zooms for French Revolution data | Anchor & Timeline Alignment Tests | CC-REQ-ANCHOR-004, CC-REQ-LAYOUT-004 | ✅ Pass |
+| v5/62-deep-zoom-anchor-count.spec.ts | Validates anchor filtering during deep zoom to match visible cards | Anchor & Timeline Alignment Tests | CC-REQ-OVERFLOW-001 | ✅ Pass |
 | **Zoom & Navigation Tests** | | | | |
 | v5/17-zoom-functionality.spec.ts | Exercises zoom controls, mouse wheel, and filtering | Zoom & Navigation Tests | CC-REQ-ZOOM-001 | ✅ Pass |
 | v5/18-zoom-stability.spec.ts | Covers zoom stability, cursor anchoring, and range limits | Zoom & Navigation Tests | CC-REQ-ZOOM-002 | ✅ Pass |
@@ -180,7 +181,7 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 | Layout & Positioning Tests | 4 | 4 | 0 | 100% |
 | Card Degradation Tests | 12 | 6 | 6 | 50% |
 | Overflow Management Tests | 6 | 6 | 0 | 100% |
-| Anchor & Timeline Alignment Tests | 4 | 4 | 0 | 100% |
+| Anchor & Timeline Alignment Tests | 5 | 5 | 0 | 100% |
 | Zoom & Navigation Tests | 9 | 9 | 0 | 100% |
 | Minimap Tests | 6 | 5 | 1 | 83% |
 | Timeline Axis Tests | 5 | 5 | 0 | 100% |

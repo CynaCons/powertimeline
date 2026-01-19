@@ -523,29 +523,38 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return anchors.sort((a, b) => a.x - b.x);
   }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY, viewStart, viewEnd]);
 
-  // CC-REQ-OVERFLOW-001: Show all anchors, but filter overflow badges by view window
-  // Anchors always visible for navigation, but overflow badges only show for in-view events
+  // CC-REQ-OVERFLOW-001: Filter anchors and overflow badges by view window when zoomed
+  // When zoomed: Only show anchors for events in visible time window
+  // When not zoomed: Show all anchors (full timeline navigation)
   const filteredAnchors = useMemo(() => {
     if (!timelineRange) return allEventsAnchors;
 
-    const { minDate, maxDate } = timelineRange;
+    const { minDate, maxDate, isZoomed } = timelineRange;
 
     // Create event lookup map for O(1) performance
     const eventMap = new Map(events.map(e => [e.id, e]));
 
-    // Filter: hide overflow badges for events outside visible time window
-    return allEventsAnchors.map(anchor => {
-      if (!anchor.eventId) return anchor;
+    // When zoomed: Filter out anchors entirely for events outside view window
+    // When not zoomed: Keep all anchors but clear overflow badges for consistency
+    return allEventsAnchors
+      .map(anchor => {
+        if (!anchor.eventId) return anchor;
 
-      const event = eventMap.get(anchor.eventId);
-      if (!event) return anchor;
+        const event = eventMap.get(anchor.eventId);
+        if (!event) return anchor;
 
-      const eventDate = new Date(event.date).getTime();
-      const isInViewWindow = eventDate >= minDate && eventDate <= maxDate;
+        const eventDate = new Date(event.date).getTime();
+        const isInViewWindow = eventDate >= minDate && eventDate <= maxDate;
 
-      // Keep anchor but clear overflow if event is outside view window
-      return isInViewWindow ? anchor : { ...anchor, overflowCount: 0 };
-    });
+        if (isZoomed) {
+          // When zoomed: Remove anchors for events outside view window
+          return isInViewWindow ? anchor : null;
+        } else {
+          // When not zoomed: Keep all anchors, clear overflow for out-of-view events
+          return isInViewWindow ? anchor : { ...anchor, overflowCount: 0 };
+        }
+      })
+      .filter((anchor): anchor is NonNullable<typeof anchor> => anchor !== null);
   }, [allEventsAnchors, timelineRange, events]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)

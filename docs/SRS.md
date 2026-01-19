@@ -36,7 +36,7 @@ This SRS is the single source of truth for PowerTimeline requirements. Each requ
 | CC-REQ-ANCHOR-001 | Render an anchor only if there are visible cards (or in-view overflow) for that semi-column; suppress stale anchors | `src/layout/DeterministicLayoutComponent.tsx`, `src/layout/LayoutEngine.ts` | v5/31, v5/32, v5/33 |
 | CC-REQ-ANCHOR-002 | Anchor X positions precisely match corresponding event dates on timeline axis at all zoom levels | `src/layout/LayoutEngine.ts` | v5/57 |
 | CC-REQ-ANCHOR-003 | Anchors connect to their respective event clusters with clear visual grouping | `src/layout/DeterministicLayoutComponent.tsx` | v5/33 |
-| CC-REQ-ANCHOR-004 | Anchors remain visible at all times regardless of card degradation state; anchors provide timeline reference even when cards are hidden | `src/layout/LayoutEngine.ts` | v5/61-anchor-persistence |
+| CC-REQ-ANCHOR-004 | Anchors persist regardless of card degradation state (full/compact/title-only); anchors provide timeline reference even when cards are degraded or in overflow | `src/layout/LayoutEngine.ts` | v5/61-anchor-persistence |
 
 ### 6. Zoom & Navigation
 
