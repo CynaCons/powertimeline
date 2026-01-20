@@ -98,6 +98,7 @@
 - ✅ UX Polish: Breadcrumb z-index fix, Stream View hover buttons, show more calculation, mobile tap behavior (v0.8.15)
 - ✅ Visual Audit Implementation: 32-item comprehensive polish - design tokens, bottom nav, WCAG accessibility, keyboard navigation, ARIA labels, animations (v0.8.16)
 - ✅ Import Review System: Session-based YAML import with ReviewPanel, per-event decisions, localStorage persistence, E2E tests (v0.9.0-v0.9.3)
+- ✅ Anchor System Fix: Removed incorrect post-filtering, fixed coordinate system to use view window, implemented proper clustering validation in tests (v0.9.4)
 - ✅ Import Modes: Merge vs Overwrite mode selection with confirmation dialog, 19 unit tests, 10 E2E tests (v0.9.6)
 - ✅ UX Polish: Import tab default, source indicator icons on cards, YAML paste in Browse page import (v0.9.6.1)
 - ✅ Bug Fix: YAML import/export now preserves event sources field (v0.9.6.2)

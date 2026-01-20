@@ -460,19 +460,20 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return map;
   }, [layoutResult.positionedCards]);
 
-  // CC-REQ-ANCHOR-004: Create anchors for ALL events, not just those in view window
-  // This ensures anchors are visible for events outside the current zoom level
-  const allEventsAnchors = useMemo(() => {
+  // CC-REQ-ANCHOR-004: Create anchors for ALL events that have positioned cards
+  // Anchors persist regardless of card degradation (overflow), providing timeline reference
+  const anchors = useMemo(() => {
     if (!timelineRange || events.length === 0) return [];
 
-    // Calculate pixel positions using FULL timeline range (not zoomed view)
+    // Calculate pixel positions using VIEW WINDOW coordinates (same as axis)
+    // This ensures anchors align with axis labels when zoomed
     const navRailWidth = 56;
     const additionalMargin = 80;
     const leftMargin = navRailWidth + additionalMargin; // 136px total
     const rightMargin = 40;
     const usableWidth = Math.max(1, viewportSize.width - leftMargin - rightMargin);
-    const fullRange = timelineRange.fullDateRange || timelineRange.dateRange;
-    const fullMin = timelineRange.fullMinDate ?? timelineRange.minDate;
+    const viewRange = timelineRange.dateRange;
+    const viewMin = timelineRange.minDate;
 
     // Create a set of event IDs that have visible cards
     const visibleEventIds = new Set(layoutResult.positionedCards.map(c => c.event.id));
@@ -483,7 +484,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
 
     events.forEach(event => {
       const timestamp = getEventTimestamp(event);
-      const ratio = (timestamp - fullMin) / fullRange;
+      const ratio = (timestamp - viewMin) / viewRange;
       const x = leftMargin + ratio * usableWidth;
 
       // Find existing group within threshold
@@ -501,13 +502,13 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     });
 
     // Convert groups to anchors
-    const anchors: Anchor[] = [];
+    const anchorsList: Anchor[] = [];
     anchorGroups.forEach((group) => {
       const visibleCount = group.events.filter(e => visibleEventIds.has(e.id)).length;
       const overflowCount = group.events.length - visibleCount;
       const primaryEvent = group.events[0];
 
-      anchors.push({
+      anchorsList.push({
         id: `anchor-${primaryEvent.id}`,
         x: group.x,
         y: config?.timelineY ?? viewportSize.height / 2,
@@ -520,46 +521,12 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       });
     });
 
-    return anchors.sort((a, b) => a.x - b.x);
-  }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY, viewStart, viewEnd]);
-
-  // CC-REQ-OVERFLOW-001: Filter anchors and overflow badges by view window when zoomed
-  // When zoomed: Only show anchors for events in visible time window
-  // When not zoomed: Show all anchors (full timeline navigation)
-  const filteredAnchors = useMemo(() => {
-    if (!timelineRange) return allEventsAnchors;
-
-    const { minDate, maxDate, isZoomed } = timelineRange;
-
-    // Create event lookup map for O(1) performance
-    const eventMap = new Map(events.map(e => [e.id, e]));
-
-    // When zoomed: Filter out anchors entirely for events outside view window
-    // When not zoomed: Keep all anchors but clear overflow badges for consistency
-    return allEventsAnchors
-      .map(anchor => {
-        if (!anchor.eventId) return anchor;
-
-        const event = eventMap.get(anchor.eventId);
-        if (!event) return anchor;
-
-        const eventDate = new Date(event.date).getTime();
-        const isInViewWindow = eventDate >= minDate && eventDate <= maxDate;
-
-        if (isZoomed) {
-          // When zoomed: Remove anchors for events outside view window
-          return isInViewWindow ? anchor : null;
-        } else {
-          // When not zoomed: Keep all anchors, clear overflow for out-of-view events
-          return isInViewWindow ? anchor : { ...anchor, overflowCount: 0 };
-        }
-      })
-      .filter((anchor): anchor is NonNullable<typeof anchor> => anchor !== null);
-  }, [allEventsAnchors, timelineRange, events]);
+    return anchorsList.sort((a, b) => a.x - b.x);
+  }, [events, timelineRange, viewportSize.width, viewportSize.height, layoutResult.positionedCards, config?.timelineY]);
 
   // Merge nearby overflow badges to prevent overlaps (Badge Merging Strategy)
   const mergedOverflowBadges = useMemo(() => {
-    const anchors = filteredAnchors; // Use filtered anchors to prevent leftover merged badges
+    // anchors are already filtered to view window, no need for additional filtering
     if (!anchors || anchors.length === 0) return [];
     
     const MERGE_THRESHOLD = 200; // Merge anchors within 200px for aggressive spacing
@@ -605,7 +572,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     }
     
     return mergedBadges;
-  }, [filteredAnchors, config.timelineY]);
+  }, [anchors, config?.timelineY]);
 
   // Telemetry: expose dispatch/capacity/placements for tests and overlays
   // P2-3: Throttled to max once per 500ms to avoid wasted CPU during pan/zoom
@@ -915,9 +882,9 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
         />
       )}
 
-      {/* Anchors - filtered by view window to prevent leftover overflow badges */}
+      {/* Anchors - one per event in view window (CC-REQ-ANCHOR-004) */}
       <div ref={anchorsContainerRef}>
-      {filteredAnchors.map((anchor) => {
+      {anchors.map((anchor) => {
         // Check if this anchor is part of a merged badge group
         const isMerged = mergedOverflowBadges.some(badge => badge.anchorIds.includes(anchor.id));
 

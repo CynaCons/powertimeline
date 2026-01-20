@@ -206,10 +206,11 @@ export class DegradationEngine {
 
   /**
    * Determine the appropriate UNIFORM card type for the entire group
-   * Simplified degradation rules (v0.3.6.2 rollback):
-   * - 1-2 events: full cards (2 × 169px = 338px)
-   * - 3 events: compact cards (3 × 92px = 276px fits in same space)
-   * - 4+ events: title-only cards (high density)
+   * Simplified degradation rules (v0.3.6.2 rollback + v0.9.4 fix):
+   * - 1-2 events: full cards (2 × 4 cells = 8 cells max)
+   * - 3-4 events: compact cards (4 × 2 cells = 8 cells max, all fit)
+   * - 5-8 events: title-only cards (8 × 1 cell = 8 cells max, all fit)
+   * - 9+ events: title-only cards (first 8) + overflow badge (+N)
    */
   private determineCardType(group: ColumnGroup): CardType {
     // Consider both primary and overflow events when selecting card type
@@ -224,8 +225,8 @@ export class DegradationEngine {
       // 1-2 events can use full cards
       this.degradationMetrics.fullCardGroups++;
       return 'full';
-    } else if (eventCount === 3) {
-      // Exactly 3 events use compact cards
+    } else if (eventCount <= 4) {
+      // 3-4 events use compact cards (all fit: 4 cards × 2 cells = 8 cells)
       this.degradationMetrics.compactCardGroups++;
 
       // Calculate space saved by degradation

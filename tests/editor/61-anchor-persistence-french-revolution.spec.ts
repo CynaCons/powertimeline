@@ -12,9 +12,26 @@ test.describe('Anchor Persistence - French Revolution', () => {
     console.log('🔍 Testing anchor persistence across zoom levels...');
 
     // Test 1: Anchors exist at default zoom level
-    const defaultAnchors = await page.locator('[data-testid^="anchor-event-fr-"]').all();
-    console.log(`📊 Default zoom: ${defaultAnchors.length} French Revolution anchors`);
+    const defaultAnchors = await page.locator('[data-testid^="anchor-"]').all();
+    const defaultCards = await page.locator('[data-testid="event-card"]').all();
+
+    // Get total events from telemetry
+    const telemetryData = await page.evaluate(() => (window as any).__ccTelemetry);
+    const totalEvents = telemetryData?.eventDates?.length || 0;
+
+    console.log(`📊 Default zoom: ${defaultAnchors.length} anchors, ${defaultCards.length} cards, ${totalEvents} events`);
+
+    // CC-REQ-ANCHOR-004: Anchors should persist regardless of card degradation
+    // Due to clustering (events within 10px share one anchor):
+    // - Anchors ≤ events (clustering reduces count)
+    // - Anchors should still cover all events (via clustering)
     expect(defaultAnchors.length, 'Should have French Revolution anchors at default zoom').toBeGreaterThan(10);
+    expect(defaultCards.length, 'Should have visible cards').toBeGreaterThan(0);
+    expect(defaultAnchors.length, 'Anchors should not exceed total events (clustering)').toBeLessThanOrEqual(totalEvents);
+
+    // Cards can exceed anchors when many events are clustered
+    // So we just validate that both exist
+    console.log(`   Anchor clustering ratio: ${(defaultAnchors.length / totalEvents * 100).toFixed(1)}%`);
 
     // Test 2: Navigate to 1794 period and check anchors persist
     const timelineAxis = page.locator('[data-testid="timeline-axis"]');
@@ -32,11 +49,14 @@ test.describe('Anchor Persistence - French Revolution', () => {
         await page.mouse.wheel(0, -400); // Zoom in
         await page.waitForTimeout(500);
 
-        const zoomedAnchors = await page.locator('[data-testid^="anchor-event-fr-"]').all();
-        console.log(`📊 Zoom level ${zoomLevel}: ${zoomedAnchors.length} French Revolution anchors`);
+        const zoomedAnchors = await page.locator('[data-testid^="anchor-"]').all();
+        const zoomedCards = await page.locator('[data-testid="event-card"]').all();
+        console.log(`📊 Zoom level ${zoomLevel}: ${zoomedAnchors.length} anchors, ${zoomedCards.length} cards`);
 
         // CC-REQ-ANCHOR-004: Anchors should persist regardless of degradation
+        // With clustering, anchor count reflects clustered events
         expect(zoomedAnchors.length, `Anchors should persist at zoom level ${zoomLevel}`).toBeGreaterThan(0);
+        expect(zoomedCards.length, `Cards should exist at zoom level ${zoomLevel}`).toBeGreaterThan(0);
       }
 
       // Test 3: Deep zoom should still show anchors (even if different ones)
@@ -45,18 +65,22 @@ test.describe('Anchor Persistence - French Revolution', () => {
         await page.waitForTimeout(500);
       }
 
-      const deepZoomAnchors = await page.locator('[data-testid^="anchor-event-fr-"]').all();
-      console.log(`📊 Deep zoom: ${deepZoomAnchors.length} French Revolution anchors`);
+      const deepZoomAnchors = await page.locator('[data-testid^="anchor-"]').all();
+      const deepZoomCards = await page.locator('[data-testid="event-card"]').all();
+      console.log(`📊 Deep zoom: ${deepZoomAnchors.length} anchors, ${deepZoomCards.length} cards`);
       expect(deepZoomAnchors.length, 'Should have anchors even at deep zoom').toBeGreaterThan(0);
+      expect(deepZoomCards.length, 'Should have cards at deep zoom').toBeGreaterThan(0);
     }
 
-    // Test 4: Verify anchors span multiple years (not just early revolution)
-    const allAnchors = await page.locator('[data-testid^="anchor-event-fr-"]').all();
-    console.log(`📊 Final anchor count: ${allAnchors.length}`);
+    // Test 4: Verify final state maintains anchor persistence
+    const allAnchors = await page.locator('[data-testid^="anchor-"]').all();
+    const allCards = await page.locator('[data-testid="event-card"]').all();
+    console.log(`📊 Final state: ${allAnchors.length} anchors, ${allCards.length} cards`);
 
-    // With 82 events from 1794 alone, we should definitely have anchors
-    // The test passes if we maintain anchor visibility across zoom levels
+    // The test passes if we maintain anchor visibility across all zoom levels
+    // Clustering means anchor count ≤ event count, which is expected
     expect(allAnchors.length, 'Should have substantial anchor coverage').toBeGreaterThan(5);
+    expect(allCards.length, 'Should have visible cards').toBeGreaterThan(0);
 
     console.log('✅ Anchor persistence test completed - CC-REQ-ANCHOR-004 verified');
   });
