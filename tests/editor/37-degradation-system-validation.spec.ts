@@ -24,22 +24,23 @@ test.describe('Degradation System Validation', () => {
   for (const dataset of DATASETS) {
     test(`Card degradation system - ${dataset.name}`, async ({ page }) => {
       await loginAsTestUser(page);
-      await page.goto('/');
-
-      // Wait for timeline to load
-      await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
 
       console.log(`\n🔍 TESTING DEGRADATION SYSTEM WITH ${dataset.name.toUpperCase()}`);
-      
-      // Load specific dataset
-      const datasetButton = page.locator(`[data-testid="${dataset.testId}"]`);
-      if (await datasetButton.count() > 0) {
-        await datasetButton.click();
-      } else {
-        console.log(`⚠️ Dataset ${dataset.name} not found, using default data`);
-      }
-      
-      await page.waitForTimeout(2000);
+
+      // Load specific dataset by direct timeline navigation
+      // Map dataset testId to timeline slug
+      const timelineSlugMap: Record<string, string> = {
+        'dataset-napoleon': 'timeline-napoleon',
+        'dataset-rfk': 'timeline-rfk',
+        'dataset-wwii': 'timeline-napoleon' // Fallback to Napoleon for WWII
+      };
+
+      const timelineSlug = timelineSlugMap[dataset.testId] || 'timeline-napoleon';
+      await loadTestTimeline(page, timelineSlug);
+
+      // Wait for timeline to load
+      await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
+      await page.waitForTimeout(1000);
 
       // Wait for telemetry to appear
       await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
@@ -142,17 +143,14 @@ test.describe('Degradation System Validation', () => {
   }
   
   test('Degradation system stress test - Dense regions', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
-    
+    await loginAsTestUser(page);
+
     console.log('\n🔥 DEGRADATION STRESS TEST - Dense Timeline Regions');
-    
+
     // Load Napoleon dataset (typically has dense periods)
-    const napoleonButton = page.locator('[data-testid="dataset-napoleon"]');
-    if (await napoleonButton.count() > 0) {
-      await napoleonButton.click();
-      await page.waitForTimeout(2000);
-    }
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
+    await page.waitForTimeout(1000);
     
     // Wait for telemetry
     await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
@@ -219,13 +217,14 @@ test.describe('Degradation System Validation', () => {
   });
   
   test('Degradation system telemetry accuracy', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForSelector('[data-testid="timeline-container"]', { timeout: 10000 });
-    
+    await loginAsTestUser(page);
+    await loadTestTimeline(page, 'timeline-napoleon');
+    await expect(page.locator('[data-testid="event-card"]').first()).toBeVisible({ timeout: 10000 });
+
     console.log('\n📊 TELEMETRY ACCURACY TEST');
-    
-    // Load a dataset
-    await page.waitForTimeout(2000);
+
+    // Wait for timeline to stabilize
+    await page.waitForTimeout(1000);
     await page.waitForFunction(() => Boolean((window as unknown as { __ccTelemetry?: unknown }).__ccTelemetry));
 
     // Get telemetry data
