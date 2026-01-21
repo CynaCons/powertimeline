@@ -268,7 +268,8 @@ test.describe('Deep Zoom Comprehensive Sliding Tests', () => {
     // CONSISTENCY CHECKS
     for (const region of regionsWithOverflow) {
       // Overflow numbers should be positive and reasonable
-      const invalidOverflow = region.overflowNumbers.some(n => n < 1 || n > 50);
+      // Allow up to 70 to accommodate dense timelines like Napoleon (63 events)
+      const invalidOverflow = region.overflowNumbers.some(n => n < 1 || n > 70);
       if (invalidOverflow) {
         console.log(`  ❌ INVALID OVERFLOW NUMBERS in ${region.region}: [${region.overflowNumbers.join(', ')}]`);
         expect(invalidOverflow).toBe(false);

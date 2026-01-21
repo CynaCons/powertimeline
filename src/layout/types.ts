@@ -48,8 +48,8 @@ export interface CardConfig {
 export interface PositionedCard {
   id: string;
   event: Event;
-  x: number;           // Card center x
-  y: number;           // Card center y
+  x: number;           // Card center x (horizontal coordinate)
+  y: number;           // Card top y (vertical coordinate - TOP edge, not center)
   width: number;       // Card width (updated from cardWidth)
   height: number;      // Card height (updated from cardHeight)
   cardType: CardType;

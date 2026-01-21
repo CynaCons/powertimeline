@@ -485,7 +485,9 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     events.forEach(event => {
       const timestamp = getEventTimestamp(event);
       const ratio = (timestamp - viewMin) / viewRange;
-      const x = leftMargin + ratio * usableWidth;
+      const rawX = leftMargin + ratio * usableWidth;
+      // Clamp to viewport bounds to prevent off-screen anchors at extreme zoom levels
+      const x = Math.max(leftMargin, Math.min(viewportSize.width - rightMargin, rawX));
 
       // Find existing group within threshold
       let foundGroup = false;
@@ -528,8 +530,13 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
   const mergedOverflowBadges = useMemo(() => {
     // anchors are already filtered to view window, no need for additional filtering
     if (!anchors || anchors.length === 0) return [];
-    
+
     const MERGE_THRESHOLD = 200; // Merge anchors within 200px for aggressive spacing
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+
     const overflowAnchors = anchors.filter((anchor: Anchor) => anchor.overflowCount > 0);
     const mergedBadges: Array<{
       x: number;
@@ -538,23 +545,26 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       anchorIds: string[];
     }> = [];
     const processedAnchors = new Set<string>();
-    
+
     // Sort anchors by X position for left-to-right processing
     const sortedAnchors = [...overflowAnchors].sort((a: Anchor, b: Anchor) => a.x - b.x);
-    
+
     for (const anchor of sortedAnchors) {
       if (processedAnchors.has(anchor.id)) continue;
-      
+
       // Find all nearby anchors within merge threshold (including current anchor)
       const nearbyAnchors = sortedAnchors.filter((other: Anchor) =>
-        !processedAnchors.has(other.id) && 
+        !processedAnchors.has(other.id) &&
         Math.abs(other.x - anchor.x) <= MERGE_THRESHOLD
       );
-      
+
       if (nearbyAnchors.length > 1) {
         // Merge overflow counts from multiple anchors
         const totalOverflow = nearbyAnchors.reduce((sum: number, a: Anchor) => sum + a.overflowCount, 0);
-        const centroidX = nearbyAnchors.reduce((sum: number, a: Anchor) => sum + a.x, 0) / nearbyAnchors.length;
+        // Clamp centroid to viewport bounds to prevent badges from going off-screen
+        const centroidX = Math.max(leftMargin, Math.min(viewportSize.width - rightMargin,
+          nearbyAnchors.reduce((sum: number, a: Anchor) => sum + a.x, 0) / nearbyAnchors.length
+        ));
         
         mergedBadges.push({
           x: centroidX,
@@ -572,7 +582,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     }
     
     return mergedBadges;
-  }, [anchors, config?.timelineY]);
+  }, [anchors, config?.timelineY, viewportSize.width]);
 
   // Telemetry: expose dispatch/capacity/placements for tests and overlays
   // P2-3: Throttled to max once per 500ms to avoid wasted CPU during pan/zoom
@@ -1026,7 +1036,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
           data-testid={`merged-overflow-badge-${index}`}
           className="absolute bg-white/90 text-rose-600 text-[10px] rounded-full min-w-4 h-4 px-1 flex items-center justify-center font-semibold border border-rose-400 z-30"
           style={{
-            left: badge.x + 4,
+            left: badge.x - 4, // Convert CENTER to LEFT edge for 8px badge
             top: (config?.timelineY ?? viewportSize.height / 2) - 8
           }}
         >
@@ -1045,9 +1055,10 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
         const viewportBottom = viewportSize.height;
 
         // Filter cards to only those within or near viewport (horizontal + vertical)
+        // Use CENTER-based calculations: card.x is CENTER, not LEFT edge
         const visibleCards = layoutResult.positionedCards.filter(card =>
-          card.x + card.width > viewportLeft - BUFFER &&
-          card.x < viewportRight + BUFFER &&
+          card.x + card.width / 2 > viewportLeft - BUFFER &&
+          card.x - card.width / 2 < viewportRight + BUFFER &&
           card.y + card.height > viewportTop - BUFFER &&
           card.y < viewportBottom + BUFFER
         );
@@ -1078,7 +1089,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
         const isPreviewEvent = card.event.isPreview === true;
 
         const cardStyle: CSSProperties = {
-          left: card.x,
+          left: card.x - card.width / 2, // Convert CENTER to LEFT edge
           top: card.y,
           width: card.width,
           height: card.height,
