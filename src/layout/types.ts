@@ -84,6 +84,7 @@ export interface LayoutResult {
     totalSlots: number;
     usedSlots: number;
     percentage: number;
+    cellsPerSide?: number;
   };
   telemetryMetrics?: {
     dispatch?: DispatchMetrics;

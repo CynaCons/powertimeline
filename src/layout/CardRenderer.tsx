@@ -72,7 +72,7 @@ export function CardRenderer({
       `}
       style={{
         left: card.x - card.width / 2,
-        top: card.y - card.height / 2,
+        top: card.y,
         width: card.width,
         height: card.height,
         zIndex: isSelected ? 20 : (isHovered ? 15 : 10)
@@ -86,7 +86,7 @@ export function CardRenderer({
 }
 
 function getCardTypeStyles(cardType: CardType): string {
-  const baseStyles = 'border rounded-xl overflow-hidden transition-theme';
+  const baseStyles = 'border rounded overflow-hidden transition-theme';
 
   switch (cardType) {
     case 'full':
@@ -211,7 +211,7 @@ function CompactCardContent({ event, sessionDecision }: { event: Event; sessionD
           </span>
         </div>
       </div>
-      <p className="card-description line-clamp-1 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="card-description line-clamp-2 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
         {event.description}
       </p>
       <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>

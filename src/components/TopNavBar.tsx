@@ -2,7 +2,7 @@
  * TopNavBar - Public navigation for unauthenticated users
  *
  * Appears on: LandingPage, HomePage (browse)
- * Dark theme styling matching COLOR_THEME.md
+ * Public top-nav styling aligned with the project theme system
  * Simple horizontal layout: Logo | Browse | Sign In/User Menu
  */
 

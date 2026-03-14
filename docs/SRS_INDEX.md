@@ -1,7 +1,7 @@
 # PowerTimeline Requirements Index & Dashboard
 
 **Last Updated:** 2026-01-04
-**Version:** v0.8.10
+**Version:** v0.8.15
 
 ---
 

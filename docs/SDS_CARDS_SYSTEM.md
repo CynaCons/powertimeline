@@ -416,6 +416,44 @@ The slot system prevents overlaps through deterministic allocation:
 
 This ensures **mathematical guarantee** of zero overlaps.
 
+### 3.4 Viewport-Responsive Capacity Calculation
+
+The capacity system dynamically adapts to viewport height without artificial caps.
+
+#### Capacity Formula
+
+```typescript
+availableHeight = (viewportHeight / 2) - TIMELINE_MARGIN;
+cellUnit = TITLE_ONLY_CARD_HEIGHT + CARD_VERTICAL_SPACING; // 44px
+calculatedCells = floor(availableHeight / cellUnit);
+cellsPerSide = max(MIN_CELLS_PER_SIDE, min(SOFT_MAX_CELLS_PER_SIDE, calculatedCells));
+```
+
+#### Capacity by Viewport Size
+
+| Viewport | Available Height | Calculated | Final | Notes |
+|---|---|---|---|---|
+| 400px (mobile) | 100px | 2.27 | **3** | MIN clamp |
+| 768px (laptop) | 284px | 6.45 | **6** | Natural |
+| 1080px (FHD) | 440px | 10.0 | **10** | Natural (was 8) |
+| 1440px (QHD) | 620px | 14.09 | **14** | Natural (was 8) |
+| 2160px (4K) | 980px | 22.27 | **16** | SOFT_MAX |
+
+#### Design Rationale
+
+**Why Remove MAX_CELLS_PER_SIDE = 8?**
+- FHD can fit 10 cells naturally but was capped at 8 (20% waste)
+- QHD can fit 14 cells but was capped at 8 (43% waste!)
+
+**Why Keep MIN_CELLS_PER_SIDE = 3?**
+- Mobile viewports need minimum capacity guarantee
+- Prevents broken layouts when calculated < 3
+
+**Why Add SOFT_MAX_CELLS_PER_SIDE = 16?**
+- Safety guard for 4K+ displays
+- Prevents potential performance issues
+- Still allows 2× current capacity
+
 ## 4. Overflow System Design
 
 ### 4.1 Overflow Detection Logic

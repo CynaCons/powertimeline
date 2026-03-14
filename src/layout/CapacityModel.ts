@@ -11,11 +11,11 @@
 import type { CardType } from './types';
 
 // Card footprints in cells (vertical space consumed)
-// Following ARCHITECTURE.md degradation math: 1->2->4 ratio
+// Calculated based on actual card heights + spacing (120px compact + 12px = 132px / 44px cell = 3 cells)
 export const CARD_FOOTPRINTS: Record<CardType, number> = {
-  'full': 4,        // Full card takes 4 cells (baseline)
-  'compact': 2,     // Compact card takes 2 cells (two compacts = one full space)
-  'title-only': 1   // Title-only card takes 1 cell (four title-only = one full space)
+  'full': 4,        // Full card takes 4 cells (169px + 12px = 181px ≈ 4×44px = 176px)
+  'compact': 3,     // Compact card takes 3 cells (120px + 12px = 132px = 3×44px = 132px)
+  'title-only': 1   // Title-only card takes 1 cell (32px + 12px = 44px = 1×44px = 44px)
 };
 
 // Available placements per column side (above or below timeline)
@@ -35,17 +35,17 @@ export const LAYOUT_CONSTANTS = {
   /** Vertical spacing between cards */
   CARD_VERTICAL_SPACING: 12, // pixels
 
-  /** Minimum cells per half-column (ensures minimum capacity even on small screens) */
-  MIN_CELLS_PER_SIDE: 4,
+  /** Minimum cells per side (prevents broken layouts on tiny viewports) */
+  MIN_CELLS_PER_SIDE: 3,
 
-  /** Maximum cells per half-column (optimal for readability, validated in production) */
-  MAX_CELLS_PER_SIDE: 8,
+  /** Soft maximum cells per side (safety limit for ultra-wide displays) */
+  SOFT_MAX_CELLS_PER_SIDE: 16,
 } as const;
 
-// Degradation cascade with capacity requirements (1->2->4 mathematics)
+// Degradation cascade with capacity requirements (actual footprints based on card heights)
 export const DEGRADATION_CASCADE = [
   { type: 'full' as CardType, eventsPerCard: 1, footprint: 4 },
-  { type: 'compact' as CardType, eventsPerCard: 1, footprint: 2 },
+  { type: 'compact' as CardType, eventsPerCard: 1, footprint: 3 },
   { type: 'title-only' as CardType, eventsPerCard: 1, footprint: 1 }
 ];
 
@@ -76,17 +76,31 @@ export class CapacityModel {
   private columns: Map<string, ColumnCapacity> = new Map();
 
   constructor(viewportHeight: number) {
-    // Calculate available cells based on viewport
-    // Each cell represents 1 title-only card + spacing
+    // Calculate available vertical space for cards
+    // Formula: (viewport_half - timeline_margin) / (card_height + spacing)
     const availableHeight = (viewportHeight / 2) - LAYOUT_CONSTANTS.TIMELINE_MARGIN;
     const cellUnit = LAYOUT_CONSTANTS.TITLE_ONLY_CARD_HEIGHT + LAYOUT_CONSTANTS.CARD_VERTICAL_SPACING;
-    this.cellsPerSide = Math.floor(availableHeight / cellUnit);
+    const calculatedCells = Math.floor(availableHeight / cellUnit);
 
-    // Cap cells to optimal range for readability and performance
-    this.cellsPerSide = Math.min(
-      LAYOUT_CONSTANTS.MAX_CELLS_PER_SIDE,
-      Math.max(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE, this.cellsPerSide)
+    // ENHANCEMENT: Add pixel-based validation
+    // A full card is 169px tall, so max realistic cards per side:
+    const fullCardWithSpacing = 169 + LAYOUT_CONSTANTS.CARD_VERTICAL_SPACING; // 181px
+    const maxRealisticFullCards = Math.floor(availableHeight / fullCardWithSpacing);
+
+    // Cap cells to prevent over-allocation (each full card = 4 cells)
+    const pixelConstrainedCells = maxRealisticFullCards * 4;
+    const safeCells = Math.min(calculatedCells, pixelConstrainedCells);
+
+    // Apply adaptive bounds: MIN for tiny viewports, SOFT_MAX for ultra-wide
+    this.cellsPerSide = Math.max(
+      LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE,
+      Math.min(LAYOUT_CONSTANTS.SOFT_MAX_CELLS_PER_SIDE, safeCells)
     );
+
+    // Logging for capacity debugging (can be removed in production)
+    if (this.cellsPerSide !== calculatedCells) {
+      console.log(`[CapacityModel] Pixel constraint applied: ${calculatedCells} cells → ${this.cellsPerSide} cells (viewport: ${viewportHeight}px)`);
+    }
   }
 
   /**

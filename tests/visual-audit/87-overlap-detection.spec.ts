@@ -36,6 +36,11 @@ test.describe('Visual Audit - Overlap Detection (Authenticated)', () => {
   });
 
   test('T87.1: detect z-index conflicts in editor mode', async ({ page }) => {
+    test.info().annotations.push({
+      type: 'req',
+      description: 'CC-REQ-LAYOUT-002'
+    });
+
     // Load timeline as owner (edit mode)
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false); // Already logged in
 

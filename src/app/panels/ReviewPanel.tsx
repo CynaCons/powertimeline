@@ -147,6 +147,28 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
     }
   };
 
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'delete':
+        return '#dc2626'; // red for deletions
+      case 'update':
+        return '#3b82f6'; // blue for updates
+      default:
+        return '#22c55e'; // green for creates
+    }
+  };
+
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case 'delete':
+        return 'delete';
+      case 'update':
+        return 'edit';
+      default:
+        return 'add_circle';
+    }
+  };
+
   const formatDate = (date: string | undefined) => {
     if (!date) return 'Unknown date';
     try {
@@ -321,23 +343,26 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
                           close
                         </span>
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEdit(event.id)}
-                        data-testid="review-event-edit"
-                        sx={{
-                          color: 'var(--page-text-secondary)',
-                          p: 0.5,
-                          minWidth: '36px',
-                          minHeight: '36px',
-                        }}
-                        title="Edit"
-                        aria-label="Edit event"
-                      >
-                        <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
-                          edit
-                        </span>
-                      </IconButton>
+                      {/* Hide edit button for delete actions - nothing to edit */}
+                      {event.action !== 'delete' && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(event.id)}
+                          data-testid="review-event-edit"
+                          sx={{
+                            color: 'var(--page-text-secondary)',
+                            p: 0.5,
+                            minWidth: '36px',
+                            minHeight: '36px',
+                          }}
+                          title="Edit"
+                          aria-label="Edit event"
+                        >
+                          <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
+                            edit
+                          </span>
+                        </IconButton>
+                      )}
                       {onFocusEvent && (
                         <IconButton
                           size="small"
@@ -397,34 +422,59 @@ export function ReviewPanel({ onClose, onEventClick, onCommit, onFocusEvent }: R
               </Box>
 
               {/* Event Details */}
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'var(--page-text-secondary)',
-                  display: 'block',
-                  mb: 0.5,
-                }}
-              >
-                {formatDate(event.eventData.date)} • {event.action.toUpperCase()}
-                {event.action === 'update' && ' (differs from existing)'}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                <span
+                  className="material-symbols-rounded"
+                  style={{
+                    fontSize: 14,
+                    color: getActionColor(event.action),
+                  }}
+                  aria-hidden="true"
+                >
+                  {getActionIcon(event.action)}
+                </span>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'var(--page-text-secondary)',
+                  }}
+                >
+                  {formatDate(event.eventData.date)} • {event.action.toUpperCase()}
+                  {event.action === 'update' && ' (differs from existing)'}
+                  {event.action === 'delete' && ' (will be removed)'}
+                </Typography>
+              </Box>
 
-              {/* Event Description */}
-              {event.eventData.description && (
+              {/* Event Description - show warning for deletes */}
+              {event.action === 'delete' ? (
                 <Typography
                   variant="body2"
                   sx={{
-                    color: 'var(--page-text-secondary)',
+                    color: '#dc2626',
                     fontSize: '0.75rem',
+                    fontWeight: 500,
                     mb: 0.5,
                   }}
                 >
-                  {truncateDescription(event.eventData.description)}
+                  ⚠ This event will be permanently deleted when you commit
                 </Typography>
+              ) : (
+                event.eventData.description && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'var(--page-text-secondary)',
+                      fontSize: '0.75rem',
+                      mb: 0.5,
+                    }}
+                  >
+                    {truncateDescription(event.eventData.description)}
+                  </Typography>
+                )
               )}
 
-              {/* Sources display */}
-              {event.eventData.sources && event.eventData.sources.length > 0 && (
+              {/* Sources display - hide for delete actions */}
+              {event.action !== 'delete' && event.eventData.sources && event.eventData.sources.length > 0 && (
                 <Box sx={{ mt: 1, mb: 0.5 }}>
                   <Typography
                     variant="caption"

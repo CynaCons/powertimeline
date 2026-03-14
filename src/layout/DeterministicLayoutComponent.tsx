@@ -82,7 +82,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       positionedCards: PositionedCard[];
       anchors: Anchor[];
       clusters: EventCluster[];
-      utilization: { totalSlots: number; usedSlots: number; percentage: number };
+      utilization: { totalSlots: number; usedSlots: number; percentage: number; cellsPerSide?: number };
       telemetryMetrics?: any;
     };
     viewWindow: { viewStart: number; viewEnd: number };
@@ -627,14 +627,10 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
       ? engineMetrics.dispatch
       : calculateDispatchFallback();
 
-    // Capacity model from layoutResult.utilization with fallback to actual allocations
-    const availableHeight = (viewportSize.height / 2) - LAYOUT_CONSTANTS.TIMELINE_MARGIN;
-    const cellUnit = LAYOUT_CONSTANTS.TITLE_ONLY_CARD_HEIGHT + LAYOUT_CONSTANTS.CARD_VERTICAL_SPACING;
-    const rawCellsPerSide = Math.floor(availableHeight / cellUnit);
-    const cellsPerSide = Math.min(
-      LAYOUT_CONSTANTS.MAX_CELLS_PER_SIDE,
-      Math.max(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE, rawCellsPerSide)
-    );
+    // Use CapacityModel's calculated cells per side (single source of truth)
+    const cellsPerSide = layoutResult.utilization?.cellsPerSide ??
+      Math.max(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE,
+        Math.floor(((viewportSize.height / 2) - LAYOUT_CONSTANTS.TIMELINE_MARGIN) / 44));
 
     const derivedTotalCells = clusters.length > 0 ? clusters.length * cellsPerSide * 2 : 0;
     const derivedUsedCells = positionedCards.reduce((sum: number, card: PositionedCard) => {
@@ -749,10 +745,14 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
         ...(dispatchMetrics || {}),
         targetAvgEventsPerClusterBand: [4, 6] as [number, number]
       },
+      clusters: {
+        count: clusters.length
+      },
       capacity: {
         totalCells,
         usedCells,
-        utilization: utilPct
+        utilization: utilPct,
+        cellsPerSide
       },
       promotions: {
         count: promotionsCount

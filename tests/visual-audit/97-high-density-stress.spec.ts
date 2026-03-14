@@ -428,7 +428,7 @@ async function navigateToPosition(
 
   const x = box.x + box.width * normalizedPosition;
   await page.mouse.click(x, box.y + box.height / 2);
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(150); // Reduced from 200ms
 }
 
 /**
@@ -441,27 +441,30 @@ async function getTelemetry(page: Page): Promise<TelemetryData> {
 }
 
 /**
- * Zoom in N times
+ * Zoom in N times - uses force:true to click through overlays on mobile
  */
 async function zoomIn(page: Page, times: number): Promise<void> {
   const zoomInBtn = page.locator('[data-testid="btn-zoom-in"]').first();
   for (let i = 0; i < times; i++) {
     if (await zoomInBtn.isVisible()) {
-      await zoomInBtn.click();
-      await page.waitForTimeout(250);
+      // Use force:true to click through any blocking overlays
+      await zoomInBtn.click({ force: true });
+      await page.waitForTimeout(200); // Reduced from 250ms
     }
   }
 }
 
 /**
- * Zoom out N times
+ * Zoom out N times - uses force:true to click through overlays on mobile
  */
 async function zoomOut(page: Page, times: number): Promise<void> {
   const zoomOutBtn = page.locator('[data-testid="btn-zoom-out"]').first();
+
   for (let i = 0; i < times; i++) {
     if (await zoomOutBtn.isVisible()) {
-      await zoomOutBtn.click();
-      await page.waitForTimeout(250);
+      // Use force:true to click through any blocking overlays
+      await zoomOutBtn.click({ force: true });
+      await page.waitForTimeout(200); // Reduced from 250ms
     }
   }
 }
@@ -1059,55 +1062,109 @@ test.describe('High Density Stress Tests - Mathematical Approach', () => {
   });
 
   test('T97.8: Stress test - navigate through all dense regions', async ({ page }) => {
+    test.setTimeout(90000); // Increase timeout to 90s for scanning 30 positions
+
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page, 10000);
+    await page.waitForTimeout(500); // Extra wait for minimap to render
 
     const capacity = await calculateViewportCapacity(page);
     console.log('Finding all dense regions...');
 
     // Quick scan to find dense regions
-    const minimap = page.locator('[data-testid="timeline-minimap"], [data-testid="minimap-container"]').first();
-    if (!await minimap.isVisible({ timeout: 5000 }).catch(() => false)) {
-      console.log('Minimap not visible');
+    const minimapContainer = page.locator('[data-testid="minimap-container"]').first();
+    const minimap = page.locator('[data-testid="timeline-minimap"]').first();
+
+    // Wait for minimap container
+    const minimapVisible = await minimapContainer.isVisible({ timeout: 10000 }).catch(() => false);
+    if (!minimapVisible) {
+      console.log('ERROR: Minimap container not visible after 10s');
+      console.log('Cannot navigate to dense regions without minimap');
+      // Fail the test instead of silently passing
+      expect(minimapVisible, 'Minimap container should be visible for navigation').toBe(true);
       return;
     }
 
-    const box = await minimap.boundingBox();
-    if (!box) return;
+    console.log('✓ Minimap container visible');
 
-    const denseRegions: Array<{ position: number; cards: number }> = [];
+    // CRITICAL: Zoom in first so minimap clicks can actually pan the view
+    // When fully zoomed out (viewStart=0, viewEnd=1), clicking minimap does nothing
+    // because the view width is 100% and can't be panned
+    console.log('\nZooming in to enable minimap panning...');
+    await zoomIn(page, 3);
+    await page.waitForTimeout(500); // Wait for zoom animation
+
+    const telemetryAfterZoom = await getTelemetry(page);
+    console.log(`View window after zoom: ${JSON.stringify(telemetryAfterZoom.viewWindow)}`);
+
+    // Get bounding box for clicking
+    const box = await minimapContainer.boundingBox();
+    if (!box) {
+      console.log('ERROR: Cannot get minimap bounding box');
+      expect(box, 'Minimap should have bounding box').toBeTruthy();
+      return;
+    }
+
+    const denseRegions: Array<{ position: number; cards: number; viewWindow?: { start: number; end: number } }> = [];
     const scanPoints = 30;
 
+    console.log('\nScanning timeline for dense regions...');
+
+    // IMPORTANT: The minimap click handler might detect mouse.click as a drag
+    // Use navigateToPosition helper instead which properly handles minimap clicking
     for (let i = 0; i < scanPoints; i++) {
       const position = (i + 0.5) / scanPoints;
-      const x = box.x + box.width * position;
 
-      await page.mouse.click(x, box.y + box.height / 2);
-      await page.waitForTimeout(200);
+      // Navigate to this position using the helper function
+      await navigateToPosition(page, position);
+      await page.waitForTimeout(250); // Wait for view to update and telemetry to refresh
 
       const telemetry = await getTelemetry(page);
       const cards = (telemetry.halfColumns?.above?.events || 0) +
                    (telemetry.halfColumns?.below?.events || 0);
 
+      // Debug: Log first few scans to verify viewWindow is changing
+      if (i < 3) {
+        console.log(`  Scan ${i + 1}: pos=${(position * 100).toFixed(1)}%, cards=${cards}, viewWindow=${JSON.stringify(telemetry.viewWindow)}`);
+      }
+
       // Consider "dense" if > 50% of capacity
       if (cards > capacity.maxCardsTotal * 0.5) {
-        denseRegions.push({ position, cards });
+        denseRegions.push({ position, cards, viewWindow: telemetry.viewWindow });
       }
     }
 
-    console.log(`Found ${denseRegions.length} dense regions (>50% capacity)`);
+    console.log(`\nFound ${denseRegions.length} dense regions (>50% capacity):`);
+    if (denseRegions.length > 0) {
+      // Show only first 10 to avoid spam, and check for unique view windows
+      const uniqueWindows = new Set(denseRegions.map(r => JSON.stringify(r.viewWindow)));
+      console.log(`  Unique view windows: ${uniqueWindows.size}/${denseRegions.length}`);
+
+      denseRegions.slice(0, 10).forEach((r, idx) => {
+        const vw = r.viewWindow ? ` [view: ${r.viewWindow.start.toFixed(0)}-${r.viewWindow.end.toFixed(0)}]` : '';
+        console.log(`  ${idx + 1}. Position ${(r.position * 100).toFixed(1)}% - ${r.cards} cards${vw}`);
+      });
+      if (denseRegions.length > 10) {
+        console.log(`  ... and ${denseRegions.length - 10} more`);
+      }
+    }
 
     // Visit each dense region and screenshot
-    for (let i = 0; i < Math.min(denseRegions.length, 5); i++) {
+    const regionsToVisit = Math.min(denseRegions.length, 5);
+    console.log(`\nNavigating to ${regionsToVisit} dense regions and taking screenshots...\n`);
+
+    for (let i = 0; i < regionsToVisit; i++) {
       const region = denseRegions[i];
+      console.log(`  Visiting region ${i + 1}/${regionsToVisit}: ${(region.position * 100).toFixed(1)}%`);
+
       await navigateToPosition(page, region.position);
       await zoomIn(page, 5);
 
-      console.log(`  Region ${i + 1}: ${(region.position * 100).toFixed(0)}%, ${region.cards} cards`);
       await page.screenshot({
         path: `screenshots/visual-audit/t97-8-dense-region-${i + 1}.png`,
         fullPage: false
       });
+      console.log(`    ✓ Screenshot saved: t97-8-dense-region-${i + 1}.png`);
 
       await zoomOut(page, 5); // Reset zoom
     }
@@ -1165,7 +1222,16 @@ test.describe('High Density Stress Tests - Mathematical Approach', () => {
     }
   });
 
-  test('T97.10: Mouse-wheel zoom into dense clusters with overlap detection', async ({ page }) => {
+  test('T97.10: Mouse-wheel zoom into dense clusters with overlap detection', async ({ page }, testInfo) => {
+    test.info().annotations.push({
+      type: 'req',
+      description: 'CC-REQ-LAYOUT-001, CC-REQ-CARD-TITLE-ONLY-001'
+    });
+
+    // Skip on mobile/tablet - mouse.wheel() not supported in mobile WebKit
+    test.skip(testInfo.project.name === 'mobile' || testInfo.project.name === 'tablet',
+      'Mouse wheel is not supported on mobile/tablet viewports');
+
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page, 10000);
     await page.waitForTimeout(200);
@@ -1190,7 +1256,7 @@ test.describe('High Density Stress Tests - Mathematical Approach', () => {
 
     console.log(`Cluster 1 position: (${cluster1X.toFixed(0)}, ${centerY.toFixed(0)})`);
 
-    // Zoom out first to see full timeline
+    // Zoom out first to see full timeline (uses force:true to click through overlays)
     await zoomOut(page, 10);
     await page.waitForTimeout(200);
 
@@ -1209,21 +1275,68 @@ test.describe('High Density Stress Tests - Mathematical Approach', () => {
       // Measure metrics
       const metrics = await calculateVisualFillScore(page);
 
-      // Check for overlaps using telemetry
-      const overlaps = await page.evaluate(() => {
-        const placements = (window as any).__ccTelemetry?.placements?.items || [];
-        // Simple overlap detection: cards at same position
-        const positions = new Map();
+      // Check for overlaps using proper rectangle intersection
+      const overlapResult = await page.evaluate(() => {
+        const cards = Array.from(document.querySelectorAll('[data-testid="event-card"]'));
+        const rects = cards.map(card => {
+          const rect = card.getBoundingClientRect();
+          return {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            right: rect.right,
+            bottom: rect.bottom
+          };
+        });
+
         let overlapCount = 0;
-        for (const p of placements) {
-          const key = `${Math.round(p.x/50)}_${Math.round(p.y/50)}`;
-          if (positions.has(key)) overlapCount++;
-          positions.set(key, true);
+        let maxOverlapArea = 0;
+
+        for (let i = 0; i < rects.length; i++) {
+          for (let j = i + 1; j < rects.length; j++) {
+            const a = rects[i];
+            const b = rects[j];
+
+            // Rectangle intersection check
+            const overlapping = !(
+              a.right <= b.x ||
+              b.right <= a.x ||
+              a.bottom <= b.y ||
+              b.bottom <= a.y
+            );
+
+            if (overlapping) {
+              const xOverlap = Math.min(a.right, b.right) - Math.max(a.x, b.x);
+              const yOverlap = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
+              const area = xOverlap * yOverlap;
+
+              if (area > 100) { // Ignore tiny overlaps (<100px²)
+                overlapCount++;
+                maxOverlapArea = Math.max(maxOverlapArea, area);
+              }
+            }
+          }
         }
-        return overlapCount;
+
+        return { count: overlapCount, maxArea: Math.round(maxOverlapArea) };
       });
 
-      console.log(`  Zoom ${i+1}: score=${metrics.visualFillScore.toFixed(3)}, buckets=${metrics.columnsWithCards}/10, overlaps=${overlaps}`);
+      console.log(`  Zoom ${i+1}: score=${metrics.visualFillScore.toFixed(3)}, buckets=${metrics.columnsWithCards}/10, overlaps=${overlapResult.count} (max=${overlapResult.maxArea}px²)`);
+
+      // Debug zoom level 4 if overlap detected
+      if (overlapResult.count > 0 && i === 3) {
+        const telemetry = await getTelemetry(page);
+        console.log(`\n⚠️  OVERLAP DETECTED AT ZOOM 4:`);
+        console.log(`  Cards above: ${telemetry.halfColumns?.above?.events || 0}`);
+        console.log(`  Cards below: ${telemetry.halfColumns?.below?.events || 0}`);
+        console.log(`  Total cards: ${(telemetry.halfColumns?.above?.events || 0) + (telemetry.halfColumns?.below?.events || 0)}`);
+        console.log(`  Capacity: ${JSON.stringify(telemetry.capacity)}`);
+        console.log(`  Degradation: ${JSON.stringify(telemetry.degradation)}`);
+      }
+
+      // Assert no overlaps at this zoom level
+      expect(overlapResult.count, `No overlaps at 1793 cluster zoom level ${i+1}`).toBe(0);
 
       await page.screenshot({
         path: `screenshots/visual-audit/t97-10-zoom-1793-level-${i+1}.png`
@@ -1249,19 +1362,55 @@ test.describe('High Density Stress Tests - Mathematical Approach', () => {
 
       const metrics = await calculateVisualFillScore(page);
 
-      const overlaps = await page.evaluate(() => {
-        const placements = (window as any).__ccTelemetry?.placements?.items || [];
-        const positions = new Map();
+      const overlapResult = await page.evaluate(() => {
+        const cards = Array.from(document.querySelectorAll('[data-testid="event-card"]'));
+        const rects = cards.map(card => {
+          const rect = card.getBoundingClientRect();
+          return {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            right: rect.right,
+            bottom: rect.bottom
+          };
+        });
+
         let overlapCount = 0;
-        for (const p of placements) {
-          const key = `${Math.round(p.x/50)}_${Math.round(p.y/50)}`;
-          if (positions.has(key)) overlapCount++;
-          positions.set(key, true);
+        let maxOverlapArea = 0;
+
+        for (let i = 0; i < rects.length; i++) {
+          for (let j = i + 1; j < rects.length; j++) {
+            const a = rects[i];
+            const b = rects[j];
+
+            const overlapping = !(
+              a.right <= b.x ||
+              b.right <= a.x ||
+              a.bottom <= b.y ||
+              b.bottom <= a.y
+            );
+
+            if (overlapping) {
+              const xOverlap = Math.min(a.right, b.right) - Math.max(a.x, b.x);
+              const yOverlap = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
+              const area = xOverlap * yOverlap;
+
+              if (area > 100) {
+                overlapCount++;
+                maxOverlapArea = Math.max(maxOverlapArea, area);
+              }
+            }
+          }
         }
-        return overlapCount;
+
+        return { count: overlapCount, maxArea: Math.round(maxOverlapArea) };
       });
 
-      console.log(`  Zoom ${i+1}: score=${metrics.visualFillScore.toFixed(3)}, buckets=${metrics.columnsWithCards}/10, overlaps=${overlaps}`);
+      console.log(`  Zoom ${i+1}: score=${metrics.visualFillScore.toFixed(3)}, buckets=${metrics.columnsWithCards}/10, overlaps=${overlapResult.count} (max=${overlapResult.maxArea}px²)`);
+
+      // Assert no overlaps at this zoom level
+      expect(overlapResult.count, `No overlaps at 1789 cluster zoom level ${i+1}`).toBe(0);
 
       await page.screenshot({
         path: `screenshots/visual-audit/t97-10-zoom-1789-level-${i+1}.png`

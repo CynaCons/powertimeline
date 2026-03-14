@@ -111,9 +111,22 @@ export function useImportSession(timelineId?: string) {
         }));
         eventsToDelete = existingEventIds;
       } else {
-        // Merge mode (default): classify as create or update based on ID matching
+        // Merge mode (default): classify as create, update, or delete based on ID matching
         // Skip events that are identical to existing (no actual changes)
         const mappedEvents: (SessionEvent | null)[] = events.map(eventData => {
+          // Check for explicit delete action marker (from AI actions)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((eventData as any)._action === 'delete' && eventData.id) {
+            const existingEvent = existingEvents.find(existing => existing.id === eventData.id);
+            return {
+              id: crypto.randomUUID(),
+              action: 'delete' as const,
+              decision: 'pending' as const,
+              eventData,
+              existingEvent,
+            };
+          }
+
           const existingEvent = eventData.id
             ? existingEvents.find(existing => existing.id === eventData.id)
             : undefined;
@@ -212,13 +225,15 @@ export function useImportSession(timelineId?: string) {
       }
     }
 
-    // Then add/update accepted events
+    // Then add/update/delete accepted events
     for (const event of accepted) {
       const finalData = { ...event.eventData, ...event.userEdits };
       if (event.action === 'create') {
         await addEvent(session.timelineId, resolvedOwnerId, finalData as Event);
       } else if (event.action === 'update' && finalData.id) {
         await updateEvent(session.timelineId, resolvedOwnerId, finalData.id, finalData);
+      } else if (event.action === 'delete' && event.eventData.id) {
+        await deleteEvent(session.timelineId, resolvedOwnerId, event.eventData.id);
       }
     }
 

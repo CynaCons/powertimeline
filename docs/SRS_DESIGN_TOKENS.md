@@ -97,7 +97,7 @@ Brand accent colors and gradients:
 ## Source of Truth
 - Design tokens live in `src/styles/tokens.css`
 - This SRS documents the token system and requirements
-- See `VISUAL_AUDIT_REPORT.md` for token recommendations from visual audit
+- See `archive/audits/VISUAL_AUDIT_REPORT.md` for token recommendations from visual audit
 
 ## Change History
 - **2026-01-05** - Expanded SRS with detailed token tables and requirements
@@ -106,4 +106,4 @@ Brand accent colors and gradients:
   - Added shadow elevation scale
   - Added transitions and brand color documentation
   - Added CC-REQ-TOKENS-001 to 006 requirements
-  - References VISUAL_AUDIT_REPORT.md Part 9 (CSS Token Additions)
+  - References archive/audits/VISUAL_AUDIT_REPORT.md Part 9 (CSS Token Additions)

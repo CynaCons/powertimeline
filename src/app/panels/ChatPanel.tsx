@@ -33,6 +33,9 @@ interface ChatPanelProps {
   // Timeline metadata (for showing metadata change preview)
   timelineTitle?: string;
   timelineDescription?: string;
+  // Import session state (for AI events routed to ReviewPanel)
+  hasEventActionsToReview?: boolean;
+  eventActionCount?: number;
   // Actions
   onSetApiKey: (key: string) => Promise<boolean>;
   onClearApiKey: () => void;
@@ -40,9 +43,8 @@ interface ChatPanelProps {
   onClearHistory: () => void;
   onApproveActions: (actionIds: string[]) => void;
   onRejectActions: (actionIds: string[]) => void;
-  onRestoreActions: (actionIds: string[]) => void;
   onApplyActions: () => Promise<void>;
-  onPreviewAction?: (action: AIAction) => void;
+  onOpenReviewPanel?: () => void;
   // Panel props
   onClose: () => void;
 }
@@ -57,15 +59,16 @@ export function ChatPanel({
   usage,
   timelineTitle,
   timelineDescription,
+  hasEventActionsToReview,
+  eventActionCount,
   onSetApiKey,
   onClearApiKey,
   onSendMessage,
   onClearHistory,
   onApproveActions,
   onRejectActions,
-  onRestoreActions,
   onApplyActions,
-  onPreviewAction,
+  onOpenReviewPanel,
   onClose,
 }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState('');
@@ -185,22 +188,6 @@ export function ChatPanel({
     const message = inputValue.trim();
     setInputValue('');
     await onSendMessage(message);
-  };
-
-  // Handle approve all pending actions
-  const handleApproveAll = () => {
-    const pendingIds = pendingActions
-      .filter(a => a.status === 'pending')
-      .map(a => a.id);
-    onApproveActions(pendingIds);
-  };
-
-  // Handle reject all pending actions
-  const handleRejectAll = () => {
-    const pendingIds = pendingActions
-      .filter(a => a.status === 'pending')
-      .map(a => a.id);
-    onRejectActions(pendingIds);
   };
 
   // Render API key input section
@@ -421,111 +408,8 @@ export function ChatPanel({
             </>
           )}
           {latestAction.status === 'approved' && (
-            <Chip label="✓ Approved" size="small" color="success" />
-          )}
-        </Box>
-      </Box>
-    );
-  };
-
-  // Render pending actions confirmation
-  const renderPendingActions = () => {
-    // Filter out metadata actions (they're shown separately)
-    const nonMetadataActions = pendingActions.filter(a => a.type !== 'UPDATE_METADATA');
-    const pending = nonMetadataActions.filter(a => a.status === 'pending');
-    const approved = nonMetadataActions.filter(a => a.status === 'approved');
-    const rejected = nonMetadataActions.filter(a => a.status === 'rejected');
-    const activeActions = pending.length + approved.length + rejected.length;
-
-    if (activeActions === 0) return null;
-
-    return (
-      <Box sx={{ p: 1, bgcolor: 'var(--page-bg-elevated)', borderRadius: 1, mb: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 'bold', mb: 1, display: 'block' }}>
-          Proposed Changes ({pending.length + approved.length}{rejected.length > 0 ? `, ${rejected.length} hidden` : ''})
-        </Typography>
-
-        {nonMetadataActions.map(action => (
-          <Box
-            key={action.id}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mb: 0.5,
-              opacity: action.status === 'rejected' ? 0.5 : 1,
-              textDecoration: action.status === 'rejected' ? 'line-through' : 'none'
-            }}
-          >
-            <Typography variant="body2" sx={{ flex: 1, fontSize: '0.75rem' }}>
-              {action.type === 'CREATE_EVENT' && '➕'}
-              {action.type === 'UPDATE_EVENT' && '✏️'}
-              {action.type === 'DELETE_EVENT' && '🗑️'}
-              {' '}{action.description}
-            </Typography>
-            {/* Preview button for events with dates - only for pending/approved */}
-            {action.type === 'CREATE_EVENT' && onPreviewAction && action.status !== 'rejected' && (
-              <IconButton
-                size="small"
-                onClick={() => onPreviewAction(action)}
-                sx={{ color: 'info.main', p: 0.5, minWidth: '44px', minHeight: '44px' }}
-                title="Preview on timeline"
-                aria-label="Preview on timeline"
-              >
-                <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">visibility</span>
-              </IconButton>
-            )}
-            {/* Restore button for rejected actions */}
-            {action.status === 'rejected' && (
-              <IconButton
-                size="small"
-                onClick={() => onRestoreActions([action.id])}
-                sx={{ color: 'text.secondary', p: 0.5, minWidth: '44px', minHeight: '44px' }}
-                title="Restore this suggestion"
-                aria-label="Restore this suggestion"
-              >
-                <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">visibility_off</span>
-              </IconButton>
-            )}
-            {action.status === 'pending' && (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={() => onApproveActions([action.id])}
-                  sx={{ color: 'success.main', p: 0.5, minWidth: '44px', minHeight: '44px' }}
-                  aria-label="Approve action"
-                >
-                  <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">check</span>
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => onRejectActions([action.id])}
-                  sx={{ color: 'error.main', p: 0.5, minWidth: '44px', minHeight: '44px' }}
-                  aria-label="Reject action"
-                >
-                  <span className="material-symbols-rounded" style={{ fontSize: 16 }} aria-hidden="true">close</span>
-                </IconButton>
-              </>
-            )}
-            {action.status === 'approved' && (
-              <Chip label="✓" size="small" color="success" sx={{ height: 20 }} />
-            )}
-          </Box>
-        ))}
-
-        {(pending.length > 0 || approved.length > 0) && (
-          <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-            {pending.length > 0 && (
-              <>
-                <Button size="small" variant="outlined" color="success" onClick={handleApproveAll}>
-                  Approve All
-                </Button>
-                <Button size="small" variant="outlined" color="error" onClick={handleRejectAll}>
-                  Reject All
-                </Button>
-              </>
-            )}
-            {approved.length > 0 && (
+            <>
+              <Chip label="✓ Approved" size="small" color="success" />
               <Button
                 size="small"
                 variant="contained"
@@ -533,10 +417,58 @@ export function ChatPanel({
                 onClick={onApplyActions}
                 disabled={isLoading}
               >
-                Apply ({approved.length})
+                Apply
               </Button>
-            )}
-          </Box>
+            </>
+          )}
+        </Box>
+      </Box>
+    );
+  };
+
+  // Render event actions review prompt (events are now handled via ReviewPanel)
+  const renderEventActionsReview = () => {
+    if (!hasEventActionsToReview || !eventActionCount || eventActionCount === 0) return null;
+
+    return (
+      <Box
+        sx={{
+          p: 1.5,
+          bgcolor: 'var(--page-bg-elevated)',
+          borderRadius: 1,
+          mb: 1,
+          border: '1px solid var(--page-accent)',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <span className="material-symbols-rounded" style={{ fontSize: 18, color: 'var(--page-accent)' }}>
+            fact_check
+          </span>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+            AI suggested {eventActionCount} event{eventActionCount !== 1 ? 's' : ''}
+          </Typography>
+        </Box>
+        <Typography variant="caption" sx={{ color: 'var(--page-text-secondary)', display: 'block', mb: 1.5 }}>
+          Review and approve each event before adding to your timeline.
+        </Typography>
+        {onOpenReviewPanel && (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={onOpenReviewPanel}
+            sx={{
+              textTransform: 'none',
+              bgcolor: 'var(--page-accent)',
+              '&:hover': { bgcolor: 'var(--page-accent-hover)' },
+            }}
+            startIcon={
+              <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
+                open_in_new
+              </span>
+            }
+          >
+            Review Events
+          </Button>
         )}
       </Box>
     );
@@ -611,8 +543,8 @@ export function ChatPanel({
         {/* Metadata preview - shown separately from other actions */}
         {renderMetadataPreview()}
 
-        {/* Pending actions - now inside scrollable area */}
-        {renderPendingActions()}
+        {/* Event actions review prompt - routes to ReviewPanel */}
+        {renderEventActionsReview()}
 
         {/* Error display - now inside scrollable area */}
         {error && !messages.some(m => m.error) && (

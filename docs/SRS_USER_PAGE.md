@@ -109,7 +109,7 @@ Public user profile pages displaying user information and their timeline collect
   - Added CC-REQ-USER-VIS-001 to 004: Card styling, hover effects, profile header stacking, form width
   - Added CC-REQ-USER-ACC-001 to 004: Keyboard accessibility, focus states, ARIA labels, skip link
   - Added CC-REQ-USER-RESP-001 to 002: Remove nested scroll, responsive grid columns
-  - References VISUAL_AUDIT_REPORT.md findings
+  - References archive/audits/VISUAL_AUDIT_REPORT.md findings
   - Note: USER-ACC-001 and USER-ACC-002 are duplicates of USER-031 and USER-032 (consolidated for clarity)
 
 ## Notes

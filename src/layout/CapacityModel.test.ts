@@ -22,23 +22,40 @@ describe('CapacityModel', () => {
       const metrics = model.getGlobalMetrics();
 
       expect(metrics.cellsPerSide).toBeGreaterThanOrEqual(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE);
-      expect(metrics.cellsPerSide).toBeLessThanOrEqual(LAYOUT_CONSTANTS.MAX_CELLS_PER_SIDE);
+      expect(metrics.cellsPerSide).toBeLessThanOrEqual(LAYOUT_CONSTANTS.SOFT_MAX_CELLS_PER_SIDE);
     });
 
-    it('respects minimum cells per side', () => {
-      // Very small viewport should hit minimum
-      const model = new CapacityModel(100);
+    it('respects minimum cells per side for tiny viewports', () => {
+      const model = new CapacityModel(200); // Tiny viewport
       const metrics = model.getGlobalMetrics();
 
-      expect(metrics.cellsPerSide).toBe(LAYOUT_CONSTANTS.MIN_CELLS_PER_SIDE);
+      // At 200px: (100 - 100) / 44 = 0, should clamp to MIN=3
+      expect(metrics.cellsPerSide).toBe(3);
     });
 
-    it('respects maximum cells per side', () => {
-      // Very large viewport should hit maximum
-      const model = new CapacityModel(5000);
+    it('respects soft maximum cells per side for ultra-wide viewports', () => {
+      const model = new CapacityModel(5000); // Ultra-wide
       const metrics = model.getGlobalMetrics();
 
-      expect(metrics.cellsPerSide).toBe(LAYOUT_CONSTANTS.MAX_CELLS_PER_SIDE);
+      // At 5000px: (2500 - 100) / 44 = 54.5, should cap at SOFT_MAX=16
+      expect(metrics.cellsPerSide).toBe(16);
+    });
+
+    it('scales capacity dynamically with viewport size', () => {
+      const testCases = [
+        { height: 800, expectedMin: 6, expectedMax: 7, label: 'Laptop' },
+        { height: 1080, expectedMin: 10, expectedMax: 11, label: 'FHD' },
+        { height: 1440, expectedMin: 13, expectedMax: 14, label: 'QHD' },
+        { height: 2160, expectedMin: 16, expectedMax: 16, label: '4K' },
+      ];
+
+      for (const { height, expectedMin, expectedMax } of testCases) {
+        const model = new CapacityModel(height);
+        const metrics = model.getGlobalMetrics();
+
+        expect(metrics.cellsPerSide).toBeGreaterThanOrEqual(expectedMin);
+        expect(metrics.cellsPerSide).toBeLessThanOrEqual(expectedMax);
+      }
     });
   });
 
@@ -393,9 +410,9 @@ describe('CapacityModel', () => {
   });
 
   describe('CARD_FOOTPRINTS constant', () => {
-    it('follows 1-2-4 ratio', () => {
+    it('follows 1-3-4 ratio', () => {
       expect(CARD_FOOTPRINTS['title-only']).toBe(1);
-      expect(CARD_FOOTPRINTS['compact']).toBe(2);
+      expect(CARD_FOOTPRINTS['compact']).toBe(3);
       expect(CARD_FOOTPRINTS['full']).toBe(4);
     });
   });

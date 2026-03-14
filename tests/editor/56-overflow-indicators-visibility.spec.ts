@@ -114,7 +114,7 @@ test.describe('Overflow Indicators Visibility Tests', () => {
 
     // Get overflow badges and anchors
     const overflowBadges = page.locator('[data-testid^="overflow-badge-"], [data-testid^="merged-overflow-badge-"]');
-    const anchors = page.locator('[data-testid^="anchor-event-"]');
+    const anchors = page.locator('[data-testid^="anchor-"]');
 
     const badgeCount = await overflowBadges.count();
     const anchorCount = await anchors.count();

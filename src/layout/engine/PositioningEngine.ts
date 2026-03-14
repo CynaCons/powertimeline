@@ -121,7 +121,13 @@ export class PositioningEngine {
           // Use the card's pre-set height from DegradationEngine (don't overwrite!)
           // card.height is already set correctly for mixed card types
           card.y = aboveY - card.height;
-          card.x = group.centerX - (card.width / 2);
+          card.x = group.centerX;  // Store CENTER coordinate (collision detection expects center)
+
+          // Clamp to minimap safe zone (prevent overlap with minimap 0-100px)
+          const MINIMAP_SAFE_ZONE = 100;
+          if (card.y < MINIMAP_SAFE_ZONE) {
+            card.y = MINIMAP_SAFE_ZONE;
+          }
 
           aboveY = card.y - cardSpacing; // Next card starts above this one
 
@@ -137,7 +143,7 @@ export class PositioningEngine {
           // Use the card's pre-set height from DegradationEngine (don't overwrite!)
           // card.height is already set correctly for mixed card types
           card.y = belowY;
-          card.x = group.centerX - (card.width / 2);
+          card.x = group.centerX;  // Store CENTER coordinate (collision detection expects center)
 
           belowY += (card.height + cardSpacing);
 
@@ -185,7 +191,8 @@ export class PositioningEngine {
       utilization: {
         totalSlots,
         usedSlots,
-        percentage
+        percentage,
+        cellsPerSide: capacityMetrics.cellsPerSide
       }
     };
   }
@@ -249,7 +256,7 @@ export class PositioningEngine {
    */
   private resolveCollisions(positionedCards: PositionedCard[]): void {
     // Safe zone boundaries to prevent overlap with UI elements
-    const SCREEN_TOP_BOUNDARY = 10; // Absolute minimum - just off-screen prevention
+    const SCREEN_TOP_BOUNDARY = 100; // Minimap safe zone - prevent overlap with minimap (0-100px)
     const LEFT_SAFE_ZONE = 200; // Breadcrumb area protection (left nav 56px + breadcrumb area 144px)
     const TOP_BREADCRUMB_ZONE = 120; // Only protect breadcrumb area in top region
     const resolveOverlaps = (items: PositionedCard[], preferRight = true) => {
@@ -261,17 +268,27 @@ export class PositioningEngine {
         a.x - a.width / 2 < b.x + b.width / 2 && a.x + a.width / 2 > b.x - b.width / 2 &&
         a.y < b.y + b.height && a.y + a.height > b.y
       );
-      const spacing = 8; // minimal gap
-      const maxPasses = 4; // Reduced from 6 due to spatial hashing efficiency
 
-      // Build spatial hash ONCE before loop (optimization: avoid rebuilding on every pass)
-      const spatialHash = this.buildSpatialHash(items);
+      // Viewport-adaptive collision resolution parameters
+      const availableHeightAbove = this.timelineY - SCREEN_TOP_BOUNDARY;
+      const availableHeightBelow = this.config.viewportHeight - this.timelineY - 55; // 55px below margin
+      const isConstrainedViewport = availableHeightAbove < 500 || availableHeightBelow < 500;
+
+      const spacing = isConstrainedViewport ? 4 : 8; // Tighter spacing for constrained viewports
+      const maxPasses = isConstrainedViewport ? 8 : 4; // More passes for constrained viewports
 
       // Sort deterministically by area desc then x asc to move smaller ones first
       const ordered = items.slice().sort((a, b) => (b.width * b.height) - (a.width * a.height) || a.x - b.x);
 
+      // Track boundary hits per card for fallback strategy
+      const boundaryHitCounts = new Map<string, number>();
+
       for (let pass = 0; pass < maxPasses; pass++) {
         let changed = false;
+
+        // CRITICAL FIX: Rebuild spatial hash on each pass after cards have moved
+        // Building it once before the loop caused stale positions and missed collisions
+        const spatialHash = this.buildSpatialHash(items);
 
         for (const A of ordered) {
           // Get nearby cells for this card
@@ -305,6 +322,7 @@ export class PositioningEngine {
             const sameHalfColumn = target.clusterId === other.clusterId;
 
             // Try horizontal nudge ONLY if cards are from DIFFERENT half-columns
+            // On constrained viewports, prefer horizontal nudge to save vertical space
             if (!sameHalfColumn) {
               let nx = target.x;
               const required = other.x + Math.sign(target.x - other.x || 1) * (other.width / 2 + target.width / 2 + spacing);
@@ -321,18 +339,69 @@ export class PositioningEngine {
               if (within(nx - target.width / 2, ny, target.width, target.height)) {
                 target.x = Math.max(target.width / 2, Math.min(this.config.viewportWidth - target.width / 2, nx));
                 changed = true;
-                continue;
+                continue; // Skip vertical nudge if horizontal succeeded
               }
             }
 
             // If horizontal nudge skipped (same half-column) or failed, try vertical step within the same band
-            // Use consistent 12px spacing to maintain proper gaps between cards
-            const step = 12; // Maintain consistent card spacing instead of target.height + 12
+            // Track boundary hits per card
+            if (!boundaryHitCounts.has(target.id)) boundaryHitCounts.set(target.id, 0);
+            const targetHitCount = boundaryHitCounts.get(target.id)!;
+
+            // Calculate exact overlap and move enough to clear it completely
+            const verticalOverlap = Math.max(0,
+              Math.min(target.y + target.height, other.y + other.height) -
+              Math.max(target.y, other.y)
+            );
+
+            // Move by the overlap amount plus spacing, minimum 12px
+            const step = Math.max(12, verticalOverlap + spacing);
+
             let newY = target.y;
-            if (aAbove) newY = Math.max(SCREEN_TOP_BOUNDARY, target.y - step); // Move up (decrease Y)
-            else newY = Math.min(this.config.viewportHeight - target.height, target.y + step); // Move down (increase Y)
-            // FIXED: Use TOP coordinates - newY and target.y are already top positions
-            if (within(target.x - target.width / 2, newY, target.width, target.height)) {
+            if (aAbove) {
+              newY = Math.max(SCREEN_TOP_BOUNDARY, target.y - step); // Move up (decrease Y)
+              // Record if we hit top boundary
+              if (newY === SCREEN_TOP_BOUNDARY) {
+                boundaryHitCounts.set(target.id, targetHitCount + 1);
+              }
+            } else {
+              const bottomLimit = this.config.viewportHeight - target.height - 55; // Account for below margin
+              newY = Math.min(bottomLimit, target.y + step); // Move down (increase Y)
+              // Record if we hit bottom boundary
+              if (newY === bottomLimit) {
+                boundaryHitCounts.set(target.id, targetHitCount + 1);
+              }
+            }
+
+            // If card hit boundary (once on constrained viewports, twice on normal), try aggressive horizontal nudge
+            const boundaryHitThreshold = isConstrainedViewport ? 1 : 2;
+            if (targetHitCount >= boundaryHitThreshold && !sameHalfColumn) {
+              // Try horizontal nudge with much larger displacement to spread cards
+              // Use full card width to ensure significant horizontal separation
+              const displacementDistance = target.width + spacing * 4;
+              const aggressiveRequired = other.x + Math.sign(target.x - other.x || 1) * displacementDistance;
+
+              const cardLeft = aggressiveRequired - target.width / 2;
+              const cardRight = aggressiveRequired + target.width / 2;
+
+              // Prevent nudging into breadcrumb safe zone (top-left corner)
+              const wouldOverlapBreadcrumb = newY < TOP_BREADCRUMB_ZONE && cardLeft < LEFT_SAFE_ZONE;
+
+              if (!wouldOverlapBreadcrumb && cardLeft >= 0 && cardRight <= this.config.viewportWidth) {
+                target.x = aggressiveRequired;
+                changed = true;
+                continue; // Skip vertical nudge
+              }
+            }
+
+            // Apply vertical nudge
+            // Relax bounds check for vertical nudging - allow cards to stack tightly if needed
+            const cardRight = target.x + target.width / 2;
+            const cardLeft = target.x - target.width / 2;
+            const fitsHorizontally = cardLeft >= 0 && cardRight <= this.config.viewportWidth;
+            const fitsVertically = newY >= SCREEN_TOP_BOUNDARY && (newY + target.height) <= this.config.viewportHeight;
+
+            if (fitsHorizontally && fitsVertically) {
               target.y = newY;
               changed = true;
             }
@@ -361,9 +430,16 @@ export class PositioningEngine {
     const visible = visibleCount ?? totalCount; // Default to all visible if not specified
     const overflow = overflowCount ?? Math.max(0, totalCount - visible);
 
+    // Clamp X to viewport bounds (same margins as event anchors)
+    const navRailWidth = 56;
+    const additionalMargin = 80;
+    const leftMargin = navRailWidth + additionalMargin; // 136px total
+    const rightMargin = 40;
+    const clampedX = Math.max(leftMargin, Math.min(this.config.viewportWidth - rightMargin, x));
+
     return {
       id: `anchor-${x}`,
-      x,
+      x: clampedX,
       y: this.timelineY,
       eventIds: events.map(e => e.id),
       eventCount: totalCount + overflow, // Include overflow in total count
@@ -394,6 +470,9 @@ export class PositioningEngine {
         const rightMargin = 40;
         const usableWidth = this.config.viewportWidth - leftMargin - rightMargin;
         eventXPos = leftMargin + (timeRatio * usableWidth);
+
+        // Clamp to viewport bounds to prevent off-screen anchors at extreme zoom levels
+        eventXPos = Math.max(leftMargin, Math.min(this.config.viewportWidth - rightMargin, eventXPos));
       } else {
         // Fallback positioning
         eventXPos = this.config.viewportWidth / 2;

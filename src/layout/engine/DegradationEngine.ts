@@ -76,8 +76,14 @@ export class DegradationEngine {
    * Implements spatial cluster coordination with optional mixed card types
    */
   private applyClusterCoordinatedDegradation(groups: ColumnGroup[]): ColumnGroup[] {
-    // Phase 1: Identify spatial clusters
-    const clusters = this.identifySpatialClusters(groups);
+    // Phase 1: Identify spatial clusters with viewport constraints
+    const timelineY = this.config.timelineY || this.config.viewportHeight / 2;
+    const viewportConstraints = {
+      availableHeightAbove: timelineY - 100, // Minimap safe zone
+      availableHeightBelow: this.config.viewportHeight - timelineY - 55 // Below margin
+    };
+
+    const clusters = this.identifySpatialClusters(groups, viewportConstraints);
     this.degradationMetrics.totalClusters = clusters.length;
 
     // Phase 2: Apply coordinated degradation
@@ -292,7 +298,10 @@ export class DegradationEngine {
    * Identify spatial clusters by matching above/below half-columns
    * Groups share the same X-region if their centerX positions are within threshold
    */
-  private identifySpatialClusters(groups: ColumnGroup[]): import('../LayoutEngine').SpatialCluster[] {
+  private identifySpatialClusters(
+    groups: ColumnGroup[],
+    viewportConstraints?: { availableHeightAbove: number; availableHeightBelow: number }
+  ): import('../LayoutEngine').SpatialCluster[] {
     const X_THRESHOLD = 50; // pixels - groups within 50px are same cluster
 
     const aboveGroups = groups.filter(g => g.side === 'above');
@@ -321,7 +330,31 @@ export class DegradationEngine {
       const abovePredictedOverflow = aboveTotalEvents > 8; // Exceeds max title-only capacity
       const belowPredictedOverflow = belowTotalEvents > 8; // Exceeds max title-only capacity
 
-      const hasOverflow = aboveOverflow || belowOverflow || abovePredictedOverflow || belowPredictedOverflow;
+      // PIXEL-BASED OVERFLOW: Check if cards will physically fit in available space
+      let abovePixelConstraint = false;
+      let belowPixelConstraint = false;
+
+      if (viewportConstraints) {
+        // Calculate pixel height needed assuming mixed card types
+        // Use worst-case scenario: compact cards (75px) for mixed types
+        const cardSpacing = 12; // pixels between cards
+        const titleOnlyHeight = 32; // pixels per title-only card
+        const compactHeight = 120; // pixels per compact card
+
+        // For pixel constraint check, assume worst case: compact cards if using mixed types
+        // This prevents over-allocation when mixed types create taller cards
+        const wouldUseMixedTypes = aboveTotalEvents >= 5 || belowTotalEvents >= 5;
+        const estimatedCardHeight = wouldUseMixedTypes ? compactHeight : titleOnlyHeight;
+
+        const abovePixelHeightNeeded = aboveTotalEvents * (estimatedCardHeight + cardSpacing);
+        const belowPixelHeightNeeded = belowTotalEvents * (estimatedCardHeight + cardSpacing);
+
+        abovePixelConstraint = abovePixelHeightNeeded > viewportConstraints.availableHeightAbove;
+        belowPixelConstraint = belowPixelHeightNeeded > viewportConstraints.availableHeightBelow;
+      }
+
+      const hasOverflow = aboveOverflow || belowOverflow || abovePredictedOverflow || belowPredictedOverflow ||
+                         abovePixelConstraint || belowPixelConstraint;
 
       // Calculate total events
       const totalEvents = above.events.length + (below?.events.length ?? 0);

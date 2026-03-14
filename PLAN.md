@@ -102,6 +102,7 @@
 - ✅ Import Modes: Merge vs Overwrite mode selection with confirmation dialog, 19 unit tests, 10 E2E tests (v0.9.6)
 - ✅ UX Polish: Import tab default, source indicator icons on cards, YAML paste in Browse page import (v0.9.6.1)
 - ✅ Bug Fix: YAML import/export now preserves event sources field (v0.9.6.2)
+- ✅ Layout Robustness + Repo Cleanup: compact card sizing, minimap-safe positioning, T105/T106 E2E coverage, archived legacy docs (v0.9.6.3)
 - ✅ Source Indicator: Subtle theme-aware icon on cards with sources, 3-method E2E test (CC-REQ-CARD-SOURCE-001)
 - ✅ Anchor Visibility Fix: All event anchors now visible regardless of zoom/overflow, E2E tests (CC-REQ-ANCHOR-004)
 - ✅ Event Diff View: Word-level diff modal for UPDATE events using react-diff-viewer-continued, E2E tests (v0.9.4)
@@ -838,7 +839,7 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 
 ### v0.8.1 - UI Audit ✅
 - [x] Canvas/Editor, Navigation, Pages audit
-- [x] 59 issues documented in UI_AUDIT_FINDINGS.md
+- [x] 59 issues documented in docs/archive/audits/UI_AUDIT_FINDINGS.md
 
 ### v0.8.2 - UI Visual Bug Fixes ✅
 - [x] Theme system fixes (Node, Minimap, TopNavBar, LoginPage)
@@ -1204,7 +1205,7 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 - Mobile users can browse without accidentally editing
 
 ### v0.8.16 - Visual Audit Implementation ✅
-**Goal:** Implement all 32 action items from VISUAL_AUDIT_REPORT.md for public release polish
+**Goal:** Implement all 32 action items from docs/archive/audits/VISUAL_AUDIT_REPORT.md for public release polish
 **Status:** Complete (2026-01-05)
 
 **Phase 1: Design System Foundation**
@@ -1402,6 +1403,20 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 - [x] Unit tests for both modes (9 new tests in useImportSession.test.ts)
 - [x] E2E tests for mode selection and behavior (10 tests in 100-import-modes.spec.ts)
 - [x] Update SRS_IMPORT_REVIEW.md with new requirements (CC-REQ-REVIEW-MODE-001 to 007)
+
+### v0.9.6.3 - Layout Robustness and Repository Cleanup ✅
+**Goal:** Harden dense editor rendering behavior and reduce repository noise
+**Status:** Complete
+
+**Tasks:**
+- [x] Increase compact card height to 120px and align layout capacity math to actual card footprints
+- [x] Clamp dense card positioning to the minimap safe zone and use top-based coordinates consistently
+- [x] Add robust text rendering stress coverage (T105) for zoom, panning, and minimap-overlap regression detection
+- [x] Add horizontal space optimization coverage (T106) for cluster spread, edge margins, and ultrawide scaling
+- [x] Improve overlap/high-density visual audit assertions and requirement annotations
+- [x] Archive historical audits, plans, and reports under `docs/archive/`
+- [x] Remove one-off markdown analysis notes and deprecated theme docs from the repo root
+- [x] Simplify `tests/README.md` to point at canonical test documentation in `docs/TESTS.md`
 
 ---
 

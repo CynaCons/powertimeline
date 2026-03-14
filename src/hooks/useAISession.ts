@@ -20,10 +20,13 @@ const MAX_HISTORY_TURNS = 5;
 
 interface UseAISessionOptions {
   context: AIContext;
+  /** Callback for applying metadata actions (UPDATE_METADATA) - kept in ChatPanel */
   onApplyActions: (actions: AIAction[]) => Promise<void>;
+  /** Callback when AI returns event actions - routes to ImportSession/ReviewPanel */
+  onEventActionsReceived?: (actions: AIAction[]) => void;
 }
 
-export function useAISession({ context, onApplyActions }: UseAISessionOptions): AISession & AISessionActions {
+export function useAISession({ context, onApplyActions, onEventActionsReceived }: UseAISessionOptions): AISession & AISessionActions {
   // Session state
   const [apiKey, setApiKeyState] = useState<string | null>(null);
   const [isKeyValid, setIsKeyValid] = useState(false);
@@ -133,9 +136,24 @@ export function useAISession({ context, onApplyActions }: UseAISessionOptions): 
       };
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Set pending actions if any
+      // Separate event actions from metadata actions
       if (response.actions.length > 0) {
-        setPendingActions(response.actions);
+        const eventActions = response.actions.filter(a =>
+          ['CREATE_EVENT', 'UPDATE_EVENT', 'DELETE_EVENT', 'UPDATE_SOURCES'].includes(a.type)
+        );
+        const metadataActions = response.actions.filter(a =>
+          a.type === 'UPDATE_METADATA'
+        );
+
+        // Route event actions to ImportSession/ReviewPanel
+        if (eventActions.length > 0 && onEventActionsReceived) {
+          onEventActionsReceived(eventActions);
+        }
+
+        // Keep metadata actions in ChatPanel for inline approval
+        if (metadataActions.length > 0) {
+          setPendingActions(metadataActions);
+        }
       }
 
       // Accumulate usage stats

@@ -2,7 +2,7 @@
 
 This document tracks Playwright regression coverage for PowerTimeline and is updated after every full suite run.
 
-**Last Updated:** 2025-11-27
+**Last Updated:** 2026-01-20
 **Version:** v0.8.15
 
 ## Test Suites Overview
@@ -11,7 +11,7 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 
 | Suite | Location | Purpose |
 |-------|----------|---------|
-| Editor Tests | `tests/editor/` | Timeline editor functionality (66 files) |
+| Editor Tests | `tests/editor/` | Timeline editor functionality (67 files) |
 | Home Tests | `tests/home/` | Home page and navigation (8 files) |
 | Admin Tests | `tests/admin/` | Admin panel functionality (5 files) |
 | User Tests | `tests/user/` | User profile and editing (2 files) |
@@ -165,6 +165,10 @@ PowerTimeline uses Playwright for end-to-end testing with the following test cat
 | **Visual Design Tests** | | | | |
 | v5/40-card-color-system.spec.ts | Validates card color system visuals and accessibility guidance | Visual Design Tests | CC-REQ-VISUAL-001 | ✅ Pass |
 | v5/41-visual-color-demo.spec.ts | Provides visual demo coverage for card color variations | Visual Design Tests | CC-REQ-VISUAL-001 | ✅ Pass |
+| 104-card-text-rendering.spec.ts | Comprehensive card text rendering and clipping detection using multiple methods (scrollHeight, bounds, CSS validation) | Visual Design Tests | CC-REQ-CARDS-TEXT-001 | ✅ Pass |
+| 105-robust-text-rendering-stress.spec.ts | Robust stress test using robustness template (progressive zoom, shift-scroll, chaos testing with ~60-80 verification steps) | Visual Design Tests | CC-REQ-CARDS-TEXT-001 | ✅ Pass |
+| **Test Templates** | | | | |
+| ROBUSTNESS_TEST_TEMPLATE.md | Reusable pattern for robust editor stress tests with progressive zoom, multi-step verification, and chaos testing | Test Templates | - | 📄 Doc |
 | **Integration & Scenarios Tests** | | | | |
 | v5/09-seeding-scenarios.spec.ts | Covers seeded historical scenarios and screenshot baselines | Integration & Scenarios Tests | - | ✅ Pass |
 | v5/59-necker-demo.spec.ts | Demonstrates Necker event alignment issue and resolution | Integration & Scenarios Tests | - | ✅ Pass |

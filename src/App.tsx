@@ -33,6 +33,7 @@ const ReviewPanel = lazy(() => import('./app/panels/ReviewPanel').then(m => ({ d
 import { useAISession } from './hooks/useAISession';
 import { buildAIContext } from './lib/aiContextBuilder';
 import { executeActions } from './lib/aiActionHandlers';
+import { convertAIActionsToSessionEvents } from './lib/aiActionsToSession';
 import type { AIAction, AIContext } from './types/ai';
 import { EventStorage } from './lib/storage';
 import { seedRFKTimeline } from './lib/devSeed';
@@ -126,6 +127,98 @@ function ReviewPanelContainer({ onClose, onOpenReviewEvent, onCommit, onFocusEve
   }, [session, updateEventData, onOpenReviewEvent]);
 
   return <ReviewPanel onClose={onClose} onEventClick={handleReviewEventClick} onCommit={onCommit} onFocusEvent={onFocusEvent} />;
+}
+
+/**
+ * Bridge component that processes AI event actions and sends them to ImportSession.
+ * Must be rendered inside ImportSessionProvider to have access to startSession.
+ */
+interface AIEventBridgeProps {
+  aiActions: AIAction[];
+  existingEvents: Event[];
+  onProcessed: () => void;
+}
+
+/**
+ * Hook to get AI chat session info for ChatPanel.
+ * Returns whether there are AI events to review and the count.
+ */
+function useAIChatSessionInfo() {
+  const { session } = useImportSessionContext();
+  const hasEventActionsToReview = session?.source === 'ai-chat' && session.events.length > 0;
+  const eventActionCount = session?.source === 'ai-chat' ? session.events.length : 0;
+  return { hasEventActionsToReview, eventActionCount };
+}
+
+/**
+ * ChatPanel container that provides ImportSession info.
+ */
+interface ChatPanelContainerProps {
+  aiSession: ReturnType<typeof useAISession>;
+  timelineTitle?: string;
+  timelineDescription?: string;
+  onOpenReviewPanel: () => void;
+  onClose: () => void;
+}
+
+function ChatPanelContainer({
+  aiSession,
+  timelineTitle,
+  timelineDescription,
+  onOpenReviewPanel,
+  onClose,
+}: ChatPanelContainerProps) {
+  const { hasEventActionsToReview, eventActionCount } = useAIChatSessionInfo();
+
+  return (
+    <ChatPanel
+      apiKey={aiSession.apiKey}
+      isKeyValid={aiSession.isKeyValid}
+      messages={aiSession.messages}
+      isLoading={aiSession.isLoading}
+      error={aiSession.error}
+      usage={aiSession.usage}
+      pendingActions={aiSession.pendingActions}
+      timelineTitle={timelineTitle}
+      timelineDescription={timelineDescription}
+      hasEventActionsToReview={hasEventActionsToReview}
+      eventActionCount={eventActionCount}
+      onSetApiKey={aiSession.setApiKey}
+      onClearApiKey={aiSession.clearApiKey}
+      onSendMessage={aiSession.sendMessage}
+      onClearHistory={aiSession.clearHistory}
+      onApproveActions={aiSession.approveActions}
+      onRejectActions={aiSession.rejectActions}
+      onApplyActions={aiSession.applyActions}
+      onOpenReviewPanel={onOpenReviewPanel}
+      onClose={onClose}
+    />
+  );
+}
+
+function AIEventBridge({ aiActions, existingEvents, onProcessed }: AIEventBridgeProps) {
+  const { startSession } = useImportSessionContext();
+  const processedRef = useRef(false);
+
+  useEffect(() => {
+    if (aiActions.length > 0 && !processedRef.current) {
+      processedRef.current = true;
+      const { events } = convertAIActionsToSessionEvents(aiActions, existingEvents);
+      if (events.length > 0) {
+        startSession('ai-chat', events, existingEvents, 'merge');
+      }
+      onProcessed();
+    }
+  }, [aiActions, existingEvents, startSession, onProcessed]);
+
+  // Reset processed flag when aiActions is cleared
+  useEffect(() => {
+    if (aiActions.length === 0) {
+      processedRef.current = false;
+    }
+  }, [aiActions]);
+
+  return null;
 }
 
 // Inner component that uses tour context
@@ -294,9 +387,17 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       containerWidth: resolvedContainerWidth,
     };
 
-    const usableWidth = Math.max(1, resolvedContainerWidth);
+    // Calculate actual timeline bounds accounting for padding
+    // The Timeline component adds ~5% padding on left/right sides
+    const sidePad = Math.max(16, Math.floor(resolvedContainerWidth * 0.05));
+    const timelineLeft = sidePad;
+    const timelineWidth = Math.max(1, resolvedContainerWidth - sidePad * 2);
+
+    // Convert cursor position to ratio on the actual timeline axis
     const mouseX = resolvedCursorX - resolvedContainerLeft;
-    const cursorRatio = Math.max(0, Math.min(1, mouseX / usableWidth));
+    const mouseXOnTimeline = Math.max(0, mouseX - timelineLeft);
+    const cursorRatio = Math.max(0, Math.min(1, mouseXOnTimeline / timelineWidth));
+
     const currentRange = viewEnd - viewStart;
     const cursorTime = viewStart + cursorRatio * currentRange;
 
@@ -793,10 +894,26 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     }
   }, [currentTimeline, timelineId, isOwner]);
 
+  // State to hold AI event actions that need to be sent to ImportSession
+  // These are processed by AIEventBridge component which has access to ImportSessionContext
+  const [pendingAIEventActions, setPendingAIEventActions] = useState<AIAction[]>([]);
+
+  // Handler for when AI returns event actions (CREATE/UPDATE/DELETE)
+  const handleAIEventActions = useCallback((actions: AIAction[]) => {
+    setPendingAIEventActions(actions);
+    setShowReviewPanel(true); // Open ReviewPanel to review AI events
+  }, []);
+
+  // Clear pending AI event actions after they've been processed by AIEventBridge
+  const clearPendingAIEventActions = useCallback(() => {
+    setPendingAIEventActions([]);
+  }, []);
+
   // AI Session
   const aiSession = useAISession({
     context: aiContext,
     onApplyActions: handleApplyAIActions,
+    onEventActionsReceived: handleAIEventActions,
   });
 
   // Ref to access updateActionPayload in saveAuthoring (declared earlier)
@@ -866,39 +983,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       setEditDescription(reviewEvent.description ?? '');
     }
   }, [reviewEvent, setEditDate, setEditTime, setEditTitle, setEditDescription]);
-
-  // Handle preview action - zoom to and highlight the preview event
-  const handlePreviewAction = useCallback((action: import('./types/ai').AIAction) => {
-    if (action.type !== 'CREATE_EVENT') return;
-
-    const date = action.payload.date as string;
-    if (!date) return;
-
-    // Select the preview event to highlight it
-    const previewEventId = `preview-${action.id}`;
-    setSelectedId(previewEventId);
-
-    // Calculate normalized position for the date
-    const allEvents = [...events, ...previewEvents];
-    if (allEvents.length === 0) {
-      // No events, just center on the preview date
-      animateTo(0.4, 0.6);
-      return;
-    }
-
-    const eventDate = new Date(date);
-    const allDates = allEvents.map(e => new Date(e.date).getTime());
-    const minDate = Math.min(...allDates, eventDate.getTime());
-    const maxDate = Math.max(...allDates, eventDate.getTime());
-    const range = maxDate - minDate || 1;
-    const normalizedPos = (eventDate.getTime() - minDate) / range;
-
-    // Zoom to a window around the event
-    const windowSize = 0.2;
-    const start = Math.max(0, normalizedPos - windowSize / 2);
-    const end = Math.min(1, start + windowSize);
-    animateTo(start, end);
-  }, [events, previewEvents, animateTo]);
 
   // Navigation actions
   const openCreate = useCallback(() => {
@@ -1162,6 +1246,12 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   return (
     <ImportSessionProvider timelineId={sessionTimelineId} ownerId={sessionOwnerId}>
       <>
+        {/* Bridge component to process AI event actions via ImportSession */}
+        <AIEventBridge
+          aiActions={pendingAIEventActions}
+          existingEvents={events}
+          onProcessed={clearPendingAIEventActions}
+        />
         <EditorTour />
       <div className="min-h-screen transition-theme" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
         {/* Full-bleed canvas area - no header, maximum space */}
@@ -1518,25 +1608,11 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                     borderColor: 'var(--color-border-primary)'
                   }}
                 >
-                  <ChatPanel
-                    apiKey={aiSession.apiKey}
-                    isKeyValid={aiSession.isKeyValid}
-                    messages={aiSession.messages}
-                    isLoading={aiSession.isLoading}
-                    error={aiSession.error}
-                    usage={aiSession.usage}
-                    pendingActions={aiSession.pendingActions}
+                  <ChatPanelContainer
+                    aiSession={aiSession}
                     timelineTitle={currentTimeline?.title}
                     timelineDescription={currentTimeline?.description}
-                    onSetApiKey={aiSession.setApiKey}
-                    onClearApiKey={aiSession.clearApiKey}
-                    onSendMessage={aiSession.sendMessage}
-                    onClearHistory={aiSession.clearHistory}
-                    onApproveActions={aiSession.approveActions}
-                    onRejectActions={aiSession.rejectActions}
-                    onRestoreActions={aiSession.restoreActions}
-                    onApplyActions={aiSession.applyActions}
-                    onPreviewAction={handlePreviewAction}
+                    onOpenReviewPanel={() => setShowReviewPanel(true)}
                     onClose={() => setChatPanelOpen(false)}
                   />
                 </div>

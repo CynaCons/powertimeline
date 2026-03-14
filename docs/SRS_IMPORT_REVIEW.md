@@ -1,9 +1,11 @@
 # Import Review System Software Requirements Specification
 
-**Last Updated:** 2025-01-06
+**Last Updated:** 2025-01-10
 
 ## Overview
-The unified import review system creates a session-based workflow for reviewing YAML-imported events before they are committed to a timeline. A session tracks imported events, decisions, and progress, while the Review Panel and navigation integration expose review controls and status.
+The unified import review system creates a session-based workflow for reviewing events before they are committed to a timeline. A session tracks imported events, decisions, and progress, while the Review Panel and navigation integration expose review controls and status.
+
+The system supports multiple import sources: YAML file imports, AI Chat suggestions, and (future) PR imports. All sources flow through the same ReviewPanel for user approval.
 
 ## 1. Session Management
 | ID | Requirement | Acceptance Criteria | Code | Tests |
@@ -88,3 +90,13 @@ The unified import review system creates a session-based workflow for reviewing 
 | CC-REQ-REVIEW-DIFF-009 | Theme-aware diff styling | • Uses `useTheme()` hook to get `isDarkMode`<br>• Passes `useDarkTheme` prop to ReactDiffViewer<br>• Custom styles for both light and dark themes | `src/app/panels/EventDiffView.tsx:33` | Manual verification |
 | CC-REQ-REVIEW-DIFF-010 | No changes state display | • If UPDATE event has no actual content changes, display "No differences detected" message<br>• Message centered with secondary text styling<br>• Element exposes `data-testid="diff-no-changes"` | `src/app/panels/EventDiffView.tsx:373` | `tests/review/102-event-diff-view.spec.ts` |
 | CC-REQ-REVIEW-DIFF-011 | Accessible diff markup | • Uses semantic `<del>` and `<ins>` HTML elements<br>• Screen reader text via `sr-only` class for non-visual context<br>• Decorative icons marked with `aria-hidden="true"` | `src/app/panels/EventDiffView.tsx:172` | Manual verification |
+
+## 9. AI Chat Integration (v0.9.5)
+| ID | Requirement | Acceptance Criteria | Code | Tests |
+|---|---|---|---|---|
+| CC-REQ-REVIEW-AI-001 | AI event actions route to ImportSession | • CREATE_EVENT, UPDATE_EVENT, DELETE_EVENT, UPDATE_SOURCES actions are converted to session events<br>• Conversion uses `convertAIActionsToSessionEvents()` utility<br>• UPDATE_METADATA stays in ChatPanel with inline approval | `src/lib/aiActionsToSession.ts:48`<br>`src/hooks/useAISession.ts:139` | `src/lib/aiActionsToSession.test.ts` |
+| CC-REQ-REVIEW-AI-002 | ChatPanel shows review navigation | • When AI session active with event actions, shows "Review Events" button<br>• Button click opens ReviewPanel<br>• Shows count of pending events | `src/app/panels/ChatPanel.tsx:220` | TBD |
+| CC-REQ-REVIEW-AI-003 | ReviewPanel handles AI source | • Source label shows "AI Chat" for `source === 'ai-chat'`<br>• Full diff support for UPDATE actions<br>• Visual styling consistent with other sources | `src/app/panels/ReviewPanel.tsx:117` | TBD |
+| CC-REQ-REVIEW-AI-004 | Delete actions display with confirmation | • Delete actions show trash icon with red styling<br>• Warning message "This event will be permanently deleted when you commit"<br>• Edit button hidden for delete actions (nothing to edit) | `src/app/panels/ReviewPanel.tsx:161`<br>`src/app/panels/ReviewPanel.tsx:446` | TBD |
+| CC-REQ-REVIEW-AI-005 | Accepted delete actions remove events on commit | • `commitSession()` handles `action === 'delete'` events<br>• Calls `deleteEvent()` for accepted delete actions<br>• Executes after overwrite mode deletions (if any) | `src/hooks/useImportSession.ts:235` | `src/hooks/useImportSession.test.ts` |
+| CC-REQ-REVIEW-AI-006 | AIEventBridge processes pending actions | • Bridge component runs inside ImportSessionProvider<br>• Converts AI actions to session events on receipt<br>• Clears pending actions after processing | `src/App.tsx:199` | TBD |

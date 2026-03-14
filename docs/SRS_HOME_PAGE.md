@@ -294,7 +294,7 @@ App
   - Added CC-REQ-HOME-VIS-001 to 005: Card styling, hover effects, spacing, typography, search bar
   - Added CC-REQ-HOME-ACC-001 to 005: Keyboard accessibility, focus states, ARIA labels, skip link, grid layout
   - Added CC-REQ-HOME-RESP-001 to 002: Mobile navigation, responsive stats grid
-  - References VISUAL_AUDIT_REPORT.md findings
+  - References archive/audits/VISUAL_AUDIT_REPORT.md findings
 - **2026-01-04** - Updated CC-REQ-HOME-PERF-001 (v0.8.12): Two-batch loading pattern for mobile reliability
 - **2026-01-03** - Added performance requirements (v0.8.9): parallel data loading, debounced search
 - **2026-01-02** - Added My Timelines pagination requirements (configurable page size, Load More button, pagination loading states) and removed legacy demo-only references; refreshed code pointers to Firestore-backed flows.
