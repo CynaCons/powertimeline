@@ -816,13 +816,13 @@ function HomePageContent() {
                     <div className="absolute bottom-2 right-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                         timeline.visibility === 'public'
-                          ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300'
+                          ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                           : timeline.visibility === 'private'
-                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                          ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
+                          : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                       }`}>
-                        {timeline.visibility === 'public' ? '🌍 Public' :
-                         timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                        {timeline.visibility === 'public' ? 'Public' :
+                         timeline.visibility === 'private' ? 'Private' : 'Unlisted'}
                       </span>
                     </div>
                   </div>
@@ -917,13 +917,13 @@ function HomePageContent() {
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       timeline.visibility === 'public'
-                        ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300'
+                        ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                         : timeline.visibility === 'private'
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                        ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
+                        : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                     }`}>
-                      {timeline.visibility === 'public' ? '🌍 Public' :
-                       timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                      {timeline.visibility === 'public' ? 'Public' :
+                       timeline.visibility === 'private' ? 'Private' : 'Unlisted'}
                     </span>
                   </div>
                 </div>
@@ -1034,13 +1034,13 @@ function HomePageContent() {
                   <div className="absolute bottom-2 right-2">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       timeline.visibility === 'public'
-                        ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300'
+                        ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                         : timeline.visibility === 'private'
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                        ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
+                        : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                     }`}>
-                      {timeline.visibility === 'public' ? '🌍 Public' :
-                       timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                      {timeline.visibility === 'public' ? 'Public' :
+                       timeline.visibility === 'private' ? 'Private' : 'Unlisted'}
                     </span>
                   </div>
                 </div>
@@ -1116,13 +1116,13 @@ function HomePageContent() {
                     <div className="absolute bottom-2 right-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                         timeline.visibility === 'public'
-                          ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300'
+                          ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                           : timeline.visibility === 'private'
-                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                          ? 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
+                          : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
                       }`}>
-                        {timeline.visibility === 'public' ? '🌍 Public' :
-                         timeline.visibility === 'private' ? '🔒 Private' : '🔗 Unlisted'}
+                        {timeline.visibility === 'public' ? 'Public' :
+                         timeline.visibility === 'private' ? 'Private' : 'Unlisted'}
                       </span>
                     </div>
                   </div>
