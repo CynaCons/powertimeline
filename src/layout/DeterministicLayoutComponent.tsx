@@ -460,7 +460,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     return map;
   }, [layoutResult.positionedCards]);
 
-  // CC-REQ-ANCHOR-004: Create anchors for ALL events that have positioned cards
+  // CC-REQ-ANCHOR-004: Create anchors for events within the visible time window
   // Anchors persist regardless of card degradation (overflow), providing timeline reference
   const anchors = useMemo(() => {
     if (!timelineRange || events.length === 0) return [];
@@ -474,6 +474,16 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     const usableWidth = Math.max(1, viewportSize.width - leftMargin - rightMargin);
     const viewRange = timelineRange.dateRange;
     const viewMin = timelineRange.minDate;
+    const viewMax = timelineRange.maxDate;
+
+    // Filter events to visible time window to prevent ghost overflow badges.
+    // Events outside the view window have no positioned cards, so they would
+    // all be counted as "overflow" and their clamped X positions would create
+    // phantom badges at the viewport edges.
+    const viewWindowEvents = events.filter(event => {
+      const timestamp = getEventTimestamp(event);
+      return timestamp >= viewMin && timestamp <= viewMax;
+    });
 
     // Create a set of event IDs that have visible cards
     const visibleEventIds = new Set(layoutResult.positionedCards.map(c => c.event.id));
@@ -482,7 +492,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     const CLUSTER_THRESHOLD = 10;
     const anchorGroups: Map<number, { events: Event[], x: number }> = new Map();
 
-    events.forEach(event => {
+    viewWindowEvents.forEach(event => {
       const timestamp = getEventTimestamp(event);
       const ratio = (timestamp - viewMin) / viewRange;
       const rawX = leftMargin + ratio * usableWidth;
@@ -1126,7 +1136,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
             data-cluster-id={card.clusterId}
             data-tour={isFirstCard ? 'event-card' : undefined}
             data-preview={isPreviewEvent || undefined}
-            className={`absolute rounded-xl shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} ${sessionDecisionClass} text-sm`}
+            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} ${sessionDecisionClass} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}

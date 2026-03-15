@@ -170,6 +170,10 @@ export class PositioningEngine {
     // Final collision resolution pass (per-side) to eliminate any residual overlaps
     this.resolveCollisions(positionedCards);
 
+    // Re-compact clusters: collision resolution may push same-column cards apart, creating gaps.
+    // Re-stack each cluster's cards tightly from the card closest to the timeline outward.
+    this.recompactClusters(positionedCards);
+
     const capacityMetrics = this.capacityModel.getGlobalMetrics();
     const derivedUsedSlots = positionedCards.reduce((sum, card) => {
       const footprint = CARD_FOOTPRINTS[card.cardType] ?? 0;
@@ -414,6 +418,69 @@ export class PositioningEngine {
     const below = positionedCards.filter(c => c.y >= this.timelineY);
     resolveOverlaps(above, true);
     resolveOverlaps(below, true);
+  }
+
+  /**
+   * Re-compact clusters after collision resolution.
+   * Collision resolution can push cards far from the timeline axis and create gaps.
+   * This re-anchors each cluster's baseline card near the timeline and re-stacks tightly.
+   */
+  private recompactClusters(positionedCards: PositionedCard[]): void {
+    const cardSpacing = 12;
+    const aboveTimelineMargin = 48;
+    const belowTimelineMargin = 55;
+    const MINIMAP_SAFE_ZONE = 100;
+
+    // Group cards by clusterId
+    const clusterMap = new Map<string, PositionedCard[]>();
+    for (const card of positionedCards) {
+      if (!card.clusterId) continue;
+      if (!clusterMap.has(card.clusterId)) clusterMap.set(card.clusterId, []);
+      clusterMap.get(card.clusterId)!.push(card);
+    }
+
+    for (const [, cards] of clusterMap) {
+      if (cards.length < 1) continue;
+
+      const isAbove = cards[0].clusterId?.startsWith('above') ?? cards[0].y + cards[0].height / 2 < this.timelineY;
+
+      if (isAbove) {
+        // Sort by Y descending (closest to timeline = highest Y first)
+        cards.sort((a, b) => b.y - a.y);
+
+        // Re-anchor baseline card to its ideal position near the timeline
+        const baselineCard = cards[0];
+        const idealY = this.timelineY - aboveTimelineMargin - baselineCard.height;
+        if (baselineCard.y < idealY) {
+          baselineCard.y = idealY;
+        }
+
+        // Re-stack remaining cards tightly upward from baseline
+        for (let i = 1; i < cards.length; i++) {
+          const prevCard = cards[i - 1];
+          const expectedY = prevCard.y - cardSpacing - cards[i].height;
+          // Clamp to minimap safe zone
+          cards[i].y = Math.max(MINIMAP_SAFE_ZONE, expectedY);
+        }
+      } else {
+        // Sort by Y ascending (closest to timeline = lowest Y first)
+        cards.sort((a, b) => a.y - b.y);
+
+        // Re-anchor baseline card to its ideal position near the timeline
+        const baselineCard = cards[0];
+        const idealY = this.timelineY + belowTimelineMargin;
+        if (baselineCard.y > idealY) {
+          baselineCard.y = idealY;
+        }
+
+        // Re-stack remaining cards tightly downward from baseline
+        for (let i = 1; i < cards.length; i++) {
+          const prevCard = cards[i - 1];
+          const expectedY = prevCard.y + prevCard.height + cardSpacing;
+          cards[i].y = expectedY;
+        }
+      }
+    }
   }
 
   /**

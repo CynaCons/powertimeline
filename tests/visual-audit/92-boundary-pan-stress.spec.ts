@@ -7,6 +7,7 @@ const TEST_OWNER_USERNAME = 'cynacons';
 const TEST_TIMELINE_ID = 'french-revolution';
 const CARD_SELECTOR = '[data-testid*="event-card"], [class*="event-card"]';
 const MINIMAP_SELECTOR = '[data-testid="minimap-container"]';
+const OVERFLOW_BADGE_SELECTOR = '[data-testid^="overflow-badge-"], [data-testid^="merged-overflow-badge-"]';
 
 type CardSnapshot = {
   totalDomCards: number;
@@ -35,6 +36,71 @@ async function navigateToDenseArea(page: Page, position = 0.6) {
 
   console.log('?? Minimap not found - starting pan tests from default view');
   return { success: false };
+}
+
+/**
+ * Check for ghost overflow badges: badges that appear when no (or very few) cards are visible.
+ * Returns the count of overflow badges and visible cards so callers can assert.
+ */
+async function checkOverflowBadges(page: Page): Promise<{ badges: number; cards: number; badgeDetails: Array<{ id: string; text: string; x: number; y: number }> }> {
+  const badges = page.locator(OVERFLOW_BADGE_SELECTOR);
+  const badgeCount = await badges.count();
+  const cards = await page.locator(CARD_SELECTOR).count();
+
+  const badgeDetails: Array<{ id: string; text: string; x: number; y: number }> = [];
+  for (let i = 0; i < badgeCount; i++) {
+    const badge = badges.nth(i);
+    const text = await badge.textContent() || '';
+    const id = await badge.getAttribute('data-testid') || '';
+    const box = await badge.boundingBox();
+    badgeDetails.push({ id, text, x: Math.round(box?.x ?? 0), y: Math.round(box?.y ?? 0) });
+  }
+
+  return { badges: badgeCount, cards, badgeDetails };
+}
+
+/**
+ * Dismiss the Stream Viewer overlay if it's visible (auto-opens on mobile/tablet).
+ * Must be called before interacting with zoom/pan controls.
+ */
+async function dismissMobileOverlays(page: Page): Promise<void> {
+  // On mobile/tablet: Stream Viewer and MobileNotice block the canvas.
+  // Click both dismiss buttons in a retry loop since closing one may reveal the other.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const acted = await page.evaluate(() => {
+      let found = false;
+      // Click "Continue to Canvas" if MobileNotice is visible
+      const btns = Array.from(document.querySelectorAll('button'));
+      const continueBtn = btns.find(b => b.textContent?.includes('Continue to Canvas'));
+      if (continueBtn) { continueBtn.click(); found = true; }
+      // Click stream viewer close button if visible
+      const closeBtn = document.querySelector('[data-testid="stream-close-button"]') as HTMLElement;
+      if (closeBtn) { closeBtn.click(); found = true; }
+      return found;
+    });
+    if (!acted) break;
+    await page.waitForTimeout(500);
+  }
+}
+
+/** Click a zoom button via JS to bypass overlay interception */
+async function clickZoom(page: Page, direction: 'in' | 'out'): Promise<void> {
+  const testId = direction === 'in' ? 'btn-zoom-in' : 'btn-zoom-out';
+  await page.evaluate((id) => {
+    const btn = document.querySelector(`[data-testid="${id}"]`) as HTMLElement;
+    if (btn) btn.click();
+  }, testId);
+}
+
+/** Scroll via synthetic WheelEvent to avoid mouse.wheel which isn't supported in mobile WebKit */
+async function scrollPage(page: Page, deltaX: number, deltaY: number): Promise<void> {
+  await page.evaluate(({ dx, dy }) => {
+    // Dispatch a synthetic wheel event on the canvas area to trigger the timeline's wheel handler
+    const target = document.querySelector('[data-testid="timeline-axis"]')?.parentElement || document.body;
+    target.dispatchEvent(new WheelEvent('wheel', {
+      deltaX: dx, deltaY: dy, bubbles: true, cancelable: true
+    }));
+  }, { dx: deltaX, dy: deltaY });
 }
 
 async function captureCardSnapshot(page: Page): Promise<CardSnapshot> {
@@ -84,6 +150,7 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
   test('T92.1: pan to far left boundary', async ({ page }) => {
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page);
+    await dismissMobileOverlays(page);
     await page.waitForTimeout(2000);
 
     console.log('=== PAN TO FAR LEFT BOUNDARY ===');
@@ -104,7 +171,7 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
     console.log('Zooming in 15x...');
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible().catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(150);
       }
     }
@@ -182,6 +249,13 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
       console.log(`❌ Left boundary violation: card extends ${Math.abs(leftBoundaryCheck.violation)}px beyond left edge`);
     }
 
+    // Check for ghost overflow badges in this boundary view
+    const overflowCheck = await checkOverflowBadges(page);
+    console.log(`Overflow badges: ${overflowCheck.badges}, Visible cards: ${overflowCheck.cards}`);
+    if (overflowCheck.badges > 0) {
+      console.log('Badge details:', overflowCheck.badgeDetails.map(b => `${b.id}="${b.text}" at (${b.x},${b.y})`).join(', '));
+    }
+
     // Take screenshot
     await page.screenshot({
       path: path.join(screenshotsDir, 't92-1-pan-far-left.png'),
@@ -190,11 +264,18 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
 
     // Assert boundary is respected (allow small tolerance for sub-pixel positioning)
     expect(leftBoundaryCheck.leftmostCard.x).toBeGreaterThanOrEqual(-5);
+
+    // CRITICAL: Empty or sparse boundary views must not show ghost overflow badges.
+    // If few/no cards are visible after panning to the far left, there should be no overflow badges.
+    if (overflowCheck.cards <= 2) {
+      expect(overflowCheck.badges, 'Ghost overflow badges in empty/sparse left boundary view').toBe(0);
+    }
   });
 
   test('T92.2: pan to far right boundary', async ({ page }) => {
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page);
+    await dismissMobileOverlays(page);
     await page.waitForTimeout(2000);
 
     console.log('=== PAN TO FAR RIGHT BOUNDARY ===');
@@ -215,7 +296,7 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
     console.log('Zooming in 15x...');
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible().catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(150);
       }
     }
@@ -297,6 +378,13 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
       console.log(`❌ Right boundary violation: card extends ${Math.round(rightBoundaryCheck.violation)}px beyond right edge`);
     }
 
+    // Check for ghost overflow badges in this boundary view
+    const overflowCheck = await checkOverflowBadges(page);
+    console.log(`Overflow badges: ${overflowCheck.badges}, Visible cards: ${overflowCheck.cards}`);
+    if (overflowCheck.badges > 0) {
+      console.log('Badge details:', overflowCheck.badgeDetails.map(b => `${b.id}="${b.text}" at (${b.x},${b.y})`).join(', '));
+    }
+
     // Take screenshot
     await page.screenshot({
       path: path.join(screenshotsDir, 't92-2-pan-far-right.png'),
@@ -305,11 +393,19 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
 
     // Assert boundary is respected (allow small tolerance)
     expect(rightBoundaryCheck.rightmostCard.right).toBeLessThanOrEqual(viewport.width + 5);
+
+    // CRITICAL: Empty or sparse boundary views must not show ghost overflow badges.
+    if (overflowCheck.cards <= 2) {
+      expect(overflowCheck.badges, 'Ghost overflow badges in empty/sparse right boundary view').toBe(0);
+    }
   });
 
-  test('T92.3: vertical scroll extremes - top and bottom', async ({ page }) => {
+  test('T92.3: vertical scroll extremes - top and bottom', async ({ page, browserName }) => {
+    // mouse.wheel is not supported in mobile WebKit; synthetic WheelEvent is unreliable for vertical scroll
+    test.skip(browserName === 'webkit', 'Vertical scroll via mouse.wheel not supported in mobile WebKit');
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page);
+    await dismissMobileOverlays(page);
     await page.waitForTimeout(2000);
 
     console.log('=== VERTICAL SCROLL EXTREMES - TOP AND BOTTOM ===');
@@ -330,7 +426,7 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
     console.log('Zooming in 20x...');
     for (let i = 0; i < 20; i++) {
       if (await zoomInBtn.isVisible().catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(150);
       }
     }
@@ -427,6 +523,10 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
       console.log(`⚠️ Card may overlap breadcrumb zone (clearance: ${Math.round(topBoundaryCheck.clearance)}px)`);
     }
 
+    // Check for ghost overflow badges after scrolling to top extreme
+    const topOverflowCheck = await checkOverflowBadges(page);
+    console.log(`Top boundary - Overflow badges: ${topOverflowCheck.badges}, Visible cards: ${topOverflowCheck.cards}`);
+
     // Take screenshot of top boundary
     await page.screenshot({
       path: path.join(screenshotsDir, 't92-3-scroll-top.png'),
@@ -517,6 +617,10 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
       console.log(`⚠️ Card may overlap zoom control zone (clearance: ${Math.round(bottomBoundaryCheck.clearance)}px)`);
     }
 
+    // Check for ghost overflow badges after scrolling to bottom extreme
+    const bottomOverflowCheck = await checkOverflowBadges(page);
+    console.log(`Bottom boundary - Overflow badges: ${bottomOverflowCheck.badges}, Visible cards: ${bottomOverflowCheck.cards}`);
+
     // Take screenshot of bottom boundary
     await page.screenshot({
       path: path.join(screenshotsDir, 't92-3-scroll-bottom.png'),
@@ -527,6 +631,14 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
     // Breadcrumbs at top, zoom controls at bottom
     expect(topBoundaryCheck.topmostCard.top).toBeGreaterThanOrEqual(-50); // Allow some off-screen
     expect(bottomBoundaryCheck.bottommostCard.bottom).toBeLessThanOrEqual(viewport.height + 50);
+
+    // Overflow badge assertions for vertical scroll extremes
+    if (topOverflowCheck.cards <= 2) {
+      expect(topOverflowCheck.badges, 'Ghost overflow badges at top scroll extreme').toBe(0);
+    }
+    if (bottomOverflowCheck.cards <= 2) {
+      expect(bottomOverflowCheck.badges, 'Ghost overflow badges at bottom scroll extreme').toBe(0);
+    }
 
     // CRITICAL: Assert that top and bottom screenshots show DIFFERENT views
     console.log('\n=== TOP vs BOTTOM COMPARISON ===');
@@ -542,9 +654,11 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
     expect(topBottomIdentical, 'Top and bottom boundaries must show different views').toBe(false);
   });
 
-  test('T92.4: diagonal pan to all four corners', async ({ page }) => {
+  test('T92.4: diagonal pan to all four corners', async ({ page, browserName }) => {
+    test.skip(browserName === 'webkit', 'Vertical scroll via mouse.wheel not supported in mobile WebKit');
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page);
+    await dismissMobileOverlays(page);
     await page.waitForTimeout(2000);
 
     console.log('=== DIAGONAL PAN TO ALL FOUR CORNERS ===');
@@ -565,7 +679,7 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
     console.log('Zooming in 15x...');
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible().catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(150);
       }
     }
@@ -596,13 +710,13 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
       const zoomOutBtn = page.locator('[data-testid="btn-zoom-out"]').first();
       for (let i = 0; i < 5; i++) {
         if (await zoomOutBtn.isVisible().catch(() => false)) {
-          await zoomOutBtn.click();
+          await clickZoom(page, 'out');
           await page.waitForTimeout(100);
         }
       }
       for (let i = 0; i < 5; i++) {
         if (await zoomInBtn.isVisible().catch(() => false)) {
-          await zoomInBtn.click();
+          await clickZoom(page, 'in');
           await page.waitForTimeout(100);
         }
       }
@@ -727,7 +841,11 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
         console.log(`⚠️ ${cornerCheck.controlZoneViolations} cards in control zones at ${corner.name} corner`);
       }
 
-      cornerResults.push(cornerCheck);
+      // Check for ghost overflow badges at this corner
+      const overflowCheck = await checkOverflowBadges(page);
+      console.log(`Overflow badges: ${overflowCheck.badges}, Visible cards: ${overflowCheck.cards}`);
+
+      cornerResults.push({ ...cornerCheck, overflowBadges: overflowCheck.badges, overflowCards: overflowCheck.cards });
 
       // Take screenshot
       const screenshotName = `t92-4-corner-${corner.name.toLowerCase().replace('-', '_')}.png`;
@@ -735,6 +853,11 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
         path: path.join(screenshotsDir, screenshotName),
         fullPage: false
       });
+
+      // Assert no ghost overflow badges in empty/sparse corner views
+      if (overflowCheck.cards <= 2) {
+        expect(overflowCheck.badges, `Ghost overflow badges at ${corner.name} corner`).toBe(0);
+      }
     }
 
     // Summary
@@ -765,8 +888,9 @@ test.describe('Boundary Stress Tests - Pan Extremes', () => {
       console.log(`✅ ${cornersWithCards} corners had visible cards`);
     }
 
-    // Test passes - this is an audit of boundary behavior
-    expect(true).toBe(true);
+    // Note: corners may have zero visible cards if panning overshoots timeline bounds.
+    // The key assertion above is no ghost overflow badges in empty corners.
+    console.log(`${cornersWithCards}/${corners.length} corners had visible cards`);
   });
 
 });

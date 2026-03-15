@@ -1,10 +1,40 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { loadTimeline, waitForEditorLoaded, skipIfNoCredentials } from '../utils/timelineTestUtils';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const TEST_OWNER_USERNAME = 'cynacons';
 const TEST_TIMELINE_ID = 'french-revolution';
+
+/**
+ * Dismiss the Stream Viewer overlay if it's visible (auto-opens on mobile/tablet).
+ */
+async function dismissMobileOverlays(page: Page): Promise<void> {
+  // On mobile/tablet: Stream Viewer and MobileNotice block the canvas.
+  // Click both dismiss buttons in a retry loop since closing one may reveal the other.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const acted = await page.evaluate(() => {
+      let found = false;
+      const btns = Array.from(document.querySelectorAll('button'));
+      const continueBtn = btns.find(b => b.textContent?.includes('Continue to Canvas'));
+      if (continueBtn) { continueBtn.click(); found = true; }
+      const closeBtn = document.querySelector('[data-testid="stream-close-button"]') as HTMLElement;
+      if (closeBtn) { closeBtn.click(); found = true; }
+      return found;
+    });
+    if (!acted) break;
+    await page.waitForTimeout(500);
+  }
+}
+
+/** Click a zoom button via JS to bypass overlay interception */
+async function clickZoom(page: Page, direction: 'in' | 'out'): Promise<void> {
+  const testId = direction === 'in' ? 'btn-zoom-in' : 'btn-zoom-out';
+  await page.evaluate((id) => {
+    const btn = document.querySelector(`[data-testid="${id}"]`) as HTMLElement;
+    if (btn) btn.click();
+  }, testId);
+}
 
 test.describe('Overflow Indicator Audit', () => {
   const screenshotsDir = path.join(process.cwd(), 'screenshots', 'visual-audit');
@@ -19,6 +49,7 @@ test.describe('Overflow Indicator Audit', () => {
     skipIfNoCredentials(test);
     await loadTimeline(page, TEST_OWNER_USERNAME, TEST_TIMELINE_ID, false);
     await waitForEditorLoaded(page);
+    await dismissMobileOverlays(page);
     await page.waitForTimeout(1500);
 
     // Verify timeline loaded correctly
@@ -48,7 +79,7 @@ test.describe('Overflow Indicator Audit', () => {
   const zoomInBtn = page.locator('[data-testid="btn-zoom-in"]').first();
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(150);
       }
     }
@@ -115,7 +146,7 @@ test.describe('Overflow Indicator Audit', () => {
   const zoomInBtn = page.locator('[data-testid="btn-zoom-in"]').first();
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(150);
       }
     }
@@ -128,7 +159,7 @@ test.describe('Overflow Indicator Audit', () => {
   const zoomOutBtn = page.locator('[data-testid="btn-zoom-out"]').first();
     for (let i = 0; i < 20; i++) {
       if (await zoomOutBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await zoomOutBtn.click();
+        await clickZoom(page, 'out');
         await page.waitForTimeout(150);
       }
     }
@@ -172,7 +203,7 @@ test.describe('Overflow Indicator Audit', () => {
   const zoomInBtn = page.locator('[data-testid="btn-zoom-in"]').first();
     for (let i = 0; i < 10; i++) {
       if (await zoomInBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(100);
       }
     }
@@ -239,7 +270,7 @@ test.describe('Overflow Indicator Audit', () => {
   const zoomInBtn = page.locator('[data-testid="btn-zoom-in"]').first();
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(100);
       }
     }
@@ -303,7 +334,7 @@ test.describe('Overflow Indicator Audit', () => {
   const zoomInBtn = page.locator('[data-testid="btn-zoom-in"]').first();
     for (let i = 0; i < 15; i++) {
       if (await zoomInBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await zoomInBtn.click();
+        await clickZoom(page, 'in');
         await page.waitForTimeout(100);
       }
     }
