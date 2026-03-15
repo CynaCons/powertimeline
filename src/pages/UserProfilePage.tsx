@@ -26,6 +26,9 @@ import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { Helmet } from 'react-helmet-async';
+import { userProfileUrl, OG_IMAGE_URL } from '../utils/urls';
+import { profilePageSchema, breadcrumbSchema } from '../utils/jsonLd';
+import { browseUrl } from '../utils/urls';
 
 export function UserProfilePage() {
   // Support both /@:username (preferred) and /user/:userId (legacy) routes
@@ -263,7 +266,7 @@ export function UserProfilePage() {
   // Dynamic page title and meta tags
   const pageTitle = user ? `@${user.username}'s Timelines | PowerTimeline` : 'PowerTimeline';
   const pageDescription = user ? `Explore timelines by @${user.username}. ${timelines.length} timeline${timelines.length !== 1 ? 's' : ''} with ${timelines.reduce((sum, t) => sum + (t.eventCount || 0), 0)} total events.` : 'Explore timelines on PowerTimeline';
-  const pageUrl = user ? `https://powertimeline.com/${user.username}` : 'https://powertimeline.com';
+  const pageUrl = user ? userProfileUrl(user.username) : '';
 
   return (
     <>
@@ -271,13 +274,14 @@ export function UserProfilePage() {
         <Helmet>
           <title>{pageTitle}</title>
           <meta name="description" content={pageDescription} />
+          <link rel="canonical" href={pageUrl} />
 
           {/* Open Graph */}
           <meta property="og:type" content="profile" />
           <meta property="og:url" content={pageUrl} />
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={pageDescription} />
-          <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+          <meta property="og:image" content={OG_IMAGE_URL} />
           <meta property="profile:username" content={user.username} />
 
           {/* Twitter Card */}
@@ -285,7 +289,16 @@ export function UserProfilePage() {
           <meta name="twitter:url" content={pageUrl} />
           <meta name="twitter:title" content={pageTitle} />
           <meta name="twitter:description" content={pageDescription} />
-          <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+          <meta name="twitter:image" content={OG_IMAGE_URL} />
+
+          {/* JSON-LD */}
+          <script type="application/ld+json">{JSON.stringify([
+            profilePageSchema(user),
+            breadcrumbSchema([
+              { name: 'Home', url: browseUrl() },
+              { name: `@${user.username}` },
+            ]),
+          ])}</script>
         </Helmet>
       )}
 

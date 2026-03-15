@@ -12,7 +12,7 @@ import { getTimeline, updateTimeline, getUser, addEvent, updateEvent as updateEv
 import type { User } from './types';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
-import { useToast } from './contexts/ToastContext';
+
 import { useTheme } from './contexts/ThemeContext';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -49,12 +49,16 @@ import { usePerformanceMonitoring } from './app/hooks/usePerformanceMonitoring';
 import { ErrorState } from './components/ErrorState';
 import { TourProvider, useTour } from './components/tours/TourProvider';
 import { EditorTour } from './components/tours/EditorTour';
+import { ShareMenu } from './components/ShareMenu';
+import { EmbedCodeDialog } from './components/EmbedCodeDialog';
+import { embedUrl as buildEmbedUrl } from './utils/urls';
 
 const DEV_FLAG_KEY = 'powertimeline-dev';
 
 interface AppProps {
   timelineId?: string;  // Optional timeline ID to load from home page storage
   readOnly?: boolean;   // Read-only mode: hide authoring overlay, show lock icon on nav rail
+  embed?: boolean;      // Embed mode: hide all chrome except timeline + minimap
   initialStreamViewOpen?: boolean;  // Open stream view on mount (for mobile first experience)
   onStreamViewChange?: (isOpen: boolean) => void;  // Callback when stream view opens/closes
 }
@@ -222,7 +226,7 @@ function AIEventBridge({ aiActions, existingEvents, onProcessed }: AIEventBridge
 }
 
 // Inner component that uses tour context
-function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = false, onStreamViewChange }: AppProps = {}) {
+function AppContent({ timelineId, readOnly = false, embed = false, initialStreamViewOpen = false, onStreamViewChange }: AppProps = {}) {
   // Ownership is inverse of readOnly (readOnly = false means user owns the timeline)
   const isOwner = !readOnly;
   usePerformanceMonitoring();
@@ -483,6 +487,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
   const [showReviewPanel, setShowReviewPanel] = useState(false);
   const [reviewEvent, setReviewEvent] = useState<Event | null>(null);
   const [reviewEventSaveHandler, setReviewEventSaveHandler] = useState<((edits: Partial<Event>) => void) | null>(null);
+  const [embedDialogOpen, setEmbedDialogOpen] = useState(false);
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -502,8 +507,6 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
 
   // Navigation and theme hooks
   const { toggleTheme } = useTheme();
-  const { showToast } = useToast();
-
   // Theme: dark-only (no data-theme switch)
   useEffect(() => {
     try {
@@ -1162,20 +1165,13 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
     startTour('editor-tour');
   }, [startTour]);
 
-  // Share handler - copy timeline URL to clipboard
-  const handleShareLink = useCallback(() => {
-    if (!currentTimeline) return;
-    // Get username from URL path (format: /:username/timeline/:id)
+  // Share URL for the current timeline
+  const shareUrl = useMemo(() => {
+    if (!currentTimeline) return '';
     const pathParts = window.location.pathname.split('/');
     const username = pathParts[1];
-    const url = `${window.location.origin}/${username}/timeline/${currentTimeline.id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      showToast('Link copied to clipboard!', 'success');
-    }).catch((error) => {
-      console.error('Failed to copy link:', error);
-      showToast('Failed to copy link', 'error');
-    });
-  }, [currentTimeline, showToast]);
+    return `${window.location.origin}/${username}/timeline/${currentTimeline.id}`;
+  }, [currentTimeline]);
 
   // Get context-aware navigation configuration
   const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser, handleHelpClick);
@@ -1256,7 +1252,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
       <div className="min-h-screen transition-theme" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
         {/* Full-bleed canvas area - no header, maximum space */}
         <div className="relative h-screen">
-        {/* Enhanced Navigation Rail - Always visible */}
+        {/* Enhanced Navigation Rail - Always visible (hidden in embed mode) */}
+        {!embed && (
         <aside className="absolute left-0 top-0 bottom-0 w-14 border-r z-[60] flex flex-col items-center py-2" style={{ borderColor: 'var(--color-border-primary)', backgroundColor: 'var(--color-surface-elevated)' }}>
           {/* PowerTimeline logo at top - clickable to go home */}
           <button
@@ -1301,6 +1298,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
             <ThemeToggleButton />
           </div>
         </aside>
+        )}
 
         {/* Overlays next to the sidebar, never covering it */}
         {overlay && !loadError && (
@@ -1500,38 +1498,20 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
               )}
 
               {/* Share button and user profile - top-right corner */}
-              {currentTimeline && (
+              {currentTimeline && !embed && (
                 <div
                   className="absolute top-20 right-4 z-20 flex flex-col items-end gap-2"
                   onClick={(e) => e.stopPropagation()}
                   onMouseDown={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
-                  {/* Share Button - fixed size circular */}
-                  <Tooltip title="Copy link to share" placement="left">
-                    <IconButton
-                      onClick={(e) => { e.stopPropagation(); handleShareLink(); }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      size="small"
-                      sx={{
-                        backgroundColor: 'var(--color-surface)',
-                        border: '1px solid var(--color-border-primary)',
-                        backdropFilter: 'blur(8px)',
-                        width: '44px',
-                        height: '44px',
-                        padding: '8px',
-                        borderRadius: '50%',
-                        flexShrink: 0,
-                        '&:hover': {
-                          backgroundColor: 'var(--color-surface-hover)',
-                        },
-                      }}
-                      aria-label="Share timeline"
-                      data-testid="btn-share"
-                    >
-                      <span className="material-symbols-rounded" aria-hidden="true">share</span>
-                    </IconButton>
-                  </Tooltip>
+                  {/* Share Menu - replaces single share button */}
+                  <ShareMenu
+                    url={shareUrl}
+                    title={currentTimeline.title}
+                    description={currentTimeline.description}
+                    onEmbedClick={() => setEmbedDialogOpen(true)}
+                  />
 
                   {/* User Profile Button - only when logged in */}
                   {firebaseUser && (
@@ -1545,8 +1525,8 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                 </div>
               )}
 
-              {/* Icon-based control bar */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[60] transition-opacity duration-200 opacity-20 hover:opacity-95" data-tour="zoom-controls" data-testid="zoom-controls">
+              {/* Icon-based control bar (hidden in embed mode) */}
+              {!embed && <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[60] transition-opacity duration-200 opacity-20 hover:opacity-95" data-tour="zoom-controls" data-testid="zoom-controls">
                 <div className="backdrop-blur-sm border rounded-xl shadow-xl px-3 py-2 flex gap-1 items-center" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-primary)', opacity: 0.95 }}>
                   <Tooltip title="Pan left" placement="top"><IconButton size="small" color="default" onClick={() => nudge(-0.1)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Pan left"><span className="material-symbols-rounded" aria-hidden="true">chevron_left</span></IconButton></Tooltip>
                   <Tooltip title="Pan right" placement="top"><IconButton size="small" color="default" onClick={() => nudge(0.1)} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Pan right"><span className="material-symbols-rounded" aria-hidden="true">chevron_right</span></IconButton></Tooltip>
@@ -1556,7 +1536,7 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
                   <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border-primary)' }}></div>
                   <Tooltip title="Fit all" placement="top"><IconButton data-testid="btn-fit-all" size="small" color="info" onClick={() => { animateTo(0, 1); }} sx={{ minWidth: '44px', minHeight: '44px' }} aria-label="Fit all"><FitScreenIcon fontSize="small" aria-hidden="true" /></IconButton></Tooltip>
                 </div>
-              </div>
+              </div>}
             </div>
           )}
               </div>
@@ -1564,15 +1544,31 @@ function AppContent({ timelineId, readOnly = false, initialStreamViewOpen = fals
           )}
         </SessionEventMerge>
 
-        {/* Command Palette */}
-        <Suspense fallback={null}>
-          <CommandPalette
-            isOpen={commandPaletteOpen}
-            onClose={() => setCommandPaletteOpen(false)}
-            commands={commands}
-            placeholder="Search commands... (Ctrl+K)"
+        {/* Command Palette (hidden in embed mode) */}
+        {!embed && (
+          <Suspense fallback={null}>
+            <CommandPalette
+              isOpen={commandPaletteOpen}
+              onClose={() => setCommandPaletteOpen(false)}
+              commands={commands}
+              placeholder="Search commands... (Ctrl+K)"
+            />
+          </Suspense>
+        )}
+
+        {/* Embed Code Dialog */}
+        {currentTimeline && (
+          <EmbedCodeDialog
+            open={embedDialogOpen}
+            onClose={() => setEmbedDialogOpen(false)}
+            embedUrl={(() => {
+              const pathParts = window.location.pathname.split('/');
+              const username = pathParts[1];
+              return buildEmbedUrl(username, currentTimeline.id);
+            })()}
+            title={currentTimeline.title}
           />
-        </Suspense>
+        )}
 
         {/* Stream Viewer Overlay (v0.5.26) - mobile-friendly timeline view */}
         <Suspense fallback={null}>

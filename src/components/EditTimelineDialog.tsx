@@ -3,7 +3,7 @@
  * Implements CC-REQ-EDIT-001 through CC-REQ-EDIT-005
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -38,6 +38,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
   const [idError, setIdError] = useState('');
   const [generalError, setGeneralError] = useState('');
   const [timeline, setTimeline] = useState<Timeline | null>(null);
+  const latestCustomIdRef = useRef(customId);
 
   // Load timeline data when dialog opens
   useEffect(() => {
@@ -59,6 +60,14 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     }
     loadTimeline();
   }, [open, timelineId]);
+
+  useEffect(() => {
+    latestCustomIdRef.current = customId;
+  }, [customId]);
+
+  useEffect(() => {
+    setIdError('');
+  }, [customId]);
 
   // Validation functions (moved to functions instead of useEffect for better performance)
   const validateTitle = useCallback((value: string): string => {
@@ -89,9 +98,15 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     // Check uniqueness (if ID changed)
     const fullId = `timeline-${value}`;
     if (fullId !== originalId) {
-      const isUnique = await isTimelineIdUnique(fullId, timeline.ownerId);
-      if (!isUnique) {
-        return 'This ID already exists for your account';
+      try {
+        const isUnique = await isTimelineIdUnique(fullId, timeline.ownerId);
+        if (!isUnique) {
+          return 'This ID already exists for your account';
+        }
+      } catch (error) {
+        return error instanceof Error
+          ? error.message
+          : 'Could not verify whether this ID is available. Please try again.';
       }
     }
 
@@ -108,8 +123,12 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
   };
 
   const handleIdBlur = async () => {
-    const error = await validateCustomId(customId);
-    setIdError(error);
+    const valueToValidate = customId;
+    const error = await validateCustomId(valueToValidate);
+
+    if (latestCustomIdRef.current === valueToValidate) {
+      setIdError(error);
+    }
   };
 
   const isFormValid =
@@ -117,9 +136,7 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
     title.length <= 100 &&
     description.length <= 500 &&
     customId.length > 0 &&
-    !titleError &&
-    !descriptionError &&
-    !idError;
+    /^[a-z0-9-]+$/.test(customId);
 
   const handleSave = async () => {
     if (!timeline) {
@@ -127,7 +144,15 @@ export function EditTimelineDialog({ open, timelineId, onClose, onSuccess }: Edi
       return;
     }
 
-    if (!isFormValid) {
+    const nextTitleError = validateTitle(title);
+    const nextDescriptionError = validateDescription(description);
+    const nextIdError = await validateCustomId(customId);
+
+    setTitleError(nextTitleError);
+    setDescriptionError(nextDescriptionError);
+    setIdError(nextIdError);
+
+    if (nextTitleError || nextDescriptionError || nextIdError) {
       return;
     }
 

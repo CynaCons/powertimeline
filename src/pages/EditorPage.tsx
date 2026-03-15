@@ -15,6 +15,8 @@ import { Helmet } from 'react-helmet-async';
 import { getTimeline, getUser, getUserByUsername, incrementTimelineViewCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { timelineUrl, userProfileUrl, OG_IMAGE_URL, browseUrl } from '../utils/urls';
+import { timelineArticleSchema, breadcrumbSchema } from '../utils/jsonLd';
 import type { Timeline, User } from '../types';
 import App from '../App';  // The existing editor
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -199,8 +201,8 @@ export function EditorPage() {
     ? `Explore ${timeline.title} timeline. ${timeline.eventCount || 0} events${timeline.description ? ` - ${timeline.description.substring(0, 100)}` : ''}`
     : 'Explore and create timelines on PowerTimeline';
   const pageUrl = timeline && user
-    ? `https://powertimeline.com/${user.username}/timeline/${timeline.id}`
-    : 'https://powertimeline.com';
+    ? timelineUrl(user.username, timeline.id)
+    : '';
 
   if (loading) {
     return (
@@ -232,23 +234,36 @@ export function EditorPage() {
         <Helmet>
           <title>{pageTitle}</title>
           <meta name="description" content={pageDescription} />
+          {pageUrl && <link rel="canonical" href={pageUrl} />}
 
           {/* Open Graph */}
           <meta property="og:type" content="article" />
-          <meta property="og:url" content={pageUrl} />
+          {pageUrl && <meta property="og:url" content={pageUrl} />}
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={pageDescription} />
-          <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+          <meta property="og:image" content={OG_IMAGE_URL} />
           {toISOStringSafe(timeline.createdAt) && <meta property="article:published_time" content={toISOStringSafe(timeline.createdAt)!} />}
           {toISOStringSafe(timeline.updatedAt) && <meta property="article:modified_time" content={toISOStringSafe(timeline.updatedAt)!} />}
-          {user && <meta property="article:author" content={`https://powertimeline.com/${user.username}`} />}
+          {user && <meta property="article:author" content={userProfileUrl(user.username)} />}
 
           {/* Twitter Card */}
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:url" content={pageUrl} />
+          {pageUrl && <meta name="twitter:url" content={pageUrl} />}
           <meta name="twitter:title" content={pageTitle} />
           <meta name="twitter:description" content={pageDescription} />
-          <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+          <meta name="twitter:image" content={OG_IMAGE_URL} />
+
+          {/* JSON-LD */}
+          {user && (
+            <script type="application/ld+json">{JSON.stringify([
+              timelineArticleSchema(timeline, user),
+              breadcrumbSchema([
+                { name: 'Home', url: browseUrl() },
+                { name: `@${user.username}`, url: userProfileUrl(user.username) },
+                { name: timeline.title },
+              ]),
+            ])}</script>
+          )}
         </Helmet>
       )}
 

@@ -7,6 +7,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { browseUrl, OG_IMAGE_URL } from '../utils/urls';
+import { webSiteSchema } from '../utils/jsonLd';
 import type { TimelineMetadata, User } from '../types';
 import {
   getTimeline,
@@ -441,20 +443,24 @@ function HomePageContent() {
       <Helmet>
         <title>Browse Timelines | PowerTimeline</title>
         <meta name="description" content="Explore public timelines, discover historical events, and find timelines created by the PowerTimeline community." />
+        <link rel="canonical" href={browseUrl()} />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://powertimeline.com/browse" />
+        <meta property="og:url" content={browseUrl()} />
         <meta property="og:title" content="Browse Timelines | PowerTimeline" />
         <meta property="og:description" content="Explore public timelines and discover historical events." />
-        <meta property="og:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+        <meta property="og:image" content={OG_IMAGE_URL} />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content="https://powertimeline.com/browse" />
+        <meta name="twitter:url" content={browseUrl()} />
         <meta name="twitter:title" content="Browse Timelines | PowerTimeline" />
         <meta name="twitter:description" content="Explore public timelines and discover historical events." />
-        <meta name="twitter:image" content="https://powertimeline.com/assets/images/PowerTimeline_banner.png" />
+        <meta name="twitter:image" content={OG_IMAGE_URL} />
+
+        {/* JSON-LD */}
+        <script type="application/ld+json">{JSON.stringify(webSiteSchema())}</script>
       </Helmet>
 
     <div data-testid="browse-page" className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>

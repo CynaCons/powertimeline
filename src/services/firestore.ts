@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
   setDoc,
   updateDoc,
@@ -16,6 +17,7 @@ import {
   collectionGroup,
   writeBatch,
   startAfter,
+  runTransaction,
   type QueryConstraint,
   type QueryDocumentSnapshot,
   type Unsubscribe,
@@ -474,7 +476,15 @@ export async function createTimeline(
       eventCount: events.length,
     };
 
-    await setDoc(timelineRef, newTimeline);
+    await runTransaction(db, async (transaction) => {
+      const existingTimeline = await transaction.get(timelineRef);
+
+      if (existingTimeline.exists()) {
+        throw new Error('This timeline ID is already in use.');
+      }
+
+      transaction.set(timelineRef, newTimeline);
+    });
 
     // If events were provided, add them to the subcollection
     if (events.length > 0) {
@@ -500,13 +510,13 @@ export async function createTimeline(
 export async function isTimelineIdUnique(timelineId: string, ownerId: string): Promise<boolean> {
   try {
     const timelineRef = doc(db, COLLECTIONS.USERS, ownerId, COLLECTIONS.TIMELINES, timelineId);
-    const timelineDoc = await getDoc(timelineRef);
+    const timelineDoc = await getDocFromServer(timelineRef);
 
     // ID is unique if document doesn't exist in this user's subcollection
     return !timelineDoc.exists();
   } catch (error) {
     console.error('Error checking timeline ID uniqueness:', error);
-    return false; // Assume not unique on error to be safe
+    throw new Error(getFirestoreErrorMessage(error));
   }
 }
 

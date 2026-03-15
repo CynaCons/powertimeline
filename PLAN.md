@@ -111,6 +111,7 @@
 - ✅ AI Chat Migration: AI event actions route through ImportSession with ReviewPanel approval, delete action support, 16 new unit tests (v0.9.5)
 - ✅ Critical Test Fixes: Overflow dependencies (viewStart/viewEnd), zoom handler synthetic event fallback, verified with focused tests (2026-01-18)
 - ✅ Viewport Strategy: Timeline editor restricted to desktop-only (mobile/tablet skip editor tests), Stream View is mobile experience (2026-01-18)
+- ✅ SEO & Social Sharing: Centralized URL builders (urls.ts), canonical URLs on all pages, JSON-LD structured data, robots.txt, sitemap cloud function, ShareMenu component (Twitter/X, Facebook, Reddit, Copy Link, Embed), embeddable timelines with EmbedPage, EmbedCodeDialog, embed route (v0.9.7)
 
 ### Next Up
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
@@ -1417,6 +1418,19 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 - [x] Archive historical audits, plans, and reports under `docs/archive/`
 - [x] Remove one-off markdown analysis notes and deprecated theme docs from the repo root
 - [x] Simplify `tests/README.md` to point at canonical test documentation in `docs/TESTS.md`
+
+### v0.9.6.4 - Overflow Badge Boundary Investigation and Test Hardening
+**Goal:** Reproduce reported ghost overflow badges at timeline boundaries and close the audit/assertion gaps in boundary stress coverage
+
+**Tasks:**
+- [ ] Reproduce the reported ghost overflow badge failures from `screenshots/visual-audit/t92-1-pan-far-left.png`, `t92-2-pan-far-right.png`, and `t92-3-scroll-bottom.png`
+- [ ] Trace whether the failures come from stale overflow state, boundary panning/scrolling logic, or badge-to-anchor positioning drift
+- [ ] Update `tests/visual-audit/92-boundary-pan-stress.spec.ts` so T92.1-T92.4 verify real overflow badge conditions instead of only taking screenshots
+- [ ] Add explicit T92 assertions that empty boundary views do not show overflow badges on the left, right, top, or bottom edges
+- [ ] Add T92 assertions for sparse boundary views so any remaining overflow badges stay attached to visible anchors and remain within valid viewport bounds
+- [ ] Align T92 boundary checks with the ghost badge expectations already covered by T93.3 and editor tests 30, 31, and 32
+- [ ] Remove or replace audit-only/no-op checks in the boundary scenarios wherever deterministic pass/fail assertions are feasible
+- [ ] Run the focused visual-audit and editor overflow suites after the fix and resolve any newly exposed regressions
 
 ---
 

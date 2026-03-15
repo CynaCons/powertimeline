@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
+import { timelineUrl } from '../utils/urls';
 
 interface TimelineCardMenuProps {
   timelineId: string;
@@ -55,13 +56,41 @@ export function TimelineCardMenu({
     navigate(`/${ownerUsername}/timeline/${timelineId}`);
   };
 
+  const canonicalUrl = timelineUrl(ownerUsername, timelineId);
+
   const handleCopyLink = (event: React.MouseEvent) => {
     event.stopPropagation();
     handleClose();
-    const url = `${window.location.origin}/${ownerUsername}/timeline/${timelineId}`;
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(canonicalUrl).then(() => {
       showToast('Link copied to clipboard!', 'success');
     });
+  };
+
+  const openPopup = (popupUrl: string) => {
+    window.open(popupUrl, '_blank', 'width=600,height=400,noopener,noreferrer');
+  };
+
+  const handleShareTwitter = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleClose();
+    const text = encodeURIComponent(`Check out this timeline on PowerTimeline`);
+    const shareUrl = encodeURIComponent(canonicalUrl);
+    openPopup(`https://twitter.com/intent/tweet?text=${text}&url=${shareUrl}`);
+  };
+
+  const handleShareFacebook = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleClose();
+    const shareUrl = encodeURIComponent(canonicalUrl);
+    openPopup(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`);
+  };
+
+  const handleShareReddit = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleClose();
+    const text = encodeURIComponent(`Check out this timeline on PowerTimeline`);
+    const shareUrl = encodeURIComponent(canonicalUrl);
+    openPopup(`https://www.reddit.com/submit?title=${text}&url=${shareUrl}`);
   };
 
   const handleEdit = (event: React.MouseEvent) => {
@@ -143,6 +172,27 @@ export function TimelineCardMenu({
             <span className="material-symbols-rounded" aria-hidden="true">link</span>
           </ListItemIcon>
           <ListItemText>Copy Link</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={handleShareTwitter}>
+          <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
+            <span className="material-symbols-rounded" aria-hidden="true">share</span>
+          </ListItemIcon>
+          <ListItemText>Share on X</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={handleShareFacebook}>
+          <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
+            <span className="material-symbols-rounded" aria-hidden="true">share</span>
+          </ListItemIcon>
+          <ListItemText>Share on Facebook</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={handleShareReddit}>
+          <ListItemIcon sx={{ color: 'var(--page-text-secondary)' }}>
+            <span className="material-symbols-rounded" aria-hidden="true">share</span>
+          </ListItemIcon>
+          <ListItemText>Share on Reddit</ListItemText>
         </MenuItem>
 
         {onExport && (

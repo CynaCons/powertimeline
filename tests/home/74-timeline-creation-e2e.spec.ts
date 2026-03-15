@@ -21,27 +21,20 @@ test.describe('Timeline Creation E2E', () => {
     await signInWithEmail(page);
   });
 
+  async function openCreateDialog(page: import('@playwright/test').Page) {
+    await page.goto('/browse');
+    await page.waitForLoadState('domcontentloaded');
+
+    const createButton = page.getByTestId('create-timeline-button');
+    await expect(createButton).toBeVisible({ timeout: 10000 });
+    await createButton.click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+  }
+
   test('T74.1: Create timeline with English title → verify slug generation', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CREATE-001' });
 
-    // Navigate to a page where we can create timelines
-    // After sign-in we should be on /browse or /user page
-    await page.waitForLoadState('domcontentloaded');
-
-    // Look for Create button
-    const createButton = page.getByRole('button', { name: /create/i }).first();
-    const hasCreateButton = await createButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (!hasCreateButton) {
-      test.skip(true, 'Create button not visible - user may not have create permission');
-      return;
-    }
-
-    // Click Create New button
-    await createButton.click();
-
-    // Dialog should open
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    await openCreateDialog(page);
 
     // Fill in form with unique title to avoid conflicts
     const uniqueSuffix = Date.now().toString().slice(-6);
@@ -62,18 +55,7 @@ test.describe('Timeline Creation E2E', () => {
   test('T74.2: Create timeline with accented title → verify accent removal', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CREATE-002' });
 
-    await page.waitForLoadState('domcontentloaded');
-
-    const createButton = page.getByRole('button', { name: /create/i }).first();
-    const hasCreateButton = await createButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (!hasCreateButton) {
-      test.skip(true, 'Create button not visible');
-      return;
-    }
-
-    await createButton.click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    await openCreateDialog(page);
 
     // Fill in form with accented characters
     const uniqueSuffix = Date.now().toString().slice(-6);
@@ -93,18 +75,7 @@ test.describe('Timeline Creation E2E', () => {
   test('T74.3: Create timeline with special characters → verify sanitization', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CREATE-003' });
 
-    await page.waitForLoadState('domcontentloaded');
-
-    const createButton = page.getByRole('button', { name: /create/i }).first();
-    const hasCreateButton = await createButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (!hasCreateButton) {
-      test.skip(true, 'Create button not visible');
-      return;
-    }
-
-    await createButton.click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    await openCreateDialog(page);
 
     // Fill in title with special characters
     const uniqueSuffix = Date.now().toString().slice(-6);
@@ -126,18 +97,7 @@ test.describe('Timeline Creation E2E', () => {
   test('T74.4: Verify navigation to timeline editor after creation', async ({ page }) => {
     test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CREATE-004' });
 
-    await page.waitForLoadState('domcontentloaded');
-
-    const createButton = page.getByRole('button', { name: /create/i }).first();
-    const hasCreateButton = await createButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (!hasCreateButton) {
-      test.skip(true, 'Create button not visible');
-      return;
-    }
-
-    await createButton.click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    await openCreateDialog(page);
 
     const uniqueSuffix = Date.now().toString().slice(-6);
     await page.getByLabel('Title').fill(`Editor Test ${uniqueSuffix}`);
@@ -150,5 +110,54 @@ test.describe('Timeline Creation E2E', () => {
     await page.waitForTimeout(2000);
     const hasEditor = await page.locator('[data-testid="timeline-axis"], [data-testid="authoring-overlay"], nav').first().isVisible({ timeout: 5000 }).catch(() => false);
     expect(hasEditor).toBe(true);
+  });
+
+  test('T74.5: Duplicate ID validation does not persist after the title changes', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-TIMELINE-CREATE-005' });
+
+    await page.goto('/browse');
+    await page.waitForLoadState('domcontentloaded');
+
+    const createButton = page.getByTestId('create-timeline-button');
+    await expect(createButton).toBeVisible({ timeout: 10000 });
+
+    const uniqueSuffix = Date.now().toString().slice(-6);
+    const seedTitle = `Regression Seed ${uniqueSuffix}`;
+    const revisedTitle = `${seedTitle} revised`;
+
+    await createButton.click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    await page.getByLabel('Title').fill(seedTitle);
+    await page.getByLabel('Description').fill('Seed timeline for duplicate ID regression coverage');
+    await page.getByRole('button', { name: /create timeline/i }).click();
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByTestId('my-timelines-section').getByRole('heading', { name: seedTitle }).first()
+    ).toBeVisible({ timeout: 15000 });
+
+    await createButton.click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    await page.getByLabel('Title').fill(seedTitle);
+    await page.getByLabel('Description').fill('Updated title should clear the stale duplicate error');
+
+    const idField = page.getByLabel('Timeline ID');
+    await idField.focus();
+    await idField.blur();
+
+    await expect(page.getByText('This ID already exists for your account')).toBeVisible({ timeout: 10000 });
+
+    await page.getByLabel('Title').fill(revisedTitle);
+    await expect(idField).toHaveValue(`regression-seed-${uniqueSuffix}-revised`);
+
+    const confirmButton = page.getByRole('button', { name: /create timeline/i });
+    await expect(confirmButton).toBeEnabled();
+    await confirmButton.click();
+
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByTestId('my-timelines-section').getByRole('heading', { name: revisedTitle }).first()
+    ).toBeVisible({ timeout: 15000 });
   });
 });

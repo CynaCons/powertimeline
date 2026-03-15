@@ -12,6 +12,7 @@ import { EditorPage } from './pages/EditorPage'
 import { AdminPage } from './pages/AdminPage'
 import { SettingsPage } from './pages/SettingsPage'
 import LoginPage from './pages/LoginPage'
+import { EmbedPage } from './pages/EmbedPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { environment } from './config/environment'
 import { logger } from './utils/logger'
@@ -71,6 +72,7 @@ function AppWithTheme() {
 
           {/* Username-based routes - clean URLs without prefix
               Note: /@:username pattern broken in React Router v7 (see GitHub #9779, #12460) */}
+          <Route path="/:username/timeline/:timelineId/embed" element={<EmbedPage />} />
           <Route path="/:username/timeline/:timelineId" element={<EditorPage />} />
           <Route path="/:username" element={<UserProfilePage />} />
           {/* Legacy routes for backwards compatibility - redirect internally */}

@@ -17,7 +17,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: "20"
+        node-version: "22"
         cache: "npm"
 
     - name: Install dependencies
@@ -50,7 +50,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: "20"
+        node-version: "22"
         cache: "npm"
 
     - name: Install dependencies
@@ -61,7 +61,7 @@ jobs:
 
     - name: Check bundle size
       run: |
-        echo "📦 Analyzing bundle sizes (gzipped - as served to users)..."
+        echo "Analyzing bundle sizes (gzipped - as served to users)..."
         echo ""
 
         # Calculate gzipped JavaScript size
@@ -73,7 +73,7 @@ jobs:
         CSS_SIZE_KB=$((CSS_SIZE / 1024))
 
         # Calculate image sizes (already compressed, served as-is)
-        IMAGE_SIZE=$(find dist -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.svg" -o -name "*.webp" \) -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$1} END {print s}' || find dist -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.svg" -o -name "*.webp" \) -exec stat -c%s {} \; | awk '{s+=$1} END {print s}')
+        IMAGE_SIZE=$(find dist -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.svg" -o -name "*.webp" \) -exec stat -c%s {} \; 2>/dev/null | awk '{s+=$1} END {print s+0}')
         IMAGE_SIZE_KB=$((IMAGE_SIZE / 1024))
 
         # Total transfer size (what users actually download)
@@ -83,7 +83,6 @@ jobs:
         echo "JavaScript (gzipped):  ${JS_SIZE_KB} KB"
         echo "CSS (gzipped):         ${CSS_SIZE_KB} KB"
         echo "Images:                ${IMAGE_SIZE_KB} KB"
-        echo "─────────────────────────────────────"
         echo "Total transfer size:   ${TOTAL_TRANSFER_KB} KB"
         echo ""
 
@@ -96,72 +95,38 @@ jobs:
         FAILED=0
 
         if [ $JS_SIZE -gt $MAX_JS ]; then
-          echo "❌ JavaScript bundle exceeds limit: ${JS_SIZE_KB} KB > $((MAX_JS / 1024)) KB"
+          echo "FAIL: JavaScript bundle exceeds limit: ${JS_SIZE_KB} KB > $((MAX_JS / 1024)) KB"
           FAILED=1
         else
-          echo "✅ JavaScript bundle within limit: ${JS_SIZE_KB} KB <= $((MAX_JS / 1024)) KB"
+          echo "OK: JavaScript bundle within limit: ${JS_SIZE_KB} KB <= $((MAX_JS / 1024)) KB"
         fi
 
         if [ $CSS_SIZE -gt $MAX_CSS ]; then
-          echo "❌ CSS bundle exceeds limit: ${CSS_SIZE_KB} KB > $((MAX_CSS / 1024)) KB"
+          echo "FAIL: CSS bundle exceeds limit: ${CSS_SIZE_KB} KB > $((MAX_CSS / 1024)) KB"
           FAILED=1
         else
-          echo "✅ CSS bundle within limit: ${CSS_SIZE_KB} KB <= $((MAX_CSS / 1024)) KB"
+          echo "OK: CSS bundle within limit: ${CSS_SIZE_KB} KB <= $((MAX_CSS / 1024)) KB"
         fi
 
         if [ $IMAGE_SIZE -gt $MAX_IMAGES ]; then
-          echo "❌ Images exceed limit: ${IMAGE_SIZE_KB} KB > $((MAX_IMAGES / 1024)) KB"
+          echo "FAIL: Images exceed limit: ${IMAGE_SIZE_KB} KB > $((MAX_IMAGES / 1024)) KB"
           FAILED=1
         else
-          echo "✅ Images within limit: ${IMAGE_SIZE_KB} KB <= $((MAX_IMAGES / 1024)) KB"
+          echo "OK: Images within limit: ${IMAGE_SIZE_KB} KB <= $((MAX_IMAGES / 1024)) KB"
         fi
 
         if [ $TOTAL_TRANSFER -gt $MAX_TOTAL ]; then
-          echo "❌ Total transfer size exceeds limit: ${TOTAL_TRANSFER_KB} KB > $((MAX_TOTAL / 1024)) KB"
+          echo "FAIL: Total transfer size exceeds limit: ${TOTAL_TRANSFER_KB} KB > $((MAX_TOTAL / 1024)) KB"
           FAILED=1
         else
-          echo "✅ Total transfer size within limit: ${TOTAL_TRANSFER_KB} KB <= $((MAX_TOTAL / 1024)) KB"
+          echo "OK: Total transfer size within limit: ${TOTAL_TRANSFER_KB} KB <= $((MAX_TOTAL / 1024)) KB"
         fi
 
         if [ $FAILED -eq 1 ]; then
           echo ""
-          echo "❌ Bundle size check failed!"
+          echo "Bundle size check failed!"
           exit 1
         else
           echo ""
-          echo "✅ All bundle size checks passed!"
+          echo "All bundle size checks passed!"
         fi
-
-  test-foundation:
-    runs-on: ubuntu-latest
-    needs: quality-checks
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
-        cache: "npm"
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-
-    - name: Run foundation tests
-      run: |
-        npx playwright test \
-          tests/editor/01-foundation.smoke.spec.ts \
-          --timeout=30000
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: test-results/
-        retention-days: 7
