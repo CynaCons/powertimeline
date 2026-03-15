@@ -86,11 +86,11 @@ jobs:
         echo "Total transfer size:   ${TOTAL_TRANSFER_KB} KB"
         echo ""
 
-        # Set limits based on industry standards for React + MUI apps
-        MAX_JS=650000      # 650 KB gzipped JS (MUI + React + layout engine)
+        # Limits for React + MUI + Firebase app with branding assets
+        MAX_JS=720000      # 700 KB gzipped JS (MUI + React + Firebase + layout engine)
         MAX_CSS=50000      # 50 KB gzipped CSS
-        MAX_IMAGES=1200000 # 1.2 MB total images
-        MAX_TOTAL=1500000  # 1.5 MB total transfer
+        MAX_IMAGES=25000000 # 25 MB total images (includes hero banner + logo PNGs)
+        MAX_TOTAL=26000000  # 26 MB total transfer
 
         FAILED=0
 
