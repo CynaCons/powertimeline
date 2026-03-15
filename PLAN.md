@@ -112,6 +112,7 @@
 - ✅ Critical Test Fixes: Overflow dependencies (viewStart/viewEnd), zoom handler synthetic event fallback, verified with focused tests (2026-01-18)
 - ✅ Viewport Strategy: Timeline editor restricted to desktop-only (mobile/tablet skip editor tests), Stream View is mobile experience (2026-01-18)
 - ✅ SEO & Social Sharing: Centralized URL builders (urls.ts), canonical URLs on all pages, JSON-LD structured data, robots.txt, sitemap cloud function, ShareMenu component (Twitter/X, Facebook, Reddit, Copy Link, Embed), embeddable timelines with EmbedPage, EmbedCodeDialog, embed route (v0.9.7)
+- ✅ Layout Card Overlap Fix: Viewport-aware capacity in DegradationEngine, density-aware collision passes, recompaction overlap guard, cache invalidation with event count (2026-03-15)
 
 ### Next Up
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)

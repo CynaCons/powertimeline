@@ -76,14 +76,8 @@ export class DegradationEngine {
    * Implements spatial cluster coordination with optional mixed card types
    */
   private applyClusterCoordinatedDegradation(groups: ColumnGroup[]): ColumnGroup[] {
-    // Phase 1: Identify spatial clusters with viewport constraints
-    const timelineY = this.config.timelineY || this.config.viewportHeight / 2;
-    const viewportConstraints = {
-      availableHeightAbove: timelineY - 100, // Minimap safe zone
-      availableHeightBelow: this.config.viewportHeight - timelineY - 55 // Below margin
-    };
-
-    const clusters = this.identifySpatialClusters(groups, viewportConstraints);
+    // Phase 1: Identify spatial clusters
+    const clusters = this.identifySpatialClusters(groups);
     this.degradationMetrics.totalClusters = clusters.length;
 
     // Phase 2: Apply coordinated degradation
@@ -212,11 +206,8 @@ export class DegradationEngine {
 
   /**
    * Determine the appropriate UNIFORM card type for the entire group
-   * Simplified degradation rules (v0.3.6.2 rollback + v0.9.4 fix):
-   * - 1-2 events: full cards (2 × 4 cells = 8 cells max)
-   * - 3-4 events: compact cards (4 × 2 cells = 8 cells max, all fit)
-   * - 5-8 events: title-only cards (8 × 1 cell = 8 cells max, all fit)
-   * - 9+ events: title-only cards (first 8) + overflow badge (+N)
+   * Uses viewport-aware capacity: if events exceed what physically fits
+   * for a given card type, degrade further.
    */
   private determineCardType(group: ColumnGroup): CardType {
     // Consider both primary and overflow events when selecting card type
@@ -226,16 +217,13 @@ export class DegradationEngine {
     // Track metrics for telemetry
     this.degradationMetrics.totalGroups++;
 
-    // Simplified degradation logic
-    if (eventCount <= 2) {
-      // 1-2 events can use full cards
+    // Viewport-aware degradation: check if events fit in the chosen type's capacity
+    if (eventCount <= this.getMaxCardsPerHalfColumn('full')) {
       this.degradationMetrics.fullCardGroups++;
       return 'full';
-    } else if (eventCount <= 4) {
-      // 3-4 events use compact cards (all fit: 4 cards × 2 cells = 8 cells)
+    } else if (eventCount <= this.getMaxCardsPerHalfColumn('compact')) {
       this.degradationMetrics.compactCardGroups++;
 
-      // Calculate space saved by degradation
       const fullCardHeight = this.config.cardConfigs.full.height;
       const compactCardHeight = this.config.cardConfigs.compact.height;
       const spaceSavedPerCard = fullCardHeight - compactCardHeight;
@@ -252,7 +240,6 @@ export class DegradationEngine {
 
       return 'compact';
     } else {
-      // 4+ events → title-only (high density)
       this.degradationMetrics.titleOnlyCardGroups++;
 
       const compactH = this.config.cardConfigs.compact.height;
@@ -275,23 +262,34 @@ export class DegradationEngine {
 
 
   /**
-   * Get maximum cards per half-column based on card type
-   * Updated with correct math (v0.3.6.3):
-   * - Full cards: 2 per half-column (2 × 169px + 12px = 350px)
-   * - Compact cards: 4 per half-column (4 × 75px + 3 × 12px = 336px)
-   * - Title-only: 8 per half-column (8 × 32px + 7 × 12px = 340px, fits in available space)
+   * Get maximum cards per half-column based on card type and viewport constraints
+   * Type-specific caps (legacy reference):
+   * - Full cards: up to 2 per half-column
+   * - Compact cards: up to 4 per half-column
+   * - Title-only: up to 8 per half-column
+   * Actual cap is min(type cap, what physically fits in available height)
    */
   getMaxCardsPerHalfColumn(cardType: CardType): number {
-    switch (cardType) {
-      case 'full':
-        return 2; // Full cards: 2 slots per half-column
-      case 'compact':
-        return 4; // Compact cards: 4 slots per half-column (4 × 75px + 3 × 12px = 336px)
-      case 'title-only':
-        return 8; // Title-only cards: 8 per half-column (9 would overflow out of screen)
-      default:
-        return 2; // Default to full card capacity
-    }
+    const cardConfig = this.config.cardConfigs;
+    const cardHeight = cardConfig[cardType].height;
+    const cardSpacing = 12;
+
+    // Use actual timelineY for accurate available height calculation
+    const timelineY = this.config.timelineY || this.config.viewportHeight / 2;
+    const minimapSafeZone = 100;
+    const aboveTimelineMargin = 48;
+    const availableHeight = timelineY - minimapSafeZone - aboveTimelineMargin;
+
+    // How many cards physically fit in the available space
+    const maxBySpace = Math.max(1, Math.floor((availableHeight + cardSpacing) / (cardHeight + cardSpacing)));
+
+    // Return the minimum of the type-specific cap and what physically fits
+    const typeCap = cardType === 'full' ? 2
+      : cardType === 'compact' ? 4
+      : cardType === 'title-only' ? 8
+      : 2;
+
+    return Math.min(typeCap, maxBySpace);
   }
 
   /**
@@ -300,7 +298,6 @@ export class DegradationEngine {
    */
   private identifySpatialClusters(
     groups: ColumnGroup[],
-    viewportConstraints?: { availableHeightAbove: number; availableHeightBelow: number }
   ): import('../LayoutEngine').SpatialCluster[] {
     const X_THRESHOLD = 50; // pixels - groups within 50px are same cluster
 
@@ -323,38 +320,25 @@ export class DegradationEngine {
       const aboveOverflow = (above.overflowEvents?.length ?? 0) > 0;
       const belowOverflow = (below?.overflowEvents?.length ?? 0) > 0;
 
-      // PREDICT vertical overflow: check if total events exceed maximum capacity
-      // Maximum capacity is 8 title-only cards per half-column
+      // PREDICT vertical overflow: check if total events exceed viewport-aware capacity
       const aboveTotalEvents = above.events.length + (above.overflowEvents?.length ?? 0);
       const belowTotalEvents = (below?.events.length ?? 0) + (below?.overflowEvents?.length ?? 0);
-      const abovePredictedOverflow = aboveTotalEvents > 8; // Exceeds max title-only capacity
-      const belowPredictedOverflow = belowTotalEvents > 8; // Exceeds max title-only capacity
+      const titleOnlyCap = this.getMaxCardsPerHalfColumn('title-only');
+      const abovePredictedOverflow = aboveTotalEvents > titleOnlyCap;
+      const belowPredictedOverflow = belowTotalEvents > titleOnlyCap;
 
-      // PIXEL-BASED OVERFLOW: Check if cards will physically fit in available space
-      let abovePixelConstraint = false;
-      let belowPixelConstraint = false;
-
-      if (viewportConstraints) {
-        // Calculate pixel height needed assuming mixed card types
-        // Use worst-case scenario: compact cards (75px) for mixed types
-        const cardSpacing = 12; // pixels between cards
-        const titleOnlyHeight = 32; // pixels per title-only card
-        const compactHeight = 120; // pixels per compact card
-
-        // For pixel constraint check, assume worst case: compact cards if using mixed types
-        // This prevents over-allocation when mixed types create taller cards
-        const wouldUseMixedTypes = aboveTotalEvents >= 5 || belowTotalEvents >= 5;
-        const estimatedCardHeight = wouldUseMixedTypes ? compactHeight : titleOnlyHeight;
-
-        const abovePixelHeightNeeded = aboveTotalEvents * (estimatedCardHeight + cardSpacing);
-        const belowPixelHeightNeeded = belowTotalEvents * (estimatedCardHeight + cardSpacing);
-
-        abovePixelConstraint = abovePixelHeightNeeded > viewportConstraints.availableHeightAbove;
-        belowPixelConstraint = belowPixelHeightNeeded > viewportConstraints.availableHeightBelow;
-      }
+      // Also check if events would exceed the capacity for the card type that would be chosen
+      // This catches cases where e.g. 4 events exceed compact capacity of 3
+      const compactCap = this.getMaxCardsPerHalfColumn('compact');
+      const fullCap = this.getMaxCardsPerHalfColumn('full');
+      const aboveWouldOverflowCompact = aboveTotalEvents > 2 && aboveTotalEvents <= 4 && aboveTotalEvents > compactCap;
+      const belowWouldOverflowCompact = belowTotalEvents > 2 && belowTotalEvents <= 4 && belowTotalEvents > compactCap;
+      const aboveWouldOverflowFull = aboveTotalEvents <= 2 && aboveTotalEvents > fullCap;
+      const belowWouldOverflowFull = belowTotalEvents <= 2 && belowTotalEvents > fullCap;
 
       const hasOverflow = aboveOverflow || belowOverflow || abovePredictedOverflow || belowPredictedOverflow ||
-                         abovePixelConstraint || belowPixelConstraint;
+                         aboveWouldOverflowCompact || belowWouldOverflowCompact ||
+                         aboveWouldOverflowFull || belowWouldOverflowFull;
 
       // Calculate total events
       const totalEvents = above.events.length + (below?.events.length ?? 0);
@@ -422,26 +406,20 @@ export class DegradationEngine {
    * IMPORTANT: Returns single-element array for uniform types to signal standard capacity calculation
    * Returns multi-element array only for truly mixed types
    *
-   * Mixing rules (with 75px compact cards):
-   * - 1-2 events: ['full'] - uniform, uses getMaxCardsPerHalfColumn (2 cards)
-   * - 3 events: ['compact'] - uniform, uses getMaxCardsPerHalfColumn (4 cards)
-   * - 4 events: ['compact'] - uniform, uses getMaxCardsPerHalfColumn (4 cards)
-   * - 5 events: [compact, compact, title-only, ...] - mixed
-   * - 6 events: [compact, compact, title-only, ...] - mixed
-   * - 7 events: [compact, title-only, ...] - mixed
-   * - 8+ events: ['title-only'] - uniform, uses getMaxCardsPerHalfColumn (8 cards)
+   * Viewport-aware: checks actual capacity to avoid creating cards that don't physically fit
    */
   private determineMixedCardTypes(events: Event[]): CardType[] {
     const count = events.length;
+    const fullCap = this.getMaxCardsPerHalfColumn('full');
+    const compactCap = this.getMaxCardsPerHalfColumn('compact');
 
-    // Return SINGLE-element array for uniform types (triggers standard capacity)
-    if (count <= 2) {
-      return ['full']; // Uniform: use getMaxCardsPerHalfColumn (2 full cards)
+    if (count <= fullCap) {
+      return ['full']; // Uniform full
     } else if (count === 3) {
-      // Uniform compact to avoid mixed-type overflow for 3-event clusters
-      return ['compact']; // Uniform: use getMaxCardsPerHalfColumn (4 compact cards)
-    } else if (count === 4) {
-      return ['compact']; // Uniform: use getMaxCardsPerHalfColumn (4 compact cards)
+      // Mixed: 1 full + 2 compact (chronological priority)
+      return ['full', 'compact', 'compact'];
+    } else if (count <= compactCap) {
+      return ['compact']; // Uniform compact
     } else if (count === 5) {
       // Mixed: 2 compact + 3 title-only
       return ['compact', 'compact', 'title-only', 'title-only', 'title-only'];
@@ -452,8 +430,8 @@ export class DegradationEngine {
       // Mixed: 1 compact + 6 title-only
       return ['compact', 'title-only', 'title-only', 'title-only', 'title-only', 'title-only', 'title-only'];
     } else {
-      // 8+ events: uniform degradation
-      return ['title-only']; // Uniform: use getMaxCardsPerHalfColumn (9 title-only cards)
+      // 8+ events or anything exceeding compact capacity: uniform title-only
+      return ['title-only'];
     }
   }
 
@@ -517,12 +495,12 @@ export class DegradationEngine {
     const cardConfig = this.config.cardConfigs;
     const cardSpacing = 12; // pixels between cards
 
-    // Use conservative calculation matching PositioningEngine
-    // Available height per half-column: timelineY - margins
-    const topMargin = 20;
-    const timelineMargin = 40; // Restored from 24px to prevent axis label overlap
-    const upperAnchorSpacing = 25;
-    const availableHeight = (this.config.viewportHeight / 2) - topMargin - timelineMargin - upperAnchorSpacing;
+    // Use actual timelineY for accurate available height calculation
+    // Must match PositioningEngine constants to avoid over-allocating cards that can't physically fit
+    const timelineY = this.config.timelineY || this.config.viewportHeight / 2;
+    const minimapSafeZone = 100;  // Same as SCREEN_TOP_BOUNDARY in PositioningEngine
+    const aboveTimelineMargin = 48; // Same as PositioningEngine line 63
+    const availableHeight = timelineY - minimapSafeZone - aboveTimelineMargin;
 
     let accumulatedHeight = 0;
     let cardsFit = 0;

@@ -77,6 +77,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
   // Layout cache to avoid recalculating when only view window changes
   const layoutCacheRef = useRef<{
     events: Event[];
+    eventCount: number;
     config: LayoutConfig;
     result: {
       positionedCards: PositionedCard[];
@@ -410,7 +411,10 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
 
     // Check cache: reuse layout if events, viewport, AND view window are unchanged
     // viewStart/viewEnd must be checked - cards need recalculation when zooming
-    const eventsUnchanged = layoutCacheRef.current?.events === events;
+    // Reference equality plus cheap structural check to catch cases where
+    // the same array reference is reused but contents changed
+    const eventsUnchanged = layoutCacheRef.current?.events === events
+      && layoutCacheRef.current?.eventCount === events.length;
     const configUnchanged = layoutCacheRef.current?.config.viewportWidth === config.viewportWidth
       && layoutCacheRef.current?.config.viewportHeight === config.viewportHeight;
     const viewWindowUnchanged = layoutCacheRef.current?.viewWindow?.viewStart === viewStart
@@ -443,6 +447,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
     // Update cache with current view window
     layoutCacheRef.current = {
       events,
+      eventCount: events.length,
       config,
       result: layoutResult,
       viewWindow: { viewStart, viewEnd }

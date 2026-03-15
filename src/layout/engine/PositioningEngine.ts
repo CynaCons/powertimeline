@@ -279,7 +279,10 @@ export class PositioningEngine {
       const isConstrainedViewport = availableHeightAbove < 500 || availableHeightBelow < 500;
 
       const spacing = isConstrainedViewport ? 4 : 8; // Tighter spacing for constrained viewports
-      const maxPasses = isConstrainedViewport ? 8 : 4; // More passes for constrained viewports
+      // Density-aware pass count: more cards = more potential collisions = more passes needed
+      const cardDensity = items.length;
+      const densityPasses = cardDensity > 6 ? 8 : cardDensity > 3 ? 6 : 4;
+      const maxPasses = Math.max(densityPasses, isConstrainedViewport ? 8 : 4);
 
       // Sort deterministically by area desc then x asc to move smaller ones first
       const ordered = items.slice().sort((a, b) => (b.width * b.height) - (a.width * a.height) || a.x - b.x);
@@ -377,8 +380,9 @@ export class PositioningEngine {
               }
             }
 
-            // If card hit boundary (once on constrained viewports, twice on normal), try aggressive horizontal nudge
-            const boundaryHitThreshold = isConstrainedViewport ? 1 : 2;
+            // If card hit boundary, try aggressive horizontal nudge
+            // Trigger earlier for dense layouts where cards are deeply overlapped
+            const boundaryHitThreshold = (isConstrainedViewport || cardDensity > 6) ? 1 : 2;
             if (targetHitCount >= boundaryHitThreshold && !sameHalfColumn) {
               // Try horizontal nudge with much larger displacement to spread cards
               // Use full card width to ensure significant horizontal separation
@@ -460,7 +464,16 @@ export class PositioningEngine {
           const prevCard = cards[i - 1];
           const expectedY = prevCard.y - cardSpacing - cards[i].height;
           // Clamp to minimap safe zone
-          cards[i].y = Math.max(MINIMAP_SAFE_ZONE, expectedY);
+          const clampedY = Math.max(MINIMAP_SAFE_ZONE, expectedY);
+          // If clamping would cause overlap with the previous card, keep the card
+          // at the collision-resolved position rather than introducing a new overlap
+          if (clampedY + cards[i].height > prevCard.y) {
+            // Can't fit without overlap — leave at collision-resolved position
+            // but still ensure it's above the safe zone
+            cards[i].y = Math.max(MINIMAP_SAFE_ZONE, cards[i].y);
+          } else {
+            cards[i].y = clampedY;
+          }
         }
       } else {
         // Sort by Y ascending (closest to timeline = lowest Y first)
