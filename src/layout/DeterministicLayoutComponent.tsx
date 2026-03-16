@@ -1141,7 +1141,7 @@ export const DeterministicLayoutComponent = memo(function DeterministicLayoutCom
             data-cluster-id={card.clusterId}
             data-tour={isFirstCard ? 'event-card' : undefined}
             data-preview={isPreviewEvent || undefined}
-            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} ${sessionDecisionClass} text-sm`}
+            className={`absolute rounded-lg shadow-md border hover:shadow-lg transition-all cursor-pointer overflow-hidden ${cardTypeClass} ${cardHighlightClasses} ${isPreviewEvent ? 'card-preview' : ''} ${sessionDecisionClass} text-sm`}
             style={cardStyle}
             aria-selected={isCardSelected}
             data-selected={isCardSelected || undefined}
@@ -1229,10 +1229,10 @@ function SourceIndicator({ sources }: { sources?: string[] }) {
 // P1-3: Memoized card content components to prevent unnecessary re-renders
 const FullCardContent = memo(function FullCardContent({ event }: { event: Event }) {
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-start justify-between mb-1">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex items-start justify-between mb-1 flex-shrink-0">
         <h3
-          className="card-title line-clamp-2 flex-1 pr-2"
+          className="card-title line-clamp-2 pr-2"
           style={{ color: 'var(--color-text-primary)' }}
           title={event.title}
         >
@@ -1241,21 +1241,21 @@ const FullCardContent = memo(function FullCardContent({ event }: { event: Event 
         <SourceIndicator sources={event.sources} />
       </div>
       {event.description ? (
-        <p className="card-description flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
+        <p className="card-description min-h-0 flex-1 line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
-        <div className="flex-1" />
+        <div className="flex-1 min-h-0" />
       )}
-      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
+      <div className="card-date flex-shrink-0 mt-auto" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
     </div>
   );
 });
 
 const CompactCardContent = memo(function CompactCardContent({ event }: { event: Event }) {
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-start justify-between mb-1">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex items-start justify-between mb-1 flex-shrink-0">
         <h3
-          className="card-title line-clamp-2 flex-1 pr-2"
+          className="card-title line-clamp-2 pr-2"
           style={{ color: 'var(--color-text-primary)' }}
           title={event.title}
         >
@@ -1264,11 +1264,11 @@ const CompactCardContent = memo(function CompactCardContent({ event }: { event: 
         <SourceIndicator sources={event.sources} />
       </div>
       {event.description ? (
-        <p className="card-description line-clamp-1" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
+        <p className="card-description min-h-0 flex-1 line-clamp-1" style={{ color: 'var(--color-text-secondary)' }}>{event.description}</p>
       ) : (
-        <div className="flex-1" />
+        <div className="flex-1 min-h-0" />
       )}
-      <div className="card-date" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
+      <div className="card-date flex-shrink-0 mt-auto" style={{ color: 'var(--color-text-tertiary)' }}>{formatEventDateTime(event)}</div>
     </div>
   );
 });
