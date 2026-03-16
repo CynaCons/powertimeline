@@ -36,8 +36,8 @@ export const createAppTheme = (isDarkMode: boolean = false) => createTheme({
       contrastText: '#ffffff',
     },
     background: {
-      default: isDarkMode ? '#121212' : semanticColors.neutral[50],
-      paper: isDarkMode ? '#1E1E1E' : semanticColors.neutral[0],
+      default: isDarkMode ? '#111110' : '#faf8f5',
+      paper: isDarkMode ? '#1a1918' : semanticColors.neutral[0],
     },
     text: {
       primary: isDarkMode ? semanticColors.neutral[0] : semanticColors.neutral[900],
@@ -72,8 +72,8 @@ export const createAppTheme = (isDarkMode: boolean = false) => createTheme({
         },
         containedPrimary: {
           boxShadow: isDarkMode
-            ? '0 2px 6px rgba(100, 181, 246, 0.3)'
-            : '0 2px 6px rgba(33, 150, 243, 0.25)',
+            ? '0 2px 6px rgba(226, 163, 54, 0.3)'
+            : '0 2px 6px rgba(201, 138, 31, 0.25)',
         },
         outlined: {
           borderColor: 'rgba(0,0,0,0.2)',

@@ -144,7 +144,7 @@ export function LandingPage() {
       Skip to main content
     </a>
 
-    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#e6edf3', position: 'relative', overflowX: 'hidden' }}>
+    <Box data-testid="landing-page" sx={{ minHeight: '100vh', bgcolor: 'transparent', color: 'var(--page-text-primary)', position: 'relative', overflowX: 'hidden' }}>
       {/* Fixed Background - stays while content scrolls */}
       <Box
         sx={{
@@ -169,7 +169,7 @@ export function LandingPage() {
           right: 0,
           bottom: 0,
           zIndex: -1,
-          background: 'linear-gradient(135deg, rgba(13, 17, 23, 0.85) 0%, rgba(22, 27, 34, 0.9) 100%)',
+          background: 'linear-gradient(135deg, rgba(17, 17, 16, 0.88) 0%, rgba(22, 21, 20, 0.92) 100%)',
         }}
       />
 
@@ -199,7 +199,7 @@ export function LandingPage() {
               fontWeight: 800,
               lineHeight: 1.1,
               mb: 2,
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)',
+              background: 'var(--gradient-hero-text)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -214,7 +214,7 @@ export function LandingPage() {
             component="p"
             sx={{
               mb: 3,
-              color: '#e6edf3',
+              color: 'var(--page-text-primary)',
               fontSize: { xs: '1.2rem', md: '1.5rem' },
               fontWeight: 600,
               letterSpacing: '0.05em',
@@ -229,7 +229,7 @@ export function LandingPage() {
             component="h2"
             sx={{
               mb: 5,
-              color: '#9ca3af',
+              color: 'var(--page-text-secondary)',
               fontSize: { xs: '1rem', md: '1.15rem' },
               maxWidth: 750,
               mx: 'auto',
@@ -262,7 +262,7 @@ export function LandingPage() {
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
-                boxShadow: '0 4px 14px rgba(249, 115, 22, 0.4)',
+                boxShadow: 'var(--shadow-cta-glow)',
                 '&:hover': {
                   bgcolor: '#ea580c',
                   boxShadow: '0 6px 20px rgba(249, 115, 22, 0.5)',
@@ -277,8 +277,8 @@ export function LandingPage() {
               onClick={handleCreateTimeline}
               data-testid="cta-get-started"
               sx={{
-                borderColor: '#30363d',
-                color: '#e6edf3',
+                borderColor: 'var(--page-border)',
+                color: 'var(--page-text-primary)',
                 fontSize: '1.1rem',
                 px: 5,
                 py: 1.75,
@@ -286,8 +286,8 @@ export function LandingPage() {
                 textTransform: 'none',
                 fontWeight: 600,
                 '&:hover': {
-                  borderColor: '#8b5cf6',
-                  bgcolor: 'rgba(139, 92, 246, 0.1)',
+                  borderColor: 'var(--page-accent)',
+                  bgcolor: 'rgba(226, 163, 54, 0.1)',
                 },
               }}
             >
@@ -323,7 +323,7 @@ export function LandingPage() {
       </Box>
 
       {/* The Problem Section */}
-      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.5)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
+      <Box sx={{ bgcolor: 'rgba(26, 25, 24, 0.5)', py: 10, borderTop: '1px solid rgba(46, 44, 40, 0.5)', backdropFilter: 'blur(8px)' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -333,7 +333,7 @@ export function LandingPage() {
               mb: 2,
               fontSize: { xs: '1.75rem', md: '2.25rem' },
               fontWeight: 700,
-              color: '#e6edf3',
+              color: 'var(--page-text-primary)',
             }}
           >
             Information is scattered. Context is lost.
@@ -343,7 +343,7 @@ export function LandingPage() {
             textAlign="center"
             sx={{
               mb: 6,
-              color: '#9ca3af',
+              color: 'var(--page-text-secondary)',
               fontSize: '1.1rem',
               maxWidth: 700,
               mx: 'auto',
@@ -358,7 +358,7 @@ export function LandingPage() {
             variant="h5"
             textAlign="center"
             sx={{
-              color: '#8b5cf6',
+              color: 'var(--page-accent)',
               fontWeight: 600,
               fontSize: { xs: '1.1rem', md: '1.3rem' },
             }}
@@ -378,7 +378,7 @@ export function LandingPage() {
             mb: 2,
             fontSize: { xs: '2rem', md: '2.5rem' },
             fontWeight: 700,
-            color: '#e6edf3',
+            color: 'var(--page-text-primary)',
           }}
         >
           Built for people who connect the dots
@@ -388,7 +388,7 @@ export function LandingPage() {
           textAlign="center"
           sx={{
             mb: 8,
-            color: '#9ca3af',
+            color: 'var(--page-text-secondary)',
             fontSize: '1.1rem',
             maxWidth: 600,
             mx: 'auto',
@@ -409,22 +409,22 @@ export function LandingPage() {
             <Card
               key={index}
               sx={{
-                bgcolor: 'rgba(13, 17, 23, 0.5)',
-                border: '1px solid rgba(48, 54, 61, 0.5)',
+                bgcolor: 'rgba(17, 17, 16, 0.5)',
+                border: '1px solid rgba(46, 44, 40, 0.5)',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
-                  borderColor: '#8b5cf6',
+                  borderColor: 'var(--page-accent)',
                   transform: 'translateY(-2px)',
                 },
               }}
             >
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, fontSize: '1rem' }}>
+                <Typography variant="h6" gutterBottom sx={{ color: 'var(--page-text-primary)', fontWeight: 600, fontSize: '1rem' }}>
                   {item.title}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.6, fontSize: '0.9rem' }}>
+                <Typography variant="body2" sx={{ color: 'var(--page-text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   {item.desc}
                 </Typography>
               </CardContent>
@@ -434,7 +434,7 @@ export function LandingPage() {
       </Container>
 
       {/* Features Section */}
-      <Box sx={{ bgcolor: 'rgba(22, 27, 34, 0.5)', py: 10, borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)' }}>
+      <Box sx={{ bgcolor: 'rgba(26, 25, 24, 0.5)', py: 10, borderTop: '1px solid rgba(46, 44, 40, 0.5)', backdropFilter: 'blur(8px)' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -444,7 +444,7 @@ export function LandingPage() {
               mb: 2,
               fontSize: { xs: '2rem', md: '2.5rem' },
               fontWeight: 700,
-              color: '#e6edf3',
+              color: 'var(--page-text-primary)',
             }}
           >
             Tools for serious timeline work
@@ -454,7 +454,7 @@ export function LandingPage() {
             textAlign="center"
             sx={{
               mb: 8,
-              color: '#9ca3af',
+              color: 'var(--page-text-secondary)',
               fontSize: '1.1rem',
               maxWidth: 600,
               mx: 'auto',
@@ -464,40 +464,42 @@ export function LandingPage() {
           </Typography>
 
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
-            {/* Feature 1: Timeline Editor */}
+            {/* Feature 1: Timeline Editor — purple top accent */}
             <Card
               sx={{
                 flex: 1,
-                bgcolor: 'rgba(13, 17, 23, 0.5)',
-                border: '1px solid rgba(48, 54, 61, 0.5)',
+                bgcolor: 'rgba(17, 17, 16, 0.5)',
+                border: '1px solid rgba(46, 44, 40, 0.5)',
+                borderTop: '3px solid #e2a336',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
-                  borderColor: '#8b5cf6',
+                  borderColor: '#e2a336',
                   transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 24px rgba(139, 92, 246, 0.2)',
+                  boxShadow: '0 8px 24px rgba(226, 163, 54, 0.2)',
                 },
               }}
             >
               <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <TimelineIcon sx={{ fontSize: 56, color: '#8b5cf6', mb: 2 }} />
-                <Typography variant="h5" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, mb: 2 }}>
+                <TimelineIcon sx={{ fontSize: 56, color: '#e2a336', mb: 2 }} />
+                <Typography variant="h5" gutterBottom sx={{ color: 'var(--page-text-primary)', fontWeight: 600, mb: 2 }}>
                   Infinite Zoom
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <Typography variant="body2" sx={{ color: 'var(--page-text-secondary)', lineHeight: 1.7, fontSize: '0.95rem' }}>
                   Navigate from centuries to minutes. Smart layout prevents overlap
                   at any scale. See the big picture and the details in one place.
                 </Typography>
               </CardContent>
             </Card>
 
-            {/* Feature 2: Collaboration */}
+            {/* Feature 2: Collaboration — cyan top accent */}
             <Card
               sx={{
                 flex: 1,
-                bgcolor: 'rgba(13, 17, 23, 0.5)',
-                border: '1px solid rgba(48, 54, 61, 0.5)',
+                bgcolor: 'rgba(17, 17, 16, 0.5)',
+                border: '1px solid rgba(46, 44, 40, 0.5)',
+                borderTop: '3px solid #06b6d4',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
@@ -510,22 +512,23 @@ export function LandingPage() {
             >
               <CardContent sx={{ p: 4, textAlign: 'center' }}>
                 <GroupIcon sx={{ fontSize: 56, color: '#06b6d4', mb: 2 }} />
-                <Typography variant="h5" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, mb: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ color: 'var(--page-text-primary)', fontWeight: 600, mb: 2 }}>
                   Fork & Improve
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <Typography variant="body2" sx={{ color: 'var(--page-text-secondary)', lineHeight: 1.7, fontSize: '0.95rem' }}>
                   Build on others' work. Fork any public timeline, add your perspective,
                   and contribute back. Collective knowledge grows together.
                 </Typography>
               </CardContent>
             </Card>
 
-            {/* Feature 3: Share & Verify */}
+            {/* Feature 3: Share & Verify — orange top accent */}
             <Card
               sx={{
                 flex: 1,
-                bgcolor: 'rgba(13, 17, 23, 0.5)',
-                border: '1px solid rgba(48, 54, 61, 0.5)',
+                bgcolor: 'rgba(17, 17, 16, 0.5)',
+                border: '1px solid rgba(46, 44, 40, 0.5)',
+                borderTop: '3px solid #f97316',
                 borderRadius: 2,
                 backdropFilter: 'blur(4px)',
                 transition: 'all 0.3s ease',
@@ -538,10 +541,10 @@ export function LandingPage() {
             >
               <CardContent sx={{ p: 4, textAlign: 'center' }}>
                 <SearchIcon sx={{ fontSize: 56, color: '#f97316', mb: 2 }} />
-                <Typography variant="h5" gutterBottom sx={{ color: '#e6edf3', fontWeight: 600, mb: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ color: 'var(--page-text-primary)', fontWeight: 600, mb: 2 }}>
                   Share & Verify
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af', lineHeight: 1.7, fontSize: '0.95rem' }}>
+                <Typography variant="body2" sx={{ color: 'var(--page-text-secondary)', lineHeight: 1.7, fontSize: '0.95rem' }}>
                   Every event can link to sources. Make your research transparent
                   and let others verify and expand on your work.
                 </Typography>
@@ -561,7 +564,7 @@ export function LandingPage() {
             mb: 2,
             fontSize: { xs: '2rem', md: '2.5rem' },
             fontWeight: 700,
-            color: '#e6edf3',
+            color: 'var(--page-text-primary)',
           }}
         >
           Product Roadmap
@@ -571,7 +574,7 @@ export function LandingPage() {
           textAlign="center"
           sx={{
             mb: 6,
-            color: '#9ca3af',
+            color: 'var(--page-text-secondary)',
             fontSize: '1.1rem',
             maxWidth: 600,
             mx: 'auto',
@@ -590,7 +593,7 @@ export function LandingPage() {
               top: '24px',
               bottom: '24px',
               width: '2px',
-              bgcolor: '#3d4450',
+              bgcolor: '#2e2c28',
             }}
           />
 
@@ -620,7 +623,7 @@ export function LandingPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                      color: '#e6edf3',
+                      color: 'var(--page-text-primary)',
                       fontWeight: 600,
                       fontSize: '1rem',
                       mb: 0.5,
@@ -631,7 +634,7 @@ export function LandingPage() {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#9ca3af',
+                      color: 'var(--page-text-secondary)',
                       fontSize: '0.9rem',
                     }}
                   >
@@ -683,7 +686,7 @@ export function LandingPage() {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#9ca3af',
+                    color: 'var(--page-text-secondary)',
                     fontSize: '0.9rem',
                   }}
                 >
@@ -707,14 +710,14 @@ export function LandingPage() {
                     left: '11px',
                     top: '2px',
                     fontSize: 20,
-                    color: '#30363d',
+                    color: '#2e2c28',
                   }}
                 />
                 <Box>
                   <Typography
                     variant="body1"
                     sx={{
-                      color: '#9ca3af',
+                      color: 'var(--page-text-secondary)',
                       fontWeight: 600,
                       fontSize: '1rem',
                       mb: 0.5,
@@ -746,7 +749,7 @@ export function LandingPage() {
             mb: 2,
             fontSize: { xs: '2rem', md: '2.5rem' },
             fontWeight: 700,
-            color: '#e6edf3',
+            color: 'var(--page-text-primary)',
           }}
         >
           Ready to connect the dots?
@@ -755,7 +758,7 @@ export function LandingPage() {
           variant="body1"
           sx={{
             mb: 5,
-            color: '#9ca3af',
+            color: 'var(--page-text-secondary)',
             fontSize: '1.1rem',
             maxWidth: 550,
             mx: 'auto',
@@ -771,8 +774,8 @@ export function LandingPage() {
             size="large"
             onClick={handleBrowseTimelines}
             sx={{
-              borderColor: '#30363d',
-              color: '#e6edf3',
+              borderColor: 'var(--page-border)',
+              color: 'var(--page-text-primary)',
               fontSize: '1.1rem',
               px: 5,
               py: 1.75,
@@ -780,8 +783,8 @@ export function LandingPage() {
               textTransform: 'none',
               fontWeight: 600,
               '&:hover': {
-                borderColor: '#8b5cf6',
-                bgcolor: 'rgba(139, 92, 246, 0.1)',
+                borderColor: 'var(--page-accent)',
+                bgcolor: 'rgba(226, 163, 54, 0.1)',
               },
             }}
           >
@@ -791,19 +794,19 @@ export function LandingPage() {
       </Container>
 
       {/* Footer - Reduced prominence */}
-      <Box sx={{ bgcolor: 'rgba(13, 17, 23, 0.8)', borderTop: '1px solid rgba(48, 54, 61, 0.5)', backdropFilter: 'blur(8px)', py: 6 }}>
+      <Box sx={{ bgcolor: 'rgba(17, 17, 16, 0.8)', borderTop: '1px solid rgba(46, 44, 40, 0.5)', backdropFilter: 'blur(8px)', py: 6 }}>
         <Container maxWidth="lg">
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={6} sx={{ mb: 4 }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" gutterBottom sx={{ color: '#e6edf3', fontSize: '1rem', fontWeight: 600 }}>
+              <Typography variant="h6" gutterBottom sx={{ color: 'var(--page-text-primary)', fontSize: '1rem', fontWeight: 600 }}>
                 PowerTimeline
               </Typography>
-              <Typography variant="body2" sx={{ color: '#9ca3af', fontSize: '0.9rem' }}>
+              <Typography variant="body2" sx={{ color: 'var(--page-text-secondary)', fontSize: '0.9rem' }}>
                 Where events become understanding
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ color: '#9ca3af', fontSize: '0.85rem', mb: 1.5 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ color: 'var(--page-text-secondary)', fontSize: '0.85rem', mb: 1.5 }}>
                 Product
               </Typography>
               <Stack spacing={0.5}>
@@ -811,11 +814,11 @@ export function LandingPage() {
                   size="small"
                   onClick={handleBrowseTimelines}
                   sx={{
-                    color: '#9ca3af',
+                    color: 'var(--page-text-secondary)',
                     justifyContent: 'flex-start',
                     textTransform: 'none',
                     fontSize: '0.85rem',
-                    '&:hover': { color: '#e6edf3' },
+                    '&:hover': { color: 'var(--page-text-primary)' },
                   }}
                 >
                   Browse Timelines
@@ -823,7 +826,7 @@ export function LandingPage() {
               </Stack>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ color: '#9ca3af', fontSize: '0.85rem', mb: 1.5 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ color: 'var(--page-text-secondary)', fontSize: '0.85rem', mb: 1.5 }}>
                 Contact
               </Typography>
               <Stack spacing={1}>
@@ -834,9 +837,9 @@ export function LandingPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: '#9ca3af',
+                    color: 'var(--page-text-secondary)',
                     fontSize: '0.85rem',
-                    '&:hover': { color: '#e6edf3' },
+                    '&:hover': { color: 'var(--page-text-primary)' },
                   }}
                 >
                   <EmailIcon sx={{ fontSize: 18 }} />
@@ -851,9 +854,9 @@ export function LandingPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
-                    color: '#9ca3af',
+                    color: 'var(--page-text-secondary)',
                     fontSize: '0.85rem',
-                    '&:hover': { color: '#e6edf3' },
+                    '&:hover': { color: 'var(--page-text-primary)' },
                   }}
                 >
                   <GitHubIcon sx={{ fontSize: 18 }} />
@@ -870,7 +873,7 @@ export function LandingPage() {
               display: 'block',
               fontSize: '0.8rem',
               pt: 3,
-              borderTop: '1px solid #21262d',
+              borderTop: '1px solid #2e2c28',
             }}
           >
             © 2025 PowerTimeline. Built for people who connect the dots.
@@ -890,7 +893,7 @@ export function LandingPage() {
               href="https://github.com/CynaCons/PowerSpawn"
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ color: '#71717a', '&:hover': { color: '#8b5cf6' } }}
+              sx={{ color: '#71717a', '&:hover': { color: 'var(--page-accent)' } }}
             >
               PowerSpawn
             </Link>

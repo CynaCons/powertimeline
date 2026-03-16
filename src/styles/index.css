@@ -827,7 +827,8 @@
 .nav-button:hover {
   background-color: var(--nav-hover-bg);
   color: var(--page-accent);
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--page-accent) 18%, transparent);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--page-accent) 18%, transparent),
+              0 0 12px rgba(226,163,54,0.1);
   transform: translateY(-1px);
 }
 
