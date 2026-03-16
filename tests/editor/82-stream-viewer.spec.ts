@@ -702,4 +702,92 @@ test.describe('v5/82 Stream Viewer - Scroll Verification', () => {
     const finalPos = await getScrollPosition(page);
     expect(finalPos).toBeLessThan(midPos);
   });
+
+  test('T82.16: Hovered event card does not overlap adjacent cards', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-STREAM-SELECT-001' });
+
+    await loadTestTimeline(page, TEST_TIMELINE);
+    await page.waitForTimeout(2000);
+
+    // Open Stream View
+    const streamButton = page.locator('[data-testid="nav-stream-view"]').or(
+      page.locator('.material-symbols-rounded:has-text("view_stream")').locator('..')
+    ).first();
+    await streamButton.click();
+    await expect(page.getByTestId('stream-viewer-overlay')).toBeVisible({ timeout: 5000 });
+    await waitForEventsLoaded(page);
+
+    // Get all stream event cards
+    const cards = page.locator('[data-testid="stream-event-card"]');
+    const cardCount = await cards.count();
+    if (cardCount < 3) { test.skip(); return; }
+
+    // Hover the second card (has neighbors above and below)
+    const targetCard = cards.nth(1);
+    await targetCard.hover();
+    await page.waitForTimeout(200);
+
+    // Verify the hovered card has z-index elevation
+    const hoveredZIndex = await targetCard.evaluate(el => {
+      return parseInt(window.getComputedStyle(el).zIndex || '0', 10);
+    });
+    expect(hoveredZIndex).toBeGreaterThanOrEqual(2);
+
+    // Verify bounding boxes don't overlap between hovered card and neighbors
+    const hoveredBox = await targetCard.boundingBox();
+    expect(hoveredBox).not.toBeNull();
+
+    const prevCard = cards.nth(0);
+    const prevBox = await prevCard.boundingBox();
+
+    if (hoveredBox && prevBox) {
+      // Hovered card top should be below previous card bottom (tolerance for transform + gap)
+      expect(hoveredBox.y).toBeGreaterThanOrEqual(prevBox.y + prevBox.height - 5);
+    }
+
+    const nextCard = cards.nth(2);
+    const nextBox = await nextCard.boundingBox();
+
+    if (hoveredBox && nextBox) {
+      // Hovered card bottom should be above next card top
+      expect(hoveredBox.y + hoveredBox.height).toBeLessThanOrEqual(nextBox.y + 5);
+    }
+  });
+
+  test('T82.17: Hovered event card is elevated above neighbors', async ({ page }) => {
+    test.info().annotations.push({ type: 'req', description: 'CC-REQ-STREAM-SELECT-001' });
+
+    await loadTestTimeline(page, TEST_TIMELINE);
+    await page.waitForTimeout(2000);
+
+    // Open Stream View
+    const streamButton = page.locator('[data-testid="nav-stream-view"]').or(
+      page.locator('.material-symbols-rounded:has-text("view_stream")').locator('..')
+    ).first();
+    await streamButton.click();
+    await expect(page.getByTestId('stream-viewer-overlay')).toBeVisible({ timeout: 5000 });
+    await waitForEventsLoaded(page);
+
+    const cards = page.locator('[data-testid="stream-event-card"]');
+    const cardCount = await cards.count();
+    if (cardCount < 2) { test.skip(); return; }
+
+    // Hover the second card
+    const targetCard = cards.nth(1);
+    await targetCard.hover();
+    await page.waitForTimeout(200);
+
+    // Verify the hovered card has elevated z-index
+    const hoveredZIndex = await targetCard.evaluate(el => {
+      return parseInt(window.getComputedStyle(el).zIndex || '0', 10);
+    });
+    expect(hoveredZIndex).toBeGreaterThanOrEqual(2);
+
+    // Verify it has a box-shadow (visual elevation)
+    const hasBoxShadow = await targetCard.evaluate(el => {
+      const shadow = window.getComputedStyle(el).boxShadow;
+      return shadow !== 'none' && shadow !== '';
+    });
+    expect(hasBoxShadow).toBe(true);
+  });
 });

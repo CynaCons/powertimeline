@@ -327,8 +327,11 @@ const StreamEventCard = memo(function StreamEventCard({
           p: 1.5,
           mb: isLast ? 0 : 'var(--stream-card-gap)',
           overflow: 'visible',
+          boxShadow: isSelected ? '0 4px 16px rgba(0, 0, 0, 0.2)' : 'none',
+          // Elevate selected cards so shadow doesn't bleed under neighbors
+          zIndex: isSelected ? 2 : 0,
           // Note: transform transition handled by JS in handleTouchEnd for swipe
-          transition: 'border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease',
+          transition: 'border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, z-index 0s',
           // Desktop hover effect
           '@media (hover: hover)': {
             '&:hover': {
@@ -336,6 +339,7 @@ const StreamEventCard = memo(function StreamEventCard({
               borderColor: 'var(--stream-dot-color)',
               transform: 'translateY(-1px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              zIndex: 2,
               // Show hover icons
               '& .stream-hover-icons': {
                 opacity: 1,
