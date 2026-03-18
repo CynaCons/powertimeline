@@ -19,12 +19,8 @@ import {
   searchUsersByUsername,
   type TimelinePageCursor,
 } from '../services/firestore';
-import { signOutUser } from '../services/auth';
 import { downloadTimelineAsYaml } from '../services/timelineImportExport';
-import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
-import { BottomNavigation } from '../components/BottomNavigation';
-import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
-import { UserProfileMenu } from '../components/UserProfileMenu';
+import { AppShell } from '../components/AppShell';
 import { useAuth } from '../contexts/AuthContext';
 import { CreateTimelineDialog } from '../components/CreateTimelineDialog';
 import { ImportTimelineDialog } from '../components/ImportTimelineDialog';
@@ -82,13 +78,6 @@ function HomePageContent() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Help handler - starts the home page tour
-  const handleHelpClick = useCallback(() => {
-    startTour('home-tour');
-  }, [startTour]);
-
-  // Get navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser, handleHelpClick);
-
   // Loading state for timeline data
   const [loadingTimelines, setLoadingTimelines] = useState(true);
 
@@ -463,80 +452,7 @@ function HomePageContent() {
         <script type="application/ld+json">{JSON.stringify(webSiteSchema())}</script>
       </Helmet>
 
-    <div data-testid="browse-page" className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
-        <div className="flex">
-      {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
-      <aside data-tour="nav-rail" className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" role="navigation" aria-label="Main navigation" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
-        {/* PowerTimeline logo at top - clickable to go home */}
-        <button
-          onClick={() => navigate('/browse')}
-          className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
-          title="Go to Home"
-        >
-          <span className="material-symbols-rounded" style={{ fontSize: '28px', color: '#8b5cf6' }}>timeline</span>
-        </button>
-
-        {/* Navigation sections */}
-        <NavigationRail sections={sections} />
-
-        {/* Bottom utilities */}
-        <div className="flex flex-col items-center gap-2 mt-auto">
-          <ThemeToggleButton />
-        </div>
-      </aside>
-
-      {/* Main Content Area - full width on mobile, offset on md+ */}
-      <div className="flex-1 md:ml-14">
-        {/* Header - with mobile logo and navigation */}
-        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="px-4 md:px-8 py-3 md:py-4">
-            <div className="flex items-center justify-between">
-              {/* Brand: Logo + PowerTimeline BETA */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigate('/')}
-                  className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
-                  title="Go to Landing Page"
-                  data-testid="logo-button"
-                >
-                  <span className="material-symbols-rounded" style={{ fontSize: '24px', color: '#8b5cf6' }}>timeline</span>
-                  <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
-                    PowerTimeline
-                  </span>
-                  <span
-                    className="px-2 py-0.5 text-xs font-bold rounded"
-                    style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
-                  >
-                    BETA
-                  </span>
-                </button>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Mobile: Theme toggle (since nav rail is hidden) */}
-                <div className="md:hidden">
-                  <ThemeToggleButton />
-                </div>
-                {firebaseUser ? (
-                  <UserProfileMenu
-                    onLogout={async () => {
-                      await signOutUser();
-                      navigate('/');
-                    }}
-                  />
-                ) : (
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="pt-button px-3 py-1.5 text-sm font-medium rounded-lg"
-                    style={accentButtonStyle}
-                  >
-                    Sign In
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
-
+    <AppShell data-testid="browse-page">
         {/* Main Content - has-bottom-nav adds padding for mobile bottom navigation */}
         <main className="px-4 md:px-8 py-6 md:py-8 has-bottom-nav">
         <h1 className="sr-only">Browse and Search Timelines</h1>
@@ -1140,7 +1056,6 @@ function HomePageContent() {
         </>
         )}
         </main>
-      </div>
 
       {/* Timeline CRUD Dialogs */}
       <CreateTimelineDialog
@@ -1175,11 +1090,7 @@ function HomePageContent() {
         onSuccess={handleDeleteSuccess}
       />
 
-      {/* Mobile Bottom Navigation - hidden on md+ screens */}
-      <BottomNavigation />
-
-      </div>
-    </div>
+    </AppShell>
     </>
   );
 }

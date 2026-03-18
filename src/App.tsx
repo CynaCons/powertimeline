@@ -2,8 +2,9 @@
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { DeterministicLayoutComponent } from './layout/DeterministicLayoutComponent';
-import { NavigationRail, ThemeToggleButton } from './components/NavigationRail';
+import { NavigationRail } from './components/NavigationRail';
 import { UserProfileMenu } from './components/UserProfileMenu';
+import { EnhancedTooltip } from './components/EnhancedTooltip';
 import { useNavigationShortcuts, useCommandPaletteShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNavigationConfig, type NavigationItem } from './app/hooks/useNavigationConfig';
 import { useAuth } from './contexts/AuthContext';
@@ -1098,7 +1099,7 @@ function AppContent({ timelineId, readOnly = false, embed = false, initialStream
       items.push({
         id: 'create',
         label: 'Create',
-        icon: <AddIcon fontSize="small" />,
+        icon: 'add_circle',
         shortcut: 'Alt+C',
         onClick: openCreate,
         color: 'primary.main',
@@ -1173,8 +1174,19 @@ function AppContent({ timelineId, readOnly = false, embed = false, initialStream
     return `${window.location.origin}/${username}/timeline/${currentTimeline.id}`;
   }, [currentTimeline]);
 
+  // Editor-specific utility items (info panel toggle)
+  const editorUtilityItems: NavigationItem[] = useMemo(() => [
+    {
+      id: 'info-panels',
+      label: showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels',
+      icon: 'info',
+      onClick: () => setShowInfoPanels(!showInfoPanels),
+      isActive: showInfoPanels,
+    },
+  ], [showInfoPanels]);
+
   // Get context-aware navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser, handleHelpClick);
+  const { sections } = useNavigationConfig(currentUser?.id, editorItems, currentUser, handleHelpClick, editorUtilityItems);
 
   // Command palette commands
   const commands: Command[] = useMemo(() => [
@@ -1254,49 +1266,47 @@ function AppContent({ timelineId, readOnly = false, embed = false, initialStream
         <div className="relative h-screen">
         {/* Enhanced Navigation Rail - Always visible (hidden in embed mode) */}
         {!embed && (
-        <aside className="absolute left-0 top-0 bottom-0 w-14 border-r z-[60] flex flex-col items-center py-2" style={{ borderColor: 'var(--color-border-primary)', backgroundColor: 'var(--color-surface-elevated)' }}>
-          {/* PowerTimeline logo at top - clickable to go home */}
+        <aside className="absolute left-0 top-0 bottom-0 w-14 border-r z-[60] flex flex-col items-center py-2" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
+          {/* PowerTimeline logo at top - clickable to go to landing page */}
           <button
-            onClick={() => navigate('/browse')}
-            className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
-            title="Go to Home"
+            onClick={() => navigate('/')}
+            className="mb-4 text-center hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center"
+            style={{ width: '40px', height: '40px' }}
+            title="PowerTimeline Home"
+            aria-label="Go to Home"
+            data-testid="logo-button"
           >
             <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
           </button>
-
-          {/* Read-only lock icon - shown in read-only mode */}
-          {readOnly && (
-            <Tooltip title="You are viewing in read-only mode. Sign in to edit your own timelines, or fork this timeline to make your own copy." placement="right">
-              <div className="mb-4 p-2 text-gray-400" aria-label="Read-only mode">
-                <span className="material-symbols-rounded text-xl" aria-hidden="true">lock</span>
-              </div>
-            </Tooltip>
-          )}
 
           {/* Context-Aware Navigation */}
           <NavigationRail
             sections={sections}
             activeItemId={activeNavItem || undefined}
             onReviewClick={toggleReviewPanel}
+            userSlot={firebaseUser ? <UserProfileMenu placement="rail" /> : (
+              <EnhancedTooltip title="Sign In" placement="right">
+                <IconButton
+                  aria-label="Sign In"
+                  size="small"
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    color: '#8b5cf6',
+                    minWidth: '40px',
+                    minHeight: '40px',
+                    '&:hover': {
+                      backgroundColor: 'var(--nav-hover-bg)',
+                    },
+                  }}
+                  data-testid="nav-sign-in-bottom"
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: '24px' }} aria-hidden="true">
+                    account_circle
+                  </span>
+                </IconButton>
+              </EnhancedTooltip>
+            )}
           />
-
-          {/* Bottom actions */}
-          <div className="flex flex-col items-center gap-2 mt-auto">
-            <button
-              type="button"
-              title={showInfoPanels ? 'Hide Info Panels' : 'Show Info Panels'}
-              onClick={() => setShowInfoPanels(!showInfoPanels)}
-              className={`material-symbols-rounded rounded-md p-2.5 min-w-11 min-h-11 transition-theme ${showInfoPanels ? 'bg-primary-50 text-primary-700' : ''}`}
-              style={{ color: showInfoPanels ? undefined : 'var(--color-text-secondary)', backgroundColor: showInfoPanels ? undefined : 'transparent' }}
-              onMouseEnter={(e) => !showInfoPanels && (e.currentTarget.style.backgroundColor = 'var(--color-surface-elevated)')}
-              onMouseLeave={(e) => !showInfoPanels && (e.currentTarget.style.backgroundColor = 'transparent')}
-              aria-pressed={showInfoPanels}
-              aria-label="Toggle info panels"
-            >
-              <span aria-hidden="true">info</span>
-            </button>
-            <ThemeToggleButton />
-          </div>
         </aside>
         )}
 

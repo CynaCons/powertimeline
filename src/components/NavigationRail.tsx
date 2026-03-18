@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Badge from '@mui/material/Badge';
 import IconButton from '@mui/material/IconButton';
-import RateReviewOutlined from '@mui/icons-material/RateReviewOutlined';
 import { EnhancedTooltip } from './EnhancedTooltip';
 import { useImportSessionContext } from '../contexts/ImportSessionContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -33,6 +32,7 @@ interface NavigationRailProps {
   activeItemId?: string;
   onKeyboardNavigation?: (direction: 'up' | 'down') => void;
   onReviewClick?: () => void;
+  userSlot?: React.ReactNode; // Rendered at bottom of rail (user menu / sign-in)
 }
 
 type NavigationRailBaseProps = Omit<NavigationRailProps, 'onReviewClick'>;
@@ -41,7 +41,8 @@ const NavigationRailBase: React.FC<NavigationRailBaseProps> = ({
   items,
   sections,
   activeItemId,
-  onKeyboardNavigation
+  onKeyboardNavigation,
+  userSlot,
 }) => {
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -107,6 +108,8 @@ const NavigationRailBase: React.FC<NavigationRailBaseProps> = ({
     const hasCustomColor = item.color && item.color.startsWith('#');
     const accentColor = hasCustomColor ? item.color! : 'var(--page-accent)';
     return {
+      minWidth: '40px',
+      minHeight: '40px',
       backgroundColor: isActive ? 'var(--nav-active-bg)' : 'transparent',
       color: isActive ? accentColor : item.color || 'var(--page-text-secondary)',
       position: 'relative',
@@ -156,7 +159,10 @@ const NavigationRailBase: React.FC<NavigationRailBaseProps> = ({
         {item.icon}
       </span>
     ) : (
-      item.icon
+      // Wrap MUI icons to enforce consistent 24px sizing
+      <span className="nav-icon" style={{ display: 'flex', fontSize: '24px' }} aria-hidden="true">
+        {item.icon}
+      </span>
     );
 
     if (item.badge === undefined || item.badge === null) {
@@ -203,8 +209,8 @@ const NavigationRailBase: React.FC<NavigationRailBaseProps> = ({
               onClick={() => toggleSection(sectionKey)}
               sx={{
                 fontSize: '0.75rem',
-                minWidth: '44px',
-                minHeight: '44px',
+                minWidth: '40px',
+                minHeight: '40px',
                 color: 'text.secondary',
                 '&:hover': {
                   bgcolor: 'action.hover',
@@ -311,6 +317,13 @@ const NavigationRailBase: React.FC<NavigationRailBaseProps> = ({
           })}
         </div>
       )}
+
+      {/* User slot at the very bottom (user menu / sign-in) */}
+      {userSlot && (
+        <div className="flex flex-col items-center mt-2">
+          {userSlot}
+        </div>
+      )}
     </>
   );
 };
@@ -321,6 +334,7 @@ const NavigationRailWithReview: React.FC<NavigationRailProps> = ({
   activeItemId,
   onKeyboardNavigation,
   onReviewClick,
+  userSlot,
 }) => {
   const { hasActiveSession, getStats } = useImportSessionContext();
   const stats = getStats();
@@ -328,7 +342,7 @@ const NavigationRailWithReview: React.FC<NavigationRailProps> = ({
   const reviewItem: NavigationItem = {
     id: 'review',
     label: 'Review',
-    icon: <RateReviewOutlined fontSize="small" />,
+    icon: 'rate_review',
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onClick: onReviewClick || (() => {}),
     badge: hasActiveSession && stats.pending > 0 ? stats.pending : undefined,
@@ -359,6 +373,7 @@ const NavigationRailWithReview: React.FC<NavigationRailProps> = ({
       sections={sectionsWithReview}
       activeItemId={activeItemId}
       onKeyboardNavigation={onKeyboardNavigation}
+      userSlot={userSlot}
     />
   );
 };
@@ -374,6 +389,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = (props) => {
       sections={props.sections}
       activeItemId={props.activeItemId}
       onKeyboardNavigation={props.onKeyboardNavigation}
+      userSlot={props.userSlot}
     />
   );
 };

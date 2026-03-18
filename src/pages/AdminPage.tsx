@@ -8,17 +8,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, Tab } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
-import { signOutUser } from '../services/auth';
 import { getUser } from '../services/firestore';
 import { canAccessAdmin } from '../lib/adminUtils';
-import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
-import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
-import { UserProfileMenu } from '../components/UserProfileMenu';
+import { AppShell } from '../components/AppShell';
 import { UserManagementPanel } from '../components/admin/UserManagementPanel';
 import { StatisticsDashboard } from '../components/admin/StatisticsDashboard';
 import { ActivityLogPanel } from '../components/admin/ActivityLogPanel';
 import type { User } from '../types';
-import TimelineIcon from '@mui/icons-material/Timeline';
 
 type AdminTab = 'users' | 'statistics' | 'activity';
 
@@ -27,9 +23,6 @@ export function AdminPage() {
   const { user: firebaseUser } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
-
-  // Get navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
 
   // Load user profile from Firestore
   useEffect(() => {
@@ -79,73 +72,19 @@ export function AdminPage() {
   };
 
   return (
-    <div data-testid="admin-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
-      {/* Navigation Rail */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 flex flex-col items-center py-2" role="navigation" aria-label="Main navigation" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-        {/* PowerTimeline logo at top - clickable to go home */}
-        <button
-          onClick={() => navigate('/browse')}
-          className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
-          title="Go to Home"
-          aria-label="Go to Home"
-        >
-          <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
-        </button>
-
-        {/* Navigation sections */}
-        <NavigationRail sections={sections} />
-
-        {/* Bottom utilities */}
-        <div className="flex flex-col items-center gap-2 mt-auto">
-          <ThemeToggleButton />
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 ml-14">
-        {/* Header */}
-        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
+    <AppShell data-testid="admin-page">
+        {/* Admin Panel Heading */}
+        <div className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
           <div className="px-4 md:px-8 py-3">
-            <div className="flex items-center justify-between">
-              {/* Brand: Logo + PowerTimeline BETA */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => navigate('/')}
-                  className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
-                  title="Go to Landing Page"
-                  aria-label="Go to Landing Page"
-                  data-testid="logo-button"
-                >
-                  <TimelineIcon sx={{ fontSize: 24, color: 'var(--page-accent)' }} />
-                  <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
-                    PowerTimeline
-                  </span>
-                  <span
-                    className="px-2 py-0.5 text-xs font-bold rounded"
-                    style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
-                  >
-                    BETA
-                  </span>
-                </button>
-                <span
-                  className="text-lg font-semibold"
-                  style={{ color: 'var(--page-text-primary)' }}
-                  data-testid="admin-heading"
-                >
-                  Admin Panel
-                </span>
-              </div>
-              {currentUser && (
-                <UserProfileMenu
-                  onLogout={async () => {
-                    await signOutUser();
-                    navigate('/');
-                  }}
-                />
-              )}
-            </div>
+            <h1
+              className="text-lg font-semibold"
+              style={{ color: 'var(--page-text-primary)' }}
+              data-testid="admin-heading"
+            >
+              Admin Panel
+            </h1>
           </div>
-        </header>
+        </div>
 
         {/* Tab Navigation */}
         <div className="border-b" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
@@ -159,7 +98,7 @@ export function AdminPage() {
         </div>
 
         {/* Tab Content */}
-        <main className="px-4 md:px-8 py-8">
+        <main className="px-4 md:px-8 py-8 has-bottom-nav">
           {activeTab === 'users' && (
             <div data-testid="admin-users-tab" className="space-y-4">
               <h2 data-testid="user-management-heading" className="text-xl font-semibold" style={{ color: 'var(--page-text-primary)' }}>User Management</h2>
@@ -181,7 +120,6 @@ export function AdminPage() {
             </div>
           )}
         </main>
-      </div>
-    </div>
+    </AppShell>
   );
 }

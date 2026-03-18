@@ -11,7 +11,7 @@ import { getUser, getTimelines, deleteUserData } from '../services/firestore';
 import { auth, deleteCurrentUserAccount } from '../services/auth';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { ThemeToggleButton } from '../components/NavigationRail';
-import { BottomNavigation } from '../components/BottomNavigation';
+import { AppShell } from '../components/AppShell';
 import type { User } from '../types';
 
 export function SettingsPage() {
@@ -177,28 +177,12 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--page-bg)' }}>
-      {/* Header */}
-      <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-        <div className="px-4 md:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="material-symbols-rounded p-2 rounded-lg transition-colors hover:bg-[var(--card-bg)]"
-              style={{ color: 'var(--page-text-secondary)' }}
-              aria-label="Go back"
-            >
-              arrow_back
-            </button>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--page-text-primary)' }}>
-              Account Settings
-            </h1>
-          </div>
-        </div>
-      </header>
-
+    <AppShell>
       {/* Main Content - has-bottom-nav adds padding for mobile bottom navigation */}
       <main className="px-4 md:px-8 py-8 max-w-5xl mx-auto has-bottom-nav">
+        <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--page-text-primary)' }}>
+          Account Settings
+        </h1>
         <div className="space-y-6">
           {/* Profile Section */}
           <section className="border rounded-xl p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
@@ -384,8 +368,6 @@ export function SettingsPage() {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation - hidden on md+ screens */}
-      <BottomNavigation />
-    </div>
+    </AppShell>
   );
 }

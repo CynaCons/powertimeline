@@ -12,6 +12,7 @@ import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { isAdmin } from '../../lib/adminUtils';
 import type { User } from '../../types';
 
@@ -66,11 +67,13 @@ export function useNavigationConfig(
   currentUserId?: string,
   editorItems?: NavigationItem[],
   currentUser?: User | null,
-  onHelpClick?: () => void
+  onHelpClick?: () => void,
+  extraUtilityItems?: NavigationItem[]
 ): NavigationConfig {
   const location = useLocation();
   const navigate = useNavigate();
   const { user: firebaseUser } = useAuth();
+  const { toggleTheme, themePreference, isDarkMode } = useTheme();
   const context = getNavigationContext(location.pathname);
 
   const globalNavigation: NavigationSection = useMemo(() => {
@@ -112,17 +115,6 @@ export function useNavigationConfig(
       });
     }
 
-    // Sign In - only for unauthenticated users
-    if (!isAuthenticated) {
-      items.push({
-        id: 'sign-in',
-        label: 'Sign In',
-        icon: 'person',
-        onClick: () => navigate('/login'),
-        color: '#8b5cf6', // Purple accent
-      });
-    }
-
     return {
       type: 'global',
       items,
@@ -140,7 +132,7 @@ export function useNavigationConfig(
     return null;
   }, [context, editorItems]);
 
-  // Utilities section (bottom of nav rail) - Settings and Help
+  // Utilities section (bottom of nav rail) - Settings, Help, extra items, Theme toggle
   const utilitiesSection: NavigationSection | null = useMemo(() => {
     const isAuthenticated = !!firebaseUser;
 
@@ -168,14 +160,29 @@ export function useNavigationConfig(
       });
     }
 
-    // Don't show utilities section if no items
-    if (items.length === 0) return null;
+    // Extra utility items (e.g., editor's info panel toggle)
+    if (extraUtilityItems) {
+      items.push(...extraUtilityItems);
+    }
+
+    // Theme toggle - always available
+    const getThemeIcon = () => {
+      if (themePreference === 'system') return 'auto_mode';
+      return isDarkMode ? 'light_mode' : 'dark_mode';
+    };
+    items.push({
+      id: 'theme',
+      label: 'Theme',
+      icon: getThemeIcon(),
+      shortcut: 'Alt+T',
+      onClick: toggleTheme,
+    });
 
     return {
       type: 'utilities',
       items,
     };
-  }, [firebaseUser, navigate, location.pathname, onHelpClick]);
+  }, [firebaseUser, navigate, location.pathname, onHelpClick, extraUtilityItems, toggleTheme, themePreference, isDarkMode]);
 
   const sections = useMemo(() => {
     const result: NavigationSection[] = [globalNavigation];

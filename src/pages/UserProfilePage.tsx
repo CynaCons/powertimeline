@@ -8,13 +8,9 @@ import type { CSSProperties as ReactCSSProperties } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { TimelineMetadata, User } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { signOutUser } from '../services/auth';
 import { getUser, getUserByUsername, getTimelines, getTimeline } from '../services/firestore';
 import { downloadTimelineAsYaml } from '../services/timelineImportExport';
-import { NavigationRail, ThemeToggleButton } from '../components/NavigationRail';
-import { BottomNavigation } from '../components/BottomNavigation';
-import { useNavigationConfig } from '../app/hooks/useNavigationConfig';
-import { UserProfileMenu } from '../components/UserProfileMenu';
+import { AppShell } from '../components/AppShell';
 import { TimelineCardMenu } from '../components/TimelineCardMenu';
 import { EditTimelineDialog } from '../components/EditTimelineDialog';
 import { DeleteTimelineDialog } from '../components/DeleteTimelineDialog';
@@ -24,7 +20,6 @@ import { UserAvatar } from '../components/UserAvatar';
 import { useToast } from '../contexts/ToastContext';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { ErrorState } from '../components/ErrorState';
-import TimelineIcon from '@mui/icons-material/Timeline';
 import { Helmet } from 'react-helmet-async';
 import { userProfileUrl, OG_IMAGE_URL } from '../utils/urls';
 import { profilePageSchema, breadcrumbSchema } from '../utils/jsonLd';
@@ -36,7 +31,6 @@ export function UserProfilePage() {
   const navigate = useNavigate();
   const { user: firebaseUser } = useAuth();
   const [user, setUser] = useState<User | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [timelines, setTimelines] = useState<TimelineMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -52,21 +46,6 @@ export function UserProfilePage() {
   // Toast notifications
   const { showSuccess, showError } = useToast();
 
-  // Get navigation configuration
-  const { sections } = useNavigationConfig(currentUser?.id, undefined, currentUser);
-
-  // Load current user profile from Firestore
-  useEffect(() => {
-    async function loadCurrentUser() {
-      if (firebaseUser) {
-        const userProfile = await getUser(firebaseUser.uid);
-        setCurrentUser(userProfile);
-      } else {
-        setCurrentUser(null);
-      }
-    }
-    loadCurrentUser();
-  }, [firebaseUser]);
 
   const loadUserProfile = useCallback(async () => {
     setLoading(true);
@@ -302,69 +281,7 @@ export function UserProfilePage() {
         </Helmet>
       )}
 
-      <div data-testid="user-profile-page" className="min-h-screen flex" style={{ backgroundColor: 'var(--page-bg)' }}>
-      {/* Navigation Rail - hidden on mobile, shown on md+ screens */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r z-50 hidden md:flex flex-col items-center py-2" role="navigation" aria-label="Main navigation" style={{ borderColor: 'var(--nav-border)', backgroundColor: 'var(--nav-bg)' }}>
-        {/* PowerTimeline logo at top - clickable to go home */}
-        <button
-          onClick={() => navigate('/browse')}
-          className="mb-4 p-1 text-center hover:opacity-80 transition-opacity cursor-pointer"
-          title="Go to Home"
-        >
-          <TimelineIcon sx={{ fontSize: 28, color: 'var(--page-accent)' }} />
-        </button>
-
-        {/* Navigation sections */}
-        <NavigationRail sections={sections} />
-
-        {/* Bottom utilities */}
-        <div className="flex flex-col items-center gap-2 mt-auto">
-          <ThemeToggleButton />
-        </div>
-      </aside>
-
-      {/* Main Content Area - full width on mobile, offset on md+ */}
-      <div className="flex-1 md:ml-14">
-        {/* Header */}
-        <header className="border-b sticky top-0 z-40" style={{ backgroundColor: 'var(--page-bg-elevated)', borderColor: 'var(--page-border)' }}>
-          <div className="px-4 md:px-8 py-3 md:py-4">
-            <div className="flex items-center justify-between">
-              {/* Brand: Logo + PowerTimeline BETA */}
-              <button
-                onClick={() => navigate('/')}
-                className="p-1 hover:opacity-80 transition-opacity flex items-center gap-2"
-                title="Go to Landing Page"
-                data-testid="logo-button"
-              >
-                <TimelineIcon sx={{ fontSize: 24, color: 'var(--page-accent)' }} />
-                <span className="font-bold text-lg" style={{ color: 'var(--page-text-primary)' }}>
-                  PowerTimeline
-                </span>
-                <span
-                  className="px-2 py-0.5 text-xs font-bold rounded"
-                  style={{ backgroundColor: '#f97316', color: '#fff', letterSpacing: '0.05em' }}
-                >
-                  BETA
-                </span>
-              </button>
-              <div className="flex items-center gap-2">
-                {/* Mobile: Theme toggle (since nav rail is hidden) */}
-                <div className="md:hidden">
-                  <ThemeToggleButton />
-                </div>
-                {firebaseUser && (
-                  <UserProfileMenu
-                    onLogout={async () => {
-                      await signOutUser();
-                      navigate('/');
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
-
+      <AppShell data-testid="user-profile-page">
         {/* User Profile Header */}
         <div className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
           <div className="px-4 md:px-8 py-6 md:py-8">
@@ -593,7 +510,6 @@ export function UserProfilePage() {
         </>
         )}
         </main>
-      </div>
 
       {/* Timeline Edit/Delete Dialogs */}
       <EditTimelineDialog
@@ -630,9 +546,7 @@ export function UserProfilePage() {
         onSuccess={handleCreateTimelineSuccess}
       />
 
-      {/* Mobile Bottom Navigation - hidden on md+ screens */}
-      <BottomNavigation />
-    </div>
+    </AppShell>
     </>
   );
 }

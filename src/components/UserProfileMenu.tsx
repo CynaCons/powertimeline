@@ -23,10 +23,12 @@ import type { User } from '../types';
 
 interface UserProfileMenuProps {
   onLogout?: () => void;  // Callback for logout action
+  placement?: 'header' | 'rail'; // Where the menu appears (affects popover direction)
 }
 
 export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
   onLogout,
+  placement = 'header',
 }) => {
   const navigate = useNavigate();
   const { user: firebaseUser, signOut } = useAuth();
@@ -80,6 +82,8 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
     return null;
   }
 
+  const isRail = placement === 'rail';
+
   return (
     <>
       <div
@@ -98,7 +102,22 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
           aria-label="Account menu"
-          sx={{
+          data-testid="user-profile-menu-button"
+          sx={isRail ? {
+            // Rail placement: consistent 40x40 to match other nav items
+            backgroundColor: 'transparent',
+            padding: '8px',
+            minWidth: '40px',
+            minHeight: '40px',
+            borderRadius: '10px',
+            color: 'var(--page-text-secondary)',
+            transition: 'background-color var(--pt-hover-duration, 0.15s) var(--pt-hover-ease, ease), color var(--pt-hover-duration, 0.15s) var(--pt-hover-ease, ease)',
+            '&:hover': {
+              backgroundColor: 'var(--nav-hover-bg)',
+              color: 'var(--page-accent)',
+            },
+          } : {
+            // Header placement: expandable pill with border
             backgroundColor: 'var(--page-bg-elevated)',
             border: '1px solid var(--page-border)',
             backdropFilter: 'blur(8px)',
@@ -113,30 +132,32 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             },
           }}
         >
-          <span className="material-symbols-rounded" style={{ fontSize: '20px' }} aria-hidden="true">
+          <span className="material-symbols-rounded" style={{ fontSize: isRail ? '24px' : '20px' }} aria-hidden="true">
             account_circle
           </span>
 
-          {/* Username and chevron - expand on hover */}
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              overflow: 'hidden',
-              maxWidth: isHovered ? '150px' : '0px',
-              opacity: isHovered ? 1 : 0,
-              marginLeft: isHovered ? '4px' : '0px',
-              transition: 'all 0.2s ease-in-out',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span className="text-sm font-medium">
-              {currentUser?.username || firebaseUser?.email?.split('@')[0]}
+          {/* Username and chevron - expand on hover (header only) */}
+          {!isRail && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                overflow: 'hidden',
+                maxWidth: isHovered ? '150px' : '0px',
+                opacity: isHovered ? 1 : 0,
+                marginLeft: isHovered ? '4px' : '0px',
+                transition: 'all 0.2s ease-in-out',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <span className="text-sm font-medium">
+                {currentUser?.username || firebaseUser?.email?.split('@')[0]}
+              </span>
+              <span className="material-symbols-rounded text-sm ml-1" aria-hidden="true">
+                expand_more
+              </span>
             </span>
-            <span className="material-symbols-rounded text-sm ml-1" aria-hidden="true">
-              expand_more
-            </span>
-          </span>
+          )}
         </IconButton>
       </div>
 
@@ -150,7 +171,7 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
           elevation: 3,
           sx: {
             minWidth: 260,
-            mt: 1.5,
+            ...(isRail ? { ml: 1 } : { mt: 1.5 }),
             '& .MuiAvatar-root': {
               width: 32,
               height: 32,
@@ -159,8 +180,14 @@ export const UserProfileMenu: React.FC<UserProfileMenuProps> = ({
             },
           },
         }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        transformOrigin={isRail
+          ? { horizontal: 'left', vertical: 'center' }
+          : { horizontal: 'right', vertical: 'top' }
+        }
+        anchorOrigin={isRail
+          ? { horizontal: 'right', vertical: 'center' }
+          : { horizontal: 'right', vertical: 'bottom' }
+        }
       >
         {/* User Info Header with "Logged in as" label */}
         <MenuItem disabled sx={{ opacity: '1 !important', cursor: 'default !important', pb: 2 }}>
