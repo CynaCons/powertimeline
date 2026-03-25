@@ -1,9 +1,10 @@
 /**
  * PowerTimeline Cloud Functions
- * v0.5.22 - Platform Statistics Aggregation
+ * v0.6.0 - Platform Statistics + Timeline Automation API
  *
  * These functions maintain atomic counters in stats/platform document,
- * triggered by Firestore document events.
+ * triggered by Firestore document events. Also provides the Timeline
+ * Automation API for programmatic event management via API tokens.
  *
  * Uses firebase-functions v2 API
  */
@@ -12,6 +13,7 @@ import { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } from "firebas
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import * as admin from "firebase-admin";
+import { generateToken, revokeToken } from "./tokenService";
 
 admin.initializeApp();
 
@@ -380,4 +382,53 @@ ${urls
     logger.error("Error generating sitemap:", error);
     res.status(500).send("Error generating sitemap");
   }
+});
+
+// ============================================================================
+// Timeline Automation API
+// ============================================================================
+
+// Re-export the HTTP API endpoint
+export { api } from "./api";
+
+/**
+ * Generate a new API token for the authenticated user.
+ * Returns the raw token — shown to the user exactly once.
+ */
+export const generateApiToken = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "Must be authenticated to generate an API token"
+    );
+  }
+
+  const label =
+    typeof request.data?.label === "string"
+      ? request.data.label.trim().slice(0, 100)
+      : "API Token";
+
+  const rawToken = await generateToken(request.auth.uid, label);
+
+  logger.info(`API token generated for user ${request.auth.uid}`);
+  return { token: rawToken };
+});
+
+/**
+ * Revoke the authenticated user's API token.
+ */
+export const revokeApiToken = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "Must be authenticated to revoke an API token"
+    );
+  }
+
+  const revoked = await revokeToken(request.auth.uid);
+
+  logger.info(
+    `API token revocation for user ${request.auth.uid}: ${revoked ? "success" : "no token found"}`
+  );
+  return { success: true, revoked };
 });

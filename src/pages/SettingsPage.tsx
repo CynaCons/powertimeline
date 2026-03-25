@@ -12,6 +12,7 @@ import { auth, deleteCurrentUserAccount } from '../services/auth';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { ThemeToggleButton } from '../components/NavigationRail';
 import { BottomNavigation } from '../components/BottomNavigation';
+import { ApiTokenSection } from '../components/ApiTokenSection';
 import type { User } from '../types';
 
 export function SettingsPage() {
@@ -261,6 +262,9 @@ export function SettingsPage() {
               </div>
             </div>
           </section>
+
+          {/* API Access Section */}
+          <ApiTokenSection />
 
           {/* Preferences Section */}
           <section className="border rounded-xl p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>

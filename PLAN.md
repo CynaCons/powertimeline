@@ -116,6 +116,7 @@
 - ✅ App Theme Redesign "Warm Neutral": rich charcoal palette (#111110), gold/amber accent (#e2a336), Inter heading font, card gradient+glow, feature cards with colored top borders, hero text gradient (gold→amber→terracotta), LandingPage de-hardcoded to CSS variables, light mode warm cream-white (#faf8f5), MUI theme synced (2026-03-16)
 - ✅ Card Text Clipping Fix: Added overflow-hidden on card containers, flex-shrink-0 on title/date rows, min-h-0 on description for graceful line-clamp truncation, multi-resolution tests at 4 viewport sizes (1366x768, 1440x900, 1920x1080, 2560x1440) (2026-03-16)
 - ✅ Stream Highlight Overlap Fix: Added z-index elevation on hovered/selected stream cards to prevent box-shadow bleeding under adjacent cards, 2 new E2E tests (T82.16, T82.17) (2026-03-16)
+- ✅ Timeline Automation API: Token-authenticated REST API for programmatic event management (create/update/delete/list/bulk), API token generation/revocation in Settings, SHA-256 hashed token storage, rate limiting (60 req/min), Cloud Functions HTTP endpoints, Firestore security rules (2026-03-24)
 
 ### Next Up
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)

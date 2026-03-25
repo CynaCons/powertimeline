@@ -103,6 +103,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // API tokens — server-only (Admin SDK bypasses rules)
+    // Client-side access is blocked as defense-in-depth
+    match /api_tokens/{tokenId} {
+      allow read, write: if false;
+    }
+
+    // User settings subcollection (e.g., API token references)
+    // Owner can read; only Cloud Functions (Admin SDK) can write
+    match /users/{userId}/settings/{settingId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     // Stats collection (v0.5.17 - Platform statistics aggregation)
     match /stats/{docId} {
       // Anyone can read platform stats (public dashboard data)
