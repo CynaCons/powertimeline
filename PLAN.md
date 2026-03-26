@@ -119,6 +119,7 @@
 - ✅ Timeline Automation API: Token-authenticated REST API for programmatic event management (create/update/delete/list/bulk), API token generation/revocation in Settings, SHA-256 hashed token storage, rate limiting (60 req/min), Cloud Functions HTTP endpoints, Firestore security rules (2026-03-24)
 
 ### Next Up
+- **X Post Embeds**: Rich preview of X/Twitter posts in Event Details — embed cards showing tweet text, author, media, and engagement metrics (similar to Telegram link previews). Renders inside the event description or sources section when a source URL is an X post.
 - **v1.0.x**: Collaboration and Versioning (fork/merge/diff)
 
 ### Test Status
