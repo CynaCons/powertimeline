@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { isXPostUrl, XPostEmbed } from '../../components/XPostEmbed';
 
 interface SourcesEditorProps {
   sources: string[];
@@ -151,18 +152,25 @@ export const SourcesEditor: React.FC<SourcesEditorProps> = ({
                 {isURL(source) ? 'link' : 'description'}
               </span>
 
-              {/* Source text or link */}
+              {/* Source text, link, or X post embed */}
               <div className="flex-1 min-w-0">
                 {isURL(source) ? (
-                  <a
-                    href={source}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm truncate block hover:underline"
-                    style={{ color: 'var(--page-accent)' }}
-                  >
-                    {source}
-                  </a>
+                  <>
+                    <a
+                      href={source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm truncate block hover:underline"
+                      style={{ color: 'var(--page-accent)' }}
+                    >
+                      {source}
+                    </a>
+                    {isXPostUrl(source) && (
+                      <div className="mt-2">
+                        <XPostEmbed url={source} />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <span
                     className="text-sm truncate block"
