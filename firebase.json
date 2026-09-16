@@ -36,6 +36,30 @@
         "function": "api"
       },
       {
+        "source": "/timeline-maker",
+        "function": "renderPublicTimeline"
+      },
+      {
+        "source": "/timeline-maker/**",
+        "function": "renderPublicTimeline"
+      },
+      {
+        "source": "/timelinejs-alternative",
+        "function": "renderPublicTimeline"
+      },
+      {
+        "source": "/timelinejs-alternative/**",
+        "function": "renderPublicTimeline"
+      },
+      {
+        "source": "/frise-chronologique",
+        "function": "renderPublicTimeline"
+      },
+      {
+        "source": "/frise-chronologique/**",
+        "function": "renderPublicTimeline"
+      },
+      {
         "source": "/*/timeline/*/embed",
         "function": "renderPublicTimeline"
       },

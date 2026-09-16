@@ -14,6 +14,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import LoginPage from './pages/LoginPage'
 import { EmbedPage } from './pages/EmbedPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { ToolIntentPage } from './pages/ToolIntentPage'
 import { environment } from './config/environment'
 import { logger } from './utils/logger'
 import { performanceMonitor } from './utils/performanceMonitor'
@@ -62,6 +63,10 @@ function AppWithTheme() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/browse" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          {/* Tool-intent marketing pages — must be before /:username */}
+          <Route path="/timeline-maker" element={<ToolIntentPage slug="timeline-maker" />} />
+          <Route path="/timelinejs-alternative" element={<ToolIntentPage slug="timelinejs-alternative" />} />
+          <Route path="/frise-chronologique" element={<ToolIntentPage slug="frise-chronologique" />} />
 
           {/* Settings route - protected */}
           <Route path="/settings" element={

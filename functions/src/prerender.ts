@@ -9,6 +9,11 @@ import {
   type PrerenderPayload,
   type PrerenderTimeline,
 } from "./lib/prerender";
+import {
+  getToolIntentPage,
+  injectToolIntentIntoShell,
+  parseToolIntentRoute,
+} from "./lib/toolIntentPages";
 
 const SHELL_TTL_MS = 5 * 60 * 1000;
 const MAX_EVENTS = 100;
@@ -28,8 +33,23 @@ export async function renderPublicTimelineResponse(options: {
   ogImageUrl: string;
   fetchShell: () => Promise<string>;
 }): Promise<RenderResult> {
-  const route = parseTimelineRoute(options.path);
   const spaShell = await getSpaShell(options.fetchShell);
+  const toolIntentSlug = parseToolIntentRoute(options.path);
+  if (toolIntentSlug) {
+    const page = getToolIntentPage(toolIntentSlug);
+    if (page) {
+      return {
+        status: 200,
+        html: injectToolIntentIntoShell(spaShell, page, {
+          baseUrl: options.baseUrl,
+          ogImageUrl: options.ogImageUrl,
+        }),
+        cacheControl: "public, max-age=3600, s-maxage=86400",
+      };
+    }
+  }
+
+  const route = parseTimelineRoute(options.path);
 
   if (!route) {
     return {

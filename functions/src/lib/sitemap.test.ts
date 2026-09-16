@@ -37,6 +37,9 @@ describe('sitemap XML', () => {
     const xml = buildSitemapXml(entries);
     expect(xml).toContain(`${BASE}/`);
     expect(xml).toContain(`${BASE}/browse`);
+    expect(xml).toContain(`${BASE}/timeline-maker`);
+    expect(xml).toContain(`${BASE}/timelinejs-alternative`);
+    expect(xml).toContain(`${BASE}/frise-chronologique`);
     expect(xml).toContain(`${BASE}/alice`);
     expect(xml).toContain(`${BASE}/alice/timeline/timeline-french-revolution`);
     expect(xml).toContain('<lastmod>2024-07-14</lastmod>');
