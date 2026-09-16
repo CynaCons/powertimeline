@@ -36,6 +36,14 @@
         "function": "api"
       },
       {
+        "source": "/*/timeline/*/embed",
+        "function": "prerenderTimeline"
+      },
+      {
+        "source": "/*/timeline/*",
+        "function": "prerenderTimeline"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
