@@ -29,6 +29,12 @@ jobs:
     - name: Run TypeScript type check
       run: npm run typecheck
 
+    - name: Build Cloud Functions
+      run: npm --prefix functions install && npm --prefix functions run build
+
+    - name: Run unit tests
+      run: npm run test:unit
+
     - name: Build project
       run: npm run build
 

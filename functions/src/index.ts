@@ -14,6 +14,7 @@ import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import { generateToken, revokeToken } from "./tokenService";
+import { handlePublicPageRequest, handleSitemapRequest } from "./seo/handlers";
 
 admin.initializeApp();
 
@@ -300,88 +301,32 @@ export const initializeStats = onCall(async (request) => {
 });
 
 // ============================================================================
-// Sitemap Generation (HTTP endpoint for SEO)
+// Sitemap + public-page SSR (HTTP endpoints for SEO / sharing)
 // ============================================================================
 
-const BASE_URL = "https://powertimeline.com";
+const PUBLIC_HTTP = {
+  region: "us-central1",
+  invoker: "public" as const,
+  cors: true,
+  timeoutSeconds: 60,
+  memory: "512MiB" as const,
+};
 
 /**
- * Generate XML sitemap for search engine crawlers
- * Lists static pages, user profiles, and public timelines
+ * Generate XML sitemap for search engine crawlers.
+ * Lists static pages, user profiles, and public timelines.
+ * Soft-fails (HTTP 200 with whatever URLs could be built) instead of 500.
  */
-export const sitemap = onRequest(async (_req, res) => {
-  try {
-    interface SitemapEntry {
-      loc: string;
-      priority: string;
-      lastmod?: string;
-    }
+export const sitemap = onRequest(PUBLIC_HTTP, async (_req, res) => {
+  await handleSitemapRequest(db, res);
+});
 
-    // Static pages
-    const staticPages: SitemapEntry[] = [
-      { loc: `${BASE_URL}/`, priority: "1.0" },
-      { loc: `${BASE_URL}/browse`, priority: "0.9" },
-    ];
-
-    // Fetch user profiles
-    const usersSnapshot = await db.collection("users").get();
-    const userPages: SitemapEntry[] = [];
-    const userMap = new Map<string, string>(); // userId -> username
-    usersSnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.username) {
-        userMap.set(doc.id, data.username);
-        userPages.push({
-          loc: `${BASE_URL}/${data.username}`,
-          priority: "0.7",
-        });
-      }
-    });
-
-    // Fetch public timelines
-    const timelinesSnapshot = await db
-      .collectionGroup("timelines")
-      .where("visibility", "==", "public")
-      .get();
-
-    const timelinePages: SitemapEntry[] = [];
-    timelinesSnapshot.forEach((doc) => {
-      const data = doc.data();
-      const ownerUsername = data.ownerUsername || userMap.get(data.ownerId);
-      if (!ownerUsername) return; // Skip timelines without resolvable username
-
-      const lastmod = data.updatedAt
-        ? new Date(data.updatedAt).toISOString().split("T")[0]
-        : undefined;
-
-      timelinePages.push({
-        loc: `${BASE_URL}/${ownerUsername}/timeline/${doc.id}`,
-        lastmod,
-        priority: "0.8",
-      });
-    });
-
-    // Build XML
-    const urls = [...staticPages, ...userPages, ...timelinePages];
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (u) => `  <url>
-    <loc>${u.loc}</loc>${u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : ""}
-    <priority>${u.priority}</priority>
-  </url>`
-  )
-  .join("\n")}
-</urlset>`;
-
-    res.set("Content-Type", "application/xml");
-    res.set("Cache-Control", "public, max-age=3600");
-    res.status(200).send(xml);
-  } catch (error) {
-    logger.error("Error generating sitemap:", error);
-    res.status(500).send("Error generating sitemap");
-  }
+/**
+ * SSR/prerender public timeline + embed routes so shared links and crawlers
+ * see real event text without executing JavaScript.
+ */
+export const renderPublicPage = onRequest(PUBLIC_HTTP, async (req, res) => {
+  await handlePublicPageRequest(db, req, res);
 });
 
 // ============================================================================

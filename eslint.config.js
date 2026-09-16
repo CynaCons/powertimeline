@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', '**/dist/**', 'node_modules', '**/*.cjs', 'update_all_tests.js', 'functions/lib', 'powerspawn', 'coverage', '.claude', 'agent-tools', 'mcps', 'terminals', 'screenshots'] },
+  { ignores: ['dist', '**/dist/**', 'node_modules', '**/*.cjs', 'update_all_tests.js', 'functions/lib', 'functions/src/**/*.test.ts', 'powerspawn', 'coverage', '.claude', 'agent-tools', 'mcps', 'terminals', 'screenshots'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   // React/TypeScript application code (excludes tests and scripts)
@@ -39,6 +39,18 @@ export default tseslint.config(
       // React specific rules
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
+  // Cloud Functions (Node.js)
+  {
+    files: ['functions/src/**/*.ts'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.node,
+    },
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
   // Node.js scripts configuration (JS and TS)
