@@ -83,10 +83,12 @@ export function LandingPage() {
 
   const handleCreateTimeline = () => {
     if (user && userProfile) {
-      // Navigate to browse page (could open create dialog in future)
-      navigate('/browse');
+      navigate('/browse?create=1');
     } else {
-      navigate('/login');
+      // After sign-in, land on browse with the create dialog open.
+      navigate('/login', {
+        state: { from: { pathname: '/browse', search: '?create=1' } },
+      });
     }
   };
 

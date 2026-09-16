@@ -23,11 +23,20 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Install Cloud Functions dependencies
+      run: npm --prefix functions install
+
     - name: Run ESLint
       run: npm run lint
 
     - name: Run TypeScript type check
       run: npm run typecheck
+
+    - name: Build Cloud Functions
+      run: npm --prefix functions run build
+
+    - name: Run unit tests
+      run: npm run test:unit
 
     - name: Build project
       run: npm run build

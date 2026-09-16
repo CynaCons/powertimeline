@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getPostAuthRedirect } from '../utils/postAuthRedirect';
 import {
   Box,
   TextField,
@@ -40,7 +41,10 @@ import type { User } from 'firebase/auth';
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+  const from = getPostAuthRedirect(
+    (location.state as { from?: { pathname?: string; search?: string } } | null)?.from,
+    location.search
+  );
 
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState('');
