@@ -34,6 +34,13 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,avif,json,woff2}'],
         globIgnores: ['**/assets/images/**', '**/og-image.png'],
         navigateFallback: 'index.html',
+        navigateFallbackDenylist: [
+          /^\/sitemap\.xml/,
+          /^\/api\//,
+          /^\/timeline-maker/,
+          /^\/timelinejs-alternative/,
+          /^\/frise-chronologique/,
+        ],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'document',

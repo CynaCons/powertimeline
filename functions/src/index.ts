@@ -340,8 +340,9 @@ export const sitemap = onRequest(
 });
 
 /**
- * Prerender public/unlisted timeline + embed routes so crawlers and JS-off
- * clients see real event text instead of an empty #root SPA shell.
+ * Prerender public/unlisted timeline + embed routes, and static tool-intent
+ * marketing pages, so crawlers and JS-off clients see real text instead of
+ * an empty #root SPA shell.
  */
 export const renderPublicTimeline = onRequest(
   { cors: true, timeoutSeconds: 30, invoker: "public" },

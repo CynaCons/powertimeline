@@ -44,6 +44,9 @@ export function staticSitemapEntries(baseUrl: string): SitemapEntry[] {
   return [
     { loc: `${baseUrl}/`, priority: "1.0" },
     { loc: `${baseUrl}/browse`, priority: "0.9" },
+    { loc: `${baseUrl}/timeline-maker`, priority: "0.9" },
+    { loc: `${baseUrl}/timelinejs-alternative`, priority: "0.9" },
+    { loc: `${baseUrl}/frise-chronologique`, priority: "0.9" },
   ];
 }
 

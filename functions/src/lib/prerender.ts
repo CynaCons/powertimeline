@@ -106,18 +106,48 @@ ${eventItems}
   </article>`;
 }
 
-export function injectTimelineIntoShell(
+export interface ShellInjection {
+  pageTitle: string;
+  description: string;
+  canonicalUrl: string;
+  ogImageUrl: string;
+  ogType?: string;
+  lang?: string;
+  robots?: string;
+  jsonLd?: unknown[];
+  extraHead?: string[];
+  articleHtml: string;
+}
+
+/**
+ * Inject title/meta/canonical plus visible article HTML into the SPA shell
+ * so curl / JS-off clients see real content instead of an empty #root.
+ */
+export function injectDocumentIntoShell(
   shell: string,
-  payload: PrerenderPayload
+  payload: ShellInjection
 ): string {
-  const title = stringOr(payload.timeline.title, "Untitled timeline");
-  const pageTitle = `${title} | PowerTimeline`;
-  const description = buildDescription(payload);
-  const article = buildArticleHtml(payload);
-  const visibility = normalizeVisibility(payload.timeline.visibility);
-  const indexable = visibility === "public" && !payload.embed;
+  const pageTitle = payload.pageTitle;
+  const description = payload.description;
+  const article = payload.articleHtml;
+  const ogType = payload.ogType || "website";
+  const robots = payload.robots || "index,follow";
 
   let html = shell;
+
+  if (payload.lang) {
+    if (/<html\b[^>]*\blang=/i.test(html)) {
+      html = html.replace(
+        /(<html\b[^>]*\blang=")[^"]*(")/i,
+        `$1${escapeAttribute(payload.lang)}$2`
+      );
+    } else {
+      html = html.replace(
+        /<html\b/i,
+        `<html lang="${escapeAttribute(payload.lang)}"`
+      );
+    }
+  }
 
   html = html.replace(
     /<title>[^<]*<\/title>/i,
@@ -147,7 +177,7 @@ export function injectTimelineIntoShell(
   html = replaceOrInsertMeta(
     html,
     /<meta\s+property="og:type"\s+content="[^"]*"\s*\/?>/i,
-    `<meta property="og:type" content="article" />`
+    `<meta property="og:type" content="${escapeAttribute(ogType)}" />`
   );
   html = replaceOrInsertMeta(
     html,
@@ -155,12 +185,16 @@ export function injectTimelineIntoShell(
     `<meta property="og:image" content="${escapeAttribute(payload.ogImageUrl)}" />`
   );
 
+  const jsonLdTags = (payload.jsonLd || []).map(
+    (block) =>
+      `<script type="application/ld+json">${escapeJsonLd(JSON.stringify(block))}</script>`
+  );
+
   const extraHead = [
     `<link rel="canonical" href="${escapeAttribute(payload.canonicalUrl)}" />`,
-    indexable
-      ? `<meta name="robots" content="index,follow" />`
-      : `<meta name="robots" content="noindex,follow" />`,
-    `<script type="application/ld+json">${escapeJsonLd(JSON.stringify(buildJsonLd(payload)))}</script>`,
+    `<meta name="robots" content="${escapeAttribute(robots)}" />`,
+    ...jsonLdTags,
+    ...(payload.extraHead || []),
   ].join("\n    ");
 
   html = html.replace(/<\/head>/i, `    ${extraHead}\n  </head>`);
@@ -183,6 +217,29 @@ export function injectTimelineIntoShell(
   }
 
   return html;
+}
+
+export function injectTimelineIntoShell(
+  shell: string,
+  payload: PrerenderPayload
+): string {
+  const title = stringOr(payload.timeline.title, "Untitled timeline");
+  const pageTitle = `${title} | PowerTimeline`;
+  const description = buildDescription(payload);
+  const article = buildArticleHtml(payload);
+  const visibility = normalizeVisibility(payload.timeline.visibility);
+  const indexable = visibility === "public" && !payload.embed;
+
+  return injectDocumentIntoShell(shell, {
+    pageTitle,
+    description,
+    canonicalUrl: payload.canonicalUrl,
+    ogImageUrl: payload.ogImageUrl,
+    ogType: "article",
+    robots: indexable ? "index,follow" : "noindex,follow",
+    jsonLd: [buildJsonLd(payload)],
+    articleHtml: article,
+  });
 }
 
 export function canPrerenderTimeline(visibility: unknown): boolean {

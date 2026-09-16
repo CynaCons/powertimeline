@@ -19,6 +19,9 @@ test.describe('Production SEO crawlability', () => {
     expect(body).toContain('</urlset>');
     expect(body).not.toContain('Error generating sitemap');
     expect(body).toContain(`${PRODUCTION_URL}/browse`);
+    expect(body).toContain(`${PRODUCTION_URL}/timeline-maker`);
+    expect(body).toContain(`${PRODUCTION_URL}/timelinejs-alternative`);
+    expect(body).toContain(`${PRODUCTION_URL}/frise-chronologique`);
   });
 
   test.describe('JS disabled', () => {
@@ -39,6 +42,33 @@ test.describe('Production SEO crawlability', () => {
       const body = await page.locator('body').innerText();
       expect(body.length).toBeGreaterThan(80);
       expect(body).toMatch(/French Revolution|Bastille|timeline|PowerTimeline/i);
+    });
+
+    test('tool-intent pages include outline H1 without JavaScript', async ({ request }) => {
+      const pages = [
+        {
+          path: '/timeline-maker',
+          h1: 'Free timeline maker for timelines people can explore',
+        },
+        {
+          path: '/timelinejs-alternative',
+          h1: 'A TimelineJS alternative built for denser, living timelines',
+        },
+        {
+          path: '/frise-chronologique',
+          h1: 'Frise chronologique en ligne — à explorer, pas seulement à imprimer',
+        },
+      ];
+
+      for (const page of pages) {
+        const response = await request.get(`${PRODUCTION_URL}${page.path}`);
+        expect(response.status(), `${page.path} status`).toBe(200);
+        const html = await response.text();
+        expect(html).toContain(`<h1>${page.h1}</h1>`);
+        expect(html).toContain('rel="canonical"');
+        expect(html).toContain('name="description"');
+        expect(html).not.toMatch(/<div id="root">\s*<\/div>/);
+      }
     });
   });
 });

@@ -26,3 +26,8 @@ export function userProfileUrl(username: string): string {
 export function embedUrl(username: string, timelineId: string): string {
   return `${BASE_URL}/${username}/timeline/${timelineId}/embed`;
 }
+
+export function toolIntentUrl(slug: string): string {
+  const path = slug.startsWith('/') ? slug : `/${slug}`;
+  return `${BASE_URL}${path}`;
+}
