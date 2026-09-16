@@ -14,6 +14,9 @@ import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import { generateToken, revokeToken } from "./tokenService";
+import { generateSitemapXml } from "./sitemap";
+import { emptyUrlsetXml } from "./lib/sitemap";
+import { renderPublicTimelineResponse } from "./prerender";
 
 admin.initializeApp();
 
@@ -304,85 +307,63 @@ export const initializeStats = onCall(async (request) => {
 // ============================================================================
 
 const BASE_URL = "https://powertimeline.com";
+const OG_IMAGE_URL = `${BASE_URL}/assets/images/PowerTimeline_banner.png`;
+
+function requestPath(req: { path?: string; url?: string; header: (name: string) => string | undefined }): string {
+  const forwarded = req.header("x-forwarded-uri") || req.header("x-original-url");
+  if (forwarded) {
+    try {
+      return new URL(forwarded, BASE_URL).pathname;
+    } catch {
+      return forwarded.split("?")[0];
+    }
+  }
+  return (req.path || req.url || "/").split("?")[0];
+}
 
 /**
- * Generate XML sitemap for search engine crawlers
- * Lists static pages, user profiles, and public timelines
+ * Generate XML sitemap for search engine crawlers.
+ * Soft-fails: always returns 200 + a valid urlset, even if Firestore queries fail.
  */
-export const sitemap = onRequest(async (_req, res) => {
+export const sitemap = onRequest(
+  { cors: true, timeoutSeconds: 60, invoker: "public" },
+  async (_req, res) => {
+  res.set("Content-Type", "application/xml; charset=utf-8");
+  res.set("Cache-Control", "public, max-age=3600");
   try {
-    interface SitemapEntry {
-      loc: string;
-      priority: string;
-      lastmod?: string;
-    }
-
-    // Static pages
-    const staticPages: SitemapEntry[] = [
-      { loc: `${BASE_URL}/`, priority: "1.0" },
-      { loc: `${BASE_URL}/browse`, priority: "0.9" },
-    ];
-
-    // Fetch user profiles
-    const usersSnapshot = await db.collection("users").get();
-    const userPages: SitemapEntry[] = [];
-    const userMap = new Map<string, string>(); // userId -> username
-    usersSnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.username) {
-        userMap.set(doc.id, data.username);
-        userPages.push({
-          loc: `${BASE_URL}/${data.username}`,
-          priority: "0.7",
-        });
-      }
-    });
-
-    // Fetch public timelines
-    const timelinesSnapshot = await db
-      .collectionGroup("timelines")
-      .where("visibility", "==", "public")
-      .get();
-
-    const timelinePages: SitemapEntry[] = [];
-    timelinesSnapshot.forEach((doc) => {
-      const data = doc.data();
-      const ownerUsername = data.ownerUsername || userMap.get(data.ownerId);
-      if (!ownerUsername) return; // Skip timelines without resolvable username
-
-      const lastmod = data.updatedAt
-        ? new Date(data.updatedAt).toISOString().split("T")[0]
-        : undefined;
-
-      timelinePages.push({
-        loc: `${BASE_URL}/${ownerUsername}/timeline/${doc.id}`,
-        lastmod,
-        priority: "0.8",
-      });
-    });
-
-    // Build XML
-    const urls = [...staticPages, ...userPages, ...timelinePages];
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (u) => `  <url>
-    <loc>${u.loc}</loc>${u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : ""}
-    <priority>${u.priority}</priority>
-  </url>`
-  )
-  .join("\n")}
-</urlset>`;
-
-    res.set("Content-Type", "application/xml");
-    res.set("Cache-Control", "public, max-age=3600");
+    const xml = await generateSitemapXml(db, BASE_URL);
     res.status(200).send(xml);
   } catch (error) {
-    logger.error("Error generating sitemap:", error);
-    res.status(500).send("Error generating sitemap");
+    logger.error("Error generating sitemap; returning empty urlset", error);
+    res.status(200).send(emptyUrlsetXml());
   }
 });
+
+/**
+ * Prerender public/unlisted timeline + embed routes so crawlers and JS-off
+ * clients see real event text instead of an empty #root SPA shell.
+ */
+export const renderPublicTimeline = onRequest(
+  { cors: true, timeoutSeconds: 30, invoker: "public" },
+  async (req, res) => {
+    const result = await renderPublicTimelineResponse({
+      db,
+      path: requestPath(req),
+      baseUrl: BASE_URL,
+      ogImageUrl: OG_IMAGE_URL,
+      fetchShell: async () => {
+        const response = await fetch(`${BASE_URL}/`);
+        if (!response.ok) {
+          throw new Error(`SPA shell HTTP ${response.status}`);
+        }
+        return response.text();
+      },
+    });
+    res.set("Content-Type", "text/html; charset=utf-8");
+    res.set("Cache-Control", result.cacheControl);
+    res.status(result.status).send(result.html);
+  }
+);
 
 // ============================================================================
 // Timeline Automation API

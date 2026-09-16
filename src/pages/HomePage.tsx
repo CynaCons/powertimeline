@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { browseUrl, OG_IMAGE_URL } from '../utils/urls';
 import { webSiteSchema } from '../utils/jsonLd';
@@ -66,6 +66,7 @@ function EventCount({ count }: { count: number }) {
 // Inner component that uses the tour context
 function HomePageContent() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user: firebaseUser } = useAuth();
   const { startTour } = useTour();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -97,6 +98,16 @@ function HomePageContent() {
   const [editTimelineId, setEditTimelineId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTimelineId, setDeleteTimelineId] = useState<string | null>(null);
+
+  // After login (or a Create CTA), /browse?create=1 opens the new-timeline dialog.
+  useEffect(() => {
+    if (!firebaseUser) return;
+    if (searchParams.get('create') !== '1') return;
+    setCreateDialogOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('create');
+    setSearchParams(next, { replace: true });
+  }, [firebaseUser, searchParams, setSearchParams]);
 
   // Toast notifications
   const { showSuccess, showError } = useToast();
