@@ -1479,6 +1479,18 @@ See [docs/TESTS.md](docs/TESTS.md) for detailed test coverage, categories, and r
 
 ---
 
+### v0.9.7 — Agent Tooling: free OpenCode workers + PowerScroll board (In Progress)
+**Goal:** Coordinator (Claude) spawns free OpenCode sub-agents (DeepSeek V4.1 Flash, GLM 5.3 Flash) through PowerSpawn; every OpenCode agent reports live on the owner's PowerScroll board.
+- [x] Version audit: PowerBoard 0.3.0, powerplan 0.9.0, PowerFlow 0.3.1 = latest; PowerScroll clone pulled to v0.86.1 (powerscroll-mcp 0.70.0)
+- [x] PowerSpawn v1.10.0: spawn_opencode provider (free DeepSeek/GLM default, transient retry, PWD fix) + 8 unit tests (59/59 pass)
+- [x] PowerSpawn: PowerScroll board bookends (card create/claim/status on start, result note + done/waiting + leave on exit) and agent board brief + powerscroll MCP per agent
+- [x] powertimelines: powerspawn submodule -> v1.10.0; .mcp.json -> python -m powerspawn.mcp_server; local-scope MCP config (POWERSCROLL_MCP_COMMAND, POWERSCROLL_BOARD=Dashboard, coordinator powerscroll server)
+- [x] Live E2E: OpenCode DeepSeek + GLM cards on the Dashboard board, verified via bridge and Chrome window capture
+- [x] Live E2E through PowerSpawn MCP: 2 parallel free agents, both cards closed to done
+- [x] Docs: CLAUDE.md coordinator section for spawn_opencode + board
+- [x] Push PowerSpawn v1.10.0 to GitHub and commit submodule pointer (owner approval)
+- [ ] Publish powerscroll-mcp 0.70.0 to npm so the npx default has board tools (owner npm sign-in)
+
 ## Backlog (Deferred)
 
 ### Layout Engine Enhancements

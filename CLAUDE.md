@@ -214,6 +214,13 @@ mcp__agents__spawn_copilot  - Spawn Copilot sub-agent (GPT/Claude/Gemini)
   prompt (required)         - The task to perform
   model (optional)          - gpt-5.1 | gpt-5 | claude-sonnet | gemini (default: gpt-5.1)
 
+mcp__agents__spawn_opencode - Spawn OpenCode sub-agent (FREE models) — default worker
+  prompt (required)         - The task to perform
+  model (optional)          - deepseek (default, DeepSeek V4.1 Flash) | glm (GLM 5.3 Flash) | any opencode id
+  agent_name (optional)     - Name shown on the board, e.g. oc-seo-1 (default oc-<model>-<hex>)
+  task_summary (optional)   - Card title
+  timeout (optional)        - Seconds (default: 900)
+
 mcp__agents__list           - List running/completed agents
 
 mcp__agents__result         - Get agent result by ID
@@ -226,11 +233,25 @@ mcp__agents__wait_for_agents - Block until all agents complete
 ### When to Use Which Agent
 | Agent | Best For | Notes |
 |-------|----------|-------|
+| OpenCode (deepseek / glm) | **Default worker**: implementation, fixes, analysis | Free; give it a pinned spec; review its diff |
 | Claude (haiku) | Quick searches, simple analysis | Fast, cheap |
 | Claude (sonnet) | Feature implementation, fixes | Balanced |
 | Claude (opus) | Complex reasoning, architecture | Expensive |
 | Codex | Any task, rate limit relief | Separate quota |
 | Copilot | Any task, multi-model | GitHub subscription |
+
+### PowerScroll Board (owner watches OpenCode agents live)
+- Every `spawn_opencode` agent gets a card on the **Dashboard** board of the owner's open
+  PowerScroll notebook (`C:/dev/america_2026/Dashboard.html`, Agent bridge on). PowerSpawn
+  creates/claims the card (doing) and closes it with the final answer (done) or the error
+  (waiting); the agent adds checklist steps, ticks and notes through its own `powerscroll` MCP.
+- Config lives in the **local-scope** MCP entry for `agents` (`claude mcp get agents`):
+  `POWERSCROLL_MCP_COMMAND` (local powerscroll-mcp ≥ 0.68 — npm 0.67.1 has no board tools)
+  and `POWERSCROLL_BOARD=Dashboard`. The coordinator has its own `powerscroll` server
+  (`me: "coordinator"`) to read the board or post cards for non-OpenCode work.
+- Check the spawn result: a `[powerspawn] ...board...` line means the card was skipped
+  (notebook closed, bridge off, no board) — fix that before spawning more.
+- Free endpoints drop connections sometimes; PowerSpawn retries 3x. GLM can be slow (minutes).
 
 ### Key Files
 - `powerspawn/mcp_server.py` - MCP server implementation
